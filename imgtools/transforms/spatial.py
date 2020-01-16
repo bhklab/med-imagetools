@@ -32,7 +32,7 @@ def resample_image(image, spacing, mask=None, interpolation="linear", anti_alias
         sigma = np.where(downsample, anti_alias_sigma, 1e-11)
         image = sitk.SmoothingRecursiveGaussian(image, sigma) # TODO implement better sigma computation
 
-    rif.SetInterpolator(sitk.sitkLinear)
+    rif.SetInterpolator(interpolator)
     resampled_image = rif.Execute(image)
     if mask is not None:
         rif.SetInterpolator(sitk.sitkNearestNeighbor)
