@@ -25,7 +25,10 @@ def resample_image(image: sitk.Image,
         The image to be resampled.
 
     spacing
-        The new image spacing.
+        The new image spacing. If float, assumes the same spacing in all directions.
+        Alternatively, a sequence of floats can be passed to specify spacing along
+        x, y and z dimensions. Passing 0 at any position will keep the original
+        spacing along that dimension (useful for in-plane resampling).
 
     mask, optional
         Mask with the same geometry as image to be resampled.
@@ -60,7 +63,10 @@ def resample_image(image: sitk.Image,
     original_spacing = np.array(image.GetSpacing())
     original_size = np.array(image.GetSize())
 
-    new_spacing = np.array([spacing, spacing, image.GetSpacing()[2]])
+    if type(spacing) == float:
+        new_spacing = np.repeat(spacing, len(original_spacing))
+    else:
+        new_spacing = np.where(new_spacing == 0, original_spacing, new_spacing)
     new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
 
     rif = sitk.ResampleImageFilter()
