@@ -55,12 +55,12 @@ def resample_image(image: sitk.Image,
     try:
         interpolator = INTERPOLATORS[interpolation]
     except KeyError:
-        raise ValueError(f"interpolator must be one of {list(INTERPOLATORS.keys()}, got {interpolator}.")
+        raise ValueError(f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolator}.")
 
     original_spacing = np.array(image.GetSpacing())
     original_size = np.array(image.GetSize())
 
-    new_spacing = np.array([self.spacing, self.spacing, image.GetSpacing()[2]])
+    new_spacing = np.array([spacing, spacing, image.GetSpacing()[2]])
     new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
 
     rif = sitk.ResampleImageFilter()
