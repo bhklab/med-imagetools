@@ -1,6 +1,8 @@
 import SimpleITK as sitk
 import numpy as np
 
+from typing import Sequence, Union, Tuple
+
 
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,
@@ -8,8 +10,48 @@ INTERPOLATORS = {
     "bspline": sitk.sitkBSpline,
 }
 
+def resample_image(image: sitk.Image,
+                   spacing: Union[Sequence[float], float],
+                   mask: Union[sitk.Image, None] = None,
+                   interpolation: str = "linear",
+                   anti_alias: bool = True,
+                   anti_alias_sigma: float = 2.) -> Union[sitk.Image, Tuple(sitk.Image)]:
+    """Resample image and (optionally) mask to a given spacing.
 
-def resample_image(image, spacing, mask=None, interpolation="linear", anti_alias=True, anti_alias_sigma=2.):
+
+    Parameters
+    ----------
+    image
+        The image to be resampled.
+
+    spacing
+        The new image spacing.
+
+    mask, optional
+        Mask with the same geometry as image to be resampled.
+
+    interpolation, optional
+        The interpolation method to use. Valid options are:
+        - "linear" for bi/trilinear interpolation (default)
+        - "nearest" for nearest neighbour interpolation
+        - "bspline" for order-3 b-spline interpolation
+
+    anti_alias, optional
+        Whether to smooth the image with a Gaussian kernel before resampling.
+        Only used when downsampling, i.e. when `spacing < image.GetSpacing()`.
+        This should be used to avoid aliasing artifacts.
+
+    anti_alias_sigma, optional
+        The standard deviation of the Gaussian kernel used for anti-aliasing.
+
+
+    Returns
+    -------
+    out : sitk.Image or tuple of sitk.Image
+        The resampled image. If mask is given, also return resampled mask.
+
+    """
+
     try:
         interpolator = INTERPOLATORS[interpolation]
     except KeyError:
