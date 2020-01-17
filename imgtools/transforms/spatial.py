@@ -10,13 +10,12 @@ INTERPOLATORS = {
     "bspline": sitk.sitkBSpline,
 }
 
-def resample_image(image: sitk.Image,
-                   spacing: Union[Sequence[float], float],
-                   mask: Optional[sitk.Image] = None,
-                   interpolation: str = "linear",
-                   anti_alias: bool = True,
-                   anti_alias_sigma: float = 2.) -> Union[sitk.Image, Tuple(sitk.Image)]:
-    """Resample image and (optionally) mask to a given spacing.
+def resample(image: sitk.Image,
+             spacing: Union[Sequence[float], float],
+             interpolation: str = "linear",
+             anti_alias: bool = True,
+             anti_alias_sigma: float = 2.) -> sitk.Image:
+    """Resample image to a given spacing.
 
 
     Parameters
@@ -29,9 +28,6 @@ def resample_image(image: sitk.Image,
         Alternatively, a sequence of floats can be passed to specify spacing along
         x, y and z dimensions. Passing 0 at any position will keep the original
         spacing along that dimension (useful for in-plane resampling).
-
-    mask, optional
-        Mask with the same geometry as image to be resampled.
 
     interpolation, optional
         The interpolation method to use. Valid options are:
@@ -82,9 +78,5 @@ def resample_image(image: sitk.Image,
 
     rif.SetInterpolator(interpolator)
     resampled_image = rif.Execute(image)
-    if mask is not None:
-        rif.SetInterpolator(sitk.sitkNearestNeighbor)
-        resampled_mask = rif.Execute(mask)
-        return resampled_image, resampled_mask
 
     return resampled_image
