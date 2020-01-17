@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 
-from typing import Sequence, Union, Tuple
+from typing import Sequence, Union, Tuple, Optional
 
 
 INTERPOLATORS = {
@@ -12,7 +12,7 @@ INTERPOLATORS = {
 
 def resample_image(image: sitk.Image,
                    spacing: Union[Sequence[float], float],
-                   mask: Union[sitk.Image, None] = None,
+                   mask: Optional[sitk.Image] = None,
                    interpolation: str = "linear",
                    anti_alias: bool = True,
                    anti_alias_sigma: float = 2.) -> Union[sitk.Image, Tuple(sitk.Image)]:
@@ -63,8 +63,8 @@ def resample_image(image: sitk.Image,
     original_spacing = np.array(image.GetSpacing())
     original_size = np.array(image.GetSize())
 
-    if type(spacing) == float:
-        new_spacing = np.repeat(spacing, len(original_spacing))
+    if isinstance(spacing, (float, int)):
+        new_spacing = np.repeat(spacing, len(original_spacing)).astype(np.float64)
     else:
         new_spacing = np.where(new_spacing == 0, original_spacing, new_spacing)
     new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
