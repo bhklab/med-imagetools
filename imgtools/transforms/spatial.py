@@ -80,3 +80,57 @@ def resample(image: sitk.Image,
     resampled_image = rif.Execute(image)
 
     return resampled_image
+
+
+def crop(image, crop_centre, size):
+    """
+    
+    Parameters
+    ----------
+    image : 
+
+    crop_centre : 
+
+    size : 
+
+
+    Returns
+    -------
+    out : 
+
+    """
+    crop_centre = np.asarray(crop_centre, dtype=np.float64)
+    image_shape = np.array((image.GetSize()[::-1]), dtype=np.float64)
+
+    if isinstance(size, int):
+        size_lower = size_upper = np.array([size for _ in image.GetSize()])
+    elif isinstance(size, (tuple, list, np.ndarray)):
+        if isinstance(size[0], int):
+            size_lower = size_upper = np.asarray(size)
+        elif isinstance(size[0], (tuple, list, np.ndarray)):
+            size_lower = np.array([s[0] for s in size])
+            size_upper = np.array([s[1] for s in size])
+
+    if (crop_centre < 0).any() or (crop_centre > image_shape).any():
+        raise ValueError(f"Crop centre outside image boundaries. Image shape = {image_shape}, crop centre = {crop_centre}")
+
+    min_x, min_y, min_z = np.clip(np.floor((image_shape - size_lower) / 2).astype(np.int64), 0, image_shape)
+    max_x, max_y, max_z = np.clip(np.floor((image_shape + size_upper) / 2).astype(np.int64), 0, image_shape)
+
+    return image[min_x:max_x, min_y:max_y, min_z:max_z]
+
+
+def constant_pad(image, size, cval=0.):
+    if isinstance(size, int):
+        size_lower = size_upper = [size for _ in image.GetSize()]
+    elif isinstance(size, (tuple, list, np.ndarray)):
+        if isinstance(size[0], int):
+            size_lower = size_upper = size
+        elif isinstance(size[0], (tuple, list, np.ndarray)):
+            size_lower = [s[0] for s in size]
+            size_upper = [s[1] for s in size]
+    else:
+        raise ValueError(f"Size must be either int, sequence of int or sequence of sequences of ints, got {size}.")
+    return sitk.ConstantPad(image, size_lower, size_upper, cval)
+
+
