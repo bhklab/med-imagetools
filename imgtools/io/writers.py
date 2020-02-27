@@ -1,19 +1,9 @@
 import os
-import glob
-import re
-from typing import Optional
-from collections import namedtuple
-from itertools import chain
 
 import numpy as np
-import pandas as pd
 import SimpleITK as sitk
-from pydicom import dcmread
-from pydicom.misc import is_dicom
 
-from .image import physical_point_to_index
-from .segmentation import StructureSet
-from .utils.imageutils import image_to_array
+from ..utils import image_to_array
 
 
 class ImageFileWriter:

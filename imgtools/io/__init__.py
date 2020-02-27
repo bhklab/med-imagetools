@@ -1,3 +1,3 @@
 from .common import *
-from .readers import *
+from .loaders import *
 from .writers import *

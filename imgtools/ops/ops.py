@@ -1,4 +1,5 @@
 import numpy as np
+import SimpleITK as sitk
 
 from .functional import *
 
@@ -72,49 +73,30 @@ class CentreCrop(BaseOp):
         return crop(image, crop_centre=image_centre, size=self.size)
 
 
-def constant_pad(image, size, cval=0.):
-    if isinstance(size, int):
-        size_lower = size_upper = [size for _ in image.GetSize()]
-    elif isinstance(size, (tuple, list, np.ndarray)):
-        if isinstance(size[0], int):
-            size_lower = size_upper = size
-        elif isinstance(size[0], (tuple, list, np.ndarray)):
-            size_lower = [s[0] for s in size]
-            size_upper = [s[1] for s in size]
-    else:
-        raise ValueError(f"Size must be either int, sequence of int or sequence of sequences of ints, got {size}.")
-    return sitk.ConstantPad(image, size_lower, size_upper, cval)
+# def constant_pad(image, size, cval=0.):
+#     pass
+
+# def centre_on_point(image, centre):
+#     pass
 
 
-def centre_on_point(image, centre):
-    pass
+# def clip(image, lower, upper):
+#     pass
 
 
-# def resize_by_cropping_or_padding(image, size, centre=None, cval=0.):
-#     original_size = np.array(image.GetSize())
-#     size = np.asarray(size)
-#     centre = np.asarray(centre) if centre is not None else original_size / 2 # XXX is there any benefit to not using floor div here?
-
-#     crop_dims = np.where(size < original_size)
+# def window(image, window, level):
+#     pass
 
 
-def clip(image, lower, upper):
-    pass
+# def mean(image, mask=None, labels=None):
+#     if mask is not None:
+#         pass
+#     pass
 
+# def var(image, mask=None, labels=None):
+#     if mask is not None:
+#         pass
+#     pass
 
-def window(image, window, level):
-    pass
-
-
-def mean(image, mask=None, labels=None):
-    if mask is not None:
-        pass
-    pass
-
-def var(image, mask=None, labels=None):
-    if mask is not None:
-        pass
-    pass
-
-def standard_scale(image, dataset_mean=0., dataset_var=1.):
-    return (image - dataset_mean) / dataset_var
+# def standard_scale(image, dataset_mean=0., dataset_var=1.):
+#     return (image - dataset_mean) / dataset_var

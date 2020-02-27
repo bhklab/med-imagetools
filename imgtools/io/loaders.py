@@ -95,6 +95,8 @@ class ImageDirectoryLoader(BaseLoader):
             if self.subdir_path:
                 path = os.path.join(path, self.subdir_path)
             path = glob.glob(path)[0]
+            if os.path.isdir(path):
+                path = os.path.join(path, "")
             key = self._extract_key_from_path(path)
             paths[key] = path
         return paths
