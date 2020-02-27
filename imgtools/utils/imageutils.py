@@ -31,7 +31,7 @@ def show_image(image, mask=None, ax=None):
 
     image_array, *_ = image_to_array(image)
 
-    ax.imshow(image_array, cmap="bone", interpolation="linear")
+    ax.imshow(image_array, cmap="bone", interpolation="bilinear")
 
     if mask is not None:
         mask_array, *_ = image_to_array(mask)

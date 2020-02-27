@@ -7,14 +7,15 @@ from ..utils import image_to_array
 
 
 class ImageFileWriter:
-    def __init__(self, root_directory, output_format="nrrd", filename_format="{key}"):
+    def __init__(self, root_directory, filename_format="{key}.nrrd", create_dirs=True):
         self.root_directory = root_directory
-        self.output_format = output_format.lower()
         self.filename_format = filename_format
         self.writer = sitk.ImageFileWriter()
+        if create_dirs and not os.path.exists(self.root_directory):
+            os.makedirs(self.root_directory)
 
     def add(self, key, image):
-        out_filename = self.filename_format.format(key=key) + "." + self.output_format
+        out_filename = self.filename_format.format(key=key)
         out_path = os.path.join(self.root_directory, out_filename)
         self.writer.SetFileName(out_path)
         self.writer.Execute(image)
