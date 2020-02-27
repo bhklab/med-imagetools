@@ -87,14 +87,15 @@ def resample(image: sitk.Image,
     return resampled_image
 
 
-def resize(image, new_size, interpolation="linear"):
+def resize(image, new_size, anti_alias=True, anti_alias_sigma=2., interpolation="linear"):
 
     original_size = np.array(image.GetSize())
     original_spacing = np.array(image.GetSpacing())
     new_size = np.asarray(new_size)
     new_spacing = original_spacing * original_size / new_size
 
-    return resample(image, new_spacing, interpolation=interpolation)
+    return resample(image, new_spacing, anti_alias=anti_alias, anti_alias_sigma=anti_alias_sigma, interpolation=interpolation)
+
 
 def rotate(image, rotation_centre, angles, interpolation="linear"):
     rotation_centre = image.TransformIndexToPhysicalPoint(rotation_centre)
@@ -108,7 +109,6 @@ def rotate(image, rotation_centre, angles, interpolation="linear"):
         (0., 0., 0.) # optional translation (shift) of the image, here we don't want any translation
     )
     return resample(image, spacing=image.GetSpacing(), interpolation=interpolation, transform=rotation)
-
 
 
 def crop(image, crop_centre, size):
@@ -175,4 +175,23 @@ def centre_on_point(image, centre):
 #     crop_dims = np.where(size < original_size)
 
 
+def clip(image, lower, upper):
+    pass
 
+
+def window(image, window, level):
+    pass
+
+
+def mean(image, mask=None, labels=None):
+    if mask is not None:
+        pass
+    pass
+
+def var(image, mask=None, labels=None):
+    if mask is not None:
+        pass
+    pass
+
+def standard_scale(image, dataset_mean=0., dataset_var=1.):
+    return (image - dataset_mean) / dataset_var

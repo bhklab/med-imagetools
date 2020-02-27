@@ -1,43 +1,59 @@
 import SimpleITK as sitk
 import numpy as np
-from collections import namedtuple
+
+from typing import NamedTuple, Sequence, Union
+
+# ImageGeometry = namedtuple("ImageGeometry", "origin, direction, spacing")
+
+class ImageGeometry(NamedTuple):
+    size:      Sequence[int]
+    origin:    Sequence[float]
+    direction: Sequence[float]
+    spacing:   Sequence[float]
 
 
-ImageGeometry = namedtuple("ImageGeometry", "origin, direction, spacing")
-
-
-def physical_point_to_index(point, ref_image=None, geometry=None, continuous=False):
-    if ref_image is None and geometry is None:
-        raise ValueError(f"Must pass either ref_image or geometry.")
-
-    if ref_image is None:
-        ref_image = sitk.Image()
-        ref_image.SetOrigin(geometry.origin[::-1])
-        ref_image.SetDirection(direction[:-3] + direction[3:6] + direction[:3])
-        ref_image.SetSpacing(geometry.spacing[::-1])
+def physical_point_to_index(point, reference_geometry, continuous=False):
+    if isinstance(reference_geometry, ImageGeometry):
+        ref_image = sitk.Image(reference_geometry.size[::-1], 0)
+        ref_image.SetOrigin(reference_geometry.origin[::-1])
+        direction = reference_geometry.direction
+        direction_rev = direction[:-3] + direction[3:6] + direction[:3]
+        ref_image.SetDirection(direction_rev)
+        ref_image.SetSpacing(reference_geometry.spacing[::-1])
+    elif isinstance(reference_geometry, Image):
+        ref_image = reference_geometry._image
+    elif isinstance(reference_geometry, sitk.Image):
+        ref_image = reference_geometry
+    else:
+        raise ValueError(f"Reference geometry must be of type `ImageGeometry`, `imgtools.Image` or `sitk.Image`, got {type(reference_geometry)}")
 
     if continuous:
-        return ref_image.TransformPhysicalPointToContinuousIndex(point[::-1])
+        return ref_image.TransformPhysicalPointToContinuousIndex(point[::-1])[::-1]
     else:
-        return ref_image.TransformPhysicalPointToIndex(point[::-1])
+        return ref_image.TransformPhysicalPointToIndex(point[::-1])[::-1]
 
 
-def index_to_physical_point(index, ref_image=None, geometry=None):
-    if ref_image is None and geometry is None:
-        raise ValueError(f"Must pass either ref_image or geometry.")
-
-    if ref_image is None:
-        ref_image = sitk.Image()
-        ref_image.SetOrigin(geometry.origin[::-1])
-        ref_image.SetDirection(direction[:-3] + direction[3:6] + direction[:3])
-        ref_image.SetSpacing(geometry.spacing[::-1])
+def index_to_physical_point(index, reference_geometry):
+    if isinstance(reference_geometry, ImageGeometry):
+        ref_image = sitk.Image(reference_geometry.size[::-1], 0)
+        ref_image.SetOrigin(reference_geometry.origin[::-1])
+        direction = reference_geometry.direction
+        direction_rev = direction[:-3] + direction[3:6] + direction[:3]
+        ref_image.SetDirection(direction_rev)
+        ref_image.SetSpacing(reference_geometry.spacing[::-1])
+    elif isinstance(reference_geometry, Image):
+        ref_image = reference_geometry._image
+    elif isinstance(reference_geometry, sitk.Image):
+        ref_image = reference_geometry
+    else:
+        raise ValueError(f"Reference geometry must be of type ImageGeometry, imgtools.Image or sitk.Image, got {type(reference_geometry)}")
 
     continuous = any([isinstance(i, float) for i in index])
 
     if continuous:
-        return ref_image.TransformContinuousIndexToPhysicalPoint(index[::-1])
+        return ref_image.TransformContinuousIndexToPhysicalPoint(index[::-1])[::-1]
     else:
-        return ref_image.TransformIndexToPhysicalPoint(index[::-1])
+        return ref_image.TransformIndexToPhysicalPoint(index[::-1])[::-1]
 
 
 # Goals for this module:
@@ -55,14 +71,24 @@ def index_to_physical_point(index, ref_image=None, geometry=None):
 
 
 class Image:
-    def __init__(self, image=None, origin=None, direction=None, spacing=None):
+    def __init__(self,
+                 image:     Union[sitk.Image, np.ndarray] = None,
+                 geometry:  ImageGeometry   = None,
+                 origin:    Sequence[float] = None,
+                 direction: Sequence[float] = None,
+                 spacing:   Sequence[float] = None):
+
         if isinstance(image, sitk.Image):
             self._image = image
         elif isinstance(image, np.ndarray):
-            if any((origin is None, direction is None, spacing is None)):
+            if geometry is None and any((origin is None, direction is None, spacing is None)):
                 raise ValueError(
-                    "If image is a Numpy array, origin, direction and spacing must be specified."
+                    "If image is a Numpy array, either geometry must be specified."
                 )
+
+            if geometry is not None:
+                _, origin, direction, spacing = geometry
+
             self._image = sitk.GetImageFromArray(image)
             self._image.SetOrigin(origin[::-1])
             direction = tuple(direction)
@@ -72,6 +98,10 @@ class Image:
             raise TypeError(
                 f"image must be either numpy.ndarray or SimpleITK.Image, not {type(image)}."
             )
+
+    @property
+    def size(self):
+        return self._image.GetSize()[::-1]
 
     @property
     def origin(self):
@@ -89,7 +119,8 @@ class Image:
 
     @property
     def geometry(self):
-        return ImageGeometry(origin=self.origin,
+        return ImageGeometry(size=self.size,
+                             origin=self.origin,
                              direction=self.direction,
                              spacing=self.spacing)
 
@@ -111,8 +142,11 @@ class Image:
     def to_sitk_image(self):
         return self._image
 
-    def to_numpy(self, return_geometry=False):
-        array = sitk.GetArrayFromImage(self._image)
+    def to_numpy(self, return_geometry=False, view=False):
+        if view:
+            array = sitk.GetArrayViewFromImage(self._image)
+        else:
+            array = sitk.GetArrayFromImage(self._image)
         if return_geometry:
             return array, self.geometry
         return array
@@ -154,12 +188,6 @@ class Image:
         else:
             return result
 
-    def _delegate_arithmetic_operator(self, other, operator):
-        if isinstance(other, Image):
-            return Image(getattr(self._image, operator)(other._image))
-        elif isinstance(other, (float, int)):
-            return Image(getattr(self._image, operator)(other))
-
     def __neg__(self):
         return Image(-self._image)
 
@@ -170,54 +198,54 @@ class Image:
         return Image(~self._image)
 
     def __add__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image + other_val)
 
     def __sub__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image - other_val)
 
     def __mul__(self, other):
-        other_val = getattr(other, "img", other)
-        return Image(self._image * val)
+        other_val = getattr(other, "_image", other)
+        return Image(self._image * other_val)
 
     def __div__(self, other):
-        other_val = getattr(other, "img", other)
-        return Image(self._image / val)
+        other_val = getattr(other, "_image", other)
+        return Image(self._image / other_val)
 
     def __floordiv__(self, other):
-        other_val = getattr(other, "img", other)
-        return Image(self._image / val)
+        other_val = getattr(other, "_image", other)
+        return Image(self._image / other_val)
 
-    def __pow__(self, other)
-        other_val = getattr(other, "img", other)
-        return Image(self._image ** val)
+    def __pow__(self, other):
+        other_val = getattr(other, "_image", other)
+        return Image(self._image ** other_val)
 
     def __iadd__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         self._image += other_val
 
     def __isub__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         self._image -= other_val
 
     def __imul__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         self._image *= other_val
 
     def __idiv__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         self._image /= other_val
 
     def __ifloordiv__(self, other):
-        other_val = getattr(other, "img", other)
+        other_val = getattr(other, "_image", other)
         self._image //= other_val
 
     def __iter__(self):
         pass
 
     def __repr__(self):
-        return f"Image(image=self._image, origin={self.origin}, spacing={self.spacing}, direction={self.direction})"
+        return f"Image(image={self._image}, origin={self.origin}, spacing={self.spacing}, direction={self.direction})"
 
     def __str__(self):
-        return f"origin = {self.origin}\nspacing = {self.spacing}\ndirection = {self.direction}\nvalues = \n{self.to_numpy()}"
+        return f"origin = {self.origin}\nspacing = {self.spacing}\ndirection = {self.direction}\nvalues = \n{self.to_numpy(view=True)}"
