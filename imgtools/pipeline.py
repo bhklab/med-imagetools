@@ -19,23 +19,7 @@ class Pipeline:
     def process_one_case(self, key, **kwargs):
         raise NotImplementedError
 
-
-class MyPipeline(Pipeline):
-    def __init__(self, image_root, mask_root, resample_mask=False, n_jobs=3):
-        super(MyPipeline, self).__init__(n_jobs=n_jobs)
-        self.image_loader = io.ImageLoader(image_root)
-        self.mask_loader = io.MaskLoader(image_root)
-        self.resample = Resample(spacing=(1., 1., 1.))
-        self.image_writer = io.ImageWriter("./results")
-        self.mask_writer = io.ImageWriter("./results")
-
-    def process_one_case(self, key):
-        image = self.image_loader.get(key)
-        mask = self.mask_loader.get(key)
-        image = self.resample(image)
-        mask = self.resample(mask)
-        self.image_writer.add(image, key)
-        self.mask_writer.add(mask, key)
-
     def run(self):
         Parallel(n_jobs=self.n_jobs)(delayed(self.process_one_case)(key) for key in self._keys)
+
+
