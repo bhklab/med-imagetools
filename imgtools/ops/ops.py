@@ -1,12 +1,23 @@
 import numpy as np
 import SimpleITK as sitk
 
-from .functional import *
+from itertools import chain
 
+from .functional import *
 
 class BaseOp:
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
+
+class Input(BaseOp):
+    def __init__(self, loader):
+        self.loader = loader
+        self._keys = self.loader.keys()
+        self._next_key = self._keys[0]
+
+    def __call__(self, key):
+        outputs = self.loader.get(key)
+        return outputs
 
 
 class Resample(BaseOp):
@@ -71,6 +82,30 @@ class CentreCrop(BaseOp):
         image_size = np.array(image.GetSize())
         image_centre = image_size // 2
         return crop(image, crop_centre=image_centre, size=self.size)
+
+class SimpleITKFilter(BaseOp):
+    def __init__(self, sitk_filter, *execute_args):
+        self.sitk_filter = sitk_filter
+        self.execute_args = execute_args
+
+    def __call__(self, image):
+        return self.sitk_filter.Execute(image, *self.execute_args)
+
+
+class PythonFunction(BaseOp):
+    def __init__(self, function, preserve_output_geometry=True, **kwargs):
+        self.function = function
+        self.preserve_output_geometry = preserve_output_geometry
+        self.kwargs = kwargs
+
+    def __call__(self, image):
+        array, origin, direction, spacing = image_to_array(image)
+        result = self.function(array, **self.kwargs)
+        if self.preserve_output_geometry:
+            result = image_from_array(result, origin, direction, spacing)
+        else:
+            result = image_from_array(result)
+        return result
 
 
 # def constant_pad(image, size, cval=0.):

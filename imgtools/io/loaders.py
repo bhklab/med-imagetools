@@ -125,6 +125,9 @@ class ImageDirectoryLoader(BaseLoader):
     def items(self):
         return ((k, self[k]) for k in self.keys())
 
+    def values(self):
+        return (self[k] for k in self.keys())
+
 
 class CombinedLoader(BaseLoader):
     def __init__(self, **kwargs):
