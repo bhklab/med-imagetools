@@ -172,3 +172,5 @@ dmypy.json
 .pyre/
 
 # End of https://www.gitignore.io/api/emacs,python,jupyternotebooks
+
+imgtools/image.py
