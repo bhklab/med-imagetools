@@ -4,20 +4,37 @@ import SimpleITK as sitk
 from itertools import chain
 
 from .functional import *
+from ..io import BaseLoader, BaseWriter
+from ..utils import image_to_array, array_to_image
 
 class BaseOp:
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
 
+    def __repr__(self):
+        attrs = [(k, v) for k, v in self.__dict__ if not k.startswith("_")]
+        args = ", ".join(f"{k}={v}" for k, v in attrs)
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
+
 class Input(BaseOp):
     def __init__(self, loader):
+        if not isinstance(loader, BaseLoader):
+            raise ValueError(f"loader must be a subclass of io.BaseLoader, got {type(loader)}")
         self.loader = loader
-        self._keys = self.loader.keys()
-        self._next_key = self._keys[0]
 
     def __call__(self, key):
-        outputs = self.loader.get(key)
-        return outputs
+        inputs = self.loader.get(key)
+        return inputs
+
+
+class Output(BaseOp):
+    def __init__(self, writer):
+        if not isinstance(writer, BaseWriter):
+            raise ValueError(f"writer must be a subclass of io.BaseWriter, got {type(writer)}")
+        self.writer = writer
+
+    def __call__(self, key, *args, **kwargs):
+        self.writer.put(key, *args, **kwargs)
 
 
 class Resample(BaseOp):
@@ -91,21 +108,39 @@ class SimpleITKFilter(BaseOp):
     def __call__(self, image):
         return self.sitk_filter.Execute(image, *self.execute_args)
 
-
-class PythonFunction(BaseOp):
-    def __init__(self, function, preserve_output_geometry=True, **kwargs):
+class ImageFunction(BaseOp):
+    def __init__(self, function, copy_geometry=True, **kwargs):
         self.function = function
-        self.preserve_output_geometry = preserve_output_geometry
+        self.copy_geometry = copy_geometry
+        self.kwargs = kwargs
+
+    def __call__(self, image):
+        result = self.function(image, **self.kwargs)
+        if self.copy_geometry:
+            result.CopyInformation(image)
+        return result
+
+class ArrayFunction(BaseOp):
+    def __init__(self, function, copy_geometry=True, **kwargs):
+        self.function = function
+        self.copy_geometry = copy_geometry
         self.kwargs = kwargs
 
     def __call__(self, image):
         array, origin, direction, spacing = image_to_array(image)
         result = self.function(array, **self.kwargs)
-        if self.preserve_output_geometry:
-            result = image_from_array(result, origin, direction, spacing)
+        if self.copy_geometry:
+            result = array_to_image(result, origin, direction, spacing)
         else:
-            result = image_from_array(result)
+            result = array_to_image(result)
         return result
+
+class DrawStructureSet(BaseOp):
+    def __init__(self, roi_names):
+        self.roi_names = roi_names
+
+    def __call__(self, structure_set, reference_image):
+        return structure_set.to_mask(reference_image, roi_names=self.roi_names)
 
 
 # def constant_pad(image, size, cval=0.):
