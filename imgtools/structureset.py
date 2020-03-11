@@ -49,6 +49,8 @@ class StructureSet:
 
         mask = np.zeros(size, dtype=np.uint8)
 
+        # TODO (Michal) add support for overlapping labels
+        # using SimpleITK vector-valued images
         for label, physical_points in enumerate(roi_points):
             mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
 

@@ -11,21 +11,38 @@ class RADCUREPipeline(Pipeline):
     This pipeline loads the CT images and structure sets, re-samples the images,
     and draws the GTV contour using the resampled image.
     """
-    def __init__(self, root_directory="/cluster/projects/radiomics/RADCURE_images/", output_directory="./processed", spacing=(1., 1., 1.)):
+    def __init__(self,
+                 root_directory="/cluster/projects/radiomics/RADCURE_images/",
+                 output_directory="./processed",
+                 spacing=(1., 1., 1.),
+                 n_jobs=2,
+                 missing_strategy="drop",
+                 show_progress=False):
+        super(RADCUREPipeline, self).__init__(n_jobs=n_jobs,
+                                              missing_strategy=missing_strategy,
+                                              show_progress=show_progress)
         self.root_directory = root_directory
-        self.image_input = Input(ImageDirectoryLoader(self.root_directory, index_by="parent", subdir_path="*/ImageSet_*", reader=read_dicom_series))
-        self.structure_set_input = Input(ImageDirectoryLoader(self.root_directory, index_by="parent", subdir_path="*/structures", reader=read_dicom_rtstruct))
+        self.image_input = Input(ImageDirectoryLoader(self.root_directory,
+                                                      index_by="parent",
+                                                      subdir_path="*/ImageSet_*",
+                                                      reader=read_dicom_series))
+        self.structure_set_input = Input(ImageDirectoryLoader(self.root_directory,
+                                                              index_by="parent",
+                                                              subdir_path="*/structures",
+                                                              reader=read_dicom_rtstruct))
         self.binary_mask = DrawStructureSet(roi_names="GTV")
         self.resample = Resample(spacing=spacing)
-        self.write_image = WriteImage()
+        self.statistics = ImageStatistics()
+        self.image_output = Output(ImageFileWriter())
+        self.mask_output = Output(ImageFileWriter())
 
     def process_one_case(self, key):
         image = self.image_input(key)
         structure_set = self.structure_set_input(key)
         image = self.resample(image)
         mask = self.binary_mask(structure_set, image)
-        self.write_image(key, image)
-        self.write_mask(key, mask)
+        self.image_output(key, image)
+        self.mask_output(key, mask)
 
 
 if __name__ == "__main__":
@@ -41,8 +58,17 @@ if __name__ == "__main__":
                         type=float,
                         default=(1., 1., 1.),
                         help="The resampled voxel spacing in  (x, y, z) directions.")
+    parser.add_argument("--n_jobs",
+                        type=int,
+                        default=0,
+                        help="The number of parallel processes to use".)
+    parser.add_argument("--show_progress",
+                        action="store_true"
+                        help="Whether to print progress to standard output".)
     args = parser.parse_args()
     pipeline = RADCUREPipeline(args.root_directory,
                                output_directory=args.output_directory,
-                               spacing=args.spacing)
-    pipeline.run(progress=True)
+                               spacing=args.spacing,
+                               n_jobs=args.n_jobs,
+                               show_progress=args.show_progress)
+    pipeline.run()
