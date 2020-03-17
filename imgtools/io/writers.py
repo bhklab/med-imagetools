@@ -1,17 +1,18 @@
 import os
 from datetime import datetime, timezone
 
-import numpy as np
-import SimpleITK as sitk
 import h5py
+import numpy as np
+
+import SimpleITK as sitk
 
 from ..utils import image_to_array
+
 
 class BaseWriter:
     def __init__(self, root_directory, filename_format, create_dirs=True):
         self.root_directory = root_directory
         self.filename_format = filename_format
-        self.writer = sitk.ImageFileWriter()
         if create_dirs and not os.path.exists(self.root_directory):
             os.makedirs(self.root_directory)
 
@@ -33,18 +34,17 @@ class BaseWriter:
 
 class ImageFileWriter(BaseWriter):
     def __init__(self, root_directory, filename_format="{key}.nrrd", create_dirs=True):
-        super(ImageFileWriter, self).__init__(root_directory, filename_format, create_dirs)
+        super().__init__(root_directory, filename_format, create_dirs)
 
     def put(self, key, image):
         # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_key(key)
-        self.writer.SetFileName(out_path)
-        self.writer.Execute(image)
+        sitk.WriteImage(image, out_path)
 
 
 class NumpyWriter(BaseWriter):
     def __init__(self, root_directory, filename_format="{key}.npy", create_dirs=True):
-        super(NumpyWriter, self).__init__(root_directory, filename_format, create_dirs)
+        super().__init__(root_directory, filename_format, create_dirs)
         self.root_directory = root_directory
         self.filename_format = filename_format
 
@@ -83,7 +83,7 @@ class CSVMetadataWriter:
 
 class HDF5Writer(BaseWriter):
     def __init__(self, root_directory, filename_format="{key}.h5", create_dirs=True, save_geometry=True):
-        super(HDF5Writer, self).__init__(root_directory, filename_format, create_dirs)
+        super().__init__(root_directory, filename_format, create_dirs)
         self.save_geometry = save_geometry
 
     def put(self, key, metadata=None, **kwargs):
@@ -92,6 +92,7 @@ class HDF5Writer(BaseWriter):
             for k, v in kwargs.items():
                 array, origin, direction, spacing = image_to_array(v)
                 dataset = f.create_dataset(k, data=array)
+                dataset.attrs.create("key", key)
                 if self.save_geometry:
                     dataset.attrs.create("origin", data=origin)
                     dataset.attrs.create("direction", data=direction)

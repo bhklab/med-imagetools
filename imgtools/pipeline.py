@@ -1,9 +1,8 @@
-from collections import OrderedDict
 from itertools import chain
 
 from joblib import Parallel, delayed
 
-from .ops import Input, BaseOp
+from .ops import BaseOp, Input
 
 
 class Pipeline:
@@ -12,7 +11,7 @@ class Pipeline:
     A pipeline can be created by subclassing, instantiating the required
     data loaders and operations from `ops` in the constructor and implementing
     the `process_one_case` method, which defines the processing steps for one
-    case (i.e. one key from data loaders).
+    case (i.e. one subject_id from data loaders).
     """
     def __init__(self, n_jobs=0, missing_strategy="drop", show_progress=True):
         """Initialize the base class.
@@ -28,22 +27,20 @@ class Pipeline:
         self.show_progress = show_progress
         if self.missing_strategy not in ["drop", "pass"]:
             raise ValueError(f"missing_strategy must be either of 'drop' or 'pass', got {missing_strategy}")
-        self._keys = self._get_loader_keys()
-        self._ops = self._get_all_ops()
 
-    def _get_loader_keys(self):
-        loaders = (v for v in self.__dict__.values() if isinstance(v, Input))
-        all_keys = [loader.keys() for loader in loaders]
-        unique_keys = set(chain.from_iterable(all_keys))
+    def _get_loader_subject_ids(self):
+        loaders = (v.loader for v in self.__dict__.values() if isinstance(v, Input))
+        all_subject_ids = [loader.keys() for loader in loaders]
+        unique_subject_ids = set(chain.from_iterable(all_subject_ids))
 
-        if not all_keys:
+        if not all_subject_ids:
             raise AttributeError("Pipeline must define at least one Input op")
 
         if self.missing_strategy == "drop":
-            unique_keys = list(filter(lambda k: all((k in keys for keys in all_keys)), unique_keys))
+            unique_subject_ids = list(filter(lambda k: all((k in subject_ids for subject_ids in all_subject_ids)), unique_subject_ids))
         elif self.missing_strategy == "pass":
-            unique_keys = list(unique_keys)
-        return unique_keys
+            unique_subject_ids = list(unique_subject_ids)
+        return unique_subject_ids
 
     def _get_all_ops(self):
         # TODO (Michal) return ops in actual order of execution
@@ -58,14 +55,13 @@ class Pipeline:
         repr_ = self.__repr__()
         return repr_ + "\n" + "ops: " + ",\n".join(self._ops)
 
-
-    def process_one_case(self, key):
+    def process_one_subject(self, subject_id):
         """Define the processing steps for one case.
 
         Parameters
         ----------
-        key : str
-            The key to be processed.
+        subject_id : str
+            The ID of the subject to be processed.
         """
         raise NotImplementedError
 
@@ -80,10 +76,8 @@ class Pipeline:
         # Joblib prints progress to stdout if verbose > 50
         verbose = 51 if self.show_progress else 0
 
-        # Note that result might be empty if the user's process_one_case
-        # returns nothing.
-        result = Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            delayed(self.process_one_case)(key) for key in self._keys)
-        return result
-
-
+        subject_ids = self._get_loader_subject_ids()
+        # Note that returning any SimpleITK object in process_one_subject is
+        # not supported, since they cannot be pickled
+        Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+            delayed(self.process_one_subject)(subject_id) for subject_id in subject_ids)
