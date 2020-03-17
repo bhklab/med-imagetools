@@ -10,14 +10,14 @@ from imgtools.pipeline import Pipeline
 from imgtools.ops import Input, Output
 from imgtools.io import ImageDirectoryLoader, ImageFileWriter
 
-TEST_INPUT_PATH = os.path.join("tests", "data", "images", "nrrd")
 
 class PipelineTest(Pipeline):
-    def __init__(self, n_jobs, output_path):
+    def __init__(self, n_jobs, input_path, output_path):
         super().__init__(n_jobs=n_jobs, show_progress=False)
+        self.input_path = input_path
         self.output_path = output_path
         self.image_input = Input(
-            ImageDirectoryLoader(TEST_INPUT_PATH))
+            ImageDirectoryLoader(self.input_path))
         self.image_output = Output(
             ImageFileWriter(self.output_path))
 
@@ -29,17 +29,23 @@ class PipelineTest(Pipeline):
 def test_output(n_jobs, tmp_path):
     if cpu_count() < 2 and n_jobs == 2:
         n_jobs = 0
-    output_path = tmp_path
+    input_path = tmp_path / "input"
+    output_path = tmp_path / "output"
+    input_path.mkdir(exist_ok=True)
     output_path.mkdir(exist_ok=True)
-    pipeline = PipelineTest(n_jobs, output_path)
+
+    # generate some test data
+    test_inputs = [sitk.GetImageFromArray(np.random.random((10, 10, 2))) for _ in range(4)]
+    for i, img in enumerate(test_inputs):
+        path = input_path / f"test{i}.nrrd"
+        sitk.WriteImage(img, str(path))
+
+    pipeline = PipelineTest(n_jobs, input_path, output_path)
     pipeline.run()
 
-    for f in os.scandir(TEST_INPUT_PATH):
-        test_path = os.path.join(output_path, f.name)
-        assert os.path.exists(test_path)
-        test_output = sitk.GetArrayFromImage(sitk.ReadImage(test_path))
-        true_output = sitk.GetArrayFromImage(sitk.ReadImage(f.path))
+    for i, img in enumerate(test_inputs):
+        test_path = output_path / f"test{i}.nrrd"
+        assert test_path.exists()
+        test_output = sitk.GetArrayFromImage(sitk.ReadImage(str(test_path)))
+        true_output = sitk.GetArrayFromImage(img)
         assert np.allclose(test_output, true_output)
-
-if __name__ == "__main__":
-    test_output(0, "./output/test_output_0_0/")
