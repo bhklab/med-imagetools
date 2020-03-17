@@ -11,7 +11,7 @@ from .common import read_image
 
 
 class BaseLoader:
-    def __getitem__(self, key):
+    def __getitem__(self, subject_id):
         raise NotImplementedError
 
     def __len__(self):
@@ -21,11 +21,14 @@ class BaseLoader:
         raise NotImplementedError
 
     def items(self):
-        raise NotImplementedError
+        return ((k, self[k]) for k in self.keys())
 
-    def get(self, key, default=None):
+    def values(self):
+        return (self[k] for k in self.keys())
+
+    def get(self, subject_id, default=None):
         try:
-            return self[key]
+            return self[subject_id]
         except KeyError:
             return default
 
@@ -34,25 +37,25 @@ class ImageCSVLoader(BaseLoader):
     def __init__(self,
                  csv_path,
                  colnames=[],
-                 index_col=None,
+                 id_column=None,
                  readers=[read_image]):
 
         self.csv_path = csv_path
         self.colnames = colnames
         self.readers = readers
 
-        if index_col is not None:
-            colnames.append(index_col)
+        if id_column is not None:
+            colnames.append(id_column)
 
-        self.paths = pd.read_csv(csv_path, usecols=colnames, index_col=index_col)
+        self.paths = pd.read_csv(csv_path, usecols=colnames, index_col=id_column)
 
         if not isinstance(readers, list):
             readers = [readers] * len(colnames)
 
         self.output_tuple = namedtuple("Output", self.colnames)
 
-    def __getitem__(self, key):
-        row = self.paths.loc[key]
+    def __getitem__(self, subject_id):
+        row = self.paths.loc[subject_id]
         outputs = {col: self.readers[i](row[col]) for i, col in enumerate(self.colnames)}
         return self.output_tuple(**outputs)
 
@@ -63,7 +66,7 @@ class ImageCSVLoader(BaseLoader):
         return ((k, self[k]) for k in self.keys())
 
 
-class ImageDirectoryLoader(BaseLoader):
+class ImageFileLoader(BaseLoader):
     def __init__(self,
                  root_directory,
                  index_by="filename",
@@ -97,49 +100,44 @@ class ImageDirectoryLoader(BaseLoader):
             path = glob.glob(path)[0]
             if os.path.isdir(path):
                 path = os.path.join(path, "")
-            key = self._extract_key_from_path(path)
-            paths[key] = path
+            subject_id = self._extract_subject_id_from_path(path)
+            paths[subject_id] = path
         return paths
 
-    def _extract_key_from_path(self, path):
+    def _extract_subject_id_from_path(self, path):
         filename, _ = os.path.splitext(os.path.basename(path))
         dirname = os.path.basename(os.path.dirname(path))
         if isinstance(self.index_by, str):
             if self.index_by == "filename":
-                key = filename
+                subject_id = filename
             elif self.index_by == "parent":
-                key = dirname
+                subject_id = dirname
             else:
-                key = re.search(self.index_by, path)[0]
+                subject_id = re.search(self.index_by, path)[0]
         else:
             return self.index_by(path, filename, dirname)
-        return key
+        return subject_id
 
-    def __getitem__(self, key):
-        path = self.paths[key]
+    def __getitem__(self, subject_id):
+        path = self.paths[subject_id]
         return self.reader(path)
 
     def keys(self):
         return self.paths.keys()
 
-    def items(self):
-        return ((k, self[k]) for k in self.keys())
-
-    def values(self):
-        return (self[k] for k in self.keys())
 
 
-class CombinedLoader(BaseLoader):
-    def __init__(self, **kwargs):
-        self.loaders = kwargs
-        self.output_tuple = namedtuple("Output", list(self.loaders.keys()))
+# class CombinedLoader(BaseLoader):
+#     def __init__(self, **kwargs):
+#         self.loaders = kwargs
+#         self.output_tuple = namedtuple("Output", list(self.loaders.keys()))
 
-    def __getitem__(self, key):
-        outputs = {name: loader[key] for name, loader in self.loaders.items()}
-        return self.output_tuple(**outputs)
+#     def __getitem__(self, subject_id):
+#         outputs = {name: loader[subject_id] for name, loader in self.loaders.items()}
+#         return self.output_tuple(**outputs)
 
-    def keys(self):
-        return set(chain.from_iterable(loader.keys() for loader in self.loaders))
+#     def keys(self):
+#         return set(chain.from_iterable(loader.keys() for loader in self.loaders))
 
-    def items(self):
-        return ((k, self[k]) for k in self.keys())
+#     def items(self):
+#         return ((k, self[k]) for k in self.keys())
