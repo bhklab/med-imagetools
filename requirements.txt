@@ -1,0 +1,7 @@
+h5py
+numpy
+pandas
+pydicom
+pytest
+scikit-image
+SimpleITK

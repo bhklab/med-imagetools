@@ -135,7 +135,7 @@ class ArrayFunction(BaseOp):
             result = array_to_image(result)
         return result
 
-class DrawStructureSet(BaseOp):
+class StructureSetToMask(BaseOp):
     def __init__(self, roi_names):
         self.roi_names = roi_names
 
