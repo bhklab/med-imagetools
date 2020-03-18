@@ -1,3 +1,4 @@
+import warnings
 from itertools import chain
 
 from joblib import Parallel, delayed
@@ -36,11 +37,20 @@ class Pipeline:
         if not all_subject_ids:
             raise AttributeError("Pipeline must define at least one Input op")
 
-        if self.missing_strategy == "drop":
-            unique_subject_ids = list(filter(lambda k: all((k in subject_ids for subject_ids in all_subject_ids)), unique_subject_ids))
-        elif self.missing_strategy == "pass":
-            unique_subject_ids = list(unique_subject_ids)
-        return unique_subject_ids
+        result = []
+        for subject_id in unique_subject_ids:
+            if not all((subject_id in subject_ids for subject_ids in all_subject_ids)):
+                message = f"Subject {subject_id} is missing some of the input data "
+                if self.missing_strategy == "drop":
+                    message += f"and will be dropped accoring to current missing strategy ({self.missing_strategy})."
+                elif self.missing_strategy == "pass":
+                    message += f"but will be passed accoring to current missing strategy ({self.missing_strategy})."
+                    result.append(subject_id)
+                warnings.warn(message, category=RuntimeWarning)
+                continue
+            result.append(subject_id)
+
+        return result
 
     def _get_all_ops(self):
         # TODO (Michal) return ops in actual order of execution
