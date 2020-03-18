@@ -57,13 +57,18 @@ class Pipeline:
         return [v for v in self.__dict__.values() if isinstance(v, BaseOp)]
 
     def __repr__(self):
-        attrs = [(k, v) for k, v in self.__dict__ if not isinstance(v, BaseOp) and not k.startswith("_")]
+        attrs = [(k, v) for k, v in self.__dict__.items() if not isinstance(v, BaseOp) and not k.startswith("_")]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
 
     def __str__(self):
         repr_ = self.__repr__()
-        return repr_ + "\n" + "ops: " + ",\n".join(self._ops)
+        ops = self._get_all_ops()
+        if not ops:
+            ops = "<none>"
+        else:
+            ops = ",\n".join(ops)
+        return repr_ + "\n" + "ops: (\n" + ops + "\n)"
 
     def process_one_subject(self, subject_id):
         """Define the processing steps for one case.
