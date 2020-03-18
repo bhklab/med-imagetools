@@ -3,12 +3,11 @@ from multiprocessing import cpu_count
 
 import numpy as np
 import SimpleITK as sitk
-
 from pytest import mark
 
-from imgtools.pipeline import Pipeline
+from imgtools.io import ImageFileLoader, ImageFileWriter
 from imgtools.ops import Input, Output
-from imgtools.io import ImageDirectoryLoader, ImageFileWriter
+from imgtools.pipeline import Pipeline
 
 
 class PipelineTest(Pipeline):
@@ -17,7 +16,7 @@ class PipelineTest(Pipeline):
         self.input_path = input_path
         self.output_path = output_path
         self.image_input = Input(
-            ImageDirectoryLoader(self.input_path))
+            ImageFileLoader(self.input_path))
         self.image_output = Output(
             ImageFileWriter(self.output_path))
 

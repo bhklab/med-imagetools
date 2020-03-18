@@ -69,13 +69,13 @@ class ImageCSVLoader(BaseLoader):
 class ImageFileLoader(BaseLoader):
     def __init__(self,
                  root_directory,
-                 index_by="filename",
+                 get_subject_id_from="filename",
                  subdir_path=None,
                  exclude_paths=[],
                  reader=read_image):
 
         self.root_directory = root_directory
-        self.index_by = index_by
+        self.get_subject_id_from = get_subject_id_from
         self.subdir_path = subdir_path
         self.exclude_paths = []
         for path in exclude_paths:
@@ -107,15 +107,15 @@ class ImageFileLoader(BaseLoader):
     def _extract_subject_id_from_path(self, path):
         filename, _ = os.path.splitext(os.path.basename(path))
         dirname = os.path.basename(os.path.dirname(path))
-        if isinstance(self.index_by, str):
-            if self.index_by == "filename":
+        if isinstance(self.get_subject_id_from, str):
+            if self.get_subject_id_from == "filename":
                 subject_id = filename
-            elif self.index_by == "parent":
+            elif self.get_subject_id_from == "subject_directory":
                 subject_id = dirname
             else:
-                subject_id = re.search(self.index_by, path)[0]
+                subject_id = re.search(self.get_subject_id_from, path)[0]
         else:
-            return self.index_by(path, filename, dirname)
+            return self.get_subject_id_from(path, filename, dirname)
         return subject_id
 
     def __getitem__(self, subject_id):
