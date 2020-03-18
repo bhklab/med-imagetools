@@ -16,7 +16,7 @@ class RADCUREPipeline(Pipeline):
 
     def __init__(self,
                  input_directory="/cluster/projects/radiomics/RADCURE-images/",
-                 output_directory="./RADCURE_processed",
+                 output_directory="./RADCURE-processed",
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
@@ -43,7 +43,7 @@ class RADCUREPipeline(Pipeline):
         self.structure_set_input = Input(
             ImageFileLoader(
                 self.input_directory,
-                index_by="parent",
+                get_subject_id_from="subject_directory",
                 subdir_path="*/structures",
                 reader=read_dicom_rtstruct))
 
@@ -61,7 +61,7 @@ class RADCUREPipeline(Pipeline):
         self.mask_output = Output(
             ImageFileWriter(
                 os.path.join(self.output_directory, "masks"),
-                filename_format="{key}_mask.nrrd",
+                filename_format="{subject_id}_mask.nrrd",
                 create_dirs=True))
 
     def process_one_subject(self, subject_id):
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         "--spacing",
         nargs=3,
         type=float,
-        default=(1., 1., 1.),
+        default=(1., 1., 0.),
         help="The resampled voxel spacing in  (x, y, z) directions.")
     parser.add_argument(
         "--n_jobs",
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         help="Whether to print progress to standard output.")
     args = parser.parse_args()
     pipeline = RADCUREPipeline(
-        args.input_directory,
+        input_directory=args.input_directory,
         output_directory=args.output_directory,
         spacing=args.spacing,
         n_jobs=args.n_jobs,
