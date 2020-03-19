@@ -1,6 +1,5 @@
 import SimpleITK as sitk
 import numpy as np
-import matplotlib.pyplot as plt
 
 def physical_points_to_idxs(image, points, continuous=False):
     if continuous:
@@ -26,6 +25,7 @@ def image_to_array(image):
     return array, origin, direction, spacing
 
 def show_image(image, mask=None, ax=None):
+    import matplotlib.pyplot as plt
     if ax is None:
         fig, ax = plt.subplots()
 
