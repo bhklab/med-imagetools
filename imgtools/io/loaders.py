@@ -97,6 +97,8 @@ class ImageFileLoader(BaseLoader):
             subject_dir_path = f.path
             if self.subdir_path:
                 full_path = os.path.join(subject_dir_path, self.subdir_path)
+            else:
+                full_path = subject_dir_path
             try:
                 full_path = glob.glob(full_path)[0]
             except IndexError:
