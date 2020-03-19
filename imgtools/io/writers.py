@@ -19,12 +19,12 @@ class BaseWriter:
     def put(self, *args, **kwargs):
         raise NotImplementedError
 
-    def _get_path_from_key(self, key):
+    def _get_path_from_subject_id(self, subject_id):
         now = datetime.now(timezone.utc)
         date = now.strftime("%Y-%m-%d")
         time = now.strftime("%H%M%S")
         date_time = date + "_" + time
-        out_filename = self.filename_format.format(key=key,
+        out_filename = self.filename_format.format(subject_id=subject_id,
                                                    date=date,
                                                    time=time,
                                                    date_time=date_time)
@@ -33,23 +33,23 @@ class BaseWriter:
 
 
 class ImageFileWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{key}.nrrd", create_dirs=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True):
         super().__init__(root_directory, filename_format, create_dirs)
 
-    def put(self, key, image):
+    def put(self, subject_id, image):
         # TODO (Michal) add support for .seg.nrrd files
-        out_path = self._get_path_from_key(key)
+        out_path = self._get_path_from_subject_id(subject_id)
         sitk.WriteImage(image, out_path)
 
 
 class NumpyWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{key}.npy", create_dirs=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.npy", create_dirs=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.root_directory = root_directory
         self.filename_format = filename_format
 
-    def put(self, key, image):
-        out_path = self._get_path_from_key(key)
+    def put(self, subject_id, image):
+        out_path = self._get_path_from_subject_id(subject_id)
         if isinstance(image, sitk.Image):
             array, *_ = image_to_array(image) # TODO (Michal) optionally save the image geometry
         np.save(out_path, array)
@@ -69,30 +69,30 @@ class CSVMetadataWriter:
 #     def __init__(self):
 #         self.results = {}
 
-#     def put(self, image, key):
-#         self.results[key] = image
+#     def put(self, image, subject_id):
+#         self.results[subject_id] = image
 
-#     def __getitem__(self, key):
-#         return self.results[key]
+#     def __getitem__(self, subject_id):
+#         return self.results[subject_id]
 
-#     def get(self, key, default=None):
+#     def get(self, subject_id, default=None):
 #         try:
-#             return self[key]
-#         except KeyError:
+#             return self[subject_id]
+#         except Subject_IdError:
 #             return default
 
 class HDF5Writer(BaseWriter):
-    def __init__(self, root_directory, filename_format="{key}.h5", create_dirs=True, save_geometry=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.h5", create_dirs=True, save_geometry=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.save_geometry = save_geometry
 
-    def put(self, key, metadata=None, **kwargs):
-        out_path = self._get_path_from_key(key)
+    def put(self, subject_id, metadata=None, **kwargs):
+        out_path = self._get_path_from_subject_id(subject_id)
         with h5py.File(out_path, "w") as f:
             for k, v in kwargs.items():
                 array, origin, direction, spacing = image_to_array(v)
                 dataset = f.create_dataset(k, data=array)
-                dataset.attrs.create("key", key)
+                dataset.attrs.create("subject_id", subject_id)
                 if self.save_geometry:
                     dataset.attrs.create("origin", data=origin)
                     dataset.attrs.create("direction", data=direction)
@@ -100,7 +100,7 @@ class HDF5Writer(BaseWriter):
             if metadata:
                 for k, attrs in metadata.items():
                     for name, v in attrs:
-                        f[key].attrs.create(name, data=v)
+                        f[subject_id].attrs.create(name, data=v)
 
 
 class MetadataWriter:
