@@ -3,21 +3,20 @@ import numpy as np
 
 from typing import Sequence, Union, Tuple, Optional
 
-
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,
     "nearest": sitk.sitkNearestNeighbor,
     "bspline": sitk.sitkBSpline,
 }
 
+
 def resample(image: sitk.Image,
-             spacing: Union[Sequence[float], float],
+             spacing: Union[float, Sequence[float], np.ndarray],
              interpolation: str = "linear",
              anti_alias: bool = True,
              anti_alias_sigma: float = 2.,
              transform: sitk.Transform = None) -> sitk.Image:
-    """Resample image to a given spacing.
-
+    """Resample image to a given spacing, optionally applying a transformation.
 
     Parameters
     ----------
@@ -44,28 +43,30 @@ def resample(image: sitk.Image,
     anti_alias_sigma, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
 
-
     Returns
     -------
-    out : sitk.Image or tuple of sitk.Image
-        The resampled image. If mask is given, also return resampled mask.
-
+    sitk.Image
+        The resampled image.
     """
 
     try:
         interpolator = INTERPOLATORS[interpolation]
     except KeyError:
-        raise ValueError(f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolator}.")
+        raise ValueError(
+            f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolator}."
+        )
 
     original_spacing = np.array(image.GetSpacing())
     original_size = np.array(image.GetSize())
 
     if isinstance(spacing, (float, int)):
-        new_spacing = np.repeat(spacing, len(original_spacing)).astype(np.float64)
+        new_spacing = np.repeat(spacing,
+                                len(original_spacing)).astype(np.float64)
     else:
         spacing = np.asarray(spacing)
         new_spacing = np.where(spacing == 0, original_spacing, spacing)
-    new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
+    new_size = np.floor(original_size * original_spacing / new_spacing).astype(
+        np.int)
 
     rif = sitk.ResampleImageFilter()
     rif.SetOutputOrigin(image.GetOrigin())
@@ -79,7 +80,8 @@ def resample(image: sitk.Image,
     downsample = new_spacing > original_spacing
     if downsample.any() and anti_alias:
         sigma = np.where(downsample, anti_alias_sigma, 1e-11)
-        image = sitk.SmoothingRecursiveGaussian(image, sigma) # TODO implement better sigma computation
+        image = sitk.SmoothingRecursiveGaussian(
+            image, sigma)  # TODO implement better sigma computation
 
     rif.SetInterpolator(interpolator)
     resampled_image = rif.Execute(image)
@@ -87,46 +89,128 @@ def resample(image: sitk.Image,
     return resampled_image
 
 
-def resize(image, new_size, anti_alias=True, anti_alias_sigma=2., interpolation="linear"):
+def resize(image: sitk.Image,
+           size: Union[int, Sequence[int], np.ndarray],
+           anti_alias: bool = True,
+           anti_alias_sigma: float = 2.,
+           interpolation: str = "linear") -> sitk.Image:
+    """Resize image to a given size by resampling coordinates.
+
+    Parameters
+    ----------
+    image
+        The image to be resize.
+
+    size
+        The new image size. If float, assumes the same size in all directions.
+        Alternatively, a sequence of floats can be passed to specify size along
+        x, y and z dimensions. Passing 0 at any position will keep the original
+        size along that dimension.
+
+    interpolation, optional
+        The interpolation method to use. Valid options are:
+        - "linear" for bi/trilinear interpolation (default)
+        - "nearest" for nearest neighbour interpolation
+        - "bspline" for order-3 b-spline interpolation
+
+    anti_alias, optional
+        Whether to smooth the image with a Gaussian kernel before resampling.
+        Only used when downsampling, i.e. when `size < image.GetSize()`.
+        This should be used to avoid aliasing artifacts.
+
+    anti_alias_sigma, optional
+        The standard deviation of the Gaussian kernel used for anti-aliasing.
+
+    Returns
+    -------
+    sitk.Image
+        The resized image.
+    """
 
     original_size = np.array(image.GetSize())
     original_spacing = np.array(image.GetSpacing())
-    new_size = np.asarray(new_size)
+
+    if isinstance(size, (float, int)):
+        new_size = np.repeat(size, len(original_size)).astype(np.float64)
+    else:
+        size = np.asarray(size)
+        new_size = np.where(size == 0, original_size, size)
+
     new_spacing = original_spacing * original_size / new_size
 
-    return resample(image, new_spacing, anti_alias=anti_alias, anti_alias_sigma=anti_alias_sigma, interpolation=interpolation)
+    return resample(image,
+                    new_spacing,
+                    anti_alias=anti_alias,
+                    anti_alias_sigma=anti_alias_sigma,
+                    interpolation=interpolation)
 
 
-def rotate(image, rotation_centre, angles, interpolation="linear"):
+def rotate(image: sitk.Image,
+           rotation_centre: Sequence[float],
+           angles: Sequence[float],
+           interpolation: str = "linear") -> sitk.Image:
+    """Rotate an image around a given centre.
+
+    Parameters
+    ----------
+    image
+        The image to rotate.
+
+    rotation_centre
+        The centre of rotation in image coordinates.
+
+    angles 
+        The angles of rotation around x, y and z axes.
+
+    Returns
+    -------
+    sitk.Image
+        The rotated image.
+    """
+
     rotation_centre = image.TransformIndexToPhysicalPoint(rotation_centre)
     x_angle, y_angle, z_angle = angles
 
     rotation = sitk.Euler3DTransform(
         rotation_centre,
-        x_angle,     # the angle of rotation around the x-axis, in radians -> coronal rotation
-        y_angle,     # the angle of rotation around the y-axis, in radians -> saggittal rotation
-        z_angle,     # the angle of rotation around the z-axis, in radians -> axial rotation
-        (0., 0., 0.) # optional translation (shift) of the image, here we don't want any translation
+        x_angle,  # the angle of rotation around the x-axis, in radians -> coronal rotation
+        y_angle,  # the angle of rotation around the y-axis, in radians -> saggittal rotation
+        z_angle,  # the angle of rotation around the z-axis, in radians -> axial rotation
+        (0., 0., 0.)  # optional translation (shift) of the image, here we don't want any translation
     )
-    return resample(image, spacing=image.GetSpacing(), interpolation=interpolation, transform=rotation)
+    return resample(image,
+                    spacing=image.GetSpacing(),
+                    interpolation=interpolation,
+                    transform=rotation)
 
 
-def crop(image, crop_centre, size):
-    """
+def crop(image: sitk.Image,
+         crop_centre: Sequence[float],
+         size: Union[int, Sequence[int], np.ndarray]) -> sitk.Image:
+    """Crop an image to the desired size around a given centre.
+
+    Note that the cropped image might be smaller than size in a particular
+    direction if the cropping window exceeds image boundaries.
     
     Parameters
     ----------
-    image : 
+    image
+        The image to crop.
 
-    crop_centre : 
+    crop_centre
+        The centre of the cropping window in image coordinates.
 
-    size : 
-
+    size
+        The size of the cropping window along each dimension in pixels. If
+        float, assumes the same size in all directions. Alternatively, a
+        sequence of floats can be passed to specify size along x, y and z
+        dimensions. Passing 0 at any position will keep the original size along
+        that dimension.
 
     Returns
     -------
-    out : 
-
+    sitk.Image
+        The cropped image.
     """
     crop_centre = np.asarray(crop_centre, dtype=np.float64)
     original_size = np.asarray(image.GetSize())
@@ -157,22 +241,24 @@ def crop(image, crop_centre, size):
     return image[min_x:max_x, min_y:max_y, min_z:max_z]
 
 
-def constant_pad(image, size, cval=0.):
-    if isinstance(size, int):
-        size_lower = size_upper = [size for _ in image.GetSize()]
-    elif isinstance(size, (tuple, list, np.ndarray)):
-        if isinstance(size[0], int):
-            size_lower = size_upper = size
-        elif isinstance(size[0], (tuple, list, np.ndarray)):
-            size_lower = [s[0] for s in size]
-            size_upper = [s[1] for s in size]
-    else:
-        raise ValueError(f"Size must be either int, sequence of int or sequence of sequences of ints, got {size}.")
-    return sitk.ConstantPad(image, size_lower, size_upper, cval)
+# def constant_pad(image, size, cval=0.):
+#     if isinstance(size, int):
+#         size_lower = size_upper = [size for _ in image.GetSize()]
+#     elif isinstance(size, (tuple, list, np.ndarray)):
+#         if isinstance(size[0], int):
+#             size_lower = size_upper = size
+#         elif isinstance(size[0], (tuple, list, np.ndarray)):
+#             size_lower = [s[0] for s in size]
+#             size_upper = [s[1] for s in size]
+#     else:
+#         raise ValueError(
+#             f"Size must be either int, sequence of int or sequence of sequences of ints, got {size}."
+#         )
+#     return sitk.ConstantPad(image, size_lower, size_upper, cval)
 
 
-def centre_on_point(image, centre):
-    pass
+# def centre_on_point(image, centre):
+#     pass
 
 
 # def resize_by_cropping_or_padding(image, size, centre=None, cval=0.):
@@ -183,8 +269,6 @@ def centre_on_point(image, centre):
 #     crop_dims = np.where(size < original_size)
 
 
-def clip(image, lower, upper):
-    pass
 def bounding_box(mask: sitk.Image, label: int = 1) -> tuple:
     """Find the axis-aligned bounding box of a region descriibed by a
     segmentation mask.
