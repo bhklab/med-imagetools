@@ -12,7 +12,7 @@ class BaseOp:
         raise NotImplementedError
 
     def __repr__(self):
-        attrs = [(k, v) for k, v in self.__dict__ if not k.startswith("_")]
+        attrs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
 
