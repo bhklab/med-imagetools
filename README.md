@@ -9,7 +9,7 @@ conda create -n imgtools
 
 using `conda`:
 ```
-conda install --file requirements.txt
+conda install --file requirements.txt -c defaults -c conda-forge
 ```
 
 using `pip`:
