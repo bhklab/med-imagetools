@@ -185,13 +185,106 @@ def centre_on_point(image, centre):
 
 def clip(image, lower, upper):
     pass
+def bounding_box(mask: sitk.Image, label: int = 1) -> tuple:
+    """Find the axis-aligned bounding box of a region descriibed by a
+    segmentation mask.
+
+    Parameters
+    ----------
+    mask
+        Segmentation mask describing the region of interest.
+
+    label, optional
+        Label to use when computing bounding box if segmentation mask contains
+        more than 1 labelled region.
+
+    Returns
+    -------
+    tuple
+        The bounding box location and size. For an N-dimensional image,
+        the first N elements are the location of the bounding box and the next
+        N elements describe the size along each dimension.
+    """
+
+    filter_ = sitk.LabelShapeStatisticsImageFilter()
+    filter_.Execute(mask)
+    return filter_.GetBoundingBox(label)
 
 
-def window(image, window, level):
-    pass
+def centroid(mask: sitk.Image,
+             label: int = 1,
+             world_coordinates: bool = False) -> tuple:
+    """Find the centroid of a labelled region specified by a segmentation mask.
+
+    Parameters
+    ----------
+    mask
+        Segmentation mask describing the region of interest.
+
+    label, optional
+        Label to use when computing the centroid if segmentation mask contains
+        more than 1 labelled region.
+
+    world_coordinates, optional
+        If True, return centroid in world coordinates, otherwise in image
+        (voxel) coordinates (default).
+
+    Returns
+    -------
+    tuple
+        The centroid coordinates.
+    """
+    filter_ = sitk.LabelShapeStatisticsImageFilter()
+    filter_.Execute(mask)
+    centroid_coords = filter_.GetCentroid(label)
+    if not world_coordinates:
+        centroid_coords = mask.TransformPhysicalPointToIndex(centroid_coords)
+    return centroid_coords
 
 
-def mean(image, mask=None, labels=None):
+def crop_to_mask_bounding_box(image: sitk.Image,
+                              mask: sitk.Image,
+                              margin: Union[int, Sequence[int], np.ndarray] = 0,
+                              label: int = 1) -> Tuple[sitk.Image]:
+    """Crop the image using the bounding box of a region of interest specified
+    by a segmentation mask.
+
+    Parameters
+    ----------
+    image
+        The image to crop.
+
+    mask
+        Segmentation mask describing the region of interest.
+
+    margin, optional
+        A margin that will be added to each dimension when cropping. If int,
+        add the same margin to each dimension. A sequence of ints can also be
+        passed to specify the margin separately along each dimension.
+
+    label, optional
+        Label to use when computing the centroid if segmentation mask contains
+        more than 1 labelled region.
+
+    Returns
+    -------
+    tuple of sitk.Image
+        The cropped image and mask.
+    """
+    if isinstance(margin, Sequence):
+        margin = np.asarray(margin)
+
+    mask_bbox = np.array(bounding_box(mask, label=label))
+    bbox_location, bbox_size = mask_bbox[:2], mask_bbox[2:]
+    crop_centre = (bbox_location + bbox_size) / 2
+    crop_size = bbox_size // 2 + margin
+
+    image = crop(image, crop_centre, crop_size)
+    mask = crop(mask, crop_centre, crop_size)
+
+    return image, mask
+
+
 def clip_intensity(image: sitk.Image,
                    lower: float,
                    upper: float):
