@@ -14,7 +14,7 @@ class Pipeline:
     the `process_one_case` method, which defines the processing steps for one
     case (i.e. one subject_id from data loaders).
     """
-    def __init__(self, n_jobs=0, missing_strategy="drop", show_progress=True):
+    def __init__(self, n_jobs=1, missing_strategy="drop", show_progress=True):
         """Initialize the base class.
 
         Parameters

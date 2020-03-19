@@ -15,8 +15,8 @@ class RADCUREPipeline(Pipeline):
     """
 
     def __init__(self,
-                 input_directory="/cluster/projects/radiomics/RADCURE-images/",
-                 output_directory="./RADCURE-processed",
+                 input_directory,
+                 output_directory=,
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
@@ -44,7 +44,7 @@ class RADCUREPipeline(Pipeline):
             ImageFileLoader(
                 self.input_directory,
                 get_subject_id_from="subject_directory",
-                subdir_path="*/structures",
+                subdir_path="*/structures/RTSTRUCT.dcm",
                 reader=read_dicom_rtstruct))
 
         # image processing ops
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--n_jobs",
         type=int,
-        default=0,
+        default=1,
         help="The number of parallel processes to use.")
     parser.add_argument(
         "--show_progress",
