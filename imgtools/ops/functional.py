@@ -192,14 +192,173 @@ def window(image, window, level):
 
 
 def mean(image, mask=None, labels=None):
-    if mask is not None:
-        pass
-    pass
+def clip_intensity(image: sitk.Image,
+                   lower: float,
+                   upper: float):
+    """Clip image gray level intensities to specified range.
 
-def var(image, mask=None, labels=None):
-    if mask is not None:
-        pass
-    pass
+    The gray level intensities in the resulting image will fall in the range
+    [lower, upper].
 
-def standard_scale(image, dataset_mean=0., dataset_var=1.):
-    return (image - dataset_mean) / dataset_var
+    Parameters
+    ----------
+    image
+        The intensity image to clip.
+
+    lower
+        The lower bound on gray level intensity. Voxels with lower intensity
+        will be set to this value.
+
+    upper 
+        The upper bound on gray level intensity. Voxels with higer intensity
+        will be set to this value.
+
+    Returns
+    -------
+    sitk.Image
+        The clipped intensity image.
+    """
+    return sitk.Clamp(image, image.GetPixelID(), lower, upper)
+
+
+def window_intensity(image: sitk.Image,
+                     window: float,
+                     level: float) -> sitk.Image:
+    """Restrict image gray level intensities to a given window and level.
+
+    The gray level intensities in the resulting image will fall in the range
+    [level - window / 2, level + window / 2]. 
+
+    Parameters
+    ----------
+    image
+        The intensity image to window.
+
+    window 
+        The width of the intensity window.
+
+    level
+        The mid-point of the intensity window.
+
+    Returns
+    -------
+    sitk.Image
+        The windowed intensity image.
+    """
+    lower = level - window / 2
+    upper = level + window / 2
+    return clip_intensity(image, lower, upper)
+
+
+def mean(image: sitk.Image,
+         mask: sitk.Image = None,
+         label: int = None) -> float:
+    """Compute the mean gray level intensity in an image.
+
+    This function also supports computing the mean intensity in a specific
+    region of interest if `mask` and `label` are passed.
+
+    Parameters
+    ----------
+    image
+        The image used to compute the mean.
+
+    mask, optional
+        Segmentation mask specifying a region of interest used in computation.
+        Only voxels falling within the ROI will be considered. If None, use the
+        whole image.
+
+    label, optional
+        Label to use when computing the mean if segmentation mask contains
+        more than 1 labelled region.
+
+    Returns
+    -------
+    float
+        The mean gray level intensity in the image or region.
+    """
+    if mask is not None:
+        filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
+        result = filter_.GetMean(label)
+    else:
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(image)
+        result = filter_.GetMean()
+    return result
+
+
+def variance(image, mask=None, label=None):
+    """Compute the variance of gray level intensities in an image.
+
+    This function also supports computing the variance in a specific
+    region of interest if `mask` and `label` are passed.
+
+    Parameters
+    ----------
+    image
+        The image used to compute the variance.
+
+    mask, optional
+        Segmentation mask specifying a region of interest used in computation.
+        Only voxels falling within the ROI will be considered. If None, use the
+        whole image.
+
+    label, optional
+        Label to use when computing the variance if segmentation mask contains
+        more than 1 labelled region.
+
+    Returns
+    -------
+    float
+        The variance of gray level intensities in the image or region.
+    """
+    if mask is not None:
+        filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
+        result = filter_.GetVariance(label)
+    else:
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(image)
+        result = filter_.GetVariance()
+    return result
+
+
+def standard_scale(image: sitk.Image,
+                   mask: sitk.Image = None,
+                   rescale_mean: float = None,
+                   rescale_variance: float = None,
+                   label: int = 1) -> sitk.Image:
+    """Rescale image intensities by subtracting the mean and dividing by variance.
+
+    If `rescale_mean` and `rescale_variance` are None, image mean and variance
+    will be used, i.e. the resulting image intensities will have 0 mean and
+    unit variance. Alternatively, a specific mean and variance can be passed to
+    e.g. standardize a whole dataset of images. If a segmentation mask is passed,
+    only the voxels falling within the mask will be considered when computing
+    mean and variance. However, the whole image will still be normalized using
+    the computed values.
+
+    Parameters
+    ----------
+    image
+        The image to rescale.
+
+    mask, optional
+        Segmentation mask specifying a region of interest used in computation.
+        Only voxels falling within the ROI will be considered. If None, use the
+        whole image.
+
+    label, optional
+        Label to use when computing the mean and variance if segmentation mask
+        contains more than 1 labelled region.
+
+    Returns
+    -------
+    sitk.Image
+        The rescaled image.
+    """
+    if not rescale_mean or not rescale_variance:
+        rescale_mean = mean(image, mask=mask, label=label)
+        rescale_variance = variance(image, mask=mask, label=label)
+    return (image - rescale_mean) / rescale_variance
