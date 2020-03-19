@@ -129,22 +129,30 @@ def crop(image, crop_centre, size):
 
     """
     crop_centre = np.asarray(crop_centre, dtype=np.float64)
-    image_shape = np.array((image.GetSize()[::-1]), dtype=np.float64)
+    original_size = np.asarray(image.GetSize())
 
     if isinstance(size, int):
-        size_lower = size_upper = np.array([size for _ in image.GetSize()])
-    elif isinstance(size, (tuple, list, np.ndarray)):
-        if isinstance(size[0], int):
-            size_lower = size_upper = np.asarray(size)
-        elif isinstance(size[0], (tuple, list, np.ndarray)):
-            size_lower = np.array([s[0] for s in size])
-            size_upper = np.array([s[1] for s in size])
+        size = np.array([size for _ in image.GetSize()])
+    else:
+        size = np.asarray(size) 
+    
+    if (crop_centre < 0).any() or (crop_centre > original_size).any():
+        raise ValueError(
+            f"Crop centre outside image boundaries. Image size = {original_size}, crop centre = {crop_centre}"
+        )
 
-    if (crop_centre < 0).any() or (crop_centre > image_shape).any():
-        raise ValueError(f"Crop centre outside image boundaries. Image shape = {image_shape}, crop centre = {crop_centre}")
+    min_coords = np.clip(
+        np.floor(crop_centre - size / 2).astype(np.int64), 0,
+        original_size)
+    min_coords = np.where(size == 0, 0, min_coords)
 
-    min_x, min_y, min_z = np.clip(np.floor((image_shape - size_lower) / 2).astype(np.int64), 0, image_shape)
-    max_x, max_y, max_z = np.clip(np.floor((image_shape + size_upper) / 2).astype(np.int64), 0, image_shape)
+    max_coords = np.clip(
+        np.floor(crop_centre + size / 2).astype(np.int64), 0,
+        original_size)
+    max_coords = np.where(size == 0, original_size, max_coords)
+
+    min_x, min_y, min_z = min_coords
+    max_x, max_y, max_z = max_coords
 
     return image[min_x:max_x, min_y:max_y, min_z:max_z]
 
