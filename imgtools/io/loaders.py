@@ -92,30 +92,33 @@ class ImageFileLoader(BaseLoader):
     def _generate_paths(self):
         paths = {}
         for f in os.scandir(self.root_directory):
-            path = f.path
-            if path in self.exclude_paths:
+            if f.path in self.exclude_paths:
                 continue
+            subject_dir_path = f.path
             if self.subdir_path:
-                path = os.path.join(path, self.subdir_path)
-            path = glob.glob(path)[0]
-            if os.path.isdir(path):
-                path = os.path.join(path, "")
-            subject_id = self._extract_subject_id_from_path(path)
-            paths[subject_id] = path
+                full_path = os.path.join(subject_dir_path, self.subdir_path)
+            try:
+                full_path = glob.glob(full_path)[0]
+            except IndexError:
+                continue
+            if os.path.isdir(full_path):
+                full_path = os.path.join(full_path, "")
+            subject_dir_name = os.path.basename(os.path.normpath(subject_dir_path))
+            subject_id = self._extract_subject_id_from_path(full_path, subject_dir_name)
+            paths[subject_id] = full_path
         return paths
 
-    def _extract_subject_id_from_path(self, path):
-        filename, _ = os.path.splitext(os.path.basename(path))
-        dirname = os.path.basename(os.path.dirname(path))
+    def _extract_subject_id_from_path(self, full_path, subject_dir_name):
+        filename, _ = os.path.splitext(os.path.basename(full_path))
         if isinstance(self.get_subject_id_from, str):
             if self.get_subject_id_from == "filename":
                 subject_id = filename
             elif self.get_subject_id_from == "subject_directory":
-                subject_id = dirname
+                subject_id = subject_dir_name
             else:
-                subject_id = re.search(self.get_subject_id_from, path)[0]
+                subject_id = re.search(self.get_subject_id_from, full_path)[0]
         else:
-            return self.get_subject_id_from(path, filename, dirname)
+            return self.get_subject_id_from(full_path, filename, subject_dir_name)
         return subject_id
 
     def __getitem__(self, subject_id):
