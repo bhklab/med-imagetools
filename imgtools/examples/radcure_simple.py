@@ -1,4 +1,24 @@
-import obs=-1,
+import os
+from argparse import ArgumentParser
+
+from imgtools.io import (ImageFileLoader, ImageFileWriter,
+                         read_dicom_rtstruct, read_dicom_series)
+from imgtools.ops import StructureSetToMask, Input, Output, Resample
+from imgtools.pipeline import Pipeline
+
+
+class RADCUREPipeline(Pipeline):
+    """Example processing pipeline for the RADCURE dataset.
+
+    This pipeline loads the CT images and structure sets, re-samples the images,
+    and draws the GTV contour using the resampled image.
+    """
+
+    def __init__(self,
+                 input_directory,
+                 output_directory=,
+                 spacing=(1., 1., 0.),
+                 n_jobs=-1,
                  missing_strategy="drop",
                  show_progress=False):
         super().__init__(
