@@ -3,6 +3,7 @@ import numpy as np
 
 from typing import Sequence, Union, Tuple, Optional
 
+
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,
     "nearest": sitk.sitkNearestNeighbor,
@@ -26,7 +27,7 @@ def resample(image: sitk.Image,
     spacing
         The new image spacing. If float, assumes the same spacing in all directions.
         Alternatively, a sequence of floats can be passed to specify spacing along
-        x, y and z dimensions. Passing 0 at any position will keep the original
+        each dimension. Passing 0 at any position will keep the original
         spacing along that dimension (useful for in-plane resampling).
 
     interpolation, optional
@@ -104,7 +105,7 @@ def resize(image: sitk.Image,
     size
         The new image size. If float, assumes the same size in all directions.
         Alternatively, a sequence of floats can be passed to specify size along
-        x, y and z dimensions. Passing 0 at any position will keep the original
+        each dimension. Passing 0 at any position will keep the original
         size along that dimension.
 
     interpolation, optional
@@ -147,7 +148,7 @@ def resize(image: sitk.Image,
 
 def rotate(image: sitk.Image,
            rotation_centre: Sequence[float],
-           angles: Sequence[float],
+           angles: Union[float, Sequence[float]],
            interpolation: str = "linear") -> sitk.Image:
     """Rotate an image around a given centre.
 
@@ -169,15 +170,23 @@ def rotate(image: sitk.Image,
     """
 
     rotation_centre = image.TransformIndexToPhysicalPoint(rotation_centre)
-    x_angle, y_angle, z_angle = angles
 
-    rotation = sitk.Euler3DTransform(
-        rotation_centre,
-        x_angle,  # the angle of rotation around the x-axis, in radians -> coronal rotation
-        y_angle,  # the angle of rotation around the y-axis, in radians -> saggittal rotation
-        z_angle,  # the angle of rotation around the z-axis, in radians -> axial rotation
-        (0., 0., 0.)  # optional translation (shift) of the image, here we don't want any translation
-    )
+    if image.GetDimension() == 2:
+        rotation = sitk.Euler2DTransform(
+            rotation_centre,
+            angles,
+            (0., 0.)  # no translation 
+        )
+    elif image.GetDimension() == 3:
+        x_angle, y_angle, z_angle = angles
+
+        rotation = sitk.Euler3DTransform(
+            rotation_centre,
+            x_angle,  # the angle of rotation around the x-axis, in radians -> coronal rotation
+            y_angle,  # the angle of rotation around the y-axis, in radians -> saggittal rotation
+            z_angle,  # the angle of rotation around the z-axis, in radians -> axial rotation
+            (0., 0., 0.)  # no translation
+        )
     return resample(image,
                     spacing=image.GetSpacing(),
                     interpolation=interpolation,
