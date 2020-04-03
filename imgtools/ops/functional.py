@@ -525,21 +525,57 @@ def variance(image, mask=None, label=None):
         result = filter_.GetVariance()
     return result
 
+def standard_deviation(image, mask=None, label=None):
+    """Compute the standard deviation of grey level intensities in an image.
+
+    This function also supports computing the standard deviation in a specific
+    region of interest if `mask` and `label` are passed.
+
+    Parameters
+    ----------
+    image
+        The image used to compute the standard deviation.
+
+    mask, optional
+        Segmentation mask specifying a region of interest used in computation.
+        Only voxels falling within the ROI will be considered. If None, use the
+        whole image.
+
+    label, optional
+        Label to use when computing the standard deviation if segmentation mask
+        contains more than 1 labelled region.
+
+    Returns
+    -------
+    float
+        The standard deviation of grey level intensities in the image or region.
+    """
+    if mask is not None:
+        filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
+        result = filter_.GetSigma(label)
+    else:
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(image)
+        result = filter_.GetSigma()
+    return result
+
 
 def standard_scale(image: sitk.Image,
-                   mask: sitk.Image = None,
-                   rescale_mean: float = None,
-                   rescale_variance: float = None,
+                   mask: Optional[sitk.Image] = None,
+                   rescale_mean: Optional[float] = None,
+                   rescale_std: Optional[float] = None,
                    label: int = 1) -> sitk.Image:
-    """Rescale image intensities by subtracting the mean and dividing by variance.
+    """Rescale image intensities by subtracting the mean and dividing by
+       standard deviation.
 
-    If `rescale_mean` and `rescale_variance` are None, image mean and variance
-    will be used, i.e. the resulting image intensities will have 0 mean and
-    unit variance. Alternatively, a specific mean and variance can be passed to
-    e.g. standardize a whole dataset of images. If a segmentation mask is passed,
-    only the voxels falling within the mask will be considered when computing
-    mean and variance. However, the whole image will still be normalized using
-    the computed values.
+    If `rescale_mean` and `rescale_std` are None, image mean and standard
+    deviation will be used, i.e. the resulting image intensities will have
+    0 mean and unit variance. Alternatively, a specific mean and standard
+    deviation can be passed to e.g. standardize a whole dataset of images.
+    If a segmentation mask is passed, only the voxels falling within the mask
+    will be considered when computing the statistics. However, the whole image
+    will still be normalized using the computed values.
 
     Parameters
     ----------
