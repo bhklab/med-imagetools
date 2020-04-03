@@ -109,7 +109,7 @@ def resample(image: sitk.Image,
 def resize(image: sitk.Image,
            size: Union[int, Sequence[int], np.ndarray],
            anti_alias: bool = True,
-           anti_alias_sigma: Optional[float] = None.,
+           anti_alias_sigma: Optional[float] = None,
            interpolation: str = "linear") -> sitk.Image:
     """Resize image to a given size by resampling coordinates.
 
@@ -397,9 +397,9 @@ def crop_to_mask_bounding_box(image: sitk.Image,
 def clip_intensity(image: sitk.Image,
                    lower: float,
                    upper: float):
-    """Clip image gray level intensities to specified range.
+    """Clip image grey level intensities to specified range.
 
-    The gray level intensities in the resulting image will fall in the range
+    The grey level intensities in the resulting image will fall in the range
     [lower, upper].
 
     Parameters
@@ -408,11 +408,11 @@ def clip_intensity(image: sitk.Image,
         The intensity image to clip.
 
     lower
-        The lower bound on gray level intensity. Voxels with lower intensity
+        The lower bound on grey level intensity. Voxels with lower intensity
         will be set to this value.
 
     upper
-        The upper bound on gray level intensity. Voxels with higer intensity
+        The upper bound on grey level intensity. Voxels with higer intensity
         will be set to this value.
 
     Returns
@@ -426,9 +426,9 @@ def clip_intensity(image: sitk.Image,
 def window_intensity(image: sitk.Image,
                      window: float,
                      level: float) -> sitk.Image:
-    """Restrict image gray level intensities to a given window and level.
+    """Restrict image grey level intensities to a given window and level.
 
-    The gray level intensities in the resulting image will fall in the range
+    The grey level intensities in the resulting image will fall in the range
     [level - window / 2, level + window / 2].
 
     Parameters
@@ -453,9 +453,9 @@ def window_intensity(image: sitk.Image,
 
 
 def mean(image: sitk.Image,
-         mask: sitk.Image = None,
-         label: int = None) -> float:
-    """Compute the mean gray level intensity in an image.
+         mask: Optional[sitk.Image] = None,
+         label: Optional[int] = None) -> float:
+    """Compute the mean grey level intensity in an image.
 
     This function also supports computing the mean intensity in a specific
     region of interest if `mask` and `label` are passed.
@@ -477,7 +477,7 @@ def mean(image: sitk.Image,
     Returns
     -------
     float
-        The mean gray level intensity in the image or region.
+        The mean grey level intensity in the image or region.
     """
     if mask is not None:
         filter_ = sitk.LabelStatisticsImageFilter()
@@ -491,7 +491,7 @@ def mean(image: sitk.Image,
 
 
 def variance(image, mask=None, label=None):
-    """Compute the variance of gray level intensities in an image.
+    """Compute the variance of grey level intensities in an image.
 
     This function also supports computing the variance in a specific
     region of interest if `mask` and `label` are passed.
@@ -513,7 +513,7 @@ def variance(image, mask=None, label=None):
     Returns
     -------
     float
-        The variance of gray level intensities in the image or region.
+        The variance of grey level intensities in the image or region.
     """
     if mask is not None:
         filter_ = sitk.LabelStatisticsImageFilter()
