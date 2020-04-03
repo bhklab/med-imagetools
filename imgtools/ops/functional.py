@@ -109,7 +109,7 @@ def resample(image: sitk.Image,
 def resize(image: sitk.Image,
            size: Union[int, Sequence[int], np.ndarray],
            anti_alias: bool = True,
-           anti_alias_sigma: float = 2.,
+           anti_alias_sigma: Optional[float] = None.,
            interpolation: str = "linear") -> sitk.Image:
     """Resize image to a given size by resampling coordinates.
 
@@ -191,7 +191,7 @@ def rotate(image: sitk.Image,
         rotation = sitk.Euler2DTransform(
             rotation_centre,
             angles,
-            (0., 0.)  # no translation 
+            (0., 0.)  # no translation
         )
     elif image.GetDimension() == 3:
         x_angle, y_angle, z_angle = angles
@@ -216,7 +216,7 @@ def crop(image: sitk.Image,
 
     Note that the cropped image might be smaller than size in a particular
     direction if the cropping window exceeds image boundaries.
-    
+
     Parameters
     ----------
     image
@@ -243,8 +243,8 @@ def crop(image: sitk.Image,
     if isinstance(size, int):
         size = np.array([size for _ in image.GetSize()])
     else:
-        size = np.asarray(size) 
-    
+        size = np.asarray(size)
+
     if (crop_centre < 0).any() or (crop_centre > original_size).any():
         raise ValueError(
             f"Crop centre outside image boundaries. Image size = {original_size}, crop centre = {crop_centre}"
@@ -411,7 +411,7 @@ def clip_intensity(image: sitk.Image,
         The lower bound on gray level intensity. Voxels with lower intensity
         will be set to this value.
 
-    upper 
+    upper
         The upper bound on gray level intensity. Voxels with higer intensity
         will be set to this value.
 
@@ -429,14 +429,14 @@ def window_intensity(image: sitk.Image,
     """Restrict image gray level intensities to a given window and level.
 
     The gray level intensities in the resulting image will fall in the range
-    [level - window / 2, level + window / 2]. 
+    [level - window / 2, level + window / 2].
 
     Parameters
     ----------
     image
         The intensity image to window.
 
-    window 
+    window
         The width of the intensity window.
 
     level
