@@ -16,7 +16,8 @@ def resample(image: sitk.Image,
              interpolation: str = "linear",
              anti_alias: bool = True,
              anti_alias_sigma: float = 2.,
-             transform: sitk.Transform = None) -> sitk.Image:
+             transform: sitk.Transform = None,
+             output_size: Sequence[float]) -> sitk.Image:
     """Resample image to a given spacing, optionally applying a transformation.
 
     Parameters
@@ -25,10 +26,11 @@ def resample(image: sitk.Image,
         The image to be resampled.
 
     spacing
-        The new image spacing. If float, assumes the same spacing in all directions.
-        Alternatively, a sequence of floats can be passed to specify spacing along
-        each dimension. Passing 0 at any position will keep the original
-        spacing along that dimension (useful for in-plane resampling).
+        The new image spacing. If float, assumes the same spacing in all
+        directions. Alternatively, a sequence of floats can be passed to
+        specify spacing along each dimension. Passing 0 at any position will
+        keep the original spacing along that dimension (useful for in-plane
+        resampling).
 
     interpolation, optional
         The interpolation method to use. Valid options are:
@@ -43,6 +45,14 @@ def resample(image: sitk.Image,
 
     anti_alias_sigma, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
+
+    transform, optional
+        Transform to apply to input coordinates when resampling. If None,
+        defaults to identity transformation.
+
+    output_size, optional
+        Size of the output image. If None, it is computed to preserve the
+        whole extent of the input image.
 
     Returns
     -------
@@ -66,8 +76,11 @@ def resample(image: sitk.Image,
     else:
         spacing = np.asarray(spacing)
         new_spacing = np.where(spacing == 0, original_spacing, spacing)
-    new_size = np.floor(original_size * original_spacing / new_spacing).astype(
-        np.int)
+
+    if not output_size:
+        new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
+    else:
+        new_size = output_size
 
     rif = sitk.ResampleImageFilter()
     rif.SetOutputOrigin(image.GetOrigin())
