@@ -93,9 +93,12 @@ def resample(image: sitk.Image,
 
     downsample = new_spacing > original_spacing
     if downsample.any() and anti_alias:
+        if not anti_alias_sigma:
+            # sigma computation adapted from scikit-image
+            # https://github.com/scikit-image/scikit-image/blob/master/skimage/transform/_warps.py
+            anti_alias_sigma = np.maximum(0 (original_spacing / new_spacing - 1) / 2)
         sigma = np.where(downsample, anti_alias_sigma, 1e-11)
-        image = sitk.SmoothingRecursiveGaussian(
-            image, sigma)  # TODO implement better sigma computation
+        image = sitk.SmoothingRecursiveGaussian(image, sigma)
 
     rif.SetInterpolator(interpolator)
     resampled_image = rif.Execute(image)
