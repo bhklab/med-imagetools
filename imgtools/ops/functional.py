@@ -81,7 +81,7 @@ def resample(image: sitk.Image,
     if not output_size:
         new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
     else:
-        new_size = output_size
+        new_size = np.asarray(output_size)
 
     rif = sitk.ResampleImageFilter()
     rif.SetOutputOrigin(image.GetOrigin())
@@ -109,9 +109,9 @@ def resample(image: sitk.Image,
 
 def resize(image: sitk.Image,
            size: Union[int, Sequence[int], np.ndarray],
+           interpolation: str = "linear",
            anti_alias: bool = True,
-           anti_alias_sigma: Optional[float] = None,
-           interpolation: str = "linear") -> sitk.Image:
+           anti_alias_sigma: Optional[float] = None)-> sitk.Image:
     """Resize image to a given size by resampling coordinates.
 
     Parameters
@@ -161,6 +161,65 @@ def resize(image: sitk.Image,
                     anti_alias=anti_alias,
                     anti_alias_sigma=anti_alias_sigma,
                     interpolation=interpolation)
+
+def zoom(image: sitk.Image,
+         scale_factor: Union[float, Sequence[float]],
+         interpolation: str = "linear",
+         anti_alias: bool = True,
+         anti_alias_sigma: Optional[float] = None) -> sitk.Image:
+    """Rescale image, preserving its spatial extent.
+
+    The rescaled image will have the same spatial extent (size) but will be
+    rescaled by `scale_factor` in each dimension. Alternatively, a separate
+    scale factor for each dimension can be specified by passing a sequence
+    of floats.
+
+    Parameters
+    ----------
+    image
+        The image to rescale.
+
+    scale_factor
+        If float, each dimension will be scaled by that factor. If tuple, each
+        dimension will be scaled by the corresponding element.
+
+    interpolation, optional
+        The interpolation method to use. Valid options are:
+        - "linear" for bi/trilinear interpolation (default)
+        - "nearest" for nearest neighbour interpolation
+        - "bspline" for order-3 b-spline interpolation
+
+    anti_alias, optional
+        Whether to smooth the image with a Gaussian kernel before resampling.
+        Only used when downsampling, i.e. when `size < image.GetSize()`.
+        This should be used to avoid aliasing artifacts.
+
+    anti_alias_sigma, optional
+        The standard deviation of the Gaussian kernel used for anti-aliasing.
+
+    Returns
+    -------
+    sitk.Image
+        The rescaled image.
+    """
+    dimension = image.GetDimension()
+
+    if isinstance(scale_factor, float):
+        scale_factor = (scale_factor,) * dimension
+
+    centre_idx = np.array(image.GetSize()) / 2
+    centre = image.TransformContinuousIndexToPhysicalPoint(centre_idx)
+
+    transform = sitk.ScaleTransform(dimension, scale_factor)
+    transform.SetCenter(centre)
+
+    return resample(image,
+                    spacing=image.GetSpacing(),
+                    interpolation=interpolation,
+                    anti_alias=anti_alias,
+                    anti_alias_sigma=anti_alias_sigma,
+                    transform=transform,
+                    output_size=image.GetSize())
 
 
 def rotate(image: sitk.Image,

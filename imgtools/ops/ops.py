@@ -49,7 +49,7 @@ class Resample(BaseOp):
                  spacing,
                  interpolation="linear",
                  anti_alias=True,
-                 anti_alias_sigma=2.,
+                 anti_alias_sigma=None,
                  transform=None):
         self.spacing = spacing
         self.interpolation = interpolation
@@ -67,15 +67,39 @@ class Resample(BaseOp):
 
 
 class Resize(BaseOp):
-    def __init__(self, size, interpolation="linear", anti_alias=True):
+    def __init__(self,
+                 size,
+                 interpolation="linear",
+                 anti_alias=True,
+                 anti_alias_sigma=None):
         self.size = size
         self.interpolation = interpolation
         self.anti_alias = anti_alias
+        self.anti_alias_sigma = anti_alias_sigma
 
     def __call__(self, image):
         return resize(image,
                       new_size=self.size,
-                      interpolation=self.interpolation)
+                      interpolation=self.interpolation,
+                      anti_alias_sigma=anti_alias_sigma)
+
+class Zoom(BaseOp):
+    def __init__(self,
+                 scale_factor,
+                 interpolation="linear",
+                 anti_alias=True,
+                 anti_alias_sigma=None):
+        self.scale_factor = scale_factor
+        self.interpolation = interpolation
+        self.anti_alias = anti_alias
+        self.anti_alias_sigma = anti_alias_sigma
+
+    def __call__(self, image):
+        return zoom(image,
+                    self.scale_factor,
+                    interpolation=self.interpolation,
+                    anti_alias=self.anti_alias,
+                    anti_alias_sigma=self.anti_alias_sigma)
 
 
 class Rotate(BaseOp):
