@@ -15,9 +15,9 @@ def resample(image: sitk.Image,
              spacing: Union[float, Sequence[float], np.ndarray],
              interpolation: str = "linear",
              anti_alias: bool = True,
-             anti_alias_sigma: float = 2.,
-             transform: sitk.Transform = None,
-             output_size: Sequence[float]) -> sitk.Image:
+             anti_alias_sigma: Optional[float] = None,
+             transform: Optional[sitk.Transform] = None,
+             output_size: Optional[Sequence[float]] = None) -> sitk.Image:
     """Resample image to a given spacing, optionally applying a transformation.
 
     Parameters
