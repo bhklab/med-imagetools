@@ -551,16 +551,50 @@ def standard_scale(image: sitk.Image,
         Only voxels falling within the ROI will be considered. If None, use the
         whole image.
 
+    rescale_mean, optional
+        The mean intensity used in rescaling. If None, image mean will be used.
+
+    rescale_std, optional
+        The standard deviation used in rescaling. If None, image standard
+        deviation will be used.
+
     label, optional
-        Label to use when computing the mean and variance if segmentation mask
-        contains more than 1 labelled region.
+        Label to use when computing the mean and standard deviation if
+        segmentation mask contains more than 1 labelled region.
 
     Returns
     -------
     sitk.Image
         The rescaled image.
     """
-    if not rescale_mean or not rescale_variance:
+    if not rescale_mean or not rescale_std:
         rescale_mean = mean(image, mask=mask, label=label)
-        rescale_variance = variance(image, mask=mask, label=label)
-    return (image - rescale_mean) / rescale_variance
+        rescale_std = standard_deviation(image, mask=mask, label=label)
+    return (image - rescale_mean) / rescale_std
+
+def min_max_scale(image: sitk.Image,
+                  minimum: float = 0.,
+                  maximum: float = 1.) -> sitk.Image:
+    """Rescale image intensities to a given minimum and maximum.
+
+    Applies a linear transformation to image intensities such that the minimum
+    and maximum intensity values in the resulting image are equal to minimum
+    (default 0) and maximum (default 1) respectively.
+
+    Parameters
+    ----------
+    image
+        The image to rescale.
+
+    minimum, optional
+        The minimum intensity in the rescaled image.
+
+    maximum, optional
+        The maximum intensity in the rescaled image.
+
+    Returns
+    -------
+    sitk.Image
+        The rescaled image.
+    """
+    return sitk.RescaleIntensity(image, minimum, maximum)
