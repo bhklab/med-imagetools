@@ -2,6 +2,7 @@ import SimpleITK as sitk
 import numpy as np
 
 from typing import Sequence, Union, Tuple, Optional
+from collections import namedtuple
 
 
 INTERPOLATORS = {
@@ -452,18 +453,20 @@ def window_intensity(image: sitk.Image,
     return clip_intensity(image, lower, upper)
 
 
-def mean(image: sitk.Image,
-         mask: Optional[sitk.Image] = None,
-         label: Optional[int] = None) -> float:
-    """Compute the mean grey level intensity in an image.
+def image_statistics(image: sitk.Image,
+                     mask: Optional[sitk.Image] = None,
+                     label: Optional[int] = None) -> float:
+    """Compute the intensity statistics of an image.
 
-    This function also supports computing the mean intensity in a specific
+    Returns the minimum, maximum, sum, mean, variance and standard deviation
+    of image intensities.
+    This function also supports computing the statistics in a specific
     region of interest if `mask` and `label` are passed.
 
     Parameters
     ----------
     image
-        The image used to compute the mean.
+        The image used to compute the statistics.
 
     mask, optional
         Segmentation mask specifying a region of interest used in computation.
@@ -471,95 +474,37 @@ def mean(image: sitk.Image,
         whole image.
 
     label, optional
-        Label to use when computing the mean if segmentation mask contains
+        Label to use when computing the statistics if segmentation mask contains
         more than 1 labelled region.
 
     Returns
     -------
-    float
-        The mean grey level intensity in the image or region.
+    collections.namedtuple
+        The computed intensity statistics in the image or region.
     """
     if mask is not None:
         filter_ = sitk.LabelStatisticsImageFilter()
-        filter_.Execute(image, mask)
-        result = filter_.GetMean(label)
     else:
         filter_ = sitk.StatisticsImageFilter()
-        filter_.Execute(image)
-        result = filter_.GetMean()
+    filter_.Execute(image)
+
+    ImageStatistics = namedtuple("ImageStatistics",
+                                 ["minimum",
+                                  "maximum",
+                                  "sum",
+                                  "mean",
+                                  "variance",
+                                  "standard_deviation"
+                                 ])
+    result = ImageStatistics(
+        minimum=filter_.GetMinimum(),
+        maximum=filter_.GetMaximum(),
+        sum=filter_.GetSum(),
+        mean=filter_.GetMean(),
+        variance=filter_.GetVariance(),
+        standard_deviation=filter_.GetSigma()
+    )
     return result
-
-
-def variance(image, mask=None, label=None):
-    """Compute the variance of grey level intensities in an image.
-
-    This function also supports computing the variance in a specific
-    region of interest if `mask` and `label` are passed.
-
-    Parameters
-    ----------
-    image
-        The image used to compute the variance.
-
-    mask, optional
-        Segmentation mask specifying a region of interest used in computation.
-        Only voxels falling within the ROI will be considered. If None, use the
-        whole image.
-
-    label, optional
-        Label to use when computing the variance if segmentation mask contains
-        more than 1 labelled region.
-
-    Returns
-    -------
-    float
-        The variance of grey level intensities in the image or region.
-    """
-    if mask is not None:
-        filter_ = sitk.LabelStatisticsImageFilter()
-        filter_.Execute(image, mask)
-        result = filter_.GetVariance(label)
-    else:
-        filter_ = sitk.StatisticsImageFilter()
-        filter_.Execute(image)
-        result = filter_.GetVariance()
-    return result
-
-def standard_deviation(image, mask=None, label=None):
-    """Compute the standard deviation of grey level intensities in an image.
-
-    This function also supports computing the standard deviation in a specific
-    region of interest if `mask` and `label` are passed.
-
-    Parameters
-    ----------
-    image
-        The image used to compute the standard deviation.
-
-    mask, optional
-        Segmentation mask specifying a region of interest used in computation.
-        Only voxels falling within the ROI will be considered. If None, use the
-        whole image.
-
-    label, optional
-        Label to use when computing the standard deviation if segmentation mask
-        contains more than 1 labelled region.
-
-    Returns
-    -------
-    float
-        The standard deviation of grey level intensities in the image or region.
-    """
-    if mask is not None:
-        filter_ = sitk.LabelStatisticsImageFilter()
-        filter_.Execute(image, mask)
-        result = filter_.GetSigma(label)
-    else:
-        filter_ = sitk.StatisticsImageFilter()
-        filter_.Execute(image)
-        result = filter_.GetSigma()
-    return result
-
 
 def standard_scale(image: sitk.Image,
                    mask: Optional[sitk.Image] = None,
@@ -604,8 +549,9 @@ def standard_scale(image: sitk.Image,
         The rescaled image.
     """
     if not rescale_mean or not rescale_std:
-        rescale_mean = mean(image, mask=mask, label=label)
-        rescale_std = standard_deviation(image, mask=mask, label=label)
+        statistics = image_statistics(image, mask, label)
+        rescale_mean = statistics.mean
+        rescale_std = statistics.standard_deviation
     return (image - rescale_mean) / rescale_std
 
 def min_max_scale(image: sitk.Image,
