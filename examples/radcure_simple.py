@@ -16,7 +16,7 @@ class RADCUREPipeline(Pipeline):
 
     def __init__(self,
                  input_directory,
-                 output_directory=,
+                 output_directory,
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
