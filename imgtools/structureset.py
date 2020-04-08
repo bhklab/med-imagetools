@@ -43,7 +43,7 @@ class StructureSet:
             roi_names = [name for name in self.roi_names if re.match(roi_names, name)]
         if not roi_names:
             roi_names = self.roi_names
-        roi_points = [self.segmentation_points[name] for name in roi_names]
+        roi_points = [self.segmentation_points.get(name) for name in roi_names]
 
         size = reference_image.GetSize()[::-1] + (len(roi_names) + 1,)
 
@@ -52,6 +52,9 @@ class StructureSet:
         # TODO (Michal) add support for overlapping labels
         # using SimpleITK vector-valued images
         for label, physical_points in enumerate(roi_points):
+            if physical_points is None:
+                continue # allow for missing labels, will return a blank slice
+
             mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
 
             slices = np.unique(mask_points[:, 0])
