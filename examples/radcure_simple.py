@@ -7,6 +7,12 @@ from imgtools.ops import StructureSetToMask, Input, Output, Resample
 from imgtools.pipeline import Pipeline
 
 
+###############################################################
+# Example usage:
+# python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
+###############################################################
+
+
 class RADCUREPipeline(Pipeline):
     """Example processing pipeline for the RADCURE dataset.
 
@@ -49,7 +55,9 @@ class RADCUREPipeline(Pipeline):
 
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToMask(roi_names="GTV")
+        # Note: the ROI name is temporarily changed to match the example data
+        # since RADCURE is still not public. The correct ROI name for RADCURE is 'GTV'.
+        self.make_binary_mask = StructureSetToMask(roi_names="GTV-1")#"GTV")
 
         # output ops
         self.image_output = Output(
