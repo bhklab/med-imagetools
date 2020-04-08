@@ -50,12 +50,14 @@ class Resample(BaseOp):
                  interpolation="linear",
                  anti_alias=True,
                  anti_alias_sigma=None,
-                 transform=None):
+                 transform=None,
+                 output_size=None):
         self.spacing = spacing
         self.interpolation = interpolation
         self.anti_alias = anti_alias
         self.anti_alias_sigma = anti_alias_sigma
         self.transform = transform
+        self.output_size = output_size
 
     def __call__(self, image):
         return resample(image,
@@ -63,7 +65,8 @@ class Resample(BaseOp):
                         interpolation=self.interpolation,
                         anti_alias=self.anti_alias,
                         anti_alias_sigma=self.anti_alias_sigma,
-                        transform=self.transform)
+                        transform=self.transform,
+                        output_size=self.output_size)
 
 
 class Resize(BaseOp):
