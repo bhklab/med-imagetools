@@ -13,6 +13,7 @@ class BaseWriter:
     def __init__(self, root_directory, filename_format, create_dirs=True):
         self.root_directory = root_directory
         self.filename_format = filename_format
+        self.create_dirs = create_dirs
         if create_dirs and not os.path.exists(self.root_directory):
             os.makedirs(self.root_directory)
 
@@ -40,6 +41,9 @@ class ImageFileWriter(BaseWriter):
     def put(self, subject_id, image):
         # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_subject_id(subject_id)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
         sitk.WriteImage(image, out_path, self.compress)
 
 
