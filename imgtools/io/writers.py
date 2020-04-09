@@ -1,4 +1,7 @@
 import os
+import json
+import csv
+import pickle
 from datetime import datetime, timezone
 
 import h5py
@@ -60,32 +63,6 @@ class NumpyWriter(BaseWriter):
         np.save(out_path, array)
 
 
-class JSONMetadataWriter:
-    # TODO (Michal)
-    pass
-
-
-class CSVMetadataWriter:
-    # TODO (Michal)
-    pass
-
-
-# class MemoryWriter:
-#     def __init__(self):
-#         self.results = {}
-
-#     def put(self, image, subject_id):
-#         self.results[subject_id] = image
-
-#     def __getitem__(self, subject_id):
-#         return self.results[subject_id]
-
-#     def get(self, subject_id, default=None):
-#         try:
-#             return self[subject_id]
-#         except Subject_IdError:
-#             return default
-
 class HDF5Writer(BaseWriter):
     def __init__(self, root_directory, filename_format="{subject_id}.h5", create_dirs=True, save_geometry=True):
         super().__init__(root_directory, filename_format, create_dirs)
@@ -93,6 +70,9 @@ class HDF5Writer(BaseWriter):
 
     def put(self, subject_id, metadata=None, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
         with h5py.File(out_path, "w") as f:
             for k, v in kwargs.items():
                 array, origin, direction, spacing = image_to_array(v)
@@ -108,5 +88,44 @@ class HDF5Writer(BaseWriter):
                         f[subject_id].attrs.create(name, data=v)
 
 
-class MetadataWriter:
-    pass
+class MetadataWriter(BaseWriter):
+    def __init__(self, root_directory, filename_format="{subject_id}.json", create_dirs=True):
+        super().__init__(root_directory, filename_format, create_dirs)
+        self.file_format = os.path.splitext(filename_format)[1].lstrip(".")
+        if self.file_format not in ["json", "csv", "pkl"]:
+            raise ValueError(f"File format {self.file_format} not supported. Supported formats: JSON (.json), CSV (.csv), Pickle (.pkl).")
+
+    def _put_json(self, out_path, **kwargs):
+        with open(out_path, "w") as f:
+            json.dump(kwargs, f)
+
+    def _put_csv(self, out_path, **kwargs):
+        with open(out_path, "a+") as f:
+            writer = csv.DictWriter(f, fieldnames=kwargs.keys())
+            pos = f.tell()
+            f.seek(0)
+            sample = f.read(1024)
+            if not sample or not csv.Sniffer().has_header(sample):
+                writer.writeheader()
+            f.seek(pos)
+            writer.writerow(kwargs)
+
+    def _put_pickle(self, out_path, **kwargs):
+        with open(out_path, "wb") as f:
+            pickle.dump(kwargs, f)
+
+    def put(self, subject_id, **kwargs):
+        out_path = self._get_path_from_subject_id(subject_id)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+
+        if "subject_id" not in kwargs:
+            kwargs["subject_id"] = subject_id
+
+        if self.file_format == "json":
+            self._put_json(out_path, **kwargs)
+        elif self.file_format == "csv":
+            self._put_csv(out_path, **kwargs)
+        elif self.file_format == "pkl":
+            self._put_pickle(out_path, **kwargs)
