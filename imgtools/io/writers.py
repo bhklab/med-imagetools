@@ -33,13 +33,14 @@ class BaseWriter:
 
 
 class ImageFileWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)
+        self.compress = compress
 
     def put(self, subject_id, image):
         # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_subject_id(subject_id)
-        sitk.WriteImage(image, out_path)
+        sitk.WriteImage(image, out_path, self.compress)
 
 
 class NumpyWriter(BaseWriter):
