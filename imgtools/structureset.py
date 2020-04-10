@@ -39,10 +39,11 @@ class StructureSet:
         return list(self.segmentation_points.keys())
 
     def to_mask(self, reference_image, roi_names=None):
-        if isinstance(roi_names, str):
-            roi_names = [name for name in self.roi_names if re.match(roi_names, name)]
         if not roi_names:
             roi_names = self.roi_names
+        if isinstance(roi_names, str):
+            roi_names = [roi_names]
+        roi_names = [name for name in self.roi_names if any(re.match(roi, name) for roi in self.roi_names)]
         roi_points = [self.segmentation_points.get(name) for name in roi_names]
 
         size = reference_image.GetSize()[::-1] + (len(roi_names) + 1,)
