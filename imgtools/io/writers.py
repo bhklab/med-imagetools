@@ -33,6 +33,10 @@ class BaseWriter:
                                                    time=time,
                                                    date_time=date_time)
         out_path = os.path.join(self.root_directory, out_filename)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+
         return out_path
 
 
@@ -44,9 +48,6 @@ class ImageFileWriter(BaseWriter):
     def put(self, subject_id, image):
         # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_subject_id(subject_id)
-        out_dir = os.path.dirname(out_path)
-        if self.create_dirs and not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
         sitk.WriteImage(image, out_path, self.compress)
 
 
@@ -70,9 +71,6 @@ class HDF5Writer(BaseWriter):
 
     def put(self, subject_id, metadata=None, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id)
-        out_dir = os.path.dirname(out_path)
-        if self.create_dirs and not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
         with h5py.File(out_path, "w") as f:
             for k, v in kwargs.items():
                 array, origin, direction, spacing = image_to_array(v)
@@ -116,9 +114,6 @@ class MetadataWriter(BaseWriter):
 
     def put(self, subject_id, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id)
-        out_dir = os.path.dirname(out_path)
-        if self.create_dirs and not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
 
         if "subject_id" not in kwargs:
             kwargs["subject_id"] = subject_id
