@@ -164,7 +164,7 @@ class Centroid(BaseOp):
     def __call__(self, mask, label=1):
         return centroid(mask,
                         label=label,
-                        world_coordiantes=self.world_coordinates)
+                        world_coordinates=self.world_coordinates)
 
 
 class CropToMaskBoundingBox(BaseOp):
