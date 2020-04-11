@@ -354,7 +354,7 @@ def crop(image: sitk.Image,
 #     crop_dims = np.where(size < original_size)
 
 
-def bounding_box(mask: sitk.Image, label: int = 1) -> tuple:
+def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
     """Find the axis-aligned bounding box of a region descriibed by a
     segmentation mask.
 
@@ -369,15 +369,19 @@ def bounding_box(mask: sitk.Image, label: int = 1) -> tuple:
 
     Returns
     -------
-    tuple
-        The bounding box location and size. For an N-dimensional image,
-        the first N elements are the location of the bounding box and the next
-        N elements describe the size along each dimension.
+    tuple of tuples
+        The bounding box location and size. The first tuple gives the
+        coordinates of the corner closest to the origin and the second 
+        gives the size in pixels along each dimension.
     """
 
     filter_ = sitk.LabelShapeStatisticsImageFilter()
     filter_.Execute(mask)
-    return filter_.GetBoundingBox(label)
+    bbox = filter_.GetBoundingBox(label)
+    location = bbox[:len(bbox)//2]
+    size = bbox[len(bbox)//2:]
+    return location, size
+
 
 
 def centroid(mask: sitk.Image,
