@@ -38,12 +38,6 @@ class StructureSet:
             roi_names = [roi_names]
 
         # preserve
-        names_to_extract = {}
-        for name in self.roi_names:
-            for i, pat in enumerate(roi_names):
-                if re.fullmatch(pat, name):
-                    names_to_extract[name] = label
-
         names_to_use = list(chain.from_iterable((name for name in self.roi_names if re.fullmatch(pat, name)) for pat in roi_names))
 
         size = reference_image.GetSize()[::-1] + (len(names_to_use),)
@@ -65,6 +59,6 @@ class StructureSet:
 
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
-        mask = Segmentation(mask, label_names=names_to_use)
+        mask = Segmentation(mask, roi_names=names_to_use)
 
         return mask
