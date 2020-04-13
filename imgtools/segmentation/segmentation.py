@@ -16,15 +16,15 @@ def accepts_segmentations(f):
     return wrapper
 
 
-def map_over_labels(seg, f, include_background=False, return_seg=True, **kwargs):
+def map_over_labels(segmentation, f, include_background=False, return_segmentation=True, **kwargs):
     if include_background:
-        labels = range(seg.num_labels + 1)
+        labels = range(segmentation.num_labels + 1)
     else:
-        labels = range(1, seg.num_labels + 1)
-    res = [f(seg.get_label(label=label), **kwargs) for label in labels]
-    if return_seg and isinstance(res[0], sitk.Image):
+        labels = range(1, segmentation.num_labels + 1)
+    res = [f(segmentation.get_label(label=label), **kwargs) for label in labels]
+    if return_segmentation and isinstance(res[0], sitk.Image):
         res = [sitk.Cast(r, sitk.sitkUInt8) for r in res]
-        res = Segmentation(sitk.Compose(*res), roi_names=seg.roi_names)
+        res = Segmentation(sitk.Compose(*res), roi_names=segmentation.roi_names)
     return res
 
 
@@ -37,7 +37,7 @@ class Segmentation(sitk.Image):
         else:
             self.roi_names = roi_names
 
-    def get_label(self, label=None, name=None):
+            def get_label(self, label=None, name=None, relabel=False):
         if label is None and name is None:
             raise ValueError("Must pass either label or name.")
 
@@ -50,6 +50,8 @@ class Segmentation(sitk.Image):
             label_img = sitk.GetImageFromArray((label_arr.sum(-1) == 0).astype(np.uint8))
         else:
             label_img = sitk.VectorIndexSelectionCast(self, label - 1)
+            if relabel:
+                label_img *= label
 
         return label_img
 
