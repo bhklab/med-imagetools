@@ -4,6 +4,8 @@ import numpy as np
 from typing import Sequence, Union, Tuple, Optional
 from collections import namedtuple
 
+from ..segmentation import Segmentation
+
 
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,
@@ -236,7 +238,7 @@ def rotate(image: sitk.Image,
     rotation_centre
         The centre of rotation in image coordinates.
 
-    angles 
+    angles
         The angles of rotation around x, y and z axes.
 
     Returns
@@ -361,7 +363,8 @@ def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
     Parameters
     ----------
     mask
-        Segmentation mask describing the region of interest.
+        Segmentation mask describing the region of interest. Can be an image of
+        type unsigned int representing a label map or `segmentation.Segmentation`.
 
     label, optional
         Label to use when computing bounding box if segmentation mask contains
@@ -371,9 +374,12 @@ def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
     -------
     tuple of tuples
         The bounding box location and size. The first tuple gives the
-        coordinates of the corner closest to the origin and the second 
+        coordinates of the corner closest to the origin and the second
         gives the size in pixels along each dimension.
     """
+
+    if isinstance(mask, Segmentation):
+        mask = Segmentation.get_label(label=label, relabel=True)
 
     filter_ = sitk.LabelShapeStatisticsImageFilter()
     filter_.Execute(mask)
@@ -392,7 +398,8 @@ def centroid(mask: sitk.Image,
     Parameters
     ----------
     mask
-        Segmentation mask describing the region of interest.
+        Segmentation mask describing the region of interest. Can be an image of
+        type unsigned int representing a label map or `segmentation.Segmentation`.
 
     label, optional
         Label to use when computing the centroid if segmentation mask contains
@@ -407,6 +414,10 @@ def centroid(mask: sitk.Image,
     tuple
         The centroid coordinates.
     """
+
+    if isinstance(mask, Segmentation):
+        mask = Segmentation.get_label(label=label, relabel=True)
+
     filter_ = sitk.LabelShapeStatisticsImageFilter()
     filter_.Execute(mask)
     centroid_coords = filter_.GetCentroid(label)
@@ -428,7 +439,8 @@ def crop_to_mask_bounding_box(image: sitk.Image,
         The image to crop.
 
     mask
-        Segmentation mask describing the region of interest.
+        Segmentation mask describing the region of interest. Can be an image of
+        type unsigned int representing a label map or `segmentation.Segmentation`.
 
     margin, optional
         A margin that will be added to each dimension when cropping. If int,
@@ -444,6 +456,10 @@ def crop_to_mask_bounding_box(image: sitk.Image,
     tuple of sitk.Image
         The cropped image and mask.
     """
+
+    if isinstance(mask, Segmentation):
+        mask = Segmentation.get_label(label=label, relabel=True)
+
     if isinstance(margin, Sequence):
         margin = np.asarray(margin)
 
@@ -533,8 +549,9 @@ def image_statistics(image: sitk.Image,
 
     mask, optional
         Segmentation mask specifying a region of interest used in computation.
-        Only voxels falling within the ROI will be considered. If None, use the
-        whole image.
+        Can be an image of type unsigned int representing a label map or
+        `segmentation.Segmentation`. Only voxels falling within the ROI will
+        be considered. If None, use the whole image.
 
     label, optional
         Label to use when computing the statistics if segmentation mask contains
@@ -549,6 +566,10 @@ def image_statistics(image: sitk.Image,
         filter_ = sitk.LabelStatisticsImageFilter()
     else:
         filter_ = sitk.StatisticsImageFilter()
+
+    if isinstance(mask, Segmentation):
+        mask = Segmentation.get_label(label=label, relabel=True)
+
     filter_.Execute(image)
 
     ImageStatistics = namedtuple("ImageStatistics",
@@ -592,8 +613,9 @@ def standard_scale(image: sitk.Image,
 
     mask, optional
         Segmentation mask specifying a region of interest used in computation.
-        Only voxels falling within the ROI will be considered. If None, use the
-        whole image.
+        Can be an image of type unsigned int representing a label map or
+        `segmentation.Segmentation`. Only voxels falling within the ROI will
+        be considered. If None, use the whole image.
 
     rescale_mean, optional
         The mean intensity used in rescaling. If None, image mean will be used.
