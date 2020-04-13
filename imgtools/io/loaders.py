@@ -5,10 +5,57 @@ from typing import Optional
 from collections import namedtuple
 from itertools import chain
 
+import numpy as np
 import pandas as pd
+import SimpleITK as sitk
 
-from .common import read_image
+from ..structureset import StructureSet
 
+
+def read_image(path):
+    return sitk.ReadImage(path)
+
+
+def read_dicom_series(path: str,
+                      recursive: bool = False,
+                      series_id: Optional[str] = None) -> sitk.Image:
+    """Read DICOM series as SimpleITK Image.
+
+    Parameters
+    ----------
+    path
+       Path to directory containing the DICOM series.
+
+    recursive, optional
+       Whether to recursively parse the input directory when searching for
+       DICOM series,
+
+    series_id, optional
+       Specifies the DICOM series to load if multiple series are present in
+       the directory. If None and multiple series are present, loads the first
+       series found.
+
+
+    Returns
+    -------
+    The loaded image.
+
+    """
+    reader = sitk.ImageSeriesReader()
+    dicom_names = reader.GetGDCMSeriesFileNames(path,
+                                                seriesID=series_id if series_id else "",
+                                                recursive=recursive)
+    reader.SetFileNames(dicom_names)
+    return reader.Execute()
+
+
+def read_dicom_rtstruct(path):
+    return StructureSet.from_dicom_rtstruct(path)
+
+
+def read_segmentation(path):
+    # TODO read seg.nrrd
+    pass
 
 class BaseLoader:
     def __getitem__(self, subject_id):
