@@ -258,9 +258,12 @@ class ArrayFunction(BaseOp):
         return result
 
 
-class StructureSetToMask(BaseOp):
+class StructureSetToSegmentation(BaseOp):
     def __init__(self, roi_names):
         self.roi_names = roi_names
 
     def __call__(self, structure_set, reference_image):
-        return structure_set.to_mask(reference_image, roi_names=self.roi_names)
+        return structure_set.to_segmentation(reference_image, roi_names=self.roi_names)
+
+
+
