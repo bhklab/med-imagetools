@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import SimpleITK as sitk
 
-from ..structureset import StructureSet
+from ..segmentation import StructureSet
 
 
 def read_image(path):
