@@ -16,50 +16,6 @@ from ..structureset import StructureSet
 from ..utils.imageutils import image_to_array
 
 
-def read_image(path):
-    return sitk.ReadImage(path)
-
-
-def read_numpy_array(path):
-    return np.load(path)
-
-
-def read_dicom_series(path: str,
-                      recursive: bool = False,
-                      series_id: Optional[str] = None) -> sitk.Image:
-    """Read DICOM series as SimpleITK Image.
-
-    Parameters
-    ----------
-    path
-       Path to directory containing the DICOM series.
-
-    recursive, optional
-       Whether to recursively parse the input directory when searching for
-       DICOM series,
-
-    series_id, optional
-       Specifies the DICOM series to load if multiple series are present in
-       the directory. If None and multiple series are present, loads the first
-       series found.
-
-
-    Returns
-    -------
-    The loaded image.
-
-    """
-    reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path,
-                                                seriesID=series_id if series_id else "",
-                                                recursive=recursive)
-    reader.SetFileNames(dicom_names)
-    return reader.Execute()
-
-
-def read_dicom_rtstruct(path):
-    return StructureSet.from_dicom_rtstruct(path)
-
 
 def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
     """Find DICOM file paths in the specified root directory file tree.
