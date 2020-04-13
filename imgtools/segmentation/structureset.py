@@ -31,7 +31,7 @@ class StructureSet:
     def roi_names(self):
         return list(self.segmentation_points.keys())
 
-    def to_mask(self, reference_image, roi_names=None):
+    def to_segmentation(self, reference_image, roi_names=None):
         if not roi_names:
             roi_names = self.roi_names
         if isinstance(roi_names, str):
