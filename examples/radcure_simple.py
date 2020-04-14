@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 
 from imgtools.io import (ImageFileLoader, ImageFileWriter,
                          read_dicom_rtstruct, read_dicom_series)
-from imgtools.ops import StructureSetToSegmentation, Input, Output, Resample
+from imgtools.ops import StructureSetToSegmentation, ImageFileInput, ImageFileOutput, Resample
 from imgtools.pipeline import Pipeline
 
 
@@ -39,19 +39,18 @@ class RADCUREPipeline(Pipeline):
 
         # pipeline ops
         # input ops
-        self.image_input = Input(
-            ImageFileLoader(
-                self.input_directory,                    # where to look for the images
-                get_subject_id_from="subject_directory", # how to extract the subject ID, 'subject_directory' means use the name of the subject directory
-                subdir_path="*/ImageSet_*",              # whether the images are stored in a subdirectory of the subject directory (also accepts glob patterns)
-                reader=read_dicom_series                 # the function used to read individual images
-            ))
-        self.structure_set_input = Input(
-            ImageFileLoader(
-                self.input_directory,
-                get_subject_id_from="subject_directory",
-                subdir_path="*/structures/RTSTRUCT.dcm",
-                reader=read_dicom_rtstruct))
+        self.image_input = ImageFileInput(
+            self.input_directory,                    # where to look for the images
+            get_subject_id_from="subject_directory", # how to extract the subject ID, 'subject_directory' means use the name of the subject directory
+            subdir_path="*/ImageSet_*",              # whether the images are stored in a subdirectory of the subject directory (also accepts glob patterns)
+            reader=read_dicom_series                 # the function used to read individual images
+        )
+        self.structure_set_input = ImageFileInput(
+            self.input_directory,
+            get_subject_id_from="subject_directory",
+            subdir_path="*/structures/RTSTRUCT.dcm",
+            reader=read_dicom_rtstruct
+        )
 
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
@@ -60,17 +59,18 @@ class RADCUREPipeline(Pipeline):
         self.make_binary_mask = StructureSetToSegmentation(roi_names="GTV-1")#"GTV")
 
         # output ops
-        self.image_output = Output(
-            ImageFileWriter(
-                os.path.join(self.output_directory, "images"), # where to save the processed images
-                filename_format="{subject_id}_image.nrrd",     # the filename template, {subject_id} will be replaced by each subject's ID at runtime
-                create_dirs=True                               # whether to create directories that don't exists already
-            ))
-        self.mask_output = Output(
-            ImageFileWriter(
-                os.path.join(self.output_directory, "masks"),
-                filename_format="{subject_id}_mask.nrrd",
-                create_dirs=True))
+        self.image_output = ImageFileOutput(
+            os.path.join(self.output_directory, "images"), # where to save the processed images
+            filename_format="{subject_id}_image.nrrd",     # the filename template, {subject_id} will be replaced by each subject's ID at runtime
+            create_dirs=True,                              # whether to create directories that don't exists already
+            compress=True                                  # enable compression for NRRD format
+        )
+        self.mask_output = ImageFileOutput(
+            os.path.join(self.output_directory, "masks"),
+            filename_format="{subject_id}_mask.nrrd",
+            create_dirs=True,
+            compress=True
+        )
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
