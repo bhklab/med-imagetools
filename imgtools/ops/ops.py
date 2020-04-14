@@ -6,7 +6,11 @@ import SimpleITK as sitk
 from .functional import *
 from ..io import BaseLoader, BaseWriter
 from ..utils import image_to_array, array_to_image
+from ..segmentation import map_over_labels
+from ..io import *
 
+
+# Base class
 
 class BaseOp:
     def __call__(self, *args, **kwargs):
@@ -19,7 +23,9 @@ class BaseOp:
         return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
 
 
-class Input(BaseOp):
+# Input/output
+
+class BaseInput(BaseOp):
     def __init__(self, loader):
         if not isinstance(loader, BaseLoader):
             raise ValueError(
@@ -32,7 +38,7 @@ class Input(BaseOp):
         return inputs
 
 
-class Output(BaseOp):
+class BaseOutput(BaseOp):
     def __init__(self, writer):
         if not isinstance(writer, BaseWriter):
             raise ValueError(
@@ -43,6 +49,74 @@ class Output(BaseOp):
     def __call__(self, key, *args, **kwargs):
         self.writer.put(key, *args, **kwargs)
 
+
+class ImageCSVInput(BaseInput):
+    def __init__(self, csv_path, colnames=[], id_column=None, readers=[read_image]):
+        loader = ImageCSVLoader(csv_path, colnames, id_column, readers)
+        super().__init__(loader)
+
+
+class ImageFileInput(BaseInput):
+    def __init__(self,
+                 root_directory,
+                 get_subject_id_from="filename",
+                 subdir_path=None,
+                 exclude_paths=[],
+                 reader=read_image):
+        loader = ImageFileLoader(root_directory,
+                                 get_subject_id_from,
+                                 subdir_path,
+                                 exclude_paths,
+                                 reader)
+        super().__init__(loader)
+
+
+class ImageFileOutput(BaseOutput):
+    def __init__(self,
+                 root_directory,
+                 filename_format="{subject_id}.nrrd",
+                 create_dirs=True,
+                 compress=True):
+        writer = ImageFileWriter(root_directory,
+                                 filename_format,
+                                 create_dirs,
+                                 compress)
+        super().__init__(writer)
+
+
+class NumpyOutput(BaseOutput):
+    def __init__(self,
+                 root_directory,
+                 filename_format="{subject_id}.npy",
+                 create_dirs=True):
+        writer = NumpyWriter(root_directory, filename_format, create_dirs)
+        super().__init__(writer)
+
+
+class HDF5Output(BaseOutput):
+    def __init__(self,
+                 root_directory,
+                 filename_format="{subject_id}.h5",
+                 create_dirs=True,
+                 save_geometry=True):
+        writer = HDF5Writer(root_directory,
+                            filename_format,
+                            create_dirs,
+                            save_geometry):
+        super().__init__(writer)
+
+
+class MetadataOutput(BaseOutput):
+    def __init__(self,
+                 root_directory,
+                 filename_format="{subject_id}.json",
+                 create_dirs=True):
+
+    writer = MetadataWriter(root_directory, filename_format, create_dirs)
+    super().__init__(writer)
+
+
+# Resampling ops
 
 class Resample(BaseOp):
     def __init__(self,
@@ -133,6 +207,8 @@ class InPlaneRotate(BaseOp):
                       interpolation=self.interpolation)
 
 
+# Cropping & mask ops
+
 class Crop(BaseOp):
     def __init__(self, crop_centre, size):
         self.crop_centre = crop_centre
@@ -177,6 +253,7 @@ class CropToMaskBoundingBox(BaseOp):
                                          margin=self.margin,
                                          label=label)
 
+# Intensity ops
 
 class ClipIntensity(BaseOp):
     def __init__(self, lower, upper):
@@ -220,6 +297,8 @@ class MinMaxScale(BaseOp):
         return min_max_scale(image, self.minimum, self.maximum)
 
 
+# Lambda ops
+
 class SimpleITKFilter(BaseOp):
     def __init__(self, sitk_filter, *execute_args):
         self.sitk_filter = sitk_filter
@@ -258,12 +337,27 @@ class ArrayFunction(BaseOp):
         return result
 
 
+# Segmentation ops
+
 class StructureSetToSegmentation(BaseOp):
     def __init__(self, roi_names):
         self.roi_names = roi_names
 
     def __call__(self, structure_set, reference_image):
         return structure_set.to_segmentation(reference_image, roi_names=self.roi_names)
+
+class MapOverLabels(BaseOp):
+    def __init__(self, op, include_background=False, return_segmentation=True):
+        self.op = op
+        self.include_background = include_background
+        self.return_seg = return_seg
+
+    def __call__(self, segmentation, **kwargs):
+        return map_over_labels(segmentation,
+                               self.op,
+                               include_background=self.include_background,
+                               return_segmentation=self.return_segmentation,
+                               **kwargs)
 
 
 
