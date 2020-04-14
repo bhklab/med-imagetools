@@ -3,7 +3,7 @@ from itertools import chain
 
 from joblib import Parallel, delayed
 
-from .ops import BaseOp, Input
+from .ops import BaseOp, BaseInput
 
 
 class Pipeline:
@@ -30,12 +30,12 @@ class Pipeline:
             raise ValueError(f"missing_strategy must be either of 'drop' or 'pass', got {missing_strategy}")
 
     def _get_loader_subject_ids(self):
-        loaders = (v.loader for v in self.__dict__.values() if isinstance(v, Input))
+        loaders = (v.loader for v in self.__dict__.values() if isinstance(v, BaseInput))
         all_subject_ids = [loader.keys() for loader in loaders]
         unique_subject_ids = set(chain.from_iterable(all_subject_ids))
 
         if not all_subject_ids:
-            raise AttributeError("Pipeline must define at least one Input op")
+            raise AttributeError("Pipeline must define at least one input op (subclass of ops.BaseInput)")
 
         result = []
         for subject_id in unique_subject_ids:
@@ -96,3 +96,18 @@ class Pipeline:
         # not supported, since they cannot be pickled
         Parallel(n_jobs=self.n_jobs, verbose=verbose)(
             delayed(self.process_one_subject)(subject_id) for subject_id in subject_ids)
+
+
+class SequentialPipeline(Pipeline):
+    def __init__(self, ops_list):
+        self.source = ops_list.pop(0)
+        self.sink = ops_list.pop() if isinstance(ops_list[-1], Output) else None
+        self.ops_list = ops_list
+
+    def process_one_subject(self, subject_id):
+        image = self.source(subject_id)
+        for op in self.ops_list:
+            image = op(image)
+        if self.sink is not None:
+            self.sink(image)
+        return image

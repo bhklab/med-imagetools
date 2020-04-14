@@ -1,5 +1,7 @@
-import SimpleITK as sitk
 from functools import wraps
+
+import numpy as np
+import SimpleITK as sitk
 
 from ..utils import array_to_image, image_to_array
 
@@ -37,7 +39,7 @@ class Segmentation(sitk.Image):
         else:
             self.roi_names = roi_names
 
-            def get_label(self, label=None, name=None, relabel=False):
+    def get_label(self, label=None, name=None, relabel=False):
         if label is None and name is None:
             raise ValueError("Must pass either label or name.")
 
