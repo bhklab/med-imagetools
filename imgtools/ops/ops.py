@@ -102,7 +102,7 @@ class HDF5Output(BaseOutput):
         writer = HDF5Writer(root_directory,
                             filename_format,
                             create_dirs,
-                            save_geometry):
+                            save_geometry)
         super().__init__(writer)
 
 
@@ -111,9 +111,8 @@ class MetadataOutput(BaseOutput):
                  root_directory,
                  filename_format="{subject_id}.json",
                  create_dirs=True):
-
-    writer = MetadataWriter(root_directory, filename_format, create_dirs)
-    super().__init__(writer)
+        writer = MetadataWriter(root_directory, filename_format, create_dirs)
+        super().__init__(writer)
 
 
 # Resampling ops
