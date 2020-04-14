@@ -19,8 +19,9 @@ class BaseOp:
     def __repr__(self):
         attrs = [(k, v) for k, v in self.__dict__.items()
                  if not k.startswith("_")]
+        attrs = [(k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
-        return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
+        return f"{self.__class__.__name__}({args})"
 
 
 # Input/output
@@ -31,10 +32,10 @@ class BaseInput(BaseOp):
             raise ValueError(
                 f"loader must be a subclass of io.BaseLoader, got {type(loader)}"
             )
-        self.loader = loader
+        self._loader = loader
 
     def __call__(self, key):
-        inputs = self.loader.get(key)
+        inputs = self._loader.get(key)
         return inputs
 
 
@@ -44,7 +45,7 @@ class BaseOutput(BaseOp):
             raise ValueError(
                 f"writer must be a subclass of io.BaseWriter, got {type(writer)}"
             )
-        self.writer = writer
+        self._writer = writer
 
     def __call__(self, key, *args, **kwargs):
         self.writer.put(key, *args, **kwargs)
@@ -52,7 +53,11 @@ class BaseOutput(BaseOp):
 
 class ImageCSVInput(BaseInput):
     def __init__(self, csv_path, colnames=[], id_column=None, readers=[read_image]):
-        loader = ImageCSVLoader(csv_path, colnames, id_column, readers)
+        self.csv_path = csv_path
+        self.colnames = colnames
+        self.id_column = id_column
+        self.readers = readers
+        loader = ImageCSVLoader(self.csv_path, self.olnames, self.id_column, self.readers)
         super().__init__(loader)
 
 
@@ -63,11 +68,16 @@ class ImageFileInput(BaseInput):
                  subdir_path=None,
                  exclude_paths=[],
                  reader=read_image):
-        loader = ImageFileLoader(root_directory,
-                                 get_subject_id_from,
-                                 subdir_path,
-                                 exclude_paths,
-                                 reader)
+        self.root_directory = root_directory
+        self.get_subject_id_from = get_subject_id_from
+        self.subdir_path = subdir_path
+        self.exclude_paths = exclude_paths
+        self.reader = reader
+        loader = ImageFileLoader(self.root_directory,
+                                 self.get_subject_id_from,
+                                 self.subdir_path,
+                                 self.exclude_paths,
+                                 self.reader)
         super().__init__(loader)
 
 
@@ -77,10 +87,14 @@ class ImageFileOutput(BaseOutput):
                  filename_format="{subject_id}.nrrd",
                  create_dirs=True,
                  compress=True):
-        writer = ImageFileWriter(root_directory,
-                                 filename_format,
-                                 create_dirs,
-                                 compress)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+        writer = ImageFileWriter(self.root_directory,
+                                 self.filename_format,
+                                 self.create_dirs,
+                                 self.compress)
         super().__init__(writer)
 
 
@@ -89,7 +103,10 @@ class NumpyOutput(BaseOutput):
                  root_directory,
                  filename_format="{subject_id}.npy",
                  create_dirs=True):
-        writer = NumpyWriter(root_directory, filename_format, create_dirs)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        writer = NumpyWriter(self.root_directory, self.filename_format, self.create_dirs)
         super().__init__(writer)
 
 
@@ -99,10 +116,14 @@ class HDF5Output(BaseOutput):
                  filename_format="{subject_id}.h5",
                  create_dirs=True,
                  save_geometry=True):
-        writer = HDF5Writer(root_directory,
-                            filename_format,
-                            create_dirs,
-                            save_geometry)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.save_geometry = save_geometry
+        writer = HDF5Writer(self.root_directory,
+                            self.filename_format,
+                            self.create_dirs,
+                            self.save_geometry)
         super().__init__(writer)
 
 
@@ -111,7 +132,10 @@ class MetadataOutput(BaseOutput):
                  root_directory,
                  filename_format="{subject_id}.json",
                  create_dirs=True):
-        writer = MetadataWriter(root_directory, filename_format, create_dirs)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        writer = MetadataWriter(self.root_directory, self.filename_format, self.create_dirs)
         super().__init__(writer)
 
 
