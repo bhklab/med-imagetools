@@ -30,7 +30,7 @@ class Pipeline:
             raise ValueError(f"missing_strategy must be either of 'drop' or 'pass', got {missing_strategy}")
 
     def _get_loader_subject_ids(self):
-        loaders = (v.loader for v in self.__dict__.values() if isinstance(v, BaseInput))
+        loaders = (v._loader for v in self.__dict__.values() if isinstance(v, BaseInput))
         all_subject_ids = [loader.keys() for loader in loaders]
         unique_subject_ids = set(chain.from_iterable(all_subject_ids))
 
