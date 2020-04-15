@@ -58,7 +58,7 @@ class Segmentation(sitk.Image):
         return label_img
 
     def to_label_image(self):
-        arr = image_to_array(self)
+        arr, _ = image_to_array(self)
         # TODO handle overlapping labels
         label_arr = arr.argmax(-1)
         label_img = array_to_image(label_arr, reference_image=self)
