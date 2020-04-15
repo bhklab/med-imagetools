@@ -37,8 +37,7 @@ class StructureSet:
         if isinstance(roi_names, str):
             roi_names = [roi_names]
 
-        # preserve
-        names_to_use = list(chain.from_iterable((name for name in self.roi_names if re.fullmatch(pat, name)) for pat in roi_names))
+        names_to_use = list(chain.from_iterable((name for name in self.roi_names if re.fullmatch(pat, name.lower())) for pat in roi_names))
 
         size = reference_image.GetSize()[::-1] + (len(names_to_use),)
 
