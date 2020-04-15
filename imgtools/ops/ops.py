@@ -48,7 +48,7 @@ class BaseOutput(BaseOp):
         self._writer = writer
 
     def __call__(self, key, *args, **kwargs):
-        self.writer.put(key, *args, **kwargs)
+        self._writer.put(key, *args, **kwargs)
 
 
 class ImageCSVInput(BaseInput):
