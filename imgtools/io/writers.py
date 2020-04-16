@@ -95,7 +95,7 @@ class MetadataWriter(BaseWriter):
             raise ValueError(f"File format {self.file_format} not supported. Supported formats: JSON (.json), CSV (.csv), Pickle (.pkl).")
 
         if self.file_format == "csv" and self.remove_existing:
-            out_path = os.path.exists(os.path.join(self.root_directory, self.filename_format))
+            out_path = os.path.join(self.root_directory, self.filename_format)
             if os.path.exists(out_path):
                 os.remove(out_path) # remove existing CSV instead of appending
 
