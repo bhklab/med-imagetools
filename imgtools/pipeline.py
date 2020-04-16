@@ -40,6 +40,7 @@ class Pipeline:
         result = []
         for subject_id in unique_subject_ids:
             if not all((subject_id in subject_ids for subject_ids in all_subject_ids)):
+                # TODO give more details about which input data is missing
                 message = f"Subject {subject_id} is missing some of the input data "
                 if self.missing_strategy == "drop":
                     message += f"and will be dropped according to current missing strategy ('{self.missing_strategy}')."

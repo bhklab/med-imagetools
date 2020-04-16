@@ -534,7 +534,7 @@ def window_intensity(image: sitk.Image,
 
 def image_statistics(image: sitk.Image,
                      mask: Optional[sitk.Image] = None,
-                     label: Optional[int] = None) -> float:
+                     label: int = 1) -> float:
     """Compute the intensity statistics of an image.
 
     Returns the minimum, maximum, sum, mean, variance and standard deviation
@@ -562,15 +562,6 @@ def image_statistics(image: sitk.Image,
     collections.namedtuple
         The computed intensity statistics in the image or region.
     """
-    if mask is not None:
-        filter_ = sitk.LabelStatisticsImageFilter()
-    else:
-        filter_ = sitk.StatisticsImageFilter()
-
-    if isinstance(mask, Segmentation):
-        mask = mask.get_label(label=label, relabel=True)
-
-    filter_.Execute(image)
 
     ImageStatistics = namedtuple("ImageStatistics",
                                  ["minimum",
@@ -580,14 +571,33 @@ def image_statistics(image: sitk.Image,
                                   "variance",
                                   "standard_deviation"
                                  ])
-    result = ImageStatistics(
-        minimum=filter_.GetMinimum(),
-        maximum=filter_.GetMaximum(),
-        sum=filter_.GetSum(),
-        mean=filter_.GetMean(),
-        variance=filter_.GetVariance(),
-        standard_deviation=filter_.GetSigma()
-    )
+
+    if mask is not None:
+        if isinstance(mask, Segmentation):
+            mask = mask.get_label(label=label, relabel=True)
+
+        filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
+        result = ImageStatistics(
+            minimum=filter_.GetMinimum(label),
+            maximum=filter_.GetMaximum(label),
+            sum=filter_.GetSum(label),
+            mean=filter_.GetMean(label),
+            variance=filter_.GetVariance(label),
+            standard_deviation=filter_.GetSigma(label)
+        )
+    else:
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(image)
+        result = ImageStatistics(
+            minimum=filter_.GetMinimum(),
+            maximum=filter_.GetMaximum(),
+            sum=filter_.GetSum(),
+            mean=filter_.GetMean(),
+            variance=filter_.GetVariance(),
+            standard_deviation=filter_.GetSigma()
+        )
+
     return result
 
 def standard_scale(image: sitk.Image,

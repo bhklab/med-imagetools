@@ -64,6 +64,9 @@ class Segmentation(sitk.Image):
         label_img = array_to_image(label_arr, reference_image=self)
         return label_img
 
+    # TODO also overload other operators (arithmetic, etc.)
+    # with some sensible behaviour
+
     def __getitem__(self, idx):
         res = super().__getitem__(idx)
         if isinstance(res, sitk.Image):
