@@ -563,15 +563,6 @@ def image_statistics(image: sitk.Image,
         The computed intensity statistics in the image or region.
     """
 
-    if mask is not None:
-        if isinstance(mask, Segmentation):
-            mask = mask.get_label(label=label, relabel=True)
-        filter_ = sitk.LabelStatisticsImageFilter()
-        filter_.Execute(image, mask)
-    else:
-        filter_ = sitk.StatisticsImageFilter()
-        filter_.Execute(image)
-
     ImageStatistics = namedtuple("ImageStatistics",
                                  ["minimum",
                                   "maximum",
@@ -580,14 +571,33 @@ def image_statistics(image: sitk.Image,
                                   "variance",
                                   "standard_deviation"
                                  ])
-    result = ImageStatistics(
-        minimum=filter_.GetMinimum(),
-        maximum=filter_.GetMaximum(),
-        sum=filter_.GetSum(),
-        mean=filter_.GetMean(),
-        variance=filter_.GetVariance(),
-        standard_deviation=filter_.GetSigma()
-    )
+
+    if mask is not None:
+        if isinstance(mask, Segmentation):
+            mask = mask.get_label(label=label, relabel=True)
+
+        filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
+        result = ImageStatistics(
+            minimum=filter_.GetMinimum(label),
+            maximum=filter_.GetMaximum(label),
+            sum=filter_.GetSum(label),
+            mean=filter_.GetMean(label),
+            variance=filter_.GetVariance(label),
+            standard_deviation=filter_.GetSigma(label)
+        )
+    else:
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(image)
+        result = ImageStatistics(
+            minimum=filter_.GetMinimum(),
+            maximum=filter_.GetMaximum(),
+            sum=filter_.GetSum(),
+            mean=filter_.GetMean(),
+            variance=filter_.GetVariance(),
+            standard_deviation=filter_.GetSigma()
+        )
+
     return result
 
 def standard_scale(image: sitk.Image,
