@@ -12,8 +12,6 @@ from pydicom import dcmread
 from pydicom.misc import is_dicom
 
 from ..utils import image_to_array
-from ..structureset import StructureSet
-from ..utils.imageutils import image_to_array
 
 
 
