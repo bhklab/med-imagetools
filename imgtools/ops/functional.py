@@ -562,15 +562,15 @@ def image_statistics(image: sitk.Image,
     collections.namedtuple
         The computed intensity statistics in the image or region.
     """
+
     if mask is not None:
+        if isinstance(mask, Segmentation):
+            mask = mask.get_label(label=label, relabel=True)
         filter_ = sitk.LabelStatisticsImageFilter()
+        filter_.Execute(image, mask)
     else:
         filter_ = sitk.StatisticsImageFilter()
-
-    if isinstance(mask, Segmentation):
-        mask = mask.get_label(label=label, relabel=True)
-
-    filter_.Execute(image)
+        filter_.Execute(image)
 
     ImageStatistics = namedtuple("ImageStatistics",
                                  ["minimum",
