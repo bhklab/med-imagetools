@@ -17,19 +17,26 @@ def _get_roi_points(rtstruct, roi_index):
 
 
 class StructureSet:
-    def __init__(self, roi_names, roi_points):
-        self.segmentation_points = OrderedDict(zip(roi_names, roi_points))
+    def __init__(self, roi_points):
+        self.roi_points = roi_points
 
     @classmethod
     def from_dicom_rtstruct(cls, rtstruct_path):
         rtstruct = dcmread(rtstruct_path, force=True)
         roi_names = [roi.ROIName for roi in rtstruct.StructureSetROISequence]
-        roi_points = [_get_roi_points(rtstruct, i) for i, name in enumerate(roi_names)]
-        return cls(roi_names, roi_points)
+
+        roi_points = {}
+        for i, name in enumerate(roi_names):
+            try:
+                roi_points[name] = _get_roi_points(rtstruct, i)
+            except AttributeError:
+                # XXX maybe log a warning if a ROI has no points?
+                pass
+        return cls(roi_points)
 
     @property
     def roi_names(self):
-        return list(self.segmentation_points.keys())
+        return list(self.roi_points.keys())
 
     def to_segmentation(self, reference_image, roi_names=None):
         if not roi_names:
@@ -37,14 +44,17 @@ class StructureSet:
         if isinstance(roi_names, str):
             roi_names = [roi_names]
 
-        names_to_use = list(chain.from_iterable((name for name in self.roi_names if re.fullmatch(pat, name.lower())) for pat in roi_names))
+        names_to_use = list(chain.from_iterable((name for name in self.roi_names if re.fullmatch(pat, name, flags=re.IGNORECASE)) for pat in roi_names))
+
+        if not names_to_use:
+            raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
 
         size = reference_image.GetSize()[::-1] + (len(names_to_use),)
 
         mask = np.zeros(size, dtype=np.uint8)
 
         for label, name in enumerate(names_to_use):
-            physical_points = self.segmentation_points.get(name)
+            physical_points = self.roi_points.get(name)
             if physical_points is None:
                 continue # allow for missing labels, will return a blank slice
 
