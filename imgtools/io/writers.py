@@ -102,7 +102,7 @@ class MetadataWriter(BaseWriter):
             writer = csv.DictWriter(f, fieldnames=kwargs.keys())
             pos = f.tell()
             f.seek(0)
-            sample = f.read(1024)
+            sample = "\n".join([f.readline() for _ in range(2)])
             if not sample or not csv.Sniffer().has_header(sample):
                 writer.writeheader()
             f.seek(pos)
