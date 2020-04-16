@@ -61,3 +61,9 @@ class Segmentation(sitk.Image):
         label_arr = arr.argmax(-1)
         label_img = array_to_image(label_arr, reference_image=self)
         return label_img
+
+    def __getitem__(self, idx):
+        res = super().__getitem__(idx)
+        if isinstance(res, sitk.Image):
+            res = Segmentation(res, self.roi_names)
+        return res
