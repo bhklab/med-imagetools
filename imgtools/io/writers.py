@@ -87,11 +87,17 @@ class HDF5Writer(BaseWriter):
 
 
 class MetadataWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.json", create_dirs=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.json", create_dirs=True, remove_existing=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.file_format = os.path.splitext(filename_format)[1].lstrip(".")
+        self.remove_existing = remove_existing
         if self.file_format not in ["json", "csv", "pkl"]:
             raise ValueError(f"File format {self.file_format} not supported. Supported formats: JSON (.json), CSV (.csv), Pickle (.pkl).")
+
+        if self.file_format == "csv" and self.remove_existing:
+            out_path = os.path.exists(os.path.join(self.root_directory, self.filename_format))
+            if os.path.exists(out_path):
+                os.remove(out_path) # remove existing CSV instead of appending
 
     def _put_json(self, out_path, **kwargs):
         with open(out_path, "w") as f:
@@ -103,7 +109,7 @@ class MetadataWriter(BaseWriter):
             pos = f.tell()
             f.seek(0)
             sample = "\n".join([f.readline() for _ in range(2)])
-            if not sample or not csv.Sniffer().has_header(sample):
+            if sample == "\n" or not csv.Sniffer().has_header(sample):
                 writer.writeheader()
             f.seek(pos)
             writer.writerow(kwargs)
