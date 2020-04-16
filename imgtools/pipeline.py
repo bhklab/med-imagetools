@@ -42,9 +42,9 @@ class Pipeline:
             if not all((subject_id in subject_ids for subject_ids in all_subject_ids)):
                 message = f"Subject {subject_id} is missing some of the input data "
                 if self.missing_strategy == "drop":
-                    message += f"and will be dropped accoring to current missing strategy ({self.missing_strategy})."
+                    message += f"and will be dropped according to current missing strategy ('{self.missing_strategy}')."
                 elif self.missing_strategy == "pass":
-                    message += f"but will be passed accoring to current missing strategy ({self.missing_strategy})."
+                    message += f"but will be passed according to current missing strategy ('{self.missing_strategy}')."
                     result.append(subject_id)
                 warnings.warn(message, category=RuntimeWarning)
                 continue
