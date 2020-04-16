@@ -379,7 +379,7 @@ def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
     """
 
     if isinstance(mask, Segmentation):
-        mask = Segmentation.get_label(label=label, relabel=True)
+        mask = mask.get_label(label=label, relabel=True)
 
     filter_ = sitk.LabelShapeStatisticsImageFilter()
     filter_.Execute(mask)
@@ -416,7 +416,7 @@ def centroid(mask: sitk.Image,
     """
 
     if isinstance(mask, Segmentation):
-        mask = Segmentation.get_label(label=label, relabel=True)
+        mask = mask.get_label(label=label, relabel=True)
 
     filter_ = sitk.LabelShapeStatisticsImageFilter()
     filter_.Execute(mask)
@@ -458,7 +458,7 @@ def crop_to_mask_bounding_box(image: sitk.Image,
     """
 
     if isinstance(mask, Segmentation):
-        mask = Segmentation.get_label(label=label, relabel=True)
+        mask = mask.get_label(label=label, relabel=True)
 
     if isinstance(margin, Sequence):
         margin = np.asarray(margin)
@@ -568,7 +568,7 @@ def image_statistics(image: sitk.Image,
         filter_ = sitk.StatisticsImageFilter()
 
     if isinstance(mask, Segmentation):
-        mask = Segmentation.get_label(label=label, relabel=True)
+        mask = mask.get_label(label=label, relabel=True)
 
     filter_.Execute(image)
 
