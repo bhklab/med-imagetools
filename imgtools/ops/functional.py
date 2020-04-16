@@ -534,7 +534,7 @@ def window_intensity(image: sitk.Image,
 
 def image_statistics(image: sitk.Image,
                      mask: Optional[sitk.Image] = None,
-                     label: Optional[int] = None) -> float:
+                     label: int = 1) -> float:
     """Compute the intensity statistics of an image.
 
     Returns the minimum, maximum, sum, mean, variance and standard deviation
