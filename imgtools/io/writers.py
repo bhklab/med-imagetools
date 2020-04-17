@@ -23,7 +23,7 @@ class BaseWriter:
     def put(self, *args, **kwargs):
         raise NotImplementedError
 
-    def _get_path_from_subject_id(self, subject_id):
+    def _get_path_from_subject_id(self, subject_id, **kwargs):
         now = datetime.now(timezone.utc)
         date = now.strftime("%Y-%m-%d")
         time = now.strftime("%H%M%S")
@@ -31,7 +31,8 @@ class BaseWriter:
         out_filename = self.filename_format.format(subject_id=subject_id,
                                                    date=date,
                                                    time=time,
-                                                   date_time=date_time)
+                                                   date_time=date_time,
+                                                   **kwargs)
         out_path = os.path.join(self.root_directory, out_filename)
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
@@ -45,9 +46,9 @@ class ImageFileWriter(BaseWriter):
         super().__init__(root_directory, filename_format, create_dirs)
         self.compress = compress
 
-    def put(self, subject_id, image):
+    def put(self, subject_id, image, **kwargs):
         # TODO (Michal) add support for .seg.nrrd files
-        out_path = self._get_path_from_subject_id(subject_id)
+        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
 
@@ -57,8 +58,8 @@ class NumpyWriter(BaseWriter):
         self.root_directory = root_directory
         self.filename_format = filename_format
 
-    def put(self, subject_id, image):
-        out_path = self._get_path_from_subject_id(subject_id)
+    def put(self, subject_id, image, **kwargs):
+        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         if isinstance(image, sitk.Image):
             array, *_ = image_to_array(image) # TODO (Michal) optionally save the image geometry
         np.save(out_path, array)
@@ -69,10 +70,12 @@ class HDF5Writer(BaseWriter):
         super().__init__(root_directory, filename_format, create_dirs)
         self.save_geometry = save_geometry
 
-    def put(self, subject_id, metadata=None, **kwargs):
-        out_path = self._get_path_from_subject_id(subject_id)
+    def put(self, subject_id, images, metadata=None, **kwargs):
+        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         with h5py.File(out_path, "w") as f:
-            for k, v in kwargs.items():
+            if not isinstance(images, dict):
+                images = {"image": images}
+            for k, v in images.items():
                 array, origin, direction, spacing = image_to_array(v)
                 dataset = f.create_dataset(k, data=array)
                 dataset.attrs.create("subject_id", subject_id)
