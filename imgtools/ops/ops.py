@@ -57,13 +57,6 @@ class BaseOutput(BaseOp):
 
 
 class ImageCSVInput(BaseInput):
-    def __init__(self,
-                 csv_path_or_dataframe: str,
-                 colnames: List[str] = [],
-                 id_column: Optional[str] = None,
-                 expand_paths: bool = True,
-                 readers: List[LoaderFunction] = [read_image]):
-        self.csv_path_or_dataframe = csv_path_or_dataframe
     """ImageCSVInput class looks for a CSV file in a specified directory and loads images based on the information in the file.
 
     Parameters
@@ -75,10 +68,10 @@ class ImageCSVInput(BaseInput):
         List of column names in the CSV file to be used for image loading.
 
     id_column: str, optional
-        A column name to be used as the subject ID.
+        A column name to be used as the subject ID. 
 
     reader: LoaderFunction
-        The functions used to read images.
+        The functions used to read images. 
         The functions are implemented in the imgtools.io module.
         The options are:
         - read_image
@@ -86,6 +79,13 @@ class ImageCSVInput(BaseInput):
         - read_dicom_rtstruct
         - read_segmentation
     """
+    def __init__(self,
+                 csv_path_or_dataframe: str,
+                 colnames: List[str] = [],
+                 id_column: Optional[str] = None,
+                 expand_paths: bool = True,
+                 readers: List[LoaderFunction] = [read_image]):
+        self.csv_path_or_dataframe = csv_path_or_dataframe
         self.colnames = colnames
         self.id_column = id_column
         self.expand_paths = expand_paths
