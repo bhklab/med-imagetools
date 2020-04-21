@@ -81,22 +81,23 @@ class Pipeline:
         """
         raise NotImplementedError
 
+    def _process_wrapper(self, subject_id):
+        try:
+            self.process_one_subject(subject_id)
+        except Exception as e:
+            raise RuntimeError(f"{type(e).__name__} while processing subject {subject_id}: " + str(e)) from e
+
     def run(self):
         """Execute the pipeline, possibly in parallel.
-
-        Parameters
-        ----------
-        progress : bool, optional
-            Whether to display the execution progress (default False).
         """
         # Joblib prints progress to stdout if verbose > 50
         verbose = 51 if self.show_progress else 0
 
         subject_ids = self._get_loader_subject_ids()
         # Note that returning any SimpleITK object in process_one_subject is
-        # not supported, since they cannot be pickled
+        # not supported yet, since they cannot be pickled
         Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            delayed(self.process_one_subject)(subject_id) for subject_id in subject_ids)
+            delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
 
 
 class SequentialPipeline(Pipeline):
