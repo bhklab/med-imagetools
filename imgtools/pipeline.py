@@ -14,7 +14,7 @@ class Pipeline:
     the `process_one_case` method, which defines the processing steps for one
     case (i.e. one subject_id from data loaders).
     """
-    def __init__(self, n_jobs=1, missing_strategy="drop", show_progress=True):
+    def __init__(self, n_jobs=1, missing_strategy="drop", show_progress=True, warn_on_error=False):
         """Initialize the base class.
 
         Parameters
@@ -26,6 +26,7 @@ class Pipeline:
         self.n_jobs = n_jobs
         self.missing_strategy = missing_strategy.lower()
         self.show_progress = show_progress
+        self.warn_on_error = warn_on_error
         if self.missing_strategy not in ["drop", "pass"]:
             raise ValueError(f"missing_strategy must be either of 'drop' or 'pass', got {missing_strategy}")
 
@@ -85,7 +86,11 @@ class Pipeline:
         try:
             self.process_one_subject(subject_id)
         except Exception as e:
-            raise RuntimeError(f"{type(e).__name__} while processing subject {subject_id}: " + str(e)) from e
+            message = f"{type(e).__name__} while processing subject {subject_id}: " + str(e)
+            if self.warn_on_error:
+                warnings.warn(message, category=RuntimeWarning)
+            else:
+                raise RuntimeError(message) from e
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
