@@ -26,11 +26,13 @@ class RADCUREPipeline(Pipeline):
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
-                 show_progress=False):
+                 show_progress=False,
+                 warn_on_error=False):
         super().__init__(
             n_jobs=n_jobs,
             missing_strategy=missing_strategy,
-            show_progress=show_progress)
+            show_progress=show_progress,
+            warn_on_error=warn_on_error)
 
         # pipeline configuration
         self.input_directory = input_directory
