@@ -3,7 +3,7 @@ from itertools import chain
 
 from joblib import Parallel, delayed
 
-from .ops import BaseOp, BaseInput
+from .ops import BaseOp, BaseInput, BaseOutput
 
 
 class Pipeline:
@@ -102,7 +102,7 @@ class Pipeline:
 class SequentialPipeline(Pipeline):
     def __init__(self, ops_list):
         self.source = ops_list.pop(0)
-        self.sink = ops_list.pop() if isinstance(ops_list[-1], Output) else None
+        self.sink = ops_list.pop() if isinstance(ops_list[-1], BaseOutput) else None
         self.ops_list = ops_list
 
     def process_one_subject(self, subject_id):
