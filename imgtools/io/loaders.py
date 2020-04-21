@@ -82,28 +82,42 @@ class BaseLoader:
 
 class ImageCSVLoader(BaseLoader):
     def __init__(self,
-                 csv_path,
+                 csv_path_or_dataframe,
                  colnames=[],
                  id_column=None,
+                 expand_paths=True,
                  readers=[read_image]):
 
-        self.csv_path = csv_path
-        self.colnames = colnames
+        self.expand_paths = expand_paths
         self.readers = readers
 
-        if id_column is not None:
+        if id_column is not None and id_column not in colnames:
             colnames.append(id_column)
 
-        self.paths = pd.read_csv(csv_path, usecols=colnames, index_col=id_column)
+        self.colnames = colnames
+
+        if isinstance(csv_path_or_dataframe, str):
+            self.paths = pd.read_csv(csv_path_or_dataframe,
+                                     usecols=self.colnames,
+                                     index_col=id_column)
+        elif isinstance(csv_path_or_dataframe, pd.DataFrame):
+            self.paths = csv_path_or_dataframe
+            if not self.colnames:
+                self.colnames = self.paths.columns
+        else:
+            raise ValueError(f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.")
 
         if not isinstance(readers, list):
-            readers = [readers] * len(colnames)
+            readers = [readers] * len(self.colnames)
 
         self.output_tuple = namedtuple("Output", self.colnames)
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
-        outputs = {col: self.readers[i](row[col]) for i, col in enumerate(self.colnames)}
+        paths = {col: row[col] for col in self.colnames}
+        if self.expand_paths:
+            paths = {col: glob.glob(path) for col, path in paths.items()}
+        outputs = {col: self.readers[i](path) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)
 
     def keys(self):
