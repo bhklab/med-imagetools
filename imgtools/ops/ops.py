@@ -167,7 +167,7 @@ class ImageFileOutput(BaseOutput):
         Specify whether to enable compression for NRRD format.
         Set to be true as default.
     """
-
+    
     def __init__(self,
                  root_directory: str,
                  filename_format: Optional[str] ="{subject_id}.nrrd",
