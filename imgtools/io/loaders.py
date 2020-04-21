@@ -91,14 +91,13 @@ class ImageCSVLoader(BaseLoader):
         self.expand_paths = expand_paths
         self.readers = readers
 
-        if id_column is not None and id_column not in colnames:
-            colnames.append(id_column)
-
         self.colnames = colnames
 
         if isinstance(csv_path_or_dataframe, str):
+            if id_column is not None and id_column not in colnames:
+                colnames.append(id_column)
             self.paths = pd.read_csv(csv_path_or_dataframe,
-                                     usecols=self.colnames,
+                                     usecols=colnames,
                                      index_col=id_column)
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
             self.paths = csv_path_or_dataframe
