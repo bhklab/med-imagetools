@@ -122,7 +122,7 @@ class ImageCSVLoader(BaseLoader):
         return self.output_tuple(**outputs)
 
     def keys(self):
-        return self.paths.keys()
+        return list(self.paths.index)
 
     def items(self):
         return ((k, self[k]) for k in self.keys())
