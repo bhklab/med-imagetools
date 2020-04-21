@@ -101,6 +101,8 @@ class ImageCSVLoader(BaseLoader):
                                      index_col=id_column)
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
             self.paths = csv_path_or_dataframe
+            if id_column:
+                self.paths = self.paths.set_index(id_column)
             if not self.colnames:
                 self.colnames = self.paths.columns
         else:
