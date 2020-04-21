@@ -52,12 +52,22 @@ class BaseOutput(BaseOp):
 
 
 class ImageCSVInput(BaseInput):
-    def __init__(self, csv_path, colnames=[], id_column=None, readers=[read_image]):
-        self.csv_path = csv_path
+    def __init__(self,
+                 csv_path_or_dataframe,
+                 colnames=[],
+                 id_column=None,
+                 expand_paths=True,
+                 readers=[read_image]):
+        self.csv_path_or_dataframe = csv_path_or_dataframe
         self.colnames = colnames
         self.id_column = id_column
+        self.expand_paths = expand_paths
         self.readers = readers
-        loader = ImageCSVLoader(self.csv_path, self.olnames, self.id_column, self.readers)
+        loader = ImageCSVLoader(self.csv_path_or_dataframe,
+                                colnames=self.colnames,
+                                id_column=self.id_column,
+                                expand_paths=self.expand_paths,
+                                readers=self.readers)
         super().__init__(loader)
 
 
