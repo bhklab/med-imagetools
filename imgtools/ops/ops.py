@@ -68,10 +68,10 @@ class ImageCSVInput(BaseInput):
         List of column names in the CSV file to be used for image loading.
 
     id_column: str, optional
-        A column name to be used as the subject ID. 
+        A column name to be used as the subject ID.
 
     reader: LoaderFunction
-        The functions used to read images. 
+        The functions used to read images.
         The functions are implemented in the imgtools.io module.
         The options are:
         - read_image
@@ -108,7 +108,7 @@ class ImageFileInput(BaseInput):
 
     get_subject_id_from: str
         How to extract the subject ID. The options are:
-        - 'filename' indicates the image reader to use filename as the subject ID. (default) 
+        - 'filename' indicates the image reader to use filename as the subject ID. (default)
         - 'subject_directory' indicates the image reader to use the name of the subject directory.
 
     subdir_path: str, optional
@@ -118,7 +118,7 @@ class ImageFileInput(BaseInput):
         Directory paths to be excluded when searching for the image files to be loaded.
 
     reader: LoaderFunction
-        The function used to read individual images. 
+        The function used to read individual images.
         The functions are implemented in the imgtools.io module.
         The options are:
         - read_image
@@ -156,7 +156,7 @@ class ImageFileOutput(BaseOutput):
 
     filename_format: str, optional
         The filename template.
-        Set to be {subject_id}.nrrd as default. 
+        Set to be {subject_id}.nrrd as default.
         {subject_id} will be replaced by each subject's ID at runtime.
 
     create_dirs: bool, optional
@@ -167,7 +167,7 @@ class ImageFileOutput(BaseOutput):
         Specify whether to enable compression for NRRD format.
         Set to be true as default.
     """
-    
+
     def __init__(self,
                  root_directory: str,
                  filename_format: Optional[str] ="{subject_id}.nrrd",
@@ -194,7 +194,7 @@ class NumpyOutput(BaseOutput):
 
     filename_format: str, optional
         The filename template.
-        Set to be {subject_id}.npy as default. 
+        Set to be {subject_id}.npy as default.
         {subject_id} will be replaced by each subject's ID at runtime.
 
     create_dirs: bool, optional
@@ -224,19 +224,19 @@ class HDF5Output(BaseOutput):
 
     filename_format: str, optional
         The filename template.
-        Set to be {subject_id}.h5 as default. 
+        Set to be {subject_id}.h5 as default.
         {subject_id} will be replaced by each subject's ID at runtime.
 
     create_dirs: bool, optional
         Specify whether to create an output directory if it does not exit.
         Set to be True as default.
-    
+
     save_geometry: bool, optional
         Specify whether to save geometry data.
         Set to be True as default.
 
     """
-    
+
     def __init__(self,
                  root_directory: str,
                  filename_format: Optional[str] ="{subject_id}.h5",
@@ -263,7 +263,7 @@ class MetadataOutput(BaseOutput):
 
     filename_format: str, optional
         The filename template.
-        Set to be {subject_id}.json as default. 
+        Set to be {subject_id}.json as default.
         {subject_id} will be replaced by each subject's ID at runtime.
 
     create_dirs: bool, optional
@@ -271,7 +271,7 @@ class MetadataOutput(BaseOutput):
         Set to be True as default.
 
     """
-    
+
     def __init__(self,
                  root_directory: str,
                  filename_format: Optional[str] ="{subject_id}.json",
@@ -286,12 +286,12 @@ class MetadataOutput(BaseOutput):
 # Resampling ops
 
 class Resample(BaseOp):
-    """Resample operation class: 
+    """Resample operation class:
     A callable class that resamples image to a given spacing, optionally applying a transformation.
 
-    To instantiate: 
+    To instantiate:
         obj = Resample(spacing, interpolation, anti_alias, anti_alias_sigma, transform, output_size)
-    
+
     To call:
         result = obj(image)
 
@@ -342,7 +342,7 @@ class Resample(BaseOp):
         self.output_size = output_size
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Resample callable object: 
+        """Resample callable object:
         Resamples image to a given spacing, optionally applying a transformation..
 
         Parameters
@@ -355,23 +355,23 @@ class Resample(BaseOp):
         sitk.Image
             The resampled image.
         """
-        
+
         return resample(image,
                         spacing=self.spacing,
                         interpolation=self.interpolation,
                         anti_alias=self.anti_alias,
                         anti_alias_sigma=self.anti_alias_sigma,
                         transform=self.transform,
-                        output_size=self.output_size) 
+                        output_size=self.output_size)
 
 
 class Resize(BaseOp):
-    """Resize operation class: 
+    """Resize operation class:
     A callable class that resizes image to a given size by resampling coordinates.
 
     To instantiate:
         obj = Resize(size, interpolation, anti_alias, anti_alias_sigma)
-    
+
     To call:
         result = obj(image)
 
@@ -397,7 +397,7 @@ class Resize(BaseOp):
     anti_alias_sigma, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
-    
+
     def __init__(self,
                  size: Union[int, Sequence[int], np.ndarray],
                  interpolation: str ="linear",
@@ -432,10 +432,10 @@ class Zoom(BaseOp):
 
     To instantiate:
         obj = Zoom(scale_factor, interpolation, anti_alias, anti_alias_sigma)
-    
+
     To call:
         result = obj(image)
-    
+
     The rescaled image will have the same spatial extent (size) but will be
     rescaled by `scale_factor` in each dimension. Alternatively, a separate
     scale factor for each dimension can be specified by passing a sequence
@@ -461,7 +461,7 @@ class Zoom(BaseOp):
     anti_alias_sigma, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
-    
+
     def __init__(self,
                  scale_factor: Union[float, Sequence[float]],
                  interpolation: str ="linear",
@@ -490,7 +490,7 @@ class Zoom(BaseOp):
         sitk.Image
             The rescaled image.
         """
-    
+
         return zoom(image,
                     self.scale_factor,
                     interpolation=self.interpolation,
@@ -503,10 +503,10 @@ class Rotate(BaseOp):
 
     To instantiate:
         obj = Rotate(rotation_centre, angles, interpolation)
-    
+
     To call:
         result = obj(image)
-    
+
     Parameters
     ----------
     rotation_centre
@@ -521,10 +521,10 @@ class Rotate(BaseOp):
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
     """
-    
-    def __init__(self, 
-                rotation_centre: Sequence[float], 
-                angles: Union[float, Sequence[float]], 
+
+    def __init__(self,
+                rotation_centre: Sequence[float],
+                angles: Union[float, Sequence[float]],
                 interpolation: str ="linear"):
         self.rotation_centre = rotation_centre
         self.angles = angles
@@ -550,15 +550,15 @@ class Rotate(BaseOp):
                       interpolation=self.interpolation)
 
 
-class InPlaneRotate(BaseOp):
+class InPlaneRotate(RandomMixin, BaseOp):
     """InPlaneRorate operation class: A callable class that rotates an image on a plane.
 
     To instantiate:
         obj = InPlaneRorate(angle, interpolation)
-    
+
     To call:
         result = obj(image)
-    
+
     Parameters
     ----------
     angle
@@ -570,7 +570,7 @@ class InPlaneRotate(BaseOp):
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
     """
-    
+
     def __init__(self, angle: float, interpolation: str ="linear"):
         self.angle = angle
         self.interpolation = interpolation
@@ -601,12 +601,12 @@ class InPlaneRotate(BaseOp):
 # Cropping & mask ops
 
 class Crop(BaseOp):
-    """Crop operation class: A callable class that crops an image to 
+    """Crop operation class: A callable class that crops an image to
     the desired size around a given centre.
 
     To instantiate:
         obj = Crop(crop_centre, size)
-    
+
     To call:
         result = obj(image)
 
@@ -647,17 +647,17 @@ class Crop(BaseOp):
         sitk.Image
             The cropped image.
         """
-        
+
         return crop(image, crop_centre=self.crop_centre, size=self.size)
 
 
 class CentreCrop(BaseOp):
-    """CentreCrop operation class: A callable class that crops an image to the desired size 
+    """CentreCrop operation class: A callable class that crops an image to the desired size
     around the centre of an image.
 
     To instantiate:
         obj = CentreCrop(size)
-    
+
     To call:
         result = obj(image)
 
@@ -673,12 +673,12 @@ class CentreCrop(BaseOp):
         dimensions. Passing 0 at any position will keep the original size along
         that dimension.
     """
-    
+
     def __init__(self, size: Union[int, Sequence[int]]):
         self.size = size
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """CentreCrop callable object: Crops an image to the desired size 
+        """CentreCrop callable object: Crops an image to the desired size
         around the centre of an image.
 
         Note that the cropped image might be smaller than size in a particular
@@ -700,18 +700,18 @@ class CentreCrop(BaseOp):
 
 
 class BoundingBox(BaseOp):
-    """BoundingBox opetation class: A callable class that find the axis-aligned 
+    """BoundingBox opetation class: A callable class that find the axis-aligned
     bounding box of a region descriibed by a segmentation mask.
 
     To instantiate:
         obj = BoundingBox()
-    
+
     To call:
         result = obj(mask, label)
     """
-    
+
     def __call__(self, mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
-        """BoundingBox callable object: Find the axis-aligned 
+        """BoundingBox callable object: Find the axis-aligned
         bounding box of a region descriibed by a segmentation mask.
 
         Parameters
@@ -731,17 +731,17 @@ class BoundingBox(BaseOp):
             coordinates of the corner closest to the origin and the second
             gives the size in pixels along each dimension.
         """
-        
+
         return bounding_box(mask, label=label)
 
 
 class Centroid(BaseOp):
-    """Centroid operation class: A callable class that finds the centroid of 
+    """Centroid operation class: A callable class that finds the centroid of
     a labelled region specified by a segmentation mask.
 
     To instantiate:
         obj = Centroid(world_coordinates)
-    
+
     To call:
         result = obj(mask, label)
 
@@ -751,14 +751,14 @@ class Centroid(BaseOp):
         If True, return centroid in world coordinates, otherwise in image
         (voxel) coordinates (default).
     """
-    
+
     def __init__(self, world_coordinates: bool = False):
         self.world_coordinates = world_coordinates
 
-    def __call__(self, 
-                mask: sitk.Image, 
+    def __call__(self,
+                mask: sitk.Image,
                 label: Optional[int] = 1) -> tuple:
-        """Centroid callable object: Finds the centroid of 
+        """Centroid callable object: Finds the centroid of
         a labelled region specified by a segmentation mask.
 
         Parameters
@@ -783,7 +783,7 @@ class Centroid(BaseOp):
 
 
 class CropToMaskBoundingBox(BaseOp):
-    """CropToMaskBoundingBox opetation class: 
+    """CropToMaskBoundingBox opetation class:
     A callable class that crops the image using the bounding box of a region of interest specified
     by a segmentation mask.
 
@@ -800,15 +800,15 @@ class CropToMaskBoundingBox(BaseOp):
         add the same margin to each dimension. A sequence of ints can also be
         passed to specify the margin separately along each dimension.
     """
-    
+
     def __init__(self, margin: Union[int, Sequence[int], np.ndarray]):
         self.margin = margin
 
-    def __call__(self, 
-                image: sitk.Image, 
-                mask: Union[int, Sequence[int], np.ndarray] = None, 
+    def __call__(self,
+                image: sitk.Image,
+                mask: Union[int, Sequence[int], np.ndarray] = None,
                 label: Optional[int] = 1) -> Tuple[sitk.Image]:
-        """CropToMaskBoundingBox callable object: 
+        """CropToMaskBoundingBox callable object:
         Crops the image using the bounding box of a region of interest specified
         by a segmentation mask.
 
@@ -830,7 +830,7 @@ class CropToMaskBoundingBox(BaseOp):
         tuple of sitk.Image
             The cropped image and mask.
         """
-        
+
         return crop_to_mask_bounding_box(image,
                                          mask,
                                          margin=self.margin,
@@ -839,7 +839,7 @@ class CropToMaskBoundingBox(BaseOp):
 # Intensity ops
 
 class ClipIntensity(BaseOp):
-    """ClipIntensity operation class: 
+    """ClipIntensity operation class:
     A callable class that clips image grey level intensities to specified range.
 
     To instantiate:
@@ -861,20 +861,20 @@ class ClipIntensity(BaseOp):
         The upper bound on grey level intensity. Voxels with higer intensity
         will be set to this value.
     """
-    
+
     def __init__(self, lower: float, upper: float):
         self.lower = lower
         self.upper = upper
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ClipIntensity callable object: 
+        """ClipIntensity callable object:
         Clips image grey level intensities to specified range.
 
         Parameters
         ----------
         image
             The intensity image to clip.
-        
+
         Returns
         -------
         sitk.Image
@@ -884,7 +884,7 @@ class ClipIntensity(BaseOp):
 
 
 class WindowIntensity(BaseOp):
-    """WindowIntensity operation class: 
+    """WindowIntensity operation class:
     A callable class that restricts image grey level intensities to a given window and level.
 
     To instantiate:
@@ -904,13 +904,13 @@ class WindowIntensity(BaseOp):
     level
         The mid-point of the intensity window.
     """
-    
+
     def __init__(self, window: float, level: float):
         self.window = window
         self.level = level
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """WindowIntensity callable object: 
+        """WindowIntensity callable object:
         Restricts image grey level intensities to a given window and level.
 
         Parameters
@@ -923,15 +923,15 @@ class WindowIntensity(BaseOp):
         sitk.Image
             The windowed intensity image.
         """
-        
+
         return window_intensity(image, self.window, self.level)
 
 
 class ImageStatistics(BaseOp):
-    """ImageStatistics operation class: 
+    """ImageStatistics operation class:
     A callable class that computes the intensity statistics of an image.
 
-    To instantiate: 
+    To instantiate:
         obj = ImageStatistics()
 
     To call:
@@ -942,12 +942,12 @@ class ImageStatistics(BaseOp):
     This function also supports computing the statistics in a specific
     region of interest if `mask` and `label` are passed.
     """
-    
-    def __call__(self, 
-                image: sitk.Image, 
-                mask: Optional[sitk.Image] = None, 
+
+    def __call__(self,
+                image: sitk.Image,
+                mask: Optional[sitk.Image] = None,
                 label: Optional[int] =1) -> float:
-        """ImageStatistics callable object: 
+        """ImageStatistics callable object:
         Computes the intensity statistics of an image.
 
         Returns the minimum, maximum, sum, mean, variance and standard deviation
@@ -975,13 +975,13 @@ class ImageStatistics(BaseOp):
         collections.namedtuple
             The computed intensity statistics in the image or region.
         """
-        
+
         return image_statistics(image, mask, label=label)
 
 
 class StandardScale(BaseOp):
-    """StandardScale operation class: 
-    A callable class that rescales image intensities by subtracting 
+    """StandardScale operation class:
+    A callable class that rescales image intensities by subtracting
     the mean and dividing by standard deviation.
 
     To instantiate:
@@ -1007,21 +1007,21 @@ class StandardScale(BaseOp):
         The standard deviation used in rescaling. If None, image standard
         deviation will be used.
     """
-    
+
     def __init__(self, rescale_mean: Optional[float] = 0., rescale_std: Optional[float] = 1.):
         self.rescale_mean = rescale_mean
         self.rescale_std = rescale_std
 
-    def __call__(self, image: sitk.Image, mask: Optional[sitk.Image] =None, label: Optional[int] =1) -> sitk.Image:
-        """StandardScale callable object: 
-        A callable class that rescales image intensities by subtracting 
+    def __call__(self, image: sitk.Image, mask: Optional[sitk.Image] = None, label: Optional[int] =1) -> sitk.Image:
+        """StandardScale callable object:
+        A callable class that rescales image intensities by subtracting
         the mean and dividing by standard deviation.
 
         Parameters
         ----------
         image
             sitk.Image object to be rescaled.
-        
+
         mask, optional
             Segmentation mask specifying a region of interest used in computation.
             Can be an image of type unsigned int representing a label map or
@@ -1037,13 +1037,13 @@ class StandardScale(BaseOp):
         sitk.Image
             The rescaled image.
         """
-        
+
         return standard_scale(image, mask, self.rescale_mean, self.rescale_std,
                               label)
 
 
 class MinMaxScale(BaseOp):
-    """MinMaxScale operation class: 
+    """MinMaxScale operation class:
     A callable class that rescales image intensities to a given minimum and maximum.
 
     Applies a linear transformation to image intensities such that the minimum
@@ -1064,13 +1064,13 @@ class MinMaxScale(BaseOp):
     maximum, optional
         The maximum intensity in the rescaled image.
     """
-    
+
     def __init__(self, minimum: float, maximum: float):
         self.minimum = minimum
         self.maximum = maximum
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """MinMaxScale callable object: 
+        """MinMaxScale callable object:
         Rescales image intensities to a given minimum and maximum.
 
         Applies a linear transformation to image intensities such that the minimum
@@ -1093,14 +1093,14 @@ class MinMaxScale(BaseOp):
 # Lambda ops
 
 class SimpleITKFilter(BaseOp):
-    """SimpleITKFilter operation class: 
+    """SimpleITKFilter operation class:
     A callable class that accepts an sitk.ImageFilter object to add a filter to an image.
 
     To instantiate:
         obj = SimpleITKFilter(sitk_filter, *execute_args)
     To call:
         result = obj(image)
-      
+
     Parameters
     ----------
     sitk_filter
@@ -1109,13 +1109,13 @@ class SimpleITKFilter(BaseOp):
     execute_args, optional
         Any arguments to be passed to the Execute() function of the selected ImageFilter object.
     """
-    
+
     def __init__(self, sitk_filter: ImageFilter, *execute_args: Optional[Any]):
         self.sitk_filter = sitk_filter
         self.execute_args = execute_args
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """SimpleITKFilter callable object: 
+        """SimpleITKFilter callable object:
         A callable class that uses an sitk.ImageFilter object to add a filter to an image.
 
         Parameters
@@ -1127,12 +1127,12 @@ class SimpleITKFilter(BaseOp):
         -------
         sitk.Image
             The processed image with a given filter.
-        """ 
+        """
         return self.sitk_filter.Execute(image, *self.execute_args)
 
 
 class ImageFunction(BaseOp):
-    """ImageFunction operation class: 
+    """ImageFunction operation class:
     A callable class that takens in a function to be used to process an image,
     and executes it.
 
@@ -1144,26 +1144,26 @@ class ImageFunction(BaseOp):
     Parameters
     ----------
     function
-        A function to be used for image processing. 
+        A function to be used for image processing.
         This function needs to have the following signature:
-        - function(image: sitk.Image, **args) 
+        - function(image: sitk.Image, **args)
         - The first argument needs to be an sitkImage, followed by optional arguments.
 
     copy_geometry, optional
-        An optional argument to specify whether information about the image should be copied to the 
+        An optional argument to specify whether information about the image should be copied to the
         resulting image. Set to be true as a default.
-    
+
     kwargs, optional
         Any number of arguements used in the given function.
     """
-    
+
     def __init__(self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]):
         self.function = function
         self.copy_geometry = copy_geometry
         self.kwargs = kwargs
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ImageFunction callable object: 
+        """ImageFunction callable object:
         Process an image based on a given function.
 
         Parameters
@@ -1176,7 +1176,7 @@ class ImageFunction(BaseOp):
         sitk.Image
             The image processed with the given function.
         """
-            
+
         result = self.function(image, **self.kwargs)
         if self.copy_geometry:
             result.CopyInformation(image)
@@ -1184,7 +1184,7 @@ class ImageFunction(BaseOp):
 
 
 class ArrayFunction(BaseOp):
-    """ArrayFunction operation class: 
+    """ArrayFunction operation class:
     A callable class that takes in a function to be used to process an image from numpy array,
     and executes it.
 
@@ -1196,26 +1196,26 @@ class ArrayFunction(BaseOp):
     Parameters
     ----------
     function
-        A function to be used for image processing. 
+        A function to be used for image processing.
         This function needs to have the following signature:
-        - function(image: sitk.Image, **args) 
+        - function(image: sitk.Image, **args)
         - The first argument needs to be an sitkImage, followed by optional arguments.
 
     copy_geometry, optional
-        An optional argument to specify whether information about the image should be copied to the 
+        An optional argument to specify whether information about the image should be copied to the
         resulting image. Set to be true as a default.
-    
+
     kwargs, optional
         Any number of arguements used in the given function.
     """
-    
+
     def __init__(self, function: Function, copy_geometry: bool =True, **kwargs: Optional[Any]):
         self.function = function
         self.copy_geometry = copy_geometry
         self.kwargs = kwargs
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ArrayFunction callable object: 
+        """ArrayFunction callable object:
         Processes an image from numpy array.
 
         Parameters
@@ -1228,7 +1228,7 @@ class ArrayFunction(BaseOp):
         sitk.Image
             The image processed with a given function.
         """
-        
+
         array, origin, direction, spacing = image_to_array(image)
         result = self.function(array, **self.kwargs)
         if self.copy_geometry:
@@ -1241,10 +1241,10 @@ class ArrayFunction(BaseOp):
 # Segmentation ops
 
 class StructureSetToSegmentation(BaseOp):
-    """StructureSetToSegmentation operation class: 
-    A callable class that accepts ROI names, a StrutureSet object, and a reference image, and 
+    """StructureSetToSegmentation operation class:
+    A callable class that accepts ROI names, a StrutureSet object, and a reference image, and
     returns Segmentation mask.
-    
+
     To instantiate:
         obj = StructureSet(roi_names)
     To call:
@@ -1255,20 +1255,20 @@ class StructureSetToSegmentation(BaseOp):
     roi_names
         List of Region of Interests
     """
-    
+
     def __init__(self, roi_names: List[str]):
         self.roi_names = roi_names
 
     def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
-        """StructureSetToSegmentation callable object: 
-        A callable object that accepts a StrutureSet object, and a reference image, and 
+        """StructureSetToSegmentation callable object:
+        A callable object that accepts a StrutureSet object, and a reference image, and
         returns Segmentation mask.
 
         Parameters
         ----------
         structure_set
             A StructureSet object from the segmentation module of imgtools.
-        
+
         reference_image
             A sitk.Image object used as a reference.
 
@@ -1280,8 +1280,8 @@ class StructureSetToSegmentation(BaseOp):
         return structure_set.to_segmentation(reference_image, roi_names=self.roi_names)
 
 class MapOverLabels(BaseOp):
-    """MapOverLabels operation class: 
-    
+    """MapOverLabels operation class:
+
     To instantiate:
         obj = MapOverLabels(op, include_background, return_segmentation)
     To call:
@@ -1293,20 +1293,20 @@ class MapOverLabels(BaseOp):
         A processing function to be used for the operation.
 
     """
-    
+
     def __init__(self, op, include_background: bool = False, return_segmentation: bool =True):
         self.op = op
         self.include_background = include_background
         self.return_seg = return_segmentation
 
     def __call__(self, segmentation: Segmentation, **kwargs: Optional[Any]) -> Segmentation:
-        """MapOverLabels callable object: 
+        """MapOverLabels callable object:
 
         Parameters
         ----------
         include_background
             Specify whether to include background. Set to be false as a default.
-        
+
         return_segmentation
             Specify whether to return segmentation. Set to be true as a default.
 
@@ -1318,7 +1318,7 @@ class MapOverLabels(BaseOp):
         Segmentation
             The segmentation mask.
         """
-        
+
         return map_over_labels(segmentation,
                                self.op,
                                include_background=self.include_background,
