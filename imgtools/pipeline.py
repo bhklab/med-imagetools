@@ -54,7 +54,8 @@ class Pipeline:
 
         return result
 
-    def _get_all_ops(self):
+    @property
+    def ops(self):
         # TODO (Michal) return ops in actual order of execution
         return [v for v in self.__dict__.values() if isinstance(v, BaseOp)]
 
@@ -65,7 +66,7 @@ class Pipeline:
 
     def __str__(self):
         repr_ = self.__repr__()
-        ops = self._get_all_ops()
+        ops = self.ops()
         if not ops:
             ops = "<none>"
         else:
