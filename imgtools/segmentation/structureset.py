@@ -55,7 +55,7 @@ class StructureSet:
 
         for label, name in enumerate(names_to_use):
             physical_points = self.roi_points.get(name)
-            if physical_points is None:
+            if physical_points.size == 0:
                 continue # allow for missing labels, will return a blank slice
 
             mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
