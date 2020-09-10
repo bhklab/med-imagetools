@@ -1,7 +1,7 @@
 # imgtools: transparent and reproducible medical image processing pipelines in Python
 
 ## Installation
-### <recommended) Create new conda virtual environment
+### (recommended) Create new conda virtual environment
 ```
 conda create -n imgtools
 ```
