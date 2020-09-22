@@ -593,7 +593,7 @@ class InPlaneRotate(BaseOp):
         image_centre = image_size // 2
         angles = (0., 0., self.angle)
         return rotate(image,
-                      rotation_centre=image_centre,
+                      rotation_centre=image_centre.tolist(),
                       angles=angles,
                       interpolation=self.interpolation)
 
