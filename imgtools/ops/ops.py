@@ -550,7 +550,7 @@ class Rotate(BaseOp):
                       interpolation=self.interpolation)
 
 
-class InPlaneRotate(RandomMixin, BaseOp):
+class InPlaneRotate(BaseOp):
     """InPlaneRorate operation class: A callable class that rotates an image on a plane.
 
     To instantiate:
