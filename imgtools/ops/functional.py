@@ -246,6 +246,8 @@ def rotate(image: sitk.Image,
     sitk.Image
         The rotated image.
     """
+    if isinstance(rotation_centre, np.ndarray):
+        rotation_centre = rotation_centre.tolist()
 
     rotation_centre = image.TransformIndexToPhysicalPoint(rotation_centre)
 
