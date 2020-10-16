@@ -64,7 +64,7 @@ class StructureSet:
             for slc in slices:
                 slice_points = mask_points[mask_points[:, 0] == slc, 1:]
                 slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[int(slc), :, :, label] = slice_mask
+                mask[int(round(slc)), :, :, label] = slice_mask
 
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
