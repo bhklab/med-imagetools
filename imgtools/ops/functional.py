@@ -465,15 +465,15 @@ def crop_to_mask_bounding_box(image: sitk.Image,
     if isinstance(margin, Sequence):
         margin = np.asarray(margin)
 
-    mask_bbox = np.array(bounding_box(mask, label=label))
-    bbox_location, bbox_size = mask_bbox[:2], mask_bbox[2:]
-    crop_centre = (bbox_location + bbox_size) / 2
-    crop_size = bbox_size // 2 + margin
+    bbox_location, bbox_size = bounding_box(mask, label=label)
+    bbox_location, bbox_size = np.array(bbox_location), np.array(bbox_size)
+    crop_size = bbox_size + margin*2
+    crop_centre = bbox_location - margin + crop_size / 2
 
     image = crop(image, crop_centre, crop_size)
     mask = crop(mask, crop_centre, crop_size)
 
-    return image, mask
+    return image, mask, crop_centre
 
 
 def clip_intensity(image: sitk.Image,
