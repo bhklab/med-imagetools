@@ -35,16 +35,21 @@ class Segmentation(sitk.Image):
         super().__init__(segmentation)
         self.num_labels = self.GetNumberOfComponentsPerPixel()
         if not roi_names:
-            self.roi_names = [str(i) for i in range(self.num_labels)]
+            self.roi_names = {f"label_{i}": i for i in range(1, self.num_labels+1)}
         else:
             self.roi_names = roi_names
+            if 0 in self.roi_names.values():
+                self.roi_names = {k : v+1 for k, v in self.roi_names.items()}
+        if len(self.roi_names) != self.num_labels:
+            raise ValueError(f"Got {len(self.roi_names)} names, labels"
+                              " suggest {self.num_labels}.")
 
     def get_label(self, label=None, name=None, relabel=False):
         if label is None and name is None:
             raise ValueError("Must pass either label or name.")
 
         if label is None:
-            label = self.roi_names.index(name) + 1
+            label = self.roi_names[name]
 
         if label == 0:
             # background is stored implicitly and needs to be computed
@@ -72,3 +77,6 @@ class Segmentation(sitk.Image):
         if isinstance(res, sitk.Image):
             res = Segmentation(res, self.roi_names)
         return res
+
+    def __repr__(self):
+        return f"<Segmentation with ROIs: {self.roi_names!r}>"
