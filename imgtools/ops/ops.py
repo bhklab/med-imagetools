@@ -1256,28 +1256,58 @@ class StructureSetToSegmentation(BaseOp):
         List of Region of Interests
     """
 
-    def __init__(self, roi_names: List[str]):
+    def __init__(self, roi_names: Union[str,List[str]], force_missing: bool = False):
+        """Initialize the op.
+
+        Parameters
+        ----------
+        roi_names
+            List of ROI names to export. Both full names and
+            case-insensitive regular expressions are allowed.
+            All labels within one sublist will be assigned
+            the same label.
+        force_missing
+            If True, the number of labels in the output will
+            be equal to `len(roi_names)`, with blank slices for
+            any missing labels. Otherwise, missing ROI names
+            will be excluded.
+
+        Notes
+        -----
+        If `self.roi_names` contains lists of strings, each matching
+        name within a sublist will be assigned the same label. This means
+        that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
+        to different label assignments, depending on how many ROI names
+        match the pattern. E.g. if `self.roi_names = ['fooa', 'foob']`,
+        passing `roi_names=['foo(a|b)']` will result in a segmentation with 
+        two labels, but passing `roi_names=[['foo(a|b)']]` will result in
+        one label for both `'fooa'` and `'foob'`.
+
+        In general, the exact ordering of the returned labels cannot be
+        guaranteed (unless all patterns in `roi_names` can only match
+        a single name or are lists of strings).
+        """
         self.roi_names = roi_names
+        self.force_missing = force_missing
 
     def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
-        """StructureSetToSegmentation callable object:
-        A callable object that accepts a StrutureSet object, and a reference image, and
-        returns Segmentation mask.
+        """Convert the structure set to a Segmentation object.
 
         Parameters
         ----------
         structure_set
-            A StructureSet object from the segmentation module of imgtools.
-
+            The structure set to convert.
         reference_image
-            A sitk.Image object used as a reference.
+            Image used as reference geometry.
 
         Returns
         -------
         Segmentation
-            The segmentation mask.
+            The segmentation object.
         """
-        return structure_set.to_segmentation(reference_image, roi_names=self.roi_names)
+        return structure_set.to_segmentation(reference_image,
+                                             roi_names=self.roi_names,
+                                             force_missing=self.force_missing)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
