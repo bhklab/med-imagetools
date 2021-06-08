@@ -126,11 +126,11 @@ class StructureSet:
 
             mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
 
-            slices = np.unique(mask_points[:, 0])
+            slices = np.unique(mask_points[:, 0].round().astype(int))
             for slc in slices:
-                slice_points = mask_points[mask_points[:, 0] == slc, 1:]
+                slice_points = mask_points[np.isclose(mask_points[:, 0], slc, atol=1e-1), 1:]
                 slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[int(round(slc)), :, :, label] = slice_mask
+                mask[slc, :, :, label] = slice_mask
 
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
