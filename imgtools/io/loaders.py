@@ -8,12 +8,16 @@ from itertools import chain
 import numpy as np
 import pandas as pd
 import SimpleITK as sitk
+import nrrd
 
 from ..segmentation import StructureSet
 
 
 def read_image(path):
     return sitk.ReadImage(path)
+
+def read_header(path):
+    return nrrd.read_header(path)
 
 
 def read_dicom_series(path: str,
