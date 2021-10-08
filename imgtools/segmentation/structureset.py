@@ -39,14 +39,24 @@ class StructureSet:
     def roi_names(self) -> List[str]:
         return list(self.roi_points.keys())
 
-    def _assign_labels(self, names, force_missing=False):
+    def _assign_labels(self, names, force_missing=False, regex_ignore=False):
+        """
+        args
+        ----
+        force_missing
+            What does force_missing do?
+        regex_ignore
+            Process all labels and bypass `re.fullmatch`
+        """
         labels = {}
         cur_label = 0
-        for pat in names:
+        for j, pat in enumerate(names):
+            if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                break
             if isinstance(pat, str):
                 matched = False
-                for name in self.roi_names:
-                    if re.fullmatch(pat, name, flags=re.IGNORECASE):
+                for i, name in enumerate(self.roi_names):
+                    if regex_ignore or re.fullmatch(pat, name, flags=re.IGNORECASE):
                         labels[name] = cur_label
                         cur_label += 1
                         matched = True
@@ -57,7 +67,7 @@ class StructureSet:
                 matched = False
                 for subpat in pat:
                     for name in self.roi_names:
-                        if re.fullmatch(subpat, name, flags=re.IGNORECASE):
+                        if regex_ignore or re.fullmatch(subpat, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
                             matched = True
                 if force_missing and not matched:
@@ -68,7 +78,8 @@ class StructureSet:
 
     def to_segmentation(self, reference_image: sitk.Image,
             roi_names: Optional[List[Union[str, List[str]]]] = None,
-            force_missing: bool = False) -> Segmentation:
+            force_missing: bool = False,
+            regex_ignore: bool = False) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -110,8 +121,10 @@ class StructureSet:
             roi_names = self.roi_names
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-
-        labels = self._assign_labels(roi_names, force_missing)
+        print("roi_names:", roi_names)
+        
+        labels = self._assign_labels(roi_names, force_missing, regex_ignore)
+        print("labels:", labels)
         if not labels:
             raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
 
