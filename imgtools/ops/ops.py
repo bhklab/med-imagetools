@@ -177,10 +177,17 @@ class ImageFileOutput(BaseOutput):
         self.filename_format = filename_format
         self.create_dirs = create_dirs
         self.compress = compress
-        writer = ImageFileWriter(self.root_directory,
-                                 self.filename_format,
-                                 self.create_dirs,
-                                 self.compress)
+        
+        if "seg.nrrd" in filename_format:
+            writer_class = SegNrrdWriter
+        else:
+            writer_class = ImageFileWriter
+            
+        writer = writer_class(self.root_directory,
+                              self.filename_format,
+                              self.create_dirs,
+                              self.compress)
+        
         super().__init__(writer)
 
 
@@ -1256,7 +1263,10 @@ class StructureSetToSegmentation(BaseOp):
         List of Region of Interests
     """
 
-    def __init__(self, roi_names: Union[str,List[str]], force_missing: bool = False):
+    def __init__(self, 
+                 roi_names: Union[str,List[str]], 
+                 force_missing: bool = False,
+                 regex_ignore: bool = False):
         """Initialize the op.
 
         Parameters
@@ -1289,6 +1299,7 @@ class StructureSetToSegmentation(BaseOp):
         """
         self.roi_names = roi_names
         self.force_missing = force_missing
+        self.regex_ignore = regex_ignore
 
     def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
         """Convert the structure set to a Segmentation object.
@@ -1307,7 +1318,8 @@ class StructureSetToSegmentation(BaseOp):
         """
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
-                                             force_missing=self.force_missing)
+                                             force_missing=self.force_missing,
+                                             regex_ignore=self.regex_ignore)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
