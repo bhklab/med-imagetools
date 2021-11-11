@@ -39,47 +39,49 @@ class StructureSet:
     def roi_names(self) -> List[str]:
         return list(self.roi_points.keys())
 
-    def _assign_labels(self, names, force_missing=False, regex_ignore=False):
+    def _assign_labels(self, names, force_missing=False):
         """
         args
         ----
         force_missing
             What does force_missing do?
-        regex_ignore
-            Process all labels and bypass `re.fullmatch`
         """
         labels = {}
         cur_label = 0
-        for j, pat in enumerate(names):
-            if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
-                break
-            if isinstance(pat, str):
-                matched = False
-                for i, name in enumerate(self.roi_names):
-                    if regex_ignore or re.fullmatch(pat, name, flags=re.IGNORECASE):
-                        labels[name] = cur_label
-                        cur_label += 1
-                        matched = True
-                if force_missing and not matched:
-                    labels[pat] = cur_label
-                    cur_label += 1
-            else:
-                matched = False
-                for subpat in pat:
-                    for name in self.roi_names:
-                        if regex_ignore or re.fullmatch(subpat, name, flags=re.IGNORECASE):
+        if names == self.roi_names:
+            for i, name in enumerate(self.roi_names):
+                labels[name] = i
+        else:
+            for j, pat in enumerate(names):
+                if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                    break
+                if isinstance(pat, str):
+                    matched = False
+                    for i, name in enumerate(self.roi_names):
+                        if re.fullmatch(pat, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
+                            cur_label += 1
                             matched = True
-                if force_missing and not matched:
-                    key = '_'.join(pat)
-                    labels[key] = cur_label
-                cur_label += 1
+                    if force_missing and not matched:
+                        labels[pat] = cur_label
+                        cur_label += 1
+                else:
+                    matched = False
+                    for subpat in pat:
+                        for name in self.roi_names:
+                            if re.fullmatch(subpat, name, flags=re.IGNORECASE):
+                                labels[name] = cur_label
+                                matched = True
+                    if force_missing and not matched:
+                        key = '_'.join(pat)
+                        labels[key] = cur_label
+                    cur_label += 1
         return labels
 
     def to_segmentation(self, reference_image: sitk.Image,
             roi_names: Optional[List[Union[str, List[str]]]] = None,
             force_missing: bool = False,
-            regex_ignore: bool = False) -> Segmentation:
+            continuous: bool = True) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -123,7 +125,7 @@ class StructureSet:
             roi_names = [roi_names]
         print("roi_names:", roi_names)
         
-        labels = self._assign_labels(roi_names, force_missing, regex_ignore)
+        labels = self._assign_labels(roi_names, force_missing)
         print("labels:", labels)
         if not labels:
             raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
@@ -137,7 +139,7 @@ class StructureSet:
             if physical_points.size == 0:
                 continue # allow for missing labels, will return a blank slice
 
-            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
+            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)[:, ::-1]
 
             slices = np.unique(mask_points[:, 0].round().astype(int))
             for slc in slices:
