@@ -50,6 +50,15 @@ def read_dicom_series(path: str,
                                                 seriesID=series_id if series_id else "",
                                                 recursive=recursive)
     reader.SetFileNames(dicom_names)
+    
+    # Configure the reader to load all of the DICOM tags (public+private):
+    # By default tags are not loaded (saves time).
+    # By default if tags are loaded, the private tags are not loaded.
+    # We explicitly configure the reader to load tags, including the
+    # private ones.
+    reader.MetaDataDictionaryArrayUpdateOn()
+    reader.LoadPrivateTagsOn()
+
     return reader.Execute()
 
 

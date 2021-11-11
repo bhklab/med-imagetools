@@ -1266,7 +1266,7 @@ class StructureSetToSegmentation(BaseOp):
     def __init__(self, 
                  roi_names: Union[str,List[str]], 
                  force_missing: bool = False,
-                 regex_ignore: bool = False):
+                 continuous: bool = True):
         """Initialize the op.
 
         Parameters
@@ -1281,6 +1281,9 @@ class StructureSetToSegmentation(BaseOp):
             be equal to `len(roi_names)`, with blank slices for
             any missing labels. Otherwise, missing ROI names
             will be excluded.
+        continuous
+            flag passed to 'physical_points_to_idxs' in 'StructureSet.to_segmentation'. 
+            Helps to resolve errors caused by ContinuousIndex > Index. 
 
         Notes
         -----
@@ -1293,13 +1296,16 @@ class StructureSetToSegmentation(BaseOp):
         two labels, but passing `roi_names=[['foo(a|b)']]` will result in
         one label for both `'fooa'` and `'foob'`.
 
+        If `roi_names` is kept empty ([]), the pipeline will process all ROIs/contours 
+        found according to their original names.
+
         In general, the exact ordering of the returned labels cannot be
         guaranteed (unless all patterns in `roi_names` can only match
         a single name or are lists of strings).
         """
         self.roi_names = roi_names
         self.force_missing = force_missing
-        self.regex_ignore = regex_ignore
+        self.continuous = continuous
 
     def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
         """Convert the structure set to a Segmentation object.
@@ -1319,7 +1325,7 @@ class StructureSetToSegmentation(BaseOp):
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
                                              force_missing=self.force_missing,
-                                             regex_ignore=self.regex_ignore)
+                                             continuous=self.continuous)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:

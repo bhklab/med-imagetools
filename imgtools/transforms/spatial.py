@@ -55,7 +55,7 @@ def resample(image: sitk.Image,
     try:
         interpolator = INTERPOLATORS[interpolation]
     except KeyError:
-        raise ValueError(f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolator}.")
+        raise ValueError(f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolation}.")
 
     original_spacing = np.array(image.GetSpacing())
     original_size = np.array(image.GetSize())
