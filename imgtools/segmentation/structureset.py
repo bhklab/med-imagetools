@@ -135,11 +135,11 @@ class StructureSet:
 
         for name, label in labels.items():
             physical_points = self.roi_points.get(name, np.array([]))
-            if physical_points.size == 0:
+            if len(physical_points) == 0:
                 continue # allow for missing labels, will return a blank slice
 
-            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)[:, ::-1]
-            
+            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
+
             for contour in mask_points:
                 z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
                 assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
