@@ -145,8 +145,9 @@ class StructureSet:
                 assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
                 z = z[0]
                 slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[z, :, :, label] = slice_mask
-                
+                mask[z, :, :, label] += slice_mask
+        
+        mask[mask > 1] = 1        
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
         seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
