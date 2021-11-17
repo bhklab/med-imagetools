@@ -14,8 +14,7 @@ from ..utils import array_to_image
 
 
 def _get_roi_points(rtstruct, roi_index):
-    contour_data = (slc.ContourData for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence)
-    return np.fromiter(chain.from_iterable(contour_data), dtype=np.float64).reshape(-1, 3)
+    return [np.array(slc.ContourData).reshape(-1, 3) for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence]
 
 
 class StructureSet:
@@ -140,13 +139,14 @@ class StructureSet:
                 continue # allow for missing labels, will return a blank slice
 
             mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)[:, ::-1]
-
-            slices = np.unique(mask_points[:, 0].round().astype(int))
-            for slc in slices:
-                slice_points = mask_points[np.isclose(mask_points[:, 0], slc, atol=1e-1), 1:]
+            
+            for contour in mask_points:
+                z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
+                assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                z = z[0]
                 slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[slc, :, :, label] = slice_mask
-
+                mask[z, :, :, label] = slice_mask
+                
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
         seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
