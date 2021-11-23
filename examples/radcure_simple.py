@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from imgtools.io import (ImageFileLoader, ImageFileWriter,
-                         read_dicom_rtstruct, read_dicom_series)
+                         read_dicom_rtstruct, read_dicom_series,read_dicom_rtplan,read_dicom_pet)
 from imgtools.ops import StructureSetToSegmentation, ImageFileInput, ImageFileOutput, Resample
 from imgtools.pipeline import Pipeline
 
@@ -53,12 +53,24 @@ class RADCUREPipeline(Pipeline):
             subdir_path="*/structures/RTSTRUCT.dcm",
             reader=read_dicom_rtstruct
         )
+        self.rtdose_input = ImageFileInput(
+            self.input_directory,
+            get_subject_id_from="subject_directory",
+            subdir_path="*/dose/DOSE.dcm",
+            reader=read_dicom_rtplan
+        )
 
+        self.petscan_input = ImageFileInput(
+            self.input_directory,
+            get_subject_id_from="subject_directory",
+            subdir_path="*/pet_*",
+            reader=read_dicom_pet
+        )
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
         # Note: the ROI name is temporarily changed to match the example data
         # since RADCURE is still not public. The correct ROI name for RADCURE is 'GTV'.
-        self.make_binary_mask = StructureSetToSegmentation(roi_names="GTV-1")#"GTV")
+        self.make_binary_mask = StructureSetToSegmentation(roi_names="GTV 1")#"GTV")
 
         # output ops
         self.image_output = ImageFileOutput(
@@ -70,6 +82,18 @@ class RADCUREPipeline(Pipeline):
         self.mask_output = ImageFileOutput(
             os.path.join(self.output_directory, "masks"),
             filename_format="{subject_id}_mask.nrrd",
+            create_dirs=True,
+            compress=True
+        )
+        self.dose_output = ImageFileOutput(
+            os.path.join(self.output_directory, "doses"),
+            filename_format="{subject_id}_dose.nrrd",
+            create_dirs=True,
+            compress=True
+        )
+        self.petscan_output = ImageFileOutput(
+            os.path.join(self.output_directory, "petscan"),
+            filename_format="{subject_id}_petscan.nrrd",
             create_dirs=True,
             compress=True
         )
@@ -91,12 +115,18 @@ class RADCUREPipeline(Pipeline):
 
         image = self.image_input(subject_id)
         structure_set = self.structure_set_input(subject_id)
+        dose_set = self.rtdose_input(subject_id)
+        pet_set = self.petscan_input(subject_id)
+
+        
         image = self.resample(image)
         # note that the binary mask can be generated with correct spacing using
         # the resampled image, eliminating the need to resample it separately
-        mask = self.make_binary_mask(structure_set, image)
+        # mask = self.make_binary_mask(structure_set, image)
         self.image_output(subject_id, image)
-        self.mask_output(subject_id, mask)
+        # self.mask_output(subject_id, mask)
+        self.dose_output(subject_id, dose_set)
+        self.petscan_output(subject_id, pet_set)
 
 
 if __name__ == "__main__":
