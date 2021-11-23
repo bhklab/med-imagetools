@@ -12,6 +12,8 @@ import nrrd
 
 from ..segmentation import StructureSet
 
+from ..dose import Dose
+
 
 def read_image(path):
     return sitk.ReadImage(path)
@@ -65,6 +67,8 @@ def read_dicom_series(path: str,
 def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
 
+def read_dicom_rtplan(path):
+    return Dose.get_from_rtdose(path)
 
 def read_segmentation(path):
     # TODO read seg.nrrd
