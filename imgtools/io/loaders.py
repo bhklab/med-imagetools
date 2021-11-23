@@ -13,6 +13,8 @@ import nrrd
 from ..segmentation import StructureSet
 
 from ..dose import Dose
+from ..petscan import Petscan
+
 
 
 def read_image(path):
@@ -69,6 +71,9 @@ def read_dicom_rtstruct(path):
 
 def read_dicom_rtplan(path):
     return Dose.get_from_rtdose(path)
+
+def read_dicom_pet(path):
+    return Petscan.get_from_pt(path,"SUV")
 
 def read_segmentation(path):
     # TODO read seg.nrrd
