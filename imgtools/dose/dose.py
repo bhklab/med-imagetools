@@ -16,7 +16,7 @@ class Dose(sitk.Image):
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
         df = pydicom.dcmread(path)
-        img = df.pixel_array.transpose((1,0,2))
+        img = df.pixel_array.transpose((0,2,1))
         #Dosage values in each pixel
         img_dose = sitk.GetImageFromArray(float(df.DoseGridScaling)*img)
         return cls(img_dose,df)
