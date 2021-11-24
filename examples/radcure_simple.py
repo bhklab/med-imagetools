@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 from imgtools.io import (ImageFileLoader, ImageFileWriter,
-                         read_dicom_rtstruct, read_dicom_series,read_dicom_rtplan,read_dicom_pet)
+                         read_dicom_rtstruct, read_dicom_series,read_dicom_rtdose,read_dicom_pet)
 from imgtools.ops import StructureSetToSegmentation, ImageFileInput, ImageFileOutput, Resample
 from imgtools.pipeline import Pipeline
 
@@ -57,7 +57,7 @@ class RADCUREPipeline(Pipeline):
             self.input_directory,
             get_subject_id_from="subject_directory",
             subdir_path="*/dose/DOSE.dcm",
-            reader=read_dicom_rtplan
+            reader=read_dicom_rtdose
         )
 
         self.petscan_input = ImageFileInput(

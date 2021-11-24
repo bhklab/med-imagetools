@@ -21,7 +21,6 @@ import warnings
 
 class QCPipeline(Pipeline):
     """Example processing pipeline for the RADCURE dataset.
-
     This pipeline loads the CT images and structure sets, re-samples the images,
     and draws the GTV contour using the resampled image.
     """
@@ -88,13 +87,11 @@ class QCPipeline(Pipeline):
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
-
         This method must be defined for all pipelines. It is used to define
         the preprocessing steps for a single subject (note: that might mean
         multiple images, structures, etc.). During pipeline execution, this
         method will receive one argument, subject_id, which can be used to
         retrieve inputs and save outputs.
-
         Parameters
         ----------
         subject_id : str
@@ -185,4 +182,3 @@ if __name__ == "__main__":
     # Good for quickly checking on one sample. 
     # pipeline.process_one_subject(5) 
     print(f'finished Pipeline!')
-
