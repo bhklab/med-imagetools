@@ -93,7 +93,7 @@ def read_dicom_auto(path):
     elif modality == 'RTSTRUCT':
         return read_dicom_rtstruct(dcms[0])
     elif modality == 'RTDOSE':
-        return read_dicom_rtdose(dcms[0])
+        return read_dicom_rtdose(path)
     else:
         if len(dcms)==1:
             raise NotImplementedError
