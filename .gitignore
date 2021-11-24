@@ -177,3 +177,14 @@ dmypy.json
 imgtools/image.py
 tests/output
 examples/*output/
+
+#Some mroe files
+examples/doses
+examples/images
+examples/pet
+examples/process_all.py
+examples/process_one.py
+
+.vscode
+
+*__pycache__
