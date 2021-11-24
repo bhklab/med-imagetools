@@ -73,7 +73,7 @@ def read_dicom_series(path: str,
 def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
 
-def read_dicom_rtplan(path):
+def read_dicom_rtdose(path):
     return Dose.get_from_rtdose(path)
 
 def read_dicom_pet(path):
@@ -81,20 +81,25 @@ def read_dicom_pet(path):
 
 def read_dicom_auto(path):
     dcms = glob.glob(os.path.join(path, "*.dcm"))
-    if len(dcms) > 1:
+    meta = dcmread(dcms[0])
+    modality = meta.Modality
+    if modality == 'CT':
         return read_dicom_series(path)
-    elif len(dcms) == 1:
-        meta = dcmread(dcms[0])
-        modality = meta.Modality
-        if modality == 'RTSTRUCT':
-            return read_dicom_rtstruct(dcms[0])
-        elif modality == 'RTDOSE':
-            return #read_dicom_rtdose
-        else:
-            raise NotImplementedError
+    elif modality == 'PT':
+        return read_dicom_pet(path)
+    # elif len(dcms) == 1:
+    #     meta = dcmread(dcms[0])
+    #     modality = meta.Modality
+    elif modality == 'RTSTRUCT':
+        return read_dicom_rtstruct(dcms[0])
+    elif modality == 'RTDOSE':
+        return read_dicom_rtdose(dcms[0])
     else:
-        print("There were no dicoms in this path.")
-        return None
+        if len(dcms)==1:
+            raise NotImplementedError
+        else:
+            print("There were no dicoms in this path.")
+            return None
 
 def read_segmentation(path):
     # TODO read seg.nrrd
