@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import os
 import numpy as np
 import SimpleITK as sitk
+from imgtools.io.loaders import read_dicom_series
 
 class Dose(sitk.Image):
     def __init__(self,img_dose,df):
@@ -15,10 +16,14 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
-        df = pydicom.dcmread(path)
-        img = df.pixel_array.transpose((0,2,1))
-        #Dosage values in each pixel
-        img_dose = sitk.GetImageFromArray(float(df.DoseGridScaling)*img)
+        DOSE = read_dicom_series(path)[:,:,:,0]
+        #Get the metadata
+        dcm_path = os.path.join(path,os.listdir(path)[0])
+        df = pydicom.dcmread(dcm_path)
+        #Convert to SUV
+        factor = float(df.DoseGridScaling)
+        img_dose = sitk.Cast(DOSE, sitk.sitkFloat32)
+        img_dose = img_dose * factor
         return cls(img_dose,df)
 
     def form_DVH(self):
