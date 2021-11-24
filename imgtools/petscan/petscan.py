@@ -42,7 +42,7 @@ class Petscan(sitk.Image):
                 factor = cls.calc_factor(df,type)
             IMG.append(img*factor)
             DF.append(df)
-        all_img = np.array(IMG).transpose((1,0,2))
+        all_img = np.array(IMG).transpose((0,2,1))
         ptscan = sitk.GetImageFromArray(all_img)
         return cls(ptscan,DF)
         
