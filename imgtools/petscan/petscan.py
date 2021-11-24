@@ -4,6 +4,7 @@ import os
 import numpy as np
 import SimpleITK as sitk
 import warnings
+from imgtools.io.loaders import read_dicom_series
 
 class Petscan(sitk.Image):
     def __init__(self,ptscan,df):
@@ -25,26 +26,20 @@ class Petscan(sitk.Image):
         If there is no data on SUV/ACT then backup calculation is done based on the formula in the documentatuib, although, it may
         have some error.
         '''
-        DF = []
-        IMG = []
-        file_names = np.sort(os.listdir(path))
-        for file_paths in file_names:
-            path_full = os.path.join(path,file_paths)
-            df = pydicom.dcmread(path_full)
-            img = df.pixel_array
-            try:
-                if type=="SUV":
-                    factor = df.to_json_dict()['70531000']["Value"][0]
-                else:
-                    factor = df.to_json_dict()['70531009']['Value'][0]
-            except:
-                warnings.warn("Warning... Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
-                factor = cls.calc_factor(df,type)
-            IMG.append(img*factor)
-            DF.append(df)
-        all_img = np.array(IMG).transpose((0,2,1))
-        ptscan = sitk.GetImageFromArray(all_img)
-        return cls(ptscan,DF)
+        PET=read_dicom_series(path)
+        path_one = os.path.join(path,os.listdir(path)[0])
+        df = pydicom.dcmread(path_one)
+        try:
+            if type=="SUV":
+                factor = df.to_json_dict()['70531000']["Value"][0]
+            else:
+                factor = df.to_json_dict()['70531009']['Value'][0]
+        except:
+            warnings.warn("Warning... Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
+            factor = cls.calc_factor(df,type)
+        ptscan = sitk.Cast(PET, sitk.sitkFloat32)
+        ptscan = ptscan * factor
+        return cls(ptscan,df)
         
     def get_metadata(self):
         '''
@@ -61,12 +56,12 @@ class Petscan(sitk.Image):
         '''
         self.metadata = {}
         #In kg
-        self.metadata["weight"] = float(self.df[0].PatientWeight)
+        self.metadata["weight"] = float(self.df.PatientWeight)
         #In seconds
-        self.metadata["scan_time"] = float(self.df[0].AcquisitionTime)/1000
-        self.metadata["injection_time"] = float(self.df[0].RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)/1000
-        self.metadata["half_life"] = float(self.df[0].RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
-        self.metadata["injected_dose"] = float(self.df[0].RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
+        self.metadata["scan_time"] = float(self.df.AcquisitionTime)/1000
+        self.metadata["injection_time"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)/1000
+        self.metadata["half_life"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
+        self.metadata["injected_dose"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
         
         return self.metadata
 
