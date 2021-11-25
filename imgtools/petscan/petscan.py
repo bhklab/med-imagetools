@@ -4,7 +4,15 @@ import os
 import numpy as np
 import SimpleITK as sitk
 import warnings
-from imgtools.io.loaders import read_dicom_series
+
+def read_image(path):
+    reader = sitk.ImageSeriesReader()
+    dicom_names = reader.GetGDCMSeriesFileNames(path)
+    reader.SetFileNames(dicom_names)
+    reader.MetaDataDictionaryArrayUpdateOn()
+    reader.LoadPrivateTagsOn()
+
+    return reader.Execute()
 
 class Petscan(sitk.Image):
     def __init__(self,ptscan,df):
@@ -26,7 +34,7 @@ class Petscan(sitk.Image):
         If there is no data on SUV/ACT then backup calculation is done based on the formula in the documentatuib, although, it may
         have some error.
         '''
-        PET=read_dicom_series(path)
+        PET=read_image(path)
         path_one = os.path.join(path,os.listdir(path)[0])
         df = pydicom.dcmread(path_one)
         try:
@@ -38,7 +46,8 @@ class Petscan(sitk.Image):
             warnings.warn("Warning... Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
             factor = cls.calc_factor(df,type)
         ptscan = sitk.Cast(PET, sitk.sitkFloat32)
-        ptscan = ptscan * factor
+        #Sometimes the pixel values are negetive but with correct value
+        ptscan = sitk.Abs(ptscan * factor)
         return cls(ptscan,df)
         
     def get_metadata(self):
@@ -64,6 +73,32 @@ class Petscan(sitk.Image):
         self.metadata["injected_dose"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
         
         return self.metadata
+
+    def resample_pet(self,ct_scan:sitk.Image) -> sitk.Image:
+        '''
+        Resamples the PET scan so that it can be overlayed with CT scan. The beginning and end slices of the 
+        resampled PET scan might be empty due to the interpolation
+        '''
+        resampled_pt = sitk.Resample(self.ptscan, ct_scan,interpolator=sitk.sitkNearestNeighbor)
+        return resampled_pt
+
+    def show_overlay(self,ct_scan:sitk.Image,slice_number:int):
+        '''
+        For a given slice number, the function resamples PET scan and overlays on top of the CT scan and returns the figure of the
+        overlay
+        '''
+        pet_resampled = self.resample_pet(ct_scan)
+        fig = plt.figure("Overlayed image",figsize=[15,10])
+        pt_upsamp = sitk.GetArrayFromImage(pet_resampled)
+        plt.subplot(1,3,1)
+        plt.imshow(pt_upsamp[slice_number,:,:])
+        plt.subplot(1,3,2)
+        ct_np_img = sitk.GetArrayFromImage(ct_scan)
+        plt.imshow(ct_np_img[slice_number,:,:])
+        plt.subplot(1,3,3)
+        plt.imshow(ct_np_img[slice_number,:,:], cmap=plt.cm.gray)
+        plt.imshow(pt_upsamp[slice_number,:,:], cmap=plt.cm.hot, alpha=.4)
+        return fig
 
     @staticmethod
     def calc_factor(df,type):
