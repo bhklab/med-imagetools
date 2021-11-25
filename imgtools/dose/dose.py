@@ -3,7 +3,16 @@ from matplotlib import pyplot as plt
 import os
 import numpy as np
 import SimpleITK as sitk
-from imgtools.io.loaders import read_dicom_series
+
+def read_image(path):
+    reader = sitk.ImageSeriesReader()
+    dicom_names = reader.GetGDCMSeriesFileNames(path)
+    reader.SetFileNames(dicom_names)
+    reader.MetaDataDictionaryArrayUpdateOn()
+    reader.LoadPrivateTagsOn()
+
+    return reader.Execute()
+
 
 class Dose(sitk.Image):
     def __init__(self,img_dose,df):
@@ -16,7 +25,7 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
-        DOSE = read_dicom_series(path)[:,:,:,0]
+        DOSE = read_image(path)[:,:,:,0]
         #Get the metadata
         dcm_path = os.path.join(path,os.listdir(path)[0])
         df = pydicom.dcmread(dcm_path)
