@@ -74,8 +74,8 @@ class QCPipeline(Pipeline):
             filename_format="{subject_id}_image.nrrd",                         
         )
         self.pet_output = ImageFileOutput(
-            os.path.join(self.output_directory, "petscan"),
-            filename_format="{subject_id}_pet.nrrd",
+            os.path.join(self.output_directory, "pet"),
+            filename_format="{subject_id}_pets.nrrd",
         )
 
         # self.existing_patients()
