@@ -4,6 +4,7 @@ import os
 import numpy as np
 import SimpleITK as sitk
 import warnings
+import datetime
 
 def read_image(path):
     reader = sitk.ImageSeriesReader()
@@ -43,7 +44,7 @@ class Petscan(sitk.Image):
             else:
                 factor = df.to_json_dict()['70531009']['Value'][0]
         except:
-            warnings.warn("Warning... Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
+            warnings.warn("Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
             factor = cls.calc_factor(df,type)
         ptscan = sitk.Cast(PET, sitk.sitkFloat32)
         #Sometimes the pixel values are negetive but with correct value
@@ -105,20 +106,31 @@ class Petscan(sitk.Image):
         '''
         Following the calculation formula stated in https://gist.github.com/pangyuteng/c6a075ba9aa00bb750468c30f13fc603
         '''
+        # print(df)
         #Fetching some required Meta Data
-        weight = float(df.PatientWeight)*1000
-        Scan_time = float(df.AcquisitionTime)/1000
-        Injection_time = float(df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime)/1000
-        half_life = float(df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
-        injected_dose = float(df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
+        try:
+            weight = float(df.PatientWeight)*1000
+        except:
+            warnings.warn("Patient Weight Not Present. Taking 75Kg")
+            weight = 75000
+        try:
+            Scan_time = datetime.datetime.strptime(df.AcquisitionTime,'%H%M%S.%f')
+            Injection_time = datetime.datetime.strptime(df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,'%H%M%S.%f')
+            half_life = float(df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
+            injected_dose = float(df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
 
-        #Calculate Activity concenteration factor
-        A = np.exp(-np.log(2)*((Scan_time-Injection_time)/half_life))
+            #Calculate Activity concenteration factor
+            A = np.exp(-np.log(2)*((Scan_time-Injection_time).seconds/half_life))
 
-        #Calculate SUV factor
-        SUV = A/(injected_dose/weight)
+            #Calculate SUV factor
+            injected_dose_decay = A*injected_dose
+        except:
+            warnings.warn("Not enough data available, taking average values")
+            A = np.exp(-np.log(2)*(1.75*3600)/6588); # 90 min waiting time, 15 min preparation
+            injected_dose_decay = 420000000 * A; # 420 MBq
 
+        SUV = weight/injected_dose_decay
         if type=="SUV":
             return SUV
         else:
-            return A
+            return 1/A
