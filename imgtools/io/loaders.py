@@ -80,6 +80,8 @@ def read_dicom_pet(path):
     return Petscan.get_from_pt(path,"SUV")
 
 def read_dicom_auto(path):
+    if path is None:
+        return None
     dcms = glob.glob(os.path.join(path, "*.dcm"))
     meta = dcmread(dcms[0])
     modality = meta.Modality
