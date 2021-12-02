@@ -32,6 +32,7 @@ class DataGraph:
         self.edge_path = edge_path
         self.df_new = None
         if os.path.exists(self.edge_path):
+            print("Edge table is already present. Loading the data...")
             self.df_edges = pd.read_csv(self.edge_path)
         else:
             print("Edge table not present. Forming the edge table based on the crawl data...")

@@ -4,6 +4,7 @@ from itertools import chain
 
 import numpy as np
 import SimpleITK as sitk
+import pandas as pd
 
 from .functional import *
 from ..io import BaseLoader, BaseWriter
@@ -89,16 +90,26 @@ class ImageAutoInput(BaseInput):
             print("Couldn't find the crawled CSV for the dataset. Crawling the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
             print("Number of patients in the dataset: {}".format(len(db)))
-        
+        else:
+            print("The dataset has already been crawled...")
         ####### GRAPH ##########
         #Form the graph
         edge_path = self.parent+"/imgtools_{}_edges.csv".format(self.dataset_name)
         graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path)
+        print("Forming the graph based on the given modalities: {}".format(self.modalities))
         self.df_combined = graph.parser(self.modalities)
         self.output_streams = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
+        #Initilizations for the pipeline
+        for colnames in self.output_streams:
+            output_stream = ("_").join([items for items in colnames.split("_")[1:] if items!="1"])
+            modality = colnames.split("_")[1]
+            if modality in ["PT","CT","RTDOSE"]:
+                self.df_combined["size_{}".format(output_stream)] = None
+            elif modality=="RTSTRUCT":
+                self.df_combined["roi_names_{}".format(output_stream)] = None
         # print("Column Names: {}".format(self.column_names))
         # print(self.df_combined.head())
-        print("Returned query has {} cases amongst the crawled data".format(len(self.df_combined)))
+        print("Returned user defined modalities has {} cases amongst the crawled data".format(len(self.df_combined)))
 
         self.readers = [read_dicom_auto for i in range(len(self.output_streams))]
 
@@ -106,7 +117,7 @@ class ImageAutoInput(BaseInput):
                                 colnames=self.output_streams,
                                 id_column=None,
                                 expand_paths=True,
-                                readers=self.readers)
+                                readers=self.readers) 
         super().__init__(loader)
 
 
@@ -260,14 +271,13 @@ class ImageAutoOutput:
         self.file_name = {"CT": "images","RTDOSE_CT":"doses","RTSTRUCT_CT":"ct_masks.seg","RTSTRUCT_PT":"pet_masks.seg","PT_CT":"pets","PT":"pets","RTDOSE":"doses","RTSTRUCT":"masks.seg"}
         self.output = {}
         for colname in output_streams:
-            if colname_process[-1]!="1": #No need to defined writers for multiple same type modalities connected to a single modality
-                colname_process = ("_").join(colname.split("_")[1:])
-                extension = self.file_name[colname_process]
-                modality = colname.split("_")[1]
-                self.output[modality] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
-                                            filename_format="{subject_id}_"+"{}.nrrd".format(extension))
-    def __call__(self,subject_id:str,dicom: sitk.Image,modality):
-        self.output[modality](subject_id,dicom)
+            #Not considering colnames ending with _1
+            colname_process = ("_").join([items for items in colname.split("_")[1:] if items!="1"])
+            extension = self.file_name[colname_process]
+            self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
+                                        filename_format="{subject_id}_"+"{}.nrrd".format(extension))
+    def __call__(self,subject_id:str,dicom: sitk.Image,output_stream):
+        self.output[output_stream](subject_id,dicom)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
