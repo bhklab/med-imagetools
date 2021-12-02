@@ -4,8 +4,8 @@ import os
 import numpy as np
 from functools import reduce
 import time
+from pandas.core import series
 from tqdm import tqdm
-from functools import reduce
 
 class DataGraph:
     '''
@@ -23,18 +23,19 @@ class DataGraph:
     query = ["CT","RTDOSE","RTSTRUCT","PT], will return interconnected studies containing the listed DICOM modalities. The interconnected studies for example may look like 
     (RTDOSE->RTSTRUCT->CT<-PT<-RTSTRUCT)
     '''
-    def __init__(self,path_crawl:str,edge_file=False,edge_path="./patient_id_full_edges.csv") -> None:
+    def __init__(self,path_crawl:str,edge_path="./patient_id_full_edges.csv") -> None:
         '''
         path_crawl : The csv returned by the crawler
-        edge_file: Whether a graph should be made or a pre-existing graph can be used
         edge_path: This path denotes where the graph in the form of edge table is stored or to be stored
         '''
         self.df = pd.read_csv(path_crawl,index_col=0)
         self.edge_path = edge_path
-        if edge_file==False:
-            self.form_graph()
-        else:
+        self.df_new = None
+        if os.path.exists(self.edge_path):
             self.df_edges = pd.read_csv(self.edge_path)
+        else:
+            print("Edge table not present. Forming the edge table based on the crawl data...")
+            self.form_graph()
     
     def form_graph(self):
         '''
@@ -121,25 +122,32 @@ class DataGraph:
         
         Query ideas:
         There are four basic supported modalities are RTDOSE, RTSTRUCT, CT, PT
-        The options are:
+        The options are, the string can be in any order:
         1) RTDOSE
         2) RTSTRUCT
         3) CT
         4) PT
-        5) RTDOSE,RTSTRUCT,CT
+        5) PT,RTSTRUCT
         6) CT,PT
         7) CT,RTSTRUCT
+        8) CT,RTDOSE
+        9) RTDOSE,RTSTRUCT,CT
+        10) RTDOSE,CT,PT
+        11) RTSTRUCT,CT,PT
+        12) RTDOSE,RTSTRUCT,CT,PT
         '''
         #Basic processing of just one modality
         supp_mods = ["RTDOSE","RTSTRUCT","CT","PT"]
-        edge_def = {"RTSTRUCT,RTDOSE":0,"CT,RTDOSE":1,"CT,RTSTRUCT":2,"PET,RTSTRUCT":3,"CT,PET":4}
+        edge_def = {"RTSTRUCT,RTDOSE":0,"CT,RTDOSE":1,"CT,RTSTRUCT":2,"PET,RTSTRUCT":3,"CT,PT":4}
         self.mods= query_string.split(",")
+        self.mods_n = len(self.mods)
 
+        #Deals with single node queries
         if query_string in supp_mods:
-            final_df = self.df.loc[self.df.modality==query_string,"folder"].to_frame()
-            final_df.rename(columns = {"folder":"folder_{}".format(query_string)},inplace=True)
+            final_df = self.df.loc[self.df.modality==query_string,["study","patient_ID","series","folder"]]
+            final_df.rename(columns = {"series":"series_{}".format(query_string),"folder":"folder_{}".format(query_string)},inplace=True)
         
-        elif len(self.mods)==2:
+        elif self.mods_n ==2:
             #Reverse the query string
             query_string_rev = (",").join(self.mods[::-1])
             if query_string in edge_def.keys():
@@ -149,60 +157,119 @@ class DataGraph:
                 edge_type = edge_def[query_string_rev]
                 valid = query_string_rev
             else:
-                raise ValueError("Invalid Query. Select valid pairs ")
-            final_df = self.df_edges.loc[self.df_edges.edge_type==edge_type,["folder_x","folder_y"]]
-            node_dest = valid.split(",")[0]
-            node_origin = valid.split(",")[1]
-            final_df.rename(columns={"folder_x":"folder_{}".format(node_dest),"folder_y":"folder_{}".format(node_origin)},inplace=True)
+                raise ValueError("Invalid Query. Select valid pairs ")            
+            #For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
+            if edge_type in [0,1,2]:
+                edge_list = [0,1,2]
+                if edge_type==0:
+                    #Search for subgraphs with edges 0 or (1 and 2)
+                    regex_term = '((?=.*0)|((?=.*1)(?=.*2)))'
+                    final_df = self.graph_query(regex_term,edge_list,"folder_CT") 
+                elif edge_type==1:
+                    #Search for subgraphs with edges 1 or (0 and 2)
+                    regex_term = '((?=.*1)|((?=.*0)(?=.*2)))'
+                    final_df = self.graph_query(regex_term,edge_list,"RTSTRUCT") 
+                elif edge_type==2:
+                    #Search for subgraphs with edges 2 or (1 and 0)
+                    regex_term = '((?=.*2)|((?=.*0)(?=.*1)))'
+                    final_df = self.graph_query(regex_term,edge_list,"RTDOSE") 
+            else:
+                final_df = self.df_edges.loc[self.df_edges.edge_type==edge_type,["study_x","patient_ID_x","series_x","folder_x","series_y","folder_y"]]
+                node_dest = valid.split(",")[0]
+                node_origin = valid.split(",")[1]
+                final_df.rename(columns={"study_x":"study","patient_ID_x":"patient_ID","series_x":"series_{}".format(node_dest),"series_y":"series_{}".format(node_origin),"folder_x":"folder_{}".format(node_dest),"folder_y":"folder_{}".format(node_origin)},inplace=True)
 
-        elif len(self.mods)>2:
-            #Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
-            df_new = self.df_edges.groupby("study_x").agg({'edge_type':self.list_edges})
-            df_new.reset_index(level=0, inplace=True)
-            df_new["edge_type"] = df_new["edge_type"].astype(str)
-        
+        elif self.mods_n>2:
             #Processing of combinations of modality
             if ("CT" in query_string) & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" not in query_string):
-                #Fetch the required data. Checks whether each study has edge 2 and (edge 1 or edge 0)
-                relevant_studyid = df_new.loc[(df_new.edge_type.str.contains('(?=.*(1|0))(?=.*2)')),"study_x"].unique()
-                #Based on the correct study ids, fetches are the relevant edges
-                df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_studyid) & (self.df_edges.edge_type.isin([0,1,2]))]
-                # final_df = get_df(df_processed,query_string,relevant_studyid)
-                final_df = self._get_df(df_processed,relevant_studyid)
+                #Fetch the required data. Checks whether each study has edge 2 and (1 or 0)
+                regex_term = '(?=.*(1|0))(?=.*2)'
+                edge_list = [0,1,2]
+                final_df = self.graph_query(regex_term,edge_list) 
 
             elif ("CT" in query_string) & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" in query_string):
-                #Fetch the required data. Checks whether each study has edge 2,3,4 and (edge 1 or edge 0)
-                relevant_studyid = df_new.loc[(df_new.edge_type.str.contains('(?=.*(1|0))(?=.*2)(?=.*3)(?=.*4)')),"study_x"].unique()
-                #Based on the correct study ids, fetches are the relevant edges
-                df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_studyid) & (self.df_edges.edge_type.isin([0,1,2,3,4]))]
-                # final_df = get_df(df_processed,query_string,relevant_studyid)
-                final_df = self._get_df(df_processed,relevant_studyid)
+                #Fetch the required data. Checks whether each study has edge 2,3,4 and (1 or 0)
+                regex_term = '(?=.*(1|0))(?=.*2)(?=.*3)(?=.*4)'
+                edge_list = [0,1,2,3,4]
+                final_df = self.graph_query(regex_term,edge_list) 
 
             elif ("CT" in query_string) & ("RTSTRUCT" in query_string) & ("PT" in query_string) & ("RTDOSE" not in query_string):
-                #Fetch the required data. Checks whether each study has edge 2,3,4 and (edge 1 or edge 0)
-                relevant_studyid = df_new.loc[(df_new.edge_type.str.contains('(?=.*2)(?=.*3)(?=.*4)')),"study_x"].unique()
-                #Based on the correct study ids, fetches are the relevant edges
-                df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_studyid) & (self.df_edges.edge_type.isin([2,3,4]))]
-                # final_df = get_df(df_processed,query_string,relevant_studyid)
-                final_df = self._get_df(df_processed,relevant_studyid)
+                #Fetch the required data. Checks whether each study has edge 2,3,4
+                regex_term = '(?=.*2)(?=.*3)(?=.*4))'
+                edge_list = [2,3,4]
+                final_df = self.graph_query(regex_term,edge_list) 
             
+            elif ("CT" in query_string) & ("RTSTRUCT" not in query_string) & ("PT" in query_string) & ("RTDOSE" in query_string):
+                #Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Remove RTSTRUCT later
+                regex_term = '(?=.*4)((?=.*1)|((?=.*2)(?=.*0)))'
+                edge_list = [0,1,2,4]
+                final_df = self.graph_query(regex_term,edge_list,"RTSTRUCT") 
             else:
                 raise ValueError("Please enter the correct query")
         else:
             raise ValueError("Please enter the correct query")
+        final_df.reset_index(drop=True,inplace=True)
+        final_df["index_chng"] = final_df.index.astype(str)+"_"+final_df["patient_ID"]
+        final_df.set_index("index_chng",inplace=True)
+        final_df.rename_axis(None,inplace=True)
         return final_df
     
-    def _get_df(self,df_edges_processed,rel_studyids):
+    def graph_query(self,regex_term,edge_list,change_df="",return_components=False,remove_less_comp=True):
+        '''
+        Based on the regex forms the final dataframe. You can query the edge table based on the regex to get the subgraph in which the queried edges will be present.
+        The components are process further to get the final dataframe of the required modalities.
+        Parameters:
+            regex_term: To search the string in edge_type column of self.df_new which is aggregate of all the edges in a single study
+            edge_list: The list of edges that should be returned in the subgraph
+            # mods_n: Usually its the number of modalities present in the subgraph. Change only when you are passing more modalities than required
+            return_components: True to return the dictionary of the componets present with the condition present in the regex
+            change_df: Use only when you want to remove columns containing that string
+            remove_less_comp: False when you want to keep components with modalities less than the modalitiy listed in the query
+        '''
+        if self.df_new is None:
+            #Form aggregates
+            self._form_agg()
+        #Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
+        relevant_studyid = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)),"study_x"].unique()
+        #Based on the correct study ids, fetches are the relevant edges
+        df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_studyid) & (self.df_edges.edge_type.isin(edge_list))]
+        #The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
+        # self.mods_n = mods_n
+        final_df = self._get_df(df_processed,relevant_studyid,remove_less_comp)
+        #For removing columns
+        if len(change_df)!=0:
+            #Find columns with change_df string present
+            col_ids = [cols for cols in final_df.columns if change_df not in cols]
+            final_df = final_df[col_ids]
+        
+        if return_components:
+            return self.final_dict
+        else:
+            return final_df
+
+    def _form_agg(self):
+        '''
+        Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
+        '''
+        self.df_new = self.df_edges.groupby("study_x").agg({'edge_type':self.list_edges})
+        self.df_new.reset_index(level=0, inplace=True)
+        self.df_new["edge_type"] = self.df_new["edge_type"].astype(str)
+
+    def _get_df(self,df_edges_processed,rel_studyids,remove_less_comp = True):
         '''
         Assumption: The components are determined based on the unique CTs. Please ensure the data conforms to this case. From the analysis, there are no cases where CT and PT are present but are disconnected
         Hence this assumption should hold for most of the cases
         This function returns dataframe consisting of folder location and modality for subgraphs
         Parameters:
             df_edges_processed: Dataframe processed containing only the desired edges from the full graph
+            rel_studyids: Relevant study ids to process(This operation is a bit costly so better not to perform on full graph for maximum performance)
+            remove_less_comp: True for removing components with less number of edges than the query
         '''
         #Storing all the components across all the studies
         self.final_dict = []
         final_df = []
+        #For checking later if all the required modalities are present in a component or not
+        mods_wanted = set(self.mods)
         #Determine the number of components
         for i in range(len(rel_studyids)):
             df_temp = df_edges_processed.loc[df_edges_processed.study_x==rel_studyids[i]]
@@ -221,6 +288,10 @@ class DataGraph:
                 temp[comp[j]]["modality"] = "CT"
                 df_connections = CT_locs.loc[CT_locs.series_x==comp[j]]
                 temp[comp[j]]["folder"] = df_connections["folder_x"].iloc[0]
+                #Saving some items in folder_save dictionary
+                folder_save["study"] = rel_studyids[i]
+                folder_save["patient_ID"] = df_connections["patient_ID_x"].iloc[0]
+                folder_save["series_{}".format("CT")] = comp[j]
                 folder_save["folder_{}".format("CT")] = df_connections["folder_x"].iloc[0]
                 temp_dfconn = df_connections[["series_y","modality_y","folder_y"]]
                 for k in range(len(temp_dfconn)):
@@ -229,6 +300,7 @@ class DataGraph:
                     temp[temp_dfconn.iloc[k,0]]["modality"] = temp_dfconn.iloc[k,1]
                     temp[temp_dfconn.iloc[k,0]]["folder"] = temp_dfconn.iloc[k,2]
                     temp[temp_dfconn.iloc[k,0]]["conn_to"] = "CT"
+                    folder_save["series_{}_CT".format(temp_dfconn.iloc[k,1])] = temp_dfconn.iloc[k,0]
                     folder_save["folder_{}_CT".format(temp_dfconn.iloc[k,1])] = temp_dfconn.iloc[k,2]
                 A.append(temp)
                 save_folder_comp.append(folder_save)
@@ -244,23 +316,34 @@ class DataGraph:
                         A[k][Rest_locs.iloc[j,3]]["folder"] = Rest_locs.iloc[j,5]
                         A[k][Rest_locs.iloc[j,3]]["conn_to"] = Rest_locs.iloc[j,1]
                         if Rest_locs.iloc[j,4]=="RTDOSE":
-                            #RTDOSE is connected via either RTstruct or CT, but we usually don't care
+                            #RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
+                            save_folder_comp[k]["series_{}_CT".format(Rest_locs.iloc[j,4])] = Rest_locs.iloc[j,3]
                             save_folder_comp[k]["folder_{}_CT".format(Rest_locs.iloc[j,4])] = Rest_locs.iloc[j,5]
-                        else:
+                        else: #Cases such as RTSTRUCT-PT
                             key = "folder_{}_{}".format(Rest_locs.iloc[j,4],Rest_locs.iloc[j,1])
+                            key_series = "series_{}_{}".format(Rest_locs.iloc[j,4],Rest_locs.iloc[j,1])
                             #if there is already a connection and one more same category modality wants to connect
                             if key in save_folder_comp[k].keys():
                                 key = key + "_1"
+                                key_series = key_series + "_1"
+                            save_folder_comp[k][key_series] = Rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = Rest_locs.iloc[j,5]
                         flag = 0
                     else:
                         flag = 1
             if flag==1:
-                raise ValueError("In studyID: {}, one of the edges had no match to any of the components. Please check the data".format(rel_studyids[i]))
+                raise ValueError("In studyID: {}, one of the edges had no match to any of the components which start from CT. Please check the data".format(rel_studyids[i]))
 
-            #Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
-            save_folder_comp = [save_folder_comp[j] for j in range(len(comp)) if len(A[j].keys())>=len(self.mods)+1]         
-            A = [items for items in A if len(items.keys())>=len(self.mods)+1]
+            remove_index = []
+            if remove_less_comp:
+                for j in range(len(comp)):
+                    #Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
+                    mods_present = set([items.split("_")[1] for items in save_folder_comp[j].keys() if items.split("_")[0]=="folder"])
+                    #Checking if all the reqd modalities are present in a component
+                    if mods_wanted.issubset(mods_present)==True:
+                        remove_index.append(j)
+                save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        
+                A = [A[idx] for idx in remove_index]    
 
             self.final_dict = self.final_dict + A
             final_df = final_df + save_folder_comp
@@ -272,9 +355,15 @@ class DataGraph:
         return reduce(lambda x,y:str(x)+str(y),series)
 
 if __name__=="__main__":
-    graph = DataGraph(path_crawl="/Users/bhaibeka/Vishwesh/imgtools_Head-Neck-PET-CT_2.csv",edge_file=True,edge_path="/Users/bhaibeka/Vishwesh/patient_id_full_edges.csv")
+    graph = DataGraph(path_crawl="/Users/bhaibeka/Vishwesh/imgtools_Head-Neck-PET-CT_2.csv",edge_path="/Users/bhaibeka/Vishwesh/patient_id_full_edges.csv")
+    # graph = DataGraph(path_crawl="/cluster/home/ramanav/imgtools_Head-Neck-PET-CT_2.csv",edge_path="/cluster/home/ramanav/patient_id_full_edges.csv")
     # graph = DataGraph(path_crawl="./imgtools_Head-Neck-PET-CT_2.csv",edge_file=False,edge_path="./patient_id_full_edges2.csv")
     # final_df = graph.parser("CT,RTSTRUCT,RTDOSE,PT")
-    final_df = graph.parser("RTSTRUCT,CT,PT")
+    # final_df = graph.parser("RTSTRUCT,CT,PT")
+    final_df = graph.parser("RTDOSE,CT,PT,RTSTRUCT")
+    # final_df = graph.parser("RTSTRUCT")
+    # final_df = graph.parser("CT,RTSTRUCT")
+    # final_df = graph.parser("RTDOSE,CT")
+    # final_df = graph.parser("RTDOSE,RTSTRUCT")
+    # final_df = graph.parser("RTDOSE,CT,PT")
     # final_df = graph.parser("CT,RTSTRUCT,RTDOSE")
-    
