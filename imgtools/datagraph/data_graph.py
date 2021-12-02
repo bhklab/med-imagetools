@@ -42,8 +42,13 @@ class DataGraph:
         '''
         Forms edge table based on the crawled data
         '''
-        #Remove entries with no RT dose reference (Temporary)
-        df_filter = self.df.loc[~((self.df["modality"]=="RTDOSE") & (self.df["reference_ct"].isna()) & (self.df["reference_rs"].isna()))]
+        #Get reference_rs information from RTDOSE-RTPLAN connections
+        df_filter = pd.merge(self.df,self.df[["instance_uid","reference_rs"]],left_on="reference_pl",right_on="instance_uid",how="left")
+        df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_x"] = df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_y"].values
+        df_filter.drop(columns=["reference_rs_y","instance_uid_y"],inplace=True)
+        df_filter.rename(columns={"reference_rs_x":"reference_rs","instance_uid_x":"instance_uid"},inplace=True)
+        #Remove entries with no RT dose reference, for extra check, such cases are mostprobably removed in the earlier step
+        df_filter = df_filter.loc[~((df_filter["modality"]=="RTDOSE") & (df_filter["reference_ct"].isna()) & (df_filter["reference_rs"].isna()))]
 
         #Get all study ids
         all_study= df_filter.study.unique()
