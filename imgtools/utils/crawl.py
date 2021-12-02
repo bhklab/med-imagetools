@@ -26,6 +26,7 @@ def crawl_one(folder):
             try: #RTSTRUCT
                 reference_ct = meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID 
                 reference_rs = ""
+                reference_pl = ""
             except: 
                 try: #RTDOSE
                     reference_rs = meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID
@@ -35,6 +36,10 @@ def crawl_one(folder):
                     reference_ct = meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
                 except:
                     reference_ct = ""
+                try:
+                    reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPClassUID
+                except:
+                    reference_pl = ""
 
             try:
                 study_description = meta.StudyDescription
@@ -57,6 +62,7 @@ def crawl_one(folder):
                                                     'description': series_description,
                                                     'reference_ct': reference_ct,
                                                     'reference_rs': reference_rs,
+                                                    'reference_pl': reference_pl,
                                                     'folder': path}
             database[patient][study][series]['instances'].append(instance)
     
@@ -78,6 +84,7 @@ def to_df(database_dict):
                                     'instance_uid': database_dict[pat][study][series]['instance_uid'],
                                     'reference_ct': database_dict[pat][study][series]['reference_ct'],
                                     'reference_rs': database_dict[pat][study][series]['reference_rs'],
+                                    'reference_pl': database_dict[pat][study][series]['reference_pl'],
                                     'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
     return df
 
