@@ -182,6 +182,7 @@ examples/*output/
 examples/doses
 examples/images
 examples/pet
+examples/temp_folder
 examples/process_all.py
 examples/process_one.py
 

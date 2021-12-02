@@ -6,9 +6,8 @@ import pandas as pd
 from argparse import ArgumentParser
 
 from imgtools.io import read_dicom_auto
-from imgtools.ops import StructureSetToSegmentation, ImageCSVInput, ImageFileOutput, Resample
+from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.datagraph import DataGraph
 
 import SimpleITK as sitk
 
@@ -29,7 +28,7 @@ class AutoPipeline(Pipeline):
 
     def __init__(self,
                  output_directory,
-                 query,
+                 modalities,
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
@@ -43,43 +42,20 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
 
         # pipeline configuration
+        self.input_directory = "/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/Head-Neck-PET-CT"
         self.output_directory = output_directory
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
 
-        path_crawl = "/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/imgtools_Head-Neck-PET-CT_2.csv"
-        edge_path =  "/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/HN-PET-CT_2_edgetable.csv"
-        print("Given query: {}".format(query))
-        # query = "CT,RTSTRUCT,RTDOSE"
-        # query = "CT,PT"
-
-        
-        graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path)
-        self.df_combined = graph.parser(query)
-        # self.column_names = list(self.df_combined.columns)
-        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
-        print("Column Names: {}".format(self.column_names))
-        print(self.df_combined.head())
-        print("Returned query has {} cases amongst the crawled data".format(len(self.df_combined)))
-
-        readers = [read_dicom_auto for i in range(len(self.column_names))]
-        self.input = ImageCSVInput(self.df_combined,
-                                   self.column_names,    
-                                   readers=readers)
+        #input operations
+        self.input = ImageAutoInput(self.input_directory,modalities,n_jobs)
 
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
         self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
 
         # output ops
-        # file name dictionary
-        file_name = {"CT": "images","RTDOSE_CT":"doses","RTSTRUCT_CT":"ct_masks.seg","RTSTRUCT_PT":"pet_masks.seg","PT_CT":"pets","PT":"pets","RTDOSE":"doses","RTSTRUCT":"masks.seg"}
-        self.output = []
-        for colname in self.column_names:
-            colname_process = ("_").join(colname.split("_")[1:])
-            extension = file_name[colname_process]
-            self.output.append(ImageFileOutput(os.path.join(self.output_directory,extension.split(".")[0]),
-                                            filename_format="{subject_id}_"+"{}.nrrd".format(extension)))
+        self.output = ImageAutoOutput(self.output_directory,self.input.output_streams)
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -104,7 +80,7 @@ class AutoPipeline(Pipeline):
         counter = [0 for i in range(len(self.column_names))]
         for i,colnames in enumerate(self.column_names):
             #Based on the modality the operations will differ
-            modality = colnames.split("_")[1:][0]
+            modality = colnames.split("_")[1]
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
             mult_conn = colnames.split("_")[-1]
             if read_results[i] is None:
@@ -122,7 +98,7 @@ class AutoPipeline(Pipeline):
                     print(image.GetSize())
                 image = self.resample(image)
                 #Saving the output
-                self.output[i](subject_id, image)
+                self.output(subject_id, image,modality)
                 print(subject_id, " SAVED IMAGE")
             elif modality=="RTDOSE":
                 try:
@@ -132,19 +108,19 @@ class AutoPipeline(Pipeline):
                     doses = read_results[i]
                     
                 if mult_conn!="1":
-                    self.output[i](subject_id, doses)
+                    self.output(subject_id, doses,modality)
                 else:
                     counter[i] = counter[i]+1
-                    self.output[i](subject_id+"_{}".format(counter[i]),doses)
+                    self.output(subject_id+"_{}".format(counter[i]),doses,modality)
                 print(subject_id, " SAVED DOSE")
             elif modality=="RTSTRUCT":
                 structure_set = read_results[i]
                 mask = self.make_binary_mask(structure_set, image)
                 if mult_conn!="1":
-                    self.output[i](subject_id, mask)
+                    self.output(subject_id, mask,modality)
                 else:
                     counter[i] = counter[i]+1
-                    self.output[i](subject_id+"_{}".format(counter[i]),mask)
+                    self.output(subject_id+"_{}".format(counter[i]),mask,modality)
                 print("SAVED MASK")
             elif modality=="PT":
                 try:
@@ -154,10 +130,10 @@ class AutoPipeline(Pipeline):
                     pet = read_results[i]
 
                 if mult_conn!="1":
-                    self.output[i](subject_id, pet)
+                    self.output(subject_id, pet,modality)
                 else:
                     counter[i] = counter[i]+1
-                    self.output[i](subject_id+"_{}".format(counter[i]),pet)
+                    self.output(subject_id+"_{}".format(counter[i]),pet,modality)
                 print(subject_id, " SAVED PET")
 
         print("SUCCESS")
@@ -171,7 +147,7 @@ if __name__ == "__main__":
         type=str,
         help="Path to the directory where the processed images will be saved.")
     parser.add_argument(
-        "--modality",
+        "--modalities",
         type=str,
         default="CT,RTDOSE,RTSTRUCT,PT",
         help="Query to get the sub-dataset. Type it like a string for ex: RTSTRUCT,CT,RTDOSE")
@@ -193,7 +169,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     pipeline = AutoPipeline(
         output_directory=args.output_directory,
-        query=args.modality,
+        modalities=args.modalities,
         spacing=args.spacing,
         n_jobs=args.n_jobs,
         show_progress=args.show_progress)
