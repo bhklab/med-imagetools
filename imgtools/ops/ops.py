@@ -85,7 +85,7 @@ class ImageAutoInput(BaseInput):
         ####### CRAWLER ############
         #check if crawled data already exists or not
         #To be changed later
-        path_crawl = self.parent+"/imgtools_{}_2.csv".format(self.dataset_name)
+        path_crawl = self.parent+"/imgtools_{}_3.csv".format(self.dataset_name)
         if not os.path.exists(path_crawl):
             print("Couldn't find the crawled CSV for the dataset. Crawling the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)

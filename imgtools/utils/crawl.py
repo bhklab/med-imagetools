@@ -37,7 +37,7 @@ def crawl_one(folder):
                 except:
                     reference_ct = ""
                 try:
-                    reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPClassUID
+                    reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
                 except:
                     reference_pl = ""
 
