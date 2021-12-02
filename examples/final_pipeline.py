@@ -50,12 +50,16 @@ class AutoPipeline(Pipeline):
         #input operations
         self.input = ImageAutoInput(self.input_directory,modalities,n_jobs)
 
+        #For the pipeline
+        self.graph = self.input.df_combined.copy()
+        self.column_names = self.input.output_streams
+        
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
         self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
 
         # output ops
-        self.output = ImageAutoOutput(self.output_directory,self.input.output_streams)
+        self.output = ImageAutoOutput(self.output_directory,self.column_names)
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -81,8 +85,11 @@ class AutoPipeline(Pipeline):
         for i,colnames in enumerate(self.column_names):
             #Based on the modality the operations will differ
             modality = colnames.split("_")[1]
+            #Taking modality pairs if it exists till _1
+            output_stream = ("_").join([items for items in colnames.split("_")[1:] if items!="1"])
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
             mult_conn = colnames.split("_")[-1]
+            print(output_stream)
             if read_results[i] is None:
                 print("The subject id: {} has no {}".format(subject_id,("_").join(colnames.split("_")[1:])))
                 pass
@@ -98,42 +105,56 @@ class AutoPipeline(Pipeline):
                     print(image.GetSize())
                 image = self.resample(image)
                 #Saving the output
-                self.output(subject_id, image,modality)
+                self.output(subject_id, image,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = image.GetSize()
                 print(subject_id, " SAVED IMAGE")
             elif modality=="RTDOSE":
                 try:
+                    #For cases with no image present
                     doses = read_results[i].resample_rt(image)
                 except:
                     Warning("No CT image present. Returning dose image without resampling")
                     doses = read_results[i]
                     
                 if mult_conn!="1":
-                    self.output(subject_id, doses,modality)
+                    self.output(subject_id, doses,output_stream)
                 else:
                     counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),doses,modality)
+                    self.output(subject_id+"_{}".format(counter[i]),doses,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = doses.GetSize()
                 print(subject_id, " SAVED DOSE")
             elif modality=="RTSTRUCT":
+                #For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
-                mask = self.make_binary_mask(structure_set, image)
+                conn_to = output_stream.split("_")[-1]
+                if conn_to=="CT":
+                    mask = self.make_binary_mask(structure_set, image)
+                elif conn_to=="PT":
+                    mask = self.make_binary_mask(structure_set, pet)
+                else:
+                    raise ValueError("You need to pass CT images or PT images so that mask can be made")
+                
                 if mult_conn!="1":
-                    self.output(subject_id, mask,modality)
+                    self.output(subject_id, mask,output_stream)
                 else:
                     counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),mask,modality)
-                print("SAVED MASK")
+                    self.output(subject_id+"_{}".format(counter[i]),mask,output_stream)
+                self.graph.loc[subject_id,"roi_names_{}".format(output_stream)] = structure_set.roi_names
+                print("SAVED MASK ON {}".format(conn_to))
             elif modality=="PT":
                 try:
+                    #For cases with no image present
                     pet = read_results[i].resample_pet(image)
                 except:
                     Warning("No CT image present. Returning PET image without resampling")
                     pet = read_results[i]
 
                 if mult_conn!="1":
-                    self.output(subject_id, pet,modality)
+                    self.output(subject_id, pet,output_stream)
                 else:
                     counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),pet,modality)
+                    self.output(subject_id+"_{}".format(counter[i]),pet,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = pet.GetSize()
                 print(subject_id, " SAVED PET")
 
         print("SUCCESS")
@@ -177,7 +198,7 @@ if __name__ == "__main__":
     print(f'starting Pipeline...')
     # == Parallel Processing == 
     pipeline.run()
-    
+    AutoPipeline.graph.to_csv(args.output_directory+"/DATASET.csv")
     # == Series (Single-core) Processing ==
     # Good for finding edge cases
     # subject_ids = pipeline._get_loader_subject_ids()
