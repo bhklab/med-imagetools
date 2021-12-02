@@ -198,7 +198,7 @@ if __name__ == "__main__":
     print(f'starting Pipeline...')
     # == Parallel Processing == 
     pipeline.run()
-    AutoPipeline.graph.to_csv(args.output_directory+"/DATASET.csv")
+    pipeline.graph.to_csv(args.output_directory+"/DATASET.csv")
     # == Series (Single-core) Processing ==
     # Good for finding edge cases
     # subject_ids = pipeline._get_loader_subject_ids()
