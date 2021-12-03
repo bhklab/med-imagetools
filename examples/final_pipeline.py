@@ -106,7 +106,7 @@ class AutoPipeline(Pipeline):
                 image = self.resample(image)
                 #Saving the output
                 self.output(subject_id, image,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = image.GetSize()
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(image.GetSize())
                 print(subject_id, " SAVED IMAGE")
             elif modality=="RTDOSE":
                 try:
@@ -121,7 +121,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i]+1
                     self.output(subject_id+"_{}".format(counter[i]),doses,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = doses.GetSize()
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(doses.GetSize())
                 print(subject_id, " SAVED DOSE")
             elif modality=="RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -139,7 +139,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i]+1
                     self.output(subject_id+"_{}".format(counter[i]),mask,output_stream)
-                self.graph.loc[subject_id,"roi_names_{}".format(output_stream)] = structure_set.roi_names
+                self.graph.loc[subject_id,"roi_names_{}".format(output_stream)] = str(structure_set.roi_names)
                 print("SAVED MASK ON {}".format(conn_to))
             elif modality=="PT":
                 try:
@@ -154,7 +154,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i]+1
                     self.output(subject_id+"_{}".format(counter[i]),pet,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = pet.GetSize()
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(pet.GetSize())
                 print(subject_id, " SAVED PET")
 
         print("SUCCESS")
