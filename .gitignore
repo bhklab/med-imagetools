@@ -59,6 +59,7 @@ flycheck_*.el
 
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+*.ipynb
 
 # IPython
 profile_default/
@@ -176,3 +177,15 @@ dmypy.json
 imgtools/image.py
 tests/output
 examples/*output/
+
+#Some mroe files
+examples/doses
+examples/images
+examples/pet
+examples/temp_folder
+examples/process_all.py
+examples/process_one.py
+
+.vscode
+
+*__pycache__
