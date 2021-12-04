@@ -108,8 +108,13 @@ class AutoPipeline(Pipeline):
                     print(image.GetSize())
                 image = self.resample(image)
                 #Saving the output
+<<<<<<< HEAD:imgtools/autopipeline.py
                 self.output(subject_id, image, output_stream)
                 self.graph.loc[subject_id, f"size_{output_stream}"] = image.GetSize()
+=======
+                self.output(subject_id, image,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(image.GetSize())
+>>>>>>> accf1baf89b6270d61041adadede622efac804d5:examples/final_pipeline.py
                 print(subject_id, " SAVED IMAGE")
             elif modality == "RTDOSE":
                 try: #For cases with no image present
@@ -123,8 +128,13 @@ class AutoPipeline(Pipeline):
                     self.output(subject_id, doses, output_stream)
                 else:
                     counter[i] = counter[i]+1
+<<<<<<< HEAD:imgtools/autopipeline.py
                     self.output(f"{subject_id}_{counter[i]}", doses, output_stream)
                 self.graph.loc[subject_id, f"size_{output_stream}"] = doses.GetSize()
+=======
+                    self.output(subject_id+"_{}".format(counter[i]),doses,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(doses.GetSize())
+>>>>>>> accf1baf89b6270d61041adadede622efac804d5:examples/final_pipeline.py
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -143,12 +153,20 @@ class AutoPipeline(Pipeline):
                 if mult_conn:
                     self.output(subject_id, mask, output_stream)
                 else:
+<<<<<<< HEAD:imgtools/autopipeline.py
                     counter[i] = counter[i] + 1
                     self.output(f"{subject_id}_{counter[i]}", mask, output_stream)
                 self.graph.loc[subject_id, f"roi_names_{output_stream}"] = structure_set.roi_names
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
+=======
+                    counter[i] = counter[i]+1
+                    self.output(subject_id+"_{}".format(counter[i]),mask,output_stream)
+                self.graph.loc[subject_id,"roi_names_{}".format(output_stream)] = str(structure_set.roi_names)
+                print("SAVED MASK ON {}".format(conn_to))
+            elif modality=="PT":
+>>>>>>> accf1baf89b6270d61041adadede622efac804d5:examples/final_pipeline.py
                 try:
                     #For cases with no image present
                     pet = read_results[i].resample_pet(image)
@@ -159,9 +177,15 @@ class AutoPipeline(Pipeline):
                 if mult_conn!="1":
                     self.output(subject_id, pet, output_stream)
                 else:
+<<<<<<< HEAD:imgtools/autopipeline.py
                     counter[i] = counter[i] + 1
                     self.output(f"{subject_id}_{counter[i]}", pet, output_stream)
                 self.graph.loc[subject_id, f"size_{output_stream}"] = pet.GetSize()
+=======
+                    counter[i] = counter[i]+1
+                    self.output(subject_id+"_{}".format(counter[i]),pet,output_stream)
+                self.graph.loc[subject_id,"size_{}".format(output_stream)] = str(pet.GetSize())
+>>>>>>> accf1baf89b6270d61041adadede622efac804d5:examples/final_pipeline.py
                 print(subject_id, " SAVED PET")
         return
 
@@ -197,6 +221,7 @@ if __name__ == "__main__":
         show_progress=args.show_progress)
 
     print(f'starting Pipeline...')
+<<<<<<< HEAD:imgtools/autopipeline.py
     if args.n_jobs > 1 or args.n_jobs == -1:     # == Parallel Processing == 
         pipeline.run()
         pipeline.graph.to_csv(os.path.join(args.output_directory, "dataset.csv"))
@@ -205,4 +230,23 @@ if __name__ == "__main__":
         for subject_id in subject_ids:
             pipeline.process_one_subject(subject_id)
 
+=======
+    # == Parallel Processing == 
+    pipeline.run()
+    pipeline.graph.to_csv(args.output_directory+"/DATASET.csv")
+    # == Series (Single-core) Processing ==
+    # Good for finding edge cases
+    # subject_ids = pipeline._get_loader_subject_ids()
+    # subject_ids = [202, 205, 209, 163, 149, 
+    #                147, 146, 145, 144, 143, 
+    #                140, 139, 138, 132, 130,
+    #                129, 0, 1, 2, 3, 4, 5]
+    # print('starting for loop...')
+    # for subject_id in subject_ids:
+    #     pipeline.process_one_subject(subject_id)
+
+    # == Just Uno ==
+    # Good for quickly checking on one sample. 
+    # pipeline.process_one_subject(5) 
+>>>>>>> accf1baf89b6270d61041adadede622efac804d5:examples/final_pipeline.py
     print(f'finished Pipeline!')
