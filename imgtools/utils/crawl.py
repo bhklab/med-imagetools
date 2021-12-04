@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 
 def crawl_one(folder):
     database = {}
-    for path, directories, files in os.walk(folder):
+    for path, _, _ in os.walk(folder):
         # find dicoms
         dicoms = glob.glob(os.path.join(path, "*.dcm"))
 
@@ -23,23 +23,22 @@ def crawl_one(folder):
             series   = meta.SeriesInstanceUID
             instance = meta.SOPInstanceUID
 
+            reference_ct, reference_rs, reference_pl = "", "", ""
             try: #RTSTRUCT
                 reference_ct = meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID 
-                reference_rs = ""
-                reference_pl = ""
             except: 
                 try: #RTDOSE
                     reference_rs = meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID
                 except:
-                    reference_rs = ""
+                    pass
                 try:
                     reference_ct = meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
                 except:
-                    reference_ct = ""
+                    pass
                 try:
                     reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
                 except:
-                    reference_pl = ""
+                    pass
 
             try:
                 study_description = meta.StudyDescription
@@ -107,7 +106,9 @@ def crawl(top, n_jobs=1):
     
     # save one level above imaging folders
     parent  = os.path.dirname(top)
-    dataset = top.split("/")[-1]
+    print(os.path.split(top))
+    print(os.path.splitext(top))
+    dataset = os.path.split(top)[-1]
     
     # save as json
     with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
