@@ -15,10 +15,9 @@ from pydicom import dcmread
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from ..segmentation import StructureSet
-
-from ..dose import Dose
-from ..petscan import Petscan
+from ..modules import StructureSet
+from ..modules import Dose
+from ..modules import PET
 
 
 
@@ -74,10 +73,11 @@ def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
 
 def read_dicom_rtdose(path):
-    return Dose.get_from_rtdose(path)
+    return Dose.from_dicom_rtdose(path)
 
 def read_dicom_pet(path):
-    return Petscan.get_from_pt(path,"SUV")
+    pet = read_dicom_series(path)
+    return PET.from_dicom_pet(pet, path, "SUV")
 
 def read_dicom_auto(path):
     if path is None:

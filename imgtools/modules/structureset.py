@@ -78,9 +78,9 @@ class StructureSet:
         return labels
 
     def to_segmentation(self, reference_image: sitk.Image,
-            roi_names: Optional[List[Union[str, List[str]]]] = None,
-            force_missing: bool = False,
-            continuous: bool = True) -> Segmentation:
+                        roi_names: Optional[List[Union[str, List[str]]]] = None,
+                        force_missing: bool = False,
+                        continuous: bool = True) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -122,8 +122,7 @@ class StructureSet:
             roi_names = self.roi_names
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-        print("roi_names:", roi_names)
-        
+       
         labels = self._assign_labels(roi_names, force_missing)
         print("labels:", labels)
         if not labels:
@@ -142,10 +141,12 @@ class StructureSet:
 
             for contour in mask_points:
                 z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                z = z[0]
-                slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[z, :, :, label] += slice_mask
+                if len(z) == 1:
+                    # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                    z = z[0]
+                    slice_mask = polygon2mask(size[1:-1], slice_points)
+                    mask[z, :, :, label] += slice_mask
+
         
         mask[mask > 1] = 1        
         mask = sitk.GetImageFromArray(mask, isVector=True)
