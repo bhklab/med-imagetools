@@ -4,7 +4,7 @@ import numpy as np
 from typing import Sequence, Union, Tuple, Optional
 from collections import namedtuple
 
-from ..segmentation import Segmentation
+from ..modules import Segmentation
 
 
 INTERPOLATORS = {
@@ -67,7 +67,7 @@ def resample(image: sitk.Image,
         interpolator = INTERPOLATORS[interpolation]
     except KeyError:
         raise ValueError(
-            f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolator}."
+            f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolation}."
         )
 
     original_spacing = np.array(image.GetSpacing())
