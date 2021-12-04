@@ -5,7 +5,6 @@ import pandas as pd
 
 from argparse import ArgumentParser
 
-from imgtools.io import read_dicom_auto
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
 
@@ -27,8 +26,9 @@ class AutoPipeline(Pipeline):
     """
 
     def __init__(self,
+                 input_directory,
                  output_directory,
-                 modalities,
+                 modalities="CT",
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
                  missing_strategy="drop",
@@ -42,24 +42,24 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
 
         # pipeline configuration
-        self.input_directory = "/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/Head-Neck-PET-CT"
+        self.input_directory = input_directory
         self.output_directory = output_directory
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
 
         #input operations
-        self.input = ImageAutoInput(self.input_directory,modalities,n_jobs)
+        self.input = ImageAutoInput(input_directory, modalities, n_jobs)
 
         #For the pipeline
         self.graph = self.input.df_combined.copy()
-        self.column_names = self.input.output_streams
+        self.output_streams = self.input.output_streams
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
         self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
 
         # output ops
-        self.output = ImageAutoOutput(self.output_directory,self.column_names)
+        self.output = ImageAutoOutput(self.output_directory, self.output_streams)
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -81,19 +81,22 @@ class AutoPipeline(Pipeline):
 
         print(subject_id, " start")
         #For counting multiple connections per modality
-        counter = [0 for i in range(len(self.column_names))]
-        for i,colnames in enumerate(self.column_names):
-            #Based on the modality the operations will differ
-            modality = colnames.split("_")[1]
+        counter = [0 for _ in range(len(self.output_streams))]
+        
+        for i, colname in enumerate(self.output_streams):
+            modality = colname.split("_")[0]
+
             #Taking modality pairs if it exists till _1
-            output_stream = ("_").join([items for items in colnames.split("_")[1:] if items!="1"])
+            output_stream = ("_").join([item for item in colname.split("_") if item != "1"])
+
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
-            mult_conn = colnames.split("_")[-1]
+            mult_conn = colname.split("_")[-1] == "1"
             print(output_stream)
+
             if read_results[i] is None:
-                print("The subject id: {} has no {}".format(subject_id,("_").join(colnames.split("_")[1:])))
+                print("The subject id: {} has no {}".format(subject_id, ("_").join(colname.split("_")[1:])))
                 pass
-            elif modality=="CT":
+            elif modality == "CT":
                 image = read_results[i]
                 if len(image.GetSize()) == 4:
                     assert image.GetSize()[-1] == 1, f"There is more than one volume in this CT file for {subject_id}."
@@ -105,43 +108,47 @@ class AutoPipeline(Pipeline):
                     print(image.GetSize())
                 image = self.resample(image)
                 #Saving the output
-                self.output(subject_id, image,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = image.GetSize()
+                self.output(subject_id, image, output_stream)
+                self.graph.loc[subject_id, f"size_{output_stream}"] = image.GetSize()
                 print(subject_id, " SAVED IMAGE")
-            elif modality=="RTDOSE":
-                try:
-                    #For cases with no image present
+            elif modality == "RTDOSE":
+                try: #For cases with no image present
                     doses = read_results[i].resample_rt(image)
                 except:
                     Warning("No CT image present. Returning dose image without resampling")
                     doses = read_results[i]
-                    
-                if mult_conn!="1":
-                    self.output(subject_id, doses,output_stream)
+                
+                # save output
+                if mult_conn:
+                    self.output(subject_id, doses, output_stream)
                 else:
                     counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),doses,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = doses.GetSize()
+                    self.output(f"{subject_id}_{counter[i]}", doses, output_stream)
+                self.graph.loc[subject_id, f"size_{output_stream}"] = doses.GetSize()
                 print(subject_id, " SAVED DOSE")
-            elif modality=="RTSTRUCT":
+            elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
                 conn_to = output_stream.split("_")[-1]
-                if conn_to=="CT":
+
+                # make_binary_mask relative to ct/pet
+                if conn_to == "CT":
                     mask = self.make_binary_mask(structure_set, image)
-                elif conn_to=="PT":
+                elif conn_to == "PT":
                     mask = self.make_binary_mask(structure_set, pet)
                 else:
                     raise ValueError("You need to pass CT images or PT images so that mask can be made")
                 
-                if mult_conn!="1":
-                    self.output(subject_id, mask,output_stream)
+                # save output
+                if mult_conn:
+                    self.output(subject_id, mask, output_stream)
                 else:
-                    counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),mask,output_stream)
-                self.graph.loc[subject_id,"roi_names_{}".format(output_stream)] = structure_set.roi_names
-                print("SAVED MASK ON {}".format(conn_to))
-            elif modality=="PT":
+                    counter[i] = counter[i] + 1
+                    self.output(f"{subject_id}_{counter[i]}", mask, output_stream)
+                self.graph.loc[subject_id, f"roi_names_{output_stream}"] = structure_set.roi_names
+
+                print(subject_id, "SAVED MASK ON", conn_to)
+            elif modality == "PT":
                 try:
                     #For cases with no image present
                     pet = read_results[i].resample_pet(image)
@@ -150,67 +157,52 @@ class AutoPipeline(Pipeline):
                     pet = read_results[i]
 
                 if mult_conn!="1":
-                    self.output(subject_id, pet,output_stream)
+                    self.output(subject_id, pet, output_stream)
                 else:
-                    counter[i] = counter[i]+1
-                    self.output(subject_id+"_{}".format(counter[i]),pet,output_stream)
-                self.graph.loc[subject_id,"size_{}".format(output_stream)] = pet.GetSize()
+                    counter[i] = counter[i] + 1
+                    self.output(f"{subject_id}_{counter[i]}", pet, output_stream)
+                self.graph.loc[subject_id, f"size_{output_stream}"] = pet.GetSize()
                 print(subject_id, " SAVED PET")
-
-        print("SUCCESS")
         return
 
 if __name__ == "__main__":
-    print("WASSUP")
-    parser = ArgumentParser("Head-Neck-PET-CT processing pipeline.")
-    parser.add_argument(
-        "output_directory",
-        type=str,
-        help="Path to the directory where the processed images will be saved.")
-    parser.add_argument(
-        "--modalities",
-        type=str,
-        default="CT,RTDOSE,RTSTRUCT,PT",
-        help="Query to get the sub-dataset. Type it like a string for ex: RTSTRUCT,CT,RTDOSE")
-    parser.add_argument(
-        "--spacing",
-        nargs=3,
-        type=float,
-        default=(1., 1., 0.),
-        help="The resampled voxel spacing in  (x, y, z) directions.")
-    parser.add_argument(
-        "--n_jobs",
-        type=int,
-        default=-1,
-        help="The number of parallel processes to use.")
-    parser.add_argument(
-        "--show_progress",
-        action="store_true",
-        help="Whether to print progress to standard output.")
+    parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
+
+    #arguments
+    parser.add_argument("input_directory", type=str,
+                        help="Path to top-level directory of dataset.")
+
+    parser.add_argument("output_directory", type=str,
+                        help="Path to output directory to save processed images.")
+
+    parser.add_argument("--modalities", type=str, default="CT",
+                        help="List of desired modalities. Type as string for ex: RTSTRUCT,CT,RTDOSE")
+
+    parser.add_argument("--spacing", nargs=3, type=float, default=(1., 1., 0.),
+                        help="The resampled voxel spacing in  (x, y, z) directions.")
+
+    parser.add_argument("--n_jobs", type=int, default=-1,
+                        help="The number of parallel processes to use.")
+
+    parser.add_argument("--show_progress", action="store_true",
+                        help="Whether to print progress to standard output.")
+
     args = parser.parse_args()
     pipeline = AutoPipeline(
-        output_directory=args.output_directory,
+        args.input_directory,
+        args.output_directory,
         modalities=args.modalities,
         spacing=args.spacing,
         n_jobs=args.n_jobs,
         show_progress=args.show_progress)
 
     print(f'starting Pipeline...')
-    # == Parallel Processing == 
-    pipeline.run()
-    AutoPipeline.graph.to_csv(args.output_directory+"/DATASET.csv")
-    # == Series (Single-core) Processing ==
-    # Good for finding edge cases
-    # subject_ids = pipeline._get_loader_subject_ids()
-    # subject_ids = [202, 205, 209, 163, 149, 
-    #                147, 146, 145, 144, 143, 
-    #                140, 139, 138, 132, 130,
-    #                129, 0, 1, 2, 3, 4, 5]
-    # print('starting for loop...')
-    # for subject_id in subject_ids:
-    #     pipeline.process_one_subject(subject_id)
+    if args.n_jobs > 1 or args.n_jobs == -1:     # == Parallel Processing == 
+        pipeline.run()
+        pipeline.graph.to_csv(os.path.join(args.output_directory, "dataset.csv"))
+    elif args.n_jobs == 1:                       # == Series (Single-core) Processing ==
+        subject_ids = pipeline._get_loader_subject_ids()
+        for subject_id in subject_ids:
+            pipeline.process_one_subject(subject_id)
 
-    # == Just Uno ==
-    # Good for quickly checking on one sample. 
-    # pipeline.process_one_subject(5) 
     print(f'finished Pipeline!')

@@ -3,6 +3,8 @@ joblib
 numpy
 pandas
 pydicom
+pynrrd
 pytest
 scikit-image
 SimpleITK
+tqdm

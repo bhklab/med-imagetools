@@ -4,14 +4,13 @@ from itertools import chain
 
 import numpy as np
 import SimpleITK as sitk
-import pandas as pd
 
 from .functional import *
-from ..io import BaseLoader, BaseWriter
-from ..utils import image_to_array, array_to_image,crawl
-from ..segmentation import map_over_labels
 from ..io import *
-from ..datagraph import DataGraph
+from ..utils import image_to_array, array_to_image, crawl
+from ..modules import map_over_labels
+from ..modules import DataGraph
+
 
 LoaderFunction = TypeVar('LoaderFunction')
 ImageFilter = TypeVar('ImageFilter')
@@ -83,38 +82,40 @@ class ImageAutoInput(BaseInput):
         self.parent  = os.path.dirname(self.dir_path)
 
         ####### CRAWLER ############
-        #check if crawled data already exists or not
-        #To be changed later
-        path_crawl = self.parent+"/imgtools_{}_3.csv".format(self.dataset_name)
+        # Checks if dataset has already been indexed
+        # To be changed later
+        path_crawl = os.path.join(self.parent, f"imgtools_{self.dataset_name}.csv")
         if not os.path.exists(path_crawl):
-            print("Couldn't find the crawled CSV for the dataset. Crawling the dataset...")
+            print("Couldn't find the dataset index CSV. Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
-            print("Number of patients in the dataset: {}".format(len(db)))
+            print(f"Number of patients in the dataset: {len(db)}")
         else:
-            print("The dataset has already been crawled...")
+            print("The dataset has already been indexed.")
+
         ####### GRAPH ##########
-        #Form the graph
+        # Form the graph
         edge_path = self.parent+"/imgtools_{}_edges.csv".format(self.dataset_name)
         graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path)
-        print("Forming the graph based on the given modalities: {}".format(self.modalities))
+        print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
-        self.output_streams = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
+        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
+        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
+        
         #Initilizations for the pipeline
         for colnames in self.output_streams:
-            output_stream = ("_").join([items for items in colnames.split("_")[1:] if items!="1"])
-            modality = colnames.split("_")[1]
+            output_stream = ("_").join([items for items in colnames.split("_") if items!="1"])
+            modality = colnames.split("_")[0]
             if modality in ["PT","CT","RTDOSE"]:
                 self.df_combined["size_{}".format(output_stream)] = None
             elif modality=="RTSTRUCT":
                 self.df_combined["roi_names_{}".format(output_stream)] = None
-        # print("Column Names: {}".format(self.column_names))
-        # print(self.df_combined.head())
-        print("Returned user defined modalities has {} cases amongst the crawled data".format(len(self.df_combined)))
+        
+        print(f"Returned user defined modalities has {len(self.df_combined)} cases amongst the crawled data")
 
         self.readers = [read_dicom_auto for i in range(len(self.output_streams))]
 
         loader = ImageCSVLoader(self.df_combined,
-                                colnames=self.output_streams,
+                                colnames=self.column_names,
                                 id_column=None,
                                 expand_paths=True,
                                 readers=self.readers) 
@@ -191,12 +192,15 @@ class ImageFileInput(BaseInput):
         - read_dicom_series
         - read_dicom_rtstruct
         - read_segmentation
+        - read_dicom_auto
+        - read_dicom_rtdose
+        - read_dicom_pet
     """
 
     def __init__(self,
                  root_directory: str,
                  get_subject_id_from: str = "filename",
-                 subdir_path: Optional[str] =None,
+                 subdir_path: Optional[str] = None,
                  exclude_paths: Optional[List[str]] =[],
                  reader: LoaderFunction =read_image):
         self.root_directory = root_directory
@@ -259,25 +263,44 @@ class ImageFileOutput(BaseOutput):
 class ImageAutoOutput:
     """
     Wrapper class around ImageFileOutput. This class supports multiple modalities writers and calls ImageFileOutput for writing the files
-    Parameters:
-        root_directory: str
-            The directory where all the processed files will be stored in the form of nrrd
-        output_streams: List[str]
-            The modalties that should be stored. This is typically equal to the column names of the table returned after graph querying. Examples is provided in the 
-            dictionary file_name
+    
+    Parameters
+    ----------
+    root_directory: str
+        The directory where all the processed files will be stored in the form of nrrd
+
+    output_streams: List[str]
+        The modalties that should be stored. This is typically equal to the column names of the table returned after graph querying. Examples is provided in the 
+        dictionary file_name
     """
-    def __init__(self,root_directory:str,output_streams:List[str]):
-        #Predefined file structure
-        self.file_name = {"CT": "images","RTDOSE_CT":"doses","RTSTRUCT_CT":"ct_masks.seg","RTSTRUCT_PT":"pet_masks.seg","PT_CT":"pets","PT":"pets","RTDOSE":"doses","RTSTRUCT":"masks.seg"}
+    def __init__(self,
+                 root_directory: str,
+                 output_streams: List[str]):
+                 
+        # File types
+        self.file_name = {"CT": "image",
+                          "RTDOSE_CT": "dose", 
+                          "RTSTRUCT_CT": "mask_ct.seg", 
+                          "RTSTRUCT_PT": "mask_pt.seg", 
+                          "PT_CT": "pet", 
+                          "PT": "pet", 
+                          "RTDOSE": "dose", 
+                          "RTSTRUCT": "mask.seg"}
+
         self.output = {}
         for colname in output_streams:
-            #Not considering colnames ending with _1
-            colname_process = ("_").join([items for items in colname.split("_")[1:] if items!="1"])
+            # Not considering colnames ending with _1
+            colname_process = ("_").join([items for items in colname.split("_") if items!="1"])
             extension = self.file_name[colname_process]
             self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
-                                        filename_format="{subject_id}_"+"{}.nrrd".format(extension))
-    def __call__(self,subject_id:str,dicom: sitk.Image,output_stream):
-        self.output[output_stream](subject_id,dicom)
+                                                           filename_format="{subject_id}_"+"{}.nrrd".format(extension))
+    
+    def __call__(self, 
+                 subject_id: str,
+                 img: sitk.Image,
+                 output_stream):
+                 
+        self.output[output_stream](subject_id, img)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
