@@ -76,8 +76,7 @@ def read_dicom_rtdose(path):
     return Dose.from_dicom_rtdose(path)
 
 def read_dicom_pet(path):
-    pet = read_dicom_series(path)
-    return PET.from_dicom_pet(pet, path, "SUV")
+    return PET.from_dicom_pet(path, "SUV")
 
 def read_dicom_auto(path):
     if path is None:
