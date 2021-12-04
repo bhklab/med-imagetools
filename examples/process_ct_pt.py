@@ -44,15 +44,15 @@ class QCPipeline(Pipeline):
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
 
-        df = pd.read_csv("/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/imgtools_Head-Neck-PET-CT.csv", index_col=0)
-        rt = df[df['modality'] == 'RTSTRUCT']
+        df = pd.read_csv("/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/imgtools_Head-Neck-PET-CT_2.csv", index_col=0)
+        # rt = df[df['modality'] == 'RTSTRUCT']
         pet = df[df['modality'] == 'PT']
         ct = df[df['modality'] == 'CT']
 
-        rt_nPT = rt[~rt['study'].isin(pet['study'].unique())]
-        ct_nPT = ct[~ct['study'].isin(pet['study'].unique())]
+        # rt_nPT = rt[~rt['study'].isin(pet['study'].unique())]
+        # ct_nPT = ct[~ct['study'].isin(pet['study'].unique())]
 
-        self.df_combined = pd.merge(ct_nPT, rt_nPT, left_on='series', right_on='reference')
+        self.df_combined = pd.merge(ct, pet, left_on='study', right_on='study')
 
         def find_rt(s):
             return glob.glob(os.path.join(s, "*"))[0]
@@ -66,24 +66,24 @@ class QCPipeline(Pipeline):
 
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
+        # self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
 
         # output ops
         self.image_output = ImageFileOutput(
             os.path.join(self.output_directory, "images"), 
             filename_format="{subject_id}_image.nrrd",                         
         )
-        self.mask_output = ImageFileOutput(
-            os.path.join(self.output_directory, "masks"),
-            filename_format="{subject_id}_mask.seg.nrrd",
+        self.pet_output = ImageFileOutput(
+            os.path.join(self.output_directory, "pet"),
+            filename_format="{subject_id}_pets.nrrd",
         )
 
-        self.existing_patients()
-        print(self.existing)
+        # self.existing_patients()
+        # print(self.existing)
 
-    def existing_patients(self):
-        existing_masks = os.listdir(os.path.join(self.output_directory, "masks"))
-        self.existing = [i.split("_mask")[0] for i in existing_masks]
+    # def existing_patients(self):
+    #     existing_masks = os.listdir(os.path.join(self.output_directory, "masks"))
+    #     self.existing = [i.split("_mask")[0] for i in existing_masks]
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -102,9 +102,9 @@ class QCPipeline(Pipeline):
         if str(subject_id) in self.existing:
             return
 
-        image, structure_set = self.input(subject_id)
-        print(image, structure_set)
-        print(image.GetSize(), len(structure_set.roi_names))
+        image, pet = self.input(subject_id)
+        print(image, pet)
+        print(image.GetSize(), pet.GetSize())
         if len(image.GetSize()) == 4:
             assert image.GetSize()[-1] == 1, f"There is more than one volume in this CT file for {subject_id}."
             extractor = sitk.ExtractImageFilter()
@@ -124,9 +124,10 @@ class QCPipeline(Pipeline):
         self.image_output(subject_id, image)
         print(subject_id, " SAVED IMAGE")
         
-        mask = self.make_binary_mask(structure_set, image)
-        self.mask_output(subject_id, mask)
-        print(subject_id, " DONE MASK")
+        # mask = self.make_binary_mask(structure_set, image)
+        pet_resampled = pet.resample_pet(image)
+        self.pet_output(subject_id, pet_resampled)
+        print(subject_id, " DONE PET")
         print(subject_id, " SUCCESS")
         # except Exception as e:
         #     print(subject_id, e)
