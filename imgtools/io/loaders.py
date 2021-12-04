@@ -15,7 +15,10 @@ from pydicom import dcmread
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from ..segmentation import StructureSet
+from ..modules import StructureSet
+from ..modules import Dose
+from ..modules import PET
+
 
 
 def read_image(path):
@@ -69,23 +72,36 @@ def read_dicom_series(path: str,
 def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
 
+def read_dicom_rtdose(path):
+    return Dose.from_dicom_rtdose(path)
+
+def read_dicom_pet(path):
+    pet = read_dicom_series(path)
+    return PET.from_dicom_pet(pet, path, "SUV")
 
 def read_dicom_auto(path):
-    dcms = glob.glob(os.path.join(path, "*.dcm"))
-    if len(dcms) > 1:
-        return read_dicom_series(path)
-    elif len(dcms) == 1:
-        meta = dcmread(dcms[0])
-        modality = meta.Modality
-        if modality == 'RTSTRUCT':
-            return read_dicom_rtstruct(dcms[0])
-        elif modality == 'RTDOSE':
-            return #read_dicom_rtdose
-        else:
-            raise NotImplementedError
-    else:
-        print("There were no dicoms in this path.")
+    if path is None:
         return None
+    dcms = glob.glob(os.path.join(path, "*.dcm"))
+    meta = dcmread(dcms[0])
+    modality = meta.Modality
+    if modality == 'CT':
+        return read_dicom_series(path)
+    elif modality == 'PT':
+        return read_dicom_pet(path)
+    # elif len(dcms) == 1:
+    #     meta = dcmread(dcms[0])
+    #     modality = meta.Modality
+    elif modality == 'RTSTRUCT':
+        return read_dicom_rtstruct(dcms[0])
+    elif modality == 'RTDOSE':
+        return read_dicom_rtdose(path)
+    else:
+        if len(dcms)==1:
+            raise NotImplementedError
+        else:
+            print("There were no dicoms in this path.")
+            return None
 
 def read_segmentation(path):
     # TODO read seg.nrrd
@@ -150,7 +166,8 @@ class ImageCSVLoader(BaseLoader):
         row = self.paths.loc[subject_id]
         paths = {col: row[col] for col in self.colnames}
         if self.expand_paths:
-            paths = {col: glob.glob(path)[0] for col, path in paths.items()}
+            # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
+            paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
         outputs = {col: self.readers[i](path) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)
 

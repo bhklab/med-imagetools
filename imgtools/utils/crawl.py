@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 
 def crawl_one(folder):
     database = {}
-    for path, directories, files in os.walk(folder):
+    for path, _, _ in os.walk(folder):
         # find dicoms
         dicoms = glob.glob(os.path.join(path, "*.dcm"))
 
@@ -23,18 +23,22 @@ def crawl_one(folder):
             series   = meta.SeriesInstanceUID
             instance = meta.SOPInstanceUID
 
+            reference_ct, reference_rs, reference_pl = "", "", ""
             try: #RTSTRUCT
                 reference_ct = meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID 
-                reference_rs = ""
             except: 
                 try: #RTDOSE
                     reference_rs = meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID
                 except:
-                    reference_rs = ""
+                    pass
                 try:
                     reference_ct = meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
                 except:
-                    reference_ct = ""
+                    pass
+                try:
+                    reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
+                except:
+                    pass
 
             try:
                 study_description = meta.StudyDescription
@@ -57,6 +61,7 @@ def crawl_one(folder):
                                                     'description': series_description,
                                                     'reference_ct': reference_ct,
                                                     'reference_rs': reference_rs,
+                                                    'reference_pl': reference_pl,
                                                     'folder': path}
             database[patient][study][series]['instances'].append(instance)
     
@@ -78,6 +83,7 @@ def to_df(database_dict):
                                     'instance_uid': database_dict[pat][study][series]['instance_uid'],
                                     'reference_ct': database_dict[pat][study][series]['reference_ct'],
                                     'reference_rs': database_dict[pat][study][series]['reference_rs'],
+                                    'reference_pl': database_dict[pat][study][series]['reference_pl'],
                                     'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
     return df
 
@@ -100,7 +106,7 @@ def crawl(top, n_jobs=1):
     
     # save one level above imaging folders
     parent  = os.path.dirname(top)
-    dataset = top.split("/")[-1]
+    dataset = os.path.split(top)[-1]
     
     # save as json
     with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
