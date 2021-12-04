@@ -44,7 +44,7 @@ class QCPipeline(Pipeline):
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
 
-        df = pd.read_csv("/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/imgtools_Head-Neck-PET-CT_2.csv", index_col=0)
+        df = pd.read_csv("/cluster/projects/radiomics/PublicDatasets/HeadNeck/TCIA Head-Neck-PET-CT/imgtools_Head-Neck-PET-CT.csv", index_col=0)
         rt = df[df['modality'] == 'RTSTRUCT']
         pet = df[df['modality'] == 'PT']
         ct = df[df['modality'] == 'CT']
