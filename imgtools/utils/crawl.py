@@ -106,8 +106,6 @@ def crawl(top, n_jobs=1):
     
     # save one level above imaging folders
     parent  = os.path.dirname(top)
-    print(os.path.split(top))
-    print(os.path.splitext(top))
     dataset = os.path.split(top)[-1]
     
     # save as json
