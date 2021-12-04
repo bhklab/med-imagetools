@@ -6,8 +6,14 @@ def physical_points_to_idxs(image, points, continuous=False):
         transform = image.TransformPhysicalPointToContinuousIndex
     else:
         transform = image.TransformPhysicalPointToIndex
+    
     vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature='(3)->(3)')
-    return vectorized_transform(points)
+    
+    # transformed points, ContourSequence/Data-wise
+    t_points = []
+    for slc in points:
+        t_points.append(vectorized_transform(slc)[:,::-1])
+    return t_points
 
 def idxs_to_physical_points(image, idxs):
     continuous = any([isinstance(i, float) for i in idxs])
