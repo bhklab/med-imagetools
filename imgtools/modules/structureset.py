@@ -14,8 +14,7 @@ from ..utils import array_to_image
 
 
 def _get_roi_points(rtstruct, roi_index):
-    contour_data = (slc.ContourData for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence)
-    return np.fromiter(chain.from_iterable(contour_data), dtype=np.float64).reshape(-1, 3)
+    return [np.array(slc.ContourData).reshape(-1, 3) for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence]
 
 
 class StructureSet:
@@ -40,35 +39,48 @@ class StructureSet:
         return list(self.roi_points.keys())
 
     def _assign_labels(self, names, force_missing=False):
+        """
+        args
+        ----
+        force_missing
+            What does force_missing do?
+        """
         labels = {}
         cur_label = 0
-        for pat in names:
-            if isinstance(pat, str):
-                matched = False
-                for name in self.roi_names:
-                    if re.fullmatch(pat, name, flags=re.IGNORECASE):
-                        labels[name] = cur_label
-                        cur_label += 1
-                        matched = True
-                if force_missing and not matched:
-                    labels[pat] = cur_label
-                    cur_label += 1
-            else:
-                matched = False
-                for subpat in pat:
-                    for name in self.roi_names:
-                        if re.fullmatch(subpat, name, flags=re.IGNORECASE):
+        if names == self.roi_names:
+            for i, name in enumerate(self.roi_names):
+                labels[name] = i
+        else:
+            for j, pat in enumerate(names):
+                if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                    break
+                if isinstance(pat, str):
+                    matched = False
+                    for i, name in enumerate(self.roi_names):
+                        if re.fullmatch(pat, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
+                            cur_label += 1
                             matched = True
-                if force_missing and not matched:
-                    key = '_'.join(pat)
-                    labels[key] = cur_label
-                cur_label += 1
+                    if force_missing and not matched:
+                        labels[pat] = cur_label
+                        cur_label += 1
+                else:
+                    matched = False
+                    for subpat in pat:
+                        for name in self.roi_names:
+                            if re.fullmatch(subpat, name, flags=re.IGNORECASE):
+                                labels[name] = cur_label
+                                matched = True
+                    if force_missing and not matched:
+                        key = '_'.join(pat)
+                        labels[key] = cur_label
+                    cur_label += 1
         return labels
 
     def to_segmentation(self, reference_image: sitk.Image,
-            roi_names: Optional[List[Union[str, List[str]]]] = None,
-            force_missing: bool = False) -> Segmentation:
+                        roi_names: Optional[List[Union[str, List[str]]]] = None,
+                        force_missing: bool = False,
+                        continuous: bool = True) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -110,8 +122,9 @@ class StructureSet:
             roi_names = self.roi_names
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-
+       
         labels = self._assign_labels(roi_names, force_missing)
+        print("labels:", labels)
         if not labels:
             raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
 
@@ -121,17 +134,21 @@ class StructureSet:
 
         for name, label in labels.items():
             physical_points = self.roi_points.get(name, np.array([]))
-            if physical_points.size == 0:
+            if len(physical_points) == 0:
                 continue # allow for missing labels, will return a blank slice
 
-            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=True)[:, ::-1]
+            mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
 
-            slices = np.unique(mask_points[:, 0].round().astype(int))
-            for slc in slices:
-                slice_points = mask_points[np.isclose(mask_points[:, 0], slc, atol=1e-1), 1:]
-                slice_mask = polygon2mask(size[1:-1], slice_points)
-                mask[slc, :, :, label] = slice_mask
+            for contour in mask_points:
+                z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
+                if len(z) == 1:
+                    # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                    z = z[0]
+                    slice_mask = polygon2mask(size[1:-1], slice_points)
+                    mask[z, :, :, label] += slice_mask
 
+        
+        mask[mask > 1] = 1        
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
         seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
