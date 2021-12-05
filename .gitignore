@@ -1,3 +1,7 @@
+# data
+examples/data/tcia_n*
+
+# macOS
 .DS_Store
 
 # Created by https://www.gitignore.io/api/emacs,python,jupyternotebooks
