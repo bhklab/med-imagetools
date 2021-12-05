@@ -110,7 +110,7 @@ class ImageAutoInput(BaseInput):
             elif modality=="RTSTRUCT":
                 self.df_combined["roi_names_{}".format(output_stream)] = None
         
-        print(f"Returned user defined modalities has {len(self.df_combined)} cases amongst the crawled data")
+        print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
         self.readers = [read_dicom_auto for i in range(len(self.output_streams))]
 

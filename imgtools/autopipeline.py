@@ -137,7 +137,7 @@ class AutoPipeline(Pipeline):
                 elif conn_to == "PT":
                     mask = self.make_binary_mask(structure_set, pet)
                 else:
-                    raise ValueError("You need to pass CT images or PT images so that mask can be made")
+                    raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 
                 # save output
                 if mult_conn:
@@ -153,7 +153,7 @@ class AutoPipeline(Pipeline):
                     #For cases with no image present
                     pet = read_results[i].resample_pet(image)
                 except:
-                    Warning("No CT image present. Returning PET image without resampling")
+                    Warning("No CT image present. Returning PT/PET image without resampling.")
                     pet = read_results[i]
 
                 if mult_conn!="1":
