@@ -22,7 +22,6 @@ def crawl_one(folder):
             study    = meta.StudyInstanceUID
             series   = meta.SeriesInstanceUID
             instance = meta.SOPInstanceUID
-            reference_frame = meta.FrameofReferenceUID
 
             reference_ct, reference_rs, reference_pl = "", "", ""
             try: #RTSTRUCT
@@ -40,7 +39,15 @@ def crawl_one(folder):
                     reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
                 except:
                     pass
-
+            
+            try:
+                reference_frame = meta.FrameOfReferenceUID
+            except:
+                try:
+                    reference_frame = meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID
+                except:
+                    reference_frame = ""
+    
             try:
                 study_description = meta.StudyDescription
             except:
@@ -90,16 +97,12 @@ def to_df(database_dict):
                                     'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
     return df
 
-def crawl(top, n_jobs=1):
+def crawl(top, 
+          n_jobs: int = -1):
     database_list = []
     folders = glob.glob(os.path.join(top, "*"))
     
-    # crawl folder-by-folder
-    if n_jobs == 1:
-        for n, folder in enumerate(tqdm(folders)):
-            database_list.append(crawl_one(folder))
-    else:
-        database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(os.path.join(top, folder)) for folder in tqdm(folders))
+    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(os.path.join(top, folder)) for folder in tqdm(folders))
 
     # convert list to dictionary
     database_dict = {}
