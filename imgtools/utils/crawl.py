@@ -22,6 +22,7 @@ def crawl_one(folder):
             study    = meta.StudyInstanceUID
             series   = meta.SeriesInstanceUID
             instance = meta.SOPInstanceUID
+            reference_frame = meta.FrameofReferenceUID
 
             reference_ct, reference_rs, reference_pl = "", "", ""
             try: #RTSTRUCT
@@ -62,6 +63,7 @@ def crawl_one(folder):
                                                     'reference_ct': reference_ct,
                                                     'reference_rs': reference_rs,
                                                     'reference_pl': reference_pl,
+                                                    'reference_frame': reference_frame,
                                                     'folder': path}
             database[patient][study][series]['instances'].append(instance)
     
@@ -84,6 +86,7 @@ def to_df(database_dict):
                                     'reference_ct': database_dict[pat][study][series]['reference_ct'],
                                     'reference_rs': database_dict[pat][study][series]['reference_rs'],
                                     'reference_pl': database_dict[pat][study][series]['reference_pl'],
+                                    'reference_frame': database_dict[pat][study][series]['reference_frame'],
                                     'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
     return df
 
