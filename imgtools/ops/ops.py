@@ -66,16 +66,16 @@ class ImageAutoInput(BaseInput):
     Parameters
     ----------
     dir_path: str
-        Top-level of the directory where the whole data is stored. The crawler will start from this directory
+        Path to dataset top-level directory. The crawler/indexer will start at this directory.
 
     modalities: str
-        modalities that you want to process on
+        List of modalities to process. Only samples with ALL modalities will be processed. Make sure there are no space between list elements as it is parsed as a string.
 
     """
     def __init__(self,
                  dir_path: str,
                  modalities: str,
-                 n_jobs:int):
+                 n_jobs: int = -1):
         self.dir_path = dir_path
         self.modalities = modalities
         self.dataset_name = self.dir_path.split("/")[-1]
