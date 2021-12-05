@@ -8,7 +8,7 @@ from argparse import ArgumentParser
 from imgtools.io import read_dicom_auto
 from imgtools.ops import StructureSetToSegmentation, ImageCSVInput, ImageFileOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.datagraph import DataGraph
+from imgtools.modules.datagraph import DataGraph
 
 import SimpleITK as sitk
 
