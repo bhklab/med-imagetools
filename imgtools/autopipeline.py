@@ -81,7 +81,7 @@ class AutoPipeline(Pipeline):
 
         print(subject_id, " start")
         #For counting multiple connections per modality
-        counter = [0 for _ in range(len(self.output_streams))]
+        counter = {"CT":0,"RTDOSE":0,"RTSTRUCT":0,"PT":0}
         
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
@@ -109,22 +109,22 @@ class AutoPipeline(Pipeline):
                 image = self.resample(image)
                 #Saving the output
                 self.output(subject_id, image, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = image.GetSize()
+                self.graph.loc[subject_id, f"size_{output_stream}"] = str(image.GetSize())
                 print(subject_id, " SAVED IMAGE")
             elif modality == "RTDOSE":
                 try: #For cases with no image present
-                    doses = read_results[i].resample_rt(image)
+                    doses = read_results[i].resample_dose(image)
                 except:
                     Warning("No CT image present. Returning dose image without resampling")
                     doses = read_results[i]
                 
                 # save output
-                if mult_conn:
+                if not mult_conn:
                     self.output(subject_id, doses, output_stream)
                 else:
-                    counter[i] = counter[i]+1
-                    self.output(f"{subject_id}_{counter[i]}", doses, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = doses.GetSize()
+                    counter[modality] = counter[modality]+1
+                    self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
+                self.graph.loc[subject_id, f"size_{output_stream}"] = str(doses.GetSize())
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -140,12 +140,12 @@ class AutoPipeline(Pipeline):
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 
                 # save output
-                if mult_conn:
+                if not mult_conn:
                     self.output(subject_id, mask, output_stream)
                 else:
-                    counter[i] = counter[i] + 1
-                    self.output(f"{subject_id}_{counter[i]}", mask, output_stream)
-                self.graph.loc[subject_id, f"roi_names_{output_stream}"] = structure_set.roi_names
+                    counter[modality] = counter[i] + 1
+                    self.output(f"{subject_id}_{counter[modality]}", mask, output_stream)
+                self.graph.loc[subject_id, f"roi_names_{output_stream}"] = str(structure_set.roi_names)
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
@@ -156,12 +156,12 @@ class AutoPipeline(Pipeline):
                     Warning("No CT image present. Returning PT/PET image without resampling.")
                     pet = read_results[i]
 
-                if mult_conn!="1":
+                if not mult_conn:
                     self.output(subject_id, pet, output_stream)
                 else:
-                    counter[i] = counter[i] + 1
-                    self.output(f"{subject_id}_{counter[i]}", pet, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = pet.GetSize()
+                    counter[modality] = counter[modality] + 1
+                    self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
+                self.graph.loc[subject_id, f"size_{output_stream}"] = str(pet.GetSize())
                 print(subject_id, " SAVED PET")
         return
 
