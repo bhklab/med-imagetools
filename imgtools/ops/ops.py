@@ -100,6 +100,7 @@ class ImageAutoInput(BaseInput):
         self.df_combined = graph.parser(self.modalities)
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
+        self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="series"]
         
         #Initilizations for the pipeline
         for colnames in self.output_streams:
@@ -116,6 +117,7 @@ class ImageAutoInput(BaseInput):
 
         loader = ImageCSVLoader(self.df_combined,
                                 colnames=self.column_names,
+                                seriesnames=self.series_names,
                                 id_column=None,
                                 expand_paths=True,
                                 readers=self.readers) 
