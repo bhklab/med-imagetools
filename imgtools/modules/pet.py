@@ -1,10 +1,12 @@
-import pydicom
-from matplotlib import pyplot as plt
 import os
-import numpy as np
-import SimpleITK as sitk
 import warnings
 import datetime
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+import SimpleITK as sitk
+from pydicom import dcmread
 
 def read_image(path):
     reader = sitk.ImageSeriesReader()
@@ -37,7 +39,7 @@ class PET(sitk.Image):
         '''
         pet      = read_image(path)
         path_one = os.path.join(path,os.listdir(path)[0])
-        df       = pydicom.dcmread(path_one)
+        df       = dcmread(path_one)
         try:
             if type=="SUV":
                 factor = df.to_json_dict()['70531000']["Value"][0]
