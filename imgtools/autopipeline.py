@@ -1,7 +1,4 @@
 import os
-import glob
-from numpy import mod
-import pandas as pd
 
 from argparse import ArgumentParser
 
@@ -10,7 +7,7 @@ from imgtools.pipeline import Pipeline
 
 import SimpleITK as sitk
 
-import warnings
+from joblib import Parallel, delayed
 
 
 ###############################################################
@@ -51,7 +48,7 @@ class AutoPipeline(Pipeline):
         self.input = ImageAutoInput(input_directory, modalities, n_jobs)
 
         #For the pipeline
-        self.graph = self.input.df_combined.copy()
+        self.output_df = self.input.df_combined
         self.output_streams = self.input.output_streams
         
         # image processing ops
@@ -71,7 +68,7 @@ class AutoPipeline(Pipeline):
         Parameters
         ----------
         subject_id : str
-           The ID of currently processed subjectsqusqueue
+           The ID of subject to process
         """
 
         print("Processing:", subject_id)
@@ -83,6 +80,7 @@ class AutoPipeline(Pipeline):
         #For counting multiple connections per modality
         counter = [0 for _ in range(len(self.output_streams))]
         
+        metadata = {}
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
 
@@ -109,7 +107,7 @@ class AutoPipeline(Pipeline):
                 image = self.resample(image)
                 #Saving the output
                 self.output(subject_id, image, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = image.GetSize()
+                metadata[f"size_{output_stream}"] = image.GetSize()
                 print(subject_id, " SAVED IMAGE")
             elif modality == "RTDOSE":
                 try: #For cases with no image present
@@ -124,7 +122,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i]+1
                     self.output(f"{subject_id}_{counter[i]}", doses, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = doses.GetSize()
+                metadata[f"size_{output_stream}"] = doses.GetSize()
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -145,7 +143,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i] + 1
                     self.output(f"{subject_id}_{counter[i]}", mask, output_stream)
-                self.graph.loc[subject_id, f"roi_names_{output_stream}"] = structure_set.roi_names
+                metadata[f"roi_names_{output_stream}"] = structure_set.roi_names
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
@@ -161,9 +159,31 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[i] = counter[i] + 1
                     self.output(f"{subject_id}_{counter[i]}", pet, output_stream)
-                self.graph.loc[subject_id, f"size_{output_stream}"] = pet.GetSize()
+                metadata[f"size_{output_stream}"] = pet.GetSize()
                 print(subject_id, " SAVED PET")
-        return
+        return {subject_id: metadata}
+    
+    def save_data(self, outputs):
+        for dicts in outputs:
+            for subject_id in dicts:
+                metadata = dicts[subject_id]
+                self.output_df.loc[subject_id, metadata.keys()] = metadata.values()
+        self.output_df.to_csv(os.path.join(self.output_directory, "dataset.csv"))
+
+    def run(self):
+        """Execute the pipeline, possibly in parallel.
+        """
+        # Joblib prints progress to stdout if verbose > 50
+        verbose = 51 if self.show_progress else 0
+
+        subject_ids = self._get_loader_subject_ids()
+        # Note that returning any SimpleITK object in process_one_subject is
+        # not supported yet, since they cannot be pickled
+        outputs = Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+            delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+
+        self.save_data(outputs)
+        
 
 if __name__ == "__main__":
     parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
@@ -196,12 +216,7 @@ if __name__ == "__main__":
                             show_progress=args.show_progress)
 
     print(f'starting Pipeline...')
-    if args.n_jobs > 1 or args.n_jobs == -1:     # == Parallel Processing == 
-        pipeline.run()
-        pipeline.graph.to_csv(os.path.join(args.output_directory, "dataset.csv"))
-    elif args.n_jobs == 1:                       # == Series (Single-core) Processing ==
-        subject_ids = pipeline._get_loader_subject_ids()
-        for subject_id in subject_ids:
-            pipeline.process_one_subject(subject_id)
+    pipeline.run()
+
 
     print(f'finished Pipeline!')
