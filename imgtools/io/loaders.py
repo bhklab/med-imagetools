@@ -28,8 +28,8 @@ def read_header(path):
     return nrrd.read_header(path)
 
 def read_dicom_series(path: str,
-                      recursive: bool = False,
-                      series_id: Optional[str] = None) -> sitk.Image:
+                      series_id: Optional[str] = None,
+                      recursive: bool = False) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -75,19 +75,19 @@ def read_dicom_rtstruct(path):
 def read_dicom_rtdose(path):
     return Dose.from_dicom_rtdose(path)
 
-def read_dicom_pet(path):
-    return PET.from_dicom_pet(path, "SUV")
+def read_dicom_pet(path,series=None):
+    return PET.from_dicom_pet(path,series, "SUV")
 
-def read_dicom_auto(path):
+def read_dicom_auto(path,series=None):
     if path is None:
         return None
     dcms = glob.glob(os.path.join(path, "*.dcm"))
     meta = dcmread(dcms[0])
     modality = meta.Modality
     if modality == 'CT':
-        return read_dicom_series(path)
+        return read_dicom_series(path,series)
     elif modality == 'PT':
-        return read_dicom_pet(path)
+        return read_dicom_pet(path,series)
     # elif len(dcms) == 1:
     #     meta = dcmread(dcms[0])
     #     modality = meta.Modality
@@ -132,6 +132,7 @@ class ImageCSVLoader(BaseLoader):
     def __init__(self,
                  csv_path_or_dataframe,
                  colnames=[],
+                 seriesnames=[],
                  id_column=None,
                  expand_paths=False,
                  readers=[read_image]):
@@ -140,12 +141,12 @@ class ImageCSVLoader(BaseLoader):
         self.readers = readers
 
         self.colnames = colnames
+        self.seriesnames = seriesnames
 
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in colnames:
                 colnames.append(id_column)
             self.paths = pd.read_csv(csv_path_or_dataframe,
-                                     usecols=colnames,
                                      index_col=id_column)
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
             self.paths = csv_path_or_dataframe
@@ -164,10 +165,11 @@ class ImageCSVLoader(BaseLoader):
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
         paths = {col: row[col] for col in self.colnames}
+        series = {col: row[col] for col in self.seriesnames}
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
-        outputs = {col: self.readers[i](path) for i, (col, path) in enumerate(paths.items())}
+        outputs = {col: self.readers[i](path,series["series_"+("_").join(col.split("_")[1:])]) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)
 
     def keys(self):
