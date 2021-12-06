@@ -1,10 +1,13 @@
-import pydicom
-from matplotlib import pyplot as plt
 import os
-import glob
-import numpy as np
-import SimpleITK as sitk
 import warnings
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+import SimpleITK as sitk
+from pydicom import dcmread
+
+
 
 def read_image(path):
     reader = sitk.ImageSeriesReader()
@@ -32,7 +35,7 @@ class Dose(sitk.Image):
 
         #Get the metadata
         dcm_path = os.path.join(path, os.listdir(path)[0])
-        df = pydicom.dcmread(dcm_path)
+        df = dcmread(dcm_path)
 
         #Convert to SUV
         factor = float(df.DoseGridScaling)
