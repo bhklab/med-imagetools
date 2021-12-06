@@ -33,7 +33,7 @@ def image_to_array(image):
 def show_image(image, mask=None, ax=None):
     import matplotlib.pyplot as plt
     if ax is None:
-        fig, ax = plt.subplots()
+        ax = plt.subplots()
 
     image_array, *_ = image_to_array(image)
 
