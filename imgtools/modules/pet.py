@@ -5,10 +5,12 @@ import numpy as np
 import SimpleITK as sitk
 import warnings
 import datetime
+from typing import Optional
 
-def read_image(path):
+
+def read_image(path:str,series_id: Optional[str]=None):
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path)
+    dicom_names = reader.GetGDCMSeriesFileNames(path,seriesID=series_id if series_id else "")
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -22,7 +24,7 @@ class PET(sitk.Image):
         self.df = df
     
     @classmethod
-    def from_dicom_pet(cls, path, type="SUV"):
+    def from_dicom_pet(cls, path,series_id=None,type="SUV"):
         '''
         Reads the PET scan and returns the data frame and the image dosage in SITK format
         There are two types of existing formats which has to be mentioned in the type
@@ -35,7 +37,7 @@ class PET(sitk.Image):
         If there is no data on SUV/ACT then backup calculation is done based on the formula in the documentation, although, it may
         have some error.
         '''
-        pet      = read_image(path)
+        pet      = read_image(path,series_id)
         path_one = os.path.join(path,os.listdir(path)[0])
         df       = pydicom.dcmread(path_one)
         try:
