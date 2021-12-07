@@ -5,12 +5,11 @@ from typing import Dict, List, Optional, Union
 import numpy as np
 import SimpleITK as sitk
 from pydicom import dcmread
-from itertools import chain, groupby
+from itertools import groupby
 from skimage.draw import polygon2mask
 
 from .segmentation import Segmentation
 from ..utils import physical_points_to_idxs
-from ..utils import array_to_image
 
 
 def _get_roi_points(rtstruct, roi_index):
