@@ -92,7 +92,7 @@ class ImageAutoInput(BaseInput):
 
         ####### GRAPH ##########
         # Form the graph
-        edge_path = os.path.join(self.parent,f"/imgtools_{self.dataset_name}_edges.csv")
+        edge_path = os.path.join(self.parent,f"imgtools_{self.dataset_name}_edges.csv")
         graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
