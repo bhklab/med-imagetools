@@ -72,7 +72,7 @@ class Dose(sitk.Image):
         plt.imshow(dose_arr[slice_number,:,:], cmap=plt.cm.hot, alpha=.4)
         return fig
         
-    def form_DVH(self):
+    def get_metadata(self):
         '''
         Forms Dose-Value Histogram (DVH) from DICOM metadata
         {
