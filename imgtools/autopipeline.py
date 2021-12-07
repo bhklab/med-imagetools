@@ -123,6 +123,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality]+1
                     self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
+                metadata[f"metadata_{output_stream}"] = str(doses.get_metadata())
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -160,6 +161,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality] + 1
                     self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
+                metadata[f"metadata_{output_stream}"] = str(pet.get_metadata())
                 print(subject_id, " SAVED PET")
         return {subject_id: metadata}
     
