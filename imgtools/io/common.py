@@ -1,17 +1,7 @@
 import os
-import glob
-import re
-from typing import Optional
-from collections import namedtuple
-from itertools import chain
 
-import numpy as np
-import pandas as pd
-import SimpleITK as sitk
-from pydicom import dcmread
 from pydicom.misc import is_dicom
 
-from ..utils import image_to_array
 
 
 
@@ -35,7 +25,7 @@ def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
 
     """
     # TODO add some filtering options
-    for root, dirs, files in os.walk(root_path):
+    for root, _, files in os.walk(root_path):
         if yield_directories:
             if any((is_dicom(os.path.join(root, f)) for f in files)):
                 yield root
