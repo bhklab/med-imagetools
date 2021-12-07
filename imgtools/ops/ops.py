@@ -1,6 +1,4 @@
-from posixpath import expanduser
 from typing import List, TypeVar, Sequence, Union, Tuple, Optional, Any
-from itertools import chain
 
 import numpy as np
 import SimpleITK as sitk

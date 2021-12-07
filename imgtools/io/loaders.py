@@ -3,10 +3,8 @@ import glob
 import re
 from typing import Optional, List
 from collections import namedtuple
-from itertools import chain
 import json
 
-import numpy as np
 import pandas as pd
 import SimpleITK as sitk
 import nrrd
