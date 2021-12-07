@@ -19,7 +19,8 @@ def dataset_path():
     output_path = curr_path+ "/tests/"
     return input_path,output_path
 
-@pytest.mark.parametrize("modalities",["PT","CT,RTDOSE","CT,RTSTRUCT,RTDOSE","CT,RTSTRUCT,RTDOSE,PT"])
+# @pytest.mark.parametrize("modalities",["PT","CT,RTDOSE","CT,RTSTRUCT,RTDOSE","CT,RTSTRUCT,RTDOSE,PT"])
+@pytest.mark.parametrize("modalities",["CT,PT,RTDOSE"])
 def test_pipeline(dataset_path,modalities):
     input_path,output_path = dataset_path
     n_jobs = 2
@@ -39,7 +40,7 @@ def test_pipeline(dataset_path,modalities):
     #for the test example, there are 6 files and 4 connections
     crawl_data = pd.read_csv(crawl_path,index_col = 0)
     edge_data = pd.read_csv(edge_path)
-    assert (len(crawl_data)==7) & (len(edge_data)==4), "this breaks because there was some error in crawling or while making the edge table"
+    assert (len(crawl_data)==6) & (len(edge_data)==4), "this breaks because there was some error in crawling or while making the edge table"
 
     #Check if the dataset.csv is having the correct number of components and has all the fields
     comp_table = pd.read_csv(comp_path)
@@ -56,6 +57,14 @@ def test_pipeline(dataset_path,modalities):
         dicom_ct,_ = nrrd.read(path_ct)
         dicom_dose,_ = nrrd.read(path_dose)
         assert dicom_ct.shape == dicom_dose.shape
+    elif modalities=="CT,PT,RTDOSE":
+        path_ct = output_path_mod + "/image/" + os.listdir(output_path_mod+"/image")[0]
+        path_dose = output_path_mod + "/dose/" + os.listdir(output_path_mod+"/dose")[0]
+        path_pet = output_path_mod + "/pet/" + os.listdir(output_path_mod+"/pet")[0]
+        dicom_ct,_ = nrrd.read(path_ct)
+        dicom_dose,_ = nrrd.read(path_dose)
+        dicom_pet,_ = nrrd.read(path_pet)
+        assert dicom_ct.shape == dicom_dose.shape == dicom_pet.shape
     elif modalities=="CT,RTSTRUCT,RTDOSE":
         path_ct = output_path_mod + "/image/" + os.listdir(output_path_mod+"/image")[0]
         path_dose = output_path_mod + "/dose/" + os.listdir(output_path_mod+"/dose")[0]
@@ -81,6 +90,6 @@ def test_pipeline(dataset_path,modalities):
         os.remove(crawl_path)
         os.remove(json_path)
         os.remove(edge_path)
-    shutil.rmtree(output_path_mod)
+    # shutil.rmtree(output_path_mod)
 
 
