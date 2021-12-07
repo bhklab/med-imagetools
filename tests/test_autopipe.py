@@ -28,13 +28,7 @@ def test_pipeline(dataset_path,modalities):
     pipeline = AutoPipeline(input_path,output_path_mod,modalities,n_jobs=n_jobs)
     #Run for different modalities
     comp_path = os.path.join(output_path_mod, "dataset.csv")
-    if n_jobs > 1 or n_jobs == -1:     # == Parallel Processing ==
-        pipeline.run()
-    elif n_jobs == 1:                       # == Series (Single-core) Processing ==
-        subject_ids = pipeline._get_loader_subject_ids()
-        for subject_id in subject_ids:
-            pipeline.process_one_subject(subject_id)
-    pipeline.graph.to_csv(comp_path)
+    pipeline.run()
 
     #Check if the crawl and edges exist
     crawl_path = ("/").join(input_path.split("/")[:-1]) + "/imgtools_" + input_path.split("/")[-1] + ".csv"

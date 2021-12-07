@@ -92,7 +92,7 @@ class ImageAutoInput(BaseInput):
 
         ####### GRAPH ##########
         # Form the graph
-        edge_path = self.parent+"/imgtools_{}_edges.csv".format(self.dataset_name)
+        edge_path = os.path.join(self.parent,f"/imgtools_{self.dataset_name}_edges.csv")
         graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
@@ -106,6 +106,8 @@ class ImageAutoInput(BaseInput):
             modality = colnames.split("_")[0]
             if modality in ["PT","CT","RTDOSE"]:
                 self.df_combined["size_{}".format(output_stream)] = None
+                if modality!="CT":
+                    self.df_combined["metadata_{}".format(output_stream)] = None
             elif modality=="RTSTRUCT":
                 self.df_combined["roi_names_{}".format(output_stream)] = None
         
