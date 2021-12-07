@@ -6,6 +6,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 
 import SimpleITK as sitk
+import pandas as pd
 
 from joblib import Parallel, delayed
 
@@ -48,7 +49,11 @@ class AutoPipeline(Pipeline):
         self.input = ImageAutoInput(input_directory, modalities, n_jobs)
 
         #For the pipeline
-        self.output_df = self.input.df_combined
+        self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
+        if os.path.exists(self.output_df_path):
+            self.output_df = pd.read_csv(self.output_df_path)
+        else:
+            self.output_df = self.input.df_combined
         self.output_streams = self.input.output_streams
         
         # image processing ops
@@ -123,7 +128,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality]+1
                     self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(doses.get_metadata())
+                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -161,7 +166,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality] + 1
                     self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(pet.get_metadata())
+                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
                 print(subject_id, " SAVED PET")
         return {subject_id: metadata}
     
@@ -169,9 +174,21 @@ class AutoPipeline(Pipeline):
         for dicts in outputs:
             for subject_id in dicts:
                 metadata = dicts[subject_id]
-                self.output_df.loc[subject_id, metadata.keys()] = metadata.values()
+                self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
         self.output_df.to_csv(os.path.join(self.output_directory, "dataset.csv"))
 
+    def _process_wrapper(self, subject_id):
+        try:
+            output = self.process_one_subject(subject_id)
+            return output
+        except Exception as e:
+            print(output)
+            message = f"{type(e).__name__} while processing subject {subject_id}: " + str(e)
+            if self.warn_on_error:
+                warnings.warn(message, category=RuntimeWarning)
+            else:
+                raise RuntimeError(message) from e
+                
     def run(self):
         """Execute the pipeline, possibly in parallel.
         """
@@ -183,7 +200,6 @@ class AutoPipeline(Pipeline):
         # not supported yet, since they cannot be pickled
         outputs = Parallel(n_jobs=self.n_jobs, verbose=verbose)(
             delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-
         self.save_data(outputs)
         
 
