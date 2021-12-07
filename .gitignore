@@ -200,3 +200,4 @@ examples/process_one.py
 .vscode
 
 tests/temp_folder*
+examples/data_test
