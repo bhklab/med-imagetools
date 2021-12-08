@@ -4,6 +4,12 @@ examples/data/tcia_n*
 # macOS
 .DS_Store
 
+__pycache__
+.pytest_cache
+*.egg-info
+*.csv
+*.json
+
 # Created by https://www.gitignore.io/api/emacs,python,jupyternotebooks
 # Edit at https://www.gitignore.io/?templates=emacs,python,jupyternotebooks
 
@@ -193,4 +199,5 @@ examples/process_one.py
 
 .vscode
 
-*__pycache__
+tests/temp_folder*
+examples/data_test
