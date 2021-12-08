@@ -50,10 +50,7 @@ class AutoPipeline(Pipeline):
         
         self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
         #Output component table
-        if os.path.exists(self.output_df_path):
-            self.output_df = pd.read_csv(self.output_df_path)
-        else:
-            self.output_df = self.input.df_combined
+        self.output_df = self.input.df_combined
         #Name of the important columns which needs to be saved    
         self.output_streams = self.input.output_streams
         
@@ -63,7 +60,7 @@ class AutoPipeline(Pipeline):
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
-        
+
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -77,6 +74,10 @@ class AutoPipeline(Pipeline):
         subject_id : str
            The ID of subject to process
         """
+        #Check if the subject_id has already been processed
+        if os.path.exists(os.path.join(self.output_directory,f'temp_{subject_id}.txt')):
+            print(f"{subject_id} already processed")
+            return 
 
         print("Processing:", subject_id)
 
@@ -173,27 +174,17 @@ class AutoPipeline(Pipeline):
         #Saving all the metadata in multiple text files
         with open(os.path.join(self.output_directory,f'temp_{subject_id}.txt'),'w') as f:
             f.write(str(metadata))
-        return {subject_id: metadata}
+        return 
     
     def save_data(self):
         files = glob.glob(os.path.join(self.output_directory,"*.txt"))
         for file in files:
-            subject_id = file.replace("/","_").replace(".","_").split("_")[-2]
-            A = file.open(files,"r").readlines()
+            subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
+            A = open(file,"r").readlines()
             metadata = ast.literal_eval(A[0])
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
-        self.output_df.to_csv(self.output_df_path,mode="a",header=False)
-
-    def _process_wrapper(self, subject_id):
-        try:
-            output = self.process_one_subject(subject_id)
-            return output
-        except Exception as e:
-            message = f"{type(e).__name__} while processing subject {subject_id}: " + str(e)
-            if self.warn_on_error:
-                warnings.warn(message, category=RuntimeWarning)
-            else:
-                raise RuntimeError(message) from e
+            os.remove(file)
+        self.output_df.to_csv(self.output_df_path)
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -204,14 +195,12 @@ class AutoPipeline(Pipeline):
         subject_ids = self._get_loader_subject_ids()
         # Note that returning any SimpleITK object in process_one_subject is
         # not supported yet, since they cannot be pickled
-        try:
-            outputs = Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-                delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+        if os.path.exists(self.output_df_path):
+            print("Dataset already processed...")
+        else:
+            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             self.save_data()
-        except Exception as e:
-            self.save_data()
-            raise RuntimeError(str(e))
-        # self.save_data(outputs)
         
 
 if __name__ == "__main__":
