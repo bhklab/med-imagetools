@@ -19,8 +19,8 @@ def dataset_path():
     output_path = curr_path+ "/tests/"
     return input_path,output_path
 
-# @pytest.mark.parametrize("modalities",["PT","CT,RTDOSE","CT,RTSTRUCT,RTDOSE","CT,RTSTRUCT,RTDOSE,PT"])
-@pytest.mark.parametrize("modalities",["CT,PT,RTDOSE"])
+@pytest.mark.parametrize("modalities",["PT","CT,RTDOSE","CT,PT,RTDOSE","CT,RTSTRUCT,RTDOSE","CT,RTSTRUCT,RTDOSE,PT"])
+# @pytest.mark.parametrize("modalities",["CT,PT,RTDOSE"])
 def test_pipeline(dataset_path,modalities):
     input_path,output_path = dataset_path
     n_jobs = 2
