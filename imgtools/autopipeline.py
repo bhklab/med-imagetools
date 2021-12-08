@@ -6,10 +6,11 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 
 import SimpleITK as sitk
-
+import pandas as pd
+import warnings
 from joblib import Parallel, delayed
-
-
+import glob
+import ast
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -46,9 +47,11 @@ class AutoPipeline(Pipeline):
 
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs)
-
-        #For the pipeline
+        
+        self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
+        #Output component table
         self.output_df = self.input.df_combined
+        #Name of the important columns which needs to be saved    
         self.output_streams = self.input.output_streams
         
         # image processing ops
@@ -57,6 +60,7 @@ class AutoPipeline(Pipeline):
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
+
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -70,6 +74,10 @@ class AutoPipeline(Pipeline):
         subject_id : str
            The ID of subject to process
         """
+        #Check if the subject_id has already been processed
+        if os.path.exists(os.path.join(self.output_directory,f'temp_{subject_id}.txt')):
+            print(f"{subject_id} already processed")
+            return 
 
         print("Processing:", subject_id)
 
@@ -78,7 +86,7 @@ class AutoPipeline(Pipeline):
 
         print(subject_id, " start")
         #For counting multiple connections per modality
-        counter = [0 for _ in range(len(self.output_streams))]
+        counter = {"CT":0,"RTDOSE":0,"RTSTRUCT":0,"PT":0}
         
         metadata = {}
         for i, colname in enumerate(self.output_streams):
@@ -107,22 +115,23 @@ class AutoPipeline(Pipeline):
                 image = self.resample(image)
                 #Saving the output
                 self.output(subject_id, image, output_stream)
-                metadata[f"size_{output_stream}"] = image.GetSize()
+                metadata[f"size_{output_stream}"] = str(image.GetSize())
                 print(subject_id, " SAVED IMAGE")
             elif modality == "RTDOSE":
                 try: #For cases with no image present
-                    doses = read_results[i].resample_rt(image)
+                    doses = read_results[i].resample_dose(image)
                 except:
                     Warning("No CT image present. Returning dose image without resampling")
                     doses = read_results[i]
                 
                 # save output
-                if mult_conn:
+                if not mult_conn:
                     self.output(subject_id, doses, output_stream)
                 else:
-                    counter[i] = counter[i]+1
-                    self.output(f"{subject_id}_{counter[i]}", doses, output_stream)
-                metadata[f"size_{output_stream}"] = doses.GetSize()
+                    counter[modality] = counter[modality]+1
+                    self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
+                metadata[f"size_{output_stream}"] = str(doses.GetSize())
+                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -138,12 +147,12 @@ class AutoPipeline(Pipeline):
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 
                 # save output
-                if mult_conn:
+                if not mult_conn:
                     self.output(subject_id, mask, output_stream)
                 else:
-                    counter[i] = counter[i] + 1
-                    self.output(f"{subject_id}_{counter[i]}", mask, output_stream)
-                metadata[f"roi_names_{output_stream}"] = structure_set.roi_names
+                    counter[modality] = counter[modality] + 1
+                    self.output(f"{subject_id}_{counter[modality]}", mask, output_stream)
+                metadata[f"roi_names_{output_stream}"] = str(structure_set.roi_names)
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
@@ -154,21 +163,28 @@ class AutoPipeline(Pipeline):
                     Warning("No CT image present. Returning PT/PET image without resampling.")
                     pet = read_results[i]
 
-                if mult_conn!="1":
+                if not mult_conn:
                     self.output(subject_id, pet, output_stream)
                 else:
-                    counter[i] = counter[i] + 1
-                    self.output(f"{subject_id}_{counter[i]}", pet, output_stream)
-                metadata[f"size_{output_stream}"] = pet.GetSize()
+                    counter[modality] = counter[modality] + 1
+                    self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
+                metadata[f"size_{output_stream}"] = str(pet.GetSize())
+                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
                 print(subject_id, " SAVED PET")
-        return {subject_id: metadata}
+        #Saving all the metadata in multiple text files
+        with open(os.path.join(self.output_directory,f'temp_{subject_id}.txt'),'w') as f:
+            f.write(str(metadata))
+        return 
     
-    def save_data(self, outputs):
-        for dicts in outputs:
-            for subject_id in dicts:
-                metadata = dicts[subject_id]
-                self.output_df.loc[subject_id, metadata.keys()] = metadata.values()
-        self.output_df.to_csv(os.path.join(self.output_directory, "dataset.csv"))
+    def save_data(self):
+        files = glob.glob(os.path.join(self.output_directory,"*.txt"))
+        for file in files:
+            subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
+            A = open(file,"r").readlines()
+            metadata = ast.literal_eval(A[0])
+            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
+            os.remove(file)
+        self.output_df.to_csv(self.output_df_path)
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -179,10 +195,12 @@ class AutoPipeline(Pipeline):
         subject_ids = self._get_loader_subject_ids()
         # Note that returning any SimpleITK object in process_one_subject is
         # not supported yet, since they cannot be pickled
-        outputs = Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-
-        self.save_data(outputs)
+        if os.path.exists(self.output_df_path):
+            print("Dataset already processed...")
+        else:
+            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            self.save_data()
         
 
 if __name__ == "__main__":

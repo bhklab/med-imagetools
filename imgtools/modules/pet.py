@@ -1,16 +1,15 @@
 import os
 import warnings
 import datetime
-
+from typing import Optional
 import numpy as np
 from matplotlib import pyplot as plt
-
 import SimpleITK as sitk
 from pydicom import dcmread
 
-def read_image(path):
+def read_image(path:str,series_id: Optional[str]=None):
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path)
+    dicom_names = reader.GetGDCMSeriesFileNames(path,seriesID=series_id if series_id else "")
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -18,13 +17,15 @@ def read_image(path):
     return reader.Execute()
 
 class PET(sitk.Image):
-    def __init__(self, img_pet, df):
+    def __init__(self, img_pet, df, factor, calc):
         super().__init__(img_pet)
         self.img_pet = img_pet
         self.df = df
+        self.factor = factor
+        self.calc = calc
     
     @classmethod
-    def from_dicom_pet(cls, path, type="SUV"):
+    def from_dicom_pet(cls, path,series_id=None,type="SUV"):
         '''
         Reads the PET scan and returns the data frame and the image dosage in SITK format
         There are two types of existing formats which has to be mentioned in the type
@@ -37,9 +38,10 @@ class PET(sitk.Image):
         If there is no data on SUV/ACT then backup calculation is done based on the formula in the documentation, although, it may
         have some error.
         '''
-        pet      = read_image(path)
+        pet      = read_image(path,series_id)
         path_one = os.path.join(path,os.listdir(path)[0])
         df       = dcmread(path_one)
+        calc     = False
         try:
             if type=="SUV":
                 factor = df.to_json_dict()['70531000']["Value"][0]
@@ -48,11 +50,12 @@ class PET(sitk.Image):
         except:
             warnings.warn("Scale factor not available in DICOMs. Calculating based on metadata, may contain errors")
             factor = cls.calc_factor(df,type)
+            calc = True
         img_pet = sitk.Cast(pet, sitk.sitkFloat32)
 
         #SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
-        return cls(img_pet, df)
+        return cls(img_pet, df, factor, calc)
         
     def get_metadata(self):
         '''
@@ -63,15 +66,24 @@ class PET(sitk.Image):
             weight (in kg): PatientWeight
             half_life (in seconds): RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
             injected_dose: RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
+            Values_Assumed: True when some values are not available and are assumed for the calculation of SUV factor
+            factor: factor used for rescaling to bring it to SUV or ACT
         }
         '''
         self.metadata = {}
-        self.metadata["weight"] = float(self.df.PatientWeight)
-        self.metadata["scan_time"] = float(self.df.AcquisitionTime) / 1000
-        self.metadata["injection_time"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime) / 1000
-        self.metadata["half_life"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
-        self.metadata["injected_dose"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
-        
+        try:
+            self.metadata["weight"] = float(self.df.PatientWeight)
+        except:
+            pass
+        try:
+            self.metadata["scan_time"] = datetime.datetime.strptime(self.df.AcquisitionTime, '%H%M%S.%f')
+            self.metadata["injection_time"] = datetime.datetime.strptime(self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime, '%H%M%S.%f')
+            self.metadata["half_life"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
+            self.metadata["injected_dose"] = float(self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose)
+        except:
+            pass
+        self.metadata["factor"] = self.factor
+        self.metadata["Values_Assumed"] = self.calc
         return self.metadata
 
     def resample_pet(self,
