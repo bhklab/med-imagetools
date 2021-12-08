@@ -85,15 +85,14 @@ class Pipeline:
 
     def _process_wrapper(self, subject_id):
         try:
-            output = self.process_one_subject(subject_id)
-            return output
+            self.process_one_subject(subject_id)
         except Exception as e:
-            print(output)
             message = f"{type(e).__name__} while processing subject {subject_id}: " + str(e)
             if self.warn_on_error:
                 warnings.warn(message, category=RuntimeWarning)
             else:
                 raise RuntimeError(message) from e
+
     def run(self):
         """Execute the pipeline, possibly in parallel.
         """
