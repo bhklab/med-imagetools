@@ -413,9 +413,11 @@ class DataGraph:
     def _check_save(save_dict,node,dest):
         key = f"folder_{node}_{dest}"
         key_series = f"series_{node}_{dest}"
-        if key in save_dict.keys():
-            key = key + "_1"
-            key_series = key_series + "_1"
+        i = 1
+        while key in save_dict.keys():
+            key = f"folder_{node}_{dest}_{i}"
+            key_series = f"series_{node}_{dest}_{i}"
+            i+=1
         return key,key_series
     
     @staticmethod
