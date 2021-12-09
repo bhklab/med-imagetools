@@ -56,10 +56,10 @@ class Dataset(tio.SubjectsDataset):
             temp = {}
             for col in output_streams:
                 extension = file_names[col]
-                mult_conn = col.split("_")[-1] == "1"
+                mult_conn = col.split("_")[-1].isnumeric()
                 metadata_name = f"metadata_{col}"
                 if mult_conn:
-                    extra = str(col.split("_").count("1"))+"_"
+                    extra = col.split("_")[-1]+"_"
                 else:
                     extra = ""
                 path_mod = os.path.join(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
@@ -127,7 +127,7 @@ class Dataset(tio.SubjectsDataset):
             output_stream = ("_").join([item for item in colname.split("_") if item != "1"])
 
             if read_results[i] is None:
-                pass
+                temp[f"mod_{colname}"] = None
             elif modality == "CT":
                 image = read_results[i]
                 if len(image.GetSize()) == 4:
