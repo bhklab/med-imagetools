@@ -11,6 +11,9 @@ import warnings
 from joblib import Parallel, delayed
 import glob
 import ast
+import datetime
+import numpy as np
+import json
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -61,6 +64,10 @@ class AutoPipeline(Pipeline):
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
 
+        #Make a directory
+        if not os.path.exists(os.path.join(self.output_directory,".temp")):
+            os.mkdir(os.path.join(self.output_directory,".temp"))
+
 
     def process_one_subject(self, subject_id):
         """Define the processing operations for one subject.
@@ -75,7 +82,7 @@ class AutoPipeline(Pipeline):
            The ID of subject to process
         """
         #Check if the subject_id has already been processed
-        if os.path.exists(os.path.join(self.output_directory,f'temp_{subject_id}.txt')):
+        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json')):
             print(f"{subject_id} already processed")
             return 
 
@@ -172,16 +179,16 @@ class AutoPipeline(Pipeline):
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        with open(os.path.join(self.output_directory,f'temp_{subject_id}.txt'),'w') as f:
-            f.write(str(metadata))
+        with open(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json'),'w') as f:
+            json.dump(metadata,f)
         return 
     
     def save_data(self):
-        files = glob.glob(os.path.join(self.output_directory,"*.txt"))
+        files = glob.glob(os.path.join(self.output_directory,".temp","*.json"))
         for file in files:
             subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
-            A = open(file,"r").readlines()
-            metadata = ast.literal_eval(A[0])
+            with open(file) as f:
+                metadata = json.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
             os.remove(file)
         self.output_df.to_csv(self.output_df_path)
