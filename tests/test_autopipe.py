@@ -91,6 +91,6 @@ def test_pipeline(dataset_path,modalities):
         os.remove(crawl_path)
         os.remove(json_path)
         os.remove(edge_path)
-    # shutil.rmtree(output_path_mod)
+    shutil.rmtree(output_path_mod)
 
 
