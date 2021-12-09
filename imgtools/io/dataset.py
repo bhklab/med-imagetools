@@ -4,10 +4,10 @@ import numpy as np
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 import torchio as tio
 import pandas as pd
-from . import file_name_convention
-from ..ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
-# from imgtools.io import file_name_convention
-# from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
+# from . import file_name_convention
+# from ..ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
+from imgtools.io import file_name_convention
+from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
 from tqdm import tqdm
 from joblib import Parallel, delayed
 import SimpleITK as sitk
@@ -145,7 +145,7 @@ class Dataset(tio.SubjectsDataset):
                     Warning("No CT image present. Returning dose image without resampling")
                     doses = read_results[i]
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(doses)
-                temp[f"metadata_{colname}"] = str(read_results[i].get_metadata())
+                temp[f"metadata_{colname}"] = read_results[i].get_metadata()
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
