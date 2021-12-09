@@ -127,8 +127,8 @@ class Dose(sitk.Image):
                 self.dvh[ROI_reference]["total_vol"] = tot_vol
         except:
             # TO-DO: more nuanced error catch instead of returning None
-            warnings.warn("No DVH information present in the DICOM. Returning None")
-            self.dvh = None
+            warnings.warn("No DVH information present in the DICOM. Returning empty dictionary")
+            self.dvh = {}
             
         return self.dvh
 
