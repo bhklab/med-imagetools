@@ -93,8 +93,6 @@ class AutoPipeline(Pipeline):
         print(read_results)
 
         print(subject_id, " start")
-        #For counting multiple connections per modality
-        counter = {"CT":0,"RTDOSE":0,"RTSTRUCT":0,"PT":0}
         
         metadata = {}
         for i, colname in enumerate(self.output_streams):
@@ -104,7 +102,9 @@ class AutoPipeline(Pipeline):
             output_stream = ("_").join([item for item in colname.split("_") if item != "1"])
 
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
-            mult_conn = colname.split("_")[-1] == "1"
+            mult_conn = colname.split("_")[-1].isnumeric()
+            num = colname.split("_")[-1]
+
             print(output_stream)
 
             if read_results[i] is None:
@@ -136,8 +136,7 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, doses, output_stream)
                 else:
-                    counter[modality] = counter[modality]+1
-                    self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
+                    self.output(f"{subject_id}_{num}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED DOSE")
@@ -158,8 +157,7 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, mask, output_stream)
                 else:
-                    counter[modality] = counter[modality] + 1
-                    self.output(f"{subject_id}_{counter[modality]}", mask, output_stream)
+                    self.output(f"{subject_id}_{num}", mask, output_stream)
                 metadata[f"metadata_{colname}"] = [structure_set.roi_names]
 
                 print(subject_id, "SAVED MASK ON", conn_to)
@@ -174,8 +172,7 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, pet, output_stream)
                 else:
-                    counter[modality] = counter[modality] + 1
-                    self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
+                    self.output(f"{subject_id}_{num}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
