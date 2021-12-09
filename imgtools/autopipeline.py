@@ -14,6 +14,7 @@ import ast
 import datetime
 import numpy as np
 import json
+import shutil
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -190,8 +191,8 @@ class AutoPipeline(Pipeline):
             with open(file) as f:
                 metadata = json.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
-            os.remove(file)
         self.output_df.to_csv(self.output_df_path)
+        shutil.rmtree(os.path.join(self.output_directory,".temp"))
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
