@@ -131,7 +131,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality]+1
                     self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
+                metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -152,7 +152,7 @@ class AutoPipeline(Pipeline):
                 else:
                     counter[modality] = counter[modality] + 1
                     self.output(f"{subject_id}_{counter[modality]}", mask, output_stream)
-                metadata[f"roi_names_{output_stream}"] = str(structure_set.roi_names)
+                metadata[f"metadata_{colname}"] = [structure_set.roi_names]
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
@@ -169,7 +169,7 @@ class AutoPipeline(Pipeline):
                     counter[modality] = counter[modality] + 1
                     self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
+                metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
         with open(os.path.join(self.output_directory,f'temp_{subject_id}.txt'),'w') as f:
