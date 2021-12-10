@@ -360,8 +360,10 @@ class DataGraph:
                     temp[temp_dfconn.iloc[k,0]]["modality"] = temp_dfconn.iloc[k,1]
                     temp[temp_dfconn.iloc[k,0]]["folder"] = temp_dfconn.iloc[k,2]
                     temp[temp_dfconn.iloc[k,0]]["conn_to"] = "CT"
-                    folder_save[f"series_{temp_dfconn.iloc[k,1]}_CT"] = temp_dfconn.iloc[k,0]
-                    folder_save[f"folder_{temp_dfconn.iloc[k,1]}_CT"] = temp_dfconn.iloc[k,2]
+                    #Checks if there is already existing connection
+                    key,key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],"CT")
+                    folder_save[key_series] = temp_dfconn.iloc[k,0]
+                    folder_save[key] = temp_dfconn.iloc[k,2]
                 A.append(temp)
                 save_folder_comp.append(folder_save)
             #For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
@@ -377,15 +379,12 @@ class DataGraph:
                         A[k][rest_locs.iloc[j,3]]["conn_to"] = rest_locs.iloc[j,1]
                         if rest_locs.iloc[j,4]=="RTDOSE":
                             #RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                            save_folder_comp[k][f"series_{rest_locs.iloc[j,4]}_CT"] = rest_locs.iloc[j,3]
-                            save_folder_comp[k][f"folder_{rest_locs.iloc[j,4]}_CT"] = rest_locs.iloc[j,5]
+                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],"CT")
+                            save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
+                            save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         else: #Cases such as RTSTRUCT-PT
-                            key = "folder_{}_{}".format(rest_locs.iloc[j,4], rest_locs.iloc[j,1])
-                            key_series = "series_{}_{}".format(rest_locs.iloc[j,4], rest_locs.iloc[j,1])
                             #if there is already a connection and one more same category modality wants to connect
-                            if key in save_folder_comp[k].keys():
-                                key = key + "_1"
-                                key_series = key_series + "_1"
+                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
                             save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         flag = 0
@@ -409,6 +408,17 @@ class DataGraph:
             final_df = final_df + save_folder_comp
         final_df = pd.DataFrame(final_df)
         return final_df
+    
+    @staticmethod
+    def _check_save(save_dict,node,dest):
+        key = f"folder_{node}_{dest}"
+        key_series = f"series_{node}_{dest}"
+        i = 1
+        while key in save_dict.keys():
+            key = f"folder_{node}_{dest}_{i}"
+            key_series = f"series_{node}_{dest}_{i}"
+            i+=1
+        return key,key_series
     
     @staticmethod
     def list_edges(series):
