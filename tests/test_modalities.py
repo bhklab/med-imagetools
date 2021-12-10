@@ -2,8 +2,8 @@
 This code is for testing functioning of different modalities 
 '''
 
-
 import os
+import pathlib
 from posixpath import dirname
 import shutil
 import warnings
@@ -20,15 +20,17 @@ from imgtools.pipeline import Pipeline
 
 @pytest.fixture
 def modalities_path():
+    curr_path = pathlib.Path(__file__).parent.parent.resolve()
+    qc_path = pathlib.Path(os.path.join(curr_path, "data", "Head-Neck-PET-CT", "HN-CHUS-052"))
     path = {}
-    path["CT"] = "../examples/data_test/patient_1/08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362"
-    path["RTSTRUCT"] = "../examples/data_test/patient_1/08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418"
-    path["RTDOSE"] = "../examples/data_test/patient_1/08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376"
-    path["PT"] = "../examples/data_test/patient_1/08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600"
+    path["CT"] = os.path.join(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362")
+    path["RTSTRUCT"] = os.path.join(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418")
+    path["RTDOSE"] = os.path.join(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376")
+    path["PT"] = os.path.join(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600")
     return path
 
-@pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT","RTDOSE","PT"])
-def test_modalities(modalities,modalities_path):
+@pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
+def test_modalities(modalities, modalities_path):
     path = modalities_path
     if modalities!="RTSTRUCT":
         #Checks for dimensions
@@ -41,10 +43,10 @@ def test_modalities(modalities,modalities_path):
             assert instances == dicom.GetDepth()
         else: #For comparing RTDOSE modalties
             assert dcm.shape == (dicom.GetDepth(),dicom.GetHeight(),dicom.GetWidth())
-        if modalities=="PT":
+        if modalities == "PT":
             dicom = dicom.resample_pet(img)
             assert dicom.GetSize()==img.GetSize()
-        if modalities=="RTDOSE":
+        if modalities == "RTDOSE":
             dicom = dicom.resample_dose(img)
             assert dicom.GetSize()==img.GetSize()
     else:

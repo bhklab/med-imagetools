@@ -8,7 +8,8 @@ import SimpleITK as sitk
 import pytest
 
 from imgtools.io import ImageFileLoader, ImageFileWriter
-from imgtools.ops import Input, Output
+from imgtools.ops import BaseInput as Input
+from imgtools.ops import BaseOutput as Output
 from imgtools.pipeline import Pipeline
 
 
@@ -118,3 +119,8 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
             not os.path.exists(os.path.join(output_paths[0], "test0.nrrd")),
             os.path.exists(os.path.join(output_paths[1], "test0.nrrd"))
         ])
+    
+    for path in input_paths:
+        os.remove(path)
+    
+    
