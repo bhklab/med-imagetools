@@ -112,8 +112,8 @@ class Dose(sitk.Image):
                 # DVH specifc properties
                 doses_bin = np.cumsum(raw_data[0:n:2])
                 vol = raw_data[1:n:2]
-                self.dvh[ROI_reference]["dose_bins"] = doses_bin
-                self.dvh[ROI_reference]["vol"] = vol
+                self.dvh[ROI_reference]["dose_bins"] = doses_bin.tolist()
+                self.dvh[ROI_reference]["vol"] = vol.tolist()
                 
                 # ROI specific properties
                 tot_vol = np.sum(vol)
