@@ -1,10 +1,11 @@
 import os, time
 from typing import List
 from functools import reduce
-
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from pyvis.network import Network
+
 
 class DataGraph:
     '''
@@ -24,7 +25,8 @@ class DataGraph:
     '''
     def __init__(self,
                  path_crawl: str,
-                 edge_path: str = "./patient_id_full_edges.csv") -> None:
+                 edge_path: str = "./patient_id_full_edges.csv",
+                 visualize: bool = False) -> None:
         '''
         Parameters
         ----------
@@ -43,6 +45,8 @@ class DataGraph:
         else:
             print("Edge table not present. Forming the edge table based on the crawl data...")
             self.form_graph()
+        if visualize:
+            self.visualize_graph()
     
     def form_graph(self):
         '''
@@ -81,6 +85,40 @@ class DataGraph:
         self.df_edges.sort_values(by="patient_ID_x", ascending=True)
         print(f"Saving edge table in {self.edge_path}")
         self.df_edges.to_csv(self.edge_path, index=False)
+
+    def visualize_graph(self):
+        """
+        Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
+        """
+        print("Generating visualizations...")
+        data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
+
+        sources = self.df_edges["series_y"]
+        targets = self.df_edges["series_x"]
+        name_src = self.df_edges["modality_y"]
+        name_tar = self.df_edges["modality_x"]
+        patient_id = self.df_edges["patient_ID_x"]
+        reference_ct = self.df_edges["reference_ct_y"]
+        reference_rs = self.df_edges["reference_rs_y"]
+
+        data_zip = zip(sources,targets,name_src,name_tar,patient_id,reference_ct,reference_rs)
+
+        for i in data_zip:
+            data_net.add_node(i[0],i[2],title=i[2],group=i[4])
+            data_net.add_node(i[1],i[3],title=i[3],group=i[4])
+            data_net.add_edge(i[0],i[1])
+            node = data_net.get_node(i[0])
+            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(i[4],i[0],i[5],i[6])
+            node = data_net.get_node(i[1])
+            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(i[4],i[1],i[5],i[6])
+
+        neigbour_map = data_net.get_adj_list()
+        for node in data_net.nodes:
+            node["title"] += "<br>Number of connections: {}".format(len(neigbour_map[node['id']])) 
+            node["value"] = len(neigbour_map[node['id']])
+
+        vis_path = os.path.join(("/").join(self.edge_path.split("/")[:-1]),"datanet.html")
+        data_net.show(vis_path)
 
     def _form_edge_study(self, df, all_study, study_id):
         '''
