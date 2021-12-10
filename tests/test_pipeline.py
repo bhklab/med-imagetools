@@ -120,7 +120,5 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
             os.path.exists(os.path.join(output_paths[1], "test0.nrrd"))
         ])
     
-    for path in input_paths:
-        os.remove(path)
     
     
