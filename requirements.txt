@@ -1,5 +1,6 @@
 h5py
 joblib
+matplotlib
 numpy
 matplotlib
 pandas
@@ -9,3 +10,4 @@ pytest
 scikit-image
 SimpleITK
 tqdm
+torchio
