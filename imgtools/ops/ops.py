@@ -280,14 +280,7 @@ class ImageAutoOutput:
                  output_streams: List[str]):
                  
         # File types
-        self.file_name = {"CT": "image",
-                          "RTDOSE_CT": "dose", 
-                          "RTSTRUCT_CT": "mask_ct.seg", 
-                          "RTSTRUCT_PT": "mask_pt.seg", 
-                          "PT_CT": "pet", 
-                          "PT": "pet", 
-                          "RTDOSE": "dose", 
-                          "RTSTRUCT": "mask.seg"}
+        self.file_name = file_name_convention()
 
         self.output = {}
         for colname in output_streams:
