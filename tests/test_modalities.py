@@ -58,7 +58,7 @@ def test_modalities(modalities, modalities_path):
     else:
         img = read_dicom_auto(path["CT"])
         struc = read_dicom_auto(path[modalities])
-        make_binary_mask = StructureSetToSegmentation(roi_names=['GTV'], continuous=False)
+        make_binary_mask = StructureSetToSegmentation(roi_names=['GTV.?', 'LARYNX'], continuous=False)
         mask = make_binary_mask(struc, img)
         A = sitk.GetArrayFromImage(mask)
         assert len(A.shape)==4
