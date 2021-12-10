@@ -33,6 +33,7 @@ class AutoPipeline(Pipeline):
                  modalities="CT",
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
+                 visualize=False,
                  missing_strategy="drop",
                  show_progress=False,
                  warn_on_error=False):
@@ -50,7 +51,7 @@ class AutoPipeline(Pipeline):
         self.existing = [None] #self.existing_patients()
 
         #input operations
-        self.input = ImageAutoInput(input_directory, modalities, n_jobs)
+        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
         
         self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
         #Output component table
@@ -220,7 +221,10 @@ if __name__ == "__main__":
 
     parser.add_argument("--modalities", type=str, default="CT",
                         help="List of desired modalities. Type as string for ex: RTSTRUCT,CT,RTDOSE")
-
+    
+    parser.add_argument("--visualize", type=bool, default=False,
+                        help="Whether to visualize the data graph")
+    
     parser.add_argument("--spacing", nargs=3, type=float, default=(1., 1., 0.),
                         help="The resampled voxel spacing in  (x, y, z) directions.")
 
@@ -236,6 +240,7 @@ if __name__ == "__main__":
                             modalities=args.modalities,
                             spacing=args.spacing,
                             n_jobs=args.n_jobs,
+                            visualize=args.visualize,
                             show_progress=args.show_progress)
 
     print(f'starting Pipeline...')
