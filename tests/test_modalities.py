@@ -2,13 +2,8 @@
 This code is for testing functioning of different modalities 
 '''
 
-<<<<<<< HEAD
 import os
 import pathlib
-=======
-
-import os
->>>>>>> c17f6b55fa2949bb33a5c32cfa57c5d0b192d583
 from posixpath import dirname
 import shutil
 import warnings
