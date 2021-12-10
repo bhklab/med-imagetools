@@ -13,7 +13,7 @@ import glob
 import ast
 import datetime
 import numpy as np
-import json
+import pickle
 import shutil
 ###############################################################
 # Example usage:
@@ -84,7 +84,7 @@ class AutoPipeline(Pipeline):
            The ID of subject to process
         """
         #Check if the subject_id has already been processed
-        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json')):
+        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.pkl')):
             print(f"{subject_id} already processed")
             return 
 
@@ -99,8 +99,8 @@ class AutoPipeline(Pipeline):
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
 
-            #Taking modality pairs if it exists till _1
-            output_stream = ("_").join([item for item in colname.split("_") if item != "1"])
+            #Taking modality pairs if it exists till _{num}
+            output_stream = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
 
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
             mult_conn = colname.split("_")[-1].isnumeric()
@@ -109,7 +109,7 @@ class AutoPipeline(Pipeline):
             print(output_stream)
 
             if read_results[i] is None:
-                print("The subject id: {} has no {}".format(subject_id, ("_").join(colname.split("_")[1:])))
+                print("The subject id: {} has no {}".format(subject_id,colname))
                 pass
             elif modality == "CT":
                 image = read_results[i]
@@ -178,16 +178,16 @@ class AutoPipeline(Pipeline):
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        with open(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json'),'w') as f:
-            json.dump(metadata,f)
+        with open(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.pkl'),'wb') as f:
+            pickle.dump(metadata,f)
         return 
     
     def save_data(self):
-        files = glob.glob(os.path.join(self.output_directory,".temp","*.json"))
+        files = glob.glob(os.path.join(self.output_directory,".temp","*.pkl"))
         for file in files:
             subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
-            with open(file) as f:
-                metadata = json.load(f)
+            with open(file,"rb") as f:
+                metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
         self.output_df.to_csv(self.output_df_path)
         shutil.rmtree(os.path.join(self.output_directory,".temp"))
