@@ -1,15 +1,12 @@
 import os
+import shutil
 import pathlib
 import urllib.request as request
 from zipfile import ZipFile
 
-import shutil
-
-import numpy as np
-import SimpleITK as sitk
 import pytest
-import nrrd
 import pandas as pd
+import nrrd
 
 from imgtools.autopipeline import AutoPipeline
 
@@ -59,31 +56,32 @@ def test_pipeline(dataset_path, modalities):
     assert len(comp_table) == 2, "There was some error in making components, check datagraph.parser"
 
     #Check the nrrd files
-    if modalities=="PT":
-        path_pet = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
-        dicom,_ = nrrd.read(path_pet)
+    if modalities   == "PT":
+        path_pet    = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
+        dicom, _    = nrrd.read(path_pet)
         assert dicom.shape[-1] == int(crawl_data.loc[crawl_data["modality"]=="PT","instances"].values[0])
-    elif modalities=="CT,RTDOSE":
-        path_ct = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
-        path_dose = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
-        dicom_ct,_ = nrrd.read(path_ct)
-        dicom_dose,_ = nrrd.read(path_dose)
+    elif modalities == "CT,RTDOSE":
+        path_ct     = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose   = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        dicom_ct, _ = nrrd.read(path_ct)
+        dicom_dose, _ = nrrd.read(path_dose)
         assert dicom_ct.shape == dicom_dose.shape
-    elif modalities=="CT,PT,RTDOSE":
-        path_ct = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
-        path_dose = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
-        path_pet = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
-        dicom_ct,_ = nrrd.read(path_ct)
-        dicom_dose,_ = nrrd.read(path_dose)
-        dicom_pet,_ = nrrd.read(path_pet)
+    elif modalities == "CT,PT,RTDOSE":
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        path_pet        = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        dicom_pet, _    = nrrd.read(path_pet)
+        print(dicom_ct.shape, dicom_dose.shape, dicom_pet.shape)
         assert dicom_ct.shape == dicom_dose.shape == dicom_pet.shape
-    elif modalities=="CT,RTSTRUCT,RTDOSE":
-        path_ct = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
-        path_dose = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
-        path_str = os.path.join(output_path_mod, "mask_ct", os.listdir(os.path.join(output_path_mod,"mask_ct"))[0])
-        dicom_ct,_ = nrrd.read(path_ct)
-        dicom_dose,_ = nrrd.read(path_dose)
-        dicom_str,_ = nrrd.read(path_str)
+    elif modalities == "CT,RTSTRUCT,RTDOSE":
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        path_str        = os.path.join(output_path_mod, "mask_ct", os.listdir(os.path.join(output_path_mod,"mask_ct"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        dicom_str, _    = nrrd.read(path_str)
         #ensure they are in same physical space
         assert dicom_ct.shape == dicom_dose.shape == dicom_str.shape[1:]
     else:
