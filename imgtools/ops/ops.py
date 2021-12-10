@@ -276,8 +276,8 @@ class ImageAutoOutput:
 
         self.output = {}
         for colname in output_streams:
-            # Not considering colnames ending with _1
-            colname_process = ("_").join([items for items in colname.split("_") if items!="1"])
+            # Not considering colnames ending with alphanumeric
+            colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
             self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
                                                            filename_format="{subject_id}_"+"{}.nrrd".format(extension))
