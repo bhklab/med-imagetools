@@ -186,6 +186,7 @@ class AutoPipeline(Pipeline):
         files = glob.glob(os.path.join(self.output_directory,".temp","*.pkl"))
         for file in files:
             subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
+            subject_id = file.replace(".","/").split("/")[-2][5:] #From temp_ considers
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
