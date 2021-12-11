@@ -72,10 +72,10 @@ class Dataset(tio.SubjectsDataset):
                 path_mod = os.path.join(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
                 #All modalities except RTSTRUCT should be of type torchIO.ScalarImage
                 if os.path.exists(path_mod):
-                    if col!="RTSTRUCT":
+                    if col.split("_")[0]!="RTSTRUCT":
                         temp[f"mod_{col}"] = tio.ScalarImage(path_mod)
                     else:
-                        temp[f"mod_{col}"] = tio.LabelImage(path_mod)
+                        temp[f"mod_{col}"] = tio.LabelMap(path_mod)
                 else:
                     temp[f"mod_{col}"] = None
                 #For including metadata
