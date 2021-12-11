@@ -202,4 +202,3 @@ examples/process_one.py
 tests/temp_folder*
 examples/data_test
 data
-demo.py
