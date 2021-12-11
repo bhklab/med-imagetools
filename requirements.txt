@@ -8,4 +8,6 @@ pytest
 scikit-image
 SimpleITK
 tqdm
+torch
 torchio
+pyvis
