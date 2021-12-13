@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import glob
 import re
 from typing import Optional, List
@@ -272,8 +272,7 @@ class ImageAutoLoader(BaseLoader):
                 database_dict[key] = db[key]
         
         # save one level above imaging folders
-        parent  = os.path.dirname(top)
-        dataset = top.split("/")[-1]
+        parent, dataset  = os.path.split(top)
         
         # save as json
         with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
