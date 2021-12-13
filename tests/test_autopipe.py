@@ -28,7 +28,7 @@ def dataset_path():
     output_path = pathlib.Path(os.path.join(curr_path, 'tests'))
     return quebec_path.as_posix(), output_path.as_posix()
 
-# @pytest.mark.parametrize("modalities",["PT","CT,RTDOSE","CT,RTSTRUCT,RTDOSE","CT,RTSTRUCT,RTDOSE,PT"])
+# @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
 @pytest.mark.parametrize("modalities", ["CT,PT,RTDOSE"])
 def test_pipeline(dataset_path, modalities):
     input_path, output_path = dataset_path
