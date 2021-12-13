@@ -1,22 +1,14 @@
-import os
+import os, pathlib
 import shutil
-import warnings
 import glob
-import ast
-import datetime
-import json
+import pickle
 
 from argparse import ArgumentParser
+import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-
-import SimpleITK as sitk
-import pandas as pd
-import numpy as np
-
 from joblib import Parallel, delayed
-
 
 ###############################################################
 # Example usage:
@@ -36,6 +28,7 @@ class AutoPipeline(Pipeline):
                  modalities="CT",
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
+                 visualize=False,
                  missing_strategy="drop",
                  show_progress=False,
                  warn_on_error=False):
@@ -53,7 +46,7 @@ class AutoPipeline(Pipeline):
         self.existing = [None] #self.existing_patients()
 
         #input operations
-        self.input = ImageAutoInput(input_directory, modalities, n_jobs)
+        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
         
         self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
         #Output component table
@@ -86,7 +79,7 @@ class AutoPipeline(Pipeline):
            The ID of subject to process
         """
         #Check if the subject_id has already been processed
-        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json')):
+        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.pkl')):
             print(f"{subject_id} already processed")
             return 
 
@@ -96,15 +89,13 @@ class AutoPipeline(Pipeline):
         print(read_results)
 
         print(subject_id, " start")
-        #For counting multiple connections per modality
-        counter = {"CT":0,"RTDOSE":0,"RTSTRUCT":0,"PT":0}
         
         metadata = {}
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
 
-            #Taking modality pairs if it exists till _1
-            output_stream = ("_").join([item for item in colname.split("_") if item != "1"])
+            #Taking modality pairs if it exists till _{num}
+            output_stream = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
 
             #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
             mult_conn = colname.split("_")[-1].isnumeric()
@@ -113,7 +104,7 @@ class AutoPipeline(Pipeline):
             print(output_stream)
 
             if read_results[i] is None:
-                print("The subject id: {} has no {}".format(subject_id, ("_").join(colname.split("_")[1:])))
+                print("The subject id: {} has no {}".format(subject_id,colname))
                 pass
             elif modality == "CT":
                 image = read_results[i]
@@ -141,12 +132,9 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, doses, output_stream)
                 else:
-                    counter[modality] = counter[modality]+1
-                    self.output(f"{subject_id}_{counter[modality]}", doses, output_stream)
-                    # self.output(f"{subject_id}_{num}", doses, output_stream)
-
+                    self.output(f"{subject_id}_{num}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
+                metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -165,12 +153,8 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, mask, output_stream)
                 else:
-                    counter[modality] = counter[modality] + 1
-                    self.output(f"{subject_id}_{counter[modality]}", mask, output_stream)
-                    # self.output(f"{subject_id}_{num}", mask, output_stream)
-                
-                metadata[f"roi_names_{output_stream}"] = str(structure_set.roi_names)
-                # metadata[f"metadata_{colname}"] = [structure_set.roi_names]
+                    self.output(f"{subject_id}_{num}", mask, output_stream)
+                metadata[f"metadata_{colname}"] = [structure_set.roi_names]
 
                 print(subject_id, "SAVED MASK ON", conn_to)
             elif modality == "PT":
@@ -184,44 +168,25 @@ class AutoPipeline(Pipeline):
                 if not mult_conn:
                     self.output(subject_id, pet, output_stream)
                 else:
-                    counter[modality] = counter[modality] + 1
-                    self.output(f"{subject_id}_{counter[modality]}", pet, output_stream)
+                    self.output(f"{subject_id}_{num}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
-                metadata[f"metadata_{output_stream}"] = str(read_results[i].get_metadata())
+                metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        with open(os.path.join(self.output_directory,f'temp_{subject_id}.txt'),'w') as f:
-            f.write(str(metadata))
+        with open(os.path.join(self.output_directory,".temp",f'{subject_id}.pkl'),'wb') as f:
+            pickle.dump(metadata,f)
         return 
-
-    #                 self.output(f"{subject_id}_{num}", pet, output_stream)
-    #             metadata[f"size_{output_stream}"] = str(pet.GetSize())
-    #             metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
-    #             print(subject_id, " SAVED PET")
-    #     #Saving all the metadata in multiple text files
-    #     with open(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.json'),'w') as f:
-    #         json.dump(metadata,f)
-    #     return 
     
-    # def save_data(self):
-    #     files = glob.glob(os.path.join(self.output_directory,".temp","*.json"))
-    #     for file in files:
-    #         subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
-    #         with open(file) as f:
-    #             metadata = json.load(f)
-    #         self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
-    #     self.output_df.to_csv(self.output_df_path)
-    #     shutil.rmtree(os.path.join(self.output_directory,".temp"))
-                    
     def save_data(self):
-        files = glob.glob(os.path.join(self.output_directory,"*.txt"))
+        files = glob.glob(os.path.join(self.output_directory,".temp","*.pkl"))
         for file in files:
-            subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
-            A = open(file,"r").readlines()
-            metadata = ast.literal_eval(A[0])
+            filename = pathlib.Path(file).name
+            subject_id = os.path.splitext(filename)[0]
+            with open(file,"rb") as f:
+                metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
-            os.remove(file)
         self.output_df.to_csv(self.output_df_path)
+        shutil.rmtree(os.path.join(self.output_directory, ".temp"))
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -252,7 +217,10 @@ if __name__ == "__main__":
 
     parser.add_argument("--modalities", type=str, default="CT",
                         help="List of desired modalities. Type as string for ex: RTSTRUCT,CT,RTDOSE")
-
+    
+    parser.add_argument("--visualize", type=bool, default=False,
+                        help="Whether to visualize the data graph")
+    
     parser.add_argument("--spacing", nargs=3, type=float, default=(1., 1., 0.),
                         help="The resampled voxel spacing in  (x, y, z) directions.")
 
@@ -268,6 +236,7 @@ if __name__ == "__main__":
                             modalities=args.modalities,
                             spacing=args.spacing,
                             n_jobs=args.n_jobs,
+                            visualize=args.visualize,
                             show_progress=args.show_progress)
 
     print(f'starting Pipeline...')
