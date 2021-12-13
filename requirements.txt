@@ -6,7 +6,6 @@ matplotlib
 pandas
 pydicom
 pynrrd
-pytest
 scikit-image
 SimpleITK
 tqdm
