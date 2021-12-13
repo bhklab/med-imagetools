@@ -38,7 +38,8 @@ class AutoPipeline(Pipeline):
                  n_jobs=-1,
                  missing_strategy="drop",
                  show_progress=False,
-                 warn_on_error=False):
+                 warn_on_error=False,
+                 roi_names=[]):
 
         super().__init__(
             n_jobs=n_jobs,
@@ -63,7 +64,7 @@ class AutoPipeline(Pipeline):
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
+        self.make_binary_mask = StructureSetToSegmentation(roi_names=roi_names, continuous=False)
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
@@ -261,6 +262,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--show_progress", action="store_true",
                         help="Whether to print progress to standard output.")
+    
+    parser.add_argument("--roi_names", nargs="+", default=[],
+                        help="ROI names to process for segmentations. Supports regex.")
 
     args = parser.parse_args()
     pipeline = AutoPipeline(args.input_directory,
@@ -268,7 +272,8 @@ if __name__ == "__main__":
                             modalities=args.modalities,
                             spacing=args.spacing,
                             n_jobs=args.n_jobs,
-                            show_progress=args.show_progress)
+                            show_progress=args.show_progress,
+                            roi_names=args.roi_names)
 
     print(f'starting Pipeline...')
     pipeline.run()

@@ -57,28 +57,49 @@ def test_pipeline(dataset_path, modalities):
     assert len(comp_table) == 2, "There was some error in making components, check datagraph.parser"
 
     #Check the nrrd files
-    subject_id_list = list(comp_table.index)
-    output_streams = [("_").join(cols.split("_")[1:]) for cols in comp_table.columns if cols.split("_")[0]=="folder"]
-    file_names = file_name_convention()
-    for subject_id in subject_id_list:
-        dicoms = []
-        for col in output_streams:
-            extension = file_names[col]
-            mult_conn = col.split("_")[-1].isnumeric()
-            if mult_conn:
-                extra = col.split("_")[-1]+"_"
-            else:
-                extra = ""
-            path_mod = os.path.join(output_path_mod,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
-            #All modalities except RTSTRUCT should be of type torchIO.ScalarImage
-            temp_dicom,_ = nrrd.read(path_mod)
-            if col.split("_")[0]=="RTSTRUCT":
-                dicoms.append(temp_dicom.shape[1:])
-            else:
-                dicoms.append(temp_dicom.shape)
-        A = [item==dicoms[0] for item  in dicoms]
-        print(dicoms)
-        assert all(A)
+    if modalities   == "PT":
+        path_pet        = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
+        dicom, _        = nrrd.read(path_pet)
+        assert dicom.shape[-1] == int(crawl_data.loc[crawl_data["modality"]=="PT","instances"].values[0])
+    elif modalities == "CT,RTDOSE":
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        assert dicom_ct.shape == dicom_dose.shape
+    elif modalities == "CT,PT,RTDOSE":
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        path_pet        = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        dicom_pet, _    = nrrd.read(path_pet)
+        print(dicom_ct.shape, dicom_dose.shape, dicom_pet.shape)
+        assert dicom_ct.shape == dicom_dose.shape == dicom_pet.shape
+    elif modalities == "CT,RTSTRUCT,RTDOSE":
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        path_str        = os.path.join(output_path_mod, "mask_ct", os.listdir(os.path.join(output_path_mod,"mask_ct"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        dicom_str, _    = nrrd.read(path_str)
+        #ensure they are in same physical space
+        assert dicom_ct.shape == dicom_dose.shape == dicom_str.shape[1:]
+    else:
+        path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
+        path_dose       = os.path.join(output_path_mod, "dose", os.listdir(os.path.join(output_path_mod,"dose"))[0])
+        path_ctstr      = os.path.join(output_path_mod, "mask_ct", os.listdir(os.path.join(output_path_mod,"mask_ct"))[0])
+        path_ptstr      = os.path.join(output_path_mod, "mask_pt", os.listdir(os.path.join(output_path_mod,"mask_pt"))[0])
+        path_pet        = os.path.join(output_path_mod, "pet", os.listdir(os.path.join(output_path_mod,"pet"))[0])
+        dicom_ct, _     = nrrd.read(path_ct)
+        dicom_dose, _   = nrrd.read(path_dose)
+        dicom_ctstr, _  = nrrd.read(path_ctstr)
+        dicom_ptstr, _  = nrrd.read(path_ptstr)
+        dicom_pet, _    = nrrd.read(path_pet)
+
+        #ensure they are in same physical space
+        assert dicom_ct.shape == dicom_dose.shape == dicom_ctstr.shape[1:] == dicom_ptstr.shape[1:] == dicom_pet.shape
+    
     os.remove(crawl_path)
     os.remove(json_path)
     os.remove(edge_path)
