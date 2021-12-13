@@ -1,18 +1,16 @@
 from genericpath import exists
 import os
-import numpy as np
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
+from tqdm import tqdm
+
+import SimpleITK as sitk
 import torchio as tio
 import pandas as pd
-# from . import file_name_convention
-# from ..ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
+
 from imgtools.io import file_name_convention
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
-from tqdm import tqdm
-from joblib import Parallel, delayed
-import SimpleITK as sitk
-import warnings
 from imgtools.pipeline import Pipeline
+from joblib import Parallel, delayed
 
 class Dataset(tio.SubjectsDataset):
     """
@@ -24,17 +22,17 @@ class Dataset(tio.SubjectsDataset):
     def __init__(
         self,
         subjects: Sequence[tio.Subject],
-        transform: Optional[Callable] = None,
-        load_getitem: bool = True
-        ) -> tio.SubjectsDataset:
-        super().__init__(subjects,transform,load_getitem)
-
+        path: str,
+        ) -> List[tio.Subject]:
+        super().__init__(subjects)
+        self.subjects = subjects
+        self.path = path
+    
     @classmethod
     def load_from_nrrd(
             cls,
             path:str,
-            transform: Optional[Callable] = None,
-            load_getitem: bool = True
+            ignore_multi: bool = True,
             ) -> List[tio.Subject]:
         """
         Based on the given path, passess the processed nrrd files present in the directory and the metadata associated with it and creates a list of Subject instances
@@ -46,34 +44,47 @@ class Dataset(tio.SubjectsDataset):
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)
-        output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0]=="folder"]
+        output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0] == "folder"]
         imp_metadata = [cols for cols in df_metadata.columns if cols.split("_")[0] in ("metadata")]
-        #Based on the file naming taxonomy
+        #Ignores multiple connection to single modality
+        if ignore_multi:
+            output_streams = [items for items in output_streams if items.split("_")[-1].isnumeric()==False]
+            imp_metadata = [items for items in imp_metadata if items.split("_")[-1].isnumeric()==False]
+        #Based on the file naming convention
         file_names = file_name_convention()
         subject_id_list = list(df_metadata.index)
         subjects = []
         for subject_id in tqdm(subject_id_list):
             temp = {}
             for col in output_streams:
-                extension = file_names[col]
                 mult_conn = col.split("_")[-1].isnumeric()
                 metadata_name = f"metadata_{col}"
                 if mult_conn:
                     extra = col.split("_")[-1]+"_"
+                    extension = file_names[("_").join(col.split("_")[:-1])]
                 else:
+                    extension = file_names[col]
                     extra = ""
                 path_mod = os.path.join(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
                 #All modalities except RTSTRUCT should be of type torchIO.ScalarImage
-                if col!="RTSTRUCT":
-                    temp[f"mod_{col}"] = tio.ScalarImage(path_mod)
+                if os.path.exists(path_mod):
+                    if col.split("_")[0]!="RTSTRUCT":
+                        temp[f"mod_{col}"] = tio.ScalarImage(path_mod)
+                    else:
+                        temp[f"mod_{col}"] = tio.LabelMap(path_mod)
                 else:
-                    temp[f"mod_{col}"] = tio.LabelImage(path_mod)
+                    temp[f"mod_{col}"] = None
                 #For including metadata
                 if metadata_name in imp_metadata:
                     #convert string to proper datatype
-                    temp[metadata_name] = df_metadata.loc[subject_id,metadata_name][0]
+                    meta = df_metadata.loc[subject_id,metadata_name]
+                    if pd.notna(meta):
+                        temp[metadata_name] = eval(meta)[0]
+                    else:
+                        #torch dataloader doesnt accept None type
+                        temp[metadata_name] = {}
             subjects.append(tio.Subject(temp))
-        return cls(subjects,transform,load_getitem)
+        return cls(subjects,path)
 
     @classmethod
     def load_directly(
@@ -82,8 +93,7 @@ class Dataset(tio.SubjectsDataset):
             modalities: str,
             n_jobs: int = -1,
             spacing: Tuple = (1., 1., 0.),
-            transform: Optional[Callable] = None,
-            load_getitem: bool = True
+            ignore_multi: bool = True,
             ) -> List[tio.Subject]:
         """
         Based on the given path, imgtools crawls through the directory, forms datagraph and picks the user defined modalities. These paths are processed into sitk.Image.
@@ -94,13 +104,16 @@ class Dataset(tio.SubjectsDataset):
         input = ImageAutoInput(path, modalities, n_jobs)
         df_metadata = input.df_combined
         output_streams = input.output_streams
+        #Ignores multiple connection to single modality
+        if ignore_multi:
+            output_streams = [items for items in output_streams if items.split("_")[-1].isnumeric()==False]
         #Basic operations
         subject_id_list = list(df_metadata.index)
         # basic image processing ops
         resample = Resample(spacing=spacing)
         make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
         subjects =  Parallel(n_jobs=n_jobs)(delayed(cls.process_one_subject)(input,subject_id,output_streams,resample,make_binary_mask) for subject_id in tqdm(subject_id_list))
-        return cls(subjects,transform,load_getitem)
+        return cls(subjects,path)
 
     @staticmethod
     def process_one_subject(
@@ -169,15 +182,3 @@ class Dataset(tio.SubjectsDataset):
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(pet)
                 temp[f"metadata_{colname}"] = read_results[i].get_metadata()
         return tio.Subject(temp)
-
-if __name__=="__main__":
-    from torch.utils.data import DataLoader
-    # output_path = "/cluster/projects/radiomics/Temp/vishwesh/HN-CT_RTdose_test2"
-    input_path = "/cluster/home/ramanav/imgtools/examples/data_test"
-    transform = tio.Compose([tio.Resize(256)])
-    # subjects_dataset = Dataset.load_from_nrrd(output_path,transform=transform)
-    subjects_dataset = Dataset.load_directly(input_path,modalities="CT,RTDOSE,PT",n_jobs=4,transform=transform)
-    print(len(subjects_dataset))
-    training_loader = DataLoader(subjects_dataset, batch_size=4)
-    items = next(iter(training_loader))
-    print(items["mod_RTDOSE_CT"])
