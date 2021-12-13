@@ -39,9 +39,15 @@ jobs:
         pytest tests
     - name: Build app (Windows)
       if: success() && startsWith(matrix.os,'Windows')
+      env:
+        USERNAME: ${{ secrets.pypi_username }}
+        KEY: ${{ secrets.pypi_pw }}
       run: |
         python -m twine upload --skip-existing -u $env:USERNAME -p $env:KEY dist/*
     - name: Build app (Ubuntu / macOS)
       if: success() && startsWith(matrix.os, 'Windows') == false
+      env:
+        USERNAME: ${{ secrets.pypi_username }}
+        KEY: ${{ secrets.pypi_pw }}
       run: | 
         python -m twine upload --skip-existing -u $USERNAME -p $KEY dist/*
