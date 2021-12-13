@@ -202,3 +202,8 @@ examples/process_one.py
 
 tests/temp_folder*
 examples/data_test
+<<<<<<< HEAD
+data/
+demo.py
+=======
+>>>>>>> 700fbe6ff316bf36536be5bf6cca67df144096fa
