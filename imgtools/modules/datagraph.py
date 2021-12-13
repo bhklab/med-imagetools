@@ -4,7 +4,6 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from pyvis.network import Network
 
 
 class DataGraph:
@@ -90,6 +89,7 @@ class DataGraph:
         """
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
+        from pyvis.network import Network
         print("Generating visualizations...")
         data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
 
@@ -117,7 +117,8 @@ class DataGraph:
             node["title"] += "<br>Number of connections: {}".format(len(neigbour_map[node['id']])) 
             node["value"] = len(neigbour_map[node['id']])
 
-        vis_path = os.path.join(("/").join(self.edge_path.split("/")[:-1]),"datanet.html")
+
+        vis_path = os.path.join(os.path.basename(self.edge_path),"datanet.html")
         data_net.show(vis_path)
 
     def _form_edge_study(self, df, all_study, study_id):

@@ -1,21 +1,16 @@
 from genericpath import exists
 import os
-import numpy as np
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
+from tqdm import tqdm
+
+import SimpleITK as sitk
 import torchio as tio
 import pandas as pd
-<<<<<<< HEAD
-=======
-# from . import file_name_convention
-# from ..ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
->>>>>>> 700fbe6ff316bf36536be5bf6cca67df144096fa
+
 from imgtools.io import file_name_convention
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
-from tqdm import tqdm
-from joblib import Parallel, delayed
-import SimpleITK as sitk
-import warnings
 from imgtools.pipeline import Pipeline
+from joblib import Parallel, delayed
 
 class Dataset(tio.SubjectsDataset):
     """
@@ -49,7 +44,7 @@ class Dataset(tio.SubjectsDataset):
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)
-        output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0]=="folder"]
+        output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0] == "folder"]
         imp_metadata = [cols for cols in df_metadata.columns if cols.split("_")[0] in ("metadata")]
         #Ignores multiple connection to single modality
         if ignore_multi:

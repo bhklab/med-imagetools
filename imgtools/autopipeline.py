@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import shutil
 import glob
 import pickle
@@ -173,20 +173,20 @@ class AutoPipeline(Pipeline):
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        with open(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.pkl'),'wb') as f:
+        with open(os.path.join(self.output_directory,".temp",f'{subject_id}.pkl'),'wb') as f:
             pickle.dump(metadata,f)
         return 
     
     def save_data(self):
         files = glob.glob(os.path.join(self.output_directory,".temp","*.pkl"))
         for file in files:
-            subject_id = ("_").join(file.replace("/","_").replace(".","_").split("_")[-3:-1])
-            subject_id = file.replace(".","/").split("/")[-2][5:] #From temp_ considers
+            filename = pathlib.Path(file).name
+            subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
         self.output_df.to_csv(self.output_df_path)
-        shutil.rmtree(os.path.join(self.output_directory,".temp"))
+        shutil.rmtree(os.path.join(self.output_directory, ".temp"))
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
