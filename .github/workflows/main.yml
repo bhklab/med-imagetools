@@ -35,3 +35,11 @@ jobs:
     - name: Run pytest
       run: |
         pytest tests
+    - name: Build app (Windows)
+      if: success() && startsWith(matrix.os,'Windows')
+      run: |
+        python -m twine upload --skip-existing -u $env:USERNAME -p $env:KEY dist/*
+    - name: Build app (Ubuntu / macOS)
+      if: success() && startsWith(matrix.os, 'Windows') == false
+      run: | 
+        python -m twine upload --skip-existing -u $USERNAME -p $KEY dist/*
