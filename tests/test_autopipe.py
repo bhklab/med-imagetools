@@ -53,6 +53,8 @@ def test_pipeline(dataset_path, modalities):
 
     #Check if the dataset.csv is having the correct number of components and has all the fields
     comp_table = pd.read_csv(comp_path)
+    print(len(comp_table))
+    print(comp_table)
     assert len(comp_table) == 2, "There was some error in making components, check datagraph.parser"
 
     #Check the nrrd files
@@ -73,7 +75,6 @@ def test_pipeline(dataset_path, modalities):
         dicom_ct, _     = nrrd.read(path_ct)
         dicom_dose, _   = nrrd.read(path_dose)
         dicom_pet, _    = nrrd.read(path_pet)
-        print(dicom_ct.shape, dicom_dose.shape, dicom_pet.shape)
         assert dicom_ct.shape == dicom_dose.shape == dicom_pet.shape
     elif modalities == "CT,RTSTRUCT,RTDOSE":
         path_ct         = os.path.join(output_path_mod, "image", os.listdir(os.path.join(output_path_mod,"image"))[0])
