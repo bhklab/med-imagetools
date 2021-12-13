@@ -105,7 +105,7 @@ class ImageAutoInput(BaseInput):
         
         print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
-        self.readers = [read_dicom_auto for i in range(len(self.output_streams))]
+        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
 
         loader = ImageCSVLoader(self.df_combined,
                                 colnames=self.column_names,
