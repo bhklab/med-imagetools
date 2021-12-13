@@ -79,8 +79,7 @@ class ImageAutoInput(BaseInput):
                  visualize: bool = False):
         self.dir_path = dir_path
         self.modalities = modalities
-        self.dataset_name = self.dir_path.split("/")[-1]
-        self.parent  = os.path.dirname(self.dir_path)
+        self.parent, self.dataset_name = os.path.split(self.dir_path)
 
         ####### CRAWLER ############
         # Checks if dataset has already been indexed
@@ -96,12 +95,12 @@ class ImageAutoInput(BaseInput):
         ####### GRAPH ##########
         # Form the graph
         edge_path = os.path.join(self.parent,f"imgtools_{self.dataset_name}_edges.csv")
-        graph = DataGraph(path_crawl=path_crawl,edge_path=edge_path,visualize=visualize)
+        graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
-        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
-        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="folder"]
-        self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0]=="series"]
+        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
+        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
+        self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
         
         print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
