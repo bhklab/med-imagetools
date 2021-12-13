@@ -4,6 +4,11 @@ import numpy as np
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 import torchio as tio
 import pandas as pd
+<<<<<<< HEAD
+=======
+# from . import file_name_convention
+# from ..ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
+>>>>>>> 700fbe6ff316bf36536be5bf6cca67df144096fa
 from imgtools.io import file_name_convention
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
 from tqdm import tqdm
@@ -11,12 +16,12 @@ from joblib import Parallel, delayed
 import SimpleITK as sitk
 import warnings
 from imgtools.pipeline import Pipeline
-import datetime
 
-class Dataset(List):
+class Dataset(tio.SubjectsDataset):
     """
-    This class takes in medical dataset in the form of nrrds or directly from the dataset and converts the data into list of torchio.Subject object, which can be later loaded into 
-    torchio.SubjectDataset object separately
+    This class takes in medical dataset in the form of nrrds or directly from the dataset and converts the data into torchio.Subject object, which can be loaded into 
+    torchio.SubjectDataset object.
+    This class inherits from torchio.SubjectDataset object, which can support transforms and torch.Dataloader.
     Read more about torchio from https://torchio.readthedocs.io/quickstart.html and torchio.SubjectDataset from https://github.com/fepegar/torchio/blob/3e07b78da16d6db4da7193325b3f9cb31fc0911a/torchio/data/dataset.py#L101
     """
     def __init__(

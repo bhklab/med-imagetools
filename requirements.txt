@@ -1,6 +1,8 @@
 h5py
 joblib
+matplotlib
 numpy
+matplotlib
 pandas
 pydicom
 pynrrd
@@ -10,4 +12,3 @@ SimpleITK
 tqdm
 torch
 torchio
-pyvis
