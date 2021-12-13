@@ -2,11 +2,12 @@
 This code is for testing functioning of different modalities 
 '''
 
+
 import os
-import pathlib
 from posixpath import dirname
 import shutil
 import warnings
+import pathlib
 from multiprocessing import cpu_count
 
 import numpy as np
@@ -61,5 +62,5 @@ def test_modalities(modalities, modalities_path):
         make_binary_mask = StructureSetToSegmentation(roi_names=['GTV.?', 'LARYNX'], continuous=False)
         mask = make_binary_mask(struc, img)
         A = sitk.GetArrayFromImage(mask)
-        assert len(A.shape)==4
+        assert len(A.shape) == 4
         assert A.shape[0:3] == (img.GetDepth(),img.GetHeight(),img.GetWidth())
