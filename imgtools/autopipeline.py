@@ -1,20 +1,15 @@
 import os
+import shutil
+import glob
+import pickle
 
 from argparse import ArgumentParser
+import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-
-import SimpleITK as sitk
-import pandas as pd
-import warnings
 from joblib import Parallel, delayed
-import glob
-import ast
-import datetime
-import numpy as np
-import pickle
-import shutil
+
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
