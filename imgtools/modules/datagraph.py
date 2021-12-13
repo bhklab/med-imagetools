@@ -89,7 +89,7 @@ class DataGraph:
         """
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
-        from pyvis.network import Network
+        from pyvis.network import Network # type: ignore (PyLance)
         print("Generating visualizations...")
         data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
 
