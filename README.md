@@ -17,12 +17,9 @@ pip install med-imagetools
 ### (optional) Install in development mode
 
 ```
-git clone https://github.com/bhklab/med-imagetools.git
-cd med-imagetools
-
 conda create -n mit
 conda activate mit
-python -m pip install -e .
+pip install -e git+https://github.com/bhklab/med-imagetools.git
 ```
 This will install the package in editable mode, so that the installed package will update when the code is changed.
 
