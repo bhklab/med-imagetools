@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as fh:
     
 setup(
     name="med-imagetools",
-    version="0.2.0",
+    version="0.2.1",
     author="Michal Kazmierski, Sejin Kim, Vishwesh Ramanathan, Benjamin Haibe-Kains",
     author_email="benjamin.haibe.kains@utoronto.ca",
     description="Transparent and reproducible image processing pipelines in Python.",
