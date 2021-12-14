@@ -1,6 +1,5 @@
-# imgtools: transparent and reproducible medical image processing pipelines in Python
-Go from messy dataset to analysis-ready Nrrd/NIfTI files in 1 command.
-
+# med-imagetools: transparent and reproducible medical image processing pipelines in Python
+From messy TCIA folders to deep learning ready Nrrd/NiFTIs in one line. 
 
 ## Installation
 ```
@@ -34,4 +33,7 @@ Under Construction
 
 ### From Training a model with Dataset 
 
+## Upcoming Features
+* TorchIO Support
+* More demos/example scripts
 
