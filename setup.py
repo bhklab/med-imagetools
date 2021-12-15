@@ -20,10 +20,11 @@ setup(
     extras_require={
         'debug': ['pyvis'],
     },
-    # classifiers=[
-    #     "Programming Language :: Python :: 3",
-    #     "License :: OSI Approved :: MIT License",
-    #     "Operating System :: OS Independent",
-    # ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+        "License :: OSI Approved :: Apache Software License",
+        "Development Status :: 2 - Pre-Alpha"
+    ],
     python_requires='>=3.6',
 )
