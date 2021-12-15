@@ -118,7 +118,7 @@ class DataGraph:
             node["value"] = len(neigbour_map[node['id']])
 
 
-        vis_path = os.path.join(os.path.basename(self.edge_path),"datanet.html")
+        vis_path = os.path.join(os.path.dirname(self.edge_path),"datanet.html")
         data_net.show(vis_path)
 
     def _form_edge_study(self, df, all_study, study_id):
@@ -255,7 +255,7 @@ class DataGraph:
 
             elif ("CT" in query_string) & ("RTSTRUCT" in query_string) & ("PT" in query_string) & ("RTDOSE" not in query_string):
                 #Fetch the required data. Checks whether each study has edge 2,3,4
-                regex_term = '(?=.*2)(?=.*3)(?=.*4))'
+                regex_term = '(?=.*2)(?=.*3)(?=.*4)'
                 edge_list = [2, 3, 4]
                 final_df = self.graph_query(regex_term, edge_list) 
             
