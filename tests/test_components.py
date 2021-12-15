@@ -43,10 +43,10 @@ def dataset_path():
     edge_path = os.path.join(os.path.dirname(quebec_path), f"imgtools_{dataset_name}_edges.csv")
     yield quebec_path, output_path, crawl_path, edge_path
     #Deleting all the temporary files
-    shutil.rmtree(output_path)
     os.remove(crawl_path)
     os.remove(json_path)
     os.remove(edge_path)
+    shutil.rmtree(output_path)
 
 #Defining for test_dataset method in Test_components class
 def collate_fn(data):
@@ -97,7 +97,7 @@ class select_roi_names(tio.LabelTransform):
 
 
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
-@pytest.mark.parametrize("modalities", ["CT,PT,RTDOSE"])
+@pytest.mark.parametrize("modalities", ["CT,RTDOSE,PT"])
 class Test_components:
     """
     For testing the autopipeline and dataset components of the med-imagetools package
@@ -125,7 +125,7 @@ class Test_components:
         n_jobs = 2
         output_path_mod = os.path.join(self.output_path, str("temp_folder_" + ("_").join(modalities.split(","))))
         #Initialize pipeline for the current setting
-        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs)
+        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs,spacing=(5,5,5))
         #Run for different modalities
         comp_path = os.path.join(output_path_mod, "dataset.csv")
         pipeline.run()
@@ -185,14 +185,13 @@ class Test_components:
         assert len(subjects_nrrd) == len(subjects_direct) == 2, "There was some error in generation of subject object"
         assert subjects_nrrd[0].keys() == subjects_direct[0].keys()
 
-
         del subjects_direct
         #To check if there are all items present in the keys
         temp_nrrd = subjects_nrrd[0]
         columns_shdbe_present = set([col if col.split("_")[0]=="metadata" else "mod_"+("_").join(col.split("_")[1:]) for col in list(comp_table.columns) if col.split("_")[0] in ["folder","metadata"]])
         assert set(temp_nrrd.keys()).issubset(columns_shdbe_present), "Not all items present in dictionary, some fault in going through the different columns in a single component"
 
-        transforms = tio.Compose([tio.Resample(4),tio.CropOrPad((96,96,40)),select_roi_names(["Body"])])
+        transforms = tio.Compose([tio.Resample(4),tio.CropOrPad((96,96,40)),select_roi_names(["larynx"]),tio.OneHot()])
 
         #Forming dataset and dataloader
         test_set = tio.SubjectsDataset(subjects_nrrd, transform=transforms)
@@ -206,12 +205,3 @@ class Test_components:
         data = next(iter(test_loader))
         A = [item[1].shape == (2,1,96,96,40) if not "RTSTRUCT" in item[0] else item[1].shape == (2,2,96,96,40) for item in data.items()]
         assert all(A), "There is some problem in the transformation/the formation of subject object"
-    
-    # @pytest.fixture(scope="session", autouse=True)
-    # def cleanup(self,request):
-    #     """Cleanup a testing directory once we are finished."""
-    #     def remove_test_dir():
-    #         curr_path = pathlib.Path(__file__).parent.parent.resolve()
-    #         output_path = pathlib.Path(os.path.join(curr_path, 'tests','temp')).as_posix()
-    #         shutil.rmtree(output_path)
-    #     request.addfinalizer(remove_test_dir)
