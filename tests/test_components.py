@@ -18,9 +18,9 @@ from imgtools.io import file_name_convention, Dataset
 def dataset_path():
     curr_path = pathlib.Path(__file__).parent.parent.resolve()
     quebec_path = pathlib.Path(os.path.join(curr_path, "data", "Head-Neck-PET-CT"))
-    pathlib.Path(quebec_path).mkdir(parents=True, exist_ok=True)
     
     if not os.path.exists(quebec_path):
+        pathlib.Path(quebec_path).mkdir(parents=True, exist_ok=True)
         # Download QC dataset
         print("Downloading the test dataset...")
         quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
