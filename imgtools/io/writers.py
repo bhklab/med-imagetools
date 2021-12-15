@@ -71,13 +71,9 @@ class SegNrrdWriter(BaseWriter):
         spacing = mask.GetSpacing()
         direction = mask.GetDirection()
 
-        # what happens if it's [-0.5, 0., 0.]? or [0.5, 0.5, 0.5]?
-        space_x = 'left' if list(direction[0:3]) == [1., 0., 0.] else 'right'
-        space_y = 'posterior' if list(direction[3:6]) == [0., 1., 0.] else 'anterior'
-        space_z = 'superior' if list(direction[6:9]) == [0., 0., 1.] else 'inferior'
-        
-        space = space_x + "-" + space_y + "-" + space_z
+        space = "left-posterior-superior"  # everything is ITK read/write 
 
+        # fix reverted somewhere.... :''''(
         space_directions = [[spacing[0], 0., 0.],
                             [0., spacing[1], 0.],
                             [0., 0., spacing[2]]]
