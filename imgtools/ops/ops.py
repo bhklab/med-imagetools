@@ -272,8 +272,10 @@ class ImageAutoOutput:
                  
         # File types
         self.file_name = file_name_convention()
+        print(self.file_name)
 
         self.output = {}
+        print(output_streams)
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
