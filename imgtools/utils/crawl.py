@@ -23,38 +23,38 @@ def crawl_one(folder):
             series   = meta.SeriesInstanceUID
             instance = meta.SOPInstanceUID
 
-            reference_ct, reference_rs, reference_pl = "", "", ""
+            reference_ct, reference_rs, reference_pl = " ", " ", " "
             try: #RTSTRUCT
-                reference_ct = meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID 
+                reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
             except: 
                 try: #RTDOSE
-                    reference_rs = meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID
+                    reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
                 except:
                     pass
                 try:
-                    reference_ct = meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
+                    reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
                 except:
                     pass
                 try:
-                    reference_pl = meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
+                    reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
                 except:
                     pass
             
             try:
-                reference_frame = meta.FrameOfReferenceUID
+                reference_frame = str(meta.FrameOfReferenceUID)
             except:
                 try:
-                    reference_frame = meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID
+                    reference_frame = str(meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID)
                 except:
                     reference_frame = ""
     
             try:
-                study_description = meta.StudyDescription
+                study_description = str(meta.StudyDescription)
             except:
                 study_description = ""
 
             try:
-                series_description = meta.SeriesDescription
+                series_description = str(meta.SeriesDescription)
             except:
                 series_description = ""
 
@@ -111,8 +111,7 @@ def crawl(top,
             database_dict[key] = db[key]
     
     # save one level above imaging folders
-    parent  = os.path.dirname(top)
-    dataset = os.path.split(top)[-1]
+    parent, dataset  = os.path.split(top)
     
     # save as json
     with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
@@ -132,7 +131,7 @@ if __name__ == "__main__":
                          help="Top-level directory of the dataset.")
     parser.add_argument("--n_jobs",
                          type=int,
-                         default=32,
+                         default=16,
                          help="Number of parallel processes for multiprocessing.")
 
     args = parser.parse_args()
