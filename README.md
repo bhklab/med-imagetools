@@ -6,7 +6,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 
-Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
+Med-Imagetools offers a simple solution to transform messy medical dataset folders to deep learning ready format with a few lines of code. It supports DICOM processing of different modalities into standard data formats, but can also structure entire datasets into PyTorch compatible Datasets while taking the dependencies of various modalities into consideration.  
 
 ## Introduction
 A medical dataset, typically contains multiple different types of scans for a single patient in a single study. As seen in the figure below, the different scans containing DICOM of different modalities are interdependent on each other. For making effective machine learning models, one ought to take different modalities into account.
@@ -68,6 +68,13 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     data_set = tio.SubjectsDataset(subjects)
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
     ```
+## Supported Modalities/Connections
+* CT
+* MR
+* RTSTRUCT: CT/MR
+* RTPLAN: CT only
+* RTDOSE: CT only
+* PT(PET): CT only
 
 ## Contributors
 
