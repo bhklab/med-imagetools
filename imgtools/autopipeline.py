@@ -94,19 +94,19 @@ class AutoPipeline(Pipeline):
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
 
-            #Taking modality pairs if it exists till _{num}
+            # Taking modality pairs if it exists till _{num}
             output_stream = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
 
-            #If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
+            # If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
             mult_conn = colname.split("_")[-1].isnumeric()
             num = colname.split("_")[-1]
 
             print(output_stream)
 
             if read_results[i] is None:
-                print("The subject id: {} has no {}".format(subject_id,colname))
+                print("The subject id: {} has no {}".format(subject_id, colname))
                 pass
-            elif modality == "CT":
+            elif modality == "CT" or modality == 'MR':
                 image = read_results[i]
                 if len(image.GetSize()) == 4:
                     assert image.GetSize()[-1] == 1, f"There is more than one volume in this CT file for {subject_id}."
@@ -142,7 +142,7 @@ class AutoPipeline(Pipeline):
                 conn_to = output_stream.split("_")[-1]
 
                 # make_binary_mask relative to ct/pet
-                if conn_to == "CT":
+                if conn_to == "CT" or conn_to == "MR":
                     mask = self.make_binary_mask(structure_set, image)
                 elif conn_to == "PT":
                     mask = self.make_binary_mask(structure_set, pet)
@@ -178,7 +178,7 @@ class AutoPipeline(Pipeline):
         return 
     
     def save_data(self):
-        files = glob.glob(os.path.join(self.output_directory,".temp","*.pkl"))
+        files = glob.glob(os.path.join(self.output_directory, ".temp", "*.pkl"))
         for file in files:
             filename = pathlib.Path(file).name
             subject_id = os.path.splitext(filename)[0]
