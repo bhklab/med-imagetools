@@ -53,17 +53,17 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
 1. ***Autopipeline***: Crawls the raw dataset, forms a network and performs graph query, based on the user defined modalities. The relevant DICOMS, get processed and saved as nrrds
     ```
     python imgtools/autopipeline.py\
-     [INPUT DATASET DIRECTORY] \
+     [INPUT DIRECTORY] \
      [OUTPUT DIRECTORY] \
-     --modalities [FOR EX: CT,RTSTRUCT,PT] \
-     --spacing [(int,int,int)]\
+     --modalities [str: CT,RTSTRUCT,PT] \
+     --spacing [Tuple: (int,int,int)]\
      --n_jobs [int]\
-     --visualize [TRUE\FALSE]\
+     --visualize [bool: True/False]\
     ```
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
     ```
     from imgtools.io import Dataset
-
+    
     subjects = Dataset.load_from_nrrd(output_directory, ignore_multi=True)
     data_set = tio.SubjectsDataset(subjects)
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
@@ -76,10 +76,11 @@ Thanks to the following people who have contributed to this project:
 * [@mkazmier](https://github.com/mkazmier)
 * [@skim2257](https://github.com/skim2257)
 * [@Vishwesh4](https://github.com/Vishwesh4)
+* [@mnakano](https://github.com/mnakano)
 
 ## Contact
 
-If you want to contact, you can reach the following contributors at  sejin.kim@uhnresearch.ca or vishweshramanathan@gmail.com
+If you have any questions/concerns, you can reach the following contributors at sejin.kim@uhnresearch.ca
 
 ## License
 
