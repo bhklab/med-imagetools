@@ -41,11 +41,13 @@ def file_name_convention() -> Dict:
     This function returns the file name taxonomy which is used by ImageAutoOutput and Dataset class
     """
     file_name_convention = {"CT": "image",
-                          "RTDOSE_CT": "dose", 
-                          "RTSTRUCT_CT": "mask_ct.seg", 
-                          "RTSTRUCT_PT": "mask_pt.seg", 
-                          "PT_CT": "pet", 
-                          "PT": "pet", 
-                          "RTDOSE": "dose", 
-                          "RTSTRUCT": "mask.seg"}
+                            "MR": "image",
+                            "RTDOSE_CT": "dose", 
+                            "RTSTRUCT_CT": "mask_ct.seg", 
+                            "RTSTRUCT_MR": "mask_mr.seg", 
+                            "RTSTRUCT_PT": "mask_pt.seg", 
+                            "PT_CT": "pet", 
+                            "PT": "pet", 
+                            "RTDOSE": "dose", 
+                            "RTSTRUCT": "mask.seg"}
     return file_name_convention

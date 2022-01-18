@@ -16,6 +16,7 @@ from tqdm.auto import tqdm
 from ..modules import StructureSet
 from ..modules import Dose
 from ..modules import PET
+from ..utils.crawl import *
 
 
 
@@ -76,13 +77,13 @@ def read_dicom_rtdose(path):
 def read_dicom_pet(path,series=None):
     return PET.from_dicom_pet(path,series, "SUV")
 
-def read_dicom_auto(path,series=None):
+def read_dicom_auto(path, series=None):
     if path is None:
         return None
     dcms = glob.glob(os.path.join(path, "*.dcm"))
     meta = dcmread(dcms[0])
     modality = meta.Modality
-    if modality == 'CT':
+    if modality == 'CT' or modality == 'MR':
         return read_dicom_series(path,series)
     elif modality == 'PT':
         return read_dicom_pet(path,series)
@@ -176,131 +177,6 @@ class ImageCSVLoader(BaseLoader):
     def items(self):
         return ((k, self[k]) for k in self.keys())
 
-class ImageAutoLoader(BaseLoader):
-    def __init__(self, 
-                 path: str, 
-                 modality: List[str] = ['CT']):
-        self.top         = path
-        self.modality    = modality
-        self.database_df = self.crawl(path)
-
-        # sort by modality
-        self.rtstruct    = self.database_df[self.database_df['modality'] == 'RTSTRUCT']
-        self.rtdose      = self.database_df[self.database_df['modality'] == 'RTDOSE']
-        self.pet         = self.database_df[self.database_df['modality'] == 'PT']
-    
-    @staticmethod
-    def crawl_one(folder):
-        database = {}
-        for path, directories, files in os.walk(folder):
-            # find dicoms
-            dicoms = glob.glob(os.path.join(path, "*.dcm"))
-
-            # instance (slice) information
-            for dcm in dicoms:
-                meta = dcmread(dcm)
-                patient  = meta.PatientID
-                study    = meta.StudyInstanceUID
-                series   = meta.SeriesInstanceUID
-                instance = meta.SOPInstanceUID
-
-                try:
-                    reference = meta.FrameOfReferenceUID
-                except:
-                    try:
-                        reference = meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID
-                    except:
-                        reference = ""
-
-                try:
-                    study_description = meta.StudyDescription
-                except:
-                    study_description = ""
-
-                try:
-                    series_description = meta.SeriesDescription
-                except:
-                    series_description = ""
-
-                if patient not in database:
-                    database[patient] = {}
-                if study not in database[patient]:
-                    database[patient][study] = {'description': study_description}
-                if series not in database[patient][study]:
-                    database[patient][study][series] = {'instances': 0,
-                                                    'modality': meta.Modality,
-                                                    'description': series_description,
-                                                    'reference': reference,
-                                                    'folder': path}
-                database[patient][study][series]['instances'] += 1
-    
-        return database
-
-    @staticmethod
-    def to_df(database_dict):
-        df = pd.DataFrame(columns=['patient_ID', 'study', 'study_description', 'series', 'series_description', 'modality', 'instances', 'folder'])
-        for pat in database_dict:
-            for study in database_dict[pat]:
-                for series in database_dict[pat][study]:
-                    if series != 'description':
-                        df = df.append({'patient_ID': pat,
-                                        'study': study,
-                                        'study_description': database_dict[pat][study]['description'],
-                                        'series': series,
-                                        'series_description': database_dict[pat][study][series]['description'],
-                                        'modality': database_dict[pat][study][series]['modality'],
-                                        'instances': database_dict[pat][study][series]['instances'],
-                                        'reference': database_dict[pat][study][series]['reference'],
-                                        'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
-        return df
-
-    def crawl(self, top, n_jobs=1):
-        database_list = []
-        folders = glob.glob(os.path.join(top, "*"))
-        
-        # crawl folder-by-folder
-        if n_jobs == 1:
-            for n, folder in enumerate(tqdm(folders)):
-                database_list.append(self.crawl_one(folder))
-        else:
-            database_list = Parallel(n_jobs=n_jobs)(delayed(self.crawl_one)(os.path.join(top, folder)) for folder in tqdm(folders))
-
-        # convert list to dictionary
-        database_dict = {}
-        for db in database_list:
-            for key in db:
-                database_dict[key] = db[key]
-        
-        # save one level above imaging folders
-        parent, dataset  = os.path.split(top)
-        
-        # save as json
-        with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
-            json.dump(database_dict, f, indent=4)
-        
-        # save as dataframe
-        df = self.to_df(database_dict)
-        df_path = os.path.join(parent, f'imgtools_{dataset}.csv')
-        df.to_csv(df_path)
-        
-        print(f"imgtools dataset {dataset} crawling complete. You can find the spreadsheet at: {df_path}")
-
-        return self.filter(df)
-
-        
-    def __getitem__(self, subject_id):
-        row = self.df['patient_ID' == subject_id]
-        paths = {col: row[col] for col in self.colnames}
-        if self.expand_paths:
-            paths = {col: glob.glob(path)[0] for col, path in paths.items()}
-        outputs = {col: self.readers[i](path) for i, (col, path) in enumerate(paths.items())}
-        return self.output_tuple(**outputs)
-
-    def keys(self):
-        return list(self.paths.index)
-
-    def items(self):
-        return ((k, self[k]) for k in self.keys())
 
 class ImageFileLoader(BaseLoader):
     def __init__(self,
