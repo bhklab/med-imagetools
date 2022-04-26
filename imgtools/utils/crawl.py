@@ -18,10 +18,10 @@ def crawl_one(folder):
         # instance (slice) information
         for dcm in dicoms:
             meta = dcmread(dcm)
-            patient  = meta.PatientID
-            study    = meta.StudyInstanceUID
-            series   = meta.SeriesInstanceUID
-            instance = meta.SOPInstanceUID
+            patient  = str(meta.PatientID)
+            study    = str(meta.StudyInstanceUID)
+            series   = str(meta.SeriesInstanceUID)
+            instance = str(meta.SOPInstanceUID)
 
             reference_ct, reference_rs, reference_pl = " ", " ", " "
             try: #RTSTRUCT
