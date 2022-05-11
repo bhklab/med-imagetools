@@ -17,62 +17,65 @@ def crawl_one(folder):
 
         # instance (slice) information
         for dcm in dicoms:
-            meta = dcmread(dcm)
-            patient  = str(meta.PatientID)
-            study    = str(meta.StudyInstanceUID)
-            series   = str(meta.SeriesInstanceUID)
-            instance = str(meta.SOPInstanceUID)
-
-            reference_ct, reference_rs, reference_pl = " ", " ", " "
-            try: #RTSTRUCT
-                reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
-            except: 
-                try: #RTDOSE
-                    reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
-                except:
-                    pass
-                try:
-                    reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
-                except:
-                    pass
-                try:
-                    reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
-                except:
-                    pass
-            
             try:
-                reference_frame = str(meta.FrameOfReferenceUID)
-            except:
+                meta = dcmread(dcm, force=True)
+                patient  = str(meta.PatientID)
+                study    = str(meta.StudyInstanceUID)
+                series   = str(meta.SeriesInstanceUID)
+                instance = str(meta.SOPInstanceUID)
+
+                reference_ct, reference_rs, reference_pl = " ", " ", " "
+                try: #RTSTRUCT
+                    reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
+                except: 
+                    try: #RTDOSE
+                        reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
+                    except:
+                        pass
+                    try:
+                        reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
+                    except:
+                        pass
+                    try:
+                        reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
+                    except:
+                        pass
+                
                 try:
-                    reference_frame = str(meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID)
+                    reference_frame = str(meta.FrameOfReferenceUID)
                 except:
-                    reference_frame = ""
-    
-            try:
-                study_description = str(meta.StudyDescription)
-            except:
-                study_description = ""
+                    try:
+                        reference_frame = str(meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID)
+                    except:
+                        reference_frame = ""
+        
+                try:
+                    study_description = str(meta.StudyDescription)
+                except:
+                    study_description = ""
 
-            try:
-                series_description = str(meta.SeriesDescription)
-            except:
-                series_description = ""
+                try:
+                    series_description = str(meta.SeriesDescription)
+                except:
+                    series_description = ""
 
-            if patient not in database:
-                database[patient] = {}
-            if study not in database[patient]:
-                database[patient][study] = {'description': study_description}
-            if series not in database[patient][study]:
-                database[patient][study][series] = {'instances': [],
-                                                    'instance_uid': instance,
-                                                    'modality': meta.Modality,
-                                                    'description': series_description,
-                                                    'reference_ct': reference_ct,
-                                                    'reference_rs': reference_rs,
-                                                    'reference_pl': reference_pl,
-                                                    'reference_frame': reference_frame,
-                                                    'folder': path}
-            database[patient][study][series]['instances'].append(instance)
+                if patient not in database:
+                    database[patient] = {}
+                if study not in database[patient]:
+                    database[patient][study] = {'description': study_description}
+                if series not in database[patient][study]:
+                    database[patient][study][series] = {'instances': [],
+                                                        'instance_uid': instance,
+                                                        'modality': meta.Modality,
+                                                        'description': series_description,
+                                                        'reference_ct': reference_ct,
+                                                        'reference_rs': reference_rs,
+                                                        'reference_pl': reference_pl,
+                                                        'reference_frame': reference_frame,
+                                                        'folder': path}
+                database[patient][study][series]['instances'].append(instance)
+            except:
+                pass
     
     return database
 
