@@ -9,7 +9,7 @@ def physical_points_to_idxs(image, points, continuous=False):
     
     vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature='(3)->(3)')
     
-    # transformed points, ContourSequence/Data-wise
+    # transform indices to ContourSequence/ContourData-wise
     t_points = []
     for slc in points:
         t_points.append(vectorized_transform(slc)[:,::-1])
