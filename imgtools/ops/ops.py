@@ -605,7 +605,7 @@ class Zoom(BaseOp):
 
 
 class Rotate(BaseOp):
-    """Rorate operation class: A callable class that rotates an image around a given centre.
+    """Rotate operation class: A callable class that rotates an image around a given centre.
 
     To instantiate:
         obj = Rotate(rotation_centre, angles, interpolation)
@@ -637,7 +637,7 @@ class Rotate(BaseOp):
         self.interpolation = interpolation
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Rorate callable object: Rotates an image around a given centre.
+        """Rotate callable object: Rotates an image around a given centre.
 
         Parameters
         ----------
@@ -657,10 +657,10 @@ class Rotate(BaseOp):
 
 
 class InPlaneRotate(BaseOp):
-    """InPlaneRorate operation class: A callable class that rotates an image on a plane.
+    """InPlaneRotate operation class: A callable class that rotates an image on a plane.
 
     To instantiate:
-        obj = InPlaneRorate(angle, interpolation)
+        obj = InPlaneRotate(angle, interpolation)
 
     To call:
         result = obj(image)
@@ -682,7 +682,7 @@ class InPlaneRotate(BaseOp):
         self.interpolation = interpolation
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """InPlaneRorate callable object: Rotates an image on a plane.
+        """InPlaneRotate callable object: Rotates an image on a plane.
 
         Parameters
         ----------
