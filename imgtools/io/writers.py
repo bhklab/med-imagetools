@@ -19,8 +19,9 @@ class BaseWriter:
         self.root_directory = root_directory
         self.filename_format = filename_format
         self.create_dirs = create_dirs
-        if create_dirs and not os.path.exists(self.root_directory):
-            os.makedirs(self.root_directory)
+        #this one makes an extra {subject_id} folder
+        # if create_dirs and not os.path.exists(self.root_directory):
+        #     os.makedirs(self.root_directory)
 
     def put(self, *args, **kwargs):
         raise NotImplementedError
@@ -35,6 +36,8 @@ class BaseWriter:
                                                    time=time,
                                                    date_time=date_time,
                                                    **kwargs)
+        self.root_directory = self.root_directory.format(subject_id=subject_id,
+                                                    **kwargs)
         out_path = os.path.join(self.root_directory, out_filename)
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
@@ -44,7 +47,7 @@ class BaseWriter:
 
 
 class ImageFileWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True, compress=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.compress = compress
 

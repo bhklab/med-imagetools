@@ -280,8 +280,10 @@ class ImageAutoOutput:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
-            self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
-                                                           filename_format="{subject_id}_"+"{}.nrrd".format(extension))
+            self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
+                                                           filename_format=colname_process+"{}.nii.gz".format(extension))
+            # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
+            #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
     
     def __call__(self, 
                  subject_id: str,
