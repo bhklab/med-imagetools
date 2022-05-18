@@ -2,6 +2,7 @@ import os
 import json
 import csv
 import pickle
+import shutil
 from datetime import datetime, timezone
 
 import h5py
@@ -20,8 +21,8 @@ class BaseWriter:
         self.filename_format = filename_format
         self.create_dirs = create_dirs
         #this one makes an extra {subject_id} folder
-        # if create_dirs and not os.path.exists(self.root_directory):
-        #     os.makedirs(self.root_directory)
+        if create_dirs and not os.path.exists(self.root_directory):
+            os.makedirs(self.root_directory)
 
     def put(self, *args, **kwargs):
         raise NotImplementedError
@@ -36,13 +37,46 @@ class BaseWriter:
                                                    time=time,
                                                    date_time=date_time,
                                                    **kwargs)
-        self.root_directory = self.root_directory.format(subject_id=subject_id,
-                                                    **kwargs)
+        # self.root_directory = self.root_directory.format(subject_id=subject_id,
+        #                                                  **kwargs)
         out_path = os.path.join(self.root_directory, out_filename)
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
 
+        return out_path
+
+
+class BaseSubjectWriter(BaseWriter):
+    def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
+        super().__init__(root_directory, filename_format, create_dirs)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+        if os.path.exists(self.root_directory)\
+           and os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+           #delete the folder called {subject_id} that was made in the original BaseWriter
+
+            shutil.rmtree(os.path.dirname(self.root_directory))
+        print(self.root_directory)
+
+    def put(self, subject_id, image, **kwargs):        
+        if kwargs["is_mask"]:
+            self.filename_format = kwargs["mask_label"]+".nii.gz"
+        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
+        sitk.WriteImage(image, out_path, self.compress)
+
+    def _get_path_from_subject_id(self, subject_id, **kwargs):
+        out_filename = self.filename_format.format(subject_id=subject_id,
+                                                   **kwargs)
+        self.root_directory = self.root_directory.format(subject_id=subject_id,
+                                                         **kwargs)
+        out_path = os.path.join(self.root_directory, out_filename)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+        
         return out_path
 
 
@@ -52,13 +86,14 @@ class ImageFileWriter(BaseWriter):
         self.compress = compress
 
     def put(self, subject_id, image, **kwargs):
-        # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
         
 class SegNrrdWriter(BaseWriter):
     def __init__(self, root_directory, filename_format="{subject_id}.seg.nrrd", create_dirs=True, compress=True):
+        if filename_format.endswith(".nii.gz"):
+            filename_format = filename_format.replace(".nii.gz", ".nrrd") #.seg is already included
         super().__init__(root_directory, filename_format, create_dirs)
         if compress:
             self.compression_level = 9
@@ -67,7 +102,7 @@ class SegNrrdWriter(BaseWriter):
 
     def put(self, subject_id, mask, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
-        labels = [k for k in mask.roi_names] 
+        labels = [k for k in mask.roi_names]
         print(labels)
 
         origin = mask.GetOrigin()
