@@ -43,11 +43,11 @@ def file_name_convention() -> Dict:
     file_name_convention = {"CT": "image",
                             "MR": "image",
                             "RTDOSE_CT": "dose", 
-                            "RTSTRUCT_CT": "mask_ct.seg", 
-                            "RTSTRUCT_MR": "mask_mr.seg", 
-                            "RTSTRUCT_PT": "mask_pt.seg", 
+                            "RTSTRUCT_CT": "mask_ct", 
+                            "RTSTRUCT_MR": "mask_mr", 
+                            "RTSTRUCT_PT": "mask_pt", 
                             "PT_CT": "pet", 
                             "PT": "pet", 
                             "RTDOSE": "dose", 
-                            "RTSTRUCT": "mask.seg"}
+                            "RTSTRUCT": "mask"}
     return file_name_convention
