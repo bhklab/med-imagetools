@@ -241,7 +241,7 @@ class ImageFileOutput(BaseOutput):
         self.create_dirs = create_dirs
         self.compress = compress
         
-        if "seg.nrrd" in filename_format:
+        if ".seg" in filename_format: #from .seg.nrrd bc it is now .nii.gz
             writer_class = SegNrrdWriter
         else:
             writer_class = ImageFileWriter
@@ -252,6 +252,30 @@ class ImageFileOutput(BaseOutput):
                               self.compress)
         
         super().__init__(writer)
+
+
+
+class ImageSubjectFileOutput(BaseOutput):
+
+    def __init__(self,
+                 root_directory: str,
+                 filename_format: Optional[str] ="{subject_id}.nrrd",
+                 create_dirs: Optional[bool] =True,
+                 compress: Optional[bool] =True):
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+
+        writer_class = BaseSubjectWriter
+            
+        writer = writer_class(self.root_directory,
+                              self.filename_format,
+                              self.create_dirs,
+                              self.compress)
+        
+        super().__init__(writer)
+
 
 class ImageAutoOutput:
     """
@@ -280,17 +304,25 @@ class ImageAutoOutput:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
-            self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
-                                                           filename_format=colname_process+"{}.nii.gz".format(extension))
+            self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
+                                                                    filename_format=colname_process+"{}.nii.gz".format(extension))
             # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
             #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
+            # if not is_mask:
+            #         self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
+            #                                                               filename_format=colname_process+"{}.nii.gz".format(extension))
+            # else:
+            #     self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
+            #                                                             filename_format=mask_label+"{}.nii.gz".format(extension),)
     
     def __call__(self, 
                  subject_id: str,
                  img: sitk.Image,
-                 output_stream):
+                 output_stream,
+                 is_mask: bool = False,
+                 mask_label: Optional[str] = ""):
                  
-        self.output[output_stream](subject_id, img)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.

@@ -31,6 +31,7 @@ class StructureSet:
                 roi_points[name] = _get_roi_points(rtstruct, i)
             except AttributeError:
                 warn(f"Could not get points for ROI {name} (in {rtstruct_path}).")
+        print(roi_names, "\n\n\n")
         return cls(roi_points)
 
     @property
@@ -162,7 +163,7 @@ class StructureSet:
                 #     mask[z, :, :, label] += slice_mask
 
         
-        mask[mask > 1] = 1        
+        mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
         seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
