@@ -61,18 +61,17 @@ class BaseSubjectWriter(BaseWriter):
             shutil.rmtree(os.path.dirname(self.root_directory))
         print(self.root_directory)
 
-    def put(self, subject_id, image, **kwargs):        
-        if kwargs["is_mask"]:
-            self.filename_format = kwargs["mask_label"]+".nii.gz"
+    def put(self, subject_id, image, is_mask=False, mask_label="",**kwargs):
+        if is_mask:
+            self.filename_format = mask_label+".nii.gz"
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, subject_id, **kwargs):
-        out_filename = self.filename_format.format(subject_id=subject_id,
-                                                   **kwargs)
+        # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
         self.root_directory = self.root_directory.format(subject_id=subject_id,
                                                          **kwargs)
-        out_path = os.path.join(self.root_directory, out_filename)
+        out_path = os.path.join(self.root_directory, self.filename_format)
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
