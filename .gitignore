@@ -1,6 +1,7 @@
 # data
 data
 examples/data/tcia_n*
+scratch.ipynb
 
 # macOS
 .DS_Store
