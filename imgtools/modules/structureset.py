@@ -31,7 +31,6 @@ class StructureSet:
                 roi_points[name] = _get_roi_points(rtstruct, i)
             except AttributeError:
                 warn(f"Could not get points for ROI {name} (in {rtstruct_path}).")
-        print(roi_names, "\n\n\n")
         return cls(roi_points)
 
     @property
@@ -156,6 +155,8 @@ class StructureSet:
                     mask[z, :, :, label] += slice_mask
                 else:
                     raise ValueError("This contour is corrupted and spans across 2 or more slices.")
+
+                # This is the old version of z index parsing. Kept for backup
                 # if len(z) == 1:
                 #     # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
                 #     z = z[0]
