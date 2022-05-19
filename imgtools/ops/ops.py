@@ -253,7 +253,37 @@ class ImageFileOutput(BaseOutput):
         
         super().__init__(writer)
 
+class MetadataOutput(BaseOutput):
+    """MetadataOutput class outputs the metadata of processed image files in .json format.
 
+    Parameters
+    ----------
+    root_directory: str
+        Root directory where the processed .json file will be stored.
+
+    filename_format: str, optional
+        The filename template.
+        Set to be {subject_id}.json as default.
+        {subject_id} will be replaced by each subject's ID at runtime.
+
+    create_dirs: bool, optional
+        Specify whether to create an output directory if it does not exit.
+        Set to be True as default.
+
+    """
+
+    def __init__(self,
+                 root_directory: str,
+                 filename_format: Optional[str] ="{subject_id}.json",
+                 create_dirs: Optional[bool] =True):
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        writer = MetadataWriter(self.root_directory, self.filename_format, self.create_dirs)
+        super().__init__(writer)
+
+
+# Resampling ops
 
 class ImageSubjectFileOutput(BaseOutput):
 
