@@ -115,14 +115,19 @@ def crawl(top,
     
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
+
+    parent_imgtools = os.path.join(parent, "imgtools")
+
+    if not os.path.exists(parent_imgtools):
+        os.makedirs(parent_imgtools)
     
     # save as json
-    with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
+    with open(os.path.join(parent_imgtools, f'imgtools_{dataset}.json'), 'w') as f:
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
     df = to_df(database_dict)
-    df_path = os.path.join(parent, f'imgtools_{dataset}.csv')
+    df_path = os.path.join(parent_imgtools, f'imgtools_{dataset}.csv')
     df.to_csv(df_path)
     
     return database_dict
