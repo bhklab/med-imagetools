@@ -44,6 +44,38 @@ class BaseWriter:
         return out_path
 
 
+class BaseSubjectWriter(BaseWriter):
+    def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
+        super().__init__(root_directory, filename_format, create_dirs)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+        if os.path.exists(self.root_directory)\
+           and os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+           #delete the folder called {subject_id} that was made in the original BaseWriter
+
+            shutil.rmtree(os.path.dirname(self.root_directory))
+        print(self.root_directory)
+
+    def put(self, subject_id, image, is_mask=False, mask_label="",**kwargs):
+        if is_mask:
+            self.filename_format = mask_label+".nii.gz"
+        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
+        sitk.WriteImage(image, out_path, self.compress)
+
+    def _get_path_from_subject_id(self, subject_id, **kwargs):
+        # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
+        self.root_directory = self.root_directory.format(subject_id=subject_id,
+                                                         **kwargs)
+        out_path = os.path.join(self.root_directory, self.filename_format)
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+
+        return out_path
+
+
 class ImageFileWriter(BaseWriter):
     def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)
