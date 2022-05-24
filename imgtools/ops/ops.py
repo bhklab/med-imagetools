@@ -84,7 +84,7 @@ class ImageAutoInput(BaseInput):
         ####### CRAWLER ############
         # Checks if dataset has already been indexed
         # To be changed later
-        path_crawl = os.path.join(self.parent, f"imgtools_{self.dataset_name}.csv")
+        path_crawl = os.path.join(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
         if not os.path.exists(path_crawl):
             print("Couldn't find the dataset index CSV. Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
@@ -94,7 +94,7 @@ class ImageAutoInput(BaseInput):
 
         ####### GRAPH ##########
         # Form the graph
-        edge_path = os.path.join(self.parent,f"imgtools_{self.dataset_name}_edges.csv")
+        edge_path = os.path.join(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)

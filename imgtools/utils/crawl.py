@@ -116,7 +116,7 @@ def crawl(top,
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
 
-    parent_imgtools = os.path.join(parent, "imgtools")
+    parent_imgtools = os.path.join(parent, ".imgtools")
 
     if not os.path.exists(parent_imgtools):
         os.makedirs(parent_imgtools)
