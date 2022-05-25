@@ -3,11 +3,10 @@ This code is for testing functioning of different modalities
 '''
 
 
-import os
+import os, pathlib
 from posixpath import dirname
 import shutil
 import warnings
-import pathlib
 from multiprocessing import cpu_count
 
 import numpy as np

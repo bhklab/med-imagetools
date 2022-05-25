@@ -191,7 +191,7 @@ class ImageFileLoader(BaseLoader):
         self.exclude_paths = []
         for path in exclude_paths:
             if not path.startswith(self.root_directory):
-                full_paths = glob.glob(os.path.join(root_directory, path))
+                full_paths = glob.glob(pathlib.Path(root_directory, path).as_posix())
                 self.exclude_paths.extend(full_paths)
             else:
                 full_path = path
@@ -207,7 +207,7 @@ class ImageFileLoader(BaseLoader):
                 continue
             subject_dir_path = f.path
             if self.subdir_path:
-                full_path = os.path.join(subject_dir_path, self.subdir_path)
+                full_path = pathlib.Path(subject_dir_path, self.subdir_path).as_posix()
             else:
                 full_path = subject_dir_path
             try:
@@ -215,7 +215,7 @@ class ImageFileLoader(BaseLoader):
             except IndexError:
                 continue
             if os.path.isdir(full_path):
-                full_path = os.path.join(full_path, "")
+                full_path = pathlib.Path(full_path, "").as_posix()
             subject_dir_name = os.path.basename(os.path.normpath(subject_dir_path))
             subject_id = self._extract_subject_id_from_path(full_path, subject_dir_name)
             paths[subject_id] = full_path

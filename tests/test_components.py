@@ -1,6 +1,5 @@
-import os
+import os, pathlib
 import shutil
-import pathlib
 import urllib.request as request
 from zipfile import ZipFile
 import torchio as tio

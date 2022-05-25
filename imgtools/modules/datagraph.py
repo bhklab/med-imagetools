@@ -1,10 +1,9 @@
-import os, time
+import os, time, pathlib
 from typing import List
 from functools import reduce
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import pathlib
 
 
 class DataGraph:
@@ -119,7 +118,7 @@ class DataGraph:
             node["value"] = len(neigbour_map[node['id']])
 
 
-        vis_path = os.path.join(os.path.dirname(self.edge_path),"datanet.html")
+        vis_path = pathlib.Path(os.path.dirname(self.edge_path),"datanet.html").as_posix()
         data_net.show(vis_path)
 
     def _form_edge_study(self, df, all_study, study_id):

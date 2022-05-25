@@ -48,7 +48,7 @@ class AutoPipeline(Pipeline):
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
         
-        self.output_df_path = os.path.join(self.output_directory, "dataset.csv")
+        self.output_df_path = pathlib.Path(self.output_directory, "dataset.csv").as_posix()
         #Output component table
         self.output_df = self.input.df_combined
         #Name of the important columns which needs to be saved    
@@ -62,8 +62,8 @@ class AutoPipeline(Pipeline):
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
 
         #Make a directory
-        if not os.path.exists(os.path.join(self.output_directory,".temp")):
-            os.mkdir(os.path.join(self.output_directory,".temp"))
+        if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
+            os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
 
 
     def process_one_subject(self, subject_id):
@@ -79,7 +79,7 @@ class AutoPipeline(Pipeline):
            The ID of subject to process
         """
         #Check if the subject_id has already been processed
-        if os.path.exists(os.path.join(self.output_directory,".temp",f'temp_{subject_id}.pkl')):
+        if os.path.exists(pathlib.Path(self.output_directory,".temp",f'temp_{subject_id}.pkl').as_posix()):
             print(f"{subject_id} already processed")
             return 
 
@@ -173,12 +173,12 @@ class AutoPipeline(Pipeline):
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        with open(os.path.join(self.output_directory,".temp",f'{subject_id}.pkl'),'wb') as f:
+        with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
             pickle.dump(metadata,f)
         return 
     
     def save_data(self):
-        files = glob.glob(os.path.join(self.output_directory, ".temp", "*.pkl"))
+        files = glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())
         for file in files:
             filename = pathlib.Path(file).name
             subject_id = os.path.splitext(filename)[0]
@@ -186,7 +186,7 @@ class AutoPipeline(Pipeline):
                 metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
         self.output_df.to_csv(self.output_df_path)
-        shutil.rmtree(os.path.join(self.output_directory, ".temp"))
+        shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
