@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-import os
+import os, pathlib
 import glob
 import json
 
@@ -64,6 +64,9 @@ def crawl_one(folder):
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
+                    parent, child = os.path.split(folder)
+                    print(folder, path)
+                    rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
                     database[patient][study][series] = {'instances': [],
                                                         'instance_uid': instance,
                                                         'modality': meta.Modality,
@@ -72,7 +75,7 @@ def crawl_one(folder):
                                                         'reference_rs': reference_rs,
                                                         'reference_pl': reference_pl,
                                                         'reference_frame': reference_frame,
-                                                        'folder': path}
+                                                        'folder': rel_path}
                 database[patient][study][series]['instances'].append(instance)
             except:
                 pass
@@ -102,6 +105,7 @@ def to_df(database_dict):
 
 def crawl(top, 
           n_jobs: int = -1):
+    #top is the input directory in the argument parser from autotest.py
     database_list = []
     folders = glob.glob(os.path.join(top, "*"))
     

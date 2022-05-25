@@ -80,16 +80,13 @@ def read_dicom_pet(path,series=None):
 def read_dicom_auto(path, series=None):
     if path is None:
         return None
-    dcms = glob.glob(os.path.join(path, "*.dcm"))
+    dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
     meta = dcmread(dcms[0])
     modality = meta.Modality
     if modality == 'CT' or modality == 'MR':
         return read_dicom_series(path,series)
     elif modality == 'PT':
         return read_dicom_pet(path,series)
-    # elif len(dcms) == 1:
-    #     meta = dcmread(dcms[0])
-    #     modality = meta.Modality
     elif modality == 'RTSTRUCT':
         return read_dicom_rtstruct(dcms[0])
     elif modality == 'RTDOSE':
@@ -141,7 +138,6 @@ class ImageCSVLoader(BaseLoader):
 
         self.colnames = colnames
         self.seriesnames = seriesnames
-
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in colnames:
                 colnames.append(id_column)
@@ -168,6 +164,9 @@ class ImageCSVLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
+        for col, path in paths.items():
+            print(path)
+
         outputs = {col: self.readers[i](path,series["series_"+("_").join(col.split("_")[1:])]) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)
 

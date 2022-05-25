@@ -1,4 +1,5 @@
 from typing import List, TypeVar, Sequence, Union, Tuple, Optional, Any
+from cv2 import DFT_COMPLEX_INPUT
 
 import numpy as np
 import SimpleITK as sitk
@@ -98,6 +99,7 @@ class ImageAutoInput(BaseInput):
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
+        print(self.df_combined.head())
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
@@ -110,7 +112,7 @@ class ImageAutoInput(BaseInput):
                                 colnames=self.column_names,
                                 seriesnames=self.series_names,
                                 id_column=None,
-                                expand_paths=True,
+                                expand_paths=False,
                                 readers=self.readers) 
         super().__init__(loader)
 
@@ -297,9 +299,7 @@ class ImageSubjectFileOutput(BaseOutput):
         self.create_dirs = create_dirs
         self.compress = compress
 
-        writer_class = BaseSubjectWriter
-            
-        writer = writer_class(self.root_directory,
+        writer = BaseSubjectWriter(self.root_directory,
                               self.filename_format,
                               self.create_dirs,
                               self.compress)
