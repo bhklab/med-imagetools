@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import warnings
 import datetime
 from typing import Optional
@@ -39,7 +39,7 @@ class PET(sitk.Image):
         have some error.
         '''
         pet      = read_image(path,series_id)
-        path_one = os.path.join(path,os.listdir(path)[0])
+        path_one = pathlib.Path(path,os.listdir(path)[0]).as_posix()
         df       = dcmread(path_one)
         calc     = False
         try:

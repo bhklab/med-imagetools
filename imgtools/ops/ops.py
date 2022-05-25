@@ -85,7 +85,7 @@ class ImageAutoInput(BaseInput):
         ####### CRAWLER ############
         # Checks if dataset has already been indexed
         # To be changed later
-        path_crawl = os.path.join(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
+        path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
         if not os.path.exists(path_crawl):
             print("Couldn't find the dataset index CSV. Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
@@ -95,7 +95,7 @@ class ImageAutoInput(BaseInput):
 
         ####### GRAPH ##########
         # Form the graph
-        edge_path = os.path.join(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
+        edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
@@ -334,16 +334,10 @@ class ImageAutoOutput:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
-            self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
+            self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
                                                                     filename_format=colname_process+"{}.nii.gz".format(extension))
             # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
             #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
-            # if not is_mask:
-            #         self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
-            #                                                               filename_format=colname_process+"{}.nii.gz".format(extension))
-            # else:
-            #     self.output[colname_process] = ImageSubjectFileOutput(os.path.join(root_directory,"{subject_id}",extension.split(".")[0]),
-            #                                                             filename_format=mask_label+"{}.nii.gz".format(extension),)
     
     def __call__(self, 
                  subject_id: str,

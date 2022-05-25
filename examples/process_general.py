@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import glob
 from numpy import mod
 import pandas as pd
@@ -78,7 +78,7 @@ class AutoPipeline(Pipeline):
         for colname in self.column_names:
             colname_process = ("_").join(colname.split("_")[1:])
             extension = file_name[colname_process]
-            self.output.append(ImageFileOutput(os.path.join(self.output_directory,extension.split(".")[0]),
+            self.output.append(ImageFileOutput(pathlib.Path(self.output_directory,extension.split(".")[0]).as_posix(),
                                             filename_format="{subject_id}_"+"{}.nrrd".format(extension)))
 
     def process_one_subject(self, subject_id):

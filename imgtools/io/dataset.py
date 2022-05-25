@@ -1,6 +1,5 @@
 from genericpath import exists
-import os
-import pathlib
+import os, pathlib
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 from tqdm import tqdm
 
@@ -41,7 +40,7 @@ class Dataset(tio.SubjectsDataset):
             path: Path to the output directory passed to the autopipeline script. The output directory should have all the user mentioned modalities processed and present in their folder. The directory
                   should additionally have dataset.csv which stores all the metadata
         """
-        path_metadata = os.path.join(path,"dataset.csv")
+        path_metadata = pathlib.Path(path,"dataset.csv").as_posix()
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)
@@ -71,7 +70,7 @@ class Dataset(tio.SubjectsDataset):
                 else:
                     extension = file_names[col]
                     extra = ""
-                path_mod = os.path.join(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
+                path_mod = pathlib.Path(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd").as_posix()
                 #All modalities except RTSTRUCT should be of type torchIO.ScalarImage
                 if os.path.exists(path_mod):
                     if col.split("_")[0]!="RTSTRUCT":
