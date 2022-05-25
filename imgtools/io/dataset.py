@@ -1,5 +1,6 @@
 from genericpath import exists
 import os
+import pathlib
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 from tqdm import tqdm
 
@@ -44,6 +45,11 @@ class Dataset(tio.SubjectsDataset):
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)
+        
+        for col in df_metadata.columns:
+            if col.startswith("folder"):
+                df_metadata[col] = df_metadata[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(path))[0], x).as_posix()) #input folder joined with the rel path
+        
         output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0] == "folder"]
         imp_metadata = [cols for cols in df_metadata.columns if cols.split("_")[0] in ("metadata")]
         #Ignores multiple connection to single modality
