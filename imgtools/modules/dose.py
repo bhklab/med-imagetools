@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import warnings
 
 import numpy as np
@@ -34,7 +34,7 @@ class Dose(sitk.Image):
         # dose = sitk.ReadImage(glob.glob(path + "/*"))
 
         #Get the metadata
-        dcm_path = os.path.join(path, os.listdir(path)[0])
+        dcm_path = pathlib.Path(path, os.listdir(path)[0]).as_posix()
         df = dcmread(dcm_path)
 
         #Convert to SUV

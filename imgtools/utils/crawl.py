@@ -13,7 +13,7 @@ def crawl_one(folder):
     database = {}
     for path, _, _ in os.walk(folder):
         # find dicoms
-        dicoms = glob.glob(os.path.join(path, "*.dcm"))
+        dicoms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
 
         # instance (slice) information
         for dcm in dicoms:
@@ -107,9 +107,9 @@ def crawl(top,
           n_jobs: int = -1):
     #top is the input directory in the argument parser from autotest.py
     database_list = []
-    folders = glob.glob(os.path.join(top, "*"))
+    folders = glob.glob(pathlib.Path(top, "*").as_posix())
     
-    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(os.path.join(top, folder)) for folder in tqdm(folders))
+    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
 
     # convert list to dictionary
     database_dict = {}
@@ -120,18 +120,18 @@ def crawl(top,
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
 
-    parent_imgtools = os.path.join(parent, ".imgtools")
+    parent_imgtools = pathlib.Path(parent, ".imgtools").as_posix()
 
     if not os.path.exists(parent_imgtools):
         os.makedirs(parent_imgtools)
     
     # save as json
-    with open(os.path.join(parent_imgtools, f'imgtools_{dataset}.json'), 'w') as f:
+    with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
     df = to_df(database_dict)
-    df_path = os.path.join(parent_imgtools, f'imgtools_{dataset}.csv')
+    df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
     df.to_csv(df_path)
     
     return database_dict

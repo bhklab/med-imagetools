@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import json
 import csv
 import pickle
@@ -36,7 +36,7 @@ class BaseWriter:
                                                    time=time,
                                                    date_time=date_time,
                                                    **kwargs)
-        out_path = os.path.join(self.root_directory, out_filename)
+        out_path = pathlib.Path(self.root_directory, out_filename).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
@@ -68,7 +68,7 @@ class BaseSubjectWriter(BaseWriter):
         # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
         self.root_directory = self.root_directory.format(subject_id=subject_id,
                                                          **kwargs)
-        out_path = os.path.join(self.root_directory, self.filename_format)
+        out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
@@ -205,7 +205,7 @@ class MetadataWriter(BaseWriter):
             raise ValueError(f"File format {self.file_format} not supported. Supported formats: JSON (.json), CSV (.csv), Pickle (.pkl).")
 
         if self.file_format == "csv" and self.remove_existing:
-            out_path = os.path.join(self.root_directory, self.filename_format)
+            out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
             if os.path.exists(out_path):
                 os.remove(out_path) # remove existing CSV instead of appending
 
