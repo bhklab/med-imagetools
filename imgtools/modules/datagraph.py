@@ -4,6 +4,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import pathlib
 
 
 class DataGraph:
@@ -276,6 +277,11 @@ class DataGraph:
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
+
+        #change relative paths to absolute paths
+        for col in final_df.columns:
+            if col.startswith("folder"):
+                final_df[col] = final_df[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(self.edge_path))[0], x).as_posix()) #input folder joined with the rel path
         return final_df
     
     def graph_query(self, 
