@@ -64,8 +64,7 @@ def crawl_one(folder):
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
-                    parent, child = os.path.split(folder)
-                    print(folder, path)
+                    parent, _ = os.path.split(folder)
                     rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
                     database[patient][study][series] = {'instances': [],
                                                         'instance_uid': instance,
