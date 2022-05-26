@@ -326,7 +326,7 @@ class ImageAutoOutput:
                  
         # File types
         self.file_name = file_name_convention()
-        print(self.file_name)
+        # print(self.file_name)
 
         self.output = {}
         print(output_streams)

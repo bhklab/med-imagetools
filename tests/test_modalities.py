@@ -27,12 +27,12 @@ def modalities_path():
     # path["RTSTRUCT"] = os.path.join(qc_path, "08-27-1885-06980/Pinnacle POI-67882")
     # path["RTDOSE"] = os.path.join(qc_path, "08-27-1885-06980/89632")
     # path["PT"] = os.path.join(qc_path, "08-27-1885-TEP cancerologique TEP-06980/552650.000000-LOR-RAMLA-72508")
-    qc_path = pathlib.Path(os.path.join(curr_path, "data", "Head-Neck-PET-CT", "HN-CHUS-052"))
+    qc_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT", "HN-CHUS-052").as_posix()
     path = {}
-    path["CT"] = os.path.join(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362")
-    path["RTSTRUCT"] = os.path.join(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418")
-    path["RTDOSE"] = os.path.join(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376")
-    path["PT"] = os.path.join(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600")
+    path["CT"] = pathlib.Path(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362").as_posix()
+    path["RTSTRUCT"] = pathlib.Path(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418").as_posix()
+    path["RTDOSE"] = pathlib.Path(qc_path, "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376").as_posix()
+    path["PT"] = pathlib.Path(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600").as_posix()
     return path
 
 @pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
@@ -41,7 +41,7 @@ def test_modalities(modalities, modalities_path):
     if modalities != "RTSTRUCT":
         #Checks for dimensions
         img = read_dicom_auto(path["CT"])
-        dcm = pydicom.dcmread(os.path.join(path[modalities],os.listdir(path[modalities])[0])).pixel_array
+        dcm = pydicom.dcmread(pathlib.Path(path[modalities],os.listdir(path[modalities])[0]).as_posix()).pixel_array
         instances = len(os.listdir(path[modalities]))
         dicom = read_dicom_auto(path[modalities])
         if instances>1: #For comparing CT and PT modalities
