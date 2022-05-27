@@ -1,5 +1,4 @@
 from typing import List, TypeVar, Sequence, Union, Tuple, Optional, Any
-from cv2 import DFT_COMPLEX_INPUT
 
 import numpy as np
 import SimpleITK as sitk
