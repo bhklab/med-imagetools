@@ -87,19 +87,12 @@ def to_df(database_dict):
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
                 if series != 'description':
-                    df = df.append({'patient_ID': pat,
-                                    'study': study,
-                                    'study_description': database_dict[pat][study]['description'],
-                                    'series': series,
-                                    'series_description': database_dict[pat][study][series]['description'],
-                                    'modality': database_dict[pat][study][series]['modality'],
-                                    'instances': len(database_dict[pat][study][series]['instances']),
-                                    'instance_uid': database_dict[pat][study][series]['instance_uid'],
-                                    'reference_ct': database_dict[pat][study][series]['reference_ct'],
-                                    'reference_rs': database_dict[pat][study][series]['reference_rs'],
-                                    'reference_pl': database_dict[pat][study][series]['reference_pl'],
-                                    'reference_frame': database_dict[pat][study][series]['reference_frame'],
-                                    'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
+                    columns = ['patient_ID', 'study', 'study_description', 'series', 'series_description', 'modality', 'instances', 'instance_uid', 'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
+                    values = [pat, study, database_dict[pat][study]['description'], series, database_dict[pat][study][series]['description'], database_dict[pat][study][series]['modality'], len(database_dict[pat][study][series]['instances']),
+                    database_dict[pat][study][series]['instance_uid'], database_dict[pat][study][series]['reference_ct'], database_dict[pat][study][series]['reference_rs'], database_dict[pat][study][series]['reference_pl'],
+                    database_dict[pat][study][series]['reference_frame'], database_dict[pat][study][series]['folder']]
+                    df_add = pd.DataFrame([values], columns=columns)
+                    df = pd.concat([df, df_add], ignore_index=True)
     return df
 
 def crawl(top, 
