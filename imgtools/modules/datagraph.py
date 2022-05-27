@@ -280,6 +280,7 @@ class DataGraph:
         #change relative paths to absolute paths
         for col in final_df.columns:
             if col.startswith("folder"):
+                print(self.edge_path, os.path.dirname(self.edge_path))
                 final_df[col] = final_df[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(self.edge_path))[0], x).as_posix()) #input folder joined with the rel path
         return final_df
     
