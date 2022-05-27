@@ -164,8 +164,6 @@ class ImageCSVLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
-        for col, path in paths.items():
-            print(path)
 
         outputs = {col: self.readers[i](path,series["series_"+("_").join(col.split("_")[1:])]) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)

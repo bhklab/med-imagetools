@@ -1,10 +1,10 @@
 # test scripts
 examples/adsf.py
-examples/autotest.py
 
 # data
 data
 examples/data/tcia_n*
+scratch.ipynb
 
 # macOS
 .DS_Store
