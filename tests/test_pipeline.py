@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 import shutil
 import warnings
 from multiprocessing import cpu_count
@@ -96,7 +96,7 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
         n_jobs = 0
     input_paths, output_paths = sample_input_output
     # simulate partial missing data
-    os.remove(os.path.join(input_paths[0], "test0.nrrd"))
+    os.remove(pathlib.Path(input_paths[0], "test0.nrrd").as_posix())
 
     pipeline = MultiInputPipelineTest(input_paths[0],
                                       input_paths[1],
@@ -111,13 +111,13 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
 
     if missing_strategy == "drop":
         assert all([
-            not os.path.exists(os.path.join(output_paths[0], "test0.nrrd")),
-            not os.path.exists(os.path.join(output_paths[1], "test0.nrrd"))
+            not os.path.exists(pathlib.Path(output_paths[0], "test0.nrrd").as_posix()),
+            not os.path.exists(pathlib.Path(output_paths[1], "test0.nrrd").as_posix())
         ])
     else:
         assert all([
-            not os.path.exists(os.path.join(output_paths[0], "test0.nrrd")),
-            os.path.exists(os.path.join(output_paths[1], "test0.nrrd"))
+            not os.path.exists(pathlib.Path(output_paths[0], "test0.nrrd").as_posix()),
+            os.path.exists(pathlib.Path(output_paths[1], "test0.nrrd").as_posix())
         ])
     
     

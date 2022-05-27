@@ -56,7 +56,6 @@ class BaseSubjectWriter(BaseWriter):
            #delete the folder called {subject_id} that was made in the original BaseWriter
 
             shutil.rmtree(os.path.dirname(self.root_directory))
-        print(self.root_directory)
 
     def put(self, subject_id, image, is_mask=False, mask_label="",**kwargs):
         if is_mask:
