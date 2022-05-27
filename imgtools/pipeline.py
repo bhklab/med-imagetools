@@ -85,6 +85,7 @@ class Pipeline:
 
     def _process_wrapper(self, subject_id):
         try:
+            print(subject_id)
             self.process_one_subject(subject_id)
         except Exception as e:
             message = f"{type(e).__name__} while processing subject {subject_id}: " + str(e)
