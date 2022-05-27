@@ -58,7 +58,7 @@ class AutoPipeline(Pipeline):
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False)
+        self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False) # "GTV-.*"
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams)
@@ -154,6 +154,11 @@ class AutoPipeline(Pipeline):
                 # save output
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
+
+                # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
+                if len(mask_arr.shape) == 3:
+                    mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
+                
                 print(mask_arr.shape)
                 roi_names_list = list(mask.roi_names.keys())
                 for i in range(mask_arr.shape[0]):
@@ -219,10 +224,15 @@ class AutoPipeline(Pipeline):
         
 
 if __name__ == "__main__":
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+                            output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
                             modalities="CT,RTSTRUCT",
                             visualize=False)
+
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False)
 
     print(f'starting Pipeline...')
     pipeline.run()
