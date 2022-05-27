@@ -98,7 +98,6 @@ class ImageAutoInput(BaseInput):
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
-        print(self.df_combined.head())
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
