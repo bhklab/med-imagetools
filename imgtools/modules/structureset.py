@@ -9,7 +9,6 @@ from itertools import groupby
 from skimage.draw import polygon2mask
 
 from .segmentation import Segmentation
-from .sparsemask import SparseMask
 from ..utils import physical_points_to_idxs
 
 
@@ -172,66 +171,6 @@ class StructureSet:
         mask = Segmentation(mask, roi_names=seg_roi_names)
 
         return mask
-        
-    def generate_sparse_mask(self, mask: Segmentation) -> SparseMask:
-        """
-        Generate a sparse mask from the contours, taking the argmax of all overlaps
-
-        Parameters
-        ----------
-        mask
-            Segmentation object to build sparse mask from
-
-        Returns
-        -------
-        SparseMask
-            The sparse mask object.
-        """
-        mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
-        roi_names = {k: v+1 for k, v in mask.roi_names.items()}
-        
-        sparsemask_arr = np.zeros(mask_arr.shape[1:])
-
-        # voxels_with_overlap = {}
-        for i in len(mask_arr.shape[0]):
-            slice = mask_arr[i, :, :, :]
-            slice *= list(roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
-            # res = self._max_adder(sparsemask_arr, slice)
-            # sparsemask_arr = res[0]
-            # for e in res[1]:
-            #     voxels_with_overlap.add(e)
-            sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
-        
-        sparsemask = SparseMask(sparsemask_arr, roi_names)
-        # if len(voxels_with_overlap) != 0:
-        #     raise Warning(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
-        return sparsemask
-
-    def _max_adder(self, arr_1: np.ndarray, arr_2: np.ndarray) -> Tuple[np.ndarray, Set[Tuple[int, int, int]]]:
-        """
-        Takes the maximum of two 3D arrays elementwise and returns the resulting array and a list of voxels that have overlapping contours in a set
-
-        Parameters
-        ----------
-        arr_1
-            First array to take maximum of
-        arr_2
-            Second array to take maximum of
-        
-        Returns
-        -------
-        Tuple[np.ndarray, Set[Tuple[int, int, int]]]
-            The resulting array and a list of voxels that have overlapping contours in a set
-        """
-        res = np.zeros(arr_1.shape)
-        overlaps = {} #set of tuples of the coords that have overlap
-        for i in range(arr_1.shape[0]):
-            for j in range(arr_1.shape[1]):
-                for k in range(arr_1.shape[2]):
-                    if arr_1[i, j, k] != 0 and arr_2[i, j, k] != 0:
-                        overlaps.add((i, j, k))
-                    res[i, j, k] = max(arr_1[i, j, k], arr_2[i, j, k])
-        return res, overlaps
 
     def __repr__(self):
         return f"<StructureSet with ROIs: {self.roi_names!r}>"
