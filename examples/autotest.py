@@ -3,6 +3,7 @@ import shutil
 import glob
 import pickle
 import numpy as np
+import sys
 
 from argparse import ArgumentParser
 import SimpleITK as sitk
@@ -11,6 +12,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
+from torch import sparse_coo_tensor
 
 ###############################################################
 # Example usage:
@@ -154,7 +156,10 @@ class AutoPipeline(Pipeline):
                 # save output
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
-
+                sparse_mask = mask.generate_sparse_mask()
+                # np.set_printoptions(threshold=sys.maxsize)
+                # print(sparse_mask.mask_array.shape)
+                # print(sparse_mask.mask_array[350:360,290:300,93])
                 # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                 if len(mask_arr.shape) == 3:
                     mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
