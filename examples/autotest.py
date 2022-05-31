@@ -156,7 +156,11 @@ class AutoPipeline(Pipeline):
                 # save output
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
-                sparse_mask = mask.generate_sparse_mask()
+
+                
+                # sparse_mask = mask.generate_sparse_mask()
+
+
                 # np.set_printoptions(threshold=sys.maxsize)
                 # print(sparse_mask.mask_array.shape)
                 # print(sparse_mask.mask_array[350:360,290:300,93])
