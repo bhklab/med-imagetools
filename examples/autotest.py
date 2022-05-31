@@ -35,14 +35,15 @@ class AutoPipeline(Pipeline):
                  visualize=False,
                  missing_strategy="drop",
                  show_progress=False,
-                 warn_on_error=False):
+                 warn_on_error=False,
+                 overwrite=False):
 
         super().__init__(
             n_jobs=n_jobs,
             missing_strategy=missing_strategy,
             show_progress=show_progress,
             warn_on_error=warn_on_error)
-
+        self.overwrite = overwrite
         # pipeline configuration
         self.input_directory = input_directory
         self.output_directory = output_directory
@@ -223,7 +224,7 @@ class AutoPipeline(Pipeline):
         subject_ids = self._get_loader_subject_ids()
         # Note that returning any SimpleITK object in process_one_subject is
         # not supported yet, since they cannot be pickled
-        if os.path.exists(self.output_df_path):
+        if os.path.exists(self.output_df_path) and not self.overwrite:
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
@@ -236,7 +237,8 @@ if __name__ == "__main__":
     pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
                             output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
                             modalities="CT,RTSTRUCT",
-                            visualize=False)
+                            visualize=False,
+                            overwrite=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
