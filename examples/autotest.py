@@ -238,7 +238,7 @@ if __name__ == "__main__":
                             output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
                             modalities="CT,RTSTRUCT",
                             visualize=False,
-                            overwrite=True)
+                            overwrite=False)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
