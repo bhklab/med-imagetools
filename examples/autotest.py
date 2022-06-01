@@ -230,7 +230,7 @@ class AutoPipeline(Pipeline):
             Parallel(n_jobs=self.n_jobs, verbose=verbose)(
                     delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             self.save_data()
-        
+
 
 if __name__ == "__main__":
     pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
