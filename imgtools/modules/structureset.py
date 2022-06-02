@@ -1,6 +1,6 @@
 import re
 from warnings import warn
-from typing import Dict, List, Optional, Union, Tuple, Set
+from typing import Dict, List, Optional, Union, Tuple, Set, TypeVar
 
 import numpy as np
 import SimpleITK as sitk
@@ -11,27 +11,35 @@ from skimage.draw import polygon2mask
 from .segmentation import Segmentation
 from ..utils import physical_points_to_idxs
 
+T = TypeVar('T')
 
 def _get_roi_points(rtstruct, roi_index):
     return [np.array(slc.ContourData).reshape(-1, 3) for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence]
 
 
 class StructureSet:
-    def __init__(self, roi_points: Dict[str, np.ndarray]):
+    def __init__(self, roi_points: Dict[str, np.ndarray], metadata: Optional[Dict[str, T]] = None):
         self.roi_points = roi_points
+        if metadata:
+            self.metadata = metadata
 
     @classmethod
     def from_dicom_rtstruct(cls, rtstruct_path: str) -> 'StructureSet':
         rtstruct = dcmread(rtstruct_path, force=True)
         roi_names = [roi.ROIName for roi in rtstruct.StructureSetROISequence]
-
         roi_points = {}
         for i, name in enumerate(roi_names):
             try:
                 roi_points[name] = _get_roi_points(rtstruct, i)
             except AttributeError:
                 warn(f"Could not get points for ROI {name} (in {rtstruct_path}).")
-        return cls(roi_points)
+
+        metadata = {}
+        if hasattr(rtstruct, 'StructureSetROISequence'):
+            metadata["num_ROIs"] = str(len(rtstruct.StructureSetROISequence))
+        
+        return cls(roi_points, metadata)
+        # return cls(roi_points)
 
     @property
     def roi_names(self) -> List[str]:

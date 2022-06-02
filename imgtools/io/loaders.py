@@ -16,6 +16,7 @@ from tqdm.auto import tqdm
 from ..modules import StructureSet
 from ..modules import Dose
 from ..modules import PET
+from ..modules import CTMRScan
 from ..utils.crawl import *
 
 
@@ -28,7 +29,7 @@ def read_header(path):
 
 def read_dicom_series(path: str,
                       series_id: Optional[str] = None,
-                      recursive: bool = False) -> sitk.Image:
+                      recursive: bool = False) -> CTMRScan:
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -55,6 +56,7 @@ def read_dicom_series(path: str,
     dicom_names = reader.GetGDCMSeriesFileNames(path,
                                                 seriesID=series_id if series_id else "",
                                                 recursive=recursive)
+    # extract the names of the dicom files that are in the path variable, which is a directory
     reader.SetFileNames(dicom_names)
     
     # Configure the reader to load all of the DICOM tags (public+private):
@@ -65,7 +67,25 @@ def read_dicom_series(path: str,
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
 
-    return reader.Execute()
+    metadata = {}
+    dicom_data = dcmread(dicom_names[0])
+    if hasattr(dicom_data, 'KVP'):
+        metadata["KVP"] = str(dicom_data.KVP)
+    if hasattr(dicom_data, 'ScanOptions'):
+        metadata["ScanOptions"] = str(dicom_data.ScanOptions)
+    if hasattr(dicom_data, 'ReconstructionAlgorithm'):
+        metadata["ReconstructionAlgorithm"] = str(dicom_data.ReconstructionAlgorithm)
+    if hasattr(dicom_data, 'ContrastFlowRate'):
+        metadata["ContrastFlowRate"] = str(dicom_data.ContrastFlowRate)
+    if hasattr(dicom_data, 'ContrastFlowDuration'):
+        metadata["ContrastFlowDuration"] = str(dicom_data.ContrastFlowDuration)
+
+    # is this contrast type?
+    # if hasattr(dicom_data, 'ContrastBolusAgent'):
+    #     metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
+
+
+    return CTMRScan(reader.Execute(), metadata)
 
 
 def read_dicom_rtstruct(path):
