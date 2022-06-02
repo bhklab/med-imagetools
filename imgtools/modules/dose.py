@@ -1,13 +1,15 @@
 import os, pathlib
 import warnings
 
+from typing import Dict, Optional, TypeVar
+
 import numpy as np
 from matplotlib import pyplot as plt
 
 import SimpleITK as sitk
 from pydicom import dcmread
 
-
+T = TypeVar('T')
 
 def read_image(path):
     reader = sitk.ImageSeriesReader()
@@ -20,10 +22,12 @@ def read_image(path):
 
 
 class Dose(sitk.Image):
-    def __init__(self, img_dose, df):
+    def __init__(self, img_dose, df, metadata: Optional[Dict[str, T]] = None):
         super().__init__(img_dose)
         self.img_dose = img_dose
         self.df = df
+        if metadata:
+            self.metadata = metadata
         
     @classmethod
     def from_dicom_rtdose(cls, path):
@@ -41,6 +45,10 @@ class Dose(sitk.Image):
         factor = float(df.DoseGridScaling)
         img_dose = sitk.Cast(dose, sitk.sitkFloat32)
         img_dose = img_dose * factor
+
+        # metadata = {}
+        # metadata["DoseType"] = df.DoseType
+        #return cls(img_dose, df, metadata)
         return cls(img_dose, df)
 
     def resample_dose(self,

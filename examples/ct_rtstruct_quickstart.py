@@ -87,7 +87,7 @@ class samplePipeline(Pipeline):
         
     def process_one_subject(self, subject_id):
         # calling the classes initialized in __init__()
-        image = self.image_input(subject_id)
+        image = self.image_input(subject_id).image
         structure_set = self.structure_set_input(subject_id)
 
         # print all the regions of interest in the RTSTRUCT
@@ -105,6 +105,8 @@ if __name__ == "__main__":
                         help="The directory containing the input data")
     parser.add_argument("output_directory", type=str,
                         help="The directory where the output will be stored")
+
+    # sample run: python ct_rtstruct_quickstart.py C:\Users\qukev\BHKLAB\datasetshort\manifest-1598890146597\NSCLC-Radiomics-Interobserver1 C:\Users\qukev\BHKLAB\starteroutput
 
     # look at your input directory and look at how all the DICOM files are named
     CT_file_convention = "*/NA-*"

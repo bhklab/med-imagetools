@@ -112,7 +112,7 @@ class AutoPipeline(Pipeline):
                 print("The subject id: {} has no {}".format(subject_id, colname))
                 pass
             elif modality == "CT" or modality == 'MR':
-                image = read_results[i]
+                image = read_results[i].image
                 if len(image.GetSize()) == 4:
                     assert image.GetSize()[-1] == 1, f"There is more than one volume in this CT file for {subject_id}."
                     extractor = sitk.ExtractImageFilter()
@@ -124,7 +124,13 @@ class AutoPipeline(Pipeline):
                 image = self.resample(image)
                 #Saving the output
                 self.output(subject_id, image, output_stream)
+
+                if hasattr(read_results[i], "metadata"):
+                    metadata.update(read_results[i].metadata)
+
                 metadata[f"size_{output_stream}"] = str(image.GetSize())
+
+
                 print(subject_id, " SAVED IMAGE")
             elif modality == "RTDOSE":
                 try: #For cases with no image present
@@ -140,6 +146,10 @@ class AutoPipeline(Pipeline):
                     self.output(f"{subject_id}_{num}", doses, output_stream)
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
+
+                if hasattr(structure_set, "metadata"):
+                    metadata.update(doses.metadata)
+
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
                 #For RTSTRUCT, you need image or PT
@@ -181,6 +191,10 @@ class AutoPipeline(Pipeline):
                         self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
                     else:
                         self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
+                
+                if hasattr(structure_set, "metadata"):
+                    metadata.update(structure_set.metadata)
+
                 metadata[f"metadata_{colname}"] = [structure_set.roi_names]
 
                 print(subject_id, "SAVED MASK ON", conn_to)
@@ -198,6 +212,10 @@ class AutoPipeline(Pipeline):
                     self.output(f"{subject_id}_{num}", pet, output_stream)
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
+
+                if hasattr(structure_set, "metadata"):
+                    metadata.update(pet.metadata)
+
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
         with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
@@ -238,7 +256,7 @@ if __name__ == "__main__":
                             output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
                             modalities="CT,RTSTRUCT",
                             visualize=False,
-                            overwrite=False)
+                            overwrite=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",

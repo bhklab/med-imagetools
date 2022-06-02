@@ -1,11 +1,13 @@
 import os, pathlib
 import warnings
 import datetime
-from typing import Optional
+from typing import Optional, Dict, TypeVar
 import numpy as np
 from matplotlib import pyplot as plt
 import SimpleITK as sitk
 from pydicom import dcmread
+
+T = TypeVar('T')
 
 def read_image(path:str,series_id: Optional[str]=None):
     reader = sitk.ImageSeriesReader()
@@ -17,12 +19,14 @@ def read_image(path:str,series_id: Optional[str]=None):
     return reader.Execute()
 
 class PET(sitk.Image):
-    def __init__(self, img_pet, df, factor, calc):
+    def __init__(self, img_pet, df, factor, calc, metadata: Optional[Dict[str, T]] = None):
         super().__init__(img_pet)
         self.img_pet = img_pet
         self.df = df
         self.factor = factor
         self.calc = calc
+        if metadata:
+            self.metadata = metadata
     
     @classmethod
     def from_dicom_pet(cls, path,series_id=None,type="SUV"):
@@ -55,7 +59,21 @@ class PET(sitk.Image):
 
         #SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
-        return cls(img_pet, df, factor, calc)
+
+        metadata = {}
+        # metadata["factor"] = df.factor
+
+        if hasattr(df, 'RescaleType'):
+            metadata["RescaleType"] = str(pet.RescaleType)
+        if hasattr(df, 'RescaleSlope'):
+            metadata["RescaleSlope"] = str(pet.RescaleSlope)
+        if hasattr(df, 'RadionuclideTotalDose'):
+            metadata["RadionuclideTotalDose"] = str(pet.RadionuclideTotalDose)
+        if hasattr(df, 'RadionuclideHalfLife'):
+            metadata["RadionuclideHalfLife"] = str(pet.RadionuclideHalfLife)
+
+        return cls(img_pet, df, factor, calc, metadata)
+        # return cls(img_pet, df, factor, calc)
         
     def get_metadata(self):
         '''
