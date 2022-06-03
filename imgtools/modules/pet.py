@@ -72,6 +72,35 @@ class PET(sitk.Image):
         if hasattr(df, 'RadionuclideHalfLife'):
             metadata["RadionuclideHalfLife"] = str(pet.RadionuclideHalfLife)
 
+        # Number of Slices is avg. number slice?
+        if hasattr(pet, 'NumberofSlices'):
+            metadata["NumberofSlices"] = str(pet.NumberofSlices)
+        # Slice Thickness is avg. slice thickness?
+        if hasattr(pet, 'SliceThickness'):
+            metadata["SliceThickness"] = str(pet.SliceThickness)
+        if hasattr(pet, 'ScanType'):
+            metadata["ScanType"] = str(pet.ScanType)
+        # Scan Progression Direction is Scan Direction?
+        if hasattr(pet, 'ScanProgressionDirection'):
+            metadata["ScanProgressionDirection"] = str(pet.ScanProgressionDirection)
+        if hasattr(pet, 'PatientPosition'):
+            metadata["PatientPosition"] = str(pet.PatientPosition)
+        # is this contrast type?
+        if hasattr(pet, 'ContrastBolusAgent'):
+            metadata["ContrastType"] = str(pet.ContrastBolusAgent)
+        if hasattr(pet, 'Manufacturer'):
+            metadata["Manufacturer"] = str(pet.Manufacturer)
+        # Which field of view?
+        # if hasattr(pet, 'FieldOfViewDescription'):
+        #     metadata["FieldOfViewDescription"] = str(pet.FieldOfViewDescription)
+        # Scan Plane?
+        if hasattr(pet, 'ScanOptions'):
+            metadata["ScanOptions"] = str(pet.ScanOptions)
+        if hasattr(pet, 'RescaleType'):
+            metadata["RescaleType"] = str(pet.RescaleType)
+        if hasattr(pet, 'RescaleSlope'):
+            metadata["RescaleSlope"] = str(pet.RescaleSlope)
+
         return cls(img_pet, df, factor, calc, metadata)
         # return cls(img_pet, df, factor, calc)
         

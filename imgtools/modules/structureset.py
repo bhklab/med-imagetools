@@ -37,6 +37,35 @@ class StructureSet:
         metadata = {}
         if hasattr(rtstruct, 'StructureSetROISequence'):
             metadata["num_ROIs"] = str(len(rtstruct.StructureSetROISequence))
+
+        # Number of Slices is avg. number slice?
+        if hasattr(rtstruct, 'NumberofSlices'):
+            metadata["NumberofSlices"] = str(rtstruct.NumberofSlices)
+        # Slice Thickness is avg. slice thickness?
+        if hasattr(rtstruct, 'SliceThickness'):
+            metadata["SliceThickness"] = str(rtstruct.SliceThickness)
+        if hasattr(rtstruct, 'ScanType'):
+            metadata["ScanType"] = str(rtstruct.ScanType)
+        # Scan Progression Direction is Scan Direction?
+        if hasattr(rtstruct, 'ScanProgressionDirection'):
+            metadata["ScanProgressionDirection"] = str(rtstruct.ScanProgressionDirection)
+        if hasattr(rtstruct, 'PatientPosition'):
+            metadata["PatientPosition"] = str(rtstruct.PatientPosition)
+        # is this contrast type?
+        if hasattr(rtstruct, 'ContrastBolusAgent'):
+            metadata["ContrastType"] = str(rtstruct.ContrastBolusAgent)
+        if hasattr(rtstruct, 'Manufacturer'):
+            metadata["Manufacturer"] = str(rtstruct.Manufacturer)
+        # Which field of view?
+        # if hasattr(rtstruct, 'FieldOfViewDescription'):
+        #     metadata["FieldOfViewDescription"] = str(rtstruct.FieldOfViewDescription)
+        # Scan Plane?
+        if hasattr(rtstruct, 'ScanOptions'):
+            metadata["ScanOptions"] = str(rtstruct.ScanOptions)
+        if hasattr(rtstruct, 'RescaleType'):
+            metadata["RescaleType"] = str(rtstruct.RescaleType)
+        if hasattr(rtstruct, 'RescaleSlope'):
+            metadata["RescaleSlope"] = str(rtstruct.RescaleSlope)
         
         return cls(roi_points, metadata)
         # return cls(roi_points)
