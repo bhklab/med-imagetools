@@ -1,6 +1,7 @@
 import re
 from warnings import warn
 from typing import Dict, List, Optional, Union, Tuple, Set, TypeVar
+import copy
 
 import numpy as np
 import SimpleITK as sitk
@@ -36,7 +37,7 @@ class StructureSet:
 
         metadata = {}
         if hasattr(rtstruct, 'StructureSetROISequence'):
-            metadata["num_ROIs"] = str(len(rtstruct.StructureSetROISequence))
+            metadata["numROIs"] = str(len(rtstruct.StructureSetROISequence))
 
         # Number of Slices is avg. number slice?
         if hasattr(rtstruct, 'NumberofSlices'):
@@ -66,6 +67,10 @@ class StructureSet:
             metadata["RescaleType"] = str(rtstruct.RescaleType)
         if hasattr(rtstruct, 'RescaleSlope'):
             metadata["RescaleSlope"] = str(rtstruct.RescaleSlope)
+        if hasattr(rtstruct, 'PixelSpacing') and hasattr(rtstruct, 'SliceThickness'):
+            pixel_size = copy.copy(rtstruct.PixelSpacing)
+            pixel_size.append(rtstruct.SliceThickness)
+            metadata["PixelSize"] = tuple(pixel_size)
         
         return cls(roi_points, metadata)
         # return cls(roi_points)
