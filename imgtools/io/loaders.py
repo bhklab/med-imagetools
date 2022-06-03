@@ -29,7 +29,8 @@ def read_header(path):
 
 def read_dicom_series(path: str,
                       series_id: Optional[str] = None,
-                      recursive: bool = False) -> CTMRScan:
+                      recursive: bool = False,
+                      modality: str = "CT") -> CTMRScan:
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -69,21 +70,64 @@ def read_dicom_series(path: str,
 
     metadata = {}
     dicom_data = dcmread(dicom_names[0])
-    if hasattr(dicom_data, 'KVP'):
-        metadata["KVP"] = str(dicom_data.KVP)
+    if modality == 'CT':
+        if hasattr(dicom_data, 'KVP'):
+            metadata["KVP"] = str(dicom_data.KVP)
+        if hasattr(dicom_data, 'ScanOptions'):
+            metadata["ScanOptions"] = str(dicom_data.ScanOptions)
+        if hasattr(dicom_data, 'ReconstructionAlgorithm'):
+            metadata["ReconstructionAlgorithm"] = str(dicom_data.ReconstructionAlgorithm)
+        if hasattr(dicom_data, 'ContrastFlowRate'):
+            metadata["ContrastFlowRate"] = str(dicom_data.ContrastFlowRate)
+        if hasattr(dicom_data, 'ContrastFlowDuration'):
+            metadata["ContrastFlowDuration"] = str(dicom_data.ContrastFlowDuration)
+        # is this contrast type?
+        # if hasattr(dicom_data, 'ContrastBolusAgent'):
+        #     metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
+    else: # MR
+        if hasattr(dicom_data, 'AcquisitionTime'):
+            metadata["AcquisitionTime"] = str(dicom_data.AcquisitionTime)
+        if hasattr(dicom_data, 'AcquisitionContrast'):
+            metadata["AcquisitionContrast"] = str(dicom_data.AcquisitionContrast)
+        if hasattr(dicom_data, 'AcquisitionType'):
+            metadata["AcquisitionType"] = str(dicom_data.AcquisitionType)
+        if hasattr(dicom_data, 'RepetitionTime'):
+            metadata["RepetitionTime"] = str(dicom_data.RepetitionTime)
+        if hasattr(dicom_data, 'EchoTime'):
+            metadata["EchoTime"] = str(dicom_data.EchoTime)
+        if hasattr(dicom_data, 'ImagingFrequency'):
+            metadata["ImagingFrequency"] = str(dicom_data.ImagingFrequency)
+        if hasattr(dicom_data, 'MagneticFieldStrength'):
+            metadata["MagneticFieldStrength"] = str(dicom_data.MagneticFieldStrength)
+
+    # Number of Slices is avg. number slice?
+    if hasattr(dicom_data, 'NumberofSlices'):
+        metadata["NumberofSlices"] = str(dicom_data.NumberofSlices)
+    # Slice Thickness is avg. slice thickness?
+    if hasattr(dicom_data, 'SliceThickness'):
+        metadata["SliceThickness"] = str(dicom_data.SliceThickness)
+    if hasattr(dicom_data, 'ScanType'):
+        metadata["ScanType"] = str(dicom_data.ScanType)
+    # Scan Progression Direction is Scan Direction?
+    if hasattr(dicom_data, 'ScanProgressionDirection'):
+        metadata["ScanProgressionDirection"] = str(dicom_data.ScanProgressionDirection)
+    if hasattr(dicom_data, 'PatientPosition'):
+        metadata["PatientPosition"] = str(dicom_data.PatientPosition)
+    # is this contrast type?
+    if hasattr(dicom_data, 'ContrastBolusAgent'):
+        metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
+    if hasattr(dicom_data, 'Manufacturer'):
+        metadata["Manufacturer"] = str(dicom_data.Manufacturer)
+    # Which field of view?
+    # if hasattr(dicom_data, 'FieldOfViewDescription'):
+    #     metadata["FieldOfViewDescription"] = str(dicom_data.FieldOfViewDescription)
+    # Scan Plane?
     if hasattr(dicom_data, 'ScanOptions'):
         metadata["ScanOptions"] = str(dicom_data.ScanOptions)
-    if hasattr(dicom_data, 'ReconstructionAlgorithm'):
-        metadata["ReconstructionAlgorithm"] = str(dicom_data.ReconstructionAlgorithm)
-    if hasattr(dicom_data, 'ContrastFlowRate'):
-        metadata["ContrastFlowRate"] = str(dicom_data.ContrastFlowRate)
-    if hasattr(dicom_data, 'ContrastFlowDuration'):
-        metadata["ContrastFlowDuration"] = str(dicom_data.ContrastFlowDuration)
-
-    # is this contrast type?
-    # if hasattr(dicom_data, 'ContrastBolusAgent'):
-    #     metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
-
+    if hasattr(dicom_data, 'RescaleType'):
+        metadata["RescaleType"] = str(dicom_data.RescaleType)
+    if hasattr(dicom_data, 'RescaleSlope'):
+        metadata["RescaleSlope"] = str(dicom_data.RescaleSlope)
 
     return CTMRScan(reader.Execute(), metadata)
 
@@ -104,7 +148,7 @@ def read_dicom_auto(path, series=None):
     meta = dcmread(dcms[0])
     modality = meta.Modality
     if modality == 'CT' or modality == 'MR':
-        return read_dicom_series(path,series)
+        return read_dicom_series(path,series, modality)
     elif modality == 'PT':
         return read_dicom_pet(path,series)
     elif modality == 'RTSTRUCT':
