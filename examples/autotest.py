@@ -108,6 +108,8 @@ class AutoPipeline(Pipeline):
 
             print(output_stream)
 
+            print(i, colname, "asdflkjqroigj")
+
             if read_results[i] is None:
                 print("The subject id: {} has no {}".format(subject_id, colname))
                 pass
