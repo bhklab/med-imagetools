@@ -3,7 +3,7 @@ import glob
 import re
 from typing import Optional, List
 from collections import namedtuple
-import json
+import copy
 
 import pandas as pd
 import SimpleITK as sitk
@@ -128,6 +128,10 @@ def read_dicom_series(path: str,
         metadata["RescaleType"] = str(dicom_data.RescaleType)
     if hasattr(dicom_data, 'RescaleSlope'):
         metadata["RescaleSlope"] = str(dicom_data.RescaleSlope)
+    if hasattr(dicom_data, 'PixelSpacing') and hasattr(dicom_data, 'SliceThickness'):
+        pixel_size = copy.copy(dicom_data.PixelSpacing)
+        pixel_size.append(dicom_data.SliceThickness)
+        metadata["PixelSize"] = tuple(pixel_size)
 
     return CTMRScan(reader.Execute(), metadata)
 

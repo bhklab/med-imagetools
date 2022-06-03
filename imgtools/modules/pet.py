@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import SimpleITK as sitk
 from pydicom import dcmread
+import copy
 
 T = TypeVar('T')
 
@@ -100,6 +101,10 @@ class PET(sitk.Image):
             metadata["RescaleType"] = str(pet.RescaleType)
         if hasattr(pet, 'RescaleSlope'):
             metadata["RescaleSlope"] = str(pet.RescaleSlope)
+        if hasattr(pet, 'PixelSpacing') and hasattr(pet, 'SliceThickness'):
+            pixel_size = copy.copy(pet.PixelSpacing)
+            pixel_size.append(pet.SliceThickness)
+            metadata["PixelSize"] = tuple(pixel_size)
 
         return cls(img_pet, df, factor, calc, metadata)
         # return cls(img_pet, df, factor, calc)

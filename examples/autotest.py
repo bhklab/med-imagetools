@@ -96,9 +96,11 @@ class AutoPipeline(Pipeline):
         print(subject_id, " start")
         
         metadata = {}
+        subject_modalities = set()
+        num_rtstructs = 0
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
-
+            subject_modalities.add(modality)
             # Taking modality pairs if it exists till _{num}
             output_stream = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
 
@@ -154,6 +156,7 @@ class AutoPipeline(Pipeline):
 
                 print(subject_id, " SAVED DOSE")
             elif modality == "RTSTRUCT":
+                num_rtstructs += 1
                 #For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
                 conn_to = output_stream.split("_")[-1]
@@ -220,6 +223,8 @@ class AutoPipeline(Pipeline):
 
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
+        metadata["Modalities"] = list(subject_modalities)
+        metadata["numRTSTRUCTs"] = num_rtstructs
         with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
             pickle.dump(metadata,f)
         return 

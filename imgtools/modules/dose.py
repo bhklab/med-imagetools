@@ -1,5 +1,6 @@
 import os, pathlib
 import warnings
+import copy
 
 from typing import Dict, Optional, TypeVar
 
@@ -77,6 +78,10 @@ class Dose(sitk.Image):
             metadata["RescaleType"] = str(df.RescaleType)
         if hasattr(df, 'RescaleSlope'):
             metadata["RescaleSlope"] = str(df.RescaleSlope)
+        if hasattr(df, 'PixelSpacing') and hasattr(df, 'SliceThickness'):
+            pixel_size = copy.copy(df.PixelSpacing)
+            pixel_size.append(df.SliceThickness)
+            metadata["PixelSize"] = tuple(pixel_size)
 
         return cls(img_dose, df)
 
