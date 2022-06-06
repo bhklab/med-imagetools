@@ -81,7 +81,7 @@ class Dose(sitk.Image):
         if hasattr(df, 'PixelSpacing') and hasattr(df, 'SliceThickness'):
             pixel_size = copy.copy(df.PixelSpacing)
             pixel_size.append(df.SliceThickness)
-            metadata["PixelSize"] = tuple(pixel_size)
+            metadata["PixelSize"] = str(tuple(pixel_size))
 
         return cls(img_dose, df)
 

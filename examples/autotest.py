@@ -223,7 +223,7 @@ class AutoPipeline(Pipeline):
 
                 print(subject_id, " SAVED PET")
         #Saving all the metadata in multiple text files
-        metadata["Modalities"] = list(subject_modalities)
+        metadata["Modalities"] = str(list(subject_modalities))
         metadata["numRTSTRUCTs"] = num_rtstructs
         with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
             pickle.dump(metadata,f)
@@ -259,16 +259,17 @@ class AutoPipeline(Pipeline):
 
 
 if __name__ == "__main__":
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
-                            output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True)
+
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True)
-
-    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
-    #                         modalities="CT,RTSTRUCT",
-    #                         visualize=False)
 
     print(f'starting Pipeline...')
     pipeline.run()

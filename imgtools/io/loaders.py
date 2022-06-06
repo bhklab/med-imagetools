@@ -131,7 +131,7 @@ def read_dicom_series(path: str,
     if hasattr(dicom_data, 'PixelSpacing') and hasattr(dicom_data, 'SliceThickness'):
         pixel_size = copy.copy(dicom_data.PixelSpacing)
         pixel_size.append(dicom_data.SliceThickness)
-        metadata["PixelSize"] = tuple(pixel_size)
+        metadata["PixelSize"] = str(tuple(pixel_size))
 
     return CTMRScan(reader.Execute(), metadata)
 
@@ -153,7 +153,7 @@ def read_dicom_auto(path, series=None):
     meta = dcmread(dcms[0])
     modality = meta.Modality
     if modality == 'CT' or modality == 'MR':
-        return read_dicom_series(path,series, modality)
+        return read_dicom_series(path,series, modality=modality)
     elif modality == 'PT':
         return read_dicom_pet(path,series)
     elif modality == 'RTSTRUCT':
