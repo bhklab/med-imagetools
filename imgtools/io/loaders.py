@@ -148,6 +148,7 @@ def read_dicom_pet(path,series=None):
 def read_dicom_auto(path, series=None):
     if path is None:
         return None
+    print(path)
     dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
     meta = dcmread(dcms[0])
     modality = meta.Modality
