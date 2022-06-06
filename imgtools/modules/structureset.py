@@ -70,7 +70,7 @@ class StructureSet:
         if hasattr(rtstruct, 'PixelSpacing') and hasattr(rtstruct, 'SliceThickness'):
             pixel_size = copy.copy(rtstruct.PixelSpacing)
             pixel_size.append(rtstruct.SliceThickness)
-            metadata["PixelSize"] = tuple(pixel_size)
+            metadata["PixelSize"] = str(tuple(pixel_size))
         
         return cls(roi_points, metadata)
         # return cls(roi_points)
