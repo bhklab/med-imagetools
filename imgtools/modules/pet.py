@@ -104,7 +104,7 @@ class PET(sitk.Image):
         if hasattr(pet, 'PixelSpacing') and hasattr(pet, 'SliceThickness'):
             pixel_size = copy.copy(pet.PixelSpacing)
             pixel_size.append(pet.SliceThickness)
-            metadata["PixelSize"] = tuple(pixel_size)
+            metadata["PixelSize"] = str(tuple(pixel_size))
 
         return cls(img_pet, df, factor, calc, metadata)
         # return cls(img_pet, df, factor, calc)
