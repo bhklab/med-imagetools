@@ -151,7 +151,7 @@ class AutoPipeline(Pipeline):
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
-                if hasattr(structure_set, "metadata"):
+                if hasattr(doses, "metadata"):
                     metadata.update(doses.metadata)
 
                 print(subject_id, " SAVED DOSE")
@@ -218,7 +218,7 @@ class AutoPipeline(Pipeline):
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
-                if hasattr(structure_set, "metadata"):
+                if hasattr(pet, "metadata"):
                     metadata.update(pet.metadata)
 
                 print(subject_id, " SAVED PET")
@@ -265,9 +265,14 @@ if __name__ == "__main__":
     #                         visualize=False,
     #                         overwrite=True)
 
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
-                            modalities="CT,RTSTRUCT",
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True)
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
+                            output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
+                            modalities="CT,PT",
                             visualize=False,
                             overwrite=True)
 

@@ -64,13 +64,13 @@ class PET(sitk.Image):
         metadata = {}
         # metadata["factor"] = df.factor
 
-        if hasattr(df, 'RescaleType'):
+        if hasattr(pet, 'RescaleType'):
             metadata["RescaleType"] = str(pet.RescaleType)
-        if hasattr(df, 'RescaleSlope'):
+        if hasattr(pet, 'RescaleSlope'):
             metadata["RescaleSlope"] = str(pet.RescaleSlope)
-        if hasattr(df, 'RadionuclideTotalDose'):
+        if hasattr(pet, 'RadionuclideTotalDose'):
             metadata["RadionuclideTotalDose"] = str(pet.RadionuclideTotalDose)
-        if hasattr(df, 'RadionuclideHalfLife'):
+        if hasattr(pet, 'RadionuclideHalfLife'):
             metadata["RadionuclideHalfLife"] = str(pet.RadionuclideHalfLife)
 
         # Number of Slices is avg. number slice?
