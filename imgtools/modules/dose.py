@@ -50,6 +50,10 @@ class Dose(sitk.Image):
         metadata = {}
         # metadata["DoseType"] = df.DoseType
         #return cls(img_dose, df, metadata)
+        if hasattr(df, 'BodyPartExamined'):
+            metadata["BodyPartExamined"] = str(df.BodyPartExamined)
+        if hasattr(df, 'DataCollectionDiameter'):
+            metadata["DataCollectionDiameter"] = str(df.DataCollectionDiameter)
         # Number of Slices is avg. number slice?
         if hasattr(df, 'NumberofSlices'):
             metadata["NumberofSlices"] = str(df.NumberofSlices)

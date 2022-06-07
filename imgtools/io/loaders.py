@@ -73,6 +73,8 @@ def read_dicom_series(path: str,
     if modality == 'CT':
         if hasattr(dicom_data, 'KVP'):
             metadata["KVP"] = str(dicom_data.KVP)
+        if hasattr(dicom_data, 'XRayTubeCurrent'):
+            metadata["XRayTubeCurrent"] = str(dicom_data.XRayTubeCurrent)
         if hasattr(dicom_data, 'ScanOptions'):
             metadata["ScanOptions"] = str(dicom_data.ScanOptions)
         if hasattr(dicom_data, 'ReconstructionAlgorithm'):
@@ -82,8 +84,8 @@ def read_dicom_series(path: str,
         if hasattr(dicom_data, 'ContrastFlowDuration'):
             metadata["ContrastFlowDuration"] = str(dicom_data.ContrastFlowDuration)
         # is this contrast type?
-        # if hasattr(dicom_data, 'ContrastBolusAgent'):
-        #     metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
+        if hasattr(dicom_data, 'ContrastBolusAgent'):
+            metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
     else: # MR
         if hasattr(dicom_data, 'AcquisitionTime'):
             metadata["AcquisitionTime"] = str(dicom_data.AcquisitionTime)
@@ -101,6 +103,10 @@ def read_dicom_series(path: str,
             metadata["MagneticFieldStrength"] = str(dicom_data.MagneticFieldStrength)
 
     # Number of Slices is avg. number slice?
+    if hasattr(dicom_data, 'BodyPartExamined'):
+        metadata["BodyPartExamined"] = str(dicom_data.BodyPartExamined)
+    if hasattr(dicom_data, 'DataCollectionDiameter'):
+        metadata["DataCollectionDiameter"] = str(dicom_data.DataCollectionDiameter)
     if hasattr(dicom_data, 'NumberofSlices'):
         metadata["NumberofSlices"] = str(dicom_data.NumberofSlices)
     # Slice Thickness is avg. slice thickness?
@@ -118,9 +124,6 @@ def read_dicom_series(path: str,
         metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
     if hasattr(dicom_data, 'Manufacturer'):
         metadata["Manufacturer"] = str(dicom_data.Manufacturer)
-    # Which field of view?
-    # if hasattr(dicom_data, 'FieldOfViewDescription'):
-    #     metadata["FieldOfViewDescription"] = str(dicom_data.FieldOfViewDescription)
     # Scan Plane?
     if hasattr(dicom_data, 'ScanOptions'):
         metadata["ScanOptions"] = str(dicom_data.ScanOptions)
@@ -148,7 +151,7 @@ def read_dicom_pet(path,series=None):
 def read_dicom_auto(path, series=None):
     if path is None:
         return None
-    print(path, "asdlfkjqeroigjodfklsjg")
+    # print(path, "asdlfkjqeroigjodfklsjg")
     dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
     meta = dcmread(dcms[0])
     modality = meta.Modality

@@ -2,6 +2,7 @@ import os, pathlib
 import shutil
 import glob
 import pickle
+from imgtools.io.common import file_name_convention
 import numpy as np
 import sys
 
@@ -45,8 +46,8 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
         self.overwrite = overwrite
         # pipeline configuration
-        self.input_directory = input_directory
-        self.output_directory = output_directory
+        self.input_directory = pathlib.Path(input_directory).as_posix()
+        self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
 
@@ -109,8 +110,6 @@ class AutoPipeline(Pipeline):
             num = colname.split("_")[-1]
 
             print(output_stream)
-
-            print(i, colname, "asdflkjqroigj")
 
             if read_results[i] is None:
                 print("The subject id: {} has no {}".format(subject_id, colname))
@@ -222,9 +221,12 @@ class AutoPipeline(Pipeline):
                     metadata.update(pet.metadata)
 
                 print(subject_id, " SAVED PET")
+            
+            metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, file_name_convention()[colname]).as_posix()
         #Saving all the metadata in multiple text files
         metadata["Modalities"] = str(list(subject_modalities))
         metadata["numRTSTRUCTs"] = num_rtstructs
+
         with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
             pickle.dump(metadata,f)
         return 
@@ -237,6 +239,12 @@ class AutoPipeline(Pipeline):
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
+        folder_renames = {}
+        for col in self.output_df.columns:
+            if col.startswith("folder"):
+                self.output_df[col] = self.output_df[col].apply(lambda x: pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
+                folder_renames[col] = f"output_{col}"
+        self.output_df.rename(columns=folder_renames, inplace=True)
         self.output_df.to_csv(self.output_df_path)
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
@@ -265,16 +273,16 @@ if __name__ == "__main__":
     #                         visualize=False,
     #                         overwrite=True)
 
-    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
-    #                         modalities="CT,RTSTRUCT",
-    #                         visualize=False,
-    #                         overwrite=True)
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
-                            modalities="CT,PT",
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+                            modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True)
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
+    #                         modalities="CT,PT",
+    #                         visualize=False,
+    #                         overwrite=True)
 
     print(f'starting Pipeline...')
     pipeline.run()
