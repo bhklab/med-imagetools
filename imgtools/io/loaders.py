@@ -148,7 +148,7 @@ def read_dicom_pet(path,series=None):
 def read_dicom_auto(path, series=None):
     if path is None:
         return None
-    print(path)
+    print(path, "asdlfkjqeroigjodfklsjg")
     dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
     meta = dcmread(dcms[0])
     modality = meta.Modality
@@ -230,10 +230,11 @@ class ImageCSVLoader(BaseLoader):
         row = self.paths.loc[subject_id]
         paths = {col: row[col] for col in self.colnames}
         series = {col: row[col] for col in self.seriesnames}
+        paths = {k: v if pd.notna(v) else None for k, v in paths.items()}
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
-
+        
         outputs = {col: self.readers[i](path,series["series_"+("_").join(col.split("_")[1:])]) for i, (col, path) in enumerate(paths.items())}
         return self.output_tuple(**outputs)
 
