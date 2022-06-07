@@ -73,6 +73,10 @@ class PET(sitk.Image):
         if hasattr(pet, 'RadionuclideHalfLife'):
             metadata["RadionuclideHalfLife"] = str(pet.RadionuclideHalfLife)
 
+        if hasattr(pet, 'BodyPartExamined'):
+            metadata["BodyPartExamined"] = str(pet.BodyPartExamined)
+        if hasattr(pet, 'DataCollectionDiameter'):
+            metadata["DataCollectionDiameter"] = str(pet.DataCollectionDiameter)
         # Number of Slices is avg. number slice?
         if hasattr(pet, 'NumberofSlices'):
             metadata["NumberofSlices"] = str(pet.NumberofSlices)
