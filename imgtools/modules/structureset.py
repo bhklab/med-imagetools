@@ -39,6 +39,10 @@ class StructureSet:
         if hasattr(rtstruct, 'StructureSetROISequence'):
             metadata["numROIs"] = str(len(rtstruct.StructureSetROISequence))
 
+        if hasattr(rtstruct, 'BodyPartExamined'):
+            metadata["BodyPartExamined"] = str(rtstruct.BodyPartExamined)
+        if hasattr(rtstruct, 'DataCollectionDiameter'):
+            metadata["DataCollectionDiameter"] = str(rtstruct.DataCollectionDiameter)
         # Number of Slices is avg. number slice?
         if hasattr(rtstruct, 'NumberofSlices'):
             metadata["NumberofSlices"] = str(rtstruct.NumberofSlices)
