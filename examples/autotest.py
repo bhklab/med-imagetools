@@ -243,7 +243,7 @@ class AutoPipeline(Pipeline):
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
-                folder_renames[col] = f"output_{col}"
+                folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True)
         self.output_df.to_csv(self.output_df_path)
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
