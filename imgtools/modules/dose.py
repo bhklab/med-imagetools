@@ -29,6 +29,8 @@ class Dose(sitk.Image):
         self.df = df
         if metadata:
             self.metadata = metadata
+        else:
+            self.metadata = {}
         
     @classmethod
     def from_dicom_rtdose(cls, path):
@@ -50,44 +52,44 @@ class Dose(sitk.Image):
         metadata = {}
         # metadata["DoseType"] = df.DoseType
         #return cls(img_dose, df, metadata)
-        if hasattr(df, 'BodyPartExamined'):
-            metadata["BodyPartExamined"] = str(df.BodyPartExamined)
-        if hasattr(df, 'DataCollectionDiameter'):
-            metadata["DataCollectionDiameter"] = str(df.DataCollectionDiameter)
-        # Number of Slices is avg. number slice?
-        if hasattr(df, 'NumberofSlices'):
-            metadata["NumberofSlices"] = str(df.NumberofSlices)
-        # Slice Thickness is avg. slice thickness?
-        if hasattr(df, 'SliceThickness'):
-            metadata["SliceThickness"] = str(df.SliceThickness)
-        if hasattr(df, 'ScanType'):
-            metadata["ScanType"] = str(df.ScanType)
-        # Scan Progression Direction is Scan Direction?
-        if hasattr(df, 'ScanProgressionDirection'):
-            metadata["ScanProgressionDirection"] = str(df.ScanProgressionDirection)
-        if hasattr(df, 'PatientPosition'):
-            metadata["PatientPosition"] = str(df.PatientPosition)
-        # is this contrast type?
-        if hasattr(df, 'ContrastBolusAgent'):
-            metadata["ContrastType"] = str(df.ContrastBolusAgent)
-        if hasattr(df, 'Manufacturer'):
-            metadata["Manufacturer"] = str(df.Manufacturer)
-        # Which field of view?
-        # if hasattr(df, 'FieldOfViewDescription'):
-        #     metadata["FieldOfViewDescription"] = str(df.FieldOfViewDescription)
-        # Scan Plane?
-        if hasattr(df, 'ScanOptions'):
-            metadata["ScanOptions"] = str(df.ScanOptions)
-        if hasattr(df, 'RescaleType'):
-            metadata["RescaleType"] = str(df.RescaleType)
-        if hasattr(df, 'RescaleSlope'):
-            metadata["RescaleSlope"] = str(df.RescaleSlope)
-        if hasattr(df, 'PixelSpacing') and hasattr(df, 'SliceThickness'):
-            pixel_size = copy.copy(df.PixelSpacing)
-            pixel_size.append(df.SliceThickness)
-            metadata["PixelSize"] = str(tuple(pixel_size))
+        # if hasattr(df, 'BodyPartExamined'):
+        #     metadata["BodyPartExamined"] = str(df.BodyPartExamined)
+        # if hasattr(df, 'DataCollectionDiameter'):
+        #     metadata["DataCollectionDiameter"] = str(df.DataCollectionDiameter)
+        # # Number of Slices is avg. number slice?
+        # if hasattr(df, 'NumberofSlices'):
+        #     metadata["NumberofSlices"] = str(df.NumberofSlices)
+        # # Slice Thickness is avg. slice thickness?
+        # if hasattr(df, 'SliceThickness'):
+        #     metadata["SliceThickness"] = str(df.SliceThickness)
+        # if hasattr(df, 'ScanType'):
+        #     metadata["ScanType"] = str(df.ScanType)
+        # # Scan Progression Direction is Scan Direction?
+        # if hasattr(df, 'ScanProgressionDirection'):
+        #     metadata["ScanProgressionDirection"] = str(df.ScanProgressionDirection)
+        # if hasattr(df, 'PatientPosition'):
+        #     metadata["PatientPosition"] = str(df.PatientPosition)
+        # # is this contrast type?
+        # if hasattr(df, 'ContrastBolusAgent'):
+        #     metadata["ContrastType"] = str(df.ContrastBolusAgent)
+        # if hasattr(df, 'Manufacturer'):
+        #     metadata["Manufacturer"] = str(df.Manufacturer)
+        # # Which field of view?
+        # # if hasattr(df, 'FieldOfViewDescription'):
+        # #     metadata["FieldOfViewDescription"] = str(df.FieldOfViewDescription)
+        # # Scan Plane?
+        # if hasattr(df, 'ScanOptions'):
+        #     metadata["ScanOptions"] = str(df.ScanOptions)
+        # if hasattr(df, 'RescaleType'):
+        #     metadata["RescaleType"] = str(df.RescaleType)
+        # if hasattr(df, 'RescaleSlope'):
+        #     metadata["RescaleSlope"] = str(df.RescaleSlope)
+        # if hasattr(df, 'PixelSpacing') and hasattr(df, 'SliceThickness'):
+        #     pixel_size = copy.copy(df.PixelSpacing)
+        #     pixel_size.append(df.SliceThickness)
+        #     metadata["PixelSize"] = str(tuple(pixel_size))
 
-        return cls(img_dose, df)
+        return cls(img_dose, df, metadata)
 
     def resample_dose(self,
                       ct_scan: sitk.Image) -> sitk.Image:
