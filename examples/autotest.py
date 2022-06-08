@@ -2,6 +2,7 @@ import os, pathlib
 import shutil
 import glob
 import pickle
+import struct
 from imgtools.io.common import file_name_convention
 import numpy as np
 import sys
@@ -128,7 +129,7 @@ class AutoPipeline(Pipeline):
                 #Saving the output
                 self.output(subject_id, image, output_stream)
 
-                if hasattr(read_results[i], "metadata"):
+                if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                     metadata.update(read_results[i].metadata)
 
                 metadata[f"size_{output_stream}"] = str(image.GetSize())
@@ -150,7 +151,7 @@ class AutoPipeline(Pipeline):
                 metadata[f"size_{output_stream}"] = str(doses.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
-                if hasattr(doses, "metadata"):
+                if hasattr(doses, "metadata") and doses.metadata is not None:
                     metadata.update(doses.metadata)
 
                 print(subject_id, " SAVED DOSE")
@@ -196,7 +197,7 @@ class AutoPipeline(Pipeline):
                     else:
                         self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
                 
-                if hasattr(structure_set, "metadata"):
+                if hasattr(structure_set, "metadata") and structure_set.metadata is not None:
                     metadata.update(structure_set.metadata)
 
                 metadata[f"metadata_{colname}"] = [structure_set.roi_names]
@@ -217,7 +218,7 @@ class AutoPipeline(Pipeline):
                 metadata[f"size_{output_stream}"] = str(pet.GetSize())
                 metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
-                if hasattr(pet, "metadata"):
+                if hasattr(pet, "metadata") and pet.metadata is not None:
                     metadata.update(pet.metadata)
 
                 print(subject_id, " SAVED PET")
@@ -273,16 +274,16 @@ if __name__ == "__main__":
     #                         visualize=False,
     #                         overwrite=True)
 
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
-                            modalities="CT,RTSTRUCT",
-                            visualize=False,
-                            overwrite=True)
-    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
-    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
-    #                         modalities="CT,PT",
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True)
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
+                            output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
+                            modalities="CT,PT,RTDOSE",
+                            visualize=False,
+                            overwrite=True)
 
     print(f'starting Pipeline...')
     pipeline.run()
