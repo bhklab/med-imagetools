@@ -320,7 +320,8 @@ class ImageAutoOutput:
     """
     def __init__(self,
                  root_directory: str,
-                 output_streams: List[str]):
+                 output_streams: List[str],
+                 nnUnet_info: Dict = None):
                  
         # File types
         self.file_name = file_name_convention()
@@ -332,8 +333,12 @@ class ImageAutoOutput:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
-            self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
+            if not nnUnet_info:
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
                                                                     filename_format=colname_process+"{}.nii.gz".format(extension))
+            else:
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}Tr").as_posix(),
+                                                                    filename_format=f"{nnUnet_info['study name']}_{nnUnet_info['index']}_{nnUnet_info['modality']}.nii.gz")
             # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
             #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
     
@@ -342,9 +347,10 @@ class ImageAutoOutput:
                  img: sitk.Image,
                  output_stream,
                  is_mask: bool = False,
+                 nnUnet_is_label: bool=False,
                  mask_label: Optional[str] = ""):
                  
-        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, nnUnet_is_label=nnUnet_is_label)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
