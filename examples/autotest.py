@@ -15,6 +15,7 @@ from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
+import nibabel as nib
 
 ###############################################################
 # Example usage:
@@ -38,7 +39,8 @@ class AutoPipeline(Pipeline):
                  missing_strategy="drop",
                  show_progress=False,
                  warn_on_error=False,
-                 overwrite=False):
+                 overwrite=False,
+                 generate_sparsemask=False):
 
         super().__init__(
             n_jobs=n_jobs,
@@ -51,6 +53,7 @@ class AutoPipeline(Pipeline):
         self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
+        self.generate_sparsemask = generate_sparsemask
 
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
@@ -172,14 +175,14 @@ class AutoPipeline(Pipeline):
                 # save output
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
-
                 
-                # sparse_mask = mask.generate_sparse_mask()
+                if self.generate_sparsemask:
+                    sparse_mask = mask.generate_sparse_mask()
+                    save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
+                    # sparse_mask_nifti = nib.Nifti1Image(sparse_mask.mask_array, affine=np.eye(4))
+                    # nib.save(sparse_mask_nifti, save_path)
+                    # self.output("sparse_mask", sparse_mask, output_stream, "sparse_mask")
 
-
-                # np.set_printoptions(threshold=sys.maxsize)
-                # print(sparse_mask.mask_array.shape)
-                # print(sparse_mask.mask_array[350:360,290:300,93])
                 # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                 if len(mask_arr.shape) == 3:
                     mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
@@ -268,22 +271,23 @@ class AutoPipeline(Pipeline):
 
 
 if __name__ == "__main__":
-    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
-    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
-    #                         modalities="CT,RTSTRUCT",
-    #                         visualize=False,
-    #                         overwrite=True)
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+                            output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+                            modalities="CT,RTSTRUCT",
+                            visualize=False,
+                            overwrite=True,
+                            generate_sparsemask=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True)
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
-                            modalities="CT,PT,RTDOSE",
-                            visualize=False,
-                            overwrite=True)
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
+    #                         modalities="CT,PT,RTDOSE",
+    #                         visualize=False,
+    #                         overwrite=True)
 
     print(f'starting Pipeline...')
     pipeline.run()
