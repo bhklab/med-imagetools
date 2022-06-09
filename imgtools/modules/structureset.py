@@ -190,27 +190,27 @@ class StructureSet:
             for contour in mask_points:
                 z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
                 # rounding errors for points on the boundary
-                if z == mask.shape[0]:
-                    z -= 1
-                elif z == -1:
-                    z += 1
-                elif z > mask.shape[0] or z < -1:
-                    raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
+                # if z == mask.shape[0]:
+                #     z -= 1
+                # elif z == -1:
+                #     z += 1
+                # elif z > mask.shape[0] or z < -1:
+                #     raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
                 
-                # if the contour spans only 1 z-slice 
-                if len(z) == 1:
-                    z = int(np.floor(z[0]))
-                    slice_mask = polygon2mask(size[1:-1], slice_points)
-                    mask[z, :, :, label] += slice_mask
-                else:
-                    raise ValueError("This contour is corrupted and spans across 2 or more slices.")
-
-                # This is the old version of z index parsing. Kept for backup
+                # # if the contour spans only 1 z-slice 
                 # if len(z) == 1:
-                #     # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                #     z = z[0]
+                #     z = int(np.floor(z[0]))
                 #     slice_mask = polygon2mask(size[1:-1], slice_points)
                 #     mask[z, :, :, label] += slice_mask
+                # else:
+                #     raise ValueError("This contour is corrupted and spans across 2 or more slices.")
+
+                # This is the old version of z index parsing. Kept for backup
+                if len(z) == 1:
+                    # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                    z = z[0]
+                    slice_mask = polygon2mask(size[1:-1], slice_points)
+                    mask[z, :, :, label] += slice_mask
 
         
         mask[mask > 1] = 1

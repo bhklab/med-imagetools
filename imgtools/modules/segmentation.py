@@ -109,14 +109,19 @@ class Segmentation(sitk.Image):
         sparsemask_arr = np.zeros(mask_arr.shape[1:])
 
         # voxels_with_overlap = {}
-        for i in range(mask_arr.shape[0]):
-            slice = mask_arr[i, :, :, :]
-            slice *= list(roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
-            # res = self._max_adder(sparsemask_arr, slice)
-            # sparsemask_arr = res[0]
-            # for e in res[1]:
-            #     voxels_with_overlap.add(e)
-            sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
+        if len(mask_arr.shape) == 4:
+            for i in range(mask_arr.shape[0]):
+                slice = mask_arr[i, :, :, :]
+                slice *= list(roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
+                # res = self._max_adder(sparsemask_arr, slice)
+                # sparsemask_arr = res[0]
+                # for e in res[1]:
+                #     voxels_with_overlap.add(e)
+                sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
+            print("A")
+        else:
+            sparsemask_arr = mask_arr
+            print("B")
         
         sparsemask = SparseMask(sparsemask_arr, roi_names)
         # if len(voxels_with_overlap) != 0:
