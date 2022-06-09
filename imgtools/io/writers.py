@@ -57,16 +57,22 @@ class BaseSubjectWriter(BaseWriter):
 
             shutil.rmtree(os.path.dirname(self.root_directory))
 
-    def put(self, subject_id, image, is_mask=False, mask_label="",**kwargs):
+    def put(self, subject_id, image, is_mask=False, nnUnet_info={}, nnUnet_is_label=False, mask_label="",**kwargs):
         if is_mask:
             self.filename_format = mask_label+".nii.gz"
-        out_path = self._get_path_from_subject_id(subject_id, **kwargs)
+        if nnUnet_is_label and nnUnet_info != {}:
+            self.filename_format = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz"
+        out_path = self._get_path_from_subject_id(subject_id, nnUnet_is_label=nnUnet_is_label, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
-    def _get_path_from_subject_id(self, subject_id, **kwargs):
+    def _get_path_from_subject_id(self, subject_id, nnUnet_is_label=False, **kwargs):
         # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
         self.root_directory = self.root_directory.format(subject_id=subject_id,
                                                          **kwargs)
+        if nnUnet_is_label:
+            self.root_directory.format(label_or_image="labels")
+        else:
+            self.root_directory.format(label_or_image="images")
         out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):

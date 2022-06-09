@@ -40,7 +40,8 @@ class AutoPipeline(Pipeline):
                  show_progress=False,
                  warn_on_error=False,
                  overwrite=False,
-                 generate_sparsemask=False):
+                 generate_sparsemask=False,
+                 nnUnet_info={}):
 
         super().__init__(
             n_jobs=n_jobs,
@@ -54,6 +55,7 @@ class AutoPipeline(Pipeline):
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.generate_sparsemask = generate_sparsemask
+        self.nnUnet_info = nnUnet_info
 
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
@@ -69,7 +71,7 @@ class AutoPipeline(Pipeline):
         self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False) # "GTV-.*"
 
         # output ops
-        self.output = ImageAutoOutput(self.output_directory, self.output_streams)
+        self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnUnet_info)
 
         #Make a directory
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
@@ -103,6 +105,7 @@ class AutoPipeline(Pipeline):
         metadata = {}
         subject_modalities = set()
         num_rtstructs = 0
+        self.nnUnet_info["index"] += 1
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
             subject_modalities.add(modality)
@@ -130,7 +133,10 @@ class AutoPipeline(Pipeline):
                     print(image.GetSize())
                 image = self.resample(image)
                 #Saving the output
-                self.output(subject_id, image, output_stream)
+                if self.nnUnet_info == {}:
+                    self.output(subject_id, image, output_stream)
+                else:
+                    self.output(subject_id, image, output_stream, nnUnet_info=self.nnUnet_info)
 
                 if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                     metadata.update(read_results[i].metadata)
@@ -176,9 +182,9 @@ class AutoPipeline(Pipeline):
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                 
-                if self.generate_sparsemask:
-                    sparse_mask = mask.generate_sparse_mask()
-                    save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
+                # if self.generate_sparsemask:
+                #     sparse_mask = mask.generate_sparse_mask()
+                #     save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
                     # sparse_mask_nifti = nib.Nifti1Image(sparse_mask.mask_array, affine=np.eye(4))
                     # nib.save(sparse_mask_nifti, save_path)
                     # self.output("sparse_mask", sparse_mask, output_stream, "sparse_mask")
@@ -194,11 +200,14 @@ class AutoPipeline(Pipeline):
                     new_mask.CopyInformation(mask)
                     new_mask = Segmentation(new_mask)
                     mask_to_process = new_mask
-                    if not mult_conn:
-                        # self.output(roi_names_list[i], mask_to_process, output_stream)
-                        self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
+                    if self.nnUnet_info == {}:
+                        if not mult_conn:
+                            # self.output(roi_names_list[i], mask_to_process, output_stream)
+                            self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
+                        else:
+                            self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
                     else:
-                        self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
+                        self.output(subject_id, mask_to_process, output_stream, nnUnet_info=self.nnUnet_info, nnUnet_is_label=True)
                 
                 if hasattr(structure_set, "metadata") and structure_set.metadata is not None:
                     metadata.update(structure_set.metadata)
@@ -276,13 +285,25 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            generate_sparsemask=True)
+                            generate_sparsemask=True,
+                            nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1",
+                                         "index": 0,
+                                         "modality": "0000"})
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
-    #                         overwrite=True)
+    #                         overwrite=True,
+    #                         generate_sparsemask=True)
+
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True,
+    #                         generate_sparsemask=True)
+
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
     #                         modalities="CT,PT,RTDOSE",
