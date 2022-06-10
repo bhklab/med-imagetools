@@ -1,4 +1,4 @@
-import os, pathlib
+import os, pathlib, sys
 import shutil
 import glob
 import pickle
@@ -8,6 +8,7 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
+from imgtools.utils import parser
 from joblib import Parallel, delayed
 
 ###############################################################
@@ -203,34 +204,9 @@ class AutoPipeline(Pipeline):
             Parallel(n_jobs=self.n_jobs, verbose=verbose)(
                     delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             self.save_data()
-        
 
-if __name__ == "__main__":
-    parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
-
-    #arguments
-    parser.add_argument("input_directory", type=str,
-                        help="Path to top-level directory of dataset.")
-
-    parser.add_argument("output_directory", type=str,
-                        help="Path to output directory to save processed images.")
-
-    parser.add_argument("--modalities", type=str, default="CT",
-                        help="List of desired modalities. Type as string for ex: RTSTRUCT,CT,RTDOSE")
-    
-    parser.add_argument("--visualize", type=bool, default=False,
-                        help="Whether to visualize the data graph")
-    
-    parser.add_argument("--spacing", nargs=3, type=float, default=(1., 1., 0.),
-                        help="The resampled voxel spacing in  (x, y, z) directions.")
-
-    parser.add_argument("--n_jobs", type=int, default=-1,
-                        help="The number of parallel processes to use.")
-
-    parser.add_argument("--show_progress", action="store_true",
-                        help="Whether to print progress to standard output.")
-
-    args = parser.parse_args()
+def main():
+    args = parser()
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
                             modalities=args.modalities,
@@ -244,3 +220,8 @@ if __name__ == "__main__":
 
 
     print(f'finished Pipeline!')
+
+if __name__ == "__main__":
+    main()
+
+    
