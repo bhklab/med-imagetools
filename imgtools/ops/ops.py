@@ -338,7 +338,7 @@ class ImageAutoOutput:
                                                                     filename_format=colname_process+"{}.nii.gz".format(extension))
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}Tr").as_posix(),
-                                                                    filename_format=f"{nnUnet_info['study name']}_{nnUnet_info['index']}_{nnUnet_info['modality']}.nii.gz")
+                                                                    filename_format="{study_name}_{index}_{modality_index}.nii.gz")
             # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
             #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
     
@@ -348,9 +348,10 @@ class ImageAutoOutput:
                  output_stream,
                  is_mask: bool = False,
                  nnUnet_is_label: bool=False,
+                 nnUnet_info: Dict=None,
                  mask_label: Optional[str] = ""):
                  
-        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, nnUnet_is_label=nnUnet_is_label)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, nnUnet_is_label=nnUnet_is_label, nnUnet_info=nnUnet_info)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
