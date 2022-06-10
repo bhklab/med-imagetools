@@ -289,7 +289,7 @@ class ImageSubjectFileOutput(BaseOutput):
 
     def __init__(self,
                  root_directory: str,
-                 filename_format: Optional[str] ="{subject_id}.nrrd",
+                 filename_format: Optional[str] ="{subject_id}.nii.gz",
                  create_dirs: Optional[bool] =True,
                  compress: Optional[bool] =True):
         self.root_directory = root_directory
@@ -347,11 +347,11 @@ class ImageAutoOutput:
                  img: sitk.Image,
                  output_stream,
                  is_mask: bool = False,
-                 nnUnet_is_label: bool=False,
-                 nnUnet_info: Dict=None,
-                 mask_label: Optional[str] = ""):
+                 mask_label: Optional[str] = "",
+                 label_or_image: str="images",
+                 nnUnet_info: Dict=None):
                  
-        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, nnUnet_is_label=nnUnet_is_label, nnUnet_info=nnUnet_info)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, nnUnet_info=nnUnet_info)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.

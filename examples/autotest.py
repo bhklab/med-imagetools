@@ -39,7 +39,6 @@ class AutoPipeline(Pipeline):
                  show_progress=False,
                  warn_on_error=False,
                  overwrite=False,
-                 generate_sparsemask=False,
                  nnUnet_info=None):
 
         super().__init__(
@@ -53,9 +52,8 @@ class AutoPipeline(Pipeline):
         self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
-        self.generate_sparsemask = generate_sparsemask
+        self.nnUnet_info = nnUnet_info
         if nnUnet_info:
-            self.nnUnet_info = nnUnet_info
             self.nnUnet_info["modalities"] = {"CT": "0000"}
             self.nnUnet_info["index"] = 0
 
@@ -107,7 +105,8 @@ class AutoPipeline(Pipeline):
         metadata = {}
         subject_modalities = set()
         num_rtstructs = 0
-        self.nnUnet_info["index"] += 1
+        if self.nnUnet_info:
+            self.nnUnet_info["index"] += 1
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
             subject_modalities.add(modality)
@@ -195,7 +194,7 @@ class AutoPipeline(Pipeline):
                     sparse_mask = mask.generate_sparse_mask().mask_array
                     sparse_mask = sitk.GetImageFromArray(sparse_mask)
                     # save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
-                    self.output(subject_id, sparse_mask, output_stream, nnUnet_info=self.nnUnet_info, nnUnet_is_label=True)
+                    self.output(subject_id, sparse_mask, output_stream, nnUnet_info=self.nnUnet_info, label_or_image="labels")
                     # sparse_mask_nifti = nib.Nifti1Image(sparse_mask.mask_array, affine=np.eye(4))
                     # nib.save(sparse_mask_nifti, save_path)
                     # self.output("sparse_mask", sparse_mask, output_stream, "sparse_mask")
@@ -282,33 +281,43 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            # Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+            #         delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            for subject_id in subject_ids:
+                self._process_wrapper(subject_id)
             self.save_data()
 
 
 if __name__ == "__main__":
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
-                            output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
-                            modalities="CT,RTSTRUCT",
-                            visualize=False,
-                            overwrite=True,
-                            generate_sparsemask=True,
-                            nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
-
-    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True)
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True,
-    #                         generate_sparsemask=True)
-
+    #                         nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True,
-    #                         generate_sparsemask=True)
+    #                         nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
+
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True)
+
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+                            output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
+                            modalities="CT,RTSTRUCT",
+                            visualize=False,
+                            overwrite=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
