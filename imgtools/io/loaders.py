@@ -13,7 +13,7 @@ from pydicom import dcmread
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from ..modules import StructureSet
+from ..modules import StructureSet, StructureSetNew
 from ..modules import Dose
 from ..modules import PET
 from ..utils.crawl import *
@@ -69,7 +69,7 @@ def read_dicom_series(path: str,
 
 
 def read_dicom_rtstruct(path):
-    return StructureSet.from_dicom_rtstruct(path)
+    return StructureSetNew.from_dicom_rtstruct(path)
 
 def read_dicom_rtdose(path):
     return Dose.from_dicom_rtdose(path)

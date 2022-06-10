@@ -36,7 +36,10 @@ class BaseWriter:
                                                    date_time=date_time,
                                                    **kwargs)
         out_path = os.path.join(self.root_directory, out_filename)
-        out_dir = os.path.dirname(out_path)
+        if "." in out_path:
+            out_dir = os.path.dirname(out_path)
+        else:
+            out_dir = out_path
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
 
@@ -44,7 +47,7 @@ class BaseWriter:
 
 
 class ImageFileWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True, compress=True):
+    def __init__(self, root_directory, filename_format="{subject_id}/image.nii.gz", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.compress = compress
 
@@ -53,7 +56,20 @@ class ImageFileWriter(BaseWriter):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
-        
+
+class MaskFileWriter(BaseWriter):
+    def __init__(self, root_directory, filename_format="{subject_id}/masks", create_dirs=True, compress=True):
+        super().__init__(root_directory, filename_format, create_dirs)
+        self.compress = compress
+
+    def put(self, subject_id, masks, **kwargs):
+        out_dir = self._get_path_from_subject_id(subject_id, **kwargs)
+        labels = masks.roi_names.keys()
+
+        for n, label in enumerate(labels):
+            sitk.WriteImage(sitk.VectorIndexSelectionCast(masks, n), os.path.join(out_dir, f"{label}.nii.gz"), self.compress)
+
+
 class SegNrrdWriter(BaseWriter):
     def __init__(self, root_directory, filename_format="{subject_id}.seg.nrrd", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)

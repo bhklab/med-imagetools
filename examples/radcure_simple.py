@@ -7,6 +7,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageFileInput, ImageFileOu
 from imgtools.pipeline import Pipeline
 
 
+
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -71,7 +72,7 @@ class RADCUREPipeline(Pipeline):
         # Note: the ROI name is temporarily changed to match the example data
         # since RADCURE is still not public. The correct ROI name for RADCURE is 'GTV'.
         self.make_binary_mask = StructureSetToSegmentation(roi_names="GTV-1")#"GTV")
-
+        
         # output ops
         self.image_output = ImageFileOutput(
             os.path.join(self.output_directory, "images"), # where to save the processed images
@@ -112,21 +113,22 @@ class RADCUREPipeline(Pipeline):
         subject_id : str
            The ID of currently processed subject
         """
-
+        if subject_id not in self.mrns:
+            return
         image = self.image_input(subject_id)
         structure_set = self.structure_set_input(subject_id)
-        dose_set = self.rtdose_input(subject_id)
-        pet_set = self.petscan_input(subject_id)
+        # dose_set = self.rtdose_input(subject_id)
+        # pet_set = self.petscan_input(subject_id)
 
         
         image = self.resample(image)
         # note that the binary mask can be generated with correct spacing using
         # the resampled image, eliminating the need to resample it separately
-        # mask = self.make_binary_mask(structure_set, image)
+        mask = self.make_binary_mask(structure_set, image)
         self.image_output(subject_id, image)
-        # self.mask_output(subject_id, mask)
-        self.dose_output(subject_id, dose_set)
-        self.petscan_output(subject_id, pet_set)
+        self.mask_output(subject_id, mask)
+        # self.dose_output(subject_id, dose_set)
+        # self.petscan_output(subject_id, pet_set)
 
 
 if __name__ == "__main__":

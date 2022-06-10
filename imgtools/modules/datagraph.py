@@ -198,13 +198,11 @@ class DataGraph:
         edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2}
         self.mods   = query_string.split(",")
         self.mods_n = len(self.mods)
-
         #Deals with single node queries
         if query_string in supp_mods:
             final_df = self.df.loc[self.df.modality == query_string, ["study", "patient_ID", "series", "folder"]]
             final_df.rename(columns = {"series": f"series_{query_string}", 
                                        "folder": f"folder_{query_string}"}, inplace=True)
-        
         elif self.mods_n == 2:
             #Reverse the query string
             query_string_rev = (",").join(self.mods[::-1])
@@ -227,11 +225,11 @@ class DataGraph:
                 elif edge_type==1:
                     #Search for subgraphs with edges 1 or (0 and 2)
                     regex_term = '((?=.*1)|((?=.*0)(?=.*2)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT") 
+                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT")
                 elif edge_type==2:
                     #Search for subgraphs with edges 2 or (1 and 0)
                     regex_term = '((?=.*2)|((?=.*0)(?=.*1)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTDOSE") 
+                    final_df = self.graph_query(regex_term, edge_list, "RTDOSE")
             else:
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type, ["study_x","patient_ID_x","series_x","folder_x","series_y","folder_y"]]
                 node_dest = valid.split(",")[0]
@@ -242,7 +240,6 @@ class DataGraph:
                                          "series_y": f"series_{node_origin}", 
                                          "folder_x": f"folder_{node_dest}", 
                                          "folder_y": f"folder_{node_origin}"}, inplace=True)
-
         elif self.mods_n > 2:
             #Processing of combinations of modality
             if (("CT" in query_string) or ('MR' in query_string)) & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" not in query_string):
@@ -272,6 +269,7 @@ class DataGraph:
                 raise ValueError("Please enter the correct query")
         else:
             raise ValueError("Please enter the correct query")
+        
         final_df.reset_index(drop=True, inplace=True)
         if len(final_df) > 0:
             final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]

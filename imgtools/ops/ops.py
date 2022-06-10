@@ -14,6 +14,7 @@ LoaderFunction = TypeVar('LoaderFunction')
 ImageFilter = TypeVar('ImageFilter')
 Function = TypeVar('Function')
 StructureSet = TypeVar('StructureSet')
+StructureSetNew = TypeVar('StructureSetNew')
 
 # Base class
 
@@ -111,7 +112,7 @@ class ImageAutoInput(BaseInput):
                                 seriesnames=self.series_names,
                                 id_column=None,
                                 expand_paths=True,
-                                readers=self.readers) 
+                                readers=self.readers)
         super().__init__(loader)
 
 
@@ -245,6 +246,47 @@ class ImageFileOutput(BaseOutput):
             writer_class = SegNrrdWriter
         else:
             writer_class = ImageFileWriter
+            
+        writer = writer_class(self.root_directory,
+                              self.filename_format,
+                              self.create_dirs,
+                              self.compress)
+        
+        super().__init__(writer)
+
+class MaskFileOutput(BaseOutput):
+    """ImageFileOutput class outputs processed images as one of the image file formats.
+
+    Parameters
+    ----------
+    root_directory: str
+        Root directory where the processed image files will be stored.
+
+    filename_format: str, optional
+        The filename template.
+        Set to be {subject_id}.nrrd as default.
+        {subject_id} will be replaced by each subject's ID at runtime.
+
+    create_dirs: bool, optional
+        Specify whether to create an output directory if it does not exit.
+        Set to be True as default.
+
+    compress: bool, optional
+        Specify whether to enable compression for NRRD format.
+        Set to be true as default.
+    """
+
+    def __init__(self,
+                 root_directory: str,
+                 filename_format: Optional[str] ="{subject_id}/masks",
+                 create_dirs: Optional[bool] =True,
+                 compress: Optional[bool] =True):
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+
+        writer_class = MaskFileWriter
             
         writer = writer_class(self.root_directory,
                               self.filename_format,
@@ -1345,7 +1387,6 @@ class ArrayFunction(BaseOp):
 
 
 # Segmentation ops
-
 class StructureSetToSegmentation(BaseOp):
     """StructureSetToSegmentation operation class:
     A callable class that accepts ROI names, a StrutureSet object, and a reference image, and
@@ -1363,7 +1404,87 @@ class StructureSetToSegmentation(BaseOp):
     """
 
     def __init__(self, 
-                 roi_names: Union[str,List[str]], 
+                 roi_names: Union[str,List[str]]=[], 
+                 force_missing: bool = False,
+                 continuous: bool = True):
+        """Initialize the op.
+
+        Parameters
+        ----------
+        roi_names
+            List of ROI names to export. Both full names and
+            case-insensitive regular expressions are allowed.
+            All labels within one sublist will be assigned
+            the same label.
+        force_missing
+            If True, the number of labels in the output will
+            be equal to `len(roi_names)`, with blank slices for
+            any missing labels. Otherwise, missing ROI names
+            will be excluded.
+        continuous
+            flag passed to 'physical_points_to_idxs' in 'StructureSet.to_segmentation'. 
+            Helps to resolve errors caused by ContinuousIndex > Index. 
+
+        Notes
+        -----
+        If `self.roi_names` contains lists of strings, each matching
+        name within a sublist will be assigned the same label. This means
+        that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
+        to different label assignments, depending on how many ROI names
+        match the pattern. E.g. if `self.roi_names = ['fooa', 'foob']`,
+        passing `roi_names=['foo(a|b)']` will result in a segmentation with 
+        two labels, but passing `roi_names=[['foo(a|b)']]` will result in
+        one label for both `'fooa'` and `'foob'`.
+
+        If `roi_names` is kept empty ([]), the pipeline will process all ROIs/contours 
+        found according to their original names.
+
+        In general, the exact ordering of the returned labels cannot be
+        guaranteed (unless all patterns in `roi_names` can only match
+        a single name or are lists of strings).
+        """
+        self.roi_names = roi_names
+        # self.force_missing = force_missing
+        self.continuous = continuous
+
+    def __call__(self, structure_set: StructureSetNew, reference_image: sitk.Image) -> Segmentation:
+        """Convert the structure set to a Segmentation object.
+
+        Parameters
+        ----------
+        structure_set
+            The structure set to convert.
+        reference_image
+            Image used as reference geometry.
+
+        Returns
+        -------
+        Segmentation
+            The segmentation object.
+        """
+        return structure_set.to_segmentation(reference_image,
+                                             roi_names=self.roi_names,)
+                                            #  force_missing=self.force_missing,
+                                             #continuous=self.continuous)
+
+class GimmeSegs(BaseOp):
+    """StructureSetToSegmentation operation class:
+    A callable class that accepts ROI names, a StrutureSet object, and a reference image, and
+    returns Segmentation mask.
+
+    To instantiate:
+        obj = StructureSet(roi_names)
+    To call:
+        mask = obj(structure_set, reference_image)
+
+    Parameters
+    ----------
+    roi_names
+        List of Region of Interests
+    """
+
+    def __init__(self, 
+                 roi_names: Dict[Union[str, int], str], 
                  force_missing: bool = False,
                  continuous: bool = True):
         """Initialize the op.
@@ -1406,7 +1527,7 @@ class StructureSetToSegmentation(BaseOp):
         self.force_missing = force_missing
         self.continuous = continuous
 
-    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
+    def __call__(self, structure_set: StructureSetNew, reference_image: sitk.Image):
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1422,9 +1543,7 @@ class StructureSetToSegmentation(BaseOp):
             The segmentation object.
         """
         return structure_set.to_segmentation(reference_image,
-                                             roi_names=self.roi_names,
-                                             force_missing=self.force_missing,
-                                             continuous=self.continuous)
+                                             roi_names=self.roi_names)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
