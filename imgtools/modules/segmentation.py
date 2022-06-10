@@ -118,10 +118,8 @@ class Segmentation(sitk.Image):
                 # for e in res[1]:
                 #     voxels_with_overlap.add(e)
                 sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
-            print("A")
         else:
             sparsemask_arr = mask_arr
-            print("B")
         
         sparsemask = SparseMask(sparsemask_arr, roi_names)
         # if len(voxels_with_overlap) != 0:
