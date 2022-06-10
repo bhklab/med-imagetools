@@ -3,7 +3,6 @@ import shutil
 import glob
 import pickle
 import struct
-from imgtools.io.common import file_name_convention
 import numpy as np
 import sys
 
@@ -15,8 +14,8 @@ from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
-import nibabel as nib
 
+from imgtools.io.common import file_name_convention
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -41,7 +40,7 @@ class AutoPipeline(Pipeline):
                  warn_on_error=False,
                  overwrite=False,
                  generate_sparsemask=False,
-                 nnUnet_info={}):
+                 nnUnet_info=None):
 
         super().__init__(
             n_jobs=n_jobs,
@@ -55,7 +54,10 @@ class AutoPipeline(Pipeline):
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.generate_sparsemask = generate_sparsemask
-        self.nnUnet_info = nnUnet_info
+        if nnUnet_info:
+            self.nnUnet_info = nnUnet_info
+            self.nnUnet_info["modalities"] = {"CT": "0000"}
+            self.nnUnet_info["index"] = 0
 
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
@@ -132,14 +134,21 @@ class AutoPipeline(Pipeline):
                     image = extractor.Execute(image)
                     print(image.GetSize())
                 image = self.resample(image)
-                #Saving the output
-                if self.nnUnet_info == {}:
-                    self.output(subject_id, image, output_stream)
-                else:
-                    self.output(subject_id, image, output_stream, nnUnet_info=self.nnUnet_info)
 
                 if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                     metadata.update(read_results[i].metadata)
+
+                #modality is MR and the user has selected to have nnUnet output
+                if self.nnUnet_info:
+                    if modality == "MR":
+                        self.nnUnet_info['current_modality'] = metadata["AcquisitionContrast"]
+                        if not metadata["AcquisitionContrast"] in self.nnUnet_info["modalities"].keys():
+                            self.nnUnet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnUnet_info["modalities"])).zfill(4)
+                    else:
+                        self.nnUnet_info['current_modality'] = modality #CT
+                    self.output(subject_id, image, output_stream, nnUnet_info=self.nnUnet_info)
+                else:
+                    self.output(subject_id, image, output_stream)
 
                 metadata[f"size_{output_stream}"] = str(image.GetSize())
 
@@ -182,32 +191,31 @@ class AutoPipeline(Pipeline):
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                 
-                # if self.generate_sparsemask:
-                #     sparse_mask = mask.generate_sparse_mask()
-                #     save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
+                if self.nnUnet_info:
+                    sparse_mask = mask.generate_sparse_mask().mask_array
+                    sparse_mask = sitk.GetImageFromArray(sparse_mask)
+                    # save_path = pathlib.Path(self.output_directory, subject_id, "sparse_mask", "sparse_mask.nii.gz").as_posix()
+                    self.output(subject_id, sparse_mask, output_stream, nnUnet_info=self.nnUnet_info, nnUnet_is_label=True)
                     # sparse_mask_nifti = nib.Nifti1Image(sparse_mask.mask_array, affine=np.eye(4))
                     # nib.save(sparse_mask_nifti, save_path)
                     # self.output("sparse_mask", sparse_mask, output_stream, "sparse_mask")
-
+                else:
                 # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
-                if len(mask_arr.shape) == 3:
-                    mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
-                
-                print(mask_arr.shape)
-                roi_names_list = list(mask.roi_names.keys())
-                for i in range(mask_arr.shape[0]):
-                    new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
-                    new_mask.CopyInformation(mask)
-                    new_mask = Segmentation(new_mask)
-                    mask_to_process = new_mask
-                    if self.nnUnet_info == {}:
+                    if len(mask_arr.shape) == 3:
+                        mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
+                    
+                    print(mask_arr.shape)
+                    roi_names_list = list(mask.roi_names.keys())
+                    for i in range(mask_arr.shape[0]):
+                        new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
+                        new_mask.CopyInformation(mask)
+                        new_mask = Segmentation(new_mask)
+                        mask_to_process = new_mask
                         if not mult_conn:
                             # self.output(roi_names_list[i], mask_to_process, output_stream)
                             self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
                         else:
                             self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
-                    else:
-                        self.output(subject_id, mask_to_process, output_stream, nnUnet_info=self.nnUnet_info, nnUnet_is_label=True)
                 
                 if hasattr(structure_set, "metadata") and structure_set.metadata is not None:
                     metadata.update(structure_set.metadata)
@@ -286,9 +294,7 @@ if __name__ == "__main__":
                             visualize=False,
                             overwrite=True,
                             generate_sparsemask=True,
-                            nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1",
-                                         "index": 0,
-                                         "modality": "0000"})
+                            nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
     #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
