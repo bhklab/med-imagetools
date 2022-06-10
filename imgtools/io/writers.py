@@ -51,28 +51,36 @@ class BaseSubjectWriter(BaseWriter):
         self.filename_format = filename_format
         self.create_dirs = create_dirs
         self.compress = compress
-        if os.path.exists(self.root_directory)\
-           and os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+        if os.path.exists(self.root_directory):
+            if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+                shutil.rmtree(os.path.dirname(self.root_directory))
+            elif "{label_or_image}" in os.path.basename(self.root_directory):
+                shutil.rmtree(self.root_directory)
            #delete the folder called {subject_id} that was made in the original BaseWriter
 
-            shutil.rmtree(os.path.dirname(self.root_directory))
 
-    def put(self, subject_id, image, is_mask=False, nnUnet_info={}, nnUnet_is_label=False, mask_label="",**kwargs):
+    def put(self, subject_id, image, is_mask=False, nnUnet_info=None, nnUnet_is_label=False, mask_label="",**kwargs):
         if is_mask:
             self.filename_format = mask_label+".nii.gz"
-        if nnUnet_is_label and nnUnet_info != {}:
-            self.filename_format = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz"
+        if nnUnet_info:
+            if nnUnet_is_label:
+                self.filename_format = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz"
+            else:
+                # f"{nnUnet_info['study name']}_{nnUnet_info['index']}_{nnUnet_info['modalities'][nnUnet_info['current_modality']]}.nii.gz"
+                self.filename_format = self.filename_format.format(study_name=nnUnet_info['study name'], index=nnUnet_info['index'], modality_index=nnUnet_info['modalities'][nnUnet_info['current_modality']])
         out_path = self._get_path_from_subject_id(subject_id, nnUnet_is_label=nnUnet_is_label, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, subject_id, nnUnet_is_label=False, **kwargs):
         # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
-        self.root_directory = self.root_directory.format(subject_id=subject_id,
-                                                         **kwargs)
-        if nnUnet_is_label:
-            self.root_directory.format(label_or_image="labels")
-        else:
-            self.root_directory.format(label_or_image="images")
+        try:
+            self.root_directory = self.root_directory.format(subject_id=subject_id,
+                                                            **kwargs)
+        except:
+            if nnUnet_is_label:
+                self.root_directory = self.root_directory.format(label_or_image="labels")
+            else:
+                self.root_directory = self.root_directory.format(label_or_image="images")
         out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
