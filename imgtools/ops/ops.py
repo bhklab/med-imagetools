@@ -337,10 +337,8 @@ class ImageAutoOutput:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
                                                                     filename_format=colname_process+"{}.nii.gz".format(extension))
             else:
-                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}Tr").as_posix(),
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
                                                                     filename_format="{study_name}_{index}_{modality_index}.nii.gz")
-            # self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
-            #                                                filename_format="{subject_id}_"+"{}.nrrd".format(extension))
     
     def __call__(self, 
                  subject_id: str,
@@ -349,9 +347,10 @@ class ImageAutoOutput:
                  is_mask: bool = False,
                  mask_label: Optional[str] = "",
                  label_or_image: str="images",
+                 train_or_test: str="Tr",
                  nnUnet_info: Dict=None):
                  
-        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, nnUnet_info=nnUnet_info)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, train_or_test=train_or_test, nnUnet_info=nnUnet_info)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
