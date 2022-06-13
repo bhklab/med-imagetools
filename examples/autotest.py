@@ -6,6 +6,7 @@ import pickle
 import struct
 import numpy as np
 import sys
+import warnings
 
 from argparse import ArgumentParser
 import SimpleITK as sitk
@@ -60,11 +61,14 @@ class AutoPipeline(Pipeline):
         self.train_size = train_size
         self.random_state = random_state
 
-        if self.train_size == 1 or self.train_size == 0:
-            raise Warning("No train/test split")
+        if self.train_size == 1.0:
+            warnings.warn("Train size is 1, all data will be used for training")
+        
+        if self.train_size == 0.0:
+            warnings.warn("Train size is 0, all data will be used for testing")
 
         if self.train_size != 1 and not self.nnUnet_info:
-            raise Warning("Cannot run train/test split without nnUnet, ignoring train_size")
+            warnings.warn("Cannot run train/test split without nnUnet, ignoring train_size")
 
         if self.train_size > 1 or self.train_size < 0 and self.nnUnet_info:
             raise ValueError("train_size must be between 0 and 1")
