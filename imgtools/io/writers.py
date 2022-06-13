@@ -59,15 +59,15 @@ class BaseSubjectWriter(BaseWriter):
            #delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
 
 
-    def put(self, subject_id, image, is_mask=False, nnUnet_info=None, label_or_image: str = "images", mask_label="", train_or_test: str = "Tr", **kwargs):
+    def put(self, subject_id, image, is_mask=False, nnunet_info=None, label_or_image: str = "images", mask_label="", train_or_test: str = "Tr", **kwargs):
         if is_mask:
             self.filename_format = mask_label+".nii.gz" #save the mask labels as their rtstruct names
-        if nnUnet_info:
+        if nnunet_info:
             if label_or_image == "labels":
-                filename = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz" #naming convention for labels
+                filename = f"{subject_id}.nii.gz" #naming convention for labels
             else:
-                # f"{nnUnet_info['study name']}_{nnUnet_info['index']}_{nnUnet_info['modalities'][nnUnet_info['current_modality']]}.nii.gz"
-                filename = self.filename_format.format(study_name=nnUnet_info['study name'], index=nnUnet_info['index'], modality_index=nnUnet_info['modalities'][nnUnet_info['current_modality']]) #naming convention for images
+                # f"{nnunet_info['study name']}_{nnunet_info['index']}_{nnunet_info['modalities'][nnunet_info['current_modality']]}.nii.gz"
+                filename = self.filename_format.format(subject_id=subject_id, modality_index=nnunet_info['modalities'][nnunet_info['current_modality']]) #naming convention for images
             out_path = self._get_path_from_subject_id(filename, label_or_image=label_or_image, train_or_test=train_or_test)
         else:
             out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
