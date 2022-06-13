@@ -215,7 +215,7 @@ class DataGraph:
                 edge_type = edge_def[query_string_rev]
                 valid = query_string_rev
             else:
-                raise ValueError("Invalid Query. Select valid pairs.")            
+                raise ValueError("Invalid Query. Select valid pairs.")
             #For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
             if edge_type in [0, 1, 2]:
                 edge_list = [0, 1, 2]
