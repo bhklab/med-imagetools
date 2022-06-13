@@ -25,8 +25,8 @@ def parser():
     parser.add_argument("--show_progress", action="store_true",
                         help="Whether to print progress to standard output.")
     
-    parser.add_argument("--nnunet_study_name", type=str, default=None,
-                        help="Name of the study to be used for nn-Unet.")
+    parser.add_argument("--nnunet", default=False, action="store_true",
+                        help="Whether to make the output conform to nnunet requirements.")
 
     parser.add_argument("--train_size", type=float, default=1.0,
                         help="The proportion of data to be used for training, as a decimal.")

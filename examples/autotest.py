@@ -42,10 +42,40 @@ class AutoPipeline(Pipeline):
                  show_progress=False,
                  warn_on_error=False,
                  overwrite=False,
-                 nnUnet_info=None,
+                 is_nnunet=False,
                  train_size=1.0,
                  random_state=42):
+        """Initialize the pipeline.
 
+        Parameters
+        ----------
+        input_directory: str
+            Directory containing the input data
+        output_directory: str
+            Directory where the output data will be stored
+        modalities: str, default="CT"
+            Modalities to load. Can be a comma-separated list of modalities with no spaces
+        spacing: tuple of floats, default=(1., 1., 0.)
+            Spacing of the output image
+        n_jobs: int, default=-1
+            Number of jobs to run in parallel. If -1, use all cores
+        visualize: bool, default=False
+            Whether to visualize the results of the pipeline using pyvis. Outputs to an HTML file.
+        missing_strategy: str, default="drop"
+            How to handle missing modalities. Can be "drop" or "fill"
+        show_progress: bool, default=False
+            Whether to show progress bars
+        warn_on_error: bool, default=False
+            Whether to warn on errors
+        overwrite: bool, default=False
+            Whether to write output files even if existing output files exist
+        is_nnunet: bool, default=False
+            Whether to format the output for nnunet
+        train_size: float, default=1.0
+            Proportion of the dataset to use for training, as a decimal
+        random_state: int, default=42
+            Random state for train_test_split
+        """
         super().__init__(
             n_jobs=n_jobs,
             missing_strategy=missing_strategy,
@@ -57,7 +87,11 @@ class AutoPipeline(Pipeline):
         self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
-        self.nnUnet_info = nnUnet_info
+        self.is_nnunet = is_nnunet
+        if is_nnunet:
+            self.nnunet_info = {}
+        else:
+            self.nnunet_info = None
         self.train_size = train_size
         self.random_state = random_state
 
@@ -67,15 +101,14 @@ class AutoPipeline(Pipeline):
         if self.train_size == 0.0:
             warnings.warn("Train size is 0, all data will be used for testing")
 
-        if self.train_size != 1 and not self.nnUnet_info:
-            warnings.warn("Cannot run train/test split without nnUnet, ignoring train_size")
+        if self.train_size != 1 and not self.is_nnunet:
+            warnings.warn("Cannot run train/test split without nnunet, ignoring train_size")
 
-        if self.train_size > 1 or self.train_size < 0 and self.nnUnet_info:
+        if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
 
-        if nnUnet_info:
-            self.nnUnet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
-            self.nnUnet_info["index"] = 0 #number of patients
+        if self.is_nnunet:
+            self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
 
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
@@ -91,7 +124,7 @@ class AutoPipeline(Pipeline):
         self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False) # "GTV-.*"
 
         # output ops
-        self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnUnet_info)
+        self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info)
 
         #Make a directory
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
@@ -105,6 +138,7 @@ class AutoPipeline(Pipeline):
         multiple images, structures, etc.). During pipeline execution, this
         method will receive one argument, subject_id, which can be used to
         retrieve inputs and save outputs.
+
         Parameters
         ----------
         subject_id : str
@@ -126,8 +160,6 @@ class AutoPipeline(Pipeline):
         subject_modalities = set() # all the modalities that this subject has
         num_rtstructs = 0
 
-        if self.nnUnet_info:
-            self.nnUnet_info["index"] += 1 #increment the number of patients
         for i, colname in enumerate(self.output_streams):
             modality = colname.split("_")[0]
             subject_modalities.add(modality) #set add
@@ -160,18 +192,18 @@ class AutoPipeline(Pipeline):
                 if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                     metadata.update(read_results[i].metadata)
 
-                #modality is MR and the user has selected to have nnUnet output
-                if self.nnUnet_info:
+                #modality is MR and the user has selected to have nnunet output
+                if self.is_nnunet:
                     if modality == "MR": #MR images can have various modalities like FLAIR, T1, etc.
-                        self.nnUnet_info['current_modality'] = metadata["AcquisitionContrast"]
-                        if not metadata["AcquisitionContrast"] in self.nnUnet_info["modalities"].keys(): #if the modality is new
-                            self.nnUnet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnUnet_info["modalities"])).zfill(4) #fill to 4 digits
+                        self.nnunet_info['current_modality'] = metadata["AcquisitionContrast"]
+                        if not metadata["AcquisitionContrast"] in self.nnunet_info["modalities"].keys(): #if the modality is new
+                            self.nnunet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnunet_info["modalities"])).zfill(4) #fill to 4 digits
                     else:
-                        self.nnUnet_info['current_modality'] = modality #CT
+                        self.nnunet_info['current_modality'] = modality #CT
                     if subject_id in self.train:
-                        self.output(subject_id, image, output_stream, nnUnet_info=self.nnUnet_info)
+                        self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                     else:
-                        self.output(subject_id, image, output_stream, nnUnet_info=self.nnUnet_info, train_or_test="Ts")
+                        self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
                 else:
                     self.output(subject_id, image, output_stream)
 
@@ -216,13 +248,13 @@ class AutoPipeline(Pipeline):
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                 
-                if self.nnUnet_info:
+                if self.is_nnunet:
                     sparse_mask = mask.generate_sparse_mask().mask_array
                     sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
                     if subject_id in self.train:
-                        self.output(subject_id, sparse_mask, output_stream, nnUnet_info=self.nnUnet_info, label_or_image="labels") #rtstruct is label for nnunet
+                        self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
                     else:
-                        self.output(subject_id, sparse_mask, output_stream, nnUnet_info=self.nnUnet_info, label_or_image="labels", train_or_test="Ts")
+                        self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
                 else:
                 # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                     if len(mask_arr.shape) == 3:
@@ -300,7 +332,7 @@ class AutoPipeline(Pipeline):
         verbose = 51 if self.show_progress else 0
 
         subject_ids = self._get_loader_subject_ids()
-        if self.nnUnet_info:
+        if self.is_nnunet:
             self.num_subjects = len(subject_ids)
             self.train, self.test = train_test_split(subject_ids, train_size=self.train_size, random_state=self.random_state)
         # Note that returning any SimpleITK object in process_one_subject is
@@ -327,20 +359,20 @@ if __name__ == "__main__":
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True,
-    #                         nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True,
-    #                         nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
 
     pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
                             output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            nnUnet_info={"study name": "TCIA-HNSCC"},
+                            is_nnunet=True,
                             train_size=0.5)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
@@ -348,7 +380,7 @@ if __name__ == "__main__":
     #                         modalities="CT,RTSTRUCT",
     #                         visualize=False,
     #                         overwrite=True,
-    #                         nnUnet_info={"study name": "NSCLC-Radiomics-Interobserver1"},
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"},
     #                         train_size=0.5)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",

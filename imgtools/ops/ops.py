@@ -321,7 +321,7 @@ class ImageAutoOutput:
     def __init__(self,
                  root_directory: str,
                  output_streams: List[str],
-                 nnUnet_info: Dict = None):
+                 nnunet_info: Dict = None):
                  
         # File types
         self.file_name = file_name_convention()
@@ -333,12 +333,12 @@ class ImageAutoOutput:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             extension = self.file_name[colname_process]
-            if not nnUnet_info:
+            if not nnunet_info:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
                                                                     filename_format=colname_process+"{}.nii.gz".format(extension))
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
-                                                                    filename_format="{study_name}_{index}_{modality_index}.nii.gz")
+                                                                    filename_format="{subject_id}_{modality_index}.nii.gz")
     
     def __call__(self, 
                  subject_id: str,
@@ -348,9 +348,9 @@ class ImageAutoOutput:
                  mask_label: Optional[str] = "",
                  label_or_image: str="images",
                  train_or_test: str="Tr",
-                 nnUnet_info: Dict=None):
+                 nnunet_info: Dict=None):
                  
-        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, train_or_test=train_or_test, nnUnet_info=nnUnet_info)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, train_or_test=train_or_test, nnunet_info=nnunet_info)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
