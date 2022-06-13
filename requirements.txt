@@ -11,3 +11,4 @@ SimpleITK
 tqdm
 torch
 torchio
+scikit-learn

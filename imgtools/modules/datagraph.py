@@ -403,7 +403,6 @@ class DataGraph:
                 folder_save["patient_ID"] = df_connections["patient_ID_x"].iloc[0]
                 folder_save[f"series_{df_connections['modality_x'].iloc[0]}"] = comp[j]
                 folder_save[f"folder_{df_connections['modality_x'].iloc[0]}"] = df_connections["folder_x"].iloc[0]
-                print(f"folder_{df_connections['modality_x'].iloc[0]}", df_connections["folder_x"].iloc[0], "asdf")
                 temp_dfconn = df_connections[["series_y", "modality_y", "folder_y"]]
                 for k in range(len(temp_dfconn)):
                     #This loop stores connection of the CT

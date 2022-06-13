@@ -85,7 +85,7 @@ class Segmentation(sitk.Image):
     def __repr__(self):
         return f"<Segmentation with ROIs: {self.roi_names!r}>"
          
-    def generate_sparse_mask(self) -> SparseMask:
+    def generate_sparse_mask(self, verbose=False) -> SparseMask:
         """
         Generate a sparse mask from the contours, taking the argmax of all overlaps
 
@@ -107,23 +107,27 @@ class Segmentation(sitk.Image):
         print(roi_names)
         
         sparsemask_arr = np.zeros(mask_arr.shape[1:])
-
-        # voxels_with_overlap = {}
+        
+        if verbose:
+            voxels_with_overlap = set()
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slice = mask_arr[i, :, :, :]
                 slice *= list(roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
-                # res = self._max_adder(sparsemask_arr, slice)
-                # sparsemask_arr = res[0]
-                # for e in res[1]:
-                #     voxels_with_overlap.add(e)
-                sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
+                if verbose:
+                    res = self._max_adder(sparsemask_arr, slice)
+                    sparsemask_arr = res[0]
+                    for e in res[1]:
+                        voxels_with_overlap.add(e)
+                else:
+                    sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
         else:
             sparsemask_arr = mask_arr
         
         sparsemask = SparseMask(sparsemask_arr, roi_names)
-        # if len(voxels_with_overlap) != 0:
-        #     raise Warning(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
+        if verbose:
+            if len(voxels_with_overlap) != 0:
+                raise Warning(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
         return sparsemask
 
     def _max_adder(self, arr_1: np.ndarray, arr_2: np.ndarray) -> Tuple[np.ndarray, Set[Tuple[int, int, int]]]:
