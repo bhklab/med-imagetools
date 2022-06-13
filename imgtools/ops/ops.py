@@ -111,7 +111,8 @@ class ImageAutoInput(BaseInput):
                                 seriesnames=self.series_names,
                                 id_column=None,
                                 expand_paths=False,
-                                readers=self.readers) 
+                                readers=self.readers)
+        
         super().__init__(loader)
 
 
