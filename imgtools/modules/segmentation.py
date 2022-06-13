@@ -1,4 +1,5 @@
 from functools import wraps
+import warnings
 
 import numpy as np
 import SimpleITK as sitk
@@ -129,8 +130,7 @@ class Segmentation(sitk.Image):
 
         if verbose:
             if len(voxels_with_overlap) != 0:
-                raise Warning(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
-                
+                warnings.warn(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
         return sparsemask
 
     def _max_adder(self, arr_1: np.ndarray, arr_2: np.ndarray) -> Tuple[np.ndarray, Set[Tuple[int, int, int]]]:
