@@ -56,6 +56,7 @@ class DataGraph:
                              left_on="reference_pl", 
                              right_on="instance_uid", 
                              how="left")
+        
         df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_x"] = df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_y"].values
         df_filter.drop(columns=["reference_rs_y", "instance_uid_y"], inplace=True)
         df_filter.rename(columns={"reference_rs_x":"reference_rs", "instance_uid_x":"instance_uid"}, inplace=True)
@@ -95,7 +96,7 @@ class DataGraph:
 
         sources = self.df_edges["series_y"]
         targets = self.df_edges["series_x"]
-        name_src = self.df_edges["modality_y"]
+        name_src = self.df_edges["modality_y"] 
         name_tar = self.df_edges["modality_x"]
         patient_id = self.df_edges["patient_ID_x"]
         reference_ct = self.df_edges["reference_ct_y"]
@@ -227,7 +228,7 @@ class DataGraph:
                 elif edge_type==1:
                     #Search for subgraphs with edges 1 or (0 and 2)
                     regex_term = '((?=.*1)|((?=.*0)(?=.*2)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT") 
+                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT")
                 elif edge_type==2:
                     #Search for subgraphs with edges 2 or (1 and 0)
                     regex_term = '((?=.*2)|((?=.*0)(?=.*1)))'
@@ -276,7 +277,7 @@ class DataGraph:
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
-
+        print(final_df.columns)
         #change relative paths to absolute paths
         for col in final_df.columns:
             if col.startswith("folder"):
@@ -323,9 +324,11 @@ class DataGraph:
         
         # Based on the correct study ids, fetches are the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
+        print(df_processed.to_csv("/cluster/home/sejinkim/projects/process/tcga_impatient.csv"))
         
         # The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
         final_df = self._get_df(df_processed, relevant_study_id, remove_less_comp)
+        print('after _get_df', final_df.columns)
 
         # Removing columns
         if len(change_df) > 0:
