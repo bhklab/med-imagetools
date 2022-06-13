@@ -20,7 +20,7 @@ setup(
     extras_require={
         'debug': ['pyvis'],
     },
-    entry_points={'console_scripts': ['autopipe = imgtools.autopipeline:main']},
+    entry_points={'console_scripts': ['autopipe = imgtools.autopipeline:main', 'autotest = imgtools.autonew:main']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

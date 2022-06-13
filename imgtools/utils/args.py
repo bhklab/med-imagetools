@@ -28,10 +28,10 @@ def parser():
     parser.add_argument("--nnunet_study_name", type=str, default=None,
                         help="Name of the study to be used for nn-Unet.")
 
-    parser.add_argument("train_size", type=float, default=1.0,
+    parser.add_argument("--train_size", type=float, default=1.0,
                         help="The proportion of data to be used for training, as a decimal.")
 
-    parser.add_argument("random_state", type=int, default=42,
+    parser.add_argument("--random_state", type=int, default=42,
                         help="The random state to be used for the train-test-split.")
 
     return parser.parse_known_args()[0]
