@@ -54,36 +54,27 @@ class BaseSubjectWriter(BaseWriter):
         if os.path.exists(self.root_directory):
             if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
                 shutil.rmtree(os.path.dirname(self.root_directory))
-            elif "{label_or_image}" in os.path.basename(self.root_directory):
+            elif "{label_or_image}{train_or_test}" in os.path.basename(self.root_directory):
                 shutil.rmtree(self.root_directory)
-           #delete the folder called {subject_id} that was made in the original BaseWriter
+           #delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
 
 
-    def put(self, subject_id, image, is_mask=False, nnUnet_info=None, label_or_image: str = "images", mask_label="", **kwargs):
+    def put(self, subject_id, image, is_mask=False, nnUnet_info=None, label_or_image: str = "images", mask_label="", train_or_test: str = "Tr", **kwargs):
         if is_mask:
-            self.filename_format = mask_label+".nii.gz"
+            self.filename_format = mask_label+".nii.gz" #save the mask labels as their rtstruct names
         if nnUnet_info:
             if label_or_image == "labels":
-                filename = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz"
+                filename = f"{nnUnet_info['study name']}_{nnUnet_info['index']}.nii.gz" #naming convention for labels
             else:
                 # f"{nnUnet_info['study name']}_{nnUnet_info['index']}_{nnUnet_info['modalities'][nnUnet_info['current_modality']]}.nii.gz"
-                filename = self.filename_format.format(study_name=nnUnet_info['study name'], index=nnUnet_info['index'], modality_index=nnUnet_info['modalities'][nnUnet_info['current_modality']])
-            out_path = self._get_path_from_subject_id(filename, label_or_image=label_or_image)
+                filename = self.filename_format.format(study_name=nnUnet_info['study name'], index=nnUnet_info['index'], modality_index=nnUnet_info['modalities'][nnUnet_info['current_modality']]) #naming convention for images
+            out_path = self._get_path_from_subject_id(filename, label_or_image=label_or_image, train_or_test=train_or_test)
         else:
             out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, filename, **kwargs):
-        # out_filename = self.filename_format.format(subject_id=subject_id, **kwargs)
-        # print(subject_id, "asasa")
-        # print(self.root_directory)
-        # try:
-        root_directory = self.root_directory.format(**kwargs)
-        # except:
-        #     if nnUnet_is_label:
-        #         self.root_directory = self.root_directory.format(label_or_image="labels")
-        #     else:
-        #         self.root_directory = self.root_directory.format(label_or_image="images")
+        root_directory = self.root_directory.format(**kwargs) #replace the {} with the kwargs passed in from .put() (above)
         out_path = pathlib.Path(root_directory, filename).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):

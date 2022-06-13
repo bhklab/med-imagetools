@@ -207,13 +207,16 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    if args.nnunet_study_name:
+        nnUnet_info = {"study name": args.nnunet_study_name}
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
                             modalities=args.modalities,
                             spacing=args.spacing,
                             n_jobs=args.n_jobs,
                             visualize=args.visualize,
-                            show_progress=args.show_progress)
+                            show_progress=args.show_progress,
+                            nnUnet_info=nnUnet_info)
 
     print(f'starting Pipeline...')
     pipeline.run()
