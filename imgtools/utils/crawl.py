@@ -115,7 +115,10 @@ def crawl(top,
     parent_imgtools = pathlib.Path(parent, ".imgtools").as_posix()
 
     if not os.path.exists(parent_imgtools):
-        os.makedirs(parent_imgtools)
+        try:
+            os.makedirs(parent_imgtools)
+        except:
+            pass
     
     # save as json
     with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
