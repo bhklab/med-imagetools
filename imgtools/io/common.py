@@ -3,9 +3,6 @@ from typing import Dict
 
 from pydicom.misc import is_dicom
 
-
-
-
 def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
     """Find DICOM file paths in the specified root directory file tree.
 
@@ -50,4 +47,5 @@ def file_name_convention() -> Dict:
                             "PT": "pet", 
                             "RTDOSE": "dose", 
                             "RTSTRUCT": "mask"}
+                            
     return file_name_convention

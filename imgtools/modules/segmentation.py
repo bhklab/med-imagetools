@@ -111,6 +111,7 @@ class Segmentation(sitk.Image):
         
         if verbose:
             voxels_with_overlap = set()
+
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slice = mask_arr[i, :, :, :]
@@ -126,6 +127,7 @@ class Segmentation(sitk.Image):
             sparsemask_arr = mask_arr
         
         sparsemask = SparseMask(sparsemask_arr, roi_names)
+
         if verbose:
             if len(voxels_with_overlap) != 0:
                 warnings.warn(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
