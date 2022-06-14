@@ -38,45 +38,6 @@ class StructureSet:
                 warn(f"Could not get points for ROI {name} (in {rtstruct_path}).")
 
         metadata = {}
-        # if hasattr(rtstruct, 'StructureSetROISequence'):
-        #     metadata["numROIs"] = str(len(rtstruct.StructureSetROISequence))
-
-        # if hasattr(rtstruct, 'BodyPartExamined'):
-        #     metadata["BodyPartExamined"] = str(rtstruct.BodyPartExamined)
-        # if hasattr(rtstruct, 'DataCollectionDiameter'):
-        #     metadata["DataCollectionDiameter"] = str(rtstruct.DataCollectionDiameter)
-        # # Number of Slices is avg. number slice?
-        # if hasattr(rtstruct, 'NumberofSlices'):
-        #     metadata["NumberofSlices"] = str(rtstruct.NumberofSlices)
-        # # Slice Thickness is avg. slice thickness?
-        # if hasattr(rtstruct, 'SliceThickness'):
-        #     metadata["SliceThickness"] = str(rtstruct.SliceThickness)
-        # if hasattr(rtstruct, 'ScanType'):
-        #     metadata["ScanType"] = str(rtstruct.ScanType)
-        # # Scan Progression Direction is Scan Direction?
-        # if hasattr(rtstruct, 'ScanProgressionDirection'):
-        #     metadata["ScanProgressionDirection"] = str(rtstruct.ScanProgressionDirection)
-        # if hasattr(rtstruct, 'PatientPosition'):
-        #     metadata["PatientPosition"] = str(rtstruct.PatientPosition)
-        # # is this contrast type?
-        # if hasattr(rtstruct, 'ContrastBolusAgent'):
-        #     metadata["ContrastType"] = str(rtstruct.ContrastBolusAgent)
-        # if hasattr(rtstruct, 'Manufacturer'):
-        #     metadata["Manufacturer"] = str(rtstruct.Manufacturer)
-        # # Which field of view?
-        # # if hasattr(rtstruct, 'FieldOfViewDescription'):
-        # #     metadata["FieldOfViewDescription"] = str(rtstruct.FieldOfViewDescription)
-        # # Scan Plane?
-        # if hasattr(rtstruct, 'ScanOptions'):
-        #     metadata["ScanOptions"] = str(rtstruct.ScanOptions)
-        # if hasattr(rtstruct, 'RescaleType'):
-        #     metadata["RescaleType"] = str(rtstruct.RescaleType)
-        # if hasattr(rtstruct, 'RescaleSlope'):
-        #     metadata["RescaleSlope"] = str(rtstruct.RescaleSlope)
-        # if hasattr(rtstruct, 'PixelSpacing') and hasattr(rtstruct, 'SliceThickness'):
-        #     pixel_size = copy.copy(rtstruct.PixelSpacing)
-        #     pixel_size.append(rtstruct.SliceThickness)
-        #     metadata["PixelSize"] = str(tuple(pixel_size))
         
         return cls(roi_points, metadata)
         # return cls(roi_points)
@@ -125,7 +86,7 @@ class StructureSet:
         return labels
 
     def to_segmentation(self, reference_image: sitk.Image,
-                        roi_names: Optional[List[Union[str, List[str]]]] = None,
+                        roi_names: Dict[str: str] = None,
                         force_missing: bool = False,
                         continuous: bool = True) -> Segmentation:
         """Convert the structure set to a Segmentation object.
@@ -165,12 +126,14 @@ class StructureSet:
         guaranteed (unless all patterns in `roi_names` can only match
         a single name or are lists of strings).
         """
-        if not roi_names:
+        if not roi_names or roi_names == {}:
             roi_names = self.roi_names
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-       
-        labels = self._assign_labels(roi_names, force_missing)
+        if isinstance(roi_names, list):
+            labels = self._assign_labels(roi_names, force_missing)
+        else:
+            labels = self._assign_labels(list(roi_names.values()), force_missing)
         print("labels:", labels)
         if not labels:
             raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
