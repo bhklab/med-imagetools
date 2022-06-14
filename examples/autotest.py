@@ -44,7 +44,8 @@ class AutoPipeline(Pipeline):
                  overwrite=False,
                  is_nnunet=False,
                  train_size=1.0,
-                 random_state=42):
+                 random_state=42,
+                 label_names=None):
         """Initialize the pipeline.
 
         Parameters
@@ -94,6 +95,7 @@ class AutoPipeline(Pipeline):
             self.nnunet_info = None
         self.train_size = train_size
         self.random_state = random_state
+        self.label_names = label_names
 
         if self.train_size == 1.0:
             warnings.warn("Train size is 1, all data will be used for training")
@@ -106,6 +108,10 @@ class AutoPipeline(Pipeline):
 
         if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
+        
+        if is_nnunet and (label_names is None or label_names == {}):
+            raise ValueError("label_names must be provided for nnunet")
+        
 
         if self.is_nnunet:
             self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
@@ -121,7 +127,7 @@ class AutoPipeline(Pipeline):
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=[], continuous=False) # "GTV-.*"
+        self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False) # "GTV-.*"
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info)
@@ -249,7 +255,7 @@ class AutoPipeline(Pipeline):
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                 
                 if self.is_nnunet:
-                    sparse_mask = mask.generate_sparse_mask().mask_array
+                    sparse_mask = mask.generate_sparse_mask(self.label_names).mask_array
                     sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
                     if subject_id in self.train:
                         self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
@@ -373,7 +379,8 @@ if __name__ == "__main__":
                             visualize=False,
                             overwrite=True,
                             is_nnunet=True,
-                            train_size=0.5)
+                            train_size=0.5,
+                            label_names={})
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",

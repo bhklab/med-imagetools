@@ -39,6 +39,8 @@ def all_modalities_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydic
         pixel_size = copy.copy(dicom_data.PixelSpacing)
         pixel_size.append(dicom_data.SliceThickness)
         metadata["PixelSize"] = str(tuple(pixel_size))
+    if hasattr(dicom_data, 'ManufacturerModelName'):
+        metadata["ManufacturerModelName"] = str(dicom_data.ManufacturerModelName)
     return metadata
 
 
@@ -59,6 +61,12 @@ def ct_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydicom.dicomdir.
     # is this contrast type?
     if hasattr(dicom_data, 'ContrastBolusAgent'):
         metadata["ContrastType"] = str(dicom_data.ContrastBolusAgent)
+    if hasattr(dicom_data, 'ReconstructionMethod'):
+        metadata["ReconstructionMethod"] = str(dicom_data.ReconstructionMethod)
+    if hasattr(dicom_data, 'ReconstructionDiameter'):
+        metadata["ReconstructionDiameter"] = str(dicom_data.ReconstructionDiameter)
+    if hasattr(dicom_data, 'ConvolutionKernel'):
+        metadata["ConvolutionKernel"] = str(dicom_data.ConvolutionKernel)
     return metadata
     
 
@@ -79,6 +87,8 @@ def mr_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydicom.dicomdir.
         metadata["ImagingFrequency"] = str(dicom_data.ImagingFrequency)
     if hasattr(dicom_data, 'MagneticFieldStrength'):
         metadata["MagneticFieldStrength"] = str(dicom_data.MagneticFieldStrength)
+    if hasattr(dicom_data, 'SequenceName'):
+        metadata["SequenceName"] = str(dicom_data.SequenceName)
     return metadata
 
 
