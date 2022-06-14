@@ -86,7 +86,7 @@ class Segmentation(sitk.Image):
     def __repr__(self):
         return f"<Segmentation with ROIs: {self.roi_names!r}>"
          
-    def generate_sparse_mask(self, verbose=False) -> SparseMask:
+    def generate_sparse_mask(self, label_names, verbose=False) -> SparseMask:
         """
         Generate a sparse mask from the contours, taking the argmax of all overlaps
 
