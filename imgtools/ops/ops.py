@@ -1469,7 +1469,7 @@ class StructureSetToSegmentation(BaseOp):
         self.force_missing = force_missing
         self.continuous = continuous
 
-    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
+    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image, existing_roi_names: Dict[str, int]) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1487,7 +1487,8 @@ class StructureSetToSegmentation(BaseOp):
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
                                              force_missing=self.force_missing,
-                                             continuous=self.continuous)
+                                             continuous=self.continuous,
+                                             existing_roi_names=existing_roi_names)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:

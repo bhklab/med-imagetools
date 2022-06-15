@@ -135,6 +135,8 @@ class AutoPipeline(Pipeline):
         #Make a directory
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
             os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
+        
+        self.existing_roi_names = {}
 
 
     def process_one_subject(self, subject_id):
@@ -244,18 +246,23 @@ class AutoPipeline(Pipeline):
 
                 # make_binary_mask relative to ct/pet
                 if conn_to == "CT" or conn_to == "MR":
-                    mask = self.make_binary_mask(structure_set, image)
+                    mask = self.make_binary_mask(structure_set, image, self.existing_roi_names)
                 elif conn_to == "PT":
-                    mask = self.make_binary_mask(structure_set, pet)
+                    mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names)
                 else:
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 
+                for name in mask.roi_names.keys():
+                    if name not in self.existing_roi_names.keys():
+                        self.existing_roi_names[name] = len(self.existing_roi_names)
+                mask.existing_roi_names = self.existing_roi_names
+
                 # save output
                 print(mask.GetSize())
                 mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                 
                 if self.is_nnunet:
-                    sparse_mask = mask.generate_sparse_mask(self.label_names).mask_array
+                    sparse_mask = mask.generate_sparse_mask().mask_array
                     sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
                     if "_".join(subject_id.split("_")[1::]) in self.train:
                         self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
@@ -383,7 +390,7 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            # is_nnunet=True,
+                            is_nnunet=True,
                             train_size=0.5,
                             label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"})
 
