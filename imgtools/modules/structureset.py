@@ -89,7 +89,8 @@ class StructureSet:
                         roi_names: Dict[str, str] = None,
                         force_missing: bool = False,
                         continuous: bool = True,
-                        existing_roi_names: Dict[str, int] = None) -> Segmentation:
+                        existing_roi_names: Dict[str, int] = None,
+                        ignore_missing_regex: bool = False) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -142,7 +143,10 @@ class StructureSet:
             labels = self._assign_labels(roi_names, force_missing)
         print("labels:", labels)
         if not labels:
-            raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
+            if ignore_missing_regex:
+                raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
+            else:
+                return None
 
         # size = reference_image.GetSize()[::-1] + (max(labels.values()) + 1,)
         size = reference_image.GetSize()[::-1] + (len(labels),)

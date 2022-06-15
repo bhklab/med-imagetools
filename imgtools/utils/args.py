@@ -34,4 +34,7 @@ def parser():
     parser.add_argument("--random_state", type=int, default=42,
                         help="The random state to be used for the train-test-split.")
 
+    parser.add_argument("--ignore_missing_roi_regex", default=False, action="store_true",
+                        help="Whether to ignore patients with no ROI regex's that match the given ones. Will throw an error on patients without matches if this is not set.")
+
     return parser.parse_known_args()[0]
