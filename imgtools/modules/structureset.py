@@ -88,7 +88,8 @@ class StructureSet:
     def to_segmentation(self, reference_image: sitk.Image,
                         roi_names: Dict[str, str] = None,
                         force_missing: bool = False,
-                        continuous: bool = True) -> Segmentation:
+                        continuous: bool = True,
+                        existing_roi_names: Dict[str, int] = None) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -154,7 +155,7 @@ class StructureSet:
         # print(self.roi_points)
 
         seg_roi_names = {}
-        print(roi_names)
+        # print(roi_names)
         if roi_names != {} and isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
@@ -209,8 +210,7 @@ class StructureSet:
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
-        print("adams",seg_roi_names)
-        mask = Segmentation(mask, roi_names=seg_roi_names)
+        mask = Segmentation(mask, roi_names=seg_roi_names, existing_roi_names=existing_roi_names) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
         return mask
 

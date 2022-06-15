@@ -35,7 +35,7 @@ def map_over_labels(segmentation, f, include_background=False, return_segmentati
 
 
 class Segmentation(sitk.Image):
-    def __init__(self, segmentation, roi_names=None):
+    def __init__(self, segmentation, roi_names=None, existing_roi_names=None):
         super().__init__(segmentation)
         self.num_labels = self.GetNumberOfComponentsPerPixel()
         if not roi_names:
@@ -48,6 +48,7 @@ class Segmentation(sitk.Image):
             for i in range(1, self.num_labels+1):
                 if i not in self.roi_names.values():
                     self.roi_names[f"label_{i}"] = i
+        self.existing_roi_names = existing_roi_names
 
     def get_label(self, label=None, name=None, relabel=False):
         if label is None and name is None:
@@ -86,7 +87,7 @@ class Segmentation(sitk.Image):
     def __repr__(self):
         return f"<Segmentation with ROIs: {self.roi_names!r}>"
          
-    def generate_sparse_mask(self, label_names, verbose=False) -> SparseMask:
+    def generate_sparse_mask(self, verbose=False) -> SparseMask:
         """
         Generate a sparse mask from the contours, taking the argmax of all overlaps
 
@@ -100,12 +101,11 @@ class Segmentation(sitk.Image):
         SparseMask
             The sparse mask object.
         """
+        # print("asdlkfjalkfsjg", self.roi_names)
         mask_arr = np.transpose(sitk.GetArrayFromImage(self))
-        if list(self.roi_names.values())[0] == 0:
-            roi_names = {k: v+1 for k, v in self.roi_names.items()}
-        else:
-            roi_names = self.roi_names
-        print(roi_names)
+        for name in self.roi_names.keys():
+            self.roi_names[name] = self.existing_roi_names[name]
+        # print(self.roi_names)
         
         sparsemask_arr = np.zeros(mask_arr.shape[1:])
         
@@ -115,7 +115,7 @@ class Segmentation(sitk.Image):
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slice = mask_arr[i, :, :, :]
-                slice *= list(roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
+                slice *= list(self.roi_names.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
                 if verbose:
                     res = self._max_adder(sparsemask_arr, slice)
                     sparsemask_arr = res[0]
@@ -126,7 +126,7 @@ class Segmentation(sitk.Image):
         else:
             sparsemask_arr = mask_arr
         
-        sparsemask = SparseMask(sparsemask_arr, roi_names)
+        sparsemask = SparseMask(sparsemask_arr, self.roi_names)
 
         if verbose:
             if len(voxels_with_overlap) != 0:
