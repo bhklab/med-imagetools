@@ -325,7 +325,6 @@ class ImageAutoOutput:
                  nnunet_info: Dict = None):
                  
         # File types
-        self.file_name = file_name_convention()
         # print(self.file_name)
 
         self.output = {}
@@ -333,10 +332,9 @@ class ImageAutoOutput:
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
-            extension = self.file_name[colname_process]
             if not nnunet_info:
-                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",extension.split(".")[0]).as_posix(),
-                                                                    filename_format=colname_process+"{}.nii.gz".format(extension))
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process).as_posix(),
+                                                                    filename_format=colname_process+".nii.gz")
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
                                                                     filename_format="{subject_id}_{modality_index}.nii.gz")
@@ -1469,7 +1467,7 @@ class StructureSetToSegmentation(BaseOp):
         self.force_missing = force_missing
         self.continuous = continuous
 
-    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image, existing_roi_names: Dict[str, int]) -> Segmentation:
+    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image, existing_roi_names: Dict[str, int], ignore_missing_regex: bool) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1488,7 +1486,8 @@ class StructureSetToSegmentation(BaseOp):
                                              roi_names=self.roi_names,
                                              force_missing=self.force_missing,
                                              continuous=self.continuous,
-                                             existing_roi_names=existing_roi_names)
+                                             existing_roi_names=existing_roi_names,
+                                             ignore_missing_regex=ignore_missing_regex)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
