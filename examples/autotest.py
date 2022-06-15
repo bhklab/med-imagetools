@@ -45,7 +45,8 @@ class AutoPipeline(Pipeline):
                  is_nnunet=False,
                  train_size=1.0,
                  random_state=42,
-                 label_names=None):
+                 label_names=None,
+                 ignore_missing_regex=False):
         """Initialize the pipeline.
 
         Parameters
@@ -76,6 +77,10 @@ class AutoPipeline(Pipeline):
             Proportion of the dataset to use for training, as a decimal
         random_state: int, default=42
             Random state for train_test_split
+        label_names: dict of str:str, default=None
+            Dictionary representing the label that regexes are mapped to. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
+        ignore_missing_regex: bool, default=False
+            Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -96,6 +101,7 @@ class AutoPipeline(Pipeline):
         self.train_size = train_size
         self.random_state = random_state
         self.label_names = label_names
+        self.ignore_missing_regex = ignore_missing_regex
 
         if self.train_size == 1.0:
             warnings.warn("Train size is 1, all data will be used for training")
@@ -246,12 +252,15 @@ class AutoPipeline(Pipeline):
 
                 # make_binary_mask relative to ct/pet
                 if conn_to == "CT" or conn_to == "MR":
-                    mask = self.make_binary_mask(structure_set, image, self.existing_roi_names)
+                    mask = self.make_binary_mask(structure_set, image, self.existing_roi_names, self.ignore_missing_regex)
                 elif conn_to == "PT":
-                    mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names)
+                    mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names, self.ignore_missing_regex)
                 else:
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 
+                if mask is None: #ignored the missing regex
+                    return
+
                 for name in mask.roi_names.keys():
                     if name not in self.existing_roi_names.keys():
                         self.existing_roi_names[name] = len(self.existing_roi_names)
@@ -312,7 +321,7 @@ class AutoPipeline(Pipeline):
 
                 print(subject_id, " SAVED PET")
             
-            metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, file_name_convention()[colname]).as_posix()
+            metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
         #Saving all the metadata in multiple text files
         metadata["Modalities"] = str(list(subject_modalities))
         metadata["numRTSTRUCTs"] = num_rtstructs
@@ -390,9 +399,10 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            is_nnunet=True,
+                            # is_nnunet=True,
                             train_size=0.5,
-                            label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"})
+                            # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
+                            ignore_missing_regex=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
