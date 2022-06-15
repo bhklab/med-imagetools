@@ -206,7 +206,7 @@ class AutoPipeline(Pipeline):
                             self.nnunet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnunet_info["modalities"])).zfill(4) #fill to 4 digits
                     else:
                         self.nnunet_info['current_modality'] = modality #CT
-                    if subject_id in self.train:
+                    if "_".join(subject_id.split("_")[1::]) in self.train:
                         self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                     else:
                         self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
@@ -257,7 +257,7 @@ class AutoPipeline(Pipeline):
                 if self.is_nnunet:
                     sparse_mask = mask.generate_sparse_mask(self.label_names).mask_array
                     sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
-                    if subject_id in self.train:
+                    if "_".join(subject_id.split("_")[1::]) in self.train:
                         self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
                     else:
                         self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
@@ -309,7 +309,7 @@ class AutoPipeline(Pipeline):
         #Saving all the metadata in multiple text files
         metadata["Modalities"] = str(list(subject_modalities))
         metadata["numRTSTRUCTs"] = num_rtstructs
-        metadata["Train or Test"] = "train" if subject_id in self.train else "test"
+        metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
         with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
             pickle.dump(metadata,f)
         return 
@@ -338,9 +338,14 @@ class AutoPipeline(Pipeline):
         verbose = 51 if self.show_progress else 0
 
         subject_ids = self._get_loader_subject_ids()
+        patient_ids = []
+        for subject_id in subject_ids:
+            if subject_id.split("_")[1::] not in patient_ids:
+                patient_ids.append("_".join(subject_id.split("_")[1::]))
         if self.is_nnunet:
-            self.num_subjects = len(subject_ids)
-            self.train, self.test = train_test_split(subject_ids, train_size=self.train_size, random_state=self.random_state)
+            self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
+        else:
+            self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
         # not supported yet, since they cannot be pickled
         if os.path.exists(self.output_df_path) and not self.overwrite:
@@ -378,9 +383,9 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            is_nnunet=True,
+                            # is_nnunet=True,
                             train_size=0.5,
-                            label_names={})
+                            label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"})
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",

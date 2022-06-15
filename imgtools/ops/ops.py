@@ -1426,7 +1426,7 @@ class StructureSetToSegmentation(BaseOp):
     """
 
     def __init__(self, 
-                 roi_names: Dict[str: str], 
+                 roi_names: Dict[str, str], 
                  force_missing: bool = False,
                  continuous: bool = True):
         """Initialize the op.
