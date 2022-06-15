@@ -324,7 +324,7 @@ class DataGraph:
         
         # Based on the correct study ids, fetches are the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
-        print(df_processed.to_csv("/cluster/home/sejinkim/projects/process/tcga_impatient.csv"))
+        # print(df_processed.to_csv("/cluster/home/sejinkim/projects/process/tcga_impatient.csv"))
         
         # The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
         final_df = self._get_df(df_processed, relevant_study_id, remove_less_comp)
