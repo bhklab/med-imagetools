@@ -101,7 +101,6 @@ class ImageAutoInput(BaseInput):
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
-        
         print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
@@ -324,17 +323,14 @@ class ImageAutoOutput:
                  output_streams: List[str],
                  nnunet_info: Dict = None):
                  
-        # File types
-        # print(self.file_name)
-
         self.output = {}
-        print(output_streams)
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
+            colname_process = colname #temproary force #
             if not nnunet_info:
-                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process).as_posix(),
-                                                                    filename_format=colname_process+".nii.gz")
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process.split(".")[0]).as_posix(),
+                                                                    filename_format="{}.nii.gz".format(colname_process))
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
                                                                     filename_format="{subject_id}_{modality_index}.nii.gz")

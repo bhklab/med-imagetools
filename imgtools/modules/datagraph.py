@@ -277,7 +277,6 @@ class DataGraph:
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
-        print(final_df.columns)
         #change relative paths to absolute paths
         for col in final_df.columns:
             if col.startswith("folder"):
@@ -322,13 +321,11 @@ class DataGraph:
         # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
         relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
         
-        # Based on the correct study ids, fetches are the relevant edges
+        # Based on the correct study ids, fetches the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
-        # print(df_processed.to_csv("/cluster/home/sejinkim/projects/process/tcga_impatient.csv"))
         
         # The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
         final_df = self._get_df(df_processed, relevant_study_id, remove_less_comp)
-        print('after _get_df', final_df.columns)
 
         # Removing columns
         if len(change_df) > 0:
@@ -336,10 +333,10 @@ class DataGraph:
             col_ids = [cols for cols in final_df.columns if change_df not in cols]
             final_df = final_df[col_ids]
         
-        if return_components:
-            return self.final_dict
-        else:
-            return final_df
+        # if return_components:
+        #     return self.final_dict
+        # else:
+        return final_df
 
     def _form_agg(self):
         '''
@@ -377,14 +374,46 @@ class DataGraph:
 
         remove_less_comp
             True for removing components with less number of edges than the query
+
+        Changelog
+        ---------
+        * June 14th, 2022: Changing from studyID-based to sample-based for loop
         '''
         #Storing all the components across all the studies
         self.final_dict = []
         final_df = []
         #For checking later if all the required modalities are present in a component or not
         mods_wanted = set(self.mods)
+
+        # per-sample
+        for i in range(len(df_edges_processed)):
+            row = df_edges_processed.iloc[i]
+            series   = row.series_x
+            modality = row.modality_x
+            folder   = row.folder_x
+            
+            series_y = row.series_y
+            modality_y = row.modality_y
+            folder_y = row.folder_y
+
+            temp = {"study": row.study_x,
+                    series: {"modality": modality,
+                             "folder": folder},
+                    row.series_y: {"modality": modality_y,
+                                   "folder": folder_y,
+                                   "conn_to": modality}}
+
+            folder_save = {'study': row.study_x,
+                           'patient_ID': row.patient_ID_x,
+                           f'series_{modality}': series,
+                           f'folder_{modality}': folder,
+                           f'series_{modality_y}': series_y,
+                           f'series_{modality_y}': folder_y}
+
+
+
         #Determine the number of components
-        for i in range(len(rel_studyids)):
+        for i in range(len(rel_studyids)): # per study_id
             df_temp = df_edges_processed.loc[df_edges_processed.study_x == rel_studyids[i]]
             CT_locs = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
             comp = CT_locs.series_x.unique()
@@ -408,14 +437,12 @@ class DataGraph:
                 folder_save[f"series_{df_connections['modality_x'].iloc[0]}"] = comp[j]
                 folder_save[f"folder_{df_connections['modality_x'].iloc[0]}"] = df_connections["folder_x"].iloc[0]
                 temp_dfconn = df_connections[["series_y", "modality_y", "folder_y"]]
+
                 for k in range(len(temp_dfconn)):
                     #This loop stores connection of the CT
-                    temp[temp_dfconn.iloc[k,0]] = {}
-                    temp[temp_dfconn.iloc[k,0]]["modality"] = temp_dfconn.iloc[k,1]
-                    temp[temp_dfconn.iloc[k,0]]["folder"] = temp_dfconn.iloc[k,2]
-                    temp[temp_dfconn.iloc[k,0]]["conn_to"] = temp[comp[j]]["modality"] #CT/MR
+                    temp[temp_dfconn.iloc[k,0]] = {"modality": temp_dfconn.iloc[k,1], "folder": temp_dfconn.iloc[k,2], "conn_to": temp[comp[j]]["modality"]}
                     #Checks if there is already existing connection
-                    key,key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],temp[comp[j]]["modality"]) #CT/MR
+                    key, key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],temp[comp[j]]["modality"]) #CT/MR
                     folder_save[key_series] = temp_dfconn.iloc[k,0]
                     folder_save[key] = temp_dfconn.iloc[k,2]
                 A.append(temp)
@@ -423,30 +450,26 @@ class DataGraph:
             
             #For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
             rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]
-            
             flag = 0
             for j in range(len(rest_locs)):
                 for k in range(len(comp)):
                     if rest_locs.iloc[j,0] in A[k]:
-                        A[k][rest_locs.iloc[j,3]] = {}
-                        A[k][rest_locs.iloc[j,3]]["modality"] = rest_locs.iloc[j,4]
-                        A[k][rest_locs.iloc[j,3]]["folder"] = rest_locs.iloc[j,5]
-                        A[k][rest_locs.iloc[j,3]]["conn_to"] = rest_locs.iloc[j,1]
+                        A[k][rest_locs.iloc[j,3]] = {"modality": rest_locs.iloc[j,4], "folder": rest_locs.iloc[j,5], "conn_to": rest_locs.iloc[j,1]}
                         if rest_locs.iloc[j,4]=="RTDOSE":
                             #RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4], "CT")
+                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4], "CT")
                             save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         else: #Cases such as RTSTRUCT-PT
                             #if there is already a connection and one more same category modality wants to connect
-                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
+                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
                             save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         flag = 0
                     else:
                         flag = 1
             if flag==1:
-                raise ValueError(f"In studyID: {rel_studyids[i]}, one of the edges had no match to any of the components which start from CT. Please check the data")
+                raise ValueError(f"In studyID: {rel_studyids[i]}, one of the edges had no match to any of the components which start from CT/MR. Please check the data")
 
             remove_index = []
             if remove_less_comp:
@@ -459,8 +482,9 @@ class DataGraph:
                 save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        
                 A = [A[idx] for idx in remove_index]    
 
-            self.final_dict = self.final_dict + A
-            final_df = final_df + save_folder_comp
+            self.final_dict.extend(A)
+            final_df.extend(save_folder_comp)
+        
         final_df = pd.DataFrame(final_df)
         return final_df
     
@@ -472,7 +496,7 @@ class DataGraph:
         while key in save_dict.keys():
             key = f"folder_{node}_{dest}_{i}"
             key_series = f"series_{node}_{dest}_{i}"
-            i+=1
+            i +=1
         return key,key_series
     
     @staticmethod
