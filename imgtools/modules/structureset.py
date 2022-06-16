@@ -134,9 +134,16 @@ class StructureSet:
             labels = self._assign_labels(roi_names, force_missing) #only the ones that match the regex
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
-                matching_names = list(self._assign_labels([pattern], force_missing).keys())
-                if matching_names:
-                    labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]}
+                if isinstance(pattern, str):
+                    matching_names = list(self._assign_labels([pattern], force_missing).keys())
+                    if matching_names:
+                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]}
+                elif isinstance(pattern, list):
+                    labels[name] = []
+                    for pat in pattern:
+                        matching_names = list(self._assign_labels([pat], force_missing).keys())
+                        if matching_names:
+                            labels[name].extend(matching_names) #{"GTV": ["GTV1", "GTV2"]}
         if isinstance(roi_names, str):
             roi_names = [roi_names]
         if isinstance(roi_names, list):
