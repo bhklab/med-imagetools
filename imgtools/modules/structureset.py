@@ -137,8 +137,8 @@ class StructureSet:
                 if isinstance(pattern, str):
                     matching_names = list(self._assign_labels([pattern], force_missing).keys())
                     if matching_names:
-                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]}
-                elif isinstance(pattern, list):
+                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+                elif isinstance(pattern, list): # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
                     labels[name] = []
                     for pat in pattern:
                         matching_names = list(self._assign_labels([pat], force_missing).keys())

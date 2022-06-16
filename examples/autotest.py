@@ -14,6 +14,7 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
+from imgtools.utils.nnunetutils import generate_dataset_json
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
@@ -109,6 +110,19 @@ class AutoPipeline(Pipeline):
                 self.label_names = yaml.safe_load(f)
             except yaml.YAMLError as exc:
                 print(exc)
+        
+        if not isinstance(self.label_names, dict):
+            raise ValueError("roi_names.yaml must parse as a dictionary")
+
+        for k, v in self.label_names.items():
+            if not isinstance(v, list) and not isinstance(v, str):
+                raise ValueError(f"Label values must be either a list of strings or a string. Got {v} for {k}")
+            elif isinstance(v, list):
+                for a in v:
+                    if not isinstance(a, str):
+                        raise ValueError(f"Label values must be either a list of strings or a string. Got {a} in list {v} for {k}")
+            elif not isinstance(k, str):
+                raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
         if self.train_size == 1.0:
             warnings.warn("Train size is 1, all data will be used for training")
@@ -149,7 +163,7 @@ class AutoPipeline(Pipeline):
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
             os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
         
-        self.existing_roi_names = {}
+        self.existing_roi_names = {"background": 0}
 
 
     def process_one_subject(self, subject_id):
@@ -353,6 +367,16 @@ class AutoPipeline(Pipeline):
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         self.output_df.to_csv(self.output_df_path)
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
+        if self.is_nnunet:
+            imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
+            images_test_location = imagests_path if os.path.exists(imagests_path) else None
+            generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
+                                pathlib.Path(self.output_directory, "imagesTr").as_posix(),
+                                images_test_location,
+                                tuple(self.nnunet_info["modalities"].keys()),
+                                {v:k for k, v in self.existing_roi_names.items()},
+                                os.path.split(self.input_directory)[1])   
+
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -406,7 +430,7 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            # is_nnunet=True,
+                            is_nnunet=True,
                             train_size=0.5,
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
                             read_yaml_label_names=True,  # "GTV.*",
