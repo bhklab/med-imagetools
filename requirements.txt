@@ -12,3 +12,4 @@ tqdm
 torch
 torchio
 scikit-learn
+pyyaml
