@@ -143,7 +143,7 @@ class StructureSet:
             labels = self._assign_labels(roi_names, force_missing)
         print("labels:", labels)
         if not labels:
-            if ignore_missing_regex:
+            if not ignore_missing_regex:
                 raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
             else:
                 return None

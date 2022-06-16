@@ -9,6 +9,7 @@ import sys
 import warnings
 
 from argparse import ArgumentParser
+import yaml
 import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
@@ -45,7 +46,7 @@ class AutoPipeline(Pipeline):
                  is_nnunet=False,
                  train_size=1.0,
                  random_state=42,
-                 label_names=None,
+                 read_yaml_label_names=False,
                  ignore_missing_regex=False):
         """Initialize the pipeline.
 
@@ -77,8 +78,8 @@ class AutoPipeline(Pipeline):
             Proportion of the dataset to use for training, as a decimal
         random_state: int, default=42
             Random state for train_test_split
-        label_names: dict of str:str, default=None
-            Dictionary representing the label that regexes are mapped to. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
+        read_yaml_label_names: bool, default=False
+            Whether to read dictionary representing the label that regexes are mapped to from YAML. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
         ignore_missing_regex: bool, default=False
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
         """
@@ -100,8 +101,14 @@ class AutoPipeline(Pipeline):
             self.nnunet_info = None
         self.train_size = train_size
         self.random_state = random_state
-        self.label_names = label_names
+        self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
+
+        with open(pathlib.Path(self.input_directory, "roi_names.yaml").as_posix(), "r") as f:
+            try:
+                self.label_names = yaml.safe_load(f)
+            except yaml.YAMLError as exc:
+                print(exc)
 
         if self.train_size == 1.0:
             warnings.warn("Train size is 1, all data will be used for training")
@@ -115,8 +122,8 @@ class AutoPipeline(Pipeline):
         if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
         
-        if is_nnunet and (label_names is None or label_names == {}):
-            raise ValueError("label_names must be provided for nnunet")
+        if is_nnunet and (not read_yaml_label_names or self.label_names == {}):
+            raise ValueError("YAML label names must be provided for nnunet")
         
 
         if self.is_nnunet:
@@ -402,6 +409,7 @@ if __name__ == "__main__":
                             # is_nnunet=True,
                             train_size=0.5,
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
+                            read_yaml_label_names=True,  # "GTV.*",
                             ignore_missing_regex=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
