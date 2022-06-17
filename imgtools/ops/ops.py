@@ -142,10 +142,14 @@ class ImageCSVInput(BaseInput):
     """
     def __init__(self,
                  csv_path_or_dataframe: str,
-                 colnames: List[str] = [],
+                 colnames: List[str] = None,
                  id_column: Optional[str] = None,
                  expand_paths: bool = True,
-                 readers: List[LoaderFunction] = [read_image]):
+                 readers: List[LoaderFunction] = None): # no mutable defaults: https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+        if colnames is None:
+            colnames = []
+        if readers is None:
+            readers = [read_image]
         self.csv_path_or_dataframe = csv_path_or_dataframe
         self.colnames = colnames
         self.id_column = id_column
@@ -195,8 +199,12 @@ class ImageFileInput(BaseInput):
                  root_directory: str,
                  get_subject_id_from: str = "filename",
                  subdir_path: Optional[str] = None,
-                 exclude_paths: Optional[List[str]] =[],
-                 reader: LoaderFunction =read_image):
+                 exclude_paths: Optional[List[str]] = None, # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+                 reader: LoaderFunction = None):
+        if exclude_paths is None:
+            exclude_paths = []
+        if reader is None:
+            reader = read_image
         self.root_directory = root_directory
         self.get_subject_id_from = get_subject_id_from
         self.subdir_path = subdir_path
