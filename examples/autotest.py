@@ -9,10 +9,12 @@ import sys
 import warnings
 
 from argparse import ArgumentParser
+import yaml
 import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
+from imgtools.utils.nnunetutils import generate_dataset_json
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
@@ -45,7 +47,7 @@ class AutoPipeline(Pipeline):
                  is_nnunet=False,
                  train_size=1.0,
                  random_state=42,
-                 label_names=None,
+                 read_yaml_label_names=False,
                  ignore_missing_regex=False):
         """Initialize the pipeline.
 
@@ -77,8 +79,8 @@ class AutoPipeline(Pipeline):
             Proportion of the dataset to use for training, as a decimal
         random_state: int, default=42
             Random state for train_test_split
-        label_names: dict of str:str, default=None
-            Dictionary representing the label that regexes are mapped to. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
+        read_yaml_label_names: bool, default=False
+            Whether to read dictionary representing the label that regexes are mapped to from YAML. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
         ignore_missing_regex: bool, default=False
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
         """
@@ -100,8 +102,27 @@ class AutoPipeline(Pipeline):
             self.nnunet_info = None
         self.train_size = train_size
         self.random_state = random_state
-        self.label_names = label_names
+        self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
+
+        with open(pathlib.Path(self.input_directory, "roi_names.yaml").as_posix(), "r") as f:
+            try:
+                self.label_names = yaml.safe_load(f)
+            except yaml.YAMLError as exc:
+                print(exc)
+        
+        if not isinstance(self.label_names, dict):
+            raise ValueError("roi_names.yaml must parse as a dictionary")
+
+        for k, v in self.label_names.items():
+            if not isinstance(v, list) and not isinstance(v, str):
+                raise ValueError(f"Label values must be either a list of strings or a string. Got {v} for {k}")
+            elif isinstance(v, list):
+                for a in v:
+                    if not isinstance(a, str):
+                        raise ValueError(f"Label values must be either a list of strings or a string. Got {a} in list {v} for {k}")
+            elif not isinstance(k, str):
+                raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
         if self.train_size == 1.0:
             warnings.warn("Train size is 1, all data will be used for training")
@@ -115,8 +136,8 @@ class AutoPipeline(Pipeline):
         if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
         
-        if is_nnunet and (label_names is None or label_names == {}):
-            raise ValueError("label_names must be provided for nnunet")
+        if is_nnunet and (not read_yaml_label_names or self.label_names == {}):
+            raise ValueError("YAML label names must be provided for nnunet")
         
 
         if self.is_nnunet:
@@ -142,7 +163,7 @@ class AutoPipeline(Pipeline):
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
             os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
         
-        self.existing_roi_names = {}
+        self.existing_roi_names = {"background": 0}
 
 
     def process_one_subject(self, subject_id):
@@ -346,6 +367,16 @@ class AutoPipeline(Pipeline):
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         self.output_df.to_csv(self.output_df_path)
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
+        if self.is_nnunet:
+            imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
+            images_test_location = imagests_path if os.path.exists(imagests_path) else None
+            generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
+                                pathlib.Path(self.output_directory, "imagesTr").as_posix(),
+                                images_test_location,
+                                tuple(self.nnunet_info["modalities"].keys()),
+                                {v:k for k, v in self.existing_roi_names.items()},
+                                os.path.split(self.input_directory)[1])   
+
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -399,9 +430,10 @@ if __name__ == "__main__":
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            # is_nnunet=True,
+                            is_nnunet=True,
                             train_size=0.5,
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
+                            read_yaml_label_names=True,  # "GTV.*",
                             ignore_missing_regex=True)
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
