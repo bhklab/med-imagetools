@@ -24,6 +24,12 @@ def parser():
 
     parser.add_argument("--show_progress", action="store_true",
                         help="Whether to print progress to standard output.")
+
+    parser.add_argument("--warn_on_error", default=False, action="store_true",
+                        help="Whether to warn on error.")
+
+    parser.add_argument("--overwrite", default=False, action="store_true",
+                        help="Whether to write output files even if existing output files exist.")
     
     parser.add_argument("--nnunet", default=False, action="store_true",
                         help="Whether to make the output conform to nnunet requirements.")
