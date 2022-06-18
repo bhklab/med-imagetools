@@ -409,6 +409,7 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    print('initializing AutoPipeline...')
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
                             modalities=args.modalities,
@@ -424,11 +425,19 @@ def main():
                             read_yaml_label_names=args.read_yaml_label_names,
                             ignore_missing_regex=args.ignore_missing_regex)
 
-    print(f'starting Pipeline...')
+    print(f'starting AutoPipeline...')
     pipeline.run()
 
 
-    print(f'finished Pipeline!')
+    print('finished AutoPipeline!')
+    
+    """Print general summary info"""
+
+    """Print nnU-Net specific info here:
+    * dataset.json can be found at /path/to/dataset/json
+    * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
+    * 
+    """
 
 if __name__ == "__main__":
     main()
