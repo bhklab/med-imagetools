@@ -20,8 +20,6 @@ from ..modules import Scan
 from ..utils.crawl import *
 from ..utils.dicomutils import *
 
-
-
 def read_image(path):
     return sitk.ReadImage(path)
 
@@ -91,7 +89,7 @@ def read_dicom_auto(path, series=None):
     modality = meta.Modality
     all_modality_metadata = all_modalities_metadata(meta)
     if modality == 'CT' or modality == 'MR':
-        dicom_series = read_dicom_series(path,series, modality=modality)
+        dicom_series = read_dicom_series(path,series)#, modality=modality)
         if modality == 'CT':
             dicom_series.metadata.update(ct_metadata(meta))
             dicom_series.metadata.update(all_modality_metadata)
