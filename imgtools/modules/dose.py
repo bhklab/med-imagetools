@@ -1,4 +1,4 @@
-import os, pathlib
+import os, pathlib, glob
 import warnings
 import copy
 
@@ -15,6 +15,7 @@ T = TypeVar('T')
 def read_image(path):
     reader = sitk.ImageSeriesReader()
     dicom_names = reader.GetGDCMSeriesFileNames(path)
+    print(dicom_names)
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -37,12 +38,15 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
-        dose = read_image(path)[:,:,:,0]
-        # dose = sitk.ReadImage(glob.glob(path + "/*"))
+        dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
+
+        if len(dcms) < 2:
+            dose = sitk.ReadImage(dcms[0])
+        else:
+            dose = read_image(path)[:,:,:,0]
 
         #Get the metadata
-        dcm_path = pathlib.Path(path, os.listdir(path)[0]).as_posix()
-        df = dcmread(dcm_path)
+        df = dcmread(dcms[0])
 
         #Convert to SUV
         factor = float(df.DoseGridScaling)
@@ -59,7 +63,7 @@ class Dose(sitk.Image):
         Resamples the RTDOSE information so that it can be overlayed with CT scan. The beginning and end slices of the 
         resampled RTDOSE scan might be empty due to the interpolation
         '''
-        resampled_dose = sitk.Resample(self.img_dose, ct_scan, interpolator=sitk.sitkNearestNeighbor)
+        resampled_dose = sitk.Resample(self.img_dose, ct_scan)#, interpolator=sitk.sitkNearestNeighbor)
         return resampled_dose
 
     def show_overlay(self,
