@@ -107,11 +107,14 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
 
-        with open(pathlib.Path(self.input_directory, "roi_names.yaml").as_posix(), "r") as f:
-            try:
-                self.label_names = yaml.safe_load(f)
-            except yaml.YAMLError as exc:
-                print(exc)
+        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix()
+
+        if os.path.exists(roi_path):
+            with open(roi_path, "r") as f:
+                try:
+                    self.label_names = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    print(exc)
         
         if not isinstance(self.label_names, dict):
             raise ValueError("roi_names.yaml must parse as a dictionary")
@@ -421,6 +424,7 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    print('initializing AutoPipeline...')
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
                             modalities=args.modalities,
@@ -436,11 +440,18 @@ def main():
                             read_yaml_label_names=args.read_yaml_label_names,
                             ignore_missing_regex=args.ignore_missing_regex)
 
-    print(f'starting Pipeline...')
+    print(f'starting AutoPipeline...')
     pipeline.run()
 
 
-    print(f'finished Pipeline!')
+    print('finished AutoPipeline!')
+    
+    """Print general summary info"""
+
+    """Print nnU-Net specific info here:
+    * dataset.json can be found at /path/to/dataset/json
+    * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
+    """
 
 if __name__ == "__main__":
     main()

@@ -85,6 +85,34 @@ class StructureSet:
                     cur_label += 1
         return labels
 
+    def get_mask(self, reference_image, mask, label, idx, continuous):
+        size = reference_image.GetSize()[::-1]
+        physical_points = self.roi_points.get(label, np.array([]))
+        mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
+        for contour in mask_points:
+            try:
+                z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
+                if len(z) == 1:
+                    #f assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                    z = z[0]
+                    slice_mask = polygon2mask(size[1:], slice_points)
+                    mask[z, :, :, idx] += slice_mask
+            except: # rounding errors for points on the boundary
+                if z == mask.shape[0]:
+                    z -= 1
+                elif z == -1:
+                    z += 1
+                elif z > mask.shape[0] or z < -1:
+                    raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
+                
+                # if the contour spans only 1 z-slice 
+                if len(z) == 1:
+                    z = int(np.floor(z[0]))
+                    slice_mask = polygon2mask(size[1:], slice_points)
+                    mask[z, :, :, label] += slice_mask
+                else:
+                    raise ValueError("This contour is corrupted and spans across 2 or more slices.")
+
     def to_segmentation(self, reference_image: sitk.Image,
                         roi_names: Dict[str, str] = None,
                         force_missing: bool = False,
@@ -165,56 +193,59 @@ class StructureSet:
 
         # print(self.roi_points)
 
+        
+
         seg_roi_names = {}
-        # print(roi_names)
         if roi_names != {} and isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
-                    physical_points = self.roi_points.get(label, np.array([]))
-                    mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
-                    for contour in mask_points:
-                        z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                        if len(z) == 1:
-                            # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                            z = z[0]
-                            slice_mask = polygon2mask(size[1:-1], slice_points)
-                            mask[z, :, :, i] += slice_mask
+                    self.get_mask(reference_image, mask, label, i, continuous)
+                    # physical_points = self.roi_points.get(label, np.array([]))
+                    # mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
+                    # for contour in mask_points:
+                    #     z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
+                    #     if len(z) == 1:
+                    #         #f assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                    #         z = z[0]
+                    #         slice_mask = polygon2mask(size[1:-1], slice_points)
+                    #         mask[z, :, :, i] += slice_mask
                 seg_roi_names[name] = i
         else:
             for name, label in labels.items():
-                physical_points = self.roi_points.get(name, np.array([]))
-                # print(physical_points) #np.ndarray, 3d array with the physical locations (float coordinates)
-                if len(physical_points) == 0:
-                    continue # allow for missing labels, will return a blank slice
+                self.get_mask(reference_image, mask, name, label, continuous)
+                # physical_points = self.roi_points.get(name, np.array([]))
+                # # print(physical_points) #np.ndarray, 3d array with the physical locations (float coordinates)
+                # if len(physical_points) == 0:
+                #     continue # allow for missing labels, will return a blank slice
 
-                mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
-                # print(mask_points)
+                # mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
+                # # print(mask_points)
                 
-                # print(mask.shape, "asldkfjalsk")
-                for contour in mask_points:
-                    z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                    # rounding errors for points on the boundary
-                    # if z == mask.shape[0]:
-                    #     z -= 1
-                    # elif z == -1:
-                    #     z += 1
-                    # elif z > mask.shape[0] or z < -1:
-                    #     raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
+                # # print(mask.shape, "asldkfjalsk")
+                # for contour in mask_points:
+                #     z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
+                #     # rounding errors for points on the boundary
+                #     # if z == mask.shape[0]:
+                #     #     z -= 1
+                #     # elif z == -1:
+                #     #     z += 1
+                #     # elif z > mask.shape[0] or z < -1:
+                #     #     raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
                     
-                    # # if the contour spans only 1 z-slice 
-                    # if len(z) == 1:
-                    #     z = int(np.floor(z[0]))
-                    #     slice_mask = polygon2mask(size[1:-1], slice_points)
-                    #     mask[z, :, :, label] += slice_mask
-                    # else:
-                    #     raise ValueError("This contour is corrupted and spans across 2 or more slices.")
+                #     # # if the contour spans only 1 z-slice 
+                #     # if len(z) == 1:
+                #     #     z = int(np.floor(z[0]))
+                #     #     slice_mask = polygon2mask(size[1:-1], slice_points)
+                #     #     mask[z, :, :, label] += slice_mask
+                #     # else:
+                #     #     raise ValueError("This contour is corrupted and spans across 2 or more slices.")
 
-                    # This is the old version of z index parsing. Kept for backup
-                    if len(z) == 1:
-                        # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                        z = z[0]
-                        slice_mask = polygon2mask(size[1:-1], slice_points)
-                        mask[z, :, :, label] += slice_mask
+                #     # This is the old version of z index parsing. Kept for backup
+                #     if len(z) == 1:
+                #         # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                #         z = z[0]
+                #         slice_mask = polygon2mask(size[1:-1], slice_points)
+                #         mask[z, :, :, label] += slice_mask
             seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
         
