@@ -16,6 +16,8 @@ class DataGraph:
     3) edge_type:2 RTSTRUCT(key:ref_ct) -> CT(pair: series) 
     4) edge_type:3 RTSTRUCT(key:ref_ct) -> PT(pair: series) 
     5) edge_type:4 CT(key:study) -> PT(pair: study) 
+    6) edge_type:5 RTDOSE(key: ref_pl) -> RTPLAN(pair: instance)
+    7) edge_type:6 RTPLAN(key: ref_rs) -> RTSTRUCT(pair: series/instance)
 
     Once the edge table is formed, one can query on the graph to get the desired results. For uniformity, the supported query is list of modalities to consider
     For ex:
@@ -61,24 +63,26 @@ class DataGraph:
         df_filter.drop(columns=["reference_rs_y", "instance_uid_y"], inplace=True)
         df_filter.rename(columns={"reference_rs_x":"reference_rs", "instance_uid_x":"instance_uid"}, inplace=True)
         
-        #Remove entries with no RT dose reference, for extra check, such cases are mostprobably removed in the earlier step
+        #Remove entries with no RTDOSE reference, for extra check, such cases are mostprobably removed in the earlier step
         df_filter = df_filter.loc[~((df_filter["modality"] == "RTDOSE") & (df_filter["reference_ct"].isna()) & (df_filter["reference_rs"].isna()))]
 
         #Get all study ids
-        all_study= df_filter.study.unique()
+        # all_study = df_filter.study.unique()
         start = time.time()
 
         #Defining Master df to store all the Edge dataframes
-        self.df_master = []
+        # self.df_master = []
 
-        for i in tqdm(range(len(all_study))):
-            self._form_edge_study(df_filter, all_study, i)
+        # for i in tqdm(range(len(all_study))):
+            # self._form_edge_study(df_filter, all_study, i)
 
         # df_edge_patient = form_edge_study(df,all_study,i)
+        
+        self.df_edges = self._form_edges(self.df) #pd.concat(self.df_master, axis=0, ignore_index=True)
         end = time.time()
         print(f"\nTotal time taken: {end - start}")
 
-        self.df_edges = pd.concat(self.df_master, axis=0, ignore_index=True)
+
         self.df_edges.loc[self.df_edges.study_x.isna(),"study_x"] = self.df_edges.loc[self.df_edges.study_x.isna(), "study"]
         #dropping some columns
         self.df_edges.drop(columns=["study_y", "patient_ID_y", "series_description_y", "study_description_y", "study"],inplace=True)
@@ -122,22 +126,22 @@ class DataGraph:
         vis_path = pathlib.Path(os.path.dirname(self.edge_path),"datanet.html").as_posix()
         data_net.show(vis_path)
 
-    def _form_edge_study(self, df, all_study, study_id):
+    def _form_edges(self, df):
         '''
         For a given study id forms edge table
         '''
-        
-        df_study = df.loc[self.df["study"] == all_study[study_id]]
-        df_list = []
-        
-        #Bifurcating the dataframe
-        dose = df_study.loc[df_study["modality"] == "RTDOSE"]
-        struct = df_study.loc[df_study["modality"] == "RTSTRUCT"]
-        ct = df_study.loc[df_study["modality"] == "CT"]
-        mr = df_study.loc[df_study["modality"] == "MR"]
-        pet = df_study.loc[df_study["modality"] == "PT"]
 
-        edge_types = np.arange(5)
+        df_list = []
+
+        # Split into each modality
+        plan = df[df["modality"] == "RTPLAN"]
+        dose = df[df["modality"] == "RTDOSE"]
+        struct = df[df["modality"] == "RTSTRUCT"]
+        ct = df[df["modality"] == "CT"]
+        mr = df[df["modality"] == "MR"]
+        pet = df[df["modality"] == "PT"]
+
+        edge_types = np.arange(7)
         for edge in edge_types:
             if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
                 df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
@@ -157,9 +161,66 @@ class DataGraph:
             elif edge==3:  # FORMS RTSTRUCT->PET on ref_ct to series
                 df_combined = pd.merge(pet, struct, left_on="series", right_on="reference_ct")
 
-            else:           # FORMS PET->CT on study
+            elif edge==4:           # FORMS PET->CT on study
+                df_combined = pd.merge(ct, pet, left_on="study", right_on="study")
+
+            elif edge==5: 
+                df_combined = pd.merge(plan, dose, left_on="instance_uid", right_on="reference_pl")
+
+            else:
+                df_combined = pd.merge(struct, plan, left_on="instance_uid", right_on="reference_rs")
+
+            df_combined["edge_type"] = edge
+            df_list.append(df_combined)
+
+        df_edges = pd.concat(df_list, axis=0, ignore_index=True)
+        return df_edges
+
+    def _form_edge_study(self, df, all_study, study_id):
+        '''
+        For a given study id forms edge table
+        '''
+        
+        df_study = df.loc[self.df["study"] == all_study[study_id]]
+        df_list = []
+        
+        # Split into each modality
+        plan = df_study.loc[df_study["modality"] == "RTPLAN"]
+        dose = df_study.loc[df_study["modality"] == "RTDOSE"]
+        struct = df_study.loc[df_study["modality"] == "RTSTRUCT"]
+        ct = df_study.loc[df_study["modality"] == "CT"]
+        mr = df_study.loc[df_study["modality"] == "MR"]
+        pet = df_study.loc[df_study["modality"] == "PT"]
+
+        edge_types = np.arange(7)
+        for edge in edge_types:
+            if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
+                df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
+                df_comb2    = pd.merge(struct, dose, left_on="series", right_on="reference_rs")
+                df_combined = pd.concat([df_comb1, df_comb2])
+                #Cases where both series and instance_uid are the same for struct
+                df_combined = df_combined.drop_duplicates(subset=["instance_uid_x"])
+
+            elif edge==1:  # FORMS RTDOSE->CT 
+                df_combined = pd.merge(ct, dose, left_on="series", right_on="reference_ct")
+
+            elif edge==2:  # FORMS RTSTRUCT->CT on ref_ct to series
+                df_ct = pd.merge(ct, struct, left_on="series", right_on="reference_ct")
+                df_mr = pd.merge(mr, struct, left_on="series", right_on="reference_ct")
+                df_combined = pd.concat([df_ct, df_mr])
+
+            elif edge==3:  # FORMS RTSTRUCT->PET on ref_ct to series
+                df_combined = pd.merge(pet, struct, left_on="series", right_on="reference_ct")
+
+            elif edge==4:           # FORMS PET->CT on study
                 df_combined = pd.merge(ct, pet, left_on="study", right_on="study")
             
+            elif edge==5: 
+                df_combined = pd.merge(plan, dose, left_on="instance", right_on="reference_pl")
+            
+            else:
+                df_combined = pd.merge(struct, plan, left_on="instance", right_on="reference_rs")
+
             df_combined["edge_type"] = edge
             df_list.append(df_combined)
                 

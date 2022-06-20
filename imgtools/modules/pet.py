@@ -102,7 +102,7 @@ class PET(sitk.Image):
         Resamples the PET scan so that it can be overlayed with CT scan. The beginning and end slices of the 
         resampled PET scan might be empty due to the interpolation
         '''
-        resampled_pt = sitk.Resample(self.img_pet, ct_scan, interpolator=sitk.sitkNearestNeighbor)
+        resampled_pt = sitk.Resample(self.img_pet, ct_scan)#, interpolator=sitk.sitkNearestNeighbor) # commented interporator due to error
         return resampled_pt
 
     def show_overlay(self,
