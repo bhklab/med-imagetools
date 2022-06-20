@@ -5,6 +5,7 @@ examples/adsf.py
 data
 examples/data/tcia_n*
 scratch.ipynb
+tests/temp
 
 # macOS
 .DS_Store
