@@ -379,7 +379,7 @@ class AutoPipeline(Pipeline):
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
-                self.output_df[col] = self.output_df[col].apply(lambda x: x if isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
+                self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         self.output_df.to_csv(self.output_df_path)
