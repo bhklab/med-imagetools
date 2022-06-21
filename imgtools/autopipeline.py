@@ -404,10 +404,10 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            # Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            #         delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-            for subject_id in subject_ids:
-                self._process_wrapper(subject_id)
+            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            # for subject_id in subject_ids:
+            #     self._process_wrapper(subject_id)
             self.save_data()
 
 def main():
