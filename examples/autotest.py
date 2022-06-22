@@ -15,6 +15,7 @@ import SimpleITK as sitk
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
 from imgtools.utils.nnunetutils import generate_dataset_json
+from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
@@ -105,11 +106,14 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
 
-        with open(pathlib.Path(self.input_directory, "roi_names.yaml").as_posix(), "r") as f:
-            try:
-                self.label_names = yaml.safe_load(f)
-            except yaml.YAMLError as exc:
-                print(exc)
+        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix()
+
+        if os.path.exists(roi_path):
+            with open(roi_path, "r") as f:
+                try:
+                    self.label_names = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    print(exc)
         
         if not isinstance(self.label_names, dict):
             raise ValueError("roi_names.yaml must parse as a dictionary")
@@ -189,6 +193,7 @@ class AutoPipeline(Pipeline):
         subject_id : str
            The ID of subject to process
         """
+        # if we want overwriting or if we don't want it and the file doesn't exist, we can process
         if self.overwrite or (not self.overwrite and not (os.path.exists(pathlib.Path(self.output_directory, subject_id).as_posix()) or self.glob_checker_nnunet(subject_id))):
             #Check if the subject_id has already been processed
             if os.path.exists(pathlib.Path(self.output_directory,".temp",f'temp_{subject_id}.pkl').as_posix()):
