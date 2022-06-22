@@ -1,5 +1,4 @@
 from aifc import Error
-from distutils.log import warn
 import os, pathlib
 import shutil
 import glob
@@ -379,7 +378,7 @@ class AutoPipeline(Pipeline):
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
-                self.output_df[col] = self.output_df[col].apply(lambda x: x if isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
+                self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         self.output_df.to_csv(self.output_df_path)
@@ -412,7 +411,7 @@ class AutoPipeline(Pipeline):
             self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
         # not supported yet, since they cannot be pickled
-        if os.path.exists(self.output_df_path):
+        if os.path.exists(self.output_df_path) and not self.overwrite:
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
@@ -421,6 +420,11 @@ class AutoPipeline(Pipeline):
             # for subject_id in subject_ids:
             #     self._process_wrapper(subject_id)
             self.save_data()
+            all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+            all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
+            for e in all_patient_names:
+                if e not in patient_ids:
+                    warnings.warn(f"Patient {e} does not have proper DICOM references")
 
 def main():
     args = parser()
@@ -452,6 +456,13 @@ def main():
     * dataset.json can be found at /path/to/dataset/json
     * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
     """
+    print(f"Outputted data to {args.output_directory}")
+    csv_path = pathlib.Path(args.output_directory, "dataset.cav").as_posix()
+    print(f"Dataset info found at {csv_path}")
+    if args.nnunet:
+        json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
+        print(f"dataset.json for nnU-net can be found at {json_path}")
+        print("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
 
 if __name__ == "__main__":
     main()
