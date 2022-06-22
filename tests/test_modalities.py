@@ -35,7 +35,7 @@ def modalities_path():
     path["PT"] = pathlib.Path(qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600").as_posix()
     return path
 
-@pytest.mark.parametrize("modalities", ["RTDOSE"])#["CT", "RTSTRUCT", "RTDOSE", "PT"])
+@pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
 def test_modalities(modalities, modalities_path):
     path = modalities_path
     img = read_dicom_auto(path["CT"]).image
