@@ -415,6 +415,11 @@ class AutoPipeline(Pipeline):
             for subject_id in subject_ids:
                 self._process_wrapper(subject_id)
             self.save_data()
+            all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+            all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
+            for e in all_patient_names:
+                if e not in patient_ids:
+                    warnings.warn(f"Patient {e} does not have proper DICOM references")
 
 
 if __name__ == "__main__":
