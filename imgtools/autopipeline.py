@@ -106,11 +106,14 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
 
-        with open(pathlib.Path(self.input_directory, "roi_names.yaml").as_posix(), "r") as f:
-            try:
-                self.label_names = yaml.safe_load(f)
-            except yaml.YAMLError as exc:
-                print(exc)
+        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix()
+
+        if os.path.exists(roi_path):
+            with open(roi_path, "r") as f:
+                try:
+                    self.label_names = yaml.safe_load(f)
+                except yaml.YAMLError as exc:
+                    print(exc)
         
         if not isinstance(self.label_names, dict):
             raise ValueError("roi_names.yaml must parse as a dictionary")
@@ -190,6 +193,7 @@ class AutoPipeline(Pipeline):
         subject_id : str
            The ID of subject to process
         """
+        # if we want overwriting or if we don't want it and the file doesn't exist, we can process
         if self.overwrite or (not self.overwrite and not (os.path.exists(pathlib.Path(self.output_directory, subject_id).as_posix()) or self.glob_checker_nnunet(subject_id))):
             #Check if the subject_id has already been processed
             if os.path.exists(pathlib.Path(self.output_directory,".temp",f'temp_{subject_id}.pkl').as_posix()):
@@ -411,10 +415,10 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            # Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            #         delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-            for subject_id in subject_ids:
-                self._process_wrapper(subject_id)
+            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            # for subject_id in subject_ids:
+            #     self._process_wrapper(subject_id)
             self.save_data()
             all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
             all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
@@ -452,6 +456,13 @@ def main():
     * dataset.json can be found at /path/to/dataset/json
     * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
     """
+    print(f"Outputted data to {args.output_directory}")
+    csv_path = pathlib.Path(args.output_directory, "dataset.cav").as_posix()
+    print(f"Dataset info found at {csv_path}")
+    if args.nnunet:
+        json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
+        print(f"dataset.json for nnU-net can be found at {json_path}")
+        print("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
 
 if __name__ == "__main__":
     main()
