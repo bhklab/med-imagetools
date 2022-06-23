@@ -43,11 +43,6 @@ def dataset_path():
     json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()
     edge_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}_edges.csv").as_posix()
     yield quebec_path, output_path, crawl_path, edge_path
-    #Deleting all the temporary files
-    # os.remove(crawl_path)
-    # os.remove(json_path)
-    # os.remove(edge_path)
-    # shutil.rmtree(output_path)
 
 #Defining for test_dataset method in Test_components class
 def collate_fn(data):

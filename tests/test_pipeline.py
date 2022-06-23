@@ -58,11 +58,14 @@ def test_output(n_jobs, sample_input_output):
     pipeline = SimplePipelineTest(input_paths[0], output_paths[0], n_jobs)
     pipeline.run()
 
-    for input_file, output_file in zip(os.scandir(input_paths[0]), os.scandir(output_paths[0])):
-        assert os.path.exists(output_file.path)
-        test_output = sitk.GetArrayFromImage(sitk.ReadImage(output_file.path))
-        true_output = sitk.GetArrayFromImage(sitk.ReadImage(input_file.path))
+    input_dir, output_dir = input_paths[0], output_paths[0]
+
+    for input_file, output_file in zip(sorted(os.listdir(input_dir)), sorted(os.listdir(output_dir))):
+        assert os.path.exists(pathlib.Path(output_dir, output_file))
+        test_output = sitk.GetArrayFromImage(sitk.ReadImage(pathlib.Path(output_dir, output_file).as_posix()))
+        true_output = sitk.GetArrayFromImage(sitk.ReadImage(pathlib.Path(input_dir, input_file).as_posix()))
         assert np.allclose(test_output, true_output)
+        print('passed assert')
 
 
 class MultiInputPipelineTest(Pipeline):
@@ -97,6 +100,7 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
     input_paths, output_paths = sample_input_output
     # simulate partial missing data
     os.remove(pathlib.Path(input_paths[0], "test0.nrrd").as_posix())
+    print(input_paths, output_paths)
 
     pipeline = MultiInputPipelineTest(input_paths[0],
                                       input_paths[1],
@@ -109,6 +113,7 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
         assert len(w) == 1
         assert missing_strategy in str(w[-1].message)
 
+    print(os.listdir(input_paths[1]), os.listdir(output_paths[1]))
     if missing_strategy == "drop":
         assert all([
             not os.path.exists(pathlib.Path(output_paths[0], "test0.nrrd").as_posix()),
@@ -116,8 +121,8 @@ def test_missing_handling(n_jobs, missing_strategy, sample_input_output):
         ])
     else:
         assert all([
-            not os.path.exists(pathlib.Path(output_paths[0], "test0.nrrd").as_posix()),
-            os.path.exists(pathlib.Path(output_paths[1], "test0.nrrd").as_posix())
+            not os.path.exists(pathlib.Path(output_paths[0], "test0.nii.gz").as_posix()),
+            os.path.exists(pathlib.Path(output_paths[1], "test0.nii.gz").as_posix())
         ])
     
     
