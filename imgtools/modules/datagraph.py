@@ -335,7 +335,7 @@ class DataGraph:
         else:
             raise ValueError("Please enter the correct query")
         final_df.reset_index(drop=True, inplace=True)
-        final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]
+        final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
         #change relative paths to absolute paths
