@@ -49,7 +49,8 @@ class AutoPipeline(Pipeline):
                  train_size=1.0,
                  random_state=42,
                  read_yaml_label_names=False,
-                 ignore_missing_regex=False):
+                 ignore_missing_regex=False,
+                 roi_yaml_path=""):
         """Initialize the pipeline.
 
         Parameters
@@ -105,15 +106,17 @@ class AutoPipeline(Pipeline):
         self.random_state = random_state
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
-
-        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix()
-
-        if os.path.exists(roi_path):
-            with open(roi_path, "r") as f:
-                try:
-                    self.label_names = yaml.safe_load(f)
-                except yaml.YAMLError as exc:
-                    print(exc)
+        
+        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
+        if read_yaml_label_names:
+            if os.path.exists(roi_yaml_path):
+                with open(roi_path, "r") as f:
+                    try:
+                        self.label_names = yaml.safe_load(f)
+                    except yaml.YAMLError as exc:
+                        print(exc)
+            else:
+                raise FileNotFoundError(f"No file named roi_names.yaml found at {roi_path}. If you did not intend on creating ROI regexes, run the CLI without --read_yaml_label_names")
         
         if not isinstance(self.label_names, dict):
             raise ValueError("roi_names.yaml must parse as a dictionary")
@@ -442,7 +445,8 @@ def main():
                             train_size=args.train_size,
                             random_state=args.random_state,
                             read_yaml_label_names=args.read_yaml_label_names,
-                            ignore_missing_regex=args.ignore_missing_regex)
+                            ignore_missing_regex=args.ignore_missing_regex,
+                            roi_yaml_path=args.roi_yaml_path)
 
     print(f'starting AutoPipeline...')
     pipeline.run()
