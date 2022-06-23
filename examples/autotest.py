@@ -49,7 +49,8 @@ class AutoPipeline(Pipeline):
                  train_size=1.0,
                  random_state=42,
                  read_yaml_label_names=False,
-                 ignore_missing_regex=False):
+                 ignore_missing_regex=False,
+                 roi_yaml_path=""):
         """Initialize the pipeline.
 
         Parameters
@@ -105,15 +106,17 @@ class AutoPipeline(Pipeline):
         self.random_state = random_state
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
-
-        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix()
-
-        if os.path.exists(roi_path):
-            with open(roi_path, "r") as f:
-                try:
-                    self.label_names = yaml.safe_load(f)
-                except yaml.YAMLError as exc:
-                    print(exc)
+        
+        roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
+        if read_yaml_label_names:
+            if os.path.exists(roi_yaml_path):
+                with open(roi_path, "r") as f:
+                    try:
+                        self.label_names = yaml.safe_load(f)
+                    except yaml.YAMLError as exc:
+                        print(exc)
+            else:
+                raise FileNotFoundError(f"No file named roi_names.yaml found at {roi_path}. If you did not intend on creating ROI regexes, run the CLI without --read_yaml_label_names")
         
         if not isinstance(self.label_names, dict):
             raise ValueError("roi_names.yaml must parse as a dictionary")
@@ -415,10 +418,10 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            # Parallel(n_jobs=self.n_jobs, verbose=verbose)(
-            #         delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-            for subject_id in subject_ids:
-                self._process_wrapper(subject_id)
+            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+            # for subject_id in subject_ids:
+            #     self._process_wrapper(subject_id)
             self.save_data()
             all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
             all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
