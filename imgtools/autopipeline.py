@@ -85,6 +85,8 @@ class AutoPipeline(Pipeline):
             Whether to read dictionary representing the label that regexes are mapped to from YAML. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
         ignore_missing_regex: bool, default=False
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
+        roi_yaml_path: str, default=""
+            The path to the 
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -107,6 +109,9 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
         
+        if roi_yaml_path != "" and not read_yaml_label_names:
+            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_namesg")
+
         roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
         if read_yaml_label_names:
             if os.path.exists(roi_yaml_path):
