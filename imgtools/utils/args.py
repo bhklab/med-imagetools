@@ -13,7 +13,7 @@ def parser():
     parser.add_argument("--modalities", type=str, default="CT",
                         help="List of desired modalities. Type as string for ex: RTSTRUCT,CT,RTDOSE")
 
-    parser.add_argument("--visualize", type=bool, default=False,
+    parser.add_argument("--visualize", default=False, action="store_true",
                         help="Whether to visualize the data graph")
 
     parser.add_argument("--spacing", nargs=3, type=float, default=(1., 1., 0.),
