@@ -1,5 +1,6 @@
 # test scripts
 examples/adsf.py
+.idea
 
 #vscode files
 /.idea
