@@ -14,7 +14,7 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.utils.nnunetutils import generate_dataset_json
+from imgtools.utils.nnunet import generate_dataset_json
 from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
