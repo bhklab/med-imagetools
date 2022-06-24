@@ -1,6 +1,9 @@
 # test scripts
 examples/adsf.py
 
+#vscode files
+/.idea
+
 # data
 data
 examples/data/tcia_n*
