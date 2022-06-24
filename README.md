@@ -52,13 +52,17 @@ These google collab notebooks will introduce the main functionalities of med-ima
 Med-Imagetools takes two step approch to turn messy medical raw dataset to ML ready dataset.  
 1. ***Autopipeline***: Crawls the raw dataset, forms a network and performs graph query, based on the user defined modalities. The relevant DICOMS, get processed and saved as nrrds
     ```
-    python imgtools/autopipeline.py\
-     [INPUT DIRECTORY] \
-     [OUTPUT DIRECTORY] \
-     --modalities [str: CT,RTSTRUCT,PT] \
-     --spacing [Tuple: (int,int,int)]\
-     --n_jobs [int]\
-     --visualize [bool: True/False]\
+    autopipeline\
+      [INPUT DIRECTORY] \
+      [OUTPUT DIRECTORY] \
+      --modalities [str: CT,RTSTRUCT,PT] \
+      --spacing [Tuple: (int,int,int)]\
+      --n_jobs [int]\
+      --visualize [flag]\
+      --nnunet [flag]\
+      --train_size [float]\
+      --random_state [int]\
+      --roi_yaml_path [str]
     ```
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
     ```
