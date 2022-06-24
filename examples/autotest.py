@@ -85,6 +85,8 @@ class AutoPipeline(Pipeline):
             Whether to read dictionary representing the label that regexes are mapped to from YAML. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
         ignore_missing_regex: bool, default=False
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
+        roi_yaml_path: str, default=""
+            The path to the yaml file defining regexes
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -131,10 +133,10 @@ class AutoPipeline(Pipeline):
             elif not isinstance(k, str):
                 raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
-        if self.train_size == 1.0:
+        if self.train_size == 1.0 and is_nnunet:
             warnings.warn("Train size is 1, all data will be used for training")
         
-        if self.train_size == 0.0:
+        if self.train_size == 0.0 and is_nnunet:
             warnings.warn("Train size is 0, all data will be used for testing")
 
         if self.train_size != 1 and not self.is_nnunet:
@@ -206,7 +208,7 @@ class AutoPipeline(Pipeline):
             print("Processing:", subject_id)
 
             read_results = self.input(subject_id)
-            print(read_results)
+            # print(read_results)
 
             print(subject_id, " start")
             
@@ -449,16 +451,17 @@ if __name__ == "__main__":
     #                         overwrite=True,
     #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
 
-    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_testing/HNSCC",
-                            output_directory="C:/Users/qukev/BHKLAB/hnscc_testing_output",
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/larynx/radcure",
+                            output_directory="C:/Users/qukev/BHKLAB/larynx_output",
                             modalities="CT,RTSTRUCT",
                             visualize=False,
                             overwrite=True,
-                            is_nnunet=True,
-                            train_size=0.5,
+                            # is_nnunet=True,
+                            # train_size=0.5,
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
-                            read_yaml_label_names=True,  # "GTV.*",
-                            ignore_missing_regex=True)
+                            # read_yaml_label_names=True,  # "GTV.*",
+                            # ignore_missing_regex=True
+                            )
 
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
     #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
