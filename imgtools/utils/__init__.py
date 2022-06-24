@@ -3,4 +3,4 @@ from .arrayutils import *
 from .crawl import *
 from .dicomutils import *
 from .args import *
-from .nnunetutils import *
+from .nnunet import *
