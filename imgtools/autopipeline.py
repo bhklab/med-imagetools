@@ -86,7 +86,7 @@ class AutoPipeline(Pipeline):
         ignore_missing_regex: bool, default=False
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
         roi_yaml_path: str, default=""
-            The path to the 
+            The path to the yaml file defining regexes
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -136,10 +136,10 @@ class AutoPipeline(Pipeline):
             elif not isinstance(k, str):
                 raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
-        if self.train_size == 1.0:
+        if self.train_size == 1.0 and is_nnunet:
             warnings.warn("Train size is 1, all data will be used for training")
         
-        if self.train_size == 0.0:
+        if self.train_size == 0.0 and is_nnunet:
             warnings.warn("Train size is 0, all data will be used for testing")
 
         if self.train_size != 1 and not self.is_nnunet:
