@@ -83,40 +83,42 @@ def read_dicom_pet(path,series=None):
 def read_dicom_auto(path, series=None):
     if path is None:
         return None
-    # print(path, "asdlfkjqeroigjodfklsjg")
     dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
-    meta = dcmread(dcms[0])
-    modality = meta.Modality
-    all_modality_metadata = all_modalities_metadata(meta)
-    if modality == 'CT' or modality == 'MR':
-        dicom_series = read_dicom_series(path,series)#, modality=modality)
-        if modality == 'CT':
-            dicom_series.metadata.update(ct_metadata(meta))
-            dicom_series.metadata.update(all_modality_metadata)
+    for dcm in dcms:
+        meta = dcmread(dcm)
+        if meta.SeriesInstanceUID != series:
+            continue
+        modality = meta.Modality
+        all_modality_metadata = all_modalities_metadata(meta)
+        if modality == 'CT' or modality == 'MR':
+            dicom_series = read_dicom_series(path,series)#, modality=modality)
+            if modality == 'CT':
+                dicom_series.metadata.update(ct_metadata(meta))
+                dicom_series.metadata.update(all_modality_metadata)
+            else:
+                dicom_series.metadata.update(mr_metadata(meta))
+                dicom_series.metadata.update(all_modality_metadata)
+            return dicom_series
+        elif modality == 'PT':
+            pet = read_dicom_pet(path,series)
+            pet.metadata.update(pet_metadata(meta))
+            pet.metadata.update(all_modality_metadata)
+            return pet
+        elif modality == 'RTSTRUCT':
+            rtstruct = read_dicom_rtstruct(dcm)
+            rtstruct.metadata.update(rtstruct_metadata(meta))
+            rtstruct.metadata.update(all_modality_metadata)
+            return rtstruct
+        elif modality == 'RTDOSE':
+            rtdose = read_dicom_rtdose(path)
+            rtdose.metadata.update(all_modality_metadata)
+            return rtdose
         else:
-            dicom_series.metadata.update(mr_metadata(meta))
-            dicom_series.metadata.update(all_modality_metadata)
-        return dicom_series
-    elif modality == 'PT':
-        pet = read_dicom_pet(path,series)
-        pet.metadata.update(pet_metadata(meta))
-        pet.metadata.update(all_modality_metadata)
-        return pet
-    elif modality == 'RTSTRUCT':
-        rtstruct = read_dicom_rtstruct(dcms[0])
-        rtstruct.metadata.update(rtstruct_metadata(meta))
-        rtstruct.metadata.update(all_modality_metadata)
-        return rtstruct
-    elif modality == 'RTDOSE':
-        rtdose = read_dicom_rtdose(path)
-        rtdose.metadata.update(all_modality_metadata)
-        return rtdose
-    else:
-        if len(dcms)==1:
-            raise NotImplementedError
-        else:
-            print("There were no dicoms in this path.")
-            return None
+            if len(dcms)==1:
+                raise NotImplementedError
+            else:
+                print("There were no dicoms in this path.")
+                return None
 
 def read_segmentation(path):
     # TODO read seg.nrrd
