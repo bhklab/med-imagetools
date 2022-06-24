@@ -1,17 +1,16 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
-### Updated to v0.4! 
+![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
+![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
+![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
+![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
+
+### Latest Updates (v0.4) - June 24th, 2022
 New features include:
 * AutoPipeline CLI
 * nnU-Net compatibility mode (--nnunet)
 * Built-in train/test split for both normal/nnU-Net modes
 * Random seed for reproducible seeds
 * Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
-
-<!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and licence info here --->
-![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
-![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
-![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
-![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 
 Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
 
@@ -86,6 +85,7 @@ Thanks to the following people who have contributed to this project:
 
 * [@mkazmier](https://github.com/mkazmier)
 * [@skim2257](https://github.com/skim2257)
+* [@fishingguy456](https://github.com/fishingguy456)
 * [@Vishwesh4](https://github.com/Vishwesh4)
 * [@mnakano](https://github.com/mnakano)
 
