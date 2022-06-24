@@ -1,4 +1,11 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
+### Updated to v0.4! 
+New features include:
+* AutoPipeline CLI
+* nnU-Net compatibility mode (--nnunet)
+* Built-in train/test split for both normal/nnU-Net modes
+* Random seed for reproducible seeds
+* Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
 
 <!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and licence info here --->
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
@@ -38,16 +45,6 @@ pip install -e git+https://github.com/bhklab/med-imagetools.git
 ```
 This will install the package in editable mode, so that the installed package will update when the code is changed.
 
-## Demo
-These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
-#### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
-
-#### Tutorial 2: Machine Learning with med-imagetools and torchio
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
-
 ## Getting Started
 Med-Imagetools takes two step approch to turn messy medical raw dataset to ML ready dataset.  
 1. ***Autopipeline***: Crawls the raw dataset, forms a network and performs graph query, based on the user defined modalities. The relevant DICOMS, get processed and saved as nrrds
@@ -72,6 +69,16 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     data_set = tio.SubjectsDataset(subjects)
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
     ```
+
+## Demo (Incompatible with v0.4)
+These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
+#### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
+
+[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
+
+#### Tutorial 2: Machine Learning with med-imagetools and torchio
+
+[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
 
 ## Contributors
 
