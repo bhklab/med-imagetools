@@ -1,4 +1,4 @@
-import os
+import os, pathlib
 from argparse import ArgumentParser
 
 from imgtools.io import (ImageFileLoader, ImageFileWriter,
@@ -74,25 +74,25 @@ class RADCUREPipeline(Pipeline):
 
         # output ops
         self.image_output = ImageFileOutput(
-            os.path.join(self.output_directory, "images"), # where to save the processed images
+            pathlib.Path(self.output_directory, "images"), # where to save the processed image.as_posix()s
             filename_format="{subject_id}_image.nrrd",     # the filename template, {subject_id} will be replaced by each subject's ID at runtime
             create_dirs=True,                              # whether to create directories that don't exists already
             compress=True                                  # enable compression for NRRD format
         )
         self.mask_output = ImageFileOutput(
-            os.path.join(self.output_directory, "masks"),
+            pathlib.Path(self.output_directory, "masks").as_posix(),
             filename_format="{subject_id}_mask.nrrd",
             create_dirs=True,
             compress=True
         )
         self.dose_output = ImageFileOutput(
-            os.path.join(self.output_directory, "doses"),
+            pathlib.Path(self.output_directory, "doses").as_posix(),
             filename_format="{subject_id}_dose.nrrd",
             create_dirs=True,
             compress=True
         )
         self.petscan_output = ImageFileOutput(
-            os.path.join(self.output_directory, "petscan"),
+            pathlib.Path(self.output_directory, "petscan").as_posix(),
             filename_format="{subject_id}_petscan.nrrd",
             create_dirs=True,
             compress=True
@@ -113,7 +113,8 @@ class RADCUREPipeline(Pipeline):
            The ID of currently processed subject
         """
 
-        image = self.image_input(subject_id)
+        image = self.image_input(subject_id).image
+
         structure_set = self.structure_set_input(subject_id)
         dose_set = self.rtdose_input(subject_id)
         pet_set = self.petscan_input(subject_id)

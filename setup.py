@@ -8,8 +8,8 @@ with open("requirements.txt", "r") as fh:
     
 setup(
     name="med-imagetools",
-    version="0.2.3",
-    author="Michal Kazmierski, Sejin Kim, Vishwesh Ramanathan, Benjamin Haibe-Kains",
+    version="0.4",
+    author="Michal Kazmierski, Sejin Kim, Kevin Qu, Vishwesh Ramanathan, Benjamin Haibe-Kains",
     author_email="benjamin.haibe.kains@utoronto.ca",
     description="Transparent and reproducible image processing pipelines in Python.",
     long_description=long_description,
@@ -20,6 +20,7 @@ setup(
     extras_require={
         'debug': ['pyvis'],
     },
+    entry_points={'console_scripts': ['autopipeline = imgtools.autopipeline:main',]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

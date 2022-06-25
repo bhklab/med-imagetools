@@ -84,7 +84,7 @@ class ImageAutoInput(BaseInput):
         ####### CRAWLER ############
         # Checks if dataset has already been indexed
         # To be changed later
-        path_crawl = os.path.join(self.parent, f"imgtools_{self.dataset_name}.csv")
+        path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
         if not os.path.exists(path_crawl):
             print("Couldn't find the dataset index CSV. Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
@@ -94,14 +94,13 @@ class ImageAutoInput(BaseInput):
 
         ####### GRAPH ##########
         # Form the graph
-        edge_path = os.path.join(self.parent,f"imgtools_{self.dataset_name}_edges.csv")
+        edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
-        
         print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
@@ -110,8 +109,9 @@ class ImageAutoInput(BaseInput):
                                 colnames=self.column_names,
                                 seriesnames=self.series_names,
                                 id_column=None,
-                                expand_paths=True,
-                                readers=self.readers) 
+                                expand_paths=False,
+                                readers=self.readers)
+        
         super().__init__(loader)
 
 
@@ -141,10 +141,14 @@ class ImageCSVInput(BaseInput):
     """
     def __init__(self,
                  csv_path_or_dataframe: str,
-                 colnames: List[str] = [],
+                 colnames: List[str] = None,
                  id_column: Optional[str] = None,
                  expand_paths: bool = True,
-                 readers: List[LoaderFunction] = [read_image]):
+                 readers: List[LoaderFunction] = None): # no mutable defaults: https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+        if colnames is None:
+            colnames = []
+        if readers is None:
+            readers = [read_image]
         self.csv_path_or_dataframe = csv_path_or_dataframe
         self.colnames = colnames
         self.id_column = id_column
@@ -194,8 +198,12 @@ class ImageFileInput(BaseInput):
                  root_directory: str,
                  get_subject_id_from: str = "filename",
                  subdir_path: Optional[str] = None,
-                 exclude_paths: Optional[List[str]] =[],
-                 reader: LoaderFunction =read_image):
+                 exclude_paths: Optional[List[str]] = None, # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+                 reader: LoaderFunction = None):
+        if exclude_paths is None:
+            exclude_paths = []
+        if reader is None:
+            reader = read_image
         self.root_directory = root_directory
         self.get_subject_id_from = get_subject_id_from
         self.subdir_path = subdir_path
@@ -241,7 +249,7 @@ class ImageFileOutput(BaseOutput):
         self.create_dirs = create_dirs
         self.compress = compress
         
-        if "seg.nrrd" in filename_format:
+        if ".seg" in filename_format: #from .seg.nrrd bc it is now .nii.gz
             writer_class = SegNrrdWriter
         else:
             writer_class = ImageFileWriter
@@ -252,6 +260,58 @@ class ImageFileOutput(BaseOutput):
                               self.compress)
         
         super().__init__(writer)
+
+class MetadataOutput(BaseOutput):
+    """MetadataOutput class outputs the metadata of processed image files in .json format.
+
+    Parameters
+    ----------
+    root_directory: str
+        Root directory where the processed .json file will be stored.
+
+    filename_format: str, optional
+        The filename template.
+        Set to be {subject_id}.json as default.
+        {subject_id} will be replaced by each subject's ID at runtime.
+
+    create_dirs: bool, optional
+        Specify whether to create an output directory if it does not exit.
+        Set to be True as default.
+
+    """
+
+    def __init__(self,
+                 root_directory: str,
+                 filename_format: Optional[str] ="{subject_id}.json",
+                 create_dirs: Optional[bool] =True):
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        writer = MetadataWriter(self.root_directory, self.filename_format, self.create_dirs)
+        super().__init__(writer)
+
+
+# Resampling ops
+
+class ImageSubjectFileOutput(BaseOutput):
+
+    def __init__(self,
+                 root_directory: str,
+                 filename_format: Optional[str] ="{subject_id}.nii.gz",
+                 create_dirs: Optional[bool] =True,
+                 compress: Optional[bool] =True):
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+
+        writer = BaseSubjectWriter(self.root_directory,
+                              self.filename_format,
+                              self.create_dirs,
+                              self.compress)
+        
+        super().__init__(writer)
+
 
 class ImageAutoOutput:
     """
@@ -268,27 +328,32 @@ class ImageAutoOutput:
     """
     def __init__(self,
                  root_directory: str,
-                 output_streams: List[str]):
+                 output_streams: List[str],
+                 nnunet_info: Dict = None):
                  
-        # File types
-        self.file_name = file_name_convention()
-        print(self.file_name)
-
         self.output = {}
-        print(output_streams)
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
-            extension = self.file_name[colname_process]
-            self.output[colname_process] = ImageFileOutput(os.path.join(root_directory,extension.split(".")[0]),
-                                                           filename_format="{subject_id}_"+"{}.nrrd".format(extension))
+            colname_process = colname #temproary force #
+            if not nnunet_info:
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process.split(".")[0]).as_posix(),
+                                                                    filename_format="{}.nii.gz".format(colname_process))
+            else:
+                self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
+                                                                    filename_format="{subject_id}_{modality_index}.nii.gz")
     
     def __call__(self, 
                  subject_id: str,
                  img: sitk.Image,
-                 output_stream):
+                 output_stream,
+                 is_mask: bool = False,
+                 mask_label: Optional[str] = "",
+                 label_or_image: str="images",
+                 train_or_test: str="Tr",
+                 nnunet_info: Dict=None):
                  
-        self.output[output_stream](subject_id, img)
+        self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, train_or_test=train_or_test, nnunet_info=nnunet_info)
     
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
@@ -605,7 +670,7 @@ class Zoom(BaseOp):
 
 
 class Rotate(BaseOp):
-    """Rorate operation class: A callable class that rotates an image around a given centre.
+    """Rotate operation class: A callable class that rotates an image around a given centre.
 
     To instantiate:
         obj = Rotate(rotation_centre, angles, interpolation)
@@ -637,7 +702,7 @@ class Rotate(BaseOp):
         self.interpolation = interpolation
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Rorate callable object: Rotates an image around a given centre.
+        """Rotate callable object: Rotates an image around a given centre.
 
         Parameters
         ----------
@@ -657,10 +722,10 @@ class Rotate(BaseOp):
 
 
 class InPlaneRotate(BaseOp):
-    """InPlaneRorate operation class: A callable class that rotates an image on a plane.
+    """InPlaneRotate operation class: A callable class that rotates an image on a plane.
 
     To instantiate:
-        obj = InPlaneRorate(angle, interpolation)
+        obj = InPlaneRotate(angle, interpolation)
 
     To call:
         result = obj(image)
@@ -682,7 +747,7 @@ class InPlaneRotate(BaseOp):
         self.interpolation = interpolation
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """InPlaneRorate callable object: Rotates an image on a plane.
+        """InPlaneRotate callable object: Rotates an image on a plane.
 
         Parameters
         ----------
@@ -1363,7 +1428,7 @@ class StructureSetToSegmentation(BaseOp):
     """
 
     def __init__(self, 
-                 roi_names: Union[str,List[str]], 
+                 roi_names: Dict[str, str], 
                  force_missing: bool = False,
                  continuous: bool = True):
         """Initialize the op.
@@ -1406,7 +1471,7 @@ class StructureSetToSegmentation(BaseOp):
         self.force_missing = force_missing
         self.continuous = continuous
 
-    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image) -> Segmentation:
+    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image, existing_roi_names: Dict[str, int], ignore_missing_regex: bool) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1424,7 +1489,9 @@ class StructureSetToSegmentation(BaseOp):
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
                                              force_missing=self.force_missing,
-                                             continuous=self.continuous)
+                                             continuous=self.continuous,
+                                             existing_roi_names=existing_roi_names,
+                                             ignore_missing_regex=ignore_missing_regex)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:

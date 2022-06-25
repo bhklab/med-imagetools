@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-import os
+import os, pathlib
 import glob
 import json
 
@@ -13,7 +13,7 @@ def crawl_one(folder):
     database = {}
     for path, _, _ in os.walk(folder):
         # find dicoms
-        dicoms = glob.glob(os.path.join(path, "*.dcm"))
+        dicoms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
 
         # instance (slice) information
         for dcm in dicoms:
@@ -64,6 +64,8 @@ def crawl_one(folder):
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
+                    parent, _ = os.path.split(folder)
+                    rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
                     database[patient][study][series] = {'instances': [],
                                                         'instance_uid': instance,
                                                         'modality': meta.Modality,
@@ -72,7 +74,7 @@ def crawl_one(folder):
                                                         'reference_rs': reference_rs,
                                                         'reference_pl': reference_pl,
                                                         'reference_frame': reference_frame,
-                                                        'folder': path}
+                                                        'folder': rel_path}
                 database[patient][study][series]['instances'].append(instance)
             except:
                 pass
@@ -85,27 +87,21 @@ def to_df(database_dict):
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
                 if series != 'description':
-                    df = df.append({'patient_ID': pat,
-                                    'study': study,
-                                    'study_description': database_dict[pat][study]['description'],
-                                    'series': series,
-                                    'series_description': database_dict[pat][study][series]['description'],
-                                    'modality': database_dict[pat][study][series]['modality'],
-                                    'instances': len(database_dict[pat][study][series]['instances']),
-                                    'instance_uid': database_dict[pat][study][series]['instance_uid'],
-                                    'reference_ct': database_dict[pat][study][series]['reference_ct'],
-                                    'reference_rs': database_dict[pat][study][series]['reference_rs'],
-                                    'reference_pl': database_dict[pat][study][series]['reference_pl'],
-                                    'reference_frame': database_dict[pat][study][series]['reference_frame'],
-                                    'folder': database_dict[pat][study][series]['folder']}, ignore_index=True)
+                    columns = ['patient_ID', 'study', 'study_description', 'series', 'series_description', 'modality', 'instances', 'instance_uid', 'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
+                    values = [pat, study, database_dict[pat][study]['description'], series, database_dict[pat][study][series]['description'], database_dict[pat][study][series]['modality'], len(database_dict[pat][study][series]['instances']),
+                    database_dict[pat][study][series]['instance_uid'], database_dict[pat][study][series]['reference_ct'], database_dict[pat][study][series]['reference_rs'], database_dict[pat][study][series]['reference_pl'],
+                    database_dict[pat][study][series]['reference_frame'], database_dict[pat][study][series]['folder']]
+                    df_add = pd.DataFrame([values], columns=columns)
+                    df = pd.concat([df, df_add], ignore_index=True)
     return df
 
 def crawl(top, 
           n_jobs: int = -1):
+    #top is the input directory in the argument parser from autotest.py
     database_list = []
-    folders = glob.glob(os.path.join(top, "*"))
+    folders = glob.glob(pathlib.Path(top, "*").as_posix())
     
-    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(os.path.join(top, folder)) for folder in tqdm(folders))
+    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
 
     # convert list to dictionary
     database_dict = {}
@@ -115,14 +111,22 @@ def crawl(top,
     
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
+
+    parent_imgtools = pathlib.Path(parent, ".imgtools").as_posix()
+
+    if not os.path.exists(parent_imgtools):
+        try:
+            os.makedirs(parent_imgtools)
+        except:
+            pass
     
     # save as json
-    with open(os.path.join(parent, f'imgtools_{dataset}.json'), 'w') as f:
+    with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
     df = to_df(database_dict)
-    df_path = os.path.join(parent, f'imgtools_{dataset}.csv')
+    df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
     df.to_csv(df_path)
     
     return database_dict
