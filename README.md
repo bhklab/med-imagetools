@@ -4,7 +4,7 @@
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 
-### Latest Updates (v0.4) - June 24th, 2022
+### Latest Updates (v0.4.1) - June 24th, 2022
 New features include:
 * AutoPipeline CLI
 * nnU-Net compatibility mode (--nnunet)
