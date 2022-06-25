@@ -109,9 +109,6 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
         
-        if roi_yaml_path != "" and not read_yaml_label_names:
-            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_namesg")
-
         roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
         if read_yaml_label_names:
             if os.path.exists(roi_yaml_path):
@@ -211,7 +208,7 @@ class AutoPipeline(Pipeline):
             print("Processing:", subject_id)
 
             read_results = self.input(subject_id)
-            print(read_results)
+            # print(read_results)
 
             print(subject_id, " start")
             
@@ -434,46 +431,54 @@ class AutoPipeline(Pipeline):
                 if e not in patient_ids:
                     warnings.warn(f"Patient {e} does not have proper DICOM references")
 
-def main():
-    args = parser()
-    print('initializing AutoPipeline...')
-    pipeline = AutoPipeline(args.input_directory,
-                            args.output_directory,
-                            modalities=args.modalities,
-                            visualize=args.visualize,
-                            spacing=args.spacing,
-                            n_jobs=args.n_jobs,
-                            show_progress=args.show_progress,
-                            warn_on_error=args.warn_on_error,
-                            overwrite=args.overwrite,
-                            is_nnunet=args.nnunet,
-                            train_size=args.train_size,
-                            random_state=args.random_state,
-                            read_yaml_label_names=args.read_yaml_label_names,
-                            ignore_missing_regex=args.ignore_missing_regex,
-                            roi_yaml_path=args.roi_yaml_path)
 
-    print(f'starting AutoPipeline...')
+if __name__ == "__main__":
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True)
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/datasetshort/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutputshort",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True,
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True,
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"})
+
+    pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/larynx/radcure",
+                            output_directory="C:/Users/qukev/BHKLAB/larynx_output",
+                            modalities="CT,RTSTRUCT",
+                            visualize=False,
+                            overwrite=True,
+                            # is_nnunet=True,
+                            # train_size=0.5,
+                            # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
+                            # read_yaml_label_names=True,  # "GTV.*",
+                            # ignore_missing_regex=True
+                            )
+
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/dataset/manifest-1598890146597/NSCLC-Radiomics-Interobserver1",
+    #                         output_directory="C:/Users/qukev/BHKLAB/autopipelineoutput",
+    #                         modalities="CT,RTSTRUCT",
+    #                         visualize=False,
+    #                         overwrite=True,
+    #                         nnunet_info={"study name": "NSCLC-Radiomics-Interobserver1"},
+    #                         train_size=0.5)
+
+    # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/hnscc_pet/PET",
+    #                         output_directory="C:/Users/qukev/BHKLAB/hnscc_pet_output",
+    #                         modalities="CT,PT,RTDOSE",
+    #                         visualize=False,
+    #                         overwrite=True)
+
+    print(f'starting Pipeline...')
     pipeline.run()
 
 
-    print('finished AutoPipeline!')
-    
-    """Print general summary info"""
-
-    """Print nnU-Net specific info here:
-    * dataset.json can be found at /path/to/dataset/json
-    * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
-    """
-    print(f"Outputted data to {args.output_directory}")
-    csv_path = pathlib.Path(args.output_directory, "dataset.cav").as_posix()
-    print(f"Dataset info found at {csv_path}")
-    if args.nnunet:
-        json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
-        print(f"dataset.json for nnU-net can be found at {json_path}")
-        print("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
-
-if __name__ == "__main__":
-    main()
-
-    
+    print(f'finished Pipeline!')

@@ -1,11 +1,14 @@
-import os
+import os, pathlib
 import warnings
 import datetime
-from typing import Optional
+from typing import Optional, Dict, TypeVar
 import numpy as np
 from matplotlib import pyplot as plt
 import SimpleITK as sitk
 from pydicom import dcmread
+import copy
+
+T = TypeVar('T')
 
 def read_image(path:str,series_id: Optional[str]=None):
     reader = sitk.ImageSeriesReader()
@@ -17,12 +20,16 @@ def read_image(path:str,series_id: Optional[str]=None):
     return reader.Execute()
 
 class PET(sitk.Image):
-    def __init__(self, img_pet, df, factor, calc):
+    def __init__(self, img_pet, df, factor, calc, metadata: Optional[Dict[str, T]] = None):
         super().__init__(img_pet)
         self.img_pet = img_pet
         self.df = df
         self.factor = factor
         self.calc = calc
+        if metadata:
+            self.metadata = metadata
+        else:
+            self.metadata = {}
     
     @classmethod
     def from_dicom_pet(cls, path,series_id=None,type="SUV"):
@@ -39,7 +46,7 @@ class PET(sitk.Image):
         have some error.
         '''
         pet      = read_image(path,series_id)
-        path_one = os.path.join(path,os.listdir(path)[0])
+        path_one = pathlib.Path(path,os.listdir(path)[0]).as_posix()
         df       = dcmread(path_one)
         calc     = False
         try:
@@ -55,7 +62,10 @@ class PET(sitk.Image):
 
         #SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
-        return cls(img_pet, df, factor, calc)
+
+        metadata = {}
+        return cls(img_pet, df, factor, calc, metadata)
+        # return cls(img_pet, df, factor, calc)
         
     def get_metadata(self):
         '''
@@ -92,7 +102,7 @@ class PET(sitk.Image):
         Resamples the PET scan so that it can be overlayed with CT scan. The beginning and end slices of the 
         resampled PET scan might be empty due to the interpolation
         '''
-        resampled_pt = sitk.Resample(self.img_pet, ct_scan, interpolator=sitk.sitkNearestNeighbor)
+        resampled_pt = sitk.Resample(self.img_pet, ct_scan)#, interpolator=sitk.sitkNearestNeighbor) # commented interporator due to error
         return resampled_pt
 
     def show_overlay(self,

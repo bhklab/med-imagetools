@@ -1,4 +1,4 @@
-import os, time
+import os, time, pathlib
 from typing import List
 from functools import reduce
 import numpy as np
@@ -16,6 +16,8 @@ class DataGraph:
     3) edge_type:2 RTSTRUCT(key:ref_ct) -> CT(pair: series) 
     4) edge_type:3 RTSTRUCT(key:ref_ct) -> PT(pair: series) 
     5) edge_type:4 CT(key:study) -> PT(pair: study) 
+    6) edge_type:5 RTDOSE(key: ref_pl) -> RTPLAN(pair: instance)
+    7) edge_type:6 RTPLAN(key: ref_rs) -> RTSTRUCT(pair: series/instance)
 
     Once the edge table is formed, one can query on the graph to get the desired results. For uniformity, the supported query is list of modalities to consider
     For ex:
@@ -56,28 +58,31 @@ class DataGraph:
                              left_on="reference_pl", 
                              right_on="instance_uid", 
                              how="left")
+        
         df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_x"] = df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_y"].values
         df_filter.drop(columns=["reference_rs_y", "instance_uid_y"], inplace=True)
         df_filter.rename(columns={"reference_rs_x":"reference_rs", "instance_uid_x":"instance_uid"}, inplace=True)
         
-        #Remove entries with no RT dose reference, for extra check, such cases are mostprobably removed in the earlier step
+        #Remove entries with no RTDOSE reference, for extra check, such cases are mostprobably removed in the earlier step
         df_filter = df_filter.loc[~((df_filter["modality"] == "RTDOSE") & (df_filter["reference_ct"].isna()) & (df_filter["reference_rs"].isna()))]
 
         #Get all study ids
-        all_study= df_filter.study.unique()
+        # all_study = df_filter.study.unique()
         start = time.time()
 
         #Defining Master df to store all the Edge dataframes
-        self.df_master = []
+        # self.df_master = []
 
-        for i in tqdm(range(len(all_study))):
-            self._form_edge_study(df_filter, all_study, i)
+        # for i in tqdm(range(len(all_study))):
+            # self._form_edge_study(df_filter, all_study, i)
 
         # df_edge_patient = form_edge_study(df,all_study,i)
+        
+        self.df_edges = self._form_edges(self.df) #pd.concat(self.df_master, axis=0, ignore_index=True)
         end = time.time()
         print(f"\nTotal time taken: {end - start}")
 
-        self.df_edges = pd.concat(self.df_master, axis=0, ignore_index=True)
+
         self.df_edges.loc[self.df_edges.study_x.isna(),"study_x"] = self.df_edges.loc[self.df_edges.study_x.isna(), "study"]
         #dropping some columns
         self.df_edges.drop(columns=["study_y", "patient_ID_y", "series_description_y", "study_description_y", "study"],inplace=True)
@@ -95,7 +100,7 @@ class DataGraph:
 
         sources = self.df_edges["series_y"]
         targets = self.df_edges["series_x"]
-        name_src = self.df_edges["modality_y"]
+        name_src = self.df_edges["modality_y"] 
         name_tar = self.df_edges["modality_x"]
         patient_id = self.df_edges["patient_ID_x"]
         reference_ct = self.df_edges["reference_ct_y"]
@@ -118,25 +123,25 @@ class DataGraph:
             node["value"] = len(neigbour_map[node['id']])
 
 
-        vis_path = os.path.join(os.path.dirname(self.edge_path),"datanet.html")
+        vis_path = pathlib.Path(os.path.dirname(self.edge_path),"datanet.html").as_posix()
         data_net.show(vis_path)
 
-    def _form_edge_study(self, df, all_study, study_id):
+    def _form_edges(self, df):
         '''
         For a given study id forms edge table
         '''
-        
-        df_study = df.loc[self.df["study"] == all_study[study_id]]
-        df_list = []
-        
-        #Bifurcating the dataframe
-        dose = df_study.loc[df_study["modality"] == "RTDOSE"]
-        struct = df_study.loc[df_study["modality"] == "RTSTRUCT"]
-        ct = df_study.loc[df_study["modality"] == "CT"]
-        mr = df_study.loc[df_study["modality"] == "MR"]
-        pet = df_study.loc[df_study["modality"] == "PT"]
 
-        edge_types = np.arange(5)
+        df_list = []
+
+        # Split into each modality
+        plan = df[df["modality"] == "RTPLAN"]
+        dose = df[df["modality"] == "RTDOSE"]
+        struct = df[df["modality"] == "RTSTRUCT"]
+        ct = df[df["modality"] == "CT"]
+        mr = df[df["modality"] == "MR"]
+        pet = df[df["modality"] == "PT"]
+
+        edge_types = np.arange(7)
         for edge in edge_types:
             if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
                 df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
@@ -156,9 +161,66 @@ class DataGraph:
             elif edge==3:  # FORMS RTSTRUCT->PET on ref_ct to series
                 df_combined = pd.merge(pet, struct, left_on="series", right_on="reference_ct")
 
-            else:           # FORMS PET->CT on study
+            elif edge==4:           # FORMS PET->CT on study
+                df_combined = pd.merge(ct, pet, left_on="study", right_on="study")
+
+            elif edge==5: 
+                df_combined = pd.merge(plan, dose, left_on="instance_uid", right_on="reference_pl")
+
+            else:
+                df_combined = pd.merge(struct, plan, left_on="instance_uid", right_on="reference_rs")
+
+            df_combined["edge_type"] = edge
+            df_list.append(df_combined)
+
+        df_edges = pd.concat(df_list, axis=0, ignore_index=True)
+        return df_edges
+
+    def _form_edge_study(self, df, all_study, study_id):
+        '''
+        For a given study id forms edge table
+        '''
+        
+        df_study = df.loc[self.df["study"] == all_study[study_id]]
+        df_list = []
+        
+        # Split into each modality
+        plan = df_study.loc[df_study["modality"] == "RTPLAN"]
+        dose = df_study.loc[df_study["modality"] == "RTDOSE"]
+        struct = df_study.loc[df_study["modality"] == "RTSTRUCT"]
+        ct = df_study.loc[df_study["modality"] == "CT"]
+        mr = df_study.loc[df_study["modality"] == "MR"]
+        pet = df_study.loc[df_study["modality"] == "PT"]
+
+        edge_types = np.arange(7)
+        for edge in edge_types:
+            if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
+                df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
+                df_comb2    = pd.merge(struct, dose, left_on="series", right_on="reference_rs")
+                df_combined = pd.concat([df_comb1, df_comb2])
+                #Cases where both series and instance_uid are the same for struct
+                df_combined = df_combined.drop_duplicates(subset=["instance_uid_x"])
+
+            elif edge==1:  # FORMS RTDOSE->CT 
+                df_combined = pd.merge(ct, dose, left_on="series", right_on="reference_ct")
+
+            elif edge==2:  # FORMS RTSTRUCT->CT on ref_ct to series
+                df_ct = pd.merge(ct, struct, left_on="series", right_on="reference_ct")
+                df_mr = pd.merge(mr, struct, left_on="series", right_on="reference_ct")
+                df_combined = pd.concat([df_ct, df_mr])
+
+            elif edge==3:  # FORMS RTSTRUCT->PET on ref_ct to series
+                df_combined = pd.merge(pet, struct, left_on="series", right_on="reference_ct")
+
+            elif edge==4:           # FORMS PET->CT on study
                 df_combined = pd.merge(ct, pet, left_on="study", right_on="study")
             
+            elif edge==5: 
+                df_combined = pd.merge(plan, dose, left_on="instance", right_on="reference_pl")
+            
+            else:
+                df_combined = pd.merge(struct, plan, left_on="instance", right_on="reference_rs")
+
             df_combined["edge_type"] = edge
             df_list.append(df_combined)
                 
@@ -215,7 +277,7 @@ class DataGraph:
                 edge_type = edge_def[query_string_rev]
                 valid = query_string_rev
             else:
-                raise ValueError("Invalid Query. Select valid pairs.")            
+                raise ValueError("Invalid Query. Select valid pairs.")
             #For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
             if edge_type in [0, 1, 2]:
                 edge_list = [0, 1, 2]
@@ -227,7 +289,7 @@ class DataGraph:
                 elif edge_type==1:
                     #Search for subgraphs with edges 1 or (0 and 2)
                     regex_term = '((?=.*1)|((?=.*0)(?=.*2)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT") 
+                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT")
                 elif edge_type==2:
                     #Search for subgraphs with edges 2 or (1 and 0)
                     regex_term = '((?=.*2)|((?=.*0)(?=.*1)))'
@@ -273,9 +335,14 @@ class DataGraph:
         else:
             raise ValueError("Please enter the correct query")
         final_df.reset_index(drop=True, inplace=True)
-        final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"]
+        final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
+        #change relative paths to absolute paths
+        for col in final_df.columns:
+            if col.startswith("folder"):
+                # print(self.edge_path, os.path.dirname(self.edge_path))
+                final_df[col] = final_df[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(self.edge_path))[0], x).as_posix() if isinstance(x, str) else x) #input folder joined with the rel path
         return final_df
     
     def graph_query(self, 
@@ -315,7 +382,7 @@ class DataGraph:
         # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
         relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
         
-        # Based on the correct study ids, fetches are the relevant edges
+        # Based on the correct study ids, fetches the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
         
         # The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
@@ -327,18 +394,19 @@ class DataGraph:
             col_ids = [cols for cols in final_df.columns if change_df not in cols]
             final_df = final_df[col_ids]
         
-        if return_components:
-            return self.final_dict
-        else:
-            return final_df
+        # if return_components:
+        #     return self.final_dict
+        # else:
+        return final_df
 
     def _form_agg(self):
         '''
         Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
         '''
-        self.df_new = self.df_edges.groupby("study_x").agg({'edge_type':self.list_edges})
-        self.df_new.reset_index(level=0, inplace=True)
-        self.df_new["edge_type"] = self.df_new["edge_type"].astype(str)
+        self.df_edges['edge_type_str'] = self.df_edges['edge_type'].astype(str)
+        self.df_new = self.df_edges.groupby("study_x").agg({'edge_type_str':self.list_edges})
+        self.df_new.reset_index(level=0, inplace=True) 
+        self.df_new["edge_type"] = self.df_new["edge_type_str"]
 
     def _get_df(self,
                 df_edges_processed,
@@ -367,14 +435,46 @@ class DataGraph:
 
         remove_less_comp
             True for removing components with less number of edges than the query
+
+        Changelog
+        ---------
+        * June 14th, 2022: Changing from studyID-based to sample-based for loop
         '''
         #Storing all the components across all the studies
         self.final_dict = []
         final_df = []
         #For checking later if all the required modalities are present in a component or not
         mods_wanted = set(self.mods)
+
+        # per-sample
+        for i in range(len(df_edges_processed)):
+            row = df_edges_processed.iloc[i]
+            series   = row.series_x
+            modality = row.modality_x
+            folder   = row.folder_x
+            
+            series_y = row.series_y
+            modality_y = row.modality_y
+            folder_y = row.folder_y
+
+            temp = {"study": row.study_x,
+                    series: {"modality": modality,
+                             "folder": folder},
+                    row.series_y: {"modality": modality_y,
+                                   "folder": folder_y,
+                                   "conn_to": modality}}
+
+            folder_save = {'study': row.study_x,
+                           'patient_ID': row.patient_ID_x,
+                           f'series_{modality}': series,
+                           f'folder_{modality}': folder,
+                           f'series_{modality_y}': series_y,
+                           f'series_{modality_y}': folder_y}
+
+
+
         #Determine the number of components
-        for i in range(len(rel_studyids)):
+        for i in range(len(rel_studyids)): # per study_id
             df_temp = df_edges_processed.loc[df_edges_processed.study_x == rel_studyids[i]]
             CT_locs = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
             comp = CT_locs.series_x.unique()
@@ -398,14 +498,12 @@ class DataGraph:
                 folder_save[f"series_{df_connections['modality_x'].iloc[0]}"] = comp[j]
                 folder_save[f"folder_{df_connections['modality_x'].iloc[0]}"] = df_connections["folder_x"].iloc[0]
                 temp_dfconn = df_connections[["series_y", "modality_y", "folder_y"]]
+
                 for k in range(len(temp_dfconn)):
                     #This loop stores connection of the CT
-                    temp[temp_dfconn.iloc[k,0]] = {}
-                    temp[temp_dfconn.iloc[k,0]]["modality"] = temp_dfconn.iloc[k,1]
-                    temp[temp_dfconn.iloc[k,0]]["folder"] = temp_dfconn.iloc[k,2]
-                    temp[temp_dfconn.iloc[k,0]]["conn_to"] = temp[comp[j]]["modality"] #CT/MR
+                    temp[temp_dfconn.iloc[k,0]] = {"modality": temp_dfconn.iloc[k,1], "folder": temp_dfconn.iloc[k,2], "conn_to": temp[comp[j]]["modality"]}
                     #Checks if there is already existing connection
-                    key,key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],temp[comp[j]]["modality"]) #CT/MR
+                    key, key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],temp[comp[j]]["modality"]) #CT/MR
                     folder_save[key_series] = temp_dfconn.iloc[k,0]
                     folder_save[key] = temp_dfconn.iloc[k,2]
                 A.append(temp)
@@ -413,30 +511,26 @@ class DataGraph:
             
             #For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
             rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]
-            
             flag = 0
             for j in range(len(rest_locs)):
                 for k in range(len(comp)):
                     if rest_locs.iloc[j,0] in A[k]:
-                        A[k][rest_locs.iloc[j,3]] = {}
-                        A[k][rest_locs.iloc[j,3]]["modality"] = rest_locs.iloc[j,4]
-                        A[k][rest_locs.iloc[j,3]]["folder"] = rest_locs.iloc[j,5]
-                        A[k][rest_locs.iloc[j,3]]["conn_to"] = rest_locs.iloc[j,1]
+                        A[k][rest_locs.iloc[j,3]] = {"modality": rest_locs.iloc[j,4], "folder": rest_locs.iloc[j,5], "conn_to": rest_locs.iloc[j,1]}
                         if rest_locs.iloc[j,4]=="RTDOSE":
                             #RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4], "CT")
+                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4], "CT")
                             save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         else: #Cases such as RTSTRUCT-PT
                             #if there is already a connection and one more same category modality wants to connect
-                            key,key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
+                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
                             save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
                             save_folder_comp[k][key] = rest_locs.iloc[j,5]
                         flag = 0
                     else:
                         flag = 1
             if flag==1:
-                raise ValueError(f"In studyID: {rel_studyids[i]}, one of the edges had no match to any of the components which start from CT. Please check the data")
+                raise ValueError(f"In studyID: {rel_studyids[i]}, one of the edges had no match to any of the components which start from CT/MR. Please check the data")
 
             remove_index = []
             if remove_less_comp:
@@ -449,8 +543,9 @@ class DataGraph:
                 save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        
                 A = [A[idx] for idx in remove_index]    
 
-            self.final_dict = self.final_dict + A
-            final_df = final_df + save_folder_comp
+            self.final_dict.extend(A)
+            final_df.extend(save_folder_comp)
+        
         final_df = pd.DataFrame(final_df)
         return final_df
     
@@ -462,7 +557,7 @@ class DataGraph:
         while key in save_dict.keys():
             key = f"folder_{node}_{dest}_{i}"
             key_series = f"series_{node}_{dest}_{i}"
-            i+=1
+            i +=1
         return key,key_series
     
     @staticmethod
