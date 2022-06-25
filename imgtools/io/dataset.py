@@ -1,5 +1,5 @@
 from genericpath import exists
-import os
+import os, pathlib, ast
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 from tqdm import tqdm
 
@@ -29,7 +29,7 @@ class Dataset(tio.SubjectsDataset):
         self.path = path
     
     @classmethod
-    def load_from_nrrd(
+    def load_image(
             cls,
             path:str,
             ignore_multi: bool = True,
@@ -40,38 +40,43 @@ class Dataset(tio.SubjectsDataset):
             path: Path to the output directory passed to the autopipeline script. The output directory should have all the user mentioned modalities processed and present in their folder. The directory
                   should additionally have dataset.csv which stores all the metadata
         """
-        path_metadata = os.path.join(path,"dataset.csv")
+        path_metadata = pathlib.Path(path,"dataset.csv").as_posix()
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)
-        output_streams = [("_").join(cols.split("_")[1:]) for cols in df_metadata.columns if cols.split("_")[0] == "folder"]
+        
+        for col in df_metadata.columns:
+            if col.startswith("output_folder"):
+                df_metadata[col] = df_metadata[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(path))[0], x).as_posix() if isinstance(x, str) else x) #input folder joined with the rel path
+        
+        output_streams = [("_").join(cols.split("_")[2:]) for cols in df_metadata.columns if cols.split("_")[0] == "output"]
         imp_metadata = [cols for cols in df_metadata.columns if cols.split("_")[0] in ("metadata")]
         #Ignores multiple connection to single modality
         if ignore_multi:
             output_streams = [items for items in output_streams if items.split("_")[-1].isnumeric()==False]
             imp_metadata = [items for items in imp_metadata if items.split("_")[-1].isnumeric()==False]
+        
         #Based on the file naming convention
-        file_names = file_name_convention()
         subject_id_list = list(df_metadata.index)
         subjects = []
         for subject_id in tqdm(subject_id_list):
             temp = {}
             for col in output_streams:
-                mult_conn = col.split("_")[-1].isnumeric()
                 metadata_name = f"metadata_{col}"
-                if mult_conn:
-                    extra = col.split("_")[-1]+"_"
-                    extension = file_names[("_").join(col.split("_")[:-1])]
+                if 'RTSTRUCT' in col:
+                    filenames = ast.literal_eval(df_metadata.loc[subject_id]['metadata_RTSTRUCT_CT'])[0]
+                    filename = filenames[0]
                 else:
-                    extension = file_names[col]
-                    extra = ""
-                path_mod = os.path.join(path,extension.split(".")[0],f"{subject_id}_{extra}{extension}.nrrd")
-                #All modalities except RTSTRUCT should be of type torchIO.ScalarImage
+                    filename = col
+                path_mod = pathlib.Path(path, subject_id, col, f"{filename}.nii.gz").as_posix()
+                print(path_mod)
+                #All modalities except RTSTRUCT should be of type torchIO.ScalarImage 
                 if os.path.exists(path_mod):
                     if col.split("_")[0]!="RTSTRUCT":
                         temp[f"mod_{col}"] = tio.ScalarImage(path_mod)
                     else:
-                        temp[f"mod_{col}"] = tio.LabelMap(path_mod)
+                        path_mods = [pathlib.Path(path, subject_id, col, f"{filename}.nii.gz").as_posix() for filename in filenames]
+                        temp[f"mod_{col}"] = tio.LabelMap(path_mods)
                 else:
                     temp[f"mod_{col}"] = None
                 #For including metadata
@@ -84,7 +89,7 @@ class Dataset(tio.SubjectsDataset):
                         #torch dataloader doesnt accept None type
                         temp[metadata_name] = {}
             subjects.append(tio.Subject(temp))
-        return cls(subjects,path)
+        return cls(subjects, path)
 
     @classmethod
     def load_directly(

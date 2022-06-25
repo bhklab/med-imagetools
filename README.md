@@ -1,10 +1,16 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
-
-<!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and licence info here --->
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
 ![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
+
+### Latest Updates (v0.4) - June 24th, 2022
+New features include:
+* AutoPipeline CLI
+* nnU-Net compatibility mode (--nnunet)
+* Built-in train/test split for both normal/nnU-Net modes
+* Random seed for reproducible seeds
+* Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
 
 Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
 
@@ -38,27 +44,21 @@ pip install -e git+https://github.com/bhklab/med-imagetools.git
 ```
 This will install the package in editable mode, so that the installed package will update when the code is changed.
 
-## Demo
-These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
-#### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
-
-#### Tutorial 2: Machine Learning with med-imagetools and torchio
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
-
 ## Getting Started
 Med-Imagetools takes two step approch to turn messy medical raw dataset to ML ready dataset.  
 1. ***Autopipeline***: Crawls the raw dataset, forms a network and performs graph query, based on the user defined modalities. The relevant DICOMS, get processed and saved as nrrds
     ```
-    python imgtools/autopipeline.py\
-     [INPUT DIRECTORY] \
-     [OUTPUT DIRECTORY] \
-     --modalities [str: CT,RTSTRUCT,PT] \
-     --spacing [Tuple: (int,int,int)]\
-     --n_jobs [int]\
-     --visualize [bool: True/False]\
+    autopipeline\
+      [INPUT DIRECTORY] \
+      [OUTPUT DIRECTORY] \
+      --modalities [str: CT,RTSTRUCT,PT] \
+      --spacing [Tuple: (int,int,int)]\
+      --n_jobs [int]\
+      --visualize [flag]\
+      --nnunet [flag]\
+      --train_size [float]\
+      --random_state [int]\
+      --roi_yaml_path [str]
     ```
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
     ```
@@ -69,12 +69,23 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
     ```
 
+## Demo (Incompatible with v0.4)
+These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
+#### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
+
+[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
+
+#### Tutorial 2: Machine Learning with med-imagetools and torchio
+
+[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
+
 ## Contributors
 
 Thanks to the following people who have contributed to this project:
 
 * [@mkazmier](https://github.com/mkazmier)
 * [@skim2257](https://github.com/skim2257)
+* [@fishingguy456](https://github.com/fishingguy456)
 * [@Vishwesh4](https://github.com/Vishwesh4)
 * [@mnakano](https://github.com/mnakano)
 

@@ -1,10 +1,7 @@
-import os
+import os, pathlib
 from typing import Dict
 
 from pydicom.misc import is_dicom
-
-
-
 
 def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
     """Find DICOM file paths in the specified root directory file tree.
@@ -28,11 +25,11 @@ def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
     # TODO add some filtering options
     for root, _, files in os.walk(root_path):
         if yield_directories:
-            if any((is_dicom(os.path.join(root, f)) for f in files)):
+            if any((is_dicom(pathlib.Path(root, f).as_posix()) for f in files)):
                 yield root
         else:
             for f in files:
-                fpath = os.path.join(root, f)
+                fpath = pathlib.Path(root, f).as_posix()
                 if is_dicom(fpath):
                     yield fpath
 
@@ -43,11 +40,12 @@ def file_name_convention() -> Dict:
     file_name_convention = {"CT": "image",
                             "MR": "image",
                             "RTDOSE_CT": "dose", 
-                            "RTSTRUCT_CT": "mask_ct.seg", 
-                            "RTSTRUCT_MR": "mask_mr.seg", 
-                            "RTSTRUCT_PT": "mask_pt.seg", 
+                            "RTSTRUCT_CT": "mask_ct", 
+                            "RTSTRUCT_MR": "mask_mr", 
+                            "RTSTRUCT_PT": "mask_pt", 
                             "PT_CT": "pet", 
                             "PT": "pet", 
                             "RTDOSE": "dose", 
-                            "RTSTRUCT": "mask.seg"}
+                            "RTSTRUCT": "mask"}
+                            
     return file_name_convention

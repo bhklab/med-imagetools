@@ -1,7 +1,8 @@
-import os
+import os, pathlib
 import json
 import csv
 import pickle
+import shutil
 from datetime import datetime, timezone
 
 import h5py
@@ -35,7 +36,7 @@ class BaseWriter:
                                                    time=time,
                                                    date_time=date_time,
                                                    **kwargs)
-        out_path = os.path.join(self.root_directory, out_filename)
+        out_path = pathlib.Path(self.root_directory, out_filename).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
             os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
@@ -43,13 +44,50 @@ class BaseWriter:
         return out_path
 
 
+class BaseSubjectWriter(BaseWriter):
+    def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
+        super().__init__(root_directory, filename_format, create_dirs)
+        self.root_directory = root_directory
+        self.filename_format = filename_format
+        self.create_dirs = create_dirs
+        self.compress = compress
+        if os.path.exists(self.root_directory):
+            if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+                shutil.rmtree(os.path.dirname(self.root_directory))
+            elif "{label_or_image}{train_or_test}" in os.path.basename(self.root_directory):
+                shutil.rmtree(self.root_directory)
+           #delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
+
+
+    def put(self, subject_id, image, is_mask=False, nnunet_info=None, label_or_image: str = "images", mask_label="", train_or_test: str = "Tr", **kwargs):
+        if is_mask:
+            self.filename_format = mask_label+".nii.gz" #save the mask labels as their rtstruct names
+        if nnunet_info:
+            if label_or_image == "labels":
+                filename = f"{subject_id}.nii.gz" #naming convention for labels
+            else:
+                # f"{nnunet_info['study name']}_{nnunet_info['index']}_{nnunet_info['modalities'][nnunet_info['current_modality']]}.nii.gz"
+                filename = self.filename_format.format(subject_id=subject_id, modality_index=nnunet_info['modalities'][nnunet_info['current_modality']]) #naming convention for images
+            out_path = self._get_path_from_subject_id(filename, label_or_image=label_or_image, train_or_test=train_or_test)
+        else:
+            out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
+        sitk.WriteImage(image, out_path, self.compress)
+
+    def _get_path_from_subject_id(self, filename, **kwargs):
+        root_directory = self.root_directory.format(**kwargs) #replace the {} with the kwargs passed in from .put() (above)
+        out_path = pathlib.Path(root_directory, filename).as_posix()
+        out_dir = os.path.dirname(out_path)
+        if self.create_dirs and not os.path.exists(out_dir):
+            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+        return out_path
+
+
 class ImageFileWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.nrrd", create_dirs=True, compress=True):
+    def __init__(self, root_directory, filename_format="{subject_id}.nii.gz", create_dirs=True, compress=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.compress = compress
 
     def put(self, subject_id, image, **kwargs):
-        # TODO (Michal) add support for .seg.nrrd files
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         sitk.WriteImage(image, out_path, self.compress)
 
@@ -64,7 +102,7 @@ class SegNrrdWriter(BaseWriter):
 
     def put(self, subject_id, mask, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
-        labels = [k for k in mask.roi_names] 
+        labels = [k for k in mask.roi_names]
         print(labels)
 
         origin = mask.GetOrigin()
@@ -173,7 +211,7 @@ class MetadataWriter(BaseWriter):
             raise ValueError(f"File format {self.file_format} not supported. Supported formats: JSON (.json), CSV (.csv), Pickle (.pkl).")
 
         if self.file_format == "csv" and self.remove_existing:
-            out_path = os.path.join(self.root_directory, self.filename_format)
+            out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
             if os.path.exists(out_path):
                 os.remove(out_path) # remove existing CSV instead of appending
 
