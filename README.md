@@ -7,7 +7,7 @@
 ### Latest Updates (v0.4.1) - June 24th, 2022
 New features include:
 * AutoPipeline CLI
-* nnU-Net compatibility mode (--nnunet)
+* nnU-Net compatibility mode
 * Built-in train/test split for both normal/nnU-Net modes
 * Random seed for reproducible seeds
 * Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
