@@ -5,6 +5,9 @@ examples/adsf.py
 #vscode files
 /.idea
 
+#vscode files
+/.idea
+
 # data
 data
 examples/data/tcia_n*
