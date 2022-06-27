@@ -1,4 +1,4 @@
-name: master-tests
+name: main-ci
 
 on: 
   pull_request:
@@ -15,9 +15,10 @@ jobs:
           - macos-latest
           - windows-latest
         python-version: 
-          - 3.7
-          - 3.8
-          - 3.9
+          - '3.7'
+          - '3.8'
+          - '3.9'
+          - '3.10'
       
     steps:
     - uses: actions/checkout@v2
@@ -37,21 +38,4 @@ jobs:
     - name: Run pytest
       run: |
         pytest tests
-    - name: Build binary wheel and a source tarball
-      run: |
-        python setup.py install
-        python setup.py sdist bdist_wheel
-    - name: Build app (Windows)
-      if: success() && startsWith(matrix.os,'Windows')
-      env:
-        USERNAME: ${{ secrets.pypi_username }}
-        KEY: ${{ secrets.pypi_pw }}
-      run: |
-        python -m twine upload --skip-existing -u $env:USERNAME -p $env:KEY dist/*
-    - name: Build app (Ubuntu / macOS)
-      if: success() && startsWith(matrix.os, 'Windows') == false
-      env:
-        USERNAME: ${{ secrets.pypi_username }}
-        KEY: ${{ secrets.pypi_pw }}
-      run: | 
-        python -m twine upload --skip-existing -u $USERNAME -p $KEY dist/*
+

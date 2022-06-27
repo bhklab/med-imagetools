@@ -1,7 +1,6 @@
 name: publish-pypi
 
 on:
-  workflow_dispatch:
   workflow_run:
     workflows: [main-ci]
     types: [completed]
