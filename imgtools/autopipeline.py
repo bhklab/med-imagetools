@@ -4,6 +4,7 @@ import shutil
 import glob
 import pickle
 import struct
+from matplotlib.style import available
 import numpy as np
 import sys
 import warnings
@@ -14,7 +15,7 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.utils.nnunetutils import generate_dataset_json
+from imgtools.utils.nnunet import generate_dataset_json
 from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
@@ -96,6 +97,28 @@ class AutoPipeline(Pipeline):
         self.overwrite = overwrite
         # pipeline configuration
         self.input_directory = pathlib.Path(input_directory).as_posix()
+        study_name = os.path.split(self.input_directory[0])
+        if is_nnunet:
+            if not os.path.exists(pathlib.Path(self.input_directory, "nnUNet_preprocessed")):
+                os.makedirs(pathlib.Path(self.input_directory, "nnUNet_preprocessed"))
+            if not os.path.exists(pathlib.Path(self.input_directory, "nnUNet_trained_models")):
+                os.makedirs(pathlib.Path(self.input_directory, "nnUNet_trained_models"))
+            self.input_directory = pathlib.Path(self.input_directory, "nnUNet_raw_data_base",
+            "nnUNet_raw_data").as_posix()
+            if not os.path.exists(self.input_directory):
+                os.makedirs(self.input_directory)
+            all_nnunet_folders = glob.glob(pathlib.Path(self.input_directory, "*", " ").as_posix())
+            available_numbers = list(range(500, 1000))
+            for folder in all_nnunet_folders:
+                folder_name = os.path.split(os.path.split(folder)[0])
+                if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
+                    available_numbers.remove(int(folder_name[4:7]))
+            if len(available_numbers) == 0:
+                raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
+            task_folder_name = f"Task{available_numbers[0]}_{study_name}"
+            self.input_directory = pathlib.Path(self.input_directory, task_folder_name)
+            self.task_id = available_numbers[0]
+        
         self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
@@ -110,11 +133,11 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         
         if roi_yaml_path != "" and not read_yaml_label_names:
-            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_namesg")
+            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
 
         roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
         if read_yaml_label_names:
-            if os.path.exists(roi_yaml_path):
+            if os.path.exists(roi_path):
                 with open(roi_path, "r") as f:
                     try:
                         self.label_names = yaml.safe_load(f)
@@ -211,7 +234,7 @@ class AutoPipeline(Pipeline):
             print("Processing:", subject_id)
 
             read_results = self.input(subject_id)
-            print(read_results)
+            # print(read_results)
 
             print(subject_id, " start")
             
@@ -303,8 +326,23 @@ class AutoPipeline(Pipeline):
                     else:
                         raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                     
-                    if mask is None: #ignored the missing regex
-                        return
+                    if mask is None: #ignored the missing regex, and exit the loop
+                        if self.is_nnunet:
+                            image_test_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
+                            image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
+                            if os.path.exists(image_test_path):
+                                all_files = glob.glob(pathlib.Path(image_test_path, "*.nii.gz").as_posix())
+                                for file in all_files:
+                                    if subject_id in file:
+                                        os.remove(file)
+                            elif os.path.exists(image_train_path):
+                                all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
+                                for file in all_files:
+                                    if subject_id in file:
+                                        os.remove(file)
+                            return
+                        else:
+                            break
 
                     for name in mask.roi_names.keys():
                         if name not in self.existing_roi_names.keys():
@@ -316,7 +354,7 @@ class AutoPipeline(Pipeline):
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
-                        sparse_mask = mask.generate_sparse_mask().mask_array
+                        sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
