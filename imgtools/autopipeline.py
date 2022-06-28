@@ -110,11 +110,11 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         
         if roi_yaml_path != "" and not read_yaml_label_names:
-            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_namesg")
+            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
 
         roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
         if read_yaml_label_names:
-            if os.path.exists(roi_yaml_path):
+            if os.path.exists(roi_path):
                 with open(roi_path, "r") as f:
                     try:
                         self.label_names = yaml.safe_load(f)
@@ -316,7 +316,7 @@ class AutoPipeline(Pipeline):
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
-                        sparse_mask = mask.generate_sparse_mask().mask_array
+                        sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
