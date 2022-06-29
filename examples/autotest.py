@@ -112,7 +112,7 @@ class AutoPipeline(Pipeline):
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
             available_numbers = list(range(500, 1000))
             for folder in all_nnunet_folders:
-                folder_name = os.path.split(os.path.split(folder)[0])
+                folder_name = os.path.split(os.path.split(folder)[0])[1]
                 if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
                     available_numbers.remove(int(folder_name[4:7]))
             if len(available_numbers) == 0:
