@@ -442,8 +442,8 @@ class AutoPipeline(Pipeline):
                                 tuple(self.nnunet_info["modalities"].keys()),
                                 {v:k for k, v in self.existing_roi_names.items()},
                                 os.path.split(self.input_directory)[1])
-            parent, child = os.path.split(self.output_directory)
-            shell_path = pathlib.Path(parent, child.split("_")[1]+".sh").as_posix()
+            _, child = os.path.split(self.output_directory)
+            shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
             if os.path.exists(shell_path):
                 os.remove(shell_path)
             with open(shell_path, "w", newline="\n") as f:
