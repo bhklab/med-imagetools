@@ -96,18 +96,19 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
         self.overwrite = overwrite
         # pipeline configuration
-        self.input_directory = pathlib.Path(input_directory).as_posix()
-        study_name = os.path.split(self.input_directory[0])
+        self.input_directory = pathlib.Path(input_directory).as_posix()        
+        self.output_directory = pathlib.Path(output_directory).as_posix()
+        study_name = os.path.split(self.input_directory)[1]
         if is_nnunet:
-            if not os.path.exists(pathlib.Path(self.input_directory, "nnUNet_preprocessed")):
-                os.makedirs(pathlib.Path(self.input_directory, "nnUNet_preprocessed"))
-            if not os.path.exists(pathlib.Path(self.input_directory, "nnUNet_trained_models")):
-                os.makedirs(pathlib.Path(self.input_directory, "nnUNet_trained_models"))
-            self.input_directory = pathlib.Path(self.input_directory, "nnUNet_raw_data_base",
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed")):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed"))
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models")):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models"))
+            self.output_directory = pathlib.Path(self.output_directory, "nnUNet_raw_data_base",
             "nnUNet_raw_data").as_posix()
-            if not os.path.exists(self.input_directory):
-                os.makedirs(self.input_directory)
-            all_nnunet_folders = glob.glob(pathlib.Path(self.input_directory, "*", " ").as_posix())
+            if not os.path.exists(self.output_directory):
+                os.makedirs(self.output_directory)
+            all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
             available_numbers = list(range(500, 1000))
             for folder in all_nnunet_folders:
                 folder_name = os.path.split(os.path.split(folder)[0])
@@ -116,10 +117,8 @@ class AutoPipeline(Pipeline):
             if len(available_numbers) == 0:
                 raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
             task_folder_name = f"Task{available_numbers[0]}_{study_name}"
-            self.input_directory = pathlib.Path(self.input_directory, task_folder_name)
+            self.output_directory = pathlib.Path(self.output_directory, task_folder_name)
             self.task_id = available_numbers[0]
-        
-        self.output_directory = pathlib.Path(output_directory).as_posix()
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.is_nnunet = is_nnunet
