@@ -100,10 +100,11 @@ class AutoPipeline(Pipeline):
         self.output_directory = pathlib.Path(output_directory).as_posix()
         study_name = os.path.split(self.input_directory)[1]
         if is_nnunet:
-            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed")):
-                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed"))
-            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models")):
-                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models"))
+            self.base_output_directory = self.output_directory
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix()):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix())
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix()):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix())
             self.output_directory = pathlib.Path(self.output_directory, "nnUNet_raw_data_base",
             "nnUNet_raw_data").as_posix()
             if not os.path.exists(self.output_directory):
@@ -117,7 +118,7 @@ class AutoPipeline(Pipeline):
             if len(available_numbers) == 0:
                 raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
             task_folder_name = f"Task{available_numbers[0]}_{study_name}"
-            self.output_directory = pathlib.Path(self.output_directory, task_folder_name)
+            self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
             self.task_id = available_numbers[0]
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
@@ -241,7 +242,7 @@ class AutoPipeline(Pipeline):
             subject_modalities = set() # all the modalities that this subject has
             num_rtstructs = 0
 
-            for i, colname in enumerate(self.output_streams):
+            for i, colname in enumerate(sorted(self.output_streams)): #CT comes before MR before PT before RTDOSE before RTSTRUCT
                 modality = colname.split("_")[0]
                 subject_modalities.add(modality) #set add
                 
@@ -426,9 +427,11 @@ class AutoPipeline(Pipeline):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        self.output_df.to_csv(self.output_df_path)
+        self.output_df.to_csv(self.output_df_path) #dataset.csv
+
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
-        if self.is_nnunet:
+
+        if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
@@ -436,7 +439,22 @@ class AutoPipeline(Pipeline):
                                 images_test_location,
                                 tuple(self.nnunet_info["modalities"].keys()),
                                 {v:k for k, v in self.existing_roi_names.items()},
-                                os.path.split(self.input_directory)[1])   
+                                os.path.split(self.input_directory)[1])
+            parent, child = os.path.split(self.output_directory)
+            shell_path = pathlib.Path(parent, child.split("_")[1]+".sh").as_posix()
+            if os.path.exists(shell_path):
+                os.remove(shell_path)
+            with open(shell_path, "w", newline="\n") as f:
+                output = "#!/bin/bash\n"
+                output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
+                output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
+                output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
+                output += f'nnUNet_plan_and_preprocess -t {self.task_id} --verify_dataset_integrity\n\n'
+                output += 'for (( i=0; i<5; i++ ))\n'
+                output += 'do\n'
+                output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
+                output += 'done'
+                f.write(output)
 
 
     def run(self):
