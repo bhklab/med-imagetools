@@ -448,6 +448,7 @@ class AutoPipeline(Pipeline):
                 os.remove(shell_path)
             with open(shell_path, "w", newline="\n") as f:
                 output = "#!/bin/bash\n"
+                output += "set -e"
                 output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
                 output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
                 output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
