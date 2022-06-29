@@ -241,7 +241,7 @@ class AutoPipeline(Pipeline):
             subject_modalities = set() # all the modalities that this subject has
             num_rtstructs = 0
 
-            for i, colname in enumerate(self.output_streams):
+            for i, colname in enumerate(sorted(self.output_streams)): #CT comes before MR before PT before RTDOSE before RTSTRUCT
                 modality = colname.split("_")[0]
                 subject_modalities.add(modality) #set add
                 
