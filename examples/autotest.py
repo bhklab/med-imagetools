@@ -356,6 +356,7 @@ class AutoPipeline(Pipeline):
                     if self.is_nnunet:
                         sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
+                        sparse_mask.CopyInformation(image)
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
                         else:
@@ -420,7 +421,8 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
-            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
+            # np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):

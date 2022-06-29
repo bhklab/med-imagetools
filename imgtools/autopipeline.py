@@ -356,6 +356,7 @@ class AutoPipeline(Pipeline):
                     if self.is_nnunet:
                         sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
+                        sparse_mask.CopyInformation(image)
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
                         else:
