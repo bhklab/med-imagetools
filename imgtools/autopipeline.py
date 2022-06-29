@@ -421,6 +421,7 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
+            np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
         folder_renames = {}
         for col in self.output_df.columns:
