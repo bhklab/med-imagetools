@@ -332,13 +332,15 @@ class AutoPipeline(Pipeline):
                             image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
                             if os.path.exists(image_test_path):
                                 all_files = glob.glob(pathlib.Path(image_test_path, "*.nii.gz").as_posix())
+                                print(all_files)
                                 for file in all_files:
-                                    if subject_id in file:
+                                    if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
-                            elif os.path.exists(image_train_path):
+                            if os.path.exists(image_train_path):
                                 all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
+                                print(all_files)
                                 for file in all_files:
-                                    if subject_id in file:
+                                    if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
                             return
                         else:
@@ -521,7 +523,7 @@ if __name__ == "__main__":
                             train_size=0.5,
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
                             read_yaml_label_names=True,  # "GTV.*",
-                            # ignore_missing_regex=True
+                            ignore_missing_regex=True
                             )
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/larynx/radcure",
     #                         output_directory="C:/Users/qukev/BHKLAB/larynx_output",

@@ -177,7 +177,11 @@ class StructureSet:
         if isinstance(roi_names, list):
             labels = self._assign_labels(roi_names, force_missing)
         print("labels:", labels)
-        if not labels:
+        all_empty = True
+        for v in labels.values():
+            if v != []:
+                all_empty = False
+        if all_empty:
             if not ignore_missing_regex:
                 raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
             else:

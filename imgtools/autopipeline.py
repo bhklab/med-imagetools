@@ -332,13 +332,15 @@ class AutoPipeline(Pipeline):
                             image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
                             if os.path.exists(image_test_path):
                                 all_files = glob.glob(pathlib.Path(image_test_path, "*.nii.gz").as_posix())
+                                print(all_files)
                                 for file in all_files:
-                                    if subject_id in file:
+                                    if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
-                            elif os.path.exists(image_train_path):
+                            if os.path.exists(image_train_path):
                                 all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
+                                print(all_files)
                                 for file in all_files:
-                                    if subject_id in file:
+                                    if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
                             return
                         else:
@@ -422,7 +424,7 @@ class AutoPipeline(Pipeline):
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
-            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
+            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
