@@ -332,24 +332,26 @@ class AutoPipeline(Pipeline):
                             image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
                             if os.path.exists(image_test_path):
                                 all_files = glob.glob(pathlib.Path(image_test_path, "*.nii.gz").as_posix())
-                                print(all_files)
+                                # print(all_files)
                                 for file in all_files:
                                     if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
                             if os.path.exists(image_train_path):
                                 all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
-                                print(all_files)
+                                # print(all_files)
                                 for file in all_files:
                                     if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
+                            warnings.warn(f"Patient {subject_id} is missing a complete image-label pair")
                             return
                         else:
                             break
-
+                    
                     for name in mask.roi_names.keys():
                         if name not in self.existing_roi_names.keys():
                             self.existing_roi_names[name] = len(self.existing_roi_names)
                     mask.existing_roi_names = self.existing_roi_names
+                    # print(self.existing_roi_names,"alskdfj")
 
                     # save output
                     print(mask.GetSize())
@@ -438,6 +440,7 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
+            # print(self.existing_roi_names)
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
                                 pathlib.Path(self.output_directory, "imagesTr").as_posix(),
                                 images_test_location,
@@ -474,7 +477,10 @@ class AutoPipeline(Pipeline):
             if subject_id.split("_")[1::] not in patient_ids:
                 patient_ids.append("_".join(subject_id.split("_")[1::]))
         if self.is_nnunet:
-            self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
+            if self.train_size == 1 and len(patient_ids) == 1:
+                self.train = patient_ids[0]
+            else:
+                self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
         else:
             self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
@@ -488,11 +494,12 @@ class AutoPipeline(Pipeline):
             # for subject_id in subject_ids:
             #     self._process_wrapper(subject_id)
             self.save_data()
-            all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
-            all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
-            for e in all_patient_names:
-                if e not in patient_ids:
-                    warnings.warn(f"Patient {e} does not have proper DICOM references")
+            if not self.is_nnunet:
+                all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+                all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
+                for e in all_patient_names:
+                    if e not in patient_ids:
+                        warnings.warn(f"Patient {e} does not have proper DICOM references")
 
 def main():
     args = parser()
