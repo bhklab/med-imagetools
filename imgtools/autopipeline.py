@@ -199,6 +199,7 @@ class AutoPipeline(Pipeline):
             os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
         
         self.existing_roi_names = {"background": 0}
+        # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
 
     def glob_checker_nnunet(self, subject_id):
         folder_names = ["imagesTr", "labelsTr", "imagesTs", "labelsTs"]
@@ -477,8 +478,9 @@ class AutoPipeline(Pipeline):
             if subject_id.split("_")[1::] not in patient_ids:
                 patient_ids.append("_".join(subject_id.split("_")[1::]))
         if self.is_nnunet:
-            if self.train_size == 1 and len(patient_ids) == 1:
-                self.train = patient_ids[0]
+            if self.train_size == 1:
+                self.train = patient_ids
+                self.test = []
             else:
                 self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
         else:
@@ -489,7 +491,7 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+            Parallel(n_jobs=self.n_jobs, verbose=verbose, require='sharedmem')(
                     delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             # for subject_id in subject_ids:
             #     self._process_wrapper(subject_id)
