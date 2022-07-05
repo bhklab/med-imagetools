@@ -482,7 +482,7 @@ class AutoPipeline(Pipeline):
                 self.train = patient_ids
                 self.test = []
             else:
-                self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
+                self.train, self.test = train_test_split(sorted(patient_ids), train_size=self.train_size, random_state=self.random_state)
         else:
             self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
