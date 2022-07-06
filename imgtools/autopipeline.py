@@ -4,6 +4,7 @@ import shutil
 import glob
 import pickle
 import struct
+from matplotlib.style import available
 import numpy as np
 import sys
 import warnings
@@ -95,8 +96,30 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
         self.overwrite = overwrite
         # pipeline configuration
-        self.input_directory = pathlib.Path(input_directory).as_posix()
+        self.input_directory = pathlib.Path(input_directory).as_posix()        
         self.output_directory = pathlib.Path(output_directory).as_posix()
+        study_name = os.path.split(self.input_directory)[1]
+        if is_nnunet:
+            self.base_output_directory = self.output_directory
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix()):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix())
+            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix()):
+                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix())
+            self.output_directory = pathlib.Path(self.output_directory, "nnUNet_raw_data_base",
+            "nnUNet_raw_data").as_posix()
+            if not os.path.exists(self.output_directory):
+                os.makedirs(self.output_directory)
+            all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
+            available_numbers = list(range(500, 1000))
+            for folder in all_nnunet_folders:
+                folder_name = os.path.split(os.path.split(folder)[0])[1]
+                if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
+                    available_numbers.remove(int(folder_name[4:7]))
+            if len(available_numbers) == 0:
+                raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
+            task_folder_name = f"Task{available_numbers[0]}_{study_name}"
+            self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
+            self.task_id = available_numbers[0]
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.is_nnunet = is_nnunet
@@ -110,11 +133,11 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         
         if roi_yaml_path != "" and not read_yaml_label_names:
-            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_namesg")
+            warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
 
         roi_path = pathlib.Path(self.input_directory, "roi_names.yaml").as_posix() if roi_yaml_path == "" else roi_yaml_path
         if read_yaml_label_names:
-            if os.path.exists(roi_yaml_path):
+            if os.path.exists(roi_path):
                 with open(roi_path, "r") as f:
                     try:
                         self.label_names = yaml.safe_load(f)
@@ -176,6 +199,7 @@ class AutoPipeline(Pipeline):
             os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
         
         self.existing_roi_names = {"background": 0}
+        # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
 
     def glob_checker_nnunet(self, subject_id):
         folder_names = ["imagesTr", "labelsTr", "imagesTs", "labelsTs"]
@@ -211,7 +235,7 @@ class AutoPipeline(Pipeline):
             print("Processing:", subject_id)
 
             read_results = self.input(subject_id)
-            print(read_results)
+            # print(read_results)
 
             print(subject_id, " start")
             
@@ -219,7 +243,7 @@ class AutoPipeline(Pipeline):
             subject_modalities = set() # all the modalities that this subject has
             num_rtstructs = 0
 
-            for i, colname in enumerate(self.output_streams):
+            for i, colname in enumerate(sorted(self.output_streams)): #CT comes before MR before PT before RTDOSE before RTSTRUCT
                 modality = colname.split("_")[0]
                 subject_modalities.add(modality) #set add
                 
@@ -303,21 +327,41 @@ class AutoPipeline(Pipeline):
                     else:
                         raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                     
-                    if mask is None: #ignored the missing regex
-                        return
-
+                    if mask is None: #ignored the missing regex, and exit the loop
+                        if self.is_nnunet:
+                            image_test_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
+                            image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
+                            if os.path.exists(image_test_path):
+                                all_files = glob.glob(pathlib.Path(image_test_path, "*.nii.gz").as_posix())
+                                # print(all_files)
+                                for file in all_files:
+                                    if subject_id in os.path.split(file)[1]:
+                                        os.remove(file)
+                            if os.path.exists(image_train_path):
+                                all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
+                                # print(all_files)
+                                for file in all_files:
+                                    if subject_id in os.path.split(file)[1]:
+                                        os.remove(file)
+                            warnings.warn(f"Patient {subject_id} is missing a complete image-label pair")
+                            return
+                        else:
+                            break
+                    
                     for name in mask.roi_names.keys():
                         if name not in self.existing_roi_names.keys():
                             self.existing_roi_names[name] = len(self.existing_roi_names)
                     mask.existing_roi_names = self.existing_roi_names
+                    # print(self.existing_roi_names,"alskdfj")
 
                     # save output
                     print(mask.GetSize())
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
-                        sparse_mask = mask.generate_sparse_mask().mask_array
+                        sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
+                        sparse_mask.CopyInformation(image)
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
                         else:
@@ -382,24 +426,44 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
-            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())
+            np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        self.output_df.to_csv(self.output_df_path)
+        self.output_df.to_csv(self.output_df_path) #dataset.csv
+
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
-        if self.is_nnunet:
+
+        if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
+            # print(self.existing_roi_names)
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
                                 pathlib.Path(self.output_directory, "imagesTr").as_posix(),
                                 images_test_location,
                                 tuple(self.nnunet_info["modalities"].keys()),
                                 {v:k for k, v in self.existing_roi_names.items()},
-                                os.path.split(self.input_directory)[1])   
+                                os.path.split(self.input_directory)[1])
+            _, child = os.path.split(self.output_directory)
+            shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
+            if os.path.exists(shell_path):
+                os.remove(shell_path)
+            with open(shell_path, "w", newline="\n") as f:
+                output = "#!/bin/bash\n"
+                output += "set -e"
+                output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
+                output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
+                output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
+                output += f'nnUNet_plan_and_preprocess -t {self.task_id} --verify_dataset_integrity\n\n'
+                output += 'for (( i=0; i<5; i++ ))\n'
+                output += 'do\n'
+                output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
+                output += 'done'
+                f.write(output)
 
 
     def run(self):
@@ -414,7 +478,11 @@ class AutoPipeline(Pipeline):
             if subject_id.split("_")[1::] not in patient_ids:
                 patient_ids.append("_".join(subject_id.split("_")[1::]))
         if self.is_nnunet:
-            self.train, self.test = train_test_split(patient_ids, train_size=self.train_size, random_state=self.random_state)
+            if self.train_size == 1:
+                self.train = patient_ids
+                self.test = []
+            else:
+                self.train, self.test = train_test_split(sorted(patient_ids), train_size=self.train_size, random_state=self.random_state)
         else:
             self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
@@ -423,16 +491,17 @@ class AutoPipeline(Pipeline):
             print("Dataset already processed...")
             shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
         else:
-            Parallel(n_jobs=self.n_jobs, verbose=verbose)(
+            Parallel(n_jobs=self.n_jobs, verbose=verbose, require='sharedmem')(
                     delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             # for subject_id in subject_ids:
             #     self._process_wrapper(subject_id)
             self.save_data()
-            all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
-            all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
-            for e in all_patient_names:
-                if e not in patient_ids:
-                    warnings.warn(f"Patient {e} does not have proper DICOM references")
+            if not self.is_nnunet:
+                all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+                all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
+                for e in all_patient_names:
+                    if e not in patient_ids:
+                        warnings.warn(f"Patient {e} does not have proper DICOM references")
 
 def main():
     args = parser()
