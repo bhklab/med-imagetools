@@ -49,4 +49,10 @@ def parser():
     parser.add_argument("--roi_yaml_path", type=str,
                         help="Path to the YAML file defining ROI regexes")
 
+    parser.add_argument("--custom_trian_test_split", default=False, action="store_true",
+                        help="Whether to use a custom train-test-split, stored in custom_train_test_split.yaml in the input directory.")
+
+    # parser.add_argument("--custom_train_test_split_path", type=str,
+    #                     help="Path to the YAML file defining the custom train-test-split.")
+
     return parser.parse_known_args()[0]

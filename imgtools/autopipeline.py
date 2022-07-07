@@ -520,7 +520,8 @@ def main():
                             random_state=args.random_state,
                             read_yaml_label_names=args.read_yaml_label_names,
                             ignore_missing_regex=args.ignore_missing_regex,
-                            roi_yaml_path=args.roi_yaml_path)
+                            roi_yaml_path=args.roi_yaml_path,
+                            custom_train_test_split=args.custom_train_test_split)
 
     print(f'starting AutoPipeline...')
     pipeline.run()

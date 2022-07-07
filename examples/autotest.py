@@ -51,7 +51,8 @@ class AutoPipeline(Pipeline):
                  random_state=42,
                  read_yaml_label_names=False,
                  ignore_missing_regex=False,
-                 roi_yaml_path=""):
+                 roi_yaml_path="",
+                 custom_train_test_split=False):
         """Initialize the pipeline.
 
         Parameters
@@ -88,6 +89,8 @@ class AutoPipeline(Pipeline):
             Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
         roi_yaml_path: str, default=""
             The path to the yaml file defining regexes
+        custom_train_test_split: bool, default=False
+            Whether to use a custom train/test split. The remaining patients will be randomly split using train_size and random_state.
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -131,6 +134,7 @@ class AutoPipeline(Pipeline):
         self.random_state = random_state
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
+        self.custom_train_test_split = custom_train_test_split
         
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
@@ -174,6 +178,40 @@ class AutoPipeline(Pipeline):
         if is_nnunet and (not read_yaml_label_names or self.label_names == {}):
             raise ValueError("YAML label names must be provided for nnunet")
         
+        if custom_train_test_split and not is_nnunet:
+            raise ValueError("Cannot use custom train/test split without nnunet")
+
+        custom_train_test_split_path = pathlib.Path(self.input_directory, "custom_train_test_split.yaml").as_posix()
+        if custom_train_test_split:
+            if os.path.exists(custom_train_test_split_path):
+                with open(custom_train_test_split_path, "r") as f:
+                    try:
+                        self.custom_split = yaml.safe_load(f)
+                        if isinstance(self.custom_split, list):
+                            for e in self.custom_split:
+                                if not isinstance(e, str):
+                                    raise ValueError("Custom split must be a list of strings. Place quotes around patient ID's that don't parse as YAML strings")
+                            self.custom_split = {"train": [], "test": self.custom_split}
+                        if isinstance(self.custom_split, dict):
+                            if sorted(list(self.custom_split.keys())) != ["test", "train"] and list(self.custom_split.keys()) != ["train"] and list(self.custom_split.keys()) != ["test"]:
+                                raise ValueError("Custom split must be a dictionary with keys 'train' and 'test'")
+                            for k, v in self.custom_split.items():
+                                if not isinstance(v, list):
+                                    raise ValueError(f"Custom split must be a list of strings. Place quotes around patient ID's that don't parse as YAML strings. Got {v} for {k}")
+                                for e in v:
+                                    if not isinstance(e, str):
+                                        raise ValueError("Custom split must be a list of strings. Place quotes around patient ID's that don't parse as YAML strings")
+                            if list(self.custom_split.keys()) == ["train"]:
+                                self.custom_split = {"train": self.custom_split["train"], "test": []}
+                            elif list(self.custom_split.keys()) == ["test"]:
+                                self.custom_split = {"train": [], "test": self.custom_split["test"]}
+                        for e in self.custom_split["train"]:
+                            if e in self.custom_split["test"]:
+                                raise ValueError("Custom split cannot contain the same patient ID in both train and test")
+                    except yaml.YAMLError as exc:
+                        print(exc)
+            else:
+                raise FileNotFoundError(f"No file named custom_train_test_split.yaml found at {custom_train_test_split_path}. If you did not intend on creating a custom train-test-split, run the CLI without --custom_train_test_split")
 
         if self.is_nnunet:
             self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
@@ -478,11 +516,21 @@ class AutoPipeline(Pipeline):
             if subject_id.split("_")[1::] not in patient_ids:
                 patient_ids.append("_".join(subject_id.split("_")[1::]))
         if self.is_nnunet:
+            custom_train = []
+            custom_test = []
+            if self.custom_train_test_split:
+                patient_ids = [item for item in patient_ids if item not in self.custom_split["train"] and item not in self.custom_split["test"]]
+                custom_test = self.custom_split["test"]
+                custom_train = self.custom_split["train"]
             if self.train_size == 1:
                 self.train = patient_ids
                 self.test = []
+                self.train.extend(custom_train)
+                self.test.extend(custom_test)
             else:
                 self.train, self.test = train_test_split(sorted(patient_ids), train_size=self.train_size, random_state=self.random_state)
+                self.train.extend(custom_train)
+                self.test.extend(custom_test)
         else:
             self.train, self.test = [], []
         # Note that returning any SimpleITK object in process_one_subject is
@@ -533,7 +581,9 @@ if __name__ == "__main__":
                             # label_names={"GTV":"GTV.*", "Brainstem": "Brainstem.*"},
                             read_yaml_label_names=True,  # "GTV.*",
                             ignore_missing_regex=True,
-                            roi_yaml_path="C:/Users/qukev/BHKLAB/roi_names.yaml")
+                            roi_yaml_path="C:/Users/qukev/BHKLAB/roi_names.yaml",
+                            custom_train_test_split=True,
+                            random_state=10)
     # pipeline = AutoPipeline(input_directory="C:/Users/qukev/BHKLAB/larynx/radcure",
     #                         output_directory="C:/Users/qukev/BHKLAB/larynx_output",
     #                         modalities="CT,RTSTRUCT",
