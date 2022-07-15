@@ -15,12 +15,13 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.utils.nnunet import generate_dataset_json
+from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
 from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 from imgtools.io.common import file_name_convention
 ###############################################################
@@ -238,6 +239,9 @@ class AutoPipeline(Pipeline):
         
         self.existing_roi_names = {"background": 0}
         # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
+        if is_nnunet:
+            self.total_modality_counter = {}
+            self.patients_with_missing_labels = set()
 
     def glob_checker_nnunet(self, subject_id):
         folder_names = ["imagesTr", "labelsTr", "imagesTs", "labelsTs"]
@@ -316,11 +320,19 @@ class AutoPipeline(Pipeline):
                     #modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
                         if modality == "MR": #MR images can have various modalities like FLAIR, T1, etc.
+                            if not metadata["AcquisitionContrast"] in self.total_modality_counter.keys():
+                                self.total_modality_counter[metadata["AcquisitionContrast"]] = 1
+                            else:
+                                self.total_modality_counter[metadata["AcquisitionContrast"]] += 1
                             self.nnunet_info['current_modality'] = metadata["AcquisitionContrast"]
                             if not metadata["AcquisitionContrast"] in self.nnunet_info["modalities"].keys(): #if the modality is new
                                 self.nnunet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnunet_info["modalities"])).zfill(4) #fill to 4 digits
                         else:
                             self.nnunet_info['current_modality'] = modality #CT
+                            if not modality in self.total_modality_counter.keys():
+                                self.total_modality_counter[modality] = 1
+                            else:
+                                self.total_modality_counter[modality] += 1
                         if "_".join(subject_id.split("_")[1::]) in self.train:
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                         else:
@@ -382,6 +394,7 @@ class AutoPipeline(Pipeline):
                                     if subject_id in os.path.split(file)[1]:
                                         os.remove(file)
                             warnings.warn(f"Patient {subject_id} is missing a complete image-label pair")
+                            self.patients_with_missing_labels.add("".join(subject_id.split("_")[1:]))
                             return
                         else:
                             break
@@ -502,6 +515,28 @@ class AutoPipeline(Pipeline):
                 output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
                 output += 'done'
                 f.write(output)
+            markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
+            markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
+            with open(markdown_path, "w", newline="\n") as f:
+                output = "# Dataset Report\n\n"
+                if not self.is_nnunet:
+                    output += "## Patients with broken DICOM references\n\n"
+                    output += "<details>\n"
+                    output += "\t<summary>Click to see the list of patients with broken DICOM references</summary>\n\n\t"
+                    formatted_list = "\n\t".join(self.broken_dicom_references)
+                    output += f"{formatted_list}\n"
+                    output += "</details>\n\n"
+                if self.is_nnunet:
+                    output += "## Train Test Split\n\n"
+                    # pie_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_train_test_pie.png").as_posix()
+                    pie_path = pathlib.Path("markdown_images", "nnunet_train_test_pie.png").as_posix()
+                    output += f"![Pie Chart of Train Test Split]({pie_path})\n\n"
+                    output += "## Image Modality Distribution\n\n"
+                    # bar_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_modality_count.png").as_posix()
+                    bar_path = pathlib.Path("markdown_images", "nnunet_modality_count.png").as_posix()
+                    output += f"![Pie Chart of Image Modality Distribution]({bar_path})\n\n"
+                f.write(output)
+
 
 
     def run(self):
@@ -543,13 +578,15 @@ class AutoPipeline(Pipeline):
                     delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
             # for subject_id in subject_ids:
             #     self._process_wrapper(subject_id)
-            self.save_data()
+            self.broken_patients = []
             if not self.is_nnunet:
                 all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
                 all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
                 for e in all_patient_names:
                     if e not in patient_ids:
                         warnings.warn(f"Patient {e} does not have proper DICOM references")
+                        self.broken_patients.append(e)
+            self.save_data()
 
 def main():
     args = parser()

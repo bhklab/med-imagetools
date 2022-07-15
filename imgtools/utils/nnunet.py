@@ -1,7 +1,24 @@
 from typing import Tuple, List
 import os, pathlib
+import glob
 import json
 import numpy as np
+import matplotlib.pyplot as plt
+
+def markdown_report_images(output_folder, modality_count):
+    modalities = list(modality_count.keys())
+    modality_totals = list(modality_count.values())
+    if not os.path.exists(pathlib.Path(output_folder, "markdown_images").as_posix()):
+        os.makedirs(pathlib.Path(output_folder, "markdown_images").as_posix())
+    plt.figure(1)
+    plt.bar(modalities, modality_totals)
+    plt.savefig(pathlib.Path(output_folder, "markdown_images", "nnunet_modality_count.png").as_posix())
+
+    plt.figure(2)
+    train_total = len(glob.glob(pathlib.Path(output_folder, "labelsTr", "*.nii.gz").as_posix()))
+    test_total = len(glob.glob(pathlib.Path(output_folder, "labelsTs", "*.nii.gz").as_posix()))
+    plt.pie([train_total, test_total], labels=[f"Train - {train_total}", f"Test - {test_total}"])
+    plt.savefig(pathlib.Path(output_folder, "markdown_images", "nnunet_train_test_pie.png").as_posix())
 
 # this code is taken from:
 # Division of Medical Image Computing, German Cancer Research Center (DKFZ)
