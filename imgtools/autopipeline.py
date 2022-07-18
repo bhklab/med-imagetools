@@ -606,7 +606,9 @@ def main():
                             read_yaml_label_names=args.read_yaml_label_names,
                             ignore_missing_regex=args.ignore_missing_regex,
                             roi_yaml_path=args.roi_yaml_path,
-                            custom_train_test_split=args.custom_train_test_split)
+                            custom_train_test_split=args.custom_train_test_split,
+                            is_nnunet_inference=args.is_nnunet_inference,
+                            dataset_json_path=args.dataset_json_path)
 
     print(f'starting AutoPipeline...')
     pipeline.run()

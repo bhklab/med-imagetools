@@ -52,6 +52,12 @@ def parser():
     parser.add_argument("--custom_train_test_split", default=False, action="store_true",
                         help="Whether to use a custom train-test-split, stored in custom_train_test_split.yaml in the input directory.")
 
+    parser.add_argument("--is_nnunet_inference", default=False, action="store_true",
+                        help="Whether to generate data for nnUNet inference.")
+    
+    parser.add_argument("--dataset_json_path", type=str,
+                        help="Path to the dataset.json file defining image modality indices for nnUNet inference.")
+
     # parser.add_argument("--custom_train_test_split_path", type=str,
     #                     help="Path to the YAML file defining the custom train-test-split.")
 
