@@ -11,6 +11,7 @@ import warnings
 
 from argparse import ArgumentParser
 import yaml
+import json
 import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
@@ -53,7 +54,9 @@ class AutoPipeline(Pipeline):
                  read_yaml_label_names=False,
                  ignore_missing_regex=False,
                  roi_yaml_path="",
-                 custom_train_test_split=False):
+                 custom_train_test_split=False,
+                 is_nnunet_inference=False,
+                 dataset_json_path=""):
         """Initialize the pipeline.
 
         Parameters
@@ -69,7 +72,7 @@ class AutoPipeline(Pipeline):
         n_jobs: int, default=-1
             Number of jobs to run in parallel. If -1, use all cores
         visualize: bool, default=False
-            Whether to visualize the results of the pipeline using pyvis. Outputs to an HTML file.
+            Whether to visualize the results of the pipeline using pyvis. Outputs to an HTML file
         missing_strategy: str, default="drop"
             How to handle missing modalities. Can be "drop" or "fill"
         show_progress: bool, default=False
@@ -87,11 +90,15 @@ class AutoPipeline(Pipeline):
         read_yaml_label_names: bool, default=False
             Whether to read dictionary representing the label that regexes are mapped to from YAML. For example, "GTV": "GTV.*" will combine all regexes that match "GTV.*" into "GTV"
         ignore_missing_regex: bool, default=False
-            Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient.
+            Whether to ignore missing regexes. Will raise an error if none of the regexes in label_names are found for a patient
         roi_yaml_path: str, default=""
             The path to the yaml file defining regexes
         custom_train_test_split: bool, default=False
-            Whether to use a custom train/test split. The remaining patients will be randomly split using train_size and random_state.
+            Whether to use a custom train/test split. The remaining patients will be randomly split using train_size and random_state
+        is_nnunet_inference: bool, default=False
+            Whether to format the output for nnUNet inference
+        dataset_json_path: str, default=""
+            The path to the dataset.json file for nnUNet inference
         """
         super().__init__(
             n_jobs=n_jobs,
@@ -103,6 +110,12 @@ class AutoPipeline(Pipeline):
         self.input_directory = pathlib.Path(input_directory).as_posix()        
         self.output_directory = pathlib.Path(output_directory).as_posix()
         study_name = os.path.split(self.input_directory)[1]
+        if is_nnunet_inference:
+            roi_yaml_path = ""
+            custom_train_test_split = False
+            is_nnunet = False
+            if modalities != "CT" or modalities != "MR":
+                raise ValueError("nnUNet inference can only be run on image files. Please set modalities to 'CT' or 'MR'")
         if is_nnunet:
             self.base_output_directory = self.output_directory
             if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix()):
@@ -127,7 +140,7 @@ class AutoPipeline(Pipeline):
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.is_nnunet = is_nnunet
-        if is_nnunet:
+        if is_nnunet or is_nnunet_inference:
             self.nnunet_info = {}
         else:
             self.nnunet_info = None
@@ -136,7 +149,9 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
+        self.is_nnunet_inference = is_nnunet_inference
         
+
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
 
@@ -183,7 +198,7 @@ class AutoPipeline(Pipeline):
             raise ValueError("Cannot use custom train/test split without nnunet")
 
         custom_train_test_split_path = pathlib.Path(self.input_directory, "custom_train_test_split.yaml").as_posix()
-        if custom_train_test_split:
+        if custom_train_test_split and is_nnunet:
             if os.path.exists(custom_train_test_split_path):
                 with open(custom_train_test_split_path, "r") as f:
                     try:
@@ -217,6 +232,13 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet:
             self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
 
+        if is_nnunet_inference:
+            if not os.path.exists(dataset_json_path):
+                raise FileNotFoundError(f"No file named {dataset_json_path} found. Image modality definitions are required for nnUNet inference")
+            else:
+                with open(dataset_json_path, "r") as f:
+                    self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["modality"].items()}
+
         #input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
         
@@ -231,7 +253,7 @@ class AutoPipeline(Pipeline):
         self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False) # "GTV-.*"
 
         # output ops
-        self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info)
+        self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
 
         #Make a directory
         if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
@@ -239,7 +261,7 @@ class AutoPipeline(Pipeline):
         
         self.existing_roi_names = {"background": 0}
         # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
-        if is_nnunet:
+        if is_nnunet or is_nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
 
@@ -337,6 +359,11 @@ class AutoPipeline(Pipeline):
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                         else:
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
+                    elif self.is_nnunet_inference:
+                        self.nnunet_info["current_modality"] = modality if modality == "CT" else metadata["AcquisitionContrast"]
+                        if not self.nnunet_info["current_modality"] in self.nnunet_info["modalities"].keys():
+                            raise ValueError(f"The modality {self.nnunet_info['current_modality']} is not in the list of modalities that are present in dataset.json.")
+                        self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                     else:
                         self.output(subject_id, image, output_stream)
 

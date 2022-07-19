@@ -329,16 +329,20 @@ class ImageAutoOutput:
     def __init__(self,
                  root_directory: str,
                  output_streams: List[str],
-                 nnunet_info: Dict = None):
+                 nnunet_info: Dict = None,
+                 inference: bool = False,):
                  
         self.output = {}
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
             colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
             colname_process = colname #temproary force #
-            if not nnunet_info:
+            if not nnunet_info and not inference:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process.split(".")[0]).as_posix(),
                                                                     filename_format="{}.nii.gz".format(colname_process))
+            elif inference:
+                self.output[colname_process] = ImageSubjectFileOutput(root_directory,
+                                                                    filename_format="{subject_id}_{modality_index}.nii.gz")
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
                                                                     filename_format="{subject_id}_{modality_index}.nii.gz")
