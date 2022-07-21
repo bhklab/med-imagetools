@@ -58,6 +58,12 @@ def parser():
     parser.add_argument("--dataset_json_path", type=str,
                         help="Path to the dataset.json file defining image modality indices for nnUNet inference.")
 
+    parser.add_argument("--continue_processing", default=False, action="store_true",
+                        help="Whether to continue processing a partially completed dataset.")
+    
+    parser.add_argument("--dry_run", default=False, action="store_true",
+                        help="Make a dry run of the pipeline, only producing the edge table and dataset.csv.")
+
     # parser.add_argument("--custom_train_test_split_path", type=str,
     #                     help="Path to the YAML file defining the custom train-test-split.")
 

@@ -56,7 +56,9 @@ class AutoPipeline(Pipeline):
                  roi_yaml_path="",
                  custom_train_test_split=False,
                  is_nnunet_inference=False,
-                 dataset_json_path=""):
+                 dataset_json_path="",
+                 continue_processing=False,
+                 dry_run=False):
         """Initialize the pipeline.
 
         Parameters
@@ -99,7 +101,60 @@ class AutoPipeline(Pipeline):
             Whether to format the output for nnUNet inference
         dataset_json_path: str, default=""
             The path to the dataset.json file for nnUNet inference
+        continue_processing: bool, default=False
+            Whether to continue processing a partially processed dataset
+        dry_run: bool, default=False
+            Whether to run the pipeline without writing any output files
         """
+
+        #save all the arguments to a pkl file and then load them back if there is a continue processing flag
+
+        self.continue_processing = continue_processing
+
+        if dry_run:
+            is_nnunet = False
+            is_nnunet_inference = False
+
+        if dry_run and continue_processing:
+            raise ValueError("Cannot continue processing a dry run. Set --continute_processing to False to do a dry run.")
+
+        with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "wb") as f:
+            parameters = locals()
+            pickle.dump(parameters, f)
+        #Make a directory
+        if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
+            os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
+
+        #continue processing operations
+        self.finished_subjects = [e[5:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())] #remove the .pkl and the temp_      
+        if not continue_processing:
+            with open(pathlib.Path(self.output_directory, ".temp", "random_state.txt").as_posix(), "w") as f:
+                f.write(str(random_state))
+        else:
+            with open(pathlib.Path(self.output_directory, ".temp", "random_state.txt").as_posix(), "r") as f:
+                self.random_state = int(f.read())
+            with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
+                parameters = pickle.load(f)
+                input_directory = parameters["input_directory"]
+                output_directory = parameters["output_directory"]
+                modalities = parameters["modalities"]
+                spacing = parameters["spacing"]
+                n_jobs = parameters["n_jobs"]
+                visualize = parameters["visualize"]
+                missing_strategy = parameters["missing_strategy"]
+                show_progress = parameters["show_progress"]
+                warn_on_error = parameters["warn_on_error"]
+                overwrite = parameters["overwrite"]
+                is_nnunet = parameters["is_nnunet"]
+                train_size = parameters["train_size"]
+                random_state = parameters["random_state"]
+                read_yaml_label_names = parameters["read_yaml_label_names"]
+                ignore_missing_regex = parameters["ignore_missing_regex"]
+                roi_yaml_path = parameters["roi_yaml_path"]
+                custom_train_test_split = parameters["custom_train_test_split"]
+                is_nnunet_inference = parameters["is_nnunet_inference"]
+                dataset_json_path = parameters["dataset_json_path"]
+        
         super().__init__(
             n_jobs=n_jobs,
             missing_strategy=missing_strategy,
@@ -107,6 +162,14 @@ class AutoPipeline(Pipeline):
             warn_on_error=warn_on_error)
         self.overwrite = overwrite
         # pipeline configuration
+        if not os.path.exists(input_directory):
+            input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
+        if not os.path.exists(output_directory):
+            output_directory = pathlib.Path(os.getcwd(), output_directory).as_posix()
+        if not os.path.exists(output_directory):
+            raise FileNotFoundError(f"Output directory {output_directory} does not exist")
+        if not os.path.exists(input_directory):
+            raise FileNotFoundError(f"Input directory {input_directory} does not exist")
         self.input_directory = pathlib.Path(input_directory).as_posix()        
         self.output_directory = pathlib.Path(output_directory).as_posix()
         study_name = os.path.split(self.input_directory)[1]
@@ -150,7 +213,7 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
         self.is_nnunet_inference = is_nnunet_inference
-        
+        self.dry_run = dry_run
 
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
@@ -254,16 +317,13 @@ class AutoPipeline(Pipeline):
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
-
-        #Make a directory
-        if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
-            os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
         
         self.existing_roi_names = {"background": 0}
         # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
         if is_nnunet or is_nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
+        
 
     def glob_checker_nnunet(self, subject_id):
         folder_names = ["imagesTr", "labelsTr", "imagesTs", "labelsTs"]
@@ -289,6 +349,9 @@ class AutoPipeline(Pipeline):
         subject_id : str
            The ID of subject to process
         """
+        if self.continue_processing:
+            if subject_id in self.finished_subjects:
+                return
         # if we want overwriting or if we don't want it and the file doesn't exist, we can process
         if self.overwrite or (not self.overwrite and not (os.path.exists(pathlib.Path(self.output_directory, subject_id).as_posix()) or self.glob_checker_nnunet(subject_id))):
             #Check if the subject_id has already been processed
@@ -493,7 +556,7 @@ class AutoPipeline(Pipeline):
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
             metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
-            with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:
+            with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f: #the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
             return 
     
@@ -544,25 +607,25 @@ class AutoPipeline(Pipeline):
                 f.write(output)
             markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
             markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
-            with open(markdown_path, "w", newline="\n") as f:
-                output = "# Dataset Report\n\n"
-                if not self.is_nnunet:
-                    output += "## Patients with broken DICOM references\n\n"
-                    output += "<details>\n"
-                    output += "\t<summary>Click to see the list of patients with broken DICOM references</summary>\n\n\t"
-                    formatted_list = "\n\t".join(self.broken_dicom_references)
-                    output += f"{formatted_list}\n"
-                    output += "</details>\n\n"
-                if self.is_nnunet:
-                    output += "## Train Test Split\n\n"
-                    # pie_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_train_test_pie.png").as_posix()
-                    pie_path = pathlib.Path("markdown_images", "nnunet_train_test_pie.png").as_posix()
-                    output += f"![Pie Chart of Train Test Split]({pie_path})\n\n"
-                    output += "## Image Modality Distribution\n\n"
-                    # bar_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_modality_count.png").as_posix()
-                    bar_path = pathlib.Path("markdown_images", "nnunet_modality_count.png").as_posix()
-                    output += f"![Pie Chart of Image Modality Distribution]({bar_path})\n\n"
-                f.write(output)
+        with open(markdown_path, "w", newline="\n") as f:
+            output = "# Dataset Report\n\n"
+            if not self.is_nnunet:
+                output += "## Patients with broken DICOM references\n\n"
+                output += "<details>\n"
+                output += "\t<summary>Click to see the list of patients with broken DICOM references</summary>\n\n\t"
+                formatted_list = "\n\t".join(self.broken_dicom_references)
+                output += f"{formatted_list}\n"
+                output += "</details>\n\n"
+            if self.is_nnunet:
+                output += "## Train Test Split\n\n"
+                # pie_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_train_test_pie.png").as_posix()
+                pie_path = pathlib.Path("markdown_images", "nnunet_train_test_pie.png").as_posix()
+                output += f"![Pie Chart of Train Test Split]({pie_path})\n\n"
+                output += "## Image Modality Distribution\n\n"
+                # bar_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_modality_count.png").as_posix()
+                bar_path = pathlib.Path("markdown_images", "nnunet_modality_count.png").as_posix()
+                output += f"![Pie Chart of Image Modality Distribution]({bar_path})\n\n"
+            f.write(output)
 
 
 
@@ -574,46 +637,48 @@ class AutoPipeline(Pipeline):
 
         subject_ids = self._get_loader_subject_ids()
         patient_ids = []
-        for subject_id in subject_ids:
-            if subject_id.split("_")[1::] not in patient_ids:
-                patient_ids.append("_".join(subject_id.split("_")[1::]))
-        if self.is_nnunet:
-            custom_train = []
-            custom_test = []
-            if self.custom_train_test_split:
-                patient_ids = [item for item in patient_ids if item not in self.custom_split["train"] and item not in self.custom_split["test"]]
-                custom_test = self.custom_split["test"]
-                custom_train = self.custom_split["train"]
-            if self.train_size == 1:
-                self.train = patient_ids
-                self.test = []
-                self.train.extend(custom_train)
-                self.test.extend(custom_test)
+        if not self.dry_run:
+            for subject_id in subject_ids:
+                if subject_id.split("_")[1::] not in patient_ids:
+                    patient_ids.append("_".join(subject_id.split("_")[1::]))
+            if self.is_nnunet:
+                custom_train = []
+                custom_test = []
+                if self.custom_train_test_split:
+                    patient_ids = [item for item in patient_ids if item not in self.custom_split["train"] and item not in self.custom_split["test"]]
+                    custom_test = self.custom_split["test"]
+                    custom_train = self.custom_split["train"]
+                if self.train_size == 1:
+                    self.train = patient_ids
+                    self.test = []
+                    self.train.extend(custom_train)
+                    self.test.extend(custom_test)
+                else:
+                    self.train, self.test = train_test_split(sorted(patient_ids), train_size=self.train_size, random_state=self.random_state)
+                    self.train.extend(custom_train)
+                    self.test.extend(custom_test)
             else:
-                self.train, self.test = train_test_split(sorted(patient_ids), train_size=self.train_size, random_state=self.random_state)
-                self.train.extend(custom_train)
-                self.test.extend(custom_test)
+                self.train, self.test = [], []
         else:
-            self.train, self.test = [], []
-        # Note that returning any SimpleITK object in process_one_subject is
-        # not supported yet, since they cannot be pickled
-        if os.path.exists(self.output_df_path) and not self.overwrite:
-            print("Dataset already processed...")
-            shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
-        else:
-            Parallel(n_jobs=self.n_jobs, verbose=verbose, require='sharedmem')(
-                    delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
-            # for subject_id in subject_ids:
-            #     self._process_wrapper(subject_id)
-            self.broken_patients = []
-            if not self.is_nnunet:
-                all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
-                all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
-                for e in all_patient_names:
-                    if e not in patient_ids:
-                        warnings.warn(f"Patient {e} does not have proper DICOM references")
-                        self.broken_patients.append(e)
-            self.save_data()
+            # Note that returning any SimpleITK object in process_one_subject is
+            # not supported yet, since they cannot be pickled
+            if os.path.exists(self.output_df_path) and not self.overwrite:
+                print("Dataset already processed...")
+                shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
+            else:
+                Parallel(n_jobs=self.n_jobs, verbose=verbose, require='sharedmem')(
+                        delayed(self._process_wrapper)(subject_id) for subject_id in subject_ids)
+                # for subject_id in subject_ids:
+                #     self._process_wrapper(subject_id)
+                self.broken_patients = []
+                if not self.is_nnunet:
+                    all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+                    all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
+                    for e in all_patient_names:
+                        if e not in patient_ids:
+                            warnings.warn(f"Patient {e} does not have proper DICOM references")
+                            self.broken_patients.append(e)
+                self.save_data()
 
 def main():
     args = parser()
