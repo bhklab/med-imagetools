@@ -4,6 +4,7 @@ import shutil
 import glob
 import pickle
 import struct
+from attr import has
 from matplotlib.style import available
 import numpy as np
 import sys
@@ -25,6 +26,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 from imgtools.io.common import file_name_convention
+import dill
 ###############################################################
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
@@ -39,7 +41,7 @@ class AutoPipeline(Pipeline):
 
     def __init__(self,
                  input_directory,
-                 output_directory,
+                 output_directory="",
                  modalities="CT",
                  spacing=(1., 1., 0.),
                  n_jobs=-1,
@@ -110,6 +112,7 @@ class AutoPipeline(Pipeline):
         #save all the arguments to a pkl file and then load them back if there is a continue processing flag
 
         self.continue_processing = continue_processing
+        self.dry_run = dry_run
 
         if dry_run:
             is_nnunet = False
@@ -118,49 +121,9 @@ class AutoPipeline(Pipeline):
         if dry_run and continue_processing:
             raise ValueError("Cannot continue processing a dry run. Set --continute_processing to False to do a dry run.")
 
-        with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "wb") as f:
-            parameters = locals()
-            pickle.dump(parameters, f)
-        #Make a directory
-        if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
-            os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
+        if not dry_run and output_directory == "":
+            raise ValueError("Must specify an output directory")
 
-        #continue processing operations
-        self.finished_subjects = [e[5:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())] #remove the .pkl and the temp_      
-        if not continue_processing:
-            with open(pathlib.Path(self.output_directory, ".temp", "random_state.txt").as_posix(), "w") as f:
-                f.write(str(random_state))
-        else:
-            with open(pathlib.Path(self.output_directory, ".temp", "random_state.txt").as_posix(), "r") as f:
-                self.random_state = int(f.read())
-            with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
-                parameters = pickle.load(f)
-                input_directory = parameters["input_directory"]
-                output_directory = parameters["output_directory"]
-                modalities = parameters["modalities"]
-                spacing = parameters["spacing"]
-                n_jobs = parameters["n_jobs"]
-                visualize = parameters["visualize"]
-                missing_strategy = parameters["missing_strategy"]
-                show_progress = parameters["show_progress"]
-                warn_on_error = parameters["warn_on_error"]
-                overwrite = parameters["overwrite"]
-                is_nnunet = parameters["is_nnunet"]
-                train_size = parameters["train_size"]
-                random_state = parameters["random_state"]
-                read_yaml_label_names = parameters["read_yaml_label_names"]
-                ignore_missing_regex = parameters["ignore_missing_regex"]
-                roi_yaml_path = parameters["roi_yaml_path"]
-                custom_train_test_split = parameters["custom_train_test_split"]
-                is_nnunet_inference = parameters["is_nnunet_inference"]
-                dataset_json_path = parameters["dataset_json_path"]
-        
-        super().__init__(
-            n_jobs=n_jobs,
-            missing_strategy=missing_strategy,
-            show_progress=show_progress,
-            warn_on_error=warn_on_error)
-        self.overwrite = overwrite
         # pipeline configuration
         if not os.path.exists(input_directory):
             input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
@@ -170,8 +133,13 @@ class AutoPipeline(Pipeline):
             raise FileNotFoundError(f"Output directory {output_directory} does not exist")
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
-        self.input_directory = pathlib.Path(input_directory).as_posix()        
+        
+        self.input_directory = pathlib.Path(input_directory).as_posix()
         self.output_directory = pathlib.Path(output_directory).as_posix()
+        
+        if not is_nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
+            raise FileNotFoundError(f"Cannot continue processing. .temp directory does not exist in {output_directory}. Run without --continue_processing to start from scratch.")
+
         study_name = os.path.split(self.input_directory)[1]
         if is_nnunet_inference:
             roi_yaml_path = ""
@@ -190,16 +158,67 @@ class AutoPipeline(Pipeline):
             if not os.path.exists(self.output_directory):
                 os.makedirs(self.output_directory)
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
-            available_numbers = list(range(500, 1000))
-            for folder in all_nnunet_folders:
-                folder_name = os.path.split(os.path.split(folder)[0])[1]
-                if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
-                    available_numbers.remove(int(folder_name[4:7]))
-            if len(available_numbers) == 0:
-                raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
-            task_folder_name = f"Task{available_numbers[0]}_{study_name}"
-            self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
-            self.task_id = available_numbers[0]
+            print(all_nnunet_folders)
+            numbers = [int(os.path.split(os.path.split(folder)[0])[1][4:7]) for folder in all_nnunet_folders if os.path.split(os.path.split(folder)[0])[1].startswith("Task")]
+            print(numbers, continue_processing)
+            if (len(numbers) == 0 and continue_processing) or not continue_processing or not os.path.exists(pathlib.Path(self.output_directory, f"Task{max(numbers)}_{study_name}", ".temp").as_posix()):
+                available_numbers = list(range(500, 1000))
+                for folder in all_nnunet_folders:
+                    folder_name = os.path.split(os.path.split(folder)[0])[1]
+                    if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
+                        available_numbers.remove(int(folder_name[4:7]))
+                if len(available_numbers) == 0:
+                    raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
+                task_folder_name = f"Task{available_numbers[0]}_{study_name}"
+                self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
+                self.task_id = available_numbers[0]
+            else:
+                self.task_id = max(numbers)
+                task_folder_name = f"Task{self.task_id}_{study_name}"
+                self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
+            if not os.path.exists(pathlib.Path(self.output_directory, ".temp").as_posix()):
+                os.makedirs(pathlib.Path(self.output_directory, ".temp").as_posix())
+        
+        if not dry_run:
+            #Make a directory
+            if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
+                os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
+                
+            with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "wb") as f:
+                parameters = locals() #save all the parameters in case we need to continue processing
+                dill.dump(parameters, f)
+
+            #continue processing operations
+            self.finished_subjects = [pathlib.Path(e).name[:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())] #remove the .pkl
+            if continue_processing:
+                with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
+                    parameters = dill.load(f)
+                    input_directory = parameters["input_directory"]
+                    output_directory = parameters["output_directory"]
+                    modalities = parameters["modalities"]
+                    spacing = parameters["spacing"]
+                    n_jobs = parameters["n_jobs"]
+                    visualize = parameters["visualize"]
+                    missing_strategy = parameters["missing_strategy"]
+                    show_progress = parameters["show_progress"]
+                    warn_on_error = parameters["warn_on_error"]
+                    overwrite = parameters["overwrite"]
+                    is_nnunet = parameters["is_nnunet"]
+                    train_size = parameters["train_size"]
+                    random_state = parameters["random_state"]
+                    read_yaml_label_names = parameters["read_yaml_label_names"]
+                    ignore_missing_regex = parameters["ignore_missing_regex"]
+                    roi_yaml_path = parameters["roi_yaml_path"]
+                    custom_train_test_split = parameters["custom_train_test_split"]
+                    is_nnunet_inference = parameters["is_nnunet_inference"]
+                    dataset_json_path = parameters["dataset_json_path"]
+
+        super().__init__(
+            n_jobs=n_jobs,
+            missing_strategy=missing_strategy,
+            show_progress=show_progress,
+            warn_on_error=warn_on_error)
+        self.overwrite = overwrite
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
         self.is_nnunet = is_nnunet
@@ -213,7 +232,6 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
         self.is_nnunet_inference = is_nnunet_inference
-        self.dry_run = dry_run
 
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
@@ -564,6 +582,8 @@ class AutoPipeline(Pipeline):
         files = glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())
         for file in files:
             filename = pathlib.Path(file).name
+            if filename == "init_parameters.pkl":
+                break
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
@@ -659,7 +679,6 @@ class AutoPipeline(Pipeline):
                     self.test.extend(custom_test)
             else:
                 self.train, self.test = [], []
-        else:
             # Note that returning any SimpleITK object in process_one_subject is
             # not supported yet, since they cannot be pickled
             if os.path.exists(self.output_df_path) and not self.overwrite:
@@ -700,13 +719,17 @@ def main():
                             roi_yaml_path=args.roi_yaml_path,
                             custom_train_test_split=args.custom_train_test_split,
                             is_nnunet_inference=args.is_nnunet_inference,
-                            dataset_json_path=args.dataset_json_path)
+                            dataset_json_path=args.dataset_json_path,
+                            continue_processing=args.continue_processing,
+                            dry_run=args.dry_run)
+    if not args.dry_run:
+        print(f'starting AutoPipeline...')
+        pipeline.run()
 
-    print(f'starting AutoPipeline...')
-    pipeline.run()
 
-
-    print('finished AutoPipeline!')
+        print('finished AutoPipeline!')
+    else:
+        print('dry run complete, no processing done')
     
     """Print general summary info"""
 
