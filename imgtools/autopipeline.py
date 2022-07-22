@@ -414,7 +414,11 @@ class AutoPipeline(Pipeline):
                         
                         image = extractor.Execute(image)
                         print(image.GetSize())
-                    image = self.resample(image)
+                    try:
+                        image = self.resample(image)
+                    except Exception as e:
+                        print(e)
+                        warnings.warn("Could not resample {} for subject {}".format(colname, subject_id))
 
                     #update the metadata for this image
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
