@@ -119,21 +119,19 @@ class AutoPipeline(Pipeline):
             is_nnunet_inference = False
 
         if dry_run and continue_processing:
-            raise ValueError("Cannot continue processing a dry run. Set --continute_processing to False to do a dry run.")
+            raise ValueError("Cannot continue processing a dry run. Set --continue_processing to False to do a dry run.")
 
         if not dry_run and output_directory == "":
             raise ValueError("Must specify an output directory")
-
         # pipeline configuration
-        if not os.path.exists(input_directory):
+        if not os.path.isabs(input_directory):
             input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
-        if not os.path.exists(output_directory):
+        if not os.path.isabs(output_directory):
             output_directory = pathlib.Path(os.getcwd(), output_directory).as_posix()
         if not os.path.exists(output_directory):
             raise FileNotFoundError(f"Output directory {output_directory} does not exist")
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
-        
         self.input_directory = pathlib.Path(input_directory).as_posix()
         self.output_directory = pathlib.Path(output_directory).as_posix()
         
