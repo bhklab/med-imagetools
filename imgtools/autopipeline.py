@@ -129,7 +129,8 @@ class AutoPipeline(Pipeline):
         if not os.path.isabs(output_directory):
             output_directory = pathlib.Path(os.getcwd(), output_directory).as_posix()
         if not os.path.exists(output_directory):
-            raise FileNotFoundError(f"Output directory {output_directory} does not exist")
+            # raise FileNotFoundError(f"Output directory {output_directory} does not exist")
+            os.makedirs(output_directory)
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
         self.input_directory = pathlib.Path(input_directory).as_posix()
@@ -628,7 +629,7 @@ class AutoPipeline(Pipeline):
                 output += 'done'
                 f.write(output)
             markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
-            markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
+        markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
         with open(markdown_path, "w", newline="\n") as f:
             output = "# Dataset Report\n\n"
             if not self.is_nnunet:
