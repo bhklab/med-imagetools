@@ -64,8 +64,12 @@ class Dataset(tio.SubjectsDataset):
             for col in output_streams:
                 metadata_name = f"metadata_{col}"
                 if 'RTSTRUCT' in col:
-                    filenames = ast.literal_eval(df_metadata.loc[subject_id]['metadata_RTSTRUCT_CT'])[0]
-                    filename = filenames[0]
+                    try:
+                        filenames = ast.literal_eval(df_metadata.loc[subject_id]['metadata_RTSTRUCT_CT'])[0]
+                        filename = filenames[0]
+                    except:
+                        print(df_metadata.head())
+                        raise ValueError(df_metadata.loc[subject_id]['metadata_RTSTRUCT_CT'])
                 else:
                     filename = col
                 path_mod = pathlib.Path(path, subject_id, col, f"{filename}.nii.gz").as_posix()
