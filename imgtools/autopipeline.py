@@ -636,7 +636,7 @@ class AutoPipeline(Pipeline):
                 output += "## Patients with broken DICOM references\n\n"
                 output += "<details>\n"
                 output += "\t<summary>Click to see the list of patients with broken DICOM references</summary>\n\n\t"
-                formatted_list = "\n\t".join(self.broken_dicom_references)
+                formatted_list = "\n\t".join(self.broken_patients)
                 output += f"{formatted_list}\n"
                 output += "</details>\n\n"
             if self.is_nnunet:
