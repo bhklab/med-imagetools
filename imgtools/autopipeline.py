@@ -576,7 +576,8 @@ class AutoPipeline(Pipeline):
             #Saving all the metadata in multiple text files
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
-            metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
+            if self.is_nnunet:
+                metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
             with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f: #the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
             return 
