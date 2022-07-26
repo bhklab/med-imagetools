@@ -37,5 +37,5 @@ jobs:
         python -c "import imgtools"
     - name: Run pytest
       run: |
-        pytest tests
+        pytest tests -s
 
