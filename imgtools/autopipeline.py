@@ -742,7 +742,7 @@ def main():
     * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
     """
     print(f"Outputted data to {args.output_directory}")
-    csv_path = pathlib.Path(args.output_directory, "dataset.cav").as_posix()
+    csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
     print(f"Dataset info found at {csv_path}")
     if args.nnunet:
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
