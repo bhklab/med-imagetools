@@ -581,7 +581,6 @@ class AutoPipeline(Pipeline):
                 metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
             with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f: #the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
-            print("asdf123", subject_id, metadata)
             return 
     
     def save_data(self):
@@ -589,10 +588,11 @@ class AutoPipeline(Pipeline):
         for file in files:
             filename = pathlib.Path(file).name
             if filename == "init_parameters.pkl":
-                break
+                continue
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
+                print("sadf123", metadata)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
             pd.set_option('display.max_rows', None)
