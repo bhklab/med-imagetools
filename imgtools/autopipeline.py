@@ -422,9 +422,6 @@ class AutoPipeline(Pipeline):
                     #update the metadata for this image
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
-                        print("here", metadata)
-                    else:
-                        print("asdf", metadata)
 
                     #modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
@@ -594,6 +591,7 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
+                print(metadata)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
         folder_renames = {}
