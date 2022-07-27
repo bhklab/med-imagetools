@@ -422,6 +422,9 @@ class AutoPipeline(Pipeline):
                     #update the metadata for this image
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
+                        print("here", metadata)
+                    else:
+                        print("asdf", metadata)
 
                     #modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:

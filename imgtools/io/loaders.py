@@ -196,7 +196,6 @@ class ImageCSVLoader(BaseLoader):
             paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
         
         outputs = {col: self.readers[i](path,series["series_"+("_").join(col.split("_")[1:])]) for i, (col, path) in enumerate(paths.items())}
-        print("here", list(outputs.values())[0].metadata)
         return self.output_tuple(**outputs)
 
     def keys(self):
