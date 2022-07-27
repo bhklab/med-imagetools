@@ -158,9 +158,9 @@ class AutoPipeline(Pipeline):
             if not os.path.exists(self.output_directory):
                 os.makedirs(self.output_directory)
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
-            print(all_nnunet_folders)
+            # print(all_nnunet_folders)
             numbers = [int(os.path.split(os.path.split(folder)[0])[1][4:7]) for folder in all_nnunet_folders if os.path.split(os.path.split(folder)[0])[1].startswith("Task")]
-            print(numbers, continue_processing)
+            # print(numbers, continue_processing)
             if (len(numbers) == 0 and continue_processing) or not continue_processing or not os.path.exists(pathlib.Path(self.output_directory, f"Task{max(numbers)}_{study_name}", ".temp").as_posix()):
                 available_numbers = list(range(500, 1000))
                 for folder in all_nnunet_folders:
@@ -399,7 +399,7 @@ class AutoPipeline(Pipeline):
                 mult_conn = colname.split("_")[-1].isnumeric()
                 num = colname.split("_")[-1]
 
-                print(output_stream)
+                # print(output_stream) #could include for verbose
 
                 if read_results[i] is None:
                     print("The subject id: {} has no {}".format(subject_id, colname))
@@ -413,7 +413,7 @@ class AutoPipeline(Pipeline):
                         extractor.SetIndex([0, 0, 0, 0])    
                         
                         image = extractor.Execute(image)
-                        print(image.GetSize())
+                        # print(image.GetSize()) #could include with verbose
                     try:
                         image = self.resample(image)
                     except Exception as e:
@@ -518,7 +518,7 @@ class AutoPipeline(Pipeline):
                     # print(self.existing_roi_names,"alskdfj")
 
                     # save output
-                    print(mask.GetSize())
+                    # print(mask.GetSize()) #could include with verbose
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
@@ -534,7 +534,7 @@ class AutoPipeline(Pipeline):
                         if len(mask_arr.shape) == 3:
                             mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
                         
-                        print(mask_arr.shape)
+                        # print(mask_arr.shape) #could include with verbose
                         roi_names_list = list(mask.roi_names.keys())
                         for i in range(mask_arr.shape[0]):
                             new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
@@ -592,21 +592,21 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
-                print("sadf123", metadata)
+                # print("sadf123", metadata)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
-            pd.set_option('display.max_rows', None)
-            pd.set_option('display.max_columns', None)
-            pd.set_option('display.width', None)
-            print("asdfjlkasdjfkajfshg", self.output_df.head())
+            # pd.set_option('display.max_rows', None)
+            # pd.set_option('display.max_columns', None)
+            # pd.set_option('display.width', None)
+            # print("asdfjlkasdjfkajfshg", self.output_df.head())
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        print("df in autopipe")
-        print(self.output_df.iloc[0])
+        # print("df in autopipe")
+        # print(self.output_df.iloc[0])
         self.output_df.to_csv(self.output_df_path) #dataset.csv
 
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
