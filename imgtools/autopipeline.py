@@ -581,6 +581,7 @@ class AutoPipeline(Pipeline):
                 metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
             with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f: #the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
+            print("asdf123", subject_id, metadata)
             return 
     
     def save_data(self):
@@ -603,7 +604,6 @@ class AutoPipeline(Pipeline):
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
-        print("asdfhere", self.output_df.head())
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         print("df in autopipe")
         print(self.output_df.iloc[0])
