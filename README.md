@@ -5,13 +5,14 @@
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 
-### Latest Updates (v0.4.3) - July 18th, 2022
+### Latest Updates (v0.4.4) - July 27th, 2022
 New features include:
 * AutoPipeline CLI
 * nnU-Net compatibility mode
 * Built-in train/test split for both normal/nnU-Net modes
 * Random seed for reproducible seeds
 * Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
+* Markdown report output post-processing
 
 Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
 
