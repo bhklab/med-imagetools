@@ -24,6 +24,7 @@ from imgtools.modules import Segmentation
 from torch import sparse_coo_tensor
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from imgtools.io.common import file_name_convention
 import dill
@@ -591,14 +592,18 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
-                print(metadata)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
+            pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_columns', None)
+            pd.set_option('display.width', None)
+            print("asdfjlkasdjfkajfshg", self.output_df.head())
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
+        print("asdfhere", self.output_df.head())
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
         print("df in autopipe")
         print(self.output_df.iloc[0])
