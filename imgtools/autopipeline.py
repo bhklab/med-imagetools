@@ -599,7 +599,8 @@ class AutoPipeline(Pipeline):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        print(self.output_df.loc[0,:], "dataframe in autopipe")
+        print("df in autopipe")
+        print(self.output_df.iloc[0])
         self.output_df.to_csv(self.output_df_path) #dataset.csv
 
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
