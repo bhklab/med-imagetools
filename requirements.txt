@@ -13,3 +13,4 @@ torch
 torchio
 scikit-learn
 pyyaml
+dill

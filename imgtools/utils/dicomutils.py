@@ -47,7 +47,7 @@ def all_modalities_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydic
 def ct_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydicom.dicomdir.DicomDir]) -> Dict[str, T]:
     metadata = {}
     if hasattr(dicom_data, 'KVP'):
-            metadata["KVP"] = str(dicom_data.KVP)
+        metadata["KVP"] = str(dicom_data.KVP)
     if hasattr(dicom_data, 'XRayTubeCurrent'):
         metadata["XRayTubeCurrent"] = str(dicom_data.XRayTubeCurrent)
     if hasattr(dicom_data, 'ScanOptions'):

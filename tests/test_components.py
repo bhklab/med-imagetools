@@ -168,6 +168,7 @@ class TestComponents:
         output_path_mod = pathlib.Path(self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))).as_posix()
         comp_path = pathlib.Path(output_path_mod).resolve().joinpath('dataset.csv').as_posix()
         comp_table = pd.read_csv(comp_path, index_col=0)
+        print(comp_path, comp_table)
         
         #Loading from nrrd files
         subjects_nrrd = Dataset.load_image(output_path_mod, ignore_multi=True)
