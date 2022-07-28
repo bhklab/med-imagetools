@@ -5,13 +5,16 @@
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 
-### Latest Updates (v0.4.3) - July 18th, 2022
+### Latest Updates (v0.4.4) - July 27th, 2022
 New features include:
 * AutoPipeline CLI
-* nnU-Net compatibility mode
+* `nnunet` nnU-Net compatibility mode
 * Built-in train/test split for both normal/nnU-Net modes
-* Random seed for reproducible seeds
+* `random_state` for reproducible seeds
 * Region of interest (ROI) yaml dictionary intake for RTSTRUCT processing
+* Markdown report output post-processing
+* `continue_processing` flag to continue autopipeline
+* `dry_run` flag to only crawl the dataset
 
 Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
 
@@ -59,7 +62,9 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
       --nnunet [flag]\
       --train_size [float]\
       --random_state [int]\
-      --roi_yaml_path [str]
+      --roi_yaml_path [str]\
+      --continue_processing [flag]\
+      --dry_run [flag]
     ```
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
     ```
