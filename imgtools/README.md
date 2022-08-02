@@ -107,14 +107,14 @@ Med-ImageTools generates the dataset.json that nnUNet requires in the output dir
 
 The generated output directory structure will look something like:
 
-`OUTPUT_DIRECTORY
+```OUTPUT_DIRECTORY
 ├── nnUNet_preprocessed
 ├── nnUNet_raw_data_base
 │   └── nnUNet_raw_data
 │       └── Task500_HNSCC
 │           ├── nnunet_preprocess_and_train.sh
 │           └── ...
-└── nnUNet_trained_models`
+└── nnUNet_trained_models```
 
 Too allow nnUNet to preprocess your data for trianing, run the following command. Set XXX to the ID that you want to preprocess. This is your task ID. For example, for Task500_HNSCC, the task ID is 500. Task IDs must be between 500 and 999, so Med-ImageTools can run 500 instances with the nnUNet flag in a single output folder.
 
