@@ -1,4 +1,4 @@
-# Preparing Data for nnUNet Training
+# Preparing Data for nnUNet
 
 nnUNet repo can be found at: <https://github.com/MIC-DKFZ/nnUNet>
 
@@ -16,82 +16,7 @@ autopipeline\
   --nnunet
 ```
 
-AutoPipeline comes with many built-in features to make your data conversion easier:
-
-1. **Training Size**
-
-    Training size of the train-test-split. default = 1.0 (all data will be in imagesTr/labelsTr)
-
-    ```sh
-    --train_size [float]
-    ```
-
-2. **Random State**
-
-    Random state for the train-test-split. Uses sklearn's train_test_split(). default = 42
-
-    ```sh
-    --random_state [int]
-    ```
-
-3. **YAML for Label Regexes**
-
-    Path to a YAML file defining the regexes for the label names for regions of interest. Path can be absolute or relative. default = "" (each ROI will have its own label index in dataset.json for nnUNet)
-
-    ```sh
-    --roi_yaml_path [str]
-    ```
-
-    <details open>
-    <summary>Click for example</summary>
-    For example, if the YAML file contains:
-
-    ```yaml
-    GTV: GTV*
-    ```
-
-    All ROIs that match the regex of GTV* (e.g. GTVn, GTVp, GTVfoo) will be saved to one label under the name of GTV
-    </details>
-
-4. **Spacing**
-
-    The spacing for the output image. default = (1., 1., 0.)
-
-    ```sh
-    --spacing [Tuple: (int,int,int)]
-    ```
-
-5. **Parallel Job Execution**
-
-    The number of jobs to be run in parallel. Set -1 to use all cores. default = -1
-
-    ```sh
-    --n_jobs [int]
-    ```
-
-6. **Dataset Graph Visualization (not recommended for large datasets)**
-
-    Whether to visualize the entire dataset using PyViz.
-
-    ```sh
-    --visualize [flag]
-    ```
-
-7. **Continue Pipeline Processing**
-
-    Whether to continue a previous run of AutoPipeline that terminated prematurely. Will only work if the .imgtools directory was not deleted from previous run.
-
-    ```sh
-    --continue_processing [flag]
-    ```
-
-8. **Dry Run for Indexed Dataset**
-
-    Whether to execute a dry run, only generating the .imgtools folder.
-
-    ```sh
-    --dry_run [flag]
-    ```
+Modalities can also be set to `--modalities MR,RTSTRUCT`
 
 ## One-Step Preprocess and Train
 

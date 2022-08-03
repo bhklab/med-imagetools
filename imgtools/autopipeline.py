@@ -145,7 +145,7 @@ class AutoPipeline(Pipeline):
             roi_yaml_path = ""
             custom_train_test_split = False
             is_nnunet = False
-            if modalities != "CT" or modalities != "MR":
+            if modalities != "CT" and modalities != "MR":
                 raise ValueError("nnUNet inference can only be run on image files. Please set modalities to 'CT' or 'MR'")
         if is_nnunet:
             self.base_output_directory = self.output_directory
