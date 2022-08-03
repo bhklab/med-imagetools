@@ -63,8 +63,8 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
 
     ``` sh
     autopipeline\
-      [INPUT DIRECTORY] \
-      [OUTPUT DIRECTORY] \
+      [INPUT_DIRECTORY] \
+      [OUTPUT_DIRECTORY] \
       --modalities [str: CT,RTSTRUCT,PT] \
       --spacing [Tuple: (int,int,int)]\
       --n_jobs [int]\

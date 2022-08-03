@@ -1,64 +1,200 @@
-# Preparing Data for nnUNet
+# AutoPipeline Usage
 
-nnUNet repo can be found at: <https://github.com/MIC-DKFZ/nnUNet>
+To use AutoPipeline, follow the installation instructions found at <https://github.com/bhklab/med-imagetools#installing-med-imagetools>.
 
-## Processing DICOM Data with Med-ImageTools
-
-Ensure that you have followed the steps in <https://github.com/bhklab/med-imagetools#installing-med-imagetools> before proceeding.
-
-To convert your data from DICOM to NIfTI for training an nnUNet auto-segmentation model, run the following command:
+AutoPipeline will crawl and process any DICOM dataset. To run the most basic variation of the script, run the following command:
 
 ```sh
-autopipeline\
-  [INPUT DIRECTORY] \
-  [OUTPUT DIRECTORY] \
-  --modalities CT,RTSTRUCT \
-  --nnunet
+autopipeline INPUT_DIRECTORY OUTPUT_DIRECTORY --modalities MODALITY_LIST
 ```
 
-Modalities can also be set to `--modalities MR,RTSTRUCT`
+Replace INPUT_DIRECTORY with the directory containing all your DICOM data, OUTPUT_DIRECTORY with the directory that you want the data to be outputted to.
 
-## One-Step Preprocess and Train
+The `--modalities` option allows you to only process certain modalities that are present in the DICOM data. The available modalities are:
 
-Med-ImageTools generates a file in your output folder called `nnunet_preprocess_and_train.sh` that combines all the commands needed for preprocessing and training your nnUNet model. Run that shell script to get a fully trained nnUNet model with default settings.
+1. CT
+2. MR
+3. RTSTRUCT
+4. PT
+5. RTDOSE
 
-Alternatively, you can go through each step individually as follows below:
+Set the modalities you want to use by separating each one with a comma. For example, to use CT and RTSTRUCT, run AutoPipeline with `--modalities CT,RTSTRUCT`
 
-## nnUNet Preprocessing
+AutoPipeline comes with many more built-in features to make your data conversion easier:
 
-Follow the instructions for setting up your paths for nnUNet: <https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/setting_up_paths.md>
+1. **YAML for Label Regexes**
 
-Med-ImageTools generates the dataset.json that nnUNet requires in the output directory that you specify.
+    Whether to read a YAML file that defines regexes for label names for regions of interest. By default, it will look for and read from `INPUT_DIRECTORY/roi_names.yaml`
 
-The generated output directory structure will look something like:
+    ```sh
+    --read_yaml_label_names [flag]
+    ```
 
-```sh
-OUTPUT_DIRECTORY
-├── nnUNet_preprocessed
-├── nnUNet_raw_data_base
-│   └── nnUNet_raw_data
-│       └── Task500_HNSCC
-│           ├── nnunet_preprocess_and_train.sh
-│           └── ...
-└── nnUNet_trained_models
-```
+    Path to the above-mentioned YAML file. Path can be absolute or relative. default = "" (each ROI will have its own label index in dataset.json for nnUNet)
 
-Too allow nnUNet to preprocess your data for trianing, run the following command. Set XXX to the ID that you want to preprocess. This is your task ID. For example, for Task500_HNSCC, the task ID is 500. Task IDs must be between 500 and 999, so Med-ImageTools can run 500 instances with the nnUNet flag in a single output folder.
+    ```sh
+    --roi_yaml_path [str]
+    ```
 
-```sh
-nnUNet_plan_and_preprocess -t XXX --verify_dataset_integrity
-```
+    <details open>
+    <summary>Click for example</summary>
+    For example, if the YAML file contains:
 
-Make sure that in your `~/.bashrc` file, the environment variable for nnUNet's nnUNet_raw_data_base environment variable looks like:
+    ```yaml
+    GTV: GTV*
+    ```
 
-```sh
-export nnUNet_raw_data_base="/OUTPUT_DIRECTORY/nnUNet_raw_data_base"
-```
+    All ROIs that match the regex of GTV* (e.g. GTVn, GTVp, GTVfoo) will be saved to one label under the name of GTV
+    </details>
 
-## nnUNet Training
+    Ignore patients with no labels that match any regexes instead of throwing error.
 
-Once nnUNet has finished preprocessing, you may begin training your nnUNet model. To train your model, run the following command. Learn more about nnUNet's options here: <https://github.com/MIC-DKFZ/nnUNet#model-training>
+    ```sh
+    --ignore_missing_regex [flag]
+    ```
 
-```sh
-nnUNet_train CONFIGURATION TRAINER_CLASS_NAME TASK_NAME_OR_ID FOLD
-```
+2. **Spacing**
+
+    The spacing for the output image. default = (1., 1., 0.)
+
+    ```sh
+    --spacing [Tuple: (int,int,int)]
+    ```
+
+3. **Parallel Job Execution**
+
+    The number of jobs to be run in parallel. Set -1 to use all cores. default = -1
+
+    ```sh
+    --n_jobs [int]
+    ```
+
+4. **Dataset Graph Visualization (not recommended for large datasets)**
+
+    Whether to visualize the entire dataset using PyViz.
+
+    ```sh
+    --visualize [flag]
+    ```
+
+5. **Continue Pipeline Processing**
+
+    Whether to continue the most recent run of AutoPipeline that terminated prematurely for that output directory. Will only work if the `.imgtools` directory was not deleted from previous run. Using this flag will retain the same flags and parameters carried over from the previous run.
+
+    ```sh
+    --continue_processing [flag]
+    ```
+
+6. **Dry Run for Indexed Dataset**
+
+    Whether to execute a dry run, only generating the .imgtools folder.
+
+    ```sh
+    --dry_run [flag]
+    ```
+
+7. **Show Progress**
+
+    Whether to print processing progress to the standard output.
+
+    ```sh
+    --show_progress [flag]
+    ```
+
+8. **Warning on Subject Processing Errors**
+
+    Whether to warn instead of error when processing subjects
+
+    ```sh
+    --warn_on_error [flag]
+    ```
+
+9. **Overwrite Existing Output Files**
+
+    Whether to overwrite exisiting file outputs
+
+    ```sh
+    --overwrite [flag]
+    ```
+
+For nnUNet:
+
+1. **Format Output for nnUNet Training**
+
+    Whether to format output for nnUNet training. Modalities must be CT,RTSTRUCT or MR,RTSTRUCT. `--modalities CT,RTSTRUCT` or `--modalities MR,RTSTRUCT`
+
+    ```sh
+    --nnunet [flag]
+    ```
+
+    ```sh
+    OUTPUT_DIRECTORY
+    ├── nnUNet_preprocessed
+    ├── nnUNet_raw_data_base
+    │   └── nnUNet_raw_data
+    │       └── Task500_HNSCC
+    │           ├── imagesTr
+    │           ├── imagesTs
+    │           ├── labelsTr
+    │           └── labelsTs
+    └── nnUNet_trained_models
+    ```
+
+2. **Training Size**
+
+    Training size of the train-test-split. default = 1.0 (all data will be in imagesTr/labelsTr)
+
+    ```sh
+    --train_size [float]
+    ```
+
+3. **Random State**
+
+    Random state for the train-test-split. Uses sklearn's train_test_split(). default = 42
+
+    ```sh
+    --random_state [int]
+    ```
+
+4. **Custom Train-Test-Split YAML**
+
+    Whether to use a custom train-test-split. Must be in a file found at `INPUT_DIRECTORY/custom_train_test_split.yaml`. All subjects not defined in this file will be randomly split to fill the defined value for `--train_size` (default = 1.0). File must conform to:
+
+    ```yaml
+    train:
+        - subject_1
+        - subject_2
+        ...
+    test:
+        - subject_1
+        - subject_2
+        ...
+    ```
+
+    ```sh
+    --custom_train_test_split [flag]
+    ```
+
+For nnUNet Inference:
+
+1. **Format Output for nnUNet Inference**
+
+    Whether to format output for nnUNet Inference.
+
+    ```sh
+    --is_nnunet_inference [flag]
+    ```
+
+    ```sh
+    OUTPUT_DIRECTORY
+    ├── 0_subject1_0000.nii.gz
+    └── ...
+    ```
+
+2. **Path to `dataset.json`**
+
+    The path to the `dataset.json` file for nnUNet inference.
+
+    ```sh
+    --dataset_json_path [str]
+    ```

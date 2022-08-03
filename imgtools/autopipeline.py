@@ -730,7 +730,7 @@ def main():
                             ignore_missing_regex=args.ignore_missing_regex,
                             roi_yaml_path=args.roi_yaml_path,
                             custom_train_test_split=args.custom_train_test_split,
-                            is_nnunet_inference=args.is_nnunet_inference,
+                            is_nnunet_inference=args.nnunet_inference,
                             dataset_json_path=args.dataset_json_path,
                             continue_processing=args.continue_processing,
                             dry_run=args.dry_run)
