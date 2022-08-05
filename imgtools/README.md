@@ -182,7 +182,7 @@ For nnUNet Inference:
     Whether to format output for nnUNet Inference.
 
     ```sh
-    --is_nnunet_inference [flag]
+    --nnunet_inference [flag]
     ```
 
     ```sh
