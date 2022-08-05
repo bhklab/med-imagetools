@@ -67,4 +67,4 @@ def parser():
     # parser.add_argument("--custom_train_test_split_path", type=str,
     #                     help="Path to the YAML file defining the custom train-test-split.")
 
-    return parser.parse_known_args()[0]
+    return parser.parse_args()
