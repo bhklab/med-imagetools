@@ -14,3 +14,4 @@ torchio
 scikit-learn
 pyyaml
 dill
+attr
