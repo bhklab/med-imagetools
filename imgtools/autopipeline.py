@@ -4,7 +4,7 @@ import shutil
 import glob
 import pickle
 import struct
-from attr import has
+# from attr import has
 from matplotlib.style import available
 import numpy as np
 import sys
