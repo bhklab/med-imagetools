@@ -59,6 +59,14 @@ def crawl_one(folder):
                 except:
                     series_description = ""
 
+                try:
+                    acquisition_number = str(meta.AcquisitionNumber)
+                except:
+                    acquisition_number = ""
+
+                # try:
+                    
+
                 if patient not in database:
                     database[patient] = {}
                 if study not in database[patient]:
