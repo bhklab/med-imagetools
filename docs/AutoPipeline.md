@@ -2,9 +2,11 @@
 
 To use AutoPipeline, follow the installation instructions found at <https://github.com/bhklab/med-imagetools#installing-med-imagetools>.
 
+## Intro to AutoPipeline
+
 AutoPipeline will crawl and process any DICOM dataset. To run the most basic variation of the script, run the following command:
 
-```sh
+```
 autopipeline INPUT_DIRECTORY OUTPUT_DIRECTORY --modalities MODALITY_LIST
 ```
 
@@ -20,7 +22,8 @@ The `--modalities` option allows you to only process certain modalities that are
 
 Set the modalities you want to use by separating each one with a comma. For example, to use CT and RTSTRUCT, run AutoPipeline with `--modalities CT,RTSTRUCT`
 
-AutoPipeline comes with many more built-in features to make your data conversion easier:
+## AutoPipeline Flags
+AutoPipeline comes with many built-in features to make your data processing easier:
 
 1. **YAML for Label Regexes**
 
@@ -117,7 +120,7 @@ AutoPipeline comes with many more built-in features to make your data conversion
     --overwrite [flag]
     ```
 
-For nnUNet:
+### Additional nnUNet-specific flags
 
 1. **Format Output for nnUNet Training**
 
@@ -175,7 +178,7 @@ For nnUNet:
     --custom_train_test_split [flag]
     ```
 
-For nnUNet Inference:
+### Additional flags for nnUNet Inference
 
 1. **Format Output for nnUNet Inference**
 

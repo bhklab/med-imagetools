@@ -25,11 +25,11 @@ Med-Imagetools, a python package offers the perfect tool to transform messy medi
 
 A medical dataset, typically contains multiple different types of scans for a single patient in a single study. As seen in the figure below, the different scans containing DICOM of different modalities are interdependent on each other. For making effective machine learning models, one ought to take different modalities into account.
 
-<img src="https://github.com/bhklab/med-imagetools/blob/master/images/graph.png" align="center" width="480" ><figcaption>Fig.1 - Different network topology for different studies of different patients</figcaption></a>  
+<img src="https://github.com/bhklab/med-imagetools/blob/master/docs/images/graph.png" align="center" width="480" ><figcaption>Fig.1 - Different network topology for different studies of different patients</figcaption></a>  
 
 Med-Imagetools is a unique tool, which focuses on subject based Machine learning. It crawls the dataset and makes a network by connecting different modalities present in the dataset. Based on the user defined modalities, med-imagetools, queries the graph and process the queried raw DICOMS. The processed DICOMS are saved as nrrds, which med-imagetools converts to torchio subject dataset and eventually torch dataloader for ML pipeline.
 
-<img src="https://github.com/bhklab/med-imagetools/blob/master/images/autopipeline.png" align="center" width="500"><figcaption>Fig.2 - Med-Imagetools AutoPipeline diagram</figcaption></a>  
+<img src="https://github.com/bhklab/med-imagetools/blob/master/docs/images/autopipeline.png" align="center" width="500"><figcaption>Fig.2 - Med-Imagetools AutoPipeline diagram</figcaption></a>  
 
 ## Installing med-imagetools
 
