@@ -25,11 +25,11 @@ Med-Imagetools, a python package offers the perfect tool to transform messy medi
 
 A medical dataset, typically contains multiple different types of scans for a single patient in a single study. As seen in the figure below, the different scans containing DICOM of different modalities are interdependent on each other. For making effective machine learning models, one ought to take different modalities into account.
 
-<img src="./docs/images/graph.png" align="center" width="480" ><figcaption>Fig.1 - Different network topology for different studies of different patients</figcaption></a>  
+<img src="images/graph.png" align="center" width="480" ><figcaption>Fig.1 - Different network topology for different studies of different patients</figcaption></a>  
 
 Med-Imagetools is a unique tool, which focuses on subject based Machine learning. It crawls the dataset and makes a network by connecting different modalities present in the dataset. Based on the user defined modalities, med-imagetools, queries the graph and process the queried raw DICOMS. The processed DICOMS are saved as nrrds, which med-imagetools converts to torchio subject dataset and eventually torch dataloader for ML pipeline.
 
-<img src="./docs/images/autopipeline.png" align="center" width="500"><figcaption>Fig.2 - Med-Imagetools AutoPipeline diagram</figcaption></a>  
+<img src="images/autopipeline.png" align="center" width="500"><figcaption>Fig.2 - Med-Imagetools AutoPipeline diagram</figcaption></a>  
 
 ## Installing med-imagetools
 
@@ -87,19 +87,8 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
     ```
 
-## Demo (Outdated as of v0.4)
 
-These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
-
-### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
-
-### Tutorial 2: Machine Learning with med-imagetools and torchio
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
-
-## Contributors
+### Contributors
 
 Thanks to the following people who have contributed to this project:
 
@@ -111,7 +100,7 @@ Thanks to the following people who have contributed to this project:
 
 ## Contact
 
-If you have any questions/concerns, you can reach the following contributors at sejin.kim@uhnresearch.ca
+If you have any questions/concerns, you can reach the main development team at sejin.kim@uhnresearch.ca or open an issue on our [GitHub repository](https://github.com/bhklab/med-imagetools)
 
 ## License
 

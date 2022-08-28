@@ -4,7 +4,7 @@ import shutil
 import glob
 import pickle
 import struct
-from attr import has
+# from attr import has
 from matplotlib.style import available
 import numpy as np
 import sys
@@ -145,7 +145,7 @@ class AutoPipeline(Pipeline):
             roi_yaml_path = ""
             custom_train_test_split = False
             is_nnunet = False
-            if modalities != "CT" or modalities != "MR":
+            if modalities != "CT" and modalities != "MR":
                 raise ValueError("nnUNet inference can only be run on image files. Please set modalities to 'CT' or 'MR'")
         if is_nnunet:
             self.base_output_directory = self.output_directory
@@ -621,20 +621,20 @@ class AutoPipeline(Pipeline):
                                 tuple(self.nnunet_info["modalities"].keys()),
                                 {v:k for k, v in self.existing_roi_names.items()},
                                 os.path.split(self.input_directory)[1])
-            _, child = os.path.split(self.output_directory)
-            shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
+            # _, child = os.path.split(self.output_directory)
+            shell_path = pathlib.Path(self.output_directory, "nnunet_preprocess_and_train.sh").as_posix()
             if os.path.exists(shell_path):
                 os.remove(shell_path)
             with open(shell_path, "w", newline="\n") as f:
                 output = "#!/bin/bash\n"
-                output += "set -e"
+                output += "set -e\n\n"
                 output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
                 output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
                 output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
                 output += f'nnUNet_plan_and_preprocess -t {self.task_id} --verify_dataset_integrity\n\n'
                 output += 'for (( i=0; i<5; i++ ))\n'
                 output += 'do\n'
-                output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
+                output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i\n'
                 output += 'done'
                 f.write(output)
             markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
@@ -702,7 +702,7 @@ class AutoPipeline(Pipeline):
                 # for subject_id in subject_ids:
                 #     self._process_wrapper(subject_id)
                 self.broken_patients = []
-                if not self.is_nnunet:
+                if not self.is_nnunet and not self.is_nnunet_inference:
                     all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
                     all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
                     for e in all_patient_names:
@@ -730,7 +730,7 @@ def main():
                             ignore_missing_regex=args.ignore_missing_regex,
                             roi_yaml_path=args.roi_yaml_path,
                             custom_train_test_split=args.custom_train_test_split,
-                            is_nnunet_inference=args.is_nnunet_inference,
+                            is_nnunet_inference=args.nnunet_inference,
                             dataset_json_path=args.dataset_json_path,
                             continue_processing=args.continue_processing,
                             dry_run=args.dry_run)
