@@ -110,7 +110,7 @@ def read_dicom_auto(path, series=None):
             rtstruct.metadata.update(all_modality_metadata)
             return rtstruct
         elif modality == 'RTDOSE':
-            rtdose = read_dicom_rtdose(path)
+            rtdose = read_dicom_rtdose(dcm)
             rtdose.metadata.update(all_modality_metadata)
             return rtdose
         else:
