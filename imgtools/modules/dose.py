@@ -38,7 +38,10 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
-        dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
+        if isinstance(path, str) or len(path) == 1:
+            dcms = [path]
+        else:
+            dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
 
         if len(dcms) < 2:
             dose = sitk.ReadImage(dcms[0])
