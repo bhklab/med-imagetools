@@ -17,7 +17,6 @@ tests/temp
 __pycache__
 .pytest_cache
 *.egg-info
-*.csv
 *.json
 
 # Created by https://www.gitignore.io/api/emacs,python,jupyternotebooks
