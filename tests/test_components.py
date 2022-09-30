@@ -93,7 +93,7 @@ class select_roi_names(tio.LabelTransform):
 
 
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
-@pytest.mark.parametrize("modalities", ["CT", "CT,RTSTRUCT"])#, "CT,RTDOSE,PT"])
+@pytest.mark.parametrize("modalities", ["CT", "CT,RTSTRUCT", "CT,RTSTRUCT,RTDOSE"])#, "CT,RTDOSE,PT"])
 class TestComponents:
     """
     For testing the autopipeline and dataset components of the med-imagetools package
