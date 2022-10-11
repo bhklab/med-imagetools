@@ -40,7 +40,7 @@ class Dataset(tio.SubjectsDataset):
             path: Path to the output directory passed to the autopipeline script. The output directory should have all the user mentioned modalities processed and present in their folder. The directory
                   should additionally have dataset.csv which stores all the metadata
         """
-        path_metadata = pathlib.Path(path,"dataset.csv").as_posix()
+        path_metadata = pathlib.Path(path, "dataset.csv").as_posix()
         if not os.path.exists(path_metadata):
             raise ValueError("The specified path has no file name {}".format(path_metadata))
         df_metadata = pd.read_csv(path_metadata,index_col=0)

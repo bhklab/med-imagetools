@@ -163,7 +163,6 @@ class TestComponents:
     def test_dataset(self, modalities):
         """
         Testing the Dataset class
-        Note that test is not for 
         """
         output_path_mod = pathlib.Path(self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))).as_posix()
         comp_path = pathlib.Path(output_path_mod).resolve().joinpath('dataset.csv').as_posix()
