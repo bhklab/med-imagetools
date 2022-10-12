@@ -15,7 +15,6 @@ T = TypeVar('T')
 def read_image(path):
     reader = sitk.ImageSeriesReader()
     dicom_names = reader.GetGDCMSeriesFileNames(path)
-    print(dicom_names)
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -38,15 +37,18 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
-        dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
-
-        if len(dcms) < 2:
-            dose = sitk.ReadImage(dcms[0])
+        # change log (2022-10-12)
+        if ".dcm" in path:
+            dose = sitk.ReadImage(path)
         else:
-            dose = read_image(path)[:,:,:,0]
-
+            dose = read_image(path) 
+        
+        # if 4D, make 3D
+        if dose.GetDimension() == 4:
+            dose = dose[:,:,:,0]
+        
         #Get the metadata
-        df = dcmread(dcms[0])
+        df = dcmread(path)
 
         #Convert to SUV
         factor = float(df.DoseGridScaling)
