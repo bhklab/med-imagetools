@@ -1,9 +1,8 @@
 name: publish-pypi
 
 on:
-  workflow_run:
-    workflows: [main-ci]
-    types: [completed]
+  pull_request:
+    types: [closed]
 
 jobs:
   on-success:
