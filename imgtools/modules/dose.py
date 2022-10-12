@@ -37,10 +37,11 @@ class Dose(sitk.Image):
         '''
         Reads the data and returns the data frame and the image dosage in SITK format
         '''
+        # change log (2022-10-12)
         if ".dcm" in path:
             dose = sitk.ReadImage(path)
         else:
-            dose = read_image(path)
+            dose = read_image(path) 
         
         # if 4D, make 3D
         if dose.GetDimension() == 4:
