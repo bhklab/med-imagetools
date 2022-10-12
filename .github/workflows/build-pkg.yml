@@ -30,7 +30,7 @@ jobs:
         env:
           USERNAME: ${{ secrets.pypi_username }}
           KEY: ${{ secrets.pypi_pw }}
-        run: python -m twine upload --skip-existing -u $USERNAME -p $KEY dist/*
+        run: python -m twine upload -u $USERNAME -p $KEY dist/*
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
