@@ -8,7 +8,8 @@
 
 ## Latest Updates (v1.0.3) - Oct 13th, 2022
 * Documentation is now available at: https://med-imagetools.readthedocs.io
-* Fixed relative path handling issue #57
+* Fixed relative path handling issue #53 and extra patient folder issue #57
+* Subseries crawl feature added, but not yet integrated into AutoPipeline. Will collect user data with prototypes first.
 
 #### Med-ImageTools core features
 * AutoPipeline CLI
