@@ -1,9 +1,8 @@
-name: pypi-on-master-push
+name: pypi-manual
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+
 jobs:
   bob-the-builder:
     runs-on: ubuntu-latest
