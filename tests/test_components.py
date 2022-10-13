@@ -122,7 +122,7 @@ class TestComponents:
         n_jobs = 2
         output_path_mod = pathlib.Path(self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))).as_posix()
         #Initialize pipeline for the current setting
-        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs,spacing=(5,5,5))
+        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs,spacing=(5,5,5), overwrite=True)
         #Run for different modalities
         comp_path = pathlib.Path(output_path_mod, "dataset.csv").as_posix()
         pipeline.run()

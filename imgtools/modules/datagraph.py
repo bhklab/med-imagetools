@@ -337,7 +337,6 @@ class DataGraph:
         else:
             raise ValueError("Please enter the correct query")
         
-        print(self.mods, final_df)
         final_df.reset_index(drop=True, inplace=True)
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
@@ -398,8 +397,6 @@ class DataGraph:
             col_ids = [cols for cols in list(final_df.columns)[1:] if bad != cols.split("_")[1]]
             final_df = final_df[[*list(final_df.columns)[:1], *col_ids]]
         
-        final_df.to_csv("final_df.csv")
-
         if return_components:
             return self.final_dict
         else:
@@ -529,7 +526,6 @@ class DataGraph:
                 for j in range(len(CT_series)):
                     #Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
                     mods_present = set([items.split("_")[1] for items in save_folder_comp[j].keys() if items.split("_")[0] == "folder"])
-                    print('\nmods_present', mods_present, mods_wanted)
                     #Checking if all the read modalities are present in a component
                     if mods_wanted.issubset(mods_present) == True:
                         remove_index.append(j)

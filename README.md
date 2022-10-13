@@ -6,9 +6,9 @@
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 [![Documentation Status](https://readthedocs.org/projects/med-imagetools/badge/?version=documentation)](https://med-imagetools.readthedocs.io/en/documentation/?badge=documentation)
 
-### Latest Updates (v1.0.2) - Oct 12th, 2022
-Documentation is now available at: https://med-imagetools.readthedocs.io
-
+## Latest Updates (v1.0.3) - Oct 13th, 2022
+* Documentation is now available at: https://med-imagetools.readthedocs.io
+* Fixed relative path handling issue #57
 
 #### Med-ImageTools core features
 * AutoPipeline CLI

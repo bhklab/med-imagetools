@@ -61,7 +61,8 @@ class AutoPipeline(Pipeline):
                  is_nnunet_inference=False,
                  dataset_json_path="",
                  continue_processing=False,
-                 dry_run=False):
+                 dry_run=False,
+                 verbose=False):
         """Initialize the pipeline.
 
         Parameters
@@ -114,6 +115,7 @@ class AutoPipeline(Pipeline):
 
         self.continue_processing = continue_processing
         self.dry_run = dry_run
+        self.v = verbose
 
         if dry_run:
             is_nnunet = False
@@ -127,13 +129,20 @@ class AutoPipeline(Pipeline):
         # pipeline configuration
         if not os.path.isabs(input_directory):
             input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
+        else:
+            input_directory = pathlib.Path(input_directory).as_posix()  # consistent parsing. ensures last child directory doesn't end with slash
+        
         if not os.path.isabs(output_directory):
             output_directory = pathlib.Path(os.getcwd(), output_directory).as_posix()
+        else:
+            output_directory = pathlib.Path(output_directory).as_posix() # consistent parsing. ensures last child directory doesn't end with slash
+
         if not os.path.exists(output_directory):
             # raise FileNotFoundError(f"Output directory {output_directory} does not exist")
             os.makedirs(output_directory)
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
+        
         self.input_directory = pathlib.Path(input_directory).as_posix()
         self.output_directory = pathlib.Path(output_directory).as_posix()
         
@@ -399,7 +408,8 @@ class AutoPipeline(Pipeline):
                 mult_conn = colname.split("_")[-1].isnumeric()
                 num = colname.split("_")[-1]
 
-                # print(output_stream) #could include for verbose
+                if self.v:
+                    print("output_stream:", output_stream)
 
                 if read_results[i] is None:
                     print("The subject id: {} has no {}".format(subject_id, colname))
@@ -413,7 +423,8 @@ class AutoPipeline(Pipeline):
                         extractor.SetIndex([0, 0, 0, 0])    
                         
                         image = extractor.Execute(image)
-                        # print(image.GetSize()) #could include with verbose
+                        if self.v:
+                            print("image.GetSize():", image.GetSize())
                     try:
                         image = self.resample(image)
                     except Exception as e:
@@ -464,10 +475,7 @@ class AutoPipeline(Pipeline):
                         doses = read_results[i]
                     
                     # save output
-                    if not mult_conn:
-                        self.output(subject_id, doses, output_stream)
-                    else:
-                        self.output(f"{subject_id}_{num}", doses, output_stream)
+                    self.output(subject_id, doses, output_stream)
                     metadata[f"size_{output_stream}"] = str(doses.GetSize())
                     metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
@@ -515,10 +523,10 @@ class AutoPipeline(Pipeline):
                         if name not in self.existing_roi_names.keys():
                             self.existing_roi_names[name] = len(self.existing_roi_names)
                     mask.existing_roi_names = self.existing_roi_names
-                    # print(self.existing_roi_names,"alskdfj")
 
-                    # save output
-                    # print(mask.GetSize()) #could include with verbose
+                    
+                    if self.v:
+                        print("mask.GetSize():", mask.GetSize())
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
@@ -534,18 +542,18 @@ class AutoPipeline(Pipeline):
                         if len(mask_arr.shape) == 3:
                             mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
                         
-                        # print(mask_arr.shape) #could include with verbose
+                        if self.v:
+                            print(mask_arr.shape)
+
                         roi_names_list = list(mask.roi_names.keys())
                         for i in range(mask_arr.shape[0]):
                             new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
                             new_mask.CopyInformation(mask)
                             new_mask = Segmentation(new_mask)
                             mask_to_process = new_mask
-                            if not mult_conn:
-                                # self.output(roi_names_list[i], mask_to_process, output_stream)
-                                self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
-                            else:
-                                self.output(f"{subject_id}_{num}", mask_to_process, output_stream, True, roi_names_list[i])
+                            
+                            # output
+                            self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
                     
                     if hasattr(structure_set, "metadata") and structure_set.metadata is not None:
                         metadata.update(structure_set.metadata)
@@ -561,10 +569,8 @@ class AutoPipeline(Pipeline):
                         Warning("No CT image present. Returning PT/PET image without resampling.")
                         pet = read_results[i]
 
-                    if not mult_conn:
-                        self.output(subject_id, pet, output_stream)
-                    else:
-                        self.output(f"{subject_id}_{num}", pet, output_stream)
+                    # output
+                    self.output(subject_id, pet, output_stream)
                     metadata[f"size_{output_stream}"] = str(pet.GetSize())
                     metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
 
@@ -665,7 +671,7 @@ class AutoPipeline(Pipeline):
         """Execute the pipeline, possibly in parallel.
         """
         # Joblib prints progress to stdout if verbose > 50
-        verbose = 51 if self.show_progress else 0
+        verbose = 51 if self.v or self.show_progress else 0
 
         subject_ids = self._get_loader_subject_ids()
         patient_ids = []
@@ -733,7 +739,8 @@ def main():
                             is_nnunet_inference=args.is_nnunet_inference,
                             dataset_json_path=args.dataset_json_path,
                             continue_processing=args.continue_processing,
-                            dry_run=args.dry_run)
+                            dry_run=args.dry_run,
+                            verbose=args.verbose)
     if not args.dry_run:
         print(f'starting AutoPipeline...')
         pipeline.run()
