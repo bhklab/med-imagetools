@@ -257,7 +257,7 @@ class DataGraph:
         '''
         #Basic processing of just one modality
         supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR']
-        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2}
+        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5}
         self.mods   = query_string.split(",")
         self.mods_n = len(self.mods)
 
@@ -278,28 +278,29 @@ class DataGraph:
                 valid = query_string_rev
             else:
                 raise ValueError("Invalid Query. Select valid pairs.")
+            
             #For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
             if edge_type in [0, 1, 2]:
                 edge_list = [0, 1, 2]
                 if edge_type==0:
                     #Search for subgraphs with edges 0 or (1 and 2)
-                    regex_term = '((?=.*0)|((?=.*1)(?=.*2)))'
+                    regex_term = '(((?=.*0)|(?=.*5)(?=.*6))|((?=.*1)(?=.*2)))'
                     mod = [i for i in self.mods if i in ['CT', 'MR']][0] # making folder_mod CT/MR agnostic <-- still needs testing
                     final_df = self.graph_query(regex_term, edge_list, f"folder_{mod}")
                 elif edge_type==1:
                     #Search for subgraphs with edges 1 or (0 and 2)
-                    regex_term = '((?=.*1)|((?=.*0)(?=.*2)))'
+                    regex_term = '((?=.*1)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
                     final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT")
                 elif edge_type==2:
                     #Search for subgraphs with edges 2 or (1 and 0)
-                    regex_term = '((?=.*2)|((?=.*0)(?=.*1)))'
+                    regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
                     final_df = self.graph_query(regex_term, edge_list, "RTDOSE") 
             else:
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type, ["study_x","patient_ID_x","series_x","folder_x","series_y","folder_y"]]
                 node_dest = valid.split(",")[0]
                 node_origin = valid.split(",")[1]
                 final_df.rename(columns={"study_x": "study", 
-                                         "patient_ID_x": "patient_ID", 
+                                         "patient_ID_x": "patient_ID",
                                          "series_x": f"series_{node_dest}", 
                                          "series_y": f"series_{node_origin}", 
                                          "folder_x": f"folder_{node_dest}", 
@@ -307,33 +308,36 @@ class DataGraph:
 
         elif self.mods_n > 2:
             #Processing of combinations of modality
+            bads = ["RTPLAN"]
+            # CT/MR,RTSTRUCT,RTDOSE
             if (("CT" in query_string) or ('MR' in query_string)) & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" not in query_string):
                 #Fetch the required data. Checks whether each study has edge 2 and (1 or 0)
-                regex_term = '(?=.*(1|0))(?=.*2)'
-                edge_list = [0, 1, 2]
-                final_df = self.graph_query(regex_term, edge_list) 
-
+                regex_term = '((?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)'
+                edge_list = [0, 1, 2, 5, 6]
+            # CT/MR,RTSTRUCT,RTDOSE,PT
             elif (("CT" in query_string) or ('MR' in query_string))  & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" in query_string):
                 #Fetch the required data. Checks whether each study has edge 2,3,4 and (1 or 0)
-                regex_term = '(?=.*(1|0))(?=.*2)(?=.*3)(?=.*4)'
+                regex_term = '((?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)(?=.*3)(?=.*4)' # fix
                 edge_list = [0, 1, 2, 3, 4]
-                final_df = self.graph_query(regex_term, edge_list) 
-
+            #CT/MR,RTSTRUCT,PT
             elif (("CT" in query_string) or ('MR' in query_string))  & ("RTSTRUCT" in query_string) & ("PT" in query_string) & ("RTDOSE" not in query_string):
                 #Fetch the required data. Checks whether each study has edge 2,3,4
                 regex_term = '(?=.*2)(?=.*3)(?=.*4)'
-                edge_list = [2, 3, 4]
-                final_df = self.graph_query(regex_term, edge_list) 
-            
+                edge_list = [2, 3, 4]            
+            #CT/MR,RTDOSE,PT
             elif (("CT" in query_string) or ('MR' in query_string))  & ("RTSTRUCT" not in query_string) & ("PT" in query_string) & ("RTDOSE" in query_string):
                 #Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Remove RTSTRUCT later
-                regex_term = '(?=.*4)((?=.*1)|((?=.*2)(?=.*0)))'
-                edge_list = [0, 1, 2, 4]
-                final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT") 
+                regex_term = '(?=.*4)((?=.*1)|((?=.*2)((?=.*0)|(?=.*5)(?=.*6))))'
+                edge_list = [0, 1, 2, 4, 5, 6]
+                bads.append("RTSTRUCT")
             else:
                 raise ValueError("Please enter the correct query")
+            
+            final_df = self.graph_query(regex_term, edge_list, bads)
         else:
             raise ValueError("Please enter the correct query")
+        
+        print(self.mods, final_df)
         final_df.reset_index(drop=True, inplace=True)
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
@@ -348,7 +352,7 @@ class DataGraph:
     def graph_query(self, 
                     regex_term: str,
                     edge_list: List[int],
-                    change_df: str = "",
+                    change_df: List[str],
                     return_components: bool = False,
                     remove_less_comp: bool = True):
         '''
@@ -389,15 +393,17 @@ class DataGraph:
         final_df = self._get_df(df_processed, relevant_study_id, remove_less_comp)
 
         # Removing columns
-        if len(change_df) > 0:
+        for bad in change_df:
             # Find columns with change_df string present
-            col_ids = [cols for cols in final_df.columns if change_df not in cols]
-            final_df = final_df[col_ids]
+            col_ids = [cols for cols in list(final_df.columns)[1:] if bad != cols.split("_")[1]]
+            final_df = final_df[[*list(final_df.columns)[:1], *col_ids]]
         
-        # if return_components:
-        #     return self.final_dict
-        # else:
-        return final_df
+        final_df.to_csv("final_df.csv")
+
+        if return_components:
+            return self.final_dict
+        else:
+            return final_df
 
     def _form_agg(self):
         '''
@@ -408,10 +414,11 @@ class DataGraph:
         self.df_new.reset_index(level=0, inplace=True) 
         self.df_new["edge_type"] = self.df_new["edge_type_str"]
 
-    def _get_df(self,
+    def _get_df(self, 
                 df_edges_processed,
-                rel_studyids: List[str],
+                rel_studyids,
                 remove_less_comp = True):
+    
         '''
         Assumption
         ----------
@@ -439,105 +446,91 @@ class DataGraph:
         Changelog
         ---------
         * June 14th, 2022: Changing from studyID-based to sample-based for loop
+        * Oct 11th, 2022: Reverted to studyID-based loop + improved readability and make CT,RTSTRUCT,RTDOSE mode pass tests
         '''
         #Storing all the components across all the studies
         self.final_dict = []
         final_df = []
         #For checking later if all the required modalities are present in a component or not
         mods_wanted = set(self.mods)
-
-        # per-sample
-        for i in range(len(df_edges_processed)):
-            row = df_edges_processed.iloc[i]
-            series   = row.series_x
-            modality = row.modality_x
-            folder   = row.folder_x
-            
-            series_y = row.series_y
-            modality_y = row.modality_y
-            folder_y = row.folder_y
-
-            temp = {"study": row.study_x,
-                    series: {"modality": modality,
-                             "folder": folder},
-                    row.series_y: {"modality": modality_y,
-                                   "folder": folder_y,
-                                   "conn_to": modality}}
-
-            folder_save = {'study': row.study_x,
-                           'patient_ID': row.patient_ID_x,
-                           f'series_{modality}': series,
-                           f'folder_{modality}': folder,
-                           f'series_{modality_y}': series_y,
-                           f'series_{modality_y}': folder_y}
-
-
-
+        
         #Determine the number of components
-        for i in range(len(rel_studyids)): # per study_id
-            df_temp = df_edges_processed.loc[df_edges_processed.study_x == rel_studyids[i]]
-            CT_locs = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
-            comp = CT_locs.series_x.unique()
+        for i, study in enumerate(rel_studyids): # per study_id
+            df_temp   = df_edges_processed.loc[df_edges_processed.study_x == study]
+            CT_locs   = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
+            CT_series = CT_locs.series_x.unique()
             A = []
             save_folder_comp = []
-            #Initialization. For each component intilize a dictionary with the CTs and their connections
-            for j in range(len(comp)):
-                #For each component, this loop stores the CT and its connections
-                temp = {}
-                #For saving the components in a format easier for the main pipeline
-                folder_save = {}
-                temp["study"] = rel_studyids[i]
-                temp[comp[j]] = {}
+            
+            #Initialization. For each component intialize a dictionary with the CTs and their connections
+            for ct in CT_series:
+                df_connections = CT_locs.loc[CT_locs.series_x == ct]
                 
-                df_connections = CT_locs.loc[CT_locs.series_x == comp[j]] 
-                temp[comp[j]]["modality"] = df_connections["modality_x"].iloc[0] #CT/MR
-                temp[comp[j]]["folder"] = df_connections["folder_x"].iloc[0]
-                #Saving some items in folder_save dictionary
-                folder_save["study"] = rel_studyids[i]
-                folder_save["patient_ID"] = df_connections["patient_ID_x"].iloc[0]
-                folder_save[f"series_{df_connections['modality_x'].iloc[0]}"] = comp[j]
-                folder_save[f"folder_{df_connections['modality_x'].iloc[0]}"] = df_connections["folder_x"].iloc[0]
-                temp_dfconn = df_connections[["series_y", "modality_y", "folder_y"]]
+                if len(df_connections) > 0:
+                    row = df_connections.iloc[0]
+                else:
+                    row = df_connections
+                    
+                series   = row.series_x
+                modality = row.modality_x
+                folder   = row.folder_x
+                
+                #For each component, this loop stores the CT and its connections
+                temp = {"study": study,
+                          ct: {"modality": modality,
+                               "folder": folder}}
+                
+                #For saving the components in a format easier for the main pipeline
+                folder_save = {"study": study,
+                               'patient_ID': row.patient_ID_x,
+                                f'series_{modality}': series,
+                                f'folder_{modality}': folder}
+                
+                #This loop stores connection of the CT
+                for k in range(len(df_connections)):
+                    row_y = df_connections.iloc[k]
+                    series_y = row_y.series_y
+                    folder_y = row_y.folder_y
+                    modality_y = row_y.modality_y
+                    
+                    temp[row.series_y] = {"modality": modality_y,
+                                          "folder": folder_y,
+                                          "conn_to": modality}
 
-                for k in range(len(temp_dfconn)):
-                    #This loop stores connection of the CT
-                    temp[temp_dfconn.iloc[k,0]] = {"modality": temp_dfconn.iloc[k,1], "folder": temp_dfconn.iloc[k,2], "conn_to": temp[comp[j]]["modality"]}
                     #Checks if there is already existing connection
-                    key, key_series = self._check_save(folder_save,temp_dfconn.iloc[k,1],temp[comp[j]]["modality"]) #CT/MR
-                    folder_save[key_series] = temp_dfconn.iloc[k,0]
-                    folder_save[key] = temp_dfconn.iloc[k,2]
+                    key, key_series = self._check_save(folder_save, modality_y, modality) #CT/MR                    
+                    folder_save[key_series] = series_y
+                    folder_save[key] = folder_y
+                
                 A.append(temp)
                 save_folder_comp.append(folder_save)
-            
+                       
             #For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
-            rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]
-            flag = 0
+            rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]            
             for j in range(len(rest_locs)):
-                for k in range(len(comp)):
-                    if rest_locs.iloc[j,0] in A[k]:
-                        A[k][rest_locs.iloc[j,3]] = {"modality": rest_locs.iloc[j,4], "folder": rest_locs.iloc[j,5], "conn_to": rest_locs.iloc[j,1]}
-                        if rest_locs.iloc[j,4]=="RTDOSE":
-                            #RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4], "CT")
-                            save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
-                            save_folder_comp[k][key] = rest_locs.iloc[j,5]
-                        else: #Cases such as RTSTRUCT-PT
-                            #if there is already a connection and one more same category modality wants to connect
-                            key, key_series = self._check_save(save_folder_comp[k],rest_locs.iloc[j,4],rest_locs.iloc[j,1])
-                            save_folder_comp[k][key_series] = rest_locs.iloc[j,3]
-                            save_folder_comp[k][key] = rest_locs.iloc[j,5]
-                        flag = 0
-                    else:
-                        flag = 1
-            if flag==1:
-                raise ValueError(f"In studyID: {rel_studyids[i]}, one of the edges had no match to any of the components which start from CT/MR. Please check the data")
+                edge = rest_locs.iloc[j]
+                for k in range(len(CT_series)):
+                    A[k][edge['series_y']] = {"modality": edge['modality_y'], 
+                                              "folder": edge['folder_y'], 
+                                              "conn_to": edge['modality_x']}
+                    modality_origin = edge['modality_x']
+
+                    # RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
+                    if edge['modality_y'] == "RTDOSE":
+                        modality_origin = "CT"
+
+                    key, key_series = self._check_save(save_folder_comp[k], edge['modality_y'], modality_origin)
+                    save_folder_comp[k][key_series] = edge['series_y']
+                    save_folder_comp[k][key] = edge['folder_y']
+                    flag = False
 
             remove_index = []
             if remove_less_comp:
-                for j in range(len(comp)):
+                for j in range(len(CT_series)):
                     #Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
                     mods_present = set([items.split("_")[1] for items in save_folder_comp[j].keys() if items.split("_")[0] == "folder"])
-                    #Checking if all the reqd modalities are present in a component
+                    print('\nmods_present', mods_present, mods_wanted)
+                    #Checking if all the read modalities are present in a component
                     if mods_wanted.issubset(mods_present) == True:
                         remove_index.append(j)
                 save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        

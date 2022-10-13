@@ -4,9 +4,13 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
+[![Documentation Status](https://readthedocs.org/projects/med-imagetools/badge/?version=documentation)](https://med-imagetools.readthedocs.io/en/documentation/?badge=documentation)
 
-### Latest Updates (v0.4.4) - July 27th, 2022
-New features include:
+### Latest Updates (v1.0.2) - Oct 12th, 2022
+Documentation is now available at: https://med-imagetools.readthedocs.io
+
+
+#### Med-ImageTools core features
 * AutoPipeline CLI
 * `nnunet` nnU-Net compatibility mode
 * Built-in train/test split for both normal/nnU-Net modes
