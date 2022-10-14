@@ -59,6 +59,14 @@ def crawl_one(folder):
                 except:
                     series_description = ""
 
+                try:
+                    subseries = str(meta.AcquisitionNumber)
+                except:
+                    subseries = "default"
+
+                # try:
+                    
+
                 if patient not in database:
                     database[patient] = {}
                 if study not in database[patient]:
@@ -66,16 +74,18 @@ def crawl_one(folder):
                 if series not in database[patient][study]:
                     parent, _ = os.path.split(folder)
                     rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
-                    database[patient][study][series] = {'instances': [],
-                                                        'instance_uid': instance,
-                                                        'modality': meta.Modality,
-                                                        'description': series_description,
-                                                        'reference_ct': reference_ct,
-                                                        'reference_rs': reference_rs,
-                                                        'reference_pl': reference_pl,
-                                                        'reference_frame': reference_frame,
-                                                        'folder': rel_path}
-                database[patient][study][series]['instances'].append(instance)
+                    database[patient][study][series] = {'description': series_description}
+                if subseries not in database[patient][study][series]:
+                    database[patient][study][series][subseries] = {'instances': [],
+                                                                   'instance_uid': instance,
+                                                                   'modality': meta.Modality,
+                                                                   'reference_ct': reference_ct,
+                                                                   'reference_rs': reference_rs,
+                                                                   'reference_pl': reference_pl,
+                                                                   'reference_frame': reference_frame,
+                                                                   'folder': rel_path}
+
+                database[patient][study][series][subseries]['instances'].append(instance)
             except:
                 pass
     
@@ -86,13 +96,21 @@ def to_df(database_dict):
     for pat in database_dict:
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
-                if series != 'description':
-                    columns = ['patient_ID', 'study', 'study_description', 'series', 'series_description', 'modality', 'instances', 'instance_uid', 'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
-                    values = [pat, study, database_dict[pat][study]['description'], series, database_dict[pat][study][series]['description'], database_dict[pat][study][series]['modality'], len(database_dict[pat][study][series]['instances']),
-                    database_dict[pat][study][series]['instance_uid'], database_dict[pat][study][series]['reference_ct'], database_dict[pat][study][series]['reference_rs'], database_dict[pat][study][series]['reference_pl'],
-                    database_dict[pat][study][series]['reference_frame'], database_dict[pat][study][series]['folder']]
-                    df_add = pd.DataFrame([values], columns=columns)
-                    df = pd.concat([df, df_add], ignore_index=True)
+                if series != 'description': # skip description key in dict
+                    for subseries in database_dict[pat][study][series]:
+                        if subseries != 'description': # skip description key in dict
+                            columns = ['patient_ID', 'study', 'study_description', 
+                                       'series', 'series_description', 'subseries', 'modality', 
+                                       'instances', 'instance_uid', 
+                                       'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
+                            values = [pat, study, database_dict[pat][study]['description'], 
+                                      series, database_dict[pat][study][series]['description'], 
+                                      subseries, database_dict[pat][study][series][subseries]['modality'], 
+                                      len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
+                                      database_dict[pat][study][series][subseries]['reference_ct'], database_dict[pat][study][series][subseries]['reference_rs'], 
+                                      database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder']]
+                            df_add = pd.DataFrame([values], columns=columns)
+                            df = pd.concat([df, df_add], ignore_index=True)
     return df
 
 def crawl(top, 
