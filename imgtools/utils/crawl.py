@@ -71,11 +71,11 @@ def crawl_one(folder):
                     database[patient] = {}
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
-                if series not in database[patient][study][series]:
+                if series not in database[patient][study]:
                     parent, _ = os.path.split(folder)
                     rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
                     database[patient][study][series] = {'description': series_description}
-                if subseries not in database[patient][study][series][subseries]:
+                if subseries not in database[patient][study][series]:
                     database[patient][study][series][subseries] = {'instances': [],
                                                                    'instance_uid': instance,
                                                                    'modality': meta.Modality,
@@ -100,12 +100,12 @@ def to_df(database_dict):
                     for subseries in database_dict[pat][study][series]:
                         if subseries != 'description': # skip description key in dict
                             columns = ['patient_ID', 'study', 'study_description', 
-                                       'series', 'series_description', 'subseries', 'subseries_description', 'modality', 
+                                       'series', 'series_description', 'subseries', 'modality', 
                                        'instances', 'instance_uid', 
                                        'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
                             values = [pat, study, database_dict[pat][study]['description'], 
                                       series, database_dict[pat][study][series]['description'], 
-                                      subseries, database_dict[pat][study][series][subseries]['description'], database_dict[pat][study][series][subseries]['modality'], 
+                                      subseries, database_dict[pat][study][series][subseries]['modality'], 
                                       len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
                                       database_dict[pat][study][series][subseries]['reference_ct'], database_dict[pat][study][series][subseries]['reference_rs'], 
                                       database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder']]
