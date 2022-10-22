@@ -67,6 +67,9 @@ def parser():
     parser.add_argument("--verbose", default=False, action="store_true",
                         help="Verbose output flag.")
 
+    parser.add_argument("--update", default=False, action="store_true",
+                        help="Update crawled index. In other words, process from scratch.")
+
     # parser.add_argument("--custom_train_test_split_path", type=str,
     #                     help="Path to the YAML file defining the custom train-test-split.")
 

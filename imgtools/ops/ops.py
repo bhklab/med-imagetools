@@ -71,12 +71,16 @@ class ImageAutoInput(BaseInput):
 
     visualize: bool
         Whether to return visualization of the data graph
+
+    update: bool
+        Whether to update crawled index
     """
     def __init__(self,
                  dir_path: str,
                  modalities: str,
                  n_jobs: int = -1,
-                 visualize: bool = False):
+                 visualize: bool = False,
+                 update: bool = False):
         self.dir_path = dir_path
         self.modalities = modalities
         self.parent, self.dataset_name = os.path.split(self.dir_path)
@@ -85,8 +89,8 @@ class ImageAutoInput(BaseInput):
         # Checks if dataset has already been indexed
         # To be changed later
         path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
-        if not os.path.exists(path_crawl):
-            print("Couldn't find the dataset index CSV. Indexing the dataset...")
+        if not os.path.exists(path_crawl) or update:
+            print("Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
             print(f"Number of patients in the dataset: {len(db)}")
         else:

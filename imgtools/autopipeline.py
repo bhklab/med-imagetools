@@ -62,7 +62,8 @@ class AutoPipeline(Pipeline):
                  dataset_json_path="",
                  continue_processing=False,
                  dry_run=False,
-                 verbose=False):
+                 verbose=False,
+                 update=False):
         """Initialize the pipeline.
 
         Parameters
@@ -126,7 +127,8 @@ class AutoPipeline(Pipeline):
 
         if not dry_run and output_directory == "":
             raise ValueError("Must specify an output directory")
-        # pipeline configuration
+        
+        # input/output directory configuration
         if not os.path.isabs(input_directory):
             input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
         else:
@@ -137,15 +139,18 @@ class AutoPipeline(Pipeline):
         else:
             output_directory = pathlib.Path(output_directory).as_posix() # consistent parsing. ensures last child directory doesn't end with slash
 
+        # check/make output directory
         if not os.path.exists(output_directory):
-            # raise FileNotFoundError(f"Output directory {output_directory} does not exist")
             os.makedirs(output_directory)
+
+        # check input directory exists
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
         
         self.input_directory = pathlib.Path(input_directory).as_posix()
         self.output_directory = pathlib.Path(output_directory).as_posix()
         
+        # if wanting to continue processing but no .temp folders
         if not is_nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
             raise FileNotFoundError(f"Cannot continue processing. .temp directory does not exist in {output_directory}. Run without --continue_processing to start from scratch.")
 
@@ -330,7 +335,7 @@ class AutoPipeline(Pipeline):
                     self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["modality"].items()}
 
         #input operations
-        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
+        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize, update)
         
         self.output_df_path = pathlib.Path(self.output_directory, "dataset.csv").as_posix()
         #Output component table
