@@ -70,6 +70,12 @@ def parser():
     parser.add_argument("--update", default=False, action="store_true",
                         help="Update crawled index. In other words, process from scratch.")
 
+    parser.add_argument("--roi_select_first", default=False, action="store_true",
+                        help="Only select first matching regex/ROI name.")
+
+    parser.add_argument("--roi_separate", default=False, action="store_true",
+                        help="Process each matching regex/ROI into separate masks. Each matched mask will be saved as ROI_n. (n = index from list of regex/ROIs)")
+
     # parser.add_argument("--custom_train_test_split_path", type=str,
     #                     help="Path to the YAML file defining the custom train-test-split.")
 

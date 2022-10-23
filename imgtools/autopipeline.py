@@ -63,7 +63,9 @@ class AutoPipeline(Pipeline):
                  continue_processing=False,
                  dry_run=False,
                  verbose=False,
-                 update=False):
+                 update=False,
+                 roi_select_first=False,
+                 roi_separate=False):
         """Initialize the pipeline.
 
         Parameters
@@ -246,6 +248,8 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
         self.is_nnunet_inference = is_nnunet_inference
+        self.roi_select_first = roi_select_first
+        self.roi_separate = roi_separate
 
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
@@ -334,24 +338,24 @@ class AutoPipeline(Pipeline):
                 with open(dataset_json_path, "r") as f:
                     self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["modality"].items()}
 
-        #input operations
+        # Input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize, update)
-        
         self.output_df_path = pathlib.Path(self.output_directory, "dataset.csv").as_posix()
-        #Output component table
+
+        # Output component table
         self.output_df = self.input.df_combined
-        #Name of the important columns which needs to be saved    
+
+        # Name of the important columns which needs to be saved
         self.output_streams = self.input.output_streams
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False) # "GTV-.*"
+        self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False)
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
         
         self.existing_roi_names = {"background": 0}
-        # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
         if is_nnunet or is_nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
@@ -496,9 +500,9 @@ class AutoPipeline(Pipeline):
 
                     # make_binary_mask relative to ct/pet
                     if conn_to == "CT" or conn_to == "MR":
-                        mask = self.make_binary_mask(structure_set, image, self.existing_roi_names, self.ignore_missing_regex)
+                        mask = self.make_binary_mask(structure_set, image, self.existing_roi_names, self.ignore_missing_regex, roi_select_first=self.roi_select_first, roi_separate=self.roi_separate)
                     elif conn_to == "PT":
-                        mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names, self.ignore_missing_regex)
+                        mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names, self.ignore_missing_regex, roi_select_first=self.roi_select_first, roi_separate=self.roi_separate)
                     else:
                         raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                     
@@ -724,28 +728,32 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    # args_dict = vars(args)
+    # args_dict.pop("input_directory")
+
     print('initializing AutoPipeline...')
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
-                            modalities=args.modalities,
-                            visualize=args.visualize,
-                            spacing=args.spacing,
-                            n_jobs=args.n_jobs,
-                            show_progress=args.show_progress,
-                            warn_on_error=args.warn_on_error,
-                            overwrite=args.overwrite,
-                            is_nnunet=args.nnunet,
-                            train_size=args.train_size,
-                            random_state=args.random_state,
-                            read_yaml_label_names=args.read_yaml_label_names,
-                            ignore_missing_regex=args.ignore_missing_regex,
-                            roi_yaml_path=args.roi_yaml_path,
-                            custom_train_test_split=args.custom_train_test_split,
-                            is_nnunet_inference=args.is_nnunet_inference,
-                            dataset_json_path=args.dataset_json_path,
-                            continue_processing=args.continue_processing,
-                            dry_run=args.dry_run,
-                            verbose=args.verbose)
+                            **vars(args))
+                            # modalities=args.modalities,
+                            # visualize=args.visualize,
+                            # spacing=args.spacing,
+                            # n_jobs=args.n_jobs,
+                            # show_progress=args.show_progress,
+                            # warn_on_error=args.warn_on_error,
+                            # overwrite=args.overwrite,
+                            # is_nnunet=args.nnunet,
+                            # train_size=args.train_size,
+                            # random_state=args.random_state,
+                            # read_yaml_label_names=args.read_yaml_label_names,
+                            # ignore_missing_regex=args.ignore_missing_regex,
+                            # roi_yaml_path=args.roi_yaml_path,
+                            # custom_train_test_split=args.custom_train_test_split,
+                            # is_nnunet_inference=args.is_nnunet_inference,
+                            # dataset_json_path=args.dataset_json_path,
+                            # continue_processing=args.continue_processing,
+                            # dry_run=args.dry_run,
+                            # verbose=args.verbose)
     if not args.dry_run:
         print(f'starting AutoPipeline...')
         pipeline.run()
