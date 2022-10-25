@@ -71,12 +71,16 @@ class ImageAutoInput(BaseInput):
 
     visualize: bool
         Whether to return visualization of the data graph
+
+    update: bool
+        Whether to update crawled index
     """
     def __init__(self,
                  dir_path: str,
                  modalities: str,
                  n_jobs: int = -1,
-                 visualize: bool = False):
+                 visualize: bool = False,
+                 update: bool = False):
         self.dir_path = dir_path
         self.modalities = modalities
         self.parent, self.dataset_name = os.path.split(self.dir_path)
@@ -85,8 +89,8 @@ class ImageAutoInput(BaseInput):
         # Checks if dataset has already been indexed
         # To be changed later
         path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
-        if not os.path.exists(path_crawl):
-            print("Couldn't find the dataset index CSV. Indexing the dataset...")
+        if not os.path.exists(path_crawl) or update:
+            print("Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
             print(f"Number of patients in the dataset: {len(db)}")
         else:
@@ -1433,7 +1437,6 @@ class StructureSetToSegmentation(BaseOp):
 
     def __init__(self, 
                  roi_names: Dict[str, str], 
-                 force_missing: bool = False,
                  continuous: bool = True):
         """Initialize the op.
 
@@ -1444,11 +1447,6 @@ class StructureSetToSegmentation(BaseOp):
             case-insensitive regular expressions are allowed.
             All labels within one sublist will be assigned
             the same label.
-        force_missing
-            If True, the number of labels in the output will
-            be equal to `len(roi_names)`, with blank slices for
-            any missing labels. Otherwise, missing ROI names
-            will be excluded.
         continuous
             flag passed to 'physical_points_to_idxs' in 'StructureSet.to_segmentation'. 
             Helps to resolve errors caused by ContinuousIndex > Index. 
@@ -1472,10 +1470,15 @@ class StructureSetToSegmentation(BaseOp):
         a single name or are lists of strings).
         """
         self.roi_names = roi_names
-        self.force_missing = force_missing
         self.continuous = continuous
 
-    def __call__(self, structure_set: StructureSet, reference_image: sitk.Image, existing_roi_names: Dict[str, int], ignore_missing_regex: bool) -> Segmentation:
+    def __call__(self, 
+                 structure_set: StructureSet, 
+                 reference_image: sitk.Image, 
+                 existing_roi_names: Dict[str, int], 
+                 ignore_missing_regex: bool,
+                 roi_select_first: bool = False,
+                 roi_separate: bool = False) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1492,10 +1495,11 @@ class StructureSetToSegmentation(BaseOp):
         """
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
-                                             force_missing=self.force_missing,
                                              continuous=self.continuous,
                                              existing_roi_names=existing_roi_names,
-                                             ignore_missing_regex=ignore_missing_regex)
+                                             ignore_missing_regex=ignore_missing_regex,
+                                             roi_select_first=roi_select_first,
+                                             roi_separate=roi_separate)
 
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:

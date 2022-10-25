@@ -20,6 +20,16 @@ def _get_roi_points(rtstruct, roi_index):
 
 class StructureSet:
     def __init__(self, roi_points: Dict[str, np.ndarray], metadata: Optional[Dict[str, T]] = None):
+        """Initializes the StructureSet class containing contour points
+        
+        Parameters
+        ----------
+        roi_points
+            Dictionary of {"ROI": [ndarray of shape n x 3 of contour points]}
+        
+        metadata
+            Dictionary of DICOM metadata
+        """
         self.roi_points = roi_points
         if metadata:
             self.metadata = metadata
@@ -46,12 +56,19 @@ class StructureSet:
     def roi_names(self) -> List[str]:
         return list(self.roi_points.keys())
 
-    def _assign_labels(self, names, force_missing=False):
+    def _assign_labels(self, 
+                       names, 
+                       roi_select_first: bool = False,
+                       roi_separate: bool = False):
         """
-        args
+        Parameters
         ----
-        force_missing
-            What does force_missing do?
+        roi_select_first
+            Select the first matching ROI/regex for each OAR, no duplicate matches. 
+
+        roi_separate
+            Process each matching ROI/regex as individual masks, instead of consolidating into one mask
+            Each mask will be named ROI_n, where n is the nth regex/name/string.
         """
         labels = {}
         cur_label = 0
@@ -59,29 +76,27 @@ class StructureSet:
             for i, name in enumerate(self.roi_names):
                 labels[name] = i
         else:
-            for _, pat in enumerate(names):
+            for _, pattern in enumerate(names):
                 if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
                     break
-                if isinstance(pat, str):
-                    matched = False
+                if isinstance(pattern, str):
                     for i, name in enumerate(self.roi_names):
-                        if re.fullmatch(pat, name, flags=re.IGNORECASE):
+                        if re.fullmatch(pattern, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
                             cur_label += 1
-                            matched = True
-                    if force_missing and not matched:
-                        labels[pat] = cur_label
-                        cur_label += 1
-                else:
+                else: # if multiple regex/names to match
                     matched = False
-                    for subpat in pat:
-                        for name in self.roi_names:
-                            if re.fullmatch(subpat, name, flags=re.IGNORECASE):
-                                labels[name] = cur_label
+                    for subpattern in pattern:
+                        if roi_select_first and matched: break # break if roi_select_first and we're matched
+
+                        for n, name in enumerate(self.roi_names):
+                            if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
                                 matched = True
-                    if force_missing and not matched:
-                        key = '_'.join(pat)
-                        labels[key] = cur_label
+                                if not roi_separate:
+                                    labels[name] = cur_label
+                                else:
+                                    labels[f"{name}_{n}"] = cur_label
+                                
                     cur_label += 1
         return labels
 
@@ -115,10 +130,11 @@ class StructureSet:
 
     def to_segmentation(self, reference_image: sitk.Image,
                         roi_names: Dict[str, str] = None,
-                        force_missing: bool = False,
                         continuous: bool = True,
                         existing_roi_names: Dict[str, int] = None,
-                        ignore_missing_regex: bool = False) -> Segmentation:
+                        ignore_missing_regex: bool = False,
+                        roi_select_first: bool = False,
+                        roi_separate: bool = False) -> Segmentation:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -130,11 +146,6 @@ class StructureSet:
             case-insensitive regular expressions are allowed.
             All labels within one sublist will be assigned
             the same label.
-        force_missing
-            If True, the number of labels in the output will
-            be equal to `len(roi_names)`, with blank slices for
-            any missing labels. Otherwise, missing ROI names
-            will be excluded.
 
         Returns
         -------
@@ -159,23 +170,24 @@ class StructureSet:
         labels = {}
         if roi_names is None or roi_names == {}:
             roi_names = self.roi_names #all the contour names
-            labels = self._assign_labels(roi_names, force_missing) #only the ones that match the regex
+            labels = self._assign_labels(roi_names, roi_select_first, roi_separate) #only the ones that match the regex
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
-                    matching_names = list(self._assign_labels([pattern], force_missing).keys())
+                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
                     if matching_names:
                         labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
                 elif isinstance(pattern, list): # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
                     labels[name] = []
-                    for pat in pattern:
-                        matching_names = list(self._assign_labels([pat], force_missing).keys())
+                    for pattern_one in pattern:
+                        matching_names = list(self._assign_labels([pattern_one], roi_select_first).keys())
                         if matching_names:
                             labels[name].extend(matching_names) #{"GTV": ["GTV1", "GTV2"]}
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-        if isinstance(roi_names, list):
-            labels = self._assign_labels(roi_names, force_missing)
+        if isinstance(roi_names, list): # won't this always trigger after the previous?
+            print("triggered")
+            labels = self._assign_labels(roi_names, roi_select_first)
         print("labels:", labels)
         all_empty = True
         for v in labels.values():
@@ -187,69 +199,18 @@ class StructureSet:
             else:
                 return None
 
-        # size = reference_image.GetSize()[::-1] + (max(labels.values()) + 1,)
         size = reference_image.GetSize()[::-1] + (len(labels),)
-        # print(size)
-        # print(reference_image.GetSize()[::-1])
-        # print((max(labels.values()) + 1,))
-
         mask = np.zeros(size, dtype=np.uint8)
-
-        # print(self.roi_points)
-
-        
 
         seg_roi_names = {}
         if roi_names != {} and isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
                     self.get_mask(reference_image, mask, label, i, continuous)
-                    # physical_points = self.roi_points.get(label, np.array([]))
-                    # mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
-                    # for contour in mask_points:
-                    #     z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                    #     if len(z) == 1:
-                    #         #f assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                    #         z = z[0]
-                    #         slice_mask = polygon2mask(size[1:-1], slice_points)
-                    #         mask[z, :, :, i] += slice_mask
                 seg_roi_names[name] = i
         else:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-                # physical_points = self.roi_points.get(name, np.array([]))
-                # # print(physical_points) #np.ndarray, 3d array with the physical locations (float coordinates)
-                # if len(physical_points) == 0:
-                #     continue # allow for missing labels, will return a blank slice
-
-                # mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
-                # # print(mask_points)
-                
-                # # print(mask.shape, "asldkfjalsk")
-                # for contour in mask_points:
-                #     z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                #     # rounding errors for points on the boundary
-                #     # if z == mask.shape[0]:
-                #     #     z -= 1
-                #     # elif z == -1:
-                #     #     z += 1
-                #     # elif z > mask.shape[0] or z < -1:
-                #     #     raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
-                    
-                #     # # if the contour spans only 1 z-slice 
-                #     # if len(z) == 1:
-                #     #     z = int(np.floor(z[0]))
-                #     #     slice_mask = polygon2mask(size[1:-1], slice_points)
-                #     #     mask[z, :, :, label] += slice_mask
-                #     # else:
-                #     #     raise ValueError("This contour is corrupted and spans across 2 or more slices.")
-
-                #     # This is the old version of z index parsing. Kept for backup
-                #     if len(z) == 1:
-                #         # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
-                #         z = z[0]
-                #         slice_mask = polygon2mask(size[1:-1], slice_points)
-                #         mask[z, :, :, label] += slice_mask
             seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
         

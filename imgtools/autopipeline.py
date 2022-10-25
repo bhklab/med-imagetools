@@ -62,7 +62,10 @@ class AutoPipeline(Pipeline):
                  dataset_json_path="",
                  continue_processing=False,
                  dry_run=False,
-                 verbose=False):
+                 verbose=False,
+                 update=False,
+                 roi_select_first=False,
+                 roi_separate=False):
         """Initialize the pipeline.
 
         Parameters
@@ -126,7 +129,8 @@ class AutoPipeline(Pipeline):
 
         if not dry_run and output_directory == "":
             raise ValueError("Must specify an output directory")
-        # pipeline configuration
+        
+        # input/output directory configuration
         if not os.path.isabs(input_directory):
             input_directory = pathlib.Path(os.getcwd(), input_directory).as_posix()
         else:
@@ -137,15 +141,18 @@ class AutoPipeline(Pipeline):
         else:
             output_directory = pathlib.Path(output_directory).as_posix() # consistent parsing. ensures last child directory doesn't end with slash
 
+        # check/make output directory
         if not os.path.exists(output_directory):
-            # raise FileNotFoundError(f"Output directory {output_directory} does not exist")
             os.makedirs(output_directory)
+
+        # check input directory exists
         if not os.path.exists(input_directory):
             raise FileNotFoundError(f"Input directory {input_directory} does not exist")
         
         self.input_directory = pathlib.Path(input_directory).as_posix()
         self.output_directory = pathlib.Path(output_directory).as_posix()
         
+        # if wanting to continue processing but no .temp folders
         if not is_nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
             raise FileNotFoundError(f"Cannot continue processing. .temp directory does not exist in {output_directory}. Run without --continue_processing to start from scratch.")
 
@@ -199,28 +206,7 @@ class AutoPipeline(Pipeline):
 
             #continue processing operations
             self.finished_subjects = [pathlib.Path(e).name[:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())] #remove the .pkl
-            if continue_processing:
-                with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
-                    parameters = dill.load(f)
-                    input_directory = parameters["input_directory"]
-                    output_directory = parameters["output_directory"]
-                    modalities = parameters["modalities"]
-                    spacing = parameters["spacing"]
-                    n_jobs = parameters["n_jobs"]
-                    visualize = parameters["visualize"]
-                    missing_strategy = parameters["missing_strategy"]
-                    show_progress = parameters["show_progress"]
-                    warn_on_error = parameters["warn_on_error"]
-                    overwrite = parameters["overwrite"]
-                    is_nnunet = parameters["is_nnunet"]
-                    train_size = parameters["train_size"]
-                    random_state = parameters["random_state"]
-                    read_yaml_label_names = parameters["read_yaml_label_names"]
-                    ignore_missing_regex = parameters["ignore_missing_regex"]
-                    roi_yaml_path = parameters["roi_yaml_path"]
-                    custom_train_test_split = parameters["custom_train_test_split"]
-                    is_nnunet_inference = parameters["is_nnunet_inference"]
-                    dataset_json_path = parameters["dataset_json_path"]
+            
 
         super().__init__(
             n_jobs=n_jobs,
@@ -241,6 +227,8 @@ class AutoPipeline(Pipeline):
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
         self.is_nnunet_inference = is_nnunet_inference
+        self.roi_select_first = roi_select_first
+        self.roi_separate = roi_separate
 
         if roi_yaml_path != "" and not read_yaml_label_names:
             warnings.warn("The YAML will not be read since it has not been specified to read them. To use the file, run the CLI with --read_yaml_label_names")
@@ -329,24 +317,24 @@ class AutoPipeline(Pipeline):
                 with open(dataset_json_path, "r") as f:
                     self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["modality"].items()}
 
-        #input operations
-        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize)
-        
+        # Input operations
+        self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize, update)
         self.output_df_path = pathlib.Path(self.output_directory, "dataset.csv").as_posix()
-        #Output component table
+
+        # Output component table
         self.output_df = self.input.df_combined
-        #Name of the important columns which needs to be saved    
+
+        # Name of the important columns which needs to be saved
         self.output_streams = self.input.output_streams
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
-        self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False) # "GTV-.*"
+        self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False)
 
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
         
         self.existing_roi_names = {"background": 0}
-        # self.existing_roi_names.update({k:i+1 for i, k in enumerate(self.label_names.keys())})
         if is_nnunet or is_nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
@@ -414,6 +402,8 @@ class AutoPipeline(Pipeline):
                 if read_results[i] is None:
                     print("The subject id: {} has no {}".format(subject_id, colname))
                     pass
+
+                # Process image (CT/MR)
                 elif modality == "CT" or modality == 'MR':
                     image = read_results[i].image
                     if len(image.GetSize()) == 4:
@@ -467,6 +457,8 @@ class AutoPipeline(Pipeline):
 
 
                     print(subject_id, " SAVED IMAGE")
+
+                # Process dose
                 elif modality == "RTDOSE":
                     try: #For cases with no image present
                         doses = read_results[i].resample_dose(image)
@@ -483,17 +475,27 @@ class AutoPipeline(Pipeline):
                         metadata.update(doses.metadata)
 
                     print(subject_id, " SAVED DOSE")
+                
+                # Process contour
                 elif modality == "RTSTRUCT":
                     num_rtstructs += 1
-                    #For RTSTRUCT, you need image or PT
+                    # For RTSTRUCT, you need image or PT
                     structure_set = read_results[i]
                     conn_to = output_stream.split("_")[-1]
 
                     # make_binary_mask relative to ct/pet
-                    if conn_to == "CT" or conn_to == "MR":
-                        mask = self.make_binary_mask(structure_set, image, self.existing_roi_names, self.ignore_missing_regex)
-                    elif conn_to == "PT":
-                        mask = self.make_binary_mask(structure_set, pet, self.existing_roi_names, self.ignore_missing_regex)
+                    if conn_to in ["CT", "MR", "PT"]:
+                        if conn_to == "CT" or conn_to == "MR":
+                            img = image
+                        elif conn_to == "PT":
+                            img = pet
+                        
+                        mask = self.make_binary_mask(structure_set, img, 
+                                                     self.existing_roi_names, 
+                                                     self.ignore_missing_regex, 
+                                                     roi_select_first=self.roi_select_first, 
+                                                     roi_separate=self.roi_separate)
+
                     else:
                         raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                     
@@ -538,6 +540,7 @@ class AutoPipeline(Pipeline):
                         else:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
                     else:
+                    
                     # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                         if len(mask_arr.shape) == 3:
                             mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
@@ -561,6 +564,8 @@ class AutoPipeline(Pipeline):
                     metadata[f"metadata_{colname}"] = [structure_set.roi_names]
 
                     print(subject_id, "SAVED MASK ON", conn_to)
+                
+                # Process PET
                 elif modality == "PT":
                     try:
                         #For cases with no image present
@@ -580,6 +585,7 @@ class AutoPipeline(Pipeline):
                     print(subject_id, " SAVED PET")
                 
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
+            
             #Saving all the metadata in multiple text files
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
@@ -590,6 +596,9 @@ class AutoPipeline(Pipeline):
             return 
     
     def save_data(self):
+        """
+        Saves metadata about processing. 
+        """
         files = glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())
         for file in files:
             filename = pathlib.Path(file).name
@@ -601,22 +610,18 @@ class AutoPipeline(Pipeline):
                 # print("sadf123", metadata)
             np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
             self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
-            # pd.set_option('display.max_rows', None)
-            # pd.set_option('display.max_columns', None)
-            # pd.set_option('display.width', None)
-            # print("asdfjlkasdjfkajfshg", self.output_df.head())
+            
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
         self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        # print("df in autopipe")
-        # print(self.output_df.iloc[0])
         self.output_df.to_csv(self.output_df_path) #dataset.csv
 
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
+        # Save dataset json
         if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
@@ -644,6 +649,8 @@ class AutoPipeline(Pipeline):
                 output += 'done'
                 f.write(output)
             markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
+        
+        # Save summary info (factor into different file)
         markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
         with open(markdown_path, "w", newline="\n") as f:
             output = "# Dataset Report\n\n"
@@ -654,6 +661,7 @@ class AutoPipeline(Pipeline):
                 formatted_list = "\n\t".join(self.broken_patients)
                 output += f"{formatted_list}\n"
                 output += "</details>\n\n"
+
             if self.is_nnunet:
                 output += "## Train Test Split\n\n"
                 # pie_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_train_test_pie.png").as_posix()
@@ -664,8 +672,6 @@ class AutoPipeline(Pipeline):
                 bar_path = pathlib.Path("markdown_images", "nnunet_modality_count.png").as_posix()
                 output += f"![Pie Chart of Image Modality Distribution]({bar_path})\n\n"
             f.write(output)
-
-
 
     def run(self):
         """Execute the pipeline, possibly in parallel.
@@ -719,33 +725,23 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    args_dict = vars(args)
+    # args_dict.pop("input_directory")
+    if args.continue_processing:
+        try:
+            with open(pathlib.Path(args.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
+                args_dict = dill.load(f)
+        except:
+            print("Could not resume processing. Starting processing from the beginning.")
+
     print('initializing AutoPipeline...')
     pipeline = AutoPipeline(args.input_directory,
                             args.output_directory,
-                            modalities=args.modalities,
-                            visualize=args.visualize,
-                            spacing=args.spacing,
-                            n_jobs=args.n_jobs,
-                            show_progress=args.show_progress,
-                            warn_on_error=args.warn_on_error,
-                            overwrite=args.overwrite,
-                            is_nnunet=args.nnunet,
-                            train_size=args.train_size,
-                            random_state=args.random_state,
-                            read_yaml_label_names=args.read_yaml_label_names,
-                            ignore_missing_regex=args.ignore_missing_regex,
-                            roi_yaml_path=args.roi_yaml_path,
-                            custom_train_test_split=args.custom_train_test_split,
-                            is_nnunet_inference=args.is_nnunet_inference,
-                            dataset_json_path=args.dataset_json_path,
-                            continue_processing=args.continue_processing,
-                            dry_run=args.dry_run,
-                            verbose=args.verbose)
+                            **args_dict)
+    
     if not args.dry_run:
         print(f'starting AutoPipeline...')
         pipeline.run()
-
-
         print('finished AutoPipeline!')
     else:
         print('dry run complete, no processing done')
