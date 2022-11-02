@@ -83,13 +83,23 @@ AutoPipeline comes with many built-in features to make your data processing easi
 
 8. **Overwrite Existing Output Files**
 
-    Whether to overwrite exisiting file outputs
+    Whether to overwrite existing file outputs
 
     ```sh
     --overwrite [flag]
     ```
 
-### Flags for parsing RTSTRUCT contours/regions of interest (ROI)
+9. **Update existing crawled index**
+
+    Whether to update existing crawled index
+
+    ```sh
+    --update [flag]
+    ```
+
+
+
+## Flags for parsing RTSTRUCT contours/regions of interest (ROI)
 The contours can be selected by creating a YAML file to define a regular expression (regex), or list of potential contour names, or a combination of both. **If none of the flags are set or the YAML file does not exist, the AutoPipeline will default to processing every contour.**
 
 1. **Defining YAML file path for contours**
@@ -106,12 +116,8 @@ The contours can be selected by creating a YAML file to define a regular express
     --roi_yaml_path [str]
     ```
 
-    <details open>
-    <summary>Click for example</summary>
-    For example, if the YAML file contains:
-
 2. **Defining contour selection behaviour**
-    
+
     A typical ROI YAML file may look like this:
     ```yaml
     GTV: GTV*
@@ -126,19 +132,36 @@ The contours can be selected by creating a YAML file to define a regular express
         - IVL4
     ```
 
-    By default, all ROIs that match any of the regex or individual strings will be saved under one label. For example, GTVn, GTVp, GTVfoo will be saved as GTV. However, this is not always the desirable behaviour. 
+    By default, **all ROIs** that match any of the regex or strings will be **saved as one label**. For example, GTVn, GTVp, GTVfoo will be saved as GTV. However, this is not always the desirable behaviour. 
 
+    **Only select the first matching regex/string**
+
+    The StructureSet iterates through the regex and string in the order it is written in the YAML. When this flag is set, once any contour matches the regex or string, the ROI search is interrupted and moves to the next ROI. This may be useful if you have a priority order of potentially matching contour names. 
+
+    ```sh
+    --roi_select_first [flag]
+    ```
+
+    If a patient has  contours `[GTVp, LNUG, IL1, IVL4]`, with the above YAML file and `--roi_select_first` flag set, it will only process `[GTVp, LNUG, IL1]` contours as `[GTV, LUNG, NODES]`, respectively. 
+
+    **Process each matching contour as a separate ROI**
+
+    Any matching contour will be saved separate with its contour name as a suffix to the ROI name. This will not apply to ROIs that only have one regex/string.
     
-    
+    ```sh
+    --roi_separate [flag]
+    ```
+    If a patient had contours `[GTVp, LNUG, IL1, IVL4]`, with the above YAML file and `--roi_sepearate` flag set, it will process the contours as `[GTV, LUNG_LNUG, NODES_IL1, NODES_IVL4]`, respectively. 
 
 3.  **Ignore patients with no contours**
-    Ignore patients with no contours that match any of the defined regex or strings instead of throwing error.
+
+    Ignore patients with no contours that match any of the defined regex or strings instead of throwing error. 
 
     ```sh
     --ignore_missing_regex [flag]
     ```
 
-### Additional nnUNet-specific flags
+## Additional nnUNet-specific flags
 
 1. **Format Output for nnUNet Training**
 
@@ -196,7 +219,7 @@ The contours can be selected by creating a YAML file to define a regular express
     --custom_train_test_split [flag]
     ```
 
-### Additional flags for nnUNet Inference
+## Additional flags for nnUNet Inference
 
 1. **Format Output for nnUNet Inference**
 
