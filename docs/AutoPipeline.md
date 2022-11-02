@@ -25,9 +25,76 @@ Set the modalities you want to use by separating each one with a comma. For exam
 ## AutoPipeline Flags
 AutoPipeline comes with many built-in features to make your data processing easier:
 
-1. **YAML for Label Regexes**
+1. **Spacing**
 
-    Whether to read a YAML file that defines regexes for label names for regions of interest. By default, it will look for and read from `INPUT_DIRECTORY/roi_names.yaml`
+    The spacing for the output image. default = (1., 1., 0.). 0. spacing means maintaining the image's spacing as-is. Spacing of (0., 0., 0.,) will not resample any image.
+
+    ```sh
+    --spacing [Tuple: (int,int,int)]
+    ```
+
+2. **Parallel Job Execution**
+
+    The number of jobs to be run in parallel. Set -1 to use all cores. default = -1
+
+    ```sh
+    --n_jobs [int]
+    ```
+
+3. **Dataset Graph Visualization (not recommended for large datasets)**
+
+    Whether to visualize the entire dataset using PyViz.
+
+    ```sh
+    --visualize [flag]
+    ```
+
+4. **Continue Pipeline Processing**
+
+    Whether to continue the most recent run of AutoPipeline that terminated prematurely for that output directory. Will only work if the `.imgtools` directory was not deleted from previous run. Using this flag will retain the same flags and parameters carried over from the previous run.
+
+    ```sh
+    --continue_processing [flag]
+    ```
+
+5. **Processing Dry Run**
+
+    Whether to execute a dry run, only generating the .imgtools folder, which includes the crawled index.
+
+    ```sh
+    --dry_run [flag]
+    ```
+
+6. **Show Progress**
+
+    Whether to print AutoPipeline progress to the standard output.
+
+    ```sh
+    --show_progress [flag]
+    ```
+
+7. **Warning on Subject Processing Errors**
+
+    Whether to warn instead of error when processing subjects
+
+    ```sh
+    --warn_on_error [flag]
+    ```
+
+8. **Overwrite Existing Output Files**
+
+    Whether to overwrite exisiting file outputs
+
+    ```sh
+    --overwrite [flag]
+    ```
+
+### Flags for parsing RTSTRUCT contours/regions of interest (ROI)
+The contours can be selected by creating a YAML file to define a regular expression (regex), or list of potential contour names, or a combination of both. **If none of the flags are set or the YAML file does not exist, the AutoPipeline will default to processing every contour.**
+
+1. **Defining YAML file path for contours**
+
+    Whether to read a YAML file that defines regex or string options for contour names for regions of interest (ROI). By default, it will look for and read from `INPUT_DIRECTORY/roi_names.yaml`
 
     ```sh
     --read_yaml_label_names [flag]
@@ -43,81 +110,32 @@ AutoPipeline comes with many built-in features to make your data processing easi
     <summary>Click for example</summary>
     For example, if the YAML file contains:
 
+2. **Defining contour selection behaviour**
+    
+    A typical ROI YAML file may look like this:
     ```yaml
     GTV: GTV*
+    LUNG:
+        - LUNG*
+        - LNUG
+        - POUMON*
+    NODES:
+        - IL1
+        - IIL2
+        - IIIL3
+        - IVL4
     ```
 
-    All ROIs that match the regex of GTV* (e.g. GTVn, GTVp, GTVfoo) will be saved to one label under the name of GTV
-    </details>
+    By default, all ROIs that match any of the regex or individual strings will be saved under one label. For example, GTVn, GTVp, GTVfoo will be saved as GTV. However, this is not always the desirable behaviour. 
 
-    Ignore patients with no labels that match any regexes instead of throwing error.
+    
+    
+
+3.  **Ignore patients with no contours**
+    Ignore patients with no contours that match any of the defined regex or strings instead of throwing error.
 
     ```sh
     --ignore_missing_regex [flag]
-    ```
-
-2. **Spacing**
-
-    The spacing for the output image. default = (1., 1., 0.)
-
-    ```sh
-    --spacing [Tuple: (int,int,int)]
-    ```
-
-3. **Parallel Job Execution**
-
-    The number of jobs to be run in parallel. Set -1 to use all cores. default = -1
-
-    ```sh
-    --n_jobs [int]
-    ```
-
-4. **Dataset Graph Visualization (not recommended for large datasets)**
-
-    Whether to visualize the entire dataset using PyViz.
-
-    ```sh
-    --visualize [flag]
-    ```
-
-5. **Continue Pipeline Processing**
-
-    Whether to continue the most recent run of AutoPipeline that terminated prematurely for that output directory. Will only work if the `.imgtools` directory was not deleted from previous run. Using this flag will retain the same flags and parameters carried over from the previous run.
-
-    ```sh
-    --continue_processing [flag]
-    ```
-
-6. **Dry Run for Indexed Dataset**
-
-    Whether to execute a dry run, only generating the .imgtools folder.
-
-    ```sh
-    --dry_run [flag]
-    ```
-
-7. **Show Progress**
-
-    Whether to print processing progress to the standard output.
-
-    ```sh
-    --show_progress [flag]
-    ```
-
-8. **Warning on Subject Processing Errors**
-
-    Whether to warn instead of error when processing subjects
-
-    ```sh
-    --warn_on_error [flag]
-    ```
-
-9. **Overwrite Existing Output Files**
-
-    Whether to overwrite exisiting file outputs
-
-    ```sh
-    --overwrite [flag]
     ```
 
 ### Additional nnUNet-specific flags
