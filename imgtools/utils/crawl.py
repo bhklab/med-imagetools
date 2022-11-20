@@ -25,6 +25,16 @@ def crawl_one(folder):
                 instance = str(meta.SOPInstanceUID)
 
                 reference_ct, reference_rs, reference_pl = " ", " ", " "
+                try:
+                    orientation = str(meta.ImageOrientationPatient) # (0020, 0037)
+                except:
+                    orientation = ""
+
+                try:
+                    orientation_type = str(meta.AnatomicalOrientationType) # (0010, 2210)
+                except:
+                    orientation_type = ""
+
                 try: #RTSTRUCT
                     reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
                 except: 
@@ -83,7 +93,9 @@ def crawl_one(folder):
                                                                    'reference_rs': reference_rs,
                                                                    'reference_pl': reference_pl,
                                                                    'reference_frame': reference_frame,
-                                                                   'folder': rel_path}
+                                                                   'folder': rel_path,
+                                                                   'orientation': orientation,
+                                                                   'orientation_type': orientation_type}
 
                 database[patient][study][series][subseries]['instances'].append(instance)
             except:
@@ -102,13 +114,15 @@ def to_df(database_dict):
                             columns = ['patient_ID', 'study', 'study_description', 
                                        'series', 'series_description', 'subseries', 'modality', 
                                        'instances', 'instance_uid', 
-                                       'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder']
+                                       'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder',
+                                       'orientation', 'orientation_type']
                             values = [pat, study, database_dict[pat][study]['description'], 
                                       series, database_dict[pat][study][series]['description'], 
                                       subseries, database_dict[pat][study][series][subseries]['modality'], 
                                       len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
                                       database_dict[pat][study][series][subseries]['reference_ct'], database_dict[pat][study][series][subseries]['reference_rs'], 
-                                      database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder']]
+                                      database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder'],
+                                      database_dict[pat][study][series][subseries]['orientation'], database_dict[pat][study][series][subseries]['orientation_type']]
                             df_add = pd.DataFrame([values], columns=columns)
                             df = pd.concat([df, df_add], ignore_index=True)
     return df
