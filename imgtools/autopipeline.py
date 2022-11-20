@@ -257,26 +257,26 @@ class AutoPipeline(Pipeline):
             elif not isinstance(k, str):
                 raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
-        if self.train_size == 1.0 and is_nnunet:
+        if self.train_size == 1.0 and nnunet:
             warnings.warn("Train size is 1, all data will be used for training")
         
-        if self.train_size == 0.0 and is_nnunet:
+        if self.train_size == 0.0 and nnunet:
             warnings.warn("Train size is 0, all data will be used for testing")
 
-        if self.train_size != 1 and not self.is_nnunet:
+        if self.train_size != 1 and not self.nnunet:
             warnings.warn("Cannot run train/test split without nnunet, ignoring train_size")
 
         if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
         
-        if is_nnunet and (not read_yaml_label_names or self.label_names == {}):
+        if nnunet and (not read_yaml_label_names or self.label_names == {}):
             raise ValueError("YAML label names must be provided for nnunet")
         
-        if custom_train_test_split and not is_nnunet:
+        if custom_train_test_split and not nnunet:
             raise ValueError("Cannot use custom train/test split without nnunet")
 
         custom_train_test_split_path = pathlib.Path(self.input_directory, "custom_train_test_split.yaml").as_posix()
-        if custom_train_test_split and is_nnunet:
+        if custom_train_test_split and nnunet:
             if os.path.exists(custom_train_test_split_path):
                 with open(custom_train_test_split_path, "r") as f:
                     try:
@@ -310,7 +310,7 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet:
             self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
 
-        if is_nnunet_inference:
+        if nnunet_inference:
             if not os.path.exists(dataset_json_path):
                 raise FileNotFoundError(f"No file named {dataset_json_path} found. Image modality definitions are required for nnUNet inference")
             else:
@@ -335,7 +335,7 @@ class AutoPipeline(Pipeline):
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
         
         self.existing_roi_names = {"background": 0}
-        if is_nnunet or is_nnunet_inference:
+        if nnunet or nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
         
@@ -760,7 +760,6 @@ def main():
     print(f"Outputted data to {args.output_directory}")
     csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
     print(f"Dataset info found at {csv_path}")
-
     if args.nnunet:
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
         print(f"dataset.json for nnU-net can be found at {json_path}")
