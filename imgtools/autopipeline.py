@@ -725,6 +725,13 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
+    
+    if args.nnunet:
+        args.is_nnunet=True
+
+    if args.nnunet_inference:
+        args.is_nnunet_inference=True
+
     args_dict = vars(args)
     
     if args.continue_processing:
@@ -753,10 +760,7 @@ def main():
     print(f"Outputted data to {args.output_directory}")
     csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
     print(f"Dataset info found at {csv_path}")
-<<<<<<< HEAD
 
-=======
->>>>>>> 1657b99 (added orientation DICOM tag crawling)
     if args.nnunet:
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
         print(f"dataset.json for nnU-net can be found at {json_path}")
