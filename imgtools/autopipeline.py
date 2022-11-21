@@ -51,14 +51,14 @@ class AutoPipeline(Pipeline):
                  show_progress=False,
                  warn_on_error=False,
                  overwrite=False,
-                 is_nnunet=False,
+                 nnunet=False,
                  train_size=1.0,
                  random_state=42,
                  read_yaml_label_names=False,
                  ignore_missing_regex=False,
                  roi_yaml_path="",
                  custom_train_test_split=False,
-                 is_nnunet_inference=False,
+                 nnunet_inference=False,
                  dataset_json_path="",
                  continue_processing=False,
                  dry_run=False,
@@ -90,7 +90,7 @@ class AutoPipeline(Pipeline):
             Whether to warn on errors
         overwrite: bool, default=False
             Whether to write output files even if existing output files exist
-        is_nnunet: bool, default=False
+        nnunet: bool, default=False
             Whether to format the output for nnunet
         train_size: float, default=1.0
             Proportion of the dataset to use for training, as a decimal
@@ -104,7 +104,7 @@ class AutoPipeline(Pipeline):
             The path to the yaml file defining regexes
         custom_train_test_split: bool, default=False
             Whether to use a custom train/test split. The remaining patients will be randomly split using train_size and random_state
-        is_nnunet_inference: bool, default=False
+        nnunet_inference: bool, default=False
             Whether to format the output for nnUNet inference
         dataset_json_path: str, default=""
             The path to the dataset.json file for nnUNet inference
@@ -121,8 +121,8 @@ class AutoPipeline(Pipeline):
         self.v = verbose
 
         if dry_run:
-            is_nnunet = False
-            is_nnunet_inference = False
+            nnunet = False
+            nnunet_inference = False
 
         if dry_run and continue_processing:
             raise ValueError("Cannot continue processing a dry run. Set --continue_processing to False to do a dry run.")
@@ -153,17 +153,17 @@ class AutoPipeline(Pipeline):
         self.output_directory = pathlib.Path(output_directory).as_posix()
         
         # if wanting to continue processing but no .temp folders
-        if not is_nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
+        if not nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
             raise FileNotFoundError(f"Cannot continue processing. .temp directory does not exist in {output_directory}. Run without --continue_processing to start from scratch.")
 
         study_name = os.path.split(self.input_directory)[1]
-        if is_nnunet_inference:
+        if nnunet_inference:
             roi_yaml_path = ""
             custom_train_test_split = False
-            is_nnunet = False
+            nnunet = False
             if modalities != "CT" and modalities != "MR":
                 raise ValueError("nnUNet inference can only be run on image files. Please set modalities to 'CT' or 'MR'")
-        if is_nnunet:
+        if nnunet:
             self.base_output_directory = self.output_directory
             if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix()):
                 os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix())
@@ -216,8 +216,8 @@ class AutoPipeline(Pipeline):
         self.overwrite = overwrite
         self.spacing = spacing
         self.existing = [None] #self.existing_patients()
-        self.is_nnunet = is_nnunet
-        if is_nnunet or is_nnunet_inference:
+        self.is_nnunet = nnunet
+        if nnunet or nnunet_inference:
             self.nnunet_info = {}
         else:
             self.nnunet_info = None
@@ -226,7 +226,7 @@ class AutoPipeline(Pipeline):
         self.label_names = {}
         self.ignore_missing_regex = ignore_missing_regex
         self.custom_train_test_split = custom_train_test_split
-        self.is_nnunet_inference = is_nnunet_inference
+        self.is_nnunet_inference = nnunet_inference
         self.roi_select_first = roi_select_first
         self.roi_separate = roi_separate
 
@@ -257,26 +257,26 @@ class AutoPipeline(Pipeline):
             elif not isinstance(k, str):
                 raise ValueError(f"Label names must be a string. Got {k} for {v}")
 
-        if self.train_size == 1.0 and is_nnunet:
+        if self.train_size == 1.0 and nnunet:
             warnings.warn("Train size is 1, all data will be used for training")
         
-        if self.train_size == 0.0 and is_nnunet:
+        if self.train_size == 0.0 and nnunet:
             warnings.warn("Train size is 0, all data will be used for testing")
 
-        if self.train_size != 1 and not self.is_nnunet:
+        if self.train_size != 1 and not self.nnunet:
             warnings.warn("Cannot run train/test split without nnunet, ignoring train_size")
 
         if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
             raise ValueError("train_size must be between 0 and 1")
         
-        if is_nnunet and (not read_yaml_label_names or self.label_names == {}):
+        if nnunet and (not read_yaml_label_names or self.label_names == {}):
             raise ValueError("YAML label names must be provided for nnunet")
         
-        if custom_train_test_split and not is_nnunet:
+        if custom_train_test_split and not nnunet:
             raise ValueError("Cannot use custom train/test split without nnunet")
 
         custom_train_test_split_path = pathlib.Path(self.input_directory, "custom_train_test_split.yaml").as_posix()
-        if custom_train_test_split and is_nnunet:
+        if custom_train_test_split and nnunet:
             if os.path.exists(custom_train_test_split_path):
                 with open(custom_train_test_split_path, "r") as f:
                     try:
@@ -310,7 +310,7 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet:
             self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
 
-        if is_nnunet_inference:
+        if nnunet_inference:
             if not os.path.exists(dataset_json_path):
                 raise FileNotFoundError(f"No file named {dataset_json_path} found. Image modality definitions are required for nnUNet inference")
             else:
@@ -335,7 +335,7 @@ class AutoPipeline(Pipeline):
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
         
         self.existing_roi_names = {"background": 0}
-        if is_nnunet or is_nnunet_inference:
+        if nnunet or nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
         
@@ -733,7 +733,7 @@ def main():
         args.is_nnunet_inference=True
 
     args_dict = vars(args)
-    # args_dict.pop("input_directory")
+    
     if args.continue_processing:
         try:
             with open(pathlib.Path(args.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
@@ -742,9 +742,7 @@ def main():
             print("Could not resume processing. Starting processing from the beginning.")
 
     print('initializing AutoPipeline...')
-    pipeline = AutoPipeline(args.input_directory,
-                            args.output_directory,
-                            **args_dict)
+    pipeline = AutoPipeline(**args_dict)
     
     if not args.dry_run:
         print(f'starting AutoPipeline...')
@@ -762,7 +760,6 @@ def main():
     print(f"Outputted data to {args.output_directory}")
     csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
     print(f"Dataset info found at {csv_path}")
-
     if args.nnunet:
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
         print(f"dataset.json for nnU-net can be found at {json_path}")
