@@ -9,6 +9,7 @@ from matplotlib.style import available
 import numpy as np
 import sys
 import warnings
+from copy import deepcopy
 
 from argparse import ArgumentParser
 import yaml
@@ -41,7 +42,7 @@ class AutoPipeline(Pipeline):
     """
 
     def __init__(self,
-                 input_directory,
+                 input_directory="",
                  output_directory="",
                  modalities="CT",
                  spacing=(1., 1., 0.),
@@ -725,13 +726,6 @@ class AutoPipeline(Pipeline):
 
 def main():
     args = parser()
-    
-    if args.nnunet:
-        args.is_nnunet=True
-
-    if args.nnunet_inference:
-        args.is_nnunet_inference=True
-
     args_dict = vars(args)
     
     if args.continue_processing:
