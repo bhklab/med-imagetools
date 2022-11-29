@@ -92,8 +92,10 @@ autopipeline\
   [INPUT_DIRECTORY] \
   [OUTPUT_DIRECTORY] \
   --modalities CT \
-  --nnunet_inference
+  --nnunet_inference \
+  --dataset_json_path [DATASET_JSON_PATH]
 ```
+To execute this command AutoPipeline needs a json file with the image modality definitions.
 
 Modalities can also be set to `--modalities MR`.
 

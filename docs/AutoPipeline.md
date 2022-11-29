@@ -17,7 +17,7 @@ The `--modalities` option allows you to only process certain modalities that are
 1. CT
 2. MR
 3. RTSTRUCT
-4. PT
+4. PT    
 5. RTDOSE
 
 Set the modalities you want to use by separating each one with a comma. For example, to use CT and RTSTRUCT, run AutoPipeline with `--modalities CT,RTSTRUCT`
@@ -241,4 +241,13 @@ The contours can be selected by creating a YAML file to define a regular express
 
     ```sh
     --dataset_json_path [str]
+    ```
+
+    A dataset json file may look like this:
+    ```json
+    {
+        "modality":{
+            "0": "CT"
+        }
+    }
     ```
