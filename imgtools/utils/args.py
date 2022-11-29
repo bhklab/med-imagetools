@@ -46,7 +46,7 @@ def parser():
     parser.add_argument("--ignore_missing_regex", default=False, action="store_true",
                         help="Whether to ignore patients with no ROI regexes that match the given ones. Will throw an error on patients without matches if this is not set.")
 
-    parser.add_argument("--roi_yaml_path", type=str,
+    parser.add_argument("--roi_yaml_path", type=str, default="",
                         help="Path to the YAML file defining ROI regexes")
 
     parser.add_argument("--custom_train_test_split", default=False, action="store_true",
@@ -55,7 +55,7 @@ def parser():
     parser.add_argument("--nnunet_inference", default=False, action="store_true",
                         help="Whether to generate data for nnUNet inference.")
     
-    parser.add_argument("--dataset_json_path", type=str,
+    parser.add_argument("--dataset_json_path", type=str, default="",
                         help="Path to the dataset.json file defining image modality indices for nnUNet inference.")
 
     parser.add_argument("--continue_processing", default=False, action="store_true",
