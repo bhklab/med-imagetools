@@ -264,10 +264,10 @@ class AutoPipeline(Pipeline):
         if self.train_size == 0.0 and nnunet:
             warnings.warn("Train size is 0, all data will be used for testing")
 
-        if self.train_size != 1 and not self.nnunet:
+        if self.train_size != 1 and not nnunet:
             warnings.warn("Cannot run train/test split without nnunet, ignoring train_size")
 
-        if self.train_size > 1 or self.train_size < 0 and self.is_nnunet:
+        if self.train_size > 1 or self.train_size < 0 and nnunet:
             raise ValueError("train_size must be between 0 and 1")
         
         if nnunet and (not read_yaml_label_names or self.label_names == {}):
