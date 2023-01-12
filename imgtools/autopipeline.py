@@ -648,7 +648,7 @@ class AutoPipeline(Pipeline):
                 formatted_list = "\n\t".join(self.broken_patients)
                 output += f"{formatted_list}\n"
                 output += "</details>\n\n"
-            if self.is_nnunet:
+            else:
                 output += "## Train Test Split\n\n"
                 # pie_path = pathlib.Path(self.output_directory, "markdown_images", "nnunet_train_test_pie.png").as_posix()
                 pie_path = pathlib.Path("markdown_images", "nnunet_train_test_pie.png").as_posix()
