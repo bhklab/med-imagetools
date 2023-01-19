@@ -198,7 +198,7 @@ class StructureSet:
                 raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
             else:
                 return None
-
+        labels = {k:v for (k,v) in labels.items() if v != [] }
         size = reference_image.GetSize()[::-1] + (len(labels),)
         mask = np.zeros(size, dtype=np.uint8)
 
