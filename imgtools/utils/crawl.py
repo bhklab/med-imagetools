@@ -39,18 +39,21 @@ def crawl_one(folder):
                 try: #RTSTRUCT
                     reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
                 except: 
-                    try: #RTDOSE
-                        reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
+                    try: #SEGMENTATION
+                        reference_ct = str(meta.ReferencedSeriesSequence[0].SeriesInstanceUID)
                     except:
-                        pass
-                    try:
-                        reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
-                    except:
-                        pass
-                    try:
-                        reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
-                    except:
-                        pass
+                        try: #RTDOSE
+                            reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
+                        except:
+                            pass
+                        try:
+                            reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
+                        except:
+                            pass
+                        try:
+                            reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
+                        except:
+                            pass
                 
                 #MRI Tags
                 try:
