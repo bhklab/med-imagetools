@@ -1,12 +1,12 @@
 h5py
 joblib
-numpy
+numpy==1.23
 matplotlib
 pandas
 pydicom
 pynrrd
 scikit-image
-SimpleITK==2.2.0
+SimpleITK
 tqdm
 torch
 torchio
