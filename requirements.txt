@@ -1,6 +1,6 @@
 h5py
 joblib
-numpy==1.23
+numpy<1.24
 matplotlib
 pandas
 pydicom
