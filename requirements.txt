@@ -1,7 +1,6 @@
-nibabel==4.0.2
+importlib==5.1.0
 h5py
 joblib
-matplotlib
 numpy
 matplotlib
 pandas
