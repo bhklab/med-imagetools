@@ -1,4 +1,3 @@
-iniconfig==1.1.1
 h5py
 joblib
 numpy
@@ -7,7 +6,7 @@ pandas
 pydicom
 pynrrd
 scikit-image
-SimpleITK
+SimpleITK==2.2.0
 tqdm
 torch
 torchio
