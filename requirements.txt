@@ -1,4 +1,4 @@
-importlib==5.1.0
+iniconfig==1.1.1
 h5py
 joblib
 numpy
