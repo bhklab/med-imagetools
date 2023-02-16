@@ -563,6 +563,8 @@ class AutoPipeline(Pipeline):
                         metadata.update(structure_set.metadata)
 
                     metadata[f"metadata_{colname}"] = [structure_set.roi_names]
+                    for roi, labels in mask.raw_roi_names.items():
+                        metadata[f"raw_labels_{roi}"] = labels                    
 
                     print(subject_id, "SAVED MASK ON", conn_to)
                 

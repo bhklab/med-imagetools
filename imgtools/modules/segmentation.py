@@ -16,7 +16,7 @@ def accepts_segmentations(f):
          result = f(img, *args, **kwargs)
          if isinstance(img, Segmentation):
              result = sitk.Cast(result, sitk.sitkVectorUInt8)
-             return Segmentation(result, roi_indices=img.roi_indices)
+             return Segmentation(result, roi_indices=img.roi_indices, raw_roi_names=img.raw_roi_names)
          else:
              return result
     return wrapper
@@ -35,7 +35,7 @@ def map_over_labels(segmentation, f, include_background=False, return_segmentati
 
 
 class Segmentation(sitk.Image):
-    def __init__(self, segmentation, roi_indices=None, existing_roi_indices=None):
+    def __init__(self, segmentation, roi_indices=None, existing_roi_indices=None, raw_roi_names=None):
         super().__init__(segmentation)
         self.num_labels = self.GetNumberOfComponentsPerPixel()
         if not roi_indices:
@@ -44,6 +44,10 @@ class Segmentation(sitk.Image):
             self.roi_indices = roi_indices
             if 0 in self.roi_indices.values():
                 self.roi_indices = {k : v+1 for k, v in self.roi_indices.items()}
+        if not raw_roi_names:
+            raw_roi_names={}
+        else:
+            self.raw_roi_names = raw_roi_names
         if len(self.roi_indices) != self.num_labels:
             for i in range(1, self.num_labels+1):
                 if i not in self.roi_indices.values():
@@ -81,7 +85,7 @@ class Segmentation(sitk.Image):
     def __getitem__(self, idx):
         res = super().__getitem__(idx)
         if isinstance(res, sitk.Image):
-            res = Segmentation(res, self.roi_indices)
+            res = Segmentation(res, roi_indices=self.roi_indices, raw_roi_names=self.raw_roi_names)
         return res
 
     def __repr__(self):
