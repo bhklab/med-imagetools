@@ -65,7 +65,7 @@ def resample(image: sitk.Image,
     else:
         spacing = np.asarray(spacing)
         new_spacing = np.where(spacing == 0, original_spacing, spacing)
-    new_size = np.floor(original_size * original_spacing / new_spacing).astype(np.int)
+    new_size = np.floor(original_size * original_spacing / new_spacing).astype(int)
 
     rif = sitk.ResampleImageFilter()
     rif.SetOutputOrigin(image.GetOrigin())
