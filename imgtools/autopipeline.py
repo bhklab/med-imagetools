@@ -608,10 +608,9 @@ class AutoPipeline(Pipeline):
             subject_id = os.path.splitext(filename)[0]
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
-                # print("sadf123", metadata)
-            # np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
-            self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
-            
+
+            self.output_df.loc[subject_id, metadata.keys()] = metadata.values() #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
+
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
