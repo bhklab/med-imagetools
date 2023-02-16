@@ -131,7 +131,7 @@ class StructureSet:
     def to_segmentation(self, reference_image: sitk.Image,
                         roi_names: Dict[str, str] = None,
                         continuous: bool = True,
-                        existing_roi_names: Dict[str, int] = None,
+                        existing_roi_indices: Dict[str, int] = None,
                         ignore_missing_regex: bool = False,
                         roi_select_first: bool = False,
                         roi_separate: bool = False) -> Segmentation:
@@ -202,22 +202,23 @@ class StructureSet:
         size = reference_image.GetSize()[::-1] + (len(labels),)
         mask = np.zeros(size, dtype=np.uint8)
 
-        seg_roi_names = {}
+        seg_roi_indices = {}
         if roi_names != {} and isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
                     self.get_mask(reference_image, mask, label, i, continuous)
-                seg_roi_names[name] = i
+                seg_roi_indices[name] = i
+
         else:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_names = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
+            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
         
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
-        mask = Segmentation(mask, roi_names=seg_roi_names, existing_roi_names=existing_roi_names) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
+        mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
         return mask
 

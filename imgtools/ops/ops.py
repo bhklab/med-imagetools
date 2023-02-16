@@ -1475,7 +1475,7 @@ class StructureSetToSegmentation(BaseOp):
     def __call__(self, 
                  structure_set: StructureSet, 
                  reference_image: sitk.Image, 
-                 existing_roi_names: Dict[str, int], 
+                 existing_roi_indices: Dict[str, int], 
                  ignore_missing_regex: bool,
                  roi_select_first: bool = False,
                  roi_separate: bool = False) -> Segmentation:
@@ -1496,7 +1496,7 @@ class StructureSetToSegmentation(BaseOp):
         return structure_set.to_segmentation(reference_image,
                                              roi_names=self.roi_names,
                                              continuous=self.continuous,
-                                             existing_roi_names=existing_roi_names,
+                                             existing_roi_indices=existing_roi_indices,
                                              ignore_missing_regex=ignore_missing_regex,
                                              roi_select_first=roi_select_first,
                                              roi_separate=roi_separate)
