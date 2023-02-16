@@ -18,7 +18,7 @@ def crawl_one(folder):
         # instance (slice) information
         for dcm in dicoms:
             try:
-                meta = dcmread(dcm, force=True)
+                meta     = dcmread(dcm, force=True)
                 patient  = str(meta.PatientID)
                 study    = str(meta.StudyInstanceUID)
                 series   = str(meta.SeriesInstanceUID)
@@ -153,7 +153,7 @@ def to_df(database_dict):
                             values = [pat, study, database_dict[pat][study]['description'], 
                                       series, database_dict[pat][study][series]['description'], 
                                       subseries, database_dict[pat][study][series][subseries]['modality'], 
-                                      database_dict[pat][study][series][subseries]['instances'], database_dict[pat][study][series][subseries]['instance_uid'], 
+                                      len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
                                       database_dict[pat][study][series][subseries]['reference_ct'], database_dict[pat][study][series][subseries]['reference_rs'], 
                                       database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder'],
                                       database_dict[pat][study][series][subseries]['orientation'], database_dict[pat][study][series][subseries]['orientation_type'],

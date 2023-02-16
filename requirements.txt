@@ -1,6 +1,5 @@
 h5py
 joblib
-matplotlib
 numpy
 matplotlib
 pandas
