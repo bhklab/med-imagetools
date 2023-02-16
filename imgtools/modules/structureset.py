@@ -218,7 +218,7 @@ class StructureSet:
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
-        mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
+        mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices, raw_roi_names=labels) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
         return mask
 
