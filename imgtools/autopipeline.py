@@ -335,7 +335,7 @@ class AutoPipeline(Pipeline):
         # output ops
         self.output = ImageAutoOutput(self.output_directory, self.output_streams, self.nnunet_info, self.is_nnunet_inference)
         
-        self.existing_roi_names = {"background": 0}
+        self.existing_roi_indices = {"background": 0}
         if nnunet or nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
@@ -492,7 +492,7 @@ class AutoPipeline(Pipeline):
                             img = pet
                         
                         mask = self.make_binary_mask(structure_set, img, 
-                                                     self.existing_roi_names, 
+                                                     self.existing_roi_indices, 
                                                      self.ignore_missing_regex, 
                                                      roi_select_first=self.roi_select_first, 
                                                      roi_separate=self.roi_separate)
@@ -522,10 +522,10 @@ class AutoPipeline(Pipeline):
                         else:
                             break
                     
-                    for name in mask.roi_names.keys():
-                        if name not in self.existing_roi_names.keys():
-                            self.existing_roi_names[name] = len(self.existing_roi_names)
-                    mask.existing_roi_names = self.existing_roi_names
+                    for name in mask.roi_indices.keys():
+                        if name not in self.existing_roi_indices.keys():
+                            self.existing_roi_indices[name] = len(self.existing_roi_indices)
+                    mask.existing_roi_indices = self.existing_roi_indices
 
                     
                     if self.v:
@@ -549,7 +549,7 @@ class AutoPipeline(Pipeline):
                         if self.v:
                             print(mask_arr.shape)
 
-                        roi_names_list = list(mask.roi_names.keys())
+                        roi_names_list = list(mask.roi_indices.keys())
                         for i in range(mask_arr.shape[0]):
                             new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
                             new_mask.CopyInformation(mask)
@@ -563,6 +563,8 @@ class AutoPipeline(Pipeline):
                         metadata.update(structure_set.metadata)
 
                     metadata[f"metadata_{colname}"] = [structure_set.roi_names]
+                    for roi, labels in mask.raw_roi_names.items():
+                        metadata[f"raw_labels_{roi}"] = labels                    
 
                     print(subject_id, "SAVED MASK ON", conn_to)
                 
@@ -625,12 +627,12 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
-            # print(self.existing_roi_names)
+            # print(self.existing_roi_indices)
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
                                 pathlib.Path(self.output_directory, "imagesTr").as_posix(),
                                 images_test_location,
                                 tuple(self.nnunet_info["modalities"].keys()),
-                                {v:k for k, v in self.existing_roi_names.items()},
+                                {v:k for k, v in self.existing_roi_indices.items()},
                                 os.path.split(self.input_directory)[1])
             _, child = os.path.split(self.output_directory)
             shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
