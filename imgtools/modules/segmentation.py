@@ -36,6 +36,19 @@ def map_over_labels(segmentation, f, include_background=False, return_segmentati
 
 class Segmentation(sitk.Image):
     def __init__(self, segmentation, roi_indices=None, existing_roi_indices=None, raw_roi_names=None):
+        """Initializes the Segmentation class
+        
+        Parameters
+        ----------
+        roi_indices
+            Dictionary of {"ROI": label number}
+        
+        existing_roi_indices
+            Dictionary of {"ROI": label number} of the existing ROIs
+
+        raw_roi_names
+            Dictionary of {"ROI": original countor names}
+        """
         super().__init__(segmentation)
         self.num_labels = self.GetNumberOfComponentsPerPixel()
         if not roi_indices:
