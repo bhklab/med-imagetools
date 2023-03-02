@@ -18,6 +18,7 @@ def crawl_one(folder):
         # instance (slice) information
         for dcm in dicoms:
             try:
+                fname    = pathlib.Path(dcm).name
                 meta     = dcmread(dcm, force=True)
                 patient  = str(meta.PatientID)
                 study    = str(meta.StudyInstanceUID)
@@ -113,7 +114,7 @@ def crawl_one(folder):
                     rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
                     database[patient][study][series] = {'description': series_description}
                 if subseries not in database[patient][study][series]:
-                    database[patient][study][series][subseries] = {'instances': [],
+                    database[patient][study][series][subseries] = {'instances': {},
                                                                    'instance_uid': instance,
                                                                    'modality': meta.Modality,
                                                                    'reference_ct': reference_ct,
@@ -130,7 +131,7 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem
                                                                    }
 
-                database[patient][study][series][subseries]['instances'].append(instance)
+                database[patient][study][series][subseries]['instances'][instance] = fname
             except:
                 pass
     

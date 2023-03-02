@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 import SimpleITK as sitk
+from pydicom import dcmread
 
 from .sparsemask import SparseMask
 
@@ -35,23 +36,47 @@ def map_over_labels(segmentation, f, include_background=False, return_segmentati
 
 
 class Segmentation(sitk.Image):
-    def __init__(self, segmentation, roi_indices=None, existing_roi_indices=None, raw_roi_names=None):
+    def __init__(self, 
+                 segmentation, 
+                 metadata: Optional[dict] = {}, 
+                 roi_indices=None, 
+                 existing_roi_indices=None, 
+                 raw_roi_names={},
+                 frame_groups=None):
+        """Initializes the Segmentation class
+        
+        Parameters
+        ----------
+        roi_indices
+            Dictionary of {"ROI": label number}
+        
+        existing_roi_indices
+            Dictionary of {"ROI": label number} of the existing ROIs
+
+        raw_roi_names
+            Dictionary of {"ROI": original countor names}
+
+        frame_groups
+            PerFrameFunctionalGroupsSequence (5200, 9230) DICOM metadata
+        """
         super().__init__(segmentation)
         self.num_labels = self.GetNumberOfComponentsPerPixel()
+        self.raw_roi_names = raw_roi_names
+        self.metadata = metadata
+        self.frame_groups = frame_groups
+
         if not roi_indices:
             self.roi_indices = {f"label_{i}": i for i in range(1, self.num_labels+1)}
         else:
             self.roi_indices = roi_indices
             if 0 in self.roi_indices.values():
                 self.roi_indices = {k : v+1 for k, v in self.roi_indices.items()}
-        if not raw_roi_names:
-            raw_roi_names={}
-        else:
-            self.raw_roi_names = raw_roi_names
+        
         if len(self.roi_indices) != self.num_labels:
             for i in range(1, self.num_labels+1):
                 if i not in self.roi_indices.values():
                     self.roi_indices[f"label_{i}"] = i
+
         self.existing_roi_indices = existing_roi_indices
 
     def get_label(self, label=None, name=None, relabel=False):
@@ -162,3 +187,24 @@ class Segmentation(sitk.Image):
                         overlaps.add((i, j, k))
                     res[i, j, k] = max(arr_1[i, j, k], arr_2[i, j, k])
         return res, overlaps
+
+    @classmethod
+    def from_dicom_seg(cls, mask, meta):
+        #get duplicates
+        label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
+        raw_roi_names  = {} #{i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
+        for n, i in enumerate(meta.SegmentSequence):
+            label = i.SegmentLabel
+            num   = i.SegmentNumber
+
+            if label not in raw_roi_names:
+                raw_roi_names[label] = num
+            else:
+                raw_roi_names[f"{label}_{label_counters[label]}"] = num
+                label_counters[label] += 1
+        
+        
+        frame_groups  = meta.PerFrameFunctionalGroupsSequence
+        return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)
+
+        
