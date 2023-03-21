@@ -50,7 +50,6 @@ class StructureSet:
         metadata = {}
         
         return cls(roi_points, metadata)
-        # return cls(roi_points)
 
     @property
     def roi_names(self) -> List[str]:
@@ -186,7 +185,6 @@ class StructureSet:
         if isinstance(roi_names, str):
             roi_names = [roi_names]
         if isinstance(roi_names, list): # won't this always trigger after the previous?
-            print("triggered")
             labels = self._assign_labels(roi_names, roi_select_first)
         print("labels:", labels)
         all_empty = True

@@ -7,28 +7,22 @@ import copy
 
 import pandas as pd
 import SimpleITK as sitk
-import nrrd
 from pydicom import dcmread
 
 from joblib import Parallel, delayed
 from tqdm.auto import tqdm
 
-from ..modules import StructureSet
-from ..modules import Dose
-from ..modules import PET
-from ..modules import Scan
+from ..modules import StructureSet, Dose, PET, Scan, Segmentation
 from ..utils.crawl import *
 from ..utils.dicomutils import *
 
 def read_image(path):
     return sitk.ReadImage(path)
 
-def read_header(path):
-    return nrrd.read_header(path)
-
 def read_dicom_series(path: str,
                       series_id: Optional[str] = None,
-                      recursive: bool = False) -> Scan:
+                      recursive: bool = False, 
+                      file_names: list = None):
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -45,6 +39,9 @@ def read_dicom_series(path: str,
        the directory. If None and multiple series are present, loads the first
        series found.
 
+    file_names, optional
+        If there are multiple acquisitions/"subseries" for an individual series,
+        use the provided list of file_names to set the ImageSeriesReader.
 
     Returns
     -------
@@ -52,11 +49,13 @@ def read_dicom_series(path: str,
 
     """
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path,
-                                                seriesID=series_id if series_id else "",
-                                                recursive=recursive)
-    # extract the names of the dicom files that are in the path variable, which is a directory
-    reader.SetFileNames(dicom_names)
+    if file_names is None:
+        file_names = reader.GetGDCMSeriesFileNames(path,
+                                                    seriesID=series_id if series_id else "",
+                                                    recursive=recursive)
+        # extract the names of the dicom files that are in the path variable, which is a directory
+    
+    reader.SetFileNames(file_names)
     
     # Configure the reader to load all of the DICOM tags (public+private):
     # By default tags are not loaded (saves time).
@@ -66,10 +65,13 @@ def read_dicom_series(path: str,
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
 
-    metadata = {}
+    return reader.Execute()
 
-    return Scan(reader.Execute(), metadata)
+    
 
+def read_dicom_scan(path, series_id=None, recursive: bool=False) -> Scan:
+    image = read_dicom_series(path, series_id=series_id, recursive=recursive)
+    return Scan(image, {})
 
 def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
@@ -77,8 +79,12 @@ def read_dicom_rtstruct(path):
 def read_dicom_rtdose(path):
     return Dose.from_dicom_rtdose(path)
 
-def read_dicom_pet(path,series=None):
-    return PET.from_dicom_pet(path,series, "SUV")
+def read_dicom_pet(path, series=None):
+    return PET.from_dicom_pet(path, series, "SUV")
+
+def read_dicom_seg(path, meta, series=None):
+    seg_img = read_dicom_series(path, series)
+    return Segmentation.from_dicom_seg(seg_img, meta)
 
 def read_dicom_auto(path, series=None):
     if path is None:
@@ -88,41 +94,28 @@ def read_dicom_auto(path, series=None):
         meta = dcmread(dcm)
         if meta.SeriesInstanceUID != series and series is not None:
             continue
+        
         modality = meta.Modality
-        all_modality_metadata = all_modalities_metadata(meta)
-        if modality == 'CT' or modality == 'MR':
-            dicom_series = read_dicom_series(path,series)#, modality=modality)
-            if modality == 'CT':
-                dicom_series.metadata.update(ct_metadata(meta))
-                dicom_series.metadata.update(all_modality_metadata)
-            else:
-                dicom_series.metadata.update(mr_metadata(meta))
-                dicom_series.metadata.update(all_modality_metadata)
-            return dicom_series
+        if modality in ['CT', 'MR']:
+            obj = read_dicom_scan(path, series)
         elif modality == 'PT':
-            pet = read_dicom_pet(path,series)
-            pet.metadata.update(pet_metadata(meta))
-            pet.metadata.update(all_modality_metadata)
-            return pet
+            obj = read_dicom_pet(path, series)
         elif modality == 'RTSTRUCT':
-            rtstruct = read_dicom_rtstruct(dcm)
-            rtstruct.metadata.update(rtstruct_metadata(meta))
-            rtstruct.metadata.update(all_modality_metadata)
-            return rtstruct
+            obj = read_dicom_rtstruct(dcm)
         elif modality == 'RTDOSE':
-            rtdose = read_dicom_rtdose(dcm)
-            rtdose.metadata.update(all_modality_metadata)
-            return rtdose
+            obj = read_dicom_rtdose(dcm)
+        elif modality == 'SEG':
+            obj = read_dicom_seg(path, meta, series)
         else:
-            if len(dcms)==1:
+            if len(dcms) == 1:
+                print(modality, 'at', dcms[0], 'is NOT implemented yet.')
                 raise NotImplementedError
             else:
                 print("There were no dicoms in this path.")
                 return None
-
-def read_segmentation(path):
-    # TODO read seg.nrrd
-    pass
+        
+        obj.metadata.update(get_modality_metadata(meta, modality))
+        return obj
 
 class BaseLoader:
     def __getitem__(self, subject_id):
@@ -149,16 +142,12 @@ class BaseLoader:
 class ImageCSVLoader(BaseLoader):
     def __init__(self,
                  csv_path_or_dataframe,
-                 colnames=None,
-                 seriesnames=None,
+                 colnames=[],
+                 seriesnames=[],
                  id_column=None,
                  expand_paths=False,
                  readers=None):
 
-        if colnames is None:
-            colnames = []
-        if seriesnames is None:
-            seriesnames = []
         if readers is None:
             readers = [read_image] # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
 
@@ -176,7 +165,7 @@ class ImageCSVLoader(BaseLoader):
             self.paths = csv_path_or_dataframe
             if id_column:
                 self.paths = self.paths.set_index(id_column)
-            if not self.colnames:
+            if len(self.colnames) == 0:
                 self.colnames = self.paths.columns
         else:
             raise ValueError(f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.")

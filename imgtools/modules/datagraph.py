@@ -53,7 +53,11 @@ class DataGraph:
         '''
         Forms edge table based on the crawled data
         '''
-        #Get reference_rs information from RTDOSE-RTPLAN connections
+        # enforce string type to all columns to prevent dtype merge errors for empty columns
+        for col in self.df:
+            self.df[col] = self.df[col].astype(str)
+        
+        #Get reference_rs information from RTDOSE-RTPLAN connections    
         df_filter = pd.merge(self.df, self.df[["instance_uid","reference_rs"]], 
                              left_on="reference_pl", 
                              right_on="instance_uid", 
@@ -191,7 +195,7 @@ class DataGraph:
         ct = df_study.loc[df_study["modality"] == "CT"]
         mr = df_study.loc[df_study["modality"] == "MR"]
         pet = df_study.loc[df_study["modality"] == "PT"]
-
+        seg = df_study.loc[df_study["modality"] == "SEG"]
         edge_types = np.arange(7)
         for edge in edge_types:
             if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
@@ -217,7 +221,12 @@ class DataGraph:
             
             elif edge==5: 
                 df_combined = pd.merge(plan, dose, left_on="instance", right_on="reference_pl")
-            
+
+            elif edge==7:  # FORMS RTSTRUCT->CT on ref_ct to series
+                df_ct_seg = pd.merge(ct, seg, left_on="series", right_on="reference_ct")
+                df_mr_seg = pd.merge(mr, seg, left_on="series", right_on="reference_ct")
+                df_combined = pd.concat([df_ct_seg, df_mr_seg])
+
             else:
                 df_combined = pd.merge(struct, plan, left_on="instance", right_on="reference_rs")
 
@@ -257,7 +266,7 @@ class DataGraph:
         '''
         #Basic processing of just one modality
         supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR']
-        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5}
+        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5, "CT,SEG": 7}
         self.mods   = query_string.split(",")
         self.mods_n = len(self.mods)
 

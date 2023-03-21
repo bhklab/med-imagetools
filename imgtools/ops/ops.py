@@ -1501,6 +1501,184 @@ class StructureSetToSegmentation(BaseOp):
                                              roi_select_first=roi_select_first,
                                              roi_separate=roi_separate)
 
+class FilterSegmentation():
+    """FilterSegmentation operation class:
+    A callable class that accepts ROI names, a Segmentation mask with all labels
+    and returns only the desired Segmentation masks based on accepted ROI names.
+
+    To instantiate:
+        obj = StructureSet(roi_names)
+    To call:
+        mask = obj(structure_set, reference_image)
+
+    Parameters
+    ----------
+    roi_names
+        List of Region of Interests
+    """
+
+    def __init__(self, 
+                 roi_patterns: Dict[str, str],
+                 continuous: bool = False):
+        """Initialize the op.
+
+        Parameters
+        ----------
+        roi_names
+            List of ROI names to export. Both full names and
+            case-insensitive regular expressions are allowed.
+            All labels within one sublist will be assigned
+            the same label.
+        
+        """
+        self.roi_patterns = roi_patterns
+        self.continuous = continuous
+
+    def _assign_labels(self, 
+                       names, 
+                       roi_select_first: bool = False,
+                       roi_separate: bool = False):
+        """
+        Parameters
+        ----
+        roi_select_first
+            Select the first matching ROI/regex for each OAR, no duplicate matches. 
+
+        roi_separate
+            Process each matching ROI/regex as individual masks, instead of consolidating into one mask
+            Each mask will be named ROI_n, where n is the nth regex/name/string.
+        """
+        labels = {}
+        cur_label = 0
+        if names == self.roi_patterns:
+            for i, name in enumerate(self.roi_patterns):
+                labels[name] = i
+        else:
+            for _, pattern in enumerate(names):
+                if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                    break
+                if isinstance(pattern, str):
+                    for i, name in enumerate(self.roi_names):
+                        if re.fullmatch(pattern, name, flags=re.IGNORECASE):
+                            labels[name] = cur_label
+                            cur_label += 1
+                else: # if multiple regex/names to match
+                    matched = False
+                    for subpattern in pattern:
+                        if roi_select_first and matched: break # break if roi_select_first and we're matched
+                        for n, name in enumerate(self.roi_names):
+                            if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
+                                matched = True
+                                if not roi_separate:
+                                    labels[name] = cur_label
+                                else:
+                                    labels[f"{name}_{n}"] = cur_label
+                                
+                    cur_label += 1
+        return labels
+
+    def get_mask(self, reference_image, seg, mask, label, idx, continuous):
+        size = seg.GetSize()
+        seg_arr = sitk.GetArrayFromImage(seg)
+        if len(size) == 5:
+            size = size[:-1]
+        elif len(size) == 3:
+            size = size.append(1)
+
+        idx_seg = self.roi_names[label] - 1         # SegmentSequence numbering starts at 1 instead of 0
+        if size[:-1] == reference_image.GetSize():  # Assumes `size` is length of 4: (x, y, z, channels)
+            mask[:,:,:,idx] += seg[:,:,:,idx_seg]
+        else:                                       # if 2D segmentations on 3D images
+            frame        = seg.frame_groups[idx_seg]
+            ref_uid      = frame.DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID  # unused but references InstanceUID of slice
+            frame_coords = np.array(frame.PlanePositionSequence[0].ImagePositionPatient)
+            img_coords   = physical_points_to_idxs(reference_image, np.expand_dims(frame_coords, (0, 1)))[0][0]
+            z            = img_coords[0]
+
+            mask[z,:,:,idx] += seg_arr[0,idx_seg,:,:]
+
+    def __call__(self, 
+                 reference_image: sitk.Image,
+                 seg: Segmentation, 
+                 existing_roi_indices: Dict[str, int], 
+                 ignore_missing_regex: bool = False,
+                 roi_select_first: bool = False,
+                 roi_separate: bool = False) -> Segmentation:
+        """Convert the structure set to a Segmentation object.
+
+        Parameters
+        ----------
+        structure_set
+            The structure set to convert.
+        reference_image
+            Image used as reference geometry.
+
+        Returns
+        -------
+        Segmentation
+            The segmentation object.
+        """
+        # variable name isn't ideal, but follows StructureSet.to_segmentation convention
+        self.roi_names    = seg.raw_roi_names 
+        labels = {}
+        
+        # `roi_names` in .to_segmentation() method = self.roi_patterns
+        if self.roi_patterns is None or self.roi_patterns == {}:
+            self.roi_patterns = self.roi_names
+            labels = self._assign_labels(self.roi_patterns, roi_select_first, roi_separate) #only the ones that match the regex
+        elif isinstance(self.roi_patterns, dict):
+            for name, pattern in self.roi_patterns.items():
+                if isinstance(pattern, str):
+                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
+                    if matching_names:
+                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+                elif isinstance(pattern, list): # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
+                    labels[name] = []
+                    for pattern_one in pattern:
+                        matching_names = list(self._assign_labels([pattern_one], roi_select_first).keys())
+                        if matching_names:
+                            labels[name].extend(matching_names) #{"GTV": ["GTV1", "GTV2"]}
+        elif isinstance(self.roi_patterns, list): # won't this always trigger after the previous?
+            labels = self._assign_labels(self.roi_patterns, roi_select_first)
+        else:
+            raise ValueError(f"{self.roi_patterns} not expected datatype")
+        print("labels:", labels)
+        
+        # removing empty labels from dictionary to prevent processing empty masks
+        all_empty = True
+        for v in labels.values():
+            if v != []:
+                all_empty = False
+        if all_empty:
+            if not ignore_missing_regex:
+                raise ValueError(f"No ROIs matching {self.roi_patterns} found in {self.roi_names}.")
+            else:
+                return None
+
+        labels = {k:v for (k,v) in labels.items() if v != [] }
+        size = reference_image.GetSize()[::-1] + (len(labels),)
+        mask = np.zeros(size, dtype=np.uint8)
+
+        seg_roi_indices = {}
+        if self.roi_patterns != {} and isinstance(self.roi_patterns, dict):
+            for i, (name, label_list) in enumerate(labels.items()):
+                for label in label_list:
+                    self.get_mask(reference_image, seg, mask, label, i, self.continuous)
+                seg_roi_indices[name] = i
+        else:
+            for name, label in labels.items():
+                self.get_mask(reference_image, seg, mask, name, label, self.continuous)
+            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
+
+        
+        mask[mask > 1] = 1
+        mask = sitk.GetImageFromArray(mask, isVector=True)
+        mask.CopyInformation(reference_image)
+        return Segmentation(mask, 
+                            roi_indices=seg_roi_indices, 
+                            existing_roi_indices=existing_roi_indices, 
+                            raw_roi_names=labels)
+        
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
 
