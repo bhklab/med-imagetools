@@ -19,6 +19,7 @@ def crawl_one(folder):
         for dcm in dicoms:
             try:
                 fname    = pathlib.Path(dcm).name
+                rel_fname = pathlib.Path(os.path.split(parent)[1], os.path.relpath(fname, parent)).as_posix()
                 meta     = dcmread(dcm, force=True)
                 patient  = str(meta.PatientID)
                 study    = str(meta.StudyInstanceUID)
@@ -111,7 +112,8 @@ def crawl_one(folder):
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
                     parent, _ = os.path.split(folder)
-                    rel_path = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
+                    rel_path  = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
+                    
                     database[patient][study][series] = {'description': series_description}
                 if subseries not in database[patient][study][series]:
                     database[patient][study][series][subseries] = {'instances': {},
@@ -128,10 +130,11 @@ def crawl_one(folder):
                                                                    'echo_time':te,
                                                                    'scan_sequence': scan_seq,
                                                                    'mag_field_strength': tesla,
-                                                                   'imaged_nucleus': elem
+                                                                   'imaged_nucleus': elem,
+                                                                   'fname': rel_fname #temporary until we switch to json-based loading
                                                                    }
-
-                database[patient][study][series][subseries]['instances'][instance] = fname
+                
+                database[patient][study][series][subseries]['instances'][instance] = rel_fname
             except:
                 pass
     
@@ -150,7 +153,7 @@ def to_df(database_dict):
                                        'instances', 'instance_uid', 
                                        'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder',
                                        'orientation', 'orientation_type', 'MR_repetition_time', 'MR_echo_time', 
-                                       'MR_scan_sequence', 'MR_magnetic_field_strength', 'MR_imaged_nucleus']
+                                       'MR_scan_sequence', 'MR_magnetic_field_strength', 'MR_imaged_nucleus', 'file_path']
                             values = [pat, study, database_dict[pat][study]['description'], 
                                       series, database_dict[pat][study][series]['description'], 
                                       subseries, database_dict[pat][study][series][subseries]['modality'], 
@@ -160,6 +163,7 @@ def to_df(database_dict):
                                       database_dict[pat][study][series][subseries]['orientation'], database_dict[pat][study][series][subseries]['orientation_type'],
                                       database_dict[pat][study][series][subseries]['repetition_time'], database_dict[pat][study][series][subseries]['echo_time'],
                                       database_dict[pat][study][series][subseries]['scan_sequence'], database_dict[pat][study][series][subseries]['mag_field_strength'], database_dict[pat][study][series][subseries]['imaged_nucleus'],
+                                      database_dict[pat][study][series][subseries]['file_path']
                                       ]
 
                             df_add = pd.DataFrame([values], columns=columns)
