@@ -133,7 +133,6 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem,
                                                                    'fname': rel_fname #temporary until we switch to json-based loading
                                                                    }
-                
                 database[patient][study][series][subseries]['instances'][instance] = rel_fname
             except:
                 pass
