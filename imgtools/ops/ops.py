@@ -5,7 +5,7 @@ import SimpleITK as sitk
 
 from .functional import *
 from ..io import *
-from ..utils import image_to_array, array_to_image, crawl
+from ..utils import image_to_array, array_to_image, crawl, physical_points_to_idxs
 from ..modules import map_over_labels
 from ..modules import DataGraph
 
@@ -55,6 +55,77 @@ class BaseOutput(BaseOp):
     def __call__(self, key, *args, **kwargs):
         self._writer.put(key, *args, **kwargs)
 
+class BetaAutoInput(BaseInput):
+    """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
+    which stores the relation between all the modalities.
+    Based on the user provided modalities, this class loads the information of the user provided modalities
+
+    Parameters
+    ----------
+    dir_path: str
+        Path to dataset top-level directory. The crawler/indexer will start at this directory.
+
+    modalities: str
+        List of modalities to process. Only samples with ALL modalities will be processed. Make sure there are no space between list elements as it is parsed as a string.
+
+    visualize: bool
+        Whether to return visualization of the data graph
+
+    update: bool
+        Whether to update crawled index
+    """
+    def __init__(self,
+                 dir_path: str,
+                 modalities: str,
+                 n_jobs: int = -1,
+                 visualize: bool = False,
+                 update: bool = False):
+        self.dir_path = dir_path
+        self.modalities = modalities
+        self.parent, self.dataset_name = os.path.split(self.dir_path)
+
+        ####### CRAWLER ############
+        # Checks if dataset has already been indexed
+        # To be changed later
+        df_crawl_path   = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
+        tree_crawl_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.json").as_posix()
+
+        if not os.path.exists(df_crawl_path) or update:
+            print("Indexing the dataset...")
+            db = crawl(self.dir_path, n_jobs=n_jobs)
+            print(f"Number of patients in the dataset: {len(db)}")
+        else:
+            print("The dataset has already been indexed.")
+
+        import json
+        with open(tree_crawl_path, 'r') as f:
+            tree_db = json.load(f)
+
+        ####### GRAPH ##########
+        # Form the graph
+        edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
+        graph = DataGraph(path_crawl=df_crawl_path, edge_path=edge_path, visualize=visualize)
+        print(f"Forming the graph based on the given modalities: {self.modalities}")
+        self.df_combined = graph.parser(self.modalities)
+        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
+        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
+        self.study_names  = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "study"]
+        self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
+        self.subseries_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "subseries"]
+        print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
+
+        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
+
+        loader = ImageCSVLoader(self.df_combined,
+                                col_names=self.column_names,
+                                study_names=self.study_names,
+                                series_names=self.series_names,
+                                subseries_names=self.subseries_names,
+                                id_column=None,
+                                expand_paths=False,
+                                readers=self.readers)
+        
+        super().__init__(loader)
 
 class ImageAutoInput(BaseInput):
     """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
@@ -1618,6 +1689,8 @@ class FilterSegmentation():
         Segmentation
             The segmentation object.
         """
+        from itertools import groupby
+
         # variable name isn't ideal, but follows StructureSet.to_segmentation convention
         self.roi_names    = seg.raw_roi_names 
         labels = {}

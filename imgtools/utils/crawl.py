@@ -10,21 +10,26 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 
 def crawl_one(folder):
+    folder_path = pathlib.Path(folder)
     database = {}
     for path, _, _ in os.walk(folder):
         # find dicoms
-        dicoms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
-
+        dicoms = glob.glob(pathlib.Path(path, "**", "*.dcm").as_posix(), recursive=True)
+        # print('\n', folder, dicoms)
         # instance (slice) information
         for dcm in dicoms:
             try:
-                fname    = pathlib.Path(dcm).name
-                rel_fname = pathlib.Path(os.path.split(parent)[1], os.path.relpath(fname, parent)).as_posix()
-                meta     = dcmread(dcm, force=True)
-                patient  = str(meta.PatientID)
-                study    = str(meta.StudyInstanceUID)
-                series   = str(meta.SeriesInstanceUID)
-                instance = str(meta.SOPInstanceUID)
+                dcm_path  = pathlib.Path(dcm)
+                # parent    = dcm_path.parent#.as_posix()
+                fname     = dcm_path.name
+                rel_path  = dcm_path.relative_to(folder_path.parent.parent)                                        # rel_path of dicom from folder
+                rel_posix = rel_path.parent.as_posix()     # folder name + until parent folder of dicom
+
+                meta      = dcmread(dcm, force=True)
+                patient   = str(meta.PatientID)
+                study     = str(meta.StudyInstanceUID)
+                series    = str(meta.SeriesInstanceUID)
+                instance  = str(meta.SOPInstanceUID)
 
                 reference_ct, reference_rs, reference_pl,  = "", "", ""
                 tr, te, tesla, scan_seq, elem = "", "", "", "", ""
@@ -111,8 +116,9 @@ def crawl_one(folder):
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
-                    parent, _ = os.path.split(folder)
-                    rel_path  = pathlib.Path(os.path.split(parent)[1], os.path.relpath(path, parent)).as_posix()
+                    rel_crawl_path  = rel_posix
+                    if meta.Modality == 'RTSTRUCT':
+                        rel_crawl_path = os.path.join(rel_crawl_path, fname)
                     
                     database[patient][study][series] = {'description': series_description}
                 if subseries not in database[patient][study][series]:
@@ -123,7 +129,7 @@ def crawl_one(folder):
                                                                    'reference_rs': reference_rs,
                                                                    'reference_pl': reference_pl,
                                                                    'reference_frame': reference_frame,
-                                                                   'folder': rel_path,
+                                                                   'folder': rel_crawl_path,
                                                                    'orientation': orientation,
                                                                    'orientation_type': orientation_type,
                                                                    'repetition_time':tr,
@@ -131,10 +137,11 @@ def crawl_one(folder):
                                                                    'scan_sequence': scan_seq,
                                                                    'mag_field_strength': tesla,
                                                                    'imaged_nucleus': elem,
-                                                                   'fname': rel_fname #temporary until we switch to json-based loading
+                                                                   'fname': rel_path.as_posix() #temporary until we switch to json-based loading
                                                                    }
-                database[patient][study][series][subseries]['instances'][instance] = rel_fname
-            except:
+                database[patient][study][series][subseries]['instances'][instance] = rel_path.as_posix()
+            except Exception as e:
+                print(folder, e)
                 pass
     
     return database
@@ -162,7 +169,7 @@ def to_df(database_dict):
                                       database_dict[pat][study][series][subseries]['orientation'], database_dict[pat][study][series][subseries]['orientation_type'],
                                       database_dict[pat][study][series][subseries]['repetition_time'], database_dict[pat][study][series][subseries]['echo_time'],
                                       database_dict[pat][study][series][subseries]['scan_sequence'], database_dict[pat][study][series][subseries]['mag_field_strength'], database_dict[pat][study][series][subseries]['imaged_nucleus'],
-                                      database_dict[pat][study][series][subseries]['file_path']
+                                      database_dict[pat][study][series][subseries]['fname']
                                       ]
 
                             df_add = pd.DataFrame([values], columns=columns)

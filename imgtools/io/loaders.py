@@ -1,16 +1,16 @@
-import os, pathlib
+import os, pathlib, json
 import glob
 import re
 from typing import Optional, List
 from collections import namedtuple
-import copy
+# import copy
 
 import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
 
-from joblib import Parallel, delayed
-from tqdm.auto import tqdm
+# from joblib import Parallel, delayed
+# from tqdm.auto import tqdm
 
 from ..modules import StructureSet, Dose, PET, Scan, Segmentation
 from ..utils.crawl import *
@@ -69,8 +69,8 @@ def read_dicom_series(path: str,
 
     
 
-def read_dicom_scan(path, series_id=None, recursive: bool=False) -> Scan:
-    image = read_dicom_series(path, series_id=series_id, recursive=recursive)
+def read_dicom_scan(path, series_id=None, recursive: bool=False, file_names=None) -> Scan:
+    image = read_dicom_series(path, series_id=series_id, recursive=recursive, file_names=file_names)
     return Scan(image, {})
 
 def read_dicom_rtstruct(path):
@@ -86,10 +86,13 @@ def read_dicom_seg(path, meta, series=None):
     seg_img = read_dicom_series(path, series)
     return Segmentation.from_dicom_seg(seg_img, meta)
 
-def read_dicom_auto(path, series=None):
+def read_dicom_auto(path, series=None, file_names=None):
     if path is None:
         return None
-    dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
+    if path.endswith(".dcm"):
+        dcms = [path]
+    else:
+        dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
     for dcm in dcms:
         meta = dcmread(dcm)
         if meta.SeriesInstanceUID != series and series is not None:
@@ -97,7 +100,7 @@ def read_dicom_auto(path, series=None):
         
         modality = meta.Modality
         if modality in ['CT', 'MR']:
-            obj = read_dicom_scan(path, series)
+            obj = read_dicom_scan(path, series, file_names=file_names)
         elif modality == 'PT':
             obj = read_dicom_pet(path, series)
         elif modality == 'RTSTRUCT':
@@ -139,6 +142,77 @@ class BaseLoader:
         except KeyError:
             return default
 
+class ImageTreeLoader(BaseLoader):
+    def __init__(self,
+                 json_path,
+                 csv_path_or_dataframe,
+                 col_names=[],
+                 study_names=[],
+                 series_names=[],
+                 subseries_names=[],
+                 id_column=None,
+                 expand_paths=False,
+                 readers=None):
+
+        if readers is None:
+            readers = [read_image] # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+
+        self.expand_paths = expand_paths
+        self.readers = readers
+        self.colnames = col_names
+        self.studynames = study_names
+        self.seriesnames = series_names
+        self.subseriesnames = subseries_names
+
+        if isinstance(csv_path_or_dataframe, str):
+            if id_column is not None and id_column not in self.colnames:
+                self.colnames.append(id_column)
+            self.paths = pd.read_csv(csv_path_or_dataframe,
+                                     index_col=id_column)
+        elif isinstance(csv_path_or_dataframe, pd.DataFrame):
+            self.paths = csv_path_or_dataframe
+            if id_column:
+                self.paths = self.paths.set_index(id_column)
+            if len(self.colnames) == 0:
+                self.colnames = self.paths.columns
+        else:
+            raise ValueError(f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.")
+        
+        if isinstance(json_path, str):
+            with open(json_path, 'r') as f:
+                self.tree = json.load(json_path)
+        else:
+            raise ValueError(f"Expected a path to a json file, not {type(json_path)}.")
+
+        if not isinstance(readers, list):
+            readers = [readers] * len(self.colnames)
+
+        self.output_tuple = namedtuple("Output", self.colnames)
+
+    def __getitem__(self, subject_id):
+        row = self.paths.loc[subject_id]
+        paths = {col: row[col] for col in self.colnames}
+        study = {col: row[col] for col in self.studynames}
+        series = {col: row[col] for col in self.seriesnames}
+        subseries = {col: row[col] for col in self.subseriesnames}
+        paths = {k: v if pd.notna(v) else None for k, v in paths.items()}
+        
+        if self.expand_paths:
+            # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
+            paths = {col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()}
+        
+        for i, (col, path) in enumerate(paths.items()):
+            files = self.tree[subject_id][study["study_"+("_").join(col.split("_")[1:])]][series["series_"+("_").join(col.split("_")[1:])]][subseries["subseries_"+("_").join(col.split("_")[1:])]]
+            self.readers[i](path, series["series_"+("_").join(col.split("_")[1:])])
+        outputs = {col: self.readers[i](path, series["series_"+("_").join(col.split("_")[1:])], file_names=files) for i, (col, path) in enumerate(paths.items())}
+        return self.output_tuple(**outputs)
+
+    def keys(self):
+        return list(self.paths.index)
+
+    def items(self):
+        return ((k, self[k]) for k in self.keys())
+    
 class ImageCSVLoader(BaseLoader):
     def __init__(self,
                  csv_path_or_dataframe,
