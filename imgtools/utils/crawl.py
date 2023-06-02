@@ -25,7 +25,7 @@ def crawl_one(folder):
                 rel_path  = dcm_path.relative_to(folder_path.parent.parent)                                        # rel_path of dicom from folder
                 rel_posix = rel_path.parent.as_posix()     # folder name + until parent folder of dicom
 
-                meta      = dcmread(dcm, force=True)
+                meta      = dcmread(dcm, force=True, stop_before_pixels=True)
                 patient   = str(meta.PatientID)
                 study     = str(meta.StudyInstanceUID)
                 series    = str(meta.SeriesInstanceUID)
