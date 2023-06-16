@@ -191,7 +191,7 @@ def crawl(top,
         for key in db:
             # If multiple directories have same patient ID, merge their information together
             if key in database_dict:
-                database_dict[key] = database_dict[key] | db[key]
+                database_dict[key] = {**database_dict[key], **db[key]}
             else:
                 database_dict[key] = db[key]
     
@@ -218,15 +218,16 @@ def crawl(top,
     return database_dict
 
 if __name__ == "__main__":
-    parser = ArgumentParser("Dataset DICOM Crawler")
-    parser.add_argument("directory",
-                         type=str,
-                         help="Top-level directory of the dataset.")
-    parser.add_argument("--n_jobs",
-                         type=int,
-                         default=16,
-                         help="Number of parallel processes for multiprocessing.")
+    # parser = ArgumentParser("Dataset DICOM Crawler")
+    # parser.add_argument("directory",
+    #                      type=str,
+    #                      help="Top-level directory of the dataset.")
+    # parser.add_argument("--n_jobs",
+    #                      type=int,
+    #                      default=16,
+    #                      help="Number of parallel processes for multiprocessing.")
 
-    args = parser.parse_args()
-    db = crawl(args.directory, n_jobs=args.n_jobs)
+    # args = parser.parse_args()
+    # db = crawl(args.directory, n_jobs=args.n_jobs)
+    db = crawl('/Users/katyscott/Documents/SARC021/images', -1)
     print("# patients:", len(db))
