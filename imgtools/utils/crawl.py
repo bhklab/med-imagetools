@@ -14,7 +14,7 @@ def crawl_one(folder):
     database = {}
     for path, _, _ in os.walk(folder):
         # find dicoms
-        dicoms = glob.glob(pathlib.Path(path, "**", "*.dcm").as_posix(), recursive=True)
+        dicoms = glob.glob(pathlib.Path(path, "**", "*.[Dd]cm").as_posix(), recursive=True)
         # print('\n', folder, dicoms)
         # instance (slice) information
         for dcm in dicoms:
