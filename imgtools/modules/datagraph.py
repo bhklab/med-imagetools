@@ -266,7 +266,7 @@ class DataGraph:
         12) RTDOSE,RTSTRUCT,CT,PT
         '''
         #Basic processing of just one modality
-        supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR']
+        supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR', 'SEG']
         edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5, "CT,SEG": 7, "MR,SEG": 7, "MR,RTSTRUCT": 2}
         self.mods   = query_string.split(",")
         self.mods_n = len(self.mods)
