@@ -182,13 +182,18 @@ def crawl(top,
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
     
+    # This is a list of dictionaries, each dictionary is a directory containing image dirs 
     database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
 
-    # convert list to dictionary
+    # convert list of dictionaries to single dictionary with each key being a patient ID
     database_dict = {}
     for db in database_list:
         for key in db:
-            database_dict[key] = db[key]
+            # If multiple directories have same patient ID, merge their information together
+            if key in database_dict:
+                database_dict[key] = database_dict[key] | db[key]
+            else:
+                database_dict[key] = db[key]
     
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
