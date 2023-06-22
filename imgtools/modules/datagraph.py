@@ -18,6 +18,7 @@ class DataGraph:
     5) edge_type:4 CT(key:study) -> PT(pair: study) 
     6) edge_type:5 RTDOSE(key: ref_pl) -> RTPLAN(pair: instance)
     7) edge_type:6 RTPLAN(key: ref_rs) -> RTSTRUCT(pair: series/instance)
+    8) edge_type:7 CT -> SEG
 
     Once the edge table is formed, one can query on the graph to get the desired results. For uniformity, the supported query is list of modalities to consider
     For ex:
@@ -144,8 +145,9 @@ class DataGraph:
         ct = df[df["modality"] == "CT"]
         mr = df[df["modality"] == "MR"]
         pet = df[df["modality"] == "PT"]
+        seg = df.loc[df["modality"] == "SEG"]
 
-        edge_types = np.arange(7)
+        edge_types = np.arange(8)
         for edge in edge_types:
             if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
                 df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
@@ -170,6 +172,9 @@ class DataGraph:
 
             elif edge==5: 
                 df_combined = pd.merge(plan, dose, left_on="instance_uid", right_on="reference_pl")
+            
+            elif edge==7:
+                df_combined = pd.merge(ct, seg, left_on="instance_uid", right_on="reference_pl")
 
             else:
                 df_combined = pd.merge(struct, plan, left_on="instance_uid", right_on="reference_rs")
@@ -348,6 +353,10 @@ class DataGraph:
                 regex_term = '(?=.*4)((?=.*1)|((?=.*2)((?=.*0)|(?=.*5)(?=.*6))))'
                 edge_list = [0, 1, 2, 4, 5, 6]
                 bads.append("RTSTRUCT")
+            elif  (("CT" in query_string) or ('MR' in query_string)) & ("SEG" in query_string):
+                # check if each study has edge 7 and (1 or 0)
+                regex_term = '((?=.*0)(?=.*1)|(?=.*7))'
+                edge_list = [0, 1, 7] 
             else:
                 raise ValueError("Please enter the correct query")
             
