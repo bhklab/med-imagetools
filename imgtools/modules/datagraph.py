@@ -55,6 +55,8 @@ class DataGraph:
         Forms edge table based on the crawled data
         '''
         # enforce string type to all columns to prevent dtype merge errors for empty columns
+        print("Forming edge graph")
+        print(self.df)
         for col in self.df:
             self.df[col] = self.df[col].astype(str)
         
@@ -93,6 +95,10 @@ class DataGraph:
         self.df_edges.drop(columns=["study_y", "patient_ID_y", "series_description_y", "study_description_y", "study"],inplace=True)
         self.df_edges.sort_values(by="patient_ID_x", ascending=True)
         print(f"Saving edge table in {self.edge_path}")
+        print(self.df_edges)
+        print("ACTUAL DF")
+        print(self.df)
+        print("")
         self.df_edges.to_csv(self.edge_path, index=False)
 
     def visualize_graph(self):
@@ -132,6 +138,7 @@ class DataGraph:
         data_net.show(vis_path)
 
     def _form_edges(self, df):
+        print("hello im in ")
         '''
         For a given study id forms edge table
         '''
@@ -146,6 +153,13 @@ class DataGraph:
         mr = df[df["modality"] == "MR"]
         pet = df[df["modality"] == "PT"]
         seg = df.loc[df["modality"] == "SEG"]
+
+        print("ct in form edges")
+        print(ct)
+
+        print("SEG In form edges")
+        print(seg)
+        print("")
 
         edge_types = np.arange(8)
         for edge in edge_types:
@@ -174,7 +188,8 @@ class DataGraph:
                 df_combined = pd.merge(plan, dose, left_on="instance_uid", right_on="reference_pl")
             
             elif edge==7:
-                df_combined = pd.merge(ct, seg, left_on="instance_uid", right_on="reference_pl")
+                print("hi IM MAKING ct seg edge")
+                df_combined = pd.merge(ct, seg, left_on="series", right_on="reference_ct")
 
             else:
                 df_combined = pd.merge(struct, plan, left_on="instance_uid", right_on="reference_rs")
@@ -182,7 +197,10 @@ class DataGraph:
             df_combined["edge_type"] = edge
             df_list.append(df_combined)
 
+        print("****** DF LIST *********")
         df_edges = pd.concat(df_list, axis=0, ignore_index=True)
+        print("df edges in _form_edges")
+        print(len(df_edges))
         return df_edges
 
     def _form_edge_study(self, df, all_study, study_id):
@@ -297,8 +315,10 @@ class DataGraph:
                 raise ValueError("Invalid Query. Select valid pairs.")
             
             #For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
-            if edge_type in [0, 1, 2]:
-                edge_list = [0, 1, 2]
+            # UMAR: adding SEG edge...
+            if edge_type in [0, 1, 2, 7]:
+                print("edge type of ct-struct, ct-rtdose AND ct-seg")
+                edge_list = [0, 1, 2, 7]
                 if edge_type==0:
                     #Search for subgraphs with edges 0 or (1 and 2)
                     regex_term = '(((?=.*0)|(?=.*5)(?=.*6))|((?=.*1)(?=.*2)))'
@@ -312,6 +332,11 @@ class DataGraph:
                     #Search for subgraphs with edges 2 or (1 and 0)
                     regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
                     final_df = self.graph_query(regex_term, edge_list, "RTDOSE") 
+                elif edge_type==7:
+                    # check if each study has edge 7 and (1 or 0)
+                    print("bout to query...")
+                    regex_term = '((?=.*0)(?=.*1)|(?=.*7))'
+                    final_df = self.graph_query(regex_term, edge_list, "SEG") 
             else:
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type, ["study_x","patient_ID_x", "study_x", "study_y", "series_x","folder_x","series_y","folder_y", "subseries_x", "subseries_y"]]
                 node_dest = valid.split(",")[0]
@@ -365,6 +390,7 @@ class DataGraph:
             raise ValueError("Please enter the correct query")
         
         final_df.reset_index(drop=True, inplace=True)
+        print(final_df.keys())
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
@@ -411,9 +437,14 @@ class DataGraph:
         
         # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
         relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
+        print("relavent study id")
+        print(relevant_study_id)
         
         # Based on the correct study ids, fetches the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
+        print("graph edges")
+        print(self.df_edges)
+        print("")
         
         # The components are deleted if it has less number of nodes than the passed modalities, change this so as to alter that condition
         final_df = self._get_df(df_processed, relevant_study_id, remove_less_comp)
