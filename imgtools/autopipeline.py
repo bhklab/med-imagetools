@@ -591,42 +591,15 @@ class AutoPipeline(Pipeline):
                 
                 # Process SEG
                 elif modality == "SEG":
+                    print("***** PROCESSING SEG **********")
                     structure_set = read_results[i]
                     conn_to = output_stream.split("_")[-1]
-                    mask = self.make_binary_mask(structure_set, image, 
-                                                    self.existing_roi_indices, 
-                                                    self.ignore_missing_regex, 
-                                                    roi_select_first=self.roi_select_first, 
-                                                    roi_separate=self.roi_separate)
-                    for name in mask.roi_indices.keys():
-                        if name not in self.existing_roi_indices.keys():
-                            self.existing_roi_indices[name] = len(self.existing_roi_indices)
-                    mask.existing_roi_indices = self.existing_roi_indices
-
-                    
-                    if self.v:
-                        print("mask.GetSize():", mask.GetSize())
-                    mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
-
-                    if len(mask_arr.shape) == 3:
-                        mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
-                    if self.v:s
-                        print(mask_arr.shape)
-                    roi_names_list = list(mask.roi_indices.keys())
-                    for i in range(mask_arr.shape[0]):
-                        new_mask = sitk.GetImageFromArray(np.transpose(mask_arr[i]))
-                        new_mask.CopyInformation(mask)
-                        new_mask = Segmentation(new_mask)
-                        mask_to_process = new_mask
-                        
-                        # output
-                        self.output(subject_id, mask_to_process, output_stream, True, roi_names_list[i])
-                
+                    #print(read_results[0]))
+                    self.output(subject_id, read_results[i], output_stream)
+                    print("output done")
 
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
 
-                    
-                
             #Saving all the metadata in multiple text files
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
