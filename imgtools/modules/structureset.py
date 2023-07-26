@@ -119,7 +119,9 @@ class StructureSet:
                 
                 # if the contour spans only 1 z-slice 
                 if len(z) == 1:
-                    z_idx = int(np.floor(z[0]))
+                    # Testing QIPCM loading setup here
+                    # z_idx = int(np.floor(z[0]))
+                    z_idx = int(np.round(z[0]))
                     slice_mask = polygon2mask(size[1:], slice_points)
                     mask[z_idx, :, :, idx] += slice_mask
                 else:
