@@ -61,16 +61,16 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     autopipeline\
       [INPUT DIRECTORY] \
       [OUTPUT DIRECTORY] \
-      --modalities [str: CT,RTSTRUCT,PT] \
-      --spacing [Tuple: (int,int,int)]\
-      --n_jobs [int]\
-      --visualize [flag]\
-      --nnunet [flag]\
-      --train_size [float]\
-      --random_state [int]\
-      --roi_yaml_path [str]\
-      --continue_processing [flag]\
-      --dry_run [flag]
+      --modalities CT,RTSTRUCT \            [str: CT,RTSTRUCT,PT (default=CT)] 
+      --spacing 1. 1. 0. \                  [Tuple: int,int,int (default=(1.,1.,0.))]
+      --n_jobs 128 \                        [int (default=-1)]
+      --visualize \                         [flag] 
+      --nnunet \                            [flag]
+      --train_size 0.8 \                    [float (default=1.0)]
+      --random_state 42 \                   [int (default=42)]
+      --roi_yaml_path /path/to/roi.yaml \   [str]
+      --continue_processing \               [flag]
+      --dry_run \                           [flag]
     ```
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
     ```
