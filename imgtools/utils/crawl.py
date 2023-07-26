@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import os, pathlib
 import glob
 import json
+from copy import deepcopy
 
 import pandas as pd
 from pydicom import dcmread
@@ -55,6 +56,15 @@ def crawl_one(folder):
                             pass
                         try:
                             reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
+                        except:
+                            pass
+                        try:
+                            # If the RTSTRUCT has contours for multiple CT images, get a list all of the reference IDs for the CTs
+                            refSOPInstances = meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence
+                            reference_ct = []
+                            if len(refSOPInstances) > 1:
+                                for idx in range(len(refSOPInstances)):
+                                    reference_ct.append(refSOPInstances[idx].ReferencedSOPInstanceUID)
                         except:
                             pass
                         try:
@@ -139,6 +149,13 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem,
                                                                    'fname': rel_path.as_posix() #temporary until we switch to json-based loading
                                                                    }
+                    # If there are multiple CTs referenced for this segmentation, make an RTSTRUCT instance/row for each CT ID as different acquisition/subseries (name pending)
+                    if isinstance(reference_ct, list):
+                        database[patient][study][series]["default"]["reference_ct"] = reference_ct[0]
+                        for n, ct_id in enumerate(reference_ct[1:]):
+                            database[patient][study][series][f"{subseries}_{n+1}"] = deepcopy(database[patient][study][series]["default"])
+                            database[patient][study][series][f"{subseries}_{n+1}"]["reference_ct"] = ct_id
+                        
                 database[patient][study][series][subseries]['instances'][instance] = rel_path.as_posix()
             except Exception as e:
                 print(folder, e)
