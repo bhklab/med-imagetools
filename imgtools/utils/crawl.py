@@ -127,8 +127,8 @@ def crawl_one(folder):
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
                     rel_crawl_path  = rel_posix
-                    if meta.Modality == 'RTSTRUCT':
-                        rel_crawl_path = os.path.join(rel_crawl_path, fname)
+                    # if meta.Modality == 'RTSTRUCT':
+                    #     rel_crawl_path = os.path.join(rel_crawl_path, fname)
                     
                     database[patient][study][series] = {'description': series_description}
                 if subseries not in database[patient][study][series]:
@@ -212,6 +212,21 @@ def crawl(top,
             else:
                 database_dict[key] = db[key]
     
+    # INSERT CHECK FOR EMPTY REFERENCE CTs HERE
+    # Find entries with empty reference_ct (dictionary or dataframe?)
+    # Should be an RTSTRUCT
+    # Find the CTs that are in the same patient directory
+    # Look through these for the SOPInstanceUID from the RTSTRUCT
+    # Record the real reference_ct ID
+    # OR 
+    # Look for entries where the reference_ct does not match any series
+    # Then, find the CTs that are in the same patient directory
+    # Look through these for the SOPInstanceUID from the RTSTRUCT
+    # Record the real reference_ct ID
+    # database_df = to_df(database_dict)
+
+
+
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
 
@@ -225,6 +240,7 @@ def crawl(top,
     
     # save as json
     with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
+        # Can I change this to saving a dataframe instead
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
@@ -232,7 +248,8 @@ def crawl(top,
     df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
     df.to_csv(df_path)
     
-    return database_dict
+    # KATY YOU HAVE TO REMOVE THE DF HERE
+    return database_dict, df
 
 if __name__ == "__main__":
     parser = ArgumentParser("Dataset DICOM Crawler")
