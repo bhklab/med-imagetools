@@ -16,7 +16,7 @@ def findMissingCTReference(database_df, folder):
     database_df = database_df.drop(missingRefCTs.index)
 
     for idx, rt in missingRefCTs.iterrows():
-        rt_path = os.path.join(os.path.dirname(folder), rt['file_path'])
+        rt_path = os.path.join(os.path.dirname(folder), rt['folder'])
         # Load the RTSTRUCT again
         rt_meta = dcmread(rt_path, force=True, stop_before_pixels=True)
         # Get any reference SOP Instances from the RTSTRUCT - these will be individual slices in the CT they correspond to
@@ -25,6 +25,8 @@ def findMissingCTReference(database_df, folder):
         if len(refSOPInstances) > 0:
             for idx in range(len(refSOPInstances)):
                 reference_ct_list.append(refSOPInstances[idx].ReferencedSOPInstanceUID)
+
+        # reference_ct_list_sample = [i.ReferencedSOPInstanceUID for i in rt_meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence]
 
         # Get a new dataframe with rows for each CT reference
         updatedRTRows = pd.concat([missingRefCTs.iloc[[0]]]*len(refSOPInstances))
@@ -111,6 +113,12 @@ def crawl_one(folder):
                         except:
                             pass
                 
+                # Special metadata 
+                try:
+                    reference_ct_special = [i.ReferencedSOPInstanceUID for i in rt_meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence]
+                except:
+                    pass
+
                 #MRI Tags
                 try:
                     tr = float(meta.RepetitionTime)
@@ -166,8 +174,8 @@ def crawl_one(folder):
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
                     rel_crawl_path  = rel_posix
-                    # if meta.Modality == 'RTSTRUCT':
-                    #     rel_crawl_path = os.path.join(rel_crawl_path, fname)
+                    if meta.Modality == 'RTSTRUCT':
+                        rel_crawl_path = os.path.join(rel_crawl_path, fname)
                     
                     database[patient][study][series] = {'description': series_description}
                 if subseries not in database[patient][study][series]:
@@ -188,6 +196,7 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem,
                                                                    'fname': rel_path.as_posix() #temporary until we switch to json-based loading
                                                                    }
+
                     # If there are multiple CTs referenced for this segmentation, make an RTSTRUCT instance/row for each CT ID as different acquisition/subseries (name pending)
                     if isinstance(reference_ct, list):
                         database[patient][study][series]["default"]["reference_ct"] = reference_ct[0]
