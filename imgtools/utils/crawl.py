@@ -276,7 +276,7 @@ def crawl(top,
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
-    df = to_df(database_dict)
+    # df = to_df(database_dict)
     df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
     df.to_csv(df_path)
     
