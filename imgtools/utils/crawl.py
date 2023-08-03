@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 import os, pathlib
 import glob
 import json
+from copy import deepcopy
 
 import pandas as pd
 from pydicom import dcmread
@@ -9,12 +10,62 @@ from tqdm import tqdm
 
 from joblib import Parallel, delayed
 
+def findMissingCTReference(database_df, folder):
+    # Find rows in the dataset dataframe that are for RTSTRUCTS with missing reference CT values
+    missingRefCTs = database_df[(database_df['reference_ct'] == '') & (database_df['modality'] == 'RTSTRUCT')]
+    database_df = database_df.drop(missingRefCTs.index)
+
+    for idx, rt in missingRefCTs.iterrows():
+        rt_path = os.path.join(os.path.dirname(folder), rt['folder'])
+        # Load the RTSTRUCT again
+        rt_meta = dcmread(rt_path, force=True, stop_before_pixels=True)
+        # Get any reference SOP Instances from the RTSTRUCT - these will be individual slices in the CT they correspond to
+        refSOPInstances = rt_meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence
+        reference_ct_list = []
+        if len(refSOPInstances) > 0:
+            for idx in range(len(refSOPInstances)):
+                reference_ct_list.append(refSOPInstances[idx].ReferencedSOPInstanceUID)
+
+        # reference_ct_list_sample = [i.ReferencedSOPInstanceUID for i in rt_meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence]
+
+        # Get a new dataframe with rows for each CT reference
+        updatedRTRows = pd.concat([missingRefCTs.iloc[[0]]]*len(refSOPInstances))
+        updatedRTRows.reset_index(drop=True, inplace=True)  
+
+        # Get any CTs for the patient the RTSTRUCT is from
+        cts = database_df[(database_df['patient_ID'] == rt['patient_ID']) & (database_df['modality'] == 'CT')]
+        
+        # Check each CT to see if it has the slice with the SOP in it
+        for ct in cts.itertuples():
+            if reference_ct_list == []:
+                print("All associations found. Exiting search.")
+                break
+            ct_path = os.path.join(os.path.dirname(folder), ct.folder)
+            dicoms = glob.glob(pathlib.Path(ct_path, "**", "*.[Dd]cm").as_posix(), recursive=True)
+            for dcm in dicoms:
+                ct_meta = dcmread(dcm, specific_tags=['SOPInstanceUID', 'SeriesInstanceUID'])
+                if ct_meta.SOPInstanceUID in reference_ct_list:
+                    print(ct_meta.SOPInstanceUID, "is in", ct_meta.SeriesInstanceUID)
+                    updatedRTRows.at[len(reference_ct_list)-1, 'reference_ct'] = ct_meta.SeriesInstanceUID
+                    reference_ct_list.remove(ct_meta.SOPInstanceUID)
+                    break
+
+        if reference_ct_list != []:
+            print("Some associations not found.")
+        
+    database_df = pd.concat([database_df, updatedRTRows], ignore_index=True)
+    database_df.sort_values(by=['patient_ID', 'folder'], inplace=True)
+    database_df.reset_index(drop=True, inplace=True)  
+
+    return database_df
+
+
 def crawl_one(folder):
     folder_path = pathlib.Path(folder)
     database = {}
     for path, _, _ in os.walk(folder):
         # find dicoms
-        dicoms = glob.glob(pathlib.Path(path, "**", "*.dcm").as_posix(), recursive=True)
+        dicoms = glob.glob(pathlib.Path(path, "**", "*.[Dd]cm").as_posix(), recursive=True)
         # print('\n', folder, dicoms)
         # instance (slice) information
         for dcm in dicoms:
@@ -62,6 +113,12 @@ def crawl_one(folder):
                         except:
                             pass
                 
+                # Special metadata 
+                try:
+                    reference_ct_special = [i.ReferencedSOPInstanceUID for i in rt_meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].ContourImageSequence]
+                except:
+                    pass
+
                 #MRI Tags
                 try:
                     tr = float(meta.RepetitionTime)
@@ -139,6 +196,14 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem,
                                                                    'fname': rel_path.as_posix() #temporary until we switch to json-based loading
                                                                    }
+
+                    # If there are multiple CTs referenced for this segmentation, make an RTSTRUCT instance/row for each CT ID as different acquisition/subseries (name pending)
+                    if isinstance(reference_ct, list):
+                        database[patient][study][series]["default"]["reference_ct"] = reference_ct[0]
+                        for n, ct_id in enumerate(reference_ct[1:]):
+                            database[patient][study][series][f"{subseries}_{n+1}"] = deepcopy(database[patient][study][series]["default"])
+                            database[patient][study][series][f"{subseries}_{n+1}"]["reference_ct"] = ct_id
+                        
                 database[patient][study][series][subseries]['instances'][instance] = rel_path.as_posix()
             except Exception as e:
                 print(folder, e)
@@ -182,14 +247,26 @@ def crawl(top,
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
     
+    # This is a list of dictionaries, each dictionary is a directory containing image dirs 
     database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
 
-    # convert list to dictionary
+    # convert list of dictionaries to single dictionary with each key being a patient ID
     database_dict = {}
     for db in database_list:
         for key in db:
-            database_dict[key] = db[key]
+            # If multiple directories have same patient ID, merge their information together
+            if key in database_dict:
+                database_dict[key] = {**database_dict[key], **db[key]}
+            else:
+                database_dict[key] = db[key]
     
+    # Checking for empty reference CT values - this works!
+    database_df = to_df(database_dict)
+    missingRefCTs = database_df[(database_df['reference_ct'] == '') & (database_df['modality'] == 'RTSTRUCT')]
+    if not missingRefCTs.empty:
+        df = findMissingCTReference(database_df, top)
+    
+
     # save one level above imaging folders
     parent, dataset  = os.path.split(top)
 
@@ -201,12 +278,14 @@ def crawl(top,
         except:
             pass
     
+    # TODO: update this to save out the database_df instead of the dict
     # save as json
     with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
+        # Can I change this to saving a dataframe instead
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
-    df = to_df(database_dict)
+    # df = to_df(database_dict)
     df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
     df.to_csv(df_path)
     
