@@ -188,6 +188,7 @@ class Segmentation(sitk.Image):
                     res[i, j, k] = max(arr_1[i, j, k], arr_2[i, j, k])
         return res, overlaps
 
+    # the method below can be refactored out of here
     @classmethod
     def from_dicom_seg(cls, mask, meta):
         #get duplicates
@@ -205,6 +206,7 @@ class Segmentation(sitk.Image):
         
         
         frame_groups  = meta.PerFrameFunctionalGroupsSequence
+
         return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)
 
         

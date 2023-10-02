@@ -116,7 +116,7 @@ class AutoPipeline(Pipeline):
         """
 
         #save all the arguments to a pkl file and then load them back if there is a continue processing flag
-
+        print("hello i'm in autopipeline")
         self.continue_processing = continue_processing
         self.dry_run = dry_run
         self.v = verbose
@@ -330,6 +330,7 @@ class AutoPipeline(Pipeline):
         
         # image processing ops
         self.resample = Resample(spacing=self.spacing)
+        # make binary mask can be refactored
         self.make_binary_mask = StructureSetToSegmentation(roi_names=self.label_names, continuous=False)
 
         # output ops
@@ -587,8 +588,19 @@ class AutoPipeline(Pipeline):
 
                     print(subject_id, " SAVED PET")
                 
+                
+                # Process SEG
+                elif modality == "SEG":
+                    #hi i´m a change
+                    print("***** PROCESSING SEG **********")
+                    structure_set = read_results[i]
+                    conn_to = output_stream.split("_")[-1]
+                    #print(read_results[0]))
+                    self.output(subject_id, read_results[i], output_stream)
+                    print("output done")
+
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
-            
+
             #Saving all the metadata in multiple text files
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
