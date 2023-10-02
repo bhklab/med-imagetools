@@ -591,6 +591,7 @@ class AutoPipeline(Pipeline):
                 
                 # Process SEG
                 elif modality == "SEG":
+                    #hi i´m a change
                     print("***** PROCESSING SEG **********")
                     structure_set = read_results[i]
                     conn_to = output_stream.split("_")[-1]
