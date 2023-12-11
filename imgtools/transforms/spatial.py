@@ -10,6 +10,7 @@ INTERPOLATORS = {
     "bspline": sitk.sitkBSpline,
 }
 
+
 def resample(image: sitk.Image,
              spacing: Union[Sequence[float], float],
              interpolation: str = "linear",
@@ -79,7 +80,7 @@ def resample(image: sitk.Image,
     downsample = new_spacing > original_spacing
     if downsample.any() and anti_alias:
         sigma = np.where(downsample, anti_alias_sigma, 1e-11)
-        image = sitk.SmoothingRecursiveGaussian(image, sigma) # TODO implement better sigma computation
+        image = sitk.SmoothingRecursiveGaussian(image, sigma)  # TODO implement better sigma computation
 
     rif.SetInterpolator(interpolator)
     resampled_image = rif.Execute(image)
@@ -96,19 +97,19 @@ def resize(image, new_size, interpolation="linear"):
 
     return resample(image, new_spacing, interpolation=interpolation)
 
+
 def rotate(image, rotation_centre, angles, interpolation="linear"):
     rotation_centre = image.TransformIndexToPhysicalPoint(rotation_centre)
     x_angle, y_angle, z_angle = angles
 
     rotation = sitk.Euler3DTransform(
         rotation_centre,
-        x_angle,     # the angle of rotation around the x-axis, in radians -> coronal rotation
-        y_angle,     # the angle of rotation around the y-axis, in radians -> saggittal rotation
-        z_angle,     # the angle of rotation around the z-axis, in radians -> axial rotation
-        (0., 0., 0.) # optional translation (shift) of the image, here we don't want any translation
+        x_angle,      # the angle of rotation around the x-axis, in radians -> coronal rotation
+        y_angle,      # the angle of rotation around the y-axis, in radians -> saggittal rotation
+        z_angle,      # the angle of rotation around the z-axis, in radians -> axial rotation
+        (0., 0., 0.)  # optional translation (shift) of the image, here we don't want any translation
     )
     return resample(image, spacing=image.GetSpacing(), interpolation=interpolation, transform=rotation)
-
 
 
 def crop(image, crop_centre, size):
@@ -166,13 +167,9 @@ def constant_pad(image, size, cval=0.):
 def centre_on_point(image, centre):
     pass
 
-
 # def resize_by_cropping_or_padding(image, size, centre=None, cval=0.):
 #     original_size = np.array(image.GetSize())
 #     size = np.asarray(size)
 #     centre = np.asarray(centre) if centre is not None else original_size / 2 # XXX is there any benefit to not using floor div here?
 
 #     crop_dims = np.where(size < original_size)
-
-
-
