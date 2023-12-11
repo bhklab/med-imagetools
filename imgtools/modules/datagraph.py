@@ -59,8 +59,8 @@ class DataGraph:
         for col in self.df:
             self.df[col] = self.df[col].astype(str)
         
-        # Get reference_rs information from RTDOSE-RTPLAN connections    
-        df_filter = pd.merge(self.df, self.df[["instance_uid","reference_rs"]], 
+        #Get reference_rs information from RTDOSE-RTPLAN connections    
+        df_filter = pd.merge(self.df, self.df[["instance_uid","reference_rs"]].apply(lambda x: x.astype(str), axis=1), 
                              left_on="reference_pl", 
                              right_on="instance_uid", 
                              how="left")
