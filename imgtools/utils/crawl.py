@@ -1,13 +1,13 @@
 from argparse import ArgumentParser
-import os, pathlib
+import os
+import pathlib
 import glob
 import json
-
 import pandas as pd
 from pydicom import dcmread
 from tqdm import tqdm
-
 from joblib import Parallel, delayed
+
 
 def crawl_one(folder):
     folder_path = pathlib.Path(folder)
@@ -34,22 +34,22 @@ def crawl_one(folder):
                 reference_ct, reference_rs, reference_pl,  = "", "", ""
                 tr, te, tesla, scan_seq, elem = "", "", "", "", ""
                 try:
-                    orientation = str(meta.ImageOrientationPatient) # (0020, 0037)
+                    orientation = str(meta.ImageOrientationPatient)  # (0020, 0037)
                 except:
                     orientation = ""
 
                 try:
-                    orientation_type = str(meta.AnatomicalOrientationType) # (0010, 2210)
+                    orientation_type = str(meta.AnatomicalOrientationType)  # (0010, 2210)
                 except:
                     orientation_type = ""
 
-                try: #RTSTRUCT
+                try:  # RTSTRUCT
                     reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
                 except: 
-                    try: #SEGMENTATION
+                    try: # SEGMENTATION
                         reference_ct = str(meta.ReferencedSeriesSequence[0].SeriesInstanceUID)
                     except:
-                        try: #RTDOSE
+                        try:  # RTDOSE
                             reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
                         except:
                             pass
@@ -62,7 +62,7 @@ def crawl_one(folder):
                         except:
                             pass
                 
-                #MRI Tags
+                # MRI Tags
                 try:
                     tr = float(meta.RepetitionTime)
                 except:
@@ -84,7 +84,7 @@ def crawl_one(folder):
                 except:
                     pass
                 
-
+                # Frame of Reference UIDs
                 try:
                     reference_frame = str(meta.FrameOfReferenceUID)
                 except:
@@ -108,15 +108,12 @@ def crawl_one(folder):
                 except:
                     subseries = "default"
 
-                # try:
-                    
-
                 if patient not in database:
                     database[patient] = {}
                 if study not in database[patient]:
                     database[patient][study] = {'description': study_description}
                 if series not in database[patient][study]:
-                    rel_crawl_path  = rel_posix
+                    rel_crawl_path = rel_posix
                     if meta.Modality == 'RTSTRUCT':
                         rel_crawl_path = os.path.join(rel_crawl_path, fname)
                     
@@ -137,7 +134,7 @@ def crawl_one(folder):
                                                                    'scan_sequence': scan_seq,
                                                                    'mag_field_strength': tesla,
                                                                    'imaged_nucleus': elem,
-                                                                   'fname': rel_path.as_posix() #temporary until we switch to json-based loading
+                                                                   'fname': rel_path.as_posix()  # temporary until we switch to json-based loading
                                                                    }
                 database[patient][study][series][subseries]['instances'][instance] = rel_path.as_posix()
             except Exception as e:
@@ -146,14 +143,15 @@ def crawl_one(folder):
     
     return database
 
+
 def to_df(database_dict):
     df = pd.DataFrame()
     for pat in database_dict:
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
-                if series != 'description': # skip description key in dict
+                if series != 'description':  # skip description key in dict
                     for subseries in database_dict[pat][study][series]:
-                        if subseries != 'description': # skip description key in dict
+                        if subseries != 'description':  # skip description key in dict
                             columns = ['patient_ID', 'study', 'study_description', 
                                        'series', 'series_description', 'subseries', 'modality', 
                                        'instances', 'instance_uid', 
@@ -176,9 +174,10 @@ def to_df(database_dict):
                             df = pd.concat([df, df_add], ignore_index=True)
     return df
 
+
 def crawl(top, 
           n_jobs: int = -1):
-    #top is the input directory in the argument parser from autotest.py
+    # top is the input directory in the argument parser from autotest.py
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
     
@@ -212,15 +211,16 @@ def crawl(top,
     
     return database_dict
 
+
 if __name__ == "__main__":
     parser = ArgumentParser("Dataset DICOM Crawler")
     parser.add_argument("directory",
-                         type=str,
-                         help="Top-level directory of the dataset.")
+                        type=str,
+                        help="Top-level directory of the dataset.")
     parser.add_argument("--n_jobs",
-                         type=int,
-                         default=16,
-                         help="Number of parallel processes for multiprocessing.")
+                        type=int,
+                        default=16,
+                        help="Number of parallel processes for multiprocessing.")
 
     args = parser.parse_args()
     db = crawl(args.directory, n_jobs=args.n_jobs)

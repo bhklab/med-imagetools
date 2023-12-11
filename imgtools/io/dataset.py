@@ -1,5 +1,7 @@
 from genericpath import exists
-import os, pathlib, ast
+import os
+import pathlib
+import ast
 from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
 from tqdm import tqdm
 
@@ -12,6 +14,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, B
 from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed
 
+
 class Dataset(tio.SubjectsDataset):
     """
     This class takes in medical dataset in the form of nrrds or directly from the dataset and converts the data into torchio.Subject object, which can be loaded into 
@@ -19,11 +22,10 @@ class Dataset(tio.SubjectsDataset):
     This class inherits from torchio.SubjectDataset object, which can support transforms and torch.Dataloader.
     Read more about torchio from https://torchio.readthedocs.io/quickstart.html and torchio.SubjectDataset from https://github.com/fepegar/torchio/blob/3e07b78da16d6db4da7193325b3f9cb31fc0911a/torchio/data/dataset.py#L101
     """
-    def __init__(
-        self,
-        subjects: Sequence[tio.Subject],
-        path: str,
-        ) -> List[tio.Subject]:
+    def __init__(self,
+                 subjects: Sequence[tio.Subject],
+                 path: str) -> List[tio.Subject]:
+                
         super().__init__(subjects)
         self.subjects = subjects
         self.path = path
@@ -47,16 +49,16 @@ class Dataset(tio.SubjectsDataset):
         
         for col in df_metadata.columns:
             if col.startswith("output_folder"):
-                df_metadata[col] = df_metadata[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(path))[0], x).as_posix() if isinstance(x, str) else x) #input folder joined with the rel path
+                df_metadata[col] = df_metadata[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(path))[0], x).as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
         
         output_streams = [("_").join(cols.split("_")[2:]) for cols in df_metadata.columns if cols.split("_")[0] == "output"]
         imp_metadata = [cols for cols in df_metadata.columns if cols.split("_")[0] in ("metadata")]
-        #Ignores multiple connection to single modality
+        # Ignores multiple connection to single modality
         if ignore_multi:
-            output_streams = [items for items in output_streams if items.split("_")[-1].isnumeric()==False]
-            imp_metadata = [items for items in imp_metadata if items.split("_")[-1].isnumeric()==False]
+            output_streams = [items for items in output_streams if not items.split("_")[-1].isnumeric()]
+            imp_metadata = [items for items in imp_metadata if not items.split("_")[-1].isnumeric()]
         
-        #Based on the file naming convention
+        # Based on the file naming convention
         subject_id_list = list(df_metadata.index)
         subjects = []
         for subject_id in tqdm(subject_id_list):
@@ -72,7 +74,7 @@ class Dataset(tio.SubjectsDataset):
                     filename = col
                 path_mod = pathlib.Path(path, subject_id, col, f"{filename}.nii.gz").as_posix()
                 print(path_mod)
-                #All modalities except RTSTRUCT should be of type torchIO.ScalarImage 
+                # All modalities except RTSTRUCT should be of type torchIO.ScalarImage 
                 if os.path.exists(path_mod):
                     if col.split("_")[0]!="RTSTRUCT":
                         temp[f"mod_{col}"] = tio.ScalarImage(path_mod)
@@ -81,14 +83,14 @@ class Dataset(tio.SubjectsDataset):
                         temp[f"mod_{col}"] = tio.LabelMap(path_mods)
                 else:
                     temp[f"mod_{col}"] = None
-                #For including metadata
+                # For including metadata
                 if metadata_name in imp_metadata:
-                    #convert string to proper datatype
+                    # convert string to proper datatype
                     meta = df_metadata.loc[subject_id,metadata_name]
                     if pd.notna(meta):
                         temp[metadata_name] = eval(meta)[0]
                     else:
-                        #torch dataloader doesnt accept None type
+                        # torch dataloader doesnt accept None type
                         temp[metadata_name] = {}
             subjects.append(tio.Subject(temp))
         return cls(subjects, path)
@@ -111,10 +113,10 @@ class Dataset(tio.SubjectsDataset):
         input = ImageAutoInput(path, modalities, n_jobs)
         df_metadata = input.df_combined
         output_streams = input.output_streams
-        #Ignores multiple connection to single modality
+        # Ignores multiple connection to single modality
         if ignore_multi:
-            output_streams = [items for items in output_streams if items.split("_")[-1].isnumeric()==False]
-        #Basic operations
+            output_streams = [items for items in output_streams if not items.split("_")[-1].isnumeric()]
+        # Basic operations
         subject_id_list = list(df_metadata.index)
         # basic image processing ops
         resample = Resample(spacing=spacing)
@@ -159,7 +161,7 @@ class Dataset(tio.SubjectsDataset):
                 image = resample(image)
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(image)
             elif modality == "RTDOSE":
-                try: #For cases with no image present
+                try:  # For cases with no image present
                     doses = read_results[i].resample_dose(image)
                 except:
                     Warning("No CT image present. Returning dose image without resampling")
@@ -167,7 +169,7 @@ class Dataset(tio.SubjectsDataset):
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(doses)
                 temp[f"metadata_{colname}"] = read_results[i].get_metadata()
             elif modality == "RTSTRUCT":
-                #For RTSTRUCT, you need image or PT
+                # For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
                 conn_to = output_stream.split("_")[-1]
                 # make_binary_mask relative to ct/pet
@@ -181,7 +183,7 @@ class Dataset(tio.SubjectsDataset):
                 temp[f"metadata_{colname}"] = structure_set.roi_names
             elif modality == "PT":
                 try:
-                    #For cases with no image present
+                    # For cases with no image present
                     pet = read_results[i].resample_pet(image)
                 except:
                     Warning("No CT image present. Returning PT/PET image without resampling.")

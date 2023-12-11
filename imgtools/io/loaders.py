@@ -1,4 +1,6 @@
-import os, pathlib, json
+import os
+import pathlib
+import json
 import glob
 import re
 from typing import Optional, List
@@ -16,8 +18,10 @@ from ..modules import StructureSet, Dose, PET, Scan, Segmentation
 from ..utils.crawl import *
 from ..utils.dicomutils import *
 
+
 def read_image(path):
     return sitk.ReadImage(path)
+
 
 def read_dicom_series(path: str,
                       series_id: Optional[str] = None,
@@ -51,8 +55,8 @@ def read_dicom_series(path: str,
     reader = sitk.ImageSeriesReader()
     if file_names is None:
         file_names = reader.GetGDCMSeriesFileNames(path,
-                                                    seriesID=series_id if series_id else "",
-                                                    recursive=recursive)
+                                                   seriesID=series_id if series_id else "",
+                                                   recursive=recursive)
         # extract the names of the dicom files that are in the path variable, which is a directory
     
     reader.SetFileNames(file_names)
@@ -68,23 +72,27 @@ def read_dicom_series(path: str,
     return reader.Execute()
 
     
-
 def read_dicom_scan(path, series_id=None, recursive: bool=False, file_names=None) -> Scan:
     image = read_dicom_series(path, series_id=series_id, recursive=recursive, file_names=file_names)
     return Scan(image, {})
 
+
 def read_dicom_rtstruct(path):
     return StructureSet.from_dicom_rtstruct(path)
+
 
 def read_dicom_rtdose(path):
     return Dose.from_dicom_rtdose(path)
 
+
 def read_dicom_pet(path, series=None):
     return PET.from_dicom_pet(path, series, "SUV")
+
 
 def read_dicom_seg(path, meta, series=None):
     seg_img = read_dicom_series(path, series)
     return Segmentation.from_dicom_seg(seg_img, meta)
+
 
 def read_dicom_auto(path, series=None, file_names=None):
     if path is None:
@@ -120,6 +128,7 @@ def read_dicom_auto(path, series=None, file_names=None):
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
 
+
 class BaseLoader:
     def __getitem__(self, subject_id):
         raise NotImplementedError
@@ -142,6 +151,7 @@ class BaseLoader:
         except KeyError:
             return default
 
+
 class ImageTreeLoader(BaseLoader):
     def __init__(self,
                  json_path,
@@ -155,7 +165,7 @@ class ImageTreeLoader(BaseLoader):
                  readers=None):
 
         if readers is None:
-            readers = [read_image] # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+            readers = [read_image]  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
 
         self.expand_paths = expand_paths
         self.readers = readers
@@ -180,7 +190,7 @@ class ImageTreeLoader(BaseLoader):
         
         if isinstance(json_path, str):
             with open(json_path, 'r') as f:
-                self.tree = json.load(json_path)
+                self.tree = json.load(f)
         else:
             raise ValueError(f"Expected a path to a json file, not {type(json_path)}.")
 
@@ -213,6 +223,7 @@ class ImageTreeLoader(BaseLoader):
     def items(self):
         return ((k, self[k]) for k in self.keys())
     
+
 class ImageCSVLoader(BaseLoader):
     def __init__(self,
                  csv_path_or_dataframe,
@@ -223,7 +234,7 @@ class ImageCSVLoader(BaseLoader):
                  readers=None):
 
         if readers is None:
-            readers = [read_image] # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+            readers = [read_image]  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
 
         self.expand_paths = expand_paths
         self.readers = readers
@@ -279,7 +290,7 @@ class ImageFileLoader(BaseLoader):
         if exclude_paths is None:
             exclude_paths = []
         if reader is None:
-            reader = read_image # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+            reader = read_image  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
 
         self.root_directory = root_directory
         self.get_subject_id_from = get_subject_id_from
@@ -336,7 +347,6 @@ class ImageFileLoader(BaseLoader):
 
     def keys(self):
         return self.paths.keys()
-
 
 
 # class CombinedLoader(BaseLoader):

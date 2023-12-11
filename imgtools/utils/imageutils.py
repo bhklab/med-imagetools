@@ -1,6 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 
+
 def physical_points_to_idxs(image, points, continuous=False):
     if continuous:
         transform = image.TransformPhysicalPointToContinuousIndex
@@ -15,6 +16,7 @@ def physical_points_to_idxs(image, points, continuous=False):
         t_points.append(vectorized_transform(slc)[:,::-1])
     return t_points
 
+
 def idxs_to_physical_points(image, idxs):
     continuous = any([isinstance(i, float) for i in idxs])
 
@@ -25,10 +27,12 @@ def idxs_to_physical_points(image, idxs):
     vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature='(3)->(3)')
     return vectorized_transform(idxs)
 
+
 def image_to_array(image):
     origin, direction, spacing = image.GetOrigin(), image.GetDirection(), image.GetSpacing()
     array = sitk.GetArrayFromImage(image)
     return array, origin, direction, spacing
+
 
 def show_image(image, mask=None, ax=None):
     import matplotlib.pyplot as plt

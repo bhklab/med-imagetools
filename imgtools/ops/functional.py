@@ -166,6 +166,7 @@ def resize(image: sitk.Image,
                     anti_alias_sigma=anti_alias_sigma,
                     interpolation=interpolation)
 
+
 def zoom(image: sitk.Image,
          scale_factor: Union[float, Sequence[float]],
          interpolation: str = "linear",
@@ -331,7 +332,6 @@ def crop(image: sitk.Image,
 
     return image[min_x:max_x, min_y:max_y, min_z:max_z]
 
-
 # def constant_pad(image, size, cval=0.):
 #     if isinstance(size, int):
 #         size_lower = size_upper = [size for _ in image.GetSize()]
@@ -347,10 +347,8 @@ def crop(image: sitk.Image,
 #         )
 #     return sitk.ConstantPad(image, size_lower, size_upper, cval)
 
-
 # def centre_on_point(image, centre):
 #     pass
-
 
 # def resize_by_cropping_or_padding(image, size, centre=None, cval=0.):
 #     original_size = np.array(image.GetSize())
@@ -392,7 +390,6 @@ def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
     location = bbox[:len(bbox)//2]
     size = bbox[len(bbox)//2:]
     return location, size
-
 
 
 def centroid(mask: sitk.Image,
@@ -571,13 +568,13 @@ def image_statistics(image: sitk.Image,
     """
 
     ImageStatistics = namedtuple("ImageStatistics",
-                                 ["minimum",
-                                  "maximum",
-                                  "sum",
-                                  "mean",
-                                  "variance",
-                                  "standard_deviation"
-                                 ])
+                                ["minimum",
+                                 "maximum",
+                                 "sum",
+                                 "mean",
+                                 "variance",
+                                 "standard_deviation"
+                                ])
 
     if mask is not None:
         if isinstance(mask, Segmentation):
@@ -607,6 +604,7 @@ def image_statistics(image: sitk.Image,
         )
 
     return result
+
 
 def standard_scale(image: sitk.Image,
                    mask: Optional[sitk.Image] = None,
@@ -656,6 +654,7 @@ def standard_scale(image: sitk.Image,
         rescale_mean = statistics.mean
         rescale_std = statistics.standard_deviation
     return (image - rescale_mean) / rescale_std
+
 
 def min_max_scale(image: sitk.Image,
                   minimum: float = 0.,
