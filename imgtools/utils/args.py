@@ -1,9 +1,10 @@
 from argparse import ArgumentParser
 
+
 def parser():
     parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
 
-    #arguments
+    # arguments
     parser.add_argument("input_directory", type=str,
                         help="Path to top-level directory of dataset.")
 

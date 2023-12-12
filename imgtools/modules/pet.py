@@ -1,4 +1,5 @@
-import os, pathlib
+import os
+import pathlib
 import warnings
 import datetime
 from typing import Optional, Dict, TypeVar
@@ -10,6 +11,7 @@ import copy
 
 T = TypeVar('T')
 
+
 def read_image(path:str,series_id: Optional[str]=None):
     reader = sitk.ImageSeriesReader()
     dicom_names = reader.GetGDCMSeriesFileNames(path,seriesID=series_id if series_id else "")
@@ -18,6 +20,7 @@ def read_image(path:str,series_id: Optional[str]=None):
     reader.LoadPrivateTagsOn()
 
     return reader.Execute()
+
 
 class PET(sitk.Image):
     def __init__(self, img_pet, df, factor, calc, metadata: Optional[Dict[str, T]] = None):
@@ -60,7 +63,7 @@ class PET(sitk.Image):
             calc = True
         img_pet = sitk.Cast(pet, sitk.sitkFloat32)
 
-        #SimpleITK reads some pixel values as negative but with correct value
+        # SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
 
         metadata = {}
@@ -102,7 +105,7 @@ class PET(sitk.Image):
         Resamples the PET scan so that it can be overlayed with CT scan. The beginning and end slices of the 
         resampled PET scan might be empty due to the interpolation
         '''
-        resampled_pt = sitk.Resample(self.img_pet, ct_scan)#, interpolator=sitk.sitkNearestNeighbor) # commented interporator due to error
+        resampled_pt = sitk.Resample(self.img_pet, ct_scan)  # , interpolator=sitk.sitkNearestNeighbor) # commented interporator due to error
         return resampled_pt
 
     def show_overlay(self,
@@ -130,7 +133,7 @@ class PET(sitk.Image):
         '''
         Following the calculation formula stated in https://gist.github.com/pangyuteng/c6a075ba9aa00bb750468c30f13fc603
         '''
-        #Fetching some required Meta Data
+        # Fetching some required Meta Data
         try:
             weight = float(df.PatientWeight) * 1000
         except:
@@ -149,8 +152,8 @@ class PET(sitk.Image):
             injected_dose_decay = a * injected_dose
         except:
             warnings.warn("Not enough data available, taking average values")
-            a = np.exp(-np.log(2) * (1.75 * 3600) / 6588) # 90 min waiting time, 15 min preparation
-            injected_dose_decay = 420000000 * a # 420 MBq
+            a = np.exp(-np.log(2) * (1.75 * 3600) / 6588)  # 90 min waiting time, 15 min preparation
+            injected_dose_decay = 420000000 * a  # 420 MBq
 
         suv = weight/injected_dose_decay
         if type == "SUV":

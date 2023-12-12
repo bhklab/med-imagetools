@@ -5,6 +5,7 @@ import copy
 
 T = TypeVar('T')
 
+
 def get_modality_metadata(dicom_data, modality: str):
     keys = {'ALL': {'BodyPartExamined': 'BodyPartExamined', 
                     'DataCollectionDiameter': 'DataCollectionDiameter', 
@@ -58,7 +59,6 @@ def get_modality_metadata(dicom_data, modality: str):
 
     return metadata
 
-    
 
 def all_modalities_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydicom.dicomdir.DicomDir]) -> Dict[str, T]:
     metadata = get_modality_metadata(dicom_data, 'ALL')
@@ -69,4 +69,3 @@ def all_modalities_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydic
         metadata["PixelSize"] = str(tuple(pixel_size))
     
     return metadata
-

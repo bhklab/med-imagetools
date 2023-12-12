@@ -12,6 +12,7 @@ from pydicom import dcmread
 
 T = TypeVar('T')
 
+
 def read_image(path):
     reader = sitk.ImageSeriesReader()
     dicom_names = reader.GetGDCMSeriesFileNames(path)
@@ -47,10 +48,10 @@ class Dose(sitk.Image):
         if dose.GetDimension() == 4:
             dose = dose[:,:,:,0]
         
-        #Get the metadata
+        # Get the metadata
         df = dcmread(path)
 
-        #Convert to SUV
+        # Convert to SUV
         factor = float(df.DoseGridScaling)
         img_dose = sitk.Cast(dose, sitk.sitkFloat32)
         img_dose = img_dose * factor
@@ -65,7 +66,7 @@ class Dose(sitk.Image):
         Resamples the RTDOSE information so that it can be overlayed with CT scan. The beginning and end slices of the 
         resampled RTDOSE scan might be empty due to the interpolation
         '''
-        resampled_dose = sitk.Resample(self.img_dose, ct_scan)#, interpolator=sitk.sitkNearestNeighbor)
+        resampled_dose = sitk.Resample(self.img_dose, ct_scan)  # , interpolator=sitk.sitkNearestNeighbor)
         return resampled_dose
 
     def show_overlay(self,
@@ -109,17 +110,17 @@ class Dose(sitk.Image):
         try:
             n_ROI =  len(self.df.DVHSequence)
             self.dvh = {}
-            #These properties are uniform across all the ROIs
+            # These properties are uniform across all the ROIs
             self.dvh["dvh_type"] = self.df.DVHSequence[0].DVHType   
             self.dvh["dose_units"] = self.df.DVHSequence[0].DoseUnits
             self.dvh["dose_type"] = self.df.DVHSequence[0].DoseType
             self.dvh["vol_units"] = self.df.DVHSequence[0].DVHVolumeUnits
-            #ROI specific properties
+            # ROI specific properties
             for i in range(n_ROI):
                 raw_data = np.array(self.df.DVHSequence[i].DVHData)
                 n = len(raw_data)
 
-                #ROI ID
+                # ROI ID
                 ROI_reference = self.df.DVHSequence[i].DVHReferencedROISequence[0].ReferencedROINumber
 
                 # Make dictionary for each ROI ID
@@ -147,6 +148,3 @@ class Dose(sitk.Image):
             self.dvh = {}
             
         return self.dvh
-
-    
-

@@ -1,7 +1,10 @@
-import glob, os, shutil
+import glob
+import os
+import shutil
 import pathlib
 import pickle    
 from .nnunet import generate_dataset_json, markdown_report_images
+
 
 def save_data(self):
     """
@@ -15,29 +18,29 @@ def save_data(self):
         subject_id = os.path.splitext(filename)[0]
         with open(file,"rb") as f:
             metadata = pickle.load(f)
-        self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values()) #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
+        self.output_df.loc[subject_id, list(metadata.keys())] = list(metadata.values())  # subject id targets the rows with that subject id and it is reassigning all the metadata values by key
         
     folder_renames = {}
     for col in self.output_df.columns:
         if col.startswith("folder"):
             self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
             folder_renames[col] = f"input_{col}"
-    self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-    self.output_df.to_csv(self.output_df_path) #dataset.csv
+    self.output_df.rename(columns=folder_renames, inplace=True)  # append input_ to the column name
+    self.output_df.to_csv(self.output_df_path)  # dataset.csv
 
     shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
     # Save dataset json
-    if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
+    if self.is_nnunet:  # dataset.json for nnunet and .sh file to run to process it
         imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
         images_test_location = imagests_path if os.path.exists(imagests_path) else None
         # print(self.existing_roi_names)
         generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
-                            pathlib.Path(self.output_directory, "imagesTr").as_posix(),
-                            images_test_location,
-                            tuple(self.nnunet_info["modalities"].keys()),
-                            {v:k for k, v in self.existing_roi_names.items()},
-                            os.path.split(self.input_directory)[1])
+                              pathlib.Path(self.output_directory, "imagesTr").as_posix(),
+                              images_test_location,
+                              tuple(self.nnunet_info["modalities"].keys()),
+                              {v: k for k, v in self.existing_roi_names.items()},
+                              os.path.split(self.input_directory)[1])
         _, child = os.path.split(self.output_directory)
         shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
         if os.path.exists(shell_path):
@@ -54,7 +57,7 @@ def save_data(self):
             output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
             output += 'done'
             f.write(output)
-        markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
+        markdown_report_images(self.output_directory, self.total_modality_counter)  # images saved to the output directory
     
     # Save summary info (factor into different file)
     markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()

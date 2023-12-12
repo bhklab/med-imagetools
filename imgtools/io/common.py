@@ -1,7 +1,9 @@
-import os, pathlib
+import os
+import pathlib
 from typing import Dict
 
 from pydicom.misc import is_dicom
+
 
 def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
     """Find DICOM file paths in the specified root directory file tree.
@@ -32,6 +34,7 @@ def find_dicom_paths(root_path: str, yield_directories: bool = False) -> str:
                 fpath = pathlib.Path(root, f).as_posix()
                 if is_dicom(fpath):
                     yield fpath
+
 
 def file_name_convention() -> Dict:
     """

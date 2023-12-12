@@ -1,4 +1,5 @@
-import os, pathlib
+import os
+import pathlib
 import json
 import csv
 import pickle
@@ -39,7 +40,7 @@ class BaseWriter:
         out_path = pathlib.Path(self.root_directory, out_filename).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+            os.makedirs(out_dir, exist_ok=True)  # create subdirectories if specified in filename_format
 
         return out_path
 
@@ -52,12 +53,11 @@ class BaseSubjectWriter(BaseWriter):
         self.create_dirs = create_dirs
         self.compress = compress
         if os.path.exists(self.root_directory):
+            # delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
             if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
                 shutil.rmtree(os.path.dirname(self.root_directory))
             elif "{label_or_image}{train_or_test}" in os.path.basename(self.root_directory):
                 shutil.rmtree(self.root_directory)
-           #delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
-
 
     def put(self, subject_id, 
             image, is_mask=False, 
@@ -69,27 +69,28 @@ class BaseSubjectWriter(BaseWriter):
         if is_mask:
             # remove illegal characters for Windows/Unix
             badboys = '<>:"/\|?*'
-            for char in badboys: mask_label = mask_label.replace(char, "")
+            for char in badboys: 
+                mask_label = mask_label.replace(char, "")
 
             # filename_format eh
-            self.filename_format = mask_label + ".nii.gz" #save the mask labels as their rtstruct names
+            self.filename_format = mask_label + ".nii.gz"  # save the mask labels as their rtstruct names
 
         if nnunet_info:
             if label_or_image == "labels":
-                filename = f"{subject_id}.nii.gz" #naming convention for labels
+                filename = f"{subject_id}.nii.gz"  # naming convention for labels
             else:
-                filename = self.filename_format.format(subject_id=subject_id, modality_index=nnunet_info['modalities'][nnunet_info['current_modality']]) #naming convention for images
+                filename = self.filename_format.format(subject_id=subject_id, modality_index=nnunet_info['modalities'][nnunet_info['current_modality']])  # naming convention for images
             out_path = self._get_path_from_subject_id(filename, label_or_image=label_or_image, train_or_test=train_or_test)
         else:
             out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, filename, **kwargs):
-        root_directory = self.root_directory.format(**kwargs) #replace the {} with the kwargs passed in from .put() (above)
+        root_directory = self.root_directory.format(**kwargs)  # replace the {} with the kwargs passed in from .put() (above)
         out_path = pathlib.Path(root_directory, filename).as_posix()
         out_dir = os.path.dirname(out_path)
         if self.create_dirs and not os.path.exists(out_dir):
-            os.makedirs(out_dir, exist_ok=True) # create subdirectories if specified in filename_format
+            os.makedirs(out_dir, exist_ok=True)  # create subdirectories if specified in filename_format
         return out_path
 
 
@@ -133,7 +134,7 @@ class SegNrrdWriter(BaseWriter):
         if len(labels) > 1: 
             arr = np.transpose(sitk.GetArrayFromImage(mask), [-1, -2, -3, -4])
 
-            #add extra dimension to metadata
+            # add extra dimension to metadata
             space_directions.insert(0, [float('nan'), float('nan'), float('nan')])
             kinds.insert(0, 'vector')
             dims += 1 
@@ -152,7 +153,7 @@ class SegNrrdWriter(BaseWriter):
                     props = regionprops(arr)[0]
                 bbox = props["bbox"]
                 bbox_segment = [bbox[0], bbox[3], bbox[1], bbox[4], bbox[2], bbox[5]]
-            except IndexError: # mask is empty
+            except IndexError:  # mask is empty
                 assert arr[n].sum() == 0, "Mask not empty but 'skimage.measure.regionprops' failed."
                 bbox_segment = [0, 0, 0, 0, 0, 0]
 
@@ -185,7 +186,7 @@ class NumpyWriter(BaseWriter):
     def put(self, subject_id, image, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         if isinstance(image, sitk.Image):
-            array, *_ = image_to_array(image) # TODO (Michal) optionally save the image geometry
+            array, *_ = image_to_array(image)  # TODO (Michal) optionally save the image geometry
         np.save(out_path, array)
 
 

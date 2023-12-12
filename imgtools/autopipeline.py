@@ -1,5 +1,6 @@
 from aifc import Error
-import os, pathlib
+import os
+import pathlib
 import shutil
 import glob
 import pickle
@@ -115,8 +116,6 @@ class AutoPipeline(Pipeline):
             Whether to run the pipeline without writing any output files
         """
 
-        #save all the arguments to a pkl file and then load them back if there is a continue processing flag
-
         self.continue_processing = continue_processing
         self.dry_run = dry_run
         self.v = verbose
@@ -140,7 +139,7 @@ class AutoPipeline(Pipeline):
         if not os.path.isabs(output_directory):
             output_directory = pathlib.Path(os.getcwd(), output_directory).as_posix()
         else:
-            output_directory = pathlib.Path(output_directory).as_posix() # consistent parsing. ensures last child directory doesn't end with slash
+            output_directory = pathlib.Path(output_directory).as_posix()  # consistent parsing. ensures last child directory doesn't end with slash
 
         # check/make output directory
         if not os.path.exists(output_directory):
@@ -171,7 +170,7 @@ class AutoPipeline(Pipeline):
             if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix()):
                 os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix())
             self.output_directory = pathlib.Path(self.output_directory, "nnUNet_raw_data_base",
-            "nnUNet_raw_data").as_posix()
+                                                 "nnUNet_raw_data").as_posix()
             if not os.path.exists(self.output_directory):
                 os.makedirs(self.output_directory)
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
@@ -197,26 +196,25 @@ class AutoPipeline(Pipeline):
                 os.makedirs(pathlib.Path(self.output_directory, ".temp").as_posix())
         
         if not dry_run:
-            #Make a directory
+            # Make a directory
             if not os.path.exists(pathlib.Path(self.output_directory,".temp").as_posix()):
                 os.mkdir(pathlib.Path(self.output_directory,".temp").as_posix())
                 
             with open(pathlib.Path(self.output_directory, ".temp", "init_parameters.pkl").as_posix(), "wb") as f:
-                parameters = locals() #save all the parameters in case we need to continue processing
+                parameters = locals()  # save all the parameters in case we need to continue processing
                 dill.dump(parameters, f)
 
-            #continue processing operations
-            self.finished_subjects = [pathlib.Path(e).name[:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())] #remove the .pkl
+            # continue processing operations
+            self.finished_subjects = [pathlib.Path(e).name[:-4] for e in glob.glob(pathlib.Path(self.output_directory, ".temp", "*.pkl").as_posix())]  # remove the .pkl
             
 
-        super().__init__(
-            n_jobs=n_jobs,
-            missing_strategy=missing_strategy,
-            show_progress=show_progress,
-            warn_on_error=warn_on_error)
+        super().__init__(n_jobs=n_jobs,
+                         missing_strategy=missing_strategy,
+                         show_progress=show_progress,
+                         warn_on_error=warn_on_error)
         self.overwrite = overwrite
         self.spacing = spacing
-        self.existing = [None] #self.existing_patients()
+        self.existing = [None]   # self.existing_patients()
         self.is_nnunet = nnunet
         if nnunet or nnunet_inference:
             self.nnunet_info = {}
@@ -309,7 +307,7 @@ class AutoPipeline(Pipeline):
                 raise FileNotFoundError(f"No file named custom_train_test_split.yaml found at {custom_train_test_split_path}. If you did not intend on creating a custom train-test-split, run the CLI without --custom_train_test_split")
 
         if self.is_nnunet:
-            self.nnunet_info["modalities"] = {"CT": "0000"} #modality to 4-digit code
+            self.nnunet_info["modalities"] = {"CT": "0000"}  # modality to 4-digit code
 
         if nnunet_inference:
             if not os.path.exists(dataset_json_path):
@@ -339,7 +337,6 @@ class AutoPipeline(Pipeline):
         if nnunet or nnunet_inference:
             self.total_modality_counter = {}
             self.patients_with_missing_labels = set()
-        
 
     def glob_checker_nnunet(self, subject_id):
         folder_names = ["imagesTr", "labelsTr", "imagesTs", "labelsTs"]
@@ -370,7 +367,7 @@ class AutoPipeline(Pipeline):
                 return
         # if we want overwriting or if we don't want it and the file doesn't exist, we can process
         if self.overwrite or (not self.overwrite and not (os.path.exists(pathlib.Path(self.output_directory, subject_id).as_posix()) or self.glob_checker_nnunet(subject_id))):
-            #Check if the subject_id has already been processed
+            # Check if the subject_id has already been processed
             if os.path.exists(pathlib.Path(self.output_directory,".temp",f'temp_{subject_id}.pkl').as_posix()):
                 print(f"{subject_id} already processed")
                 return
@@ -383,19 +380,19 @@ class AutoPipeline(Pipeline):
             print(subject_id, " start")
             
             metadata = {}
-            subject_modalities = set() # all the modalities that this subject has
+            subject_modalities = set()  # all the modalities that this subject has
             num_rtstructs = 0
 
-            for i, colname in enumerate(self.output_streams): #sorted(self.output_streams)): #CT comes before MR before PT before RTDOSE before RTSTRUCT
+            for i, colname in enumerate(self.output_streams):  # sorted(self.output_streams)):  # CT comes before MR before PT before RTDOSE before RTSTRUCT
                 modality = colname.split("_")[0]
-                subject_modalities.add(modality) #set add
+                subject_modalities.add(modality)  # set add
                 
                 # Taking modality pairs if it exists till _{num}
-                output_stream = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
+                output_stream = ("_").join([item for item in colname.split("_") if not item.isnumeric()])
 
                 # If there are multiple connections existing, multiple connections means two modalities connected to one modality. They end with _1
-                mult_conn = colname.split("_")[-1].isnumeric()
-                num = colname.split("_")[-1]
+                # mult_conn = colname.split("_")[-1].isnumeric()
+                # num = colname.split("_")[-1]
 
                 if self.v:
                     print("output_stream:", output_stream)
@@ -422,23 +419,23 @@ class AutoPipeline(Pipeline):
                         print(e)
                         warnings.warn("Could not resample {} for subject {}".format(colname, subject_id))
 
-                    #update the metadata for this image
+                    # update the metadata for this image
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
 
-                    #modality is MR and the user has selected to have nnunet output
+                    # modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
-                        if modality == "MR": #MR images can have various modalities like FLAIR, T1, etc.
-                            if not metadata["AcquisitionContrast"] in self.total_modality_counter.keys():
+                        if modality == "MR":  # MR images can have various modalities like FLAIR, T1, etc.
+                            if metadata["AcquisitionContrast"] not in self.total_modality_counter.keys():
                                 self.total_modality_counter[metadata["AcquisitionContrast"]] = 1
                             else:
                                 self.total_modality_counter[metadata["AcquisitionContrast"]] += 1
                             self.nnunet_info['current_modality'] = metadata["AcquisitionContrast"]
-                            if not metadata["AcquisitionContrast"] in self.nnunet_info["modalities"].keys(): #if the modality is new
-                                self.nnunet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnunet_info["modalities"])).zfill(4) #fill to 4 digits
+                            if metadata["AcquisitionContrast"] not in self.nnunet_info["modalities"].keys():  # if the modality is new
+                                self.nnunet_info["modalities"][metadata["AcquisitionContrast"]] = str(len(self.nnunet_info["modalities"])).zfill(4)  # fill to 4 digits
                         else:
-                            self.nnunet_info['current_modality'] = modality #CT
-                            if not modality in self.total_modality_counter.keys():
+                            self.nnunet_info['current_modality'] = modality  # CT
+                            if modality not in self.total_modality_counter.keys():
                                 self.total_modality_counter[modality] = 1
                             else:
                                 self.total_modality_counter[modality] += 1
@@ -448,20 +445,18 @@ class AutoPipeline(Pipeline):
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
                     elif self.is_nnunet_inference:
                         self.nnunet_info["current_modality"] = modality if modality == "CT" else metadata["AcquisitionContrast"]
-                        if not self.nnunet_info["current_modality"] in self.nnunet_info["modalities"].keys():
+                        if self.nnunet_info["current_modality"] not in self.nnunet_info["modalities"].keys():
                             raise ValueError(f"The modality {self.nnunet_info['current_modality']} is not in the list of modalities that are present in dataset.json.")
                         self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                     else:
                         self.output(subject_id, image, output_stream)
 
                     metadata[f"size_{output_stream}"] = str(image.GetSize())
-
-
                     print(subject_id, " SAVED IMAGE")
 
                 # Process dose
                 elif modality == "RTDOSE":
-                    try: #For cases with no image present
+                    try:   # For cases with no image present
                         doses = read_results[i].resample_dose(image)
                     except:
                         Warning("No CT image present. Returning dose image without resampling")
@@ -500,7 +495,7 @@ class AutoPipeline(Pipeline):
                     else:
                         raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                     
-                    if mask is None: #ignored the missing regex, and exit the loop
+                    if mask is None:  # ignored the missing regex, and exit the loop
                         if self.is_nnunet:
                             image_test_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
                             image_train_path = pathlib.Path(self.output_directory, "imagesTr").as_posix()
@@ -527,22 +522,20 @@ class AutoPipeline(Pipeline):
                             self.existing_roi_indices[name] = len(self.existing_roi_indices)
                     mask.existing_roi_indices = self.existing_roi_indices
 
-                    
                     if self.v:
                         print("mask.GetSize():", mask.GetSize())
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
                     if self.is_nnunet:
                         sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
-                        sparse_mask = sitk.GetImageFromArray(sparse_mask) #convert the nparray to sitk image
+                        sparse_mask = sitk.GetImageFromArray(sparse_mask)  # convert the nparray to sitk image
                         sparse_mask.CopyInformation(image)
                         if "_".join(subject_id.split("_")[1::]) in self.train:
-                            self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels") #rtstruct is label for nnunet
+                            self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels")  # rtstruct is label for nnunet
                         else:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
                     else:
-                    
-                    # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
+                        # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                         if len(mask_arr.shape) == 3:
                             mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
                         
@@ -571,7 +564,7 @@ class AutoPipeline(Pipeline):
                 # Process PET
                 elif modality == "PT":
                     try:
-                        #For cases with no image present
+                        # For cases with no image present
                         pet = read_results[i].resample_pet(image)
                     except:
                         Warning("No CT image present. Returning PT/PET image without resampling.")
@@ -589,12 +582,12 @@ class AutoPipeline(Pipeline):
                 
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
             
-            #Saving all the metadata in multiple text files
+            # Saving all the metadata in multiple text files
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
             if self.is_nnunet:
                 metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
-            with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f: #the continue flag depends on this being the last line in this method
+            with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:  # the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
             return 
     
@@ -611,29 +604,29 @@ class AutoPipeline(Pipeline):
             with open(file,"rb") as f:
                 metadata = pickle.load(f)
 
-            self.output_df.loc[subject_id, metadata.keys()] = metadata.values() #subject id targets the rows with that subject id and it is reassigning all the metadata values by key
+            self.output_df.loc[subject_id, metadata.keys()] = metadata.values()  # subject id targets the rows with that subject id and it is reassigning all the metadata values by key
 
         folder_renames = {}
         for col in self.output_df.columns:
             if col.startswith("folder"):
                 self.output_df[col] = self.output_df[col].apply(lambda x: x if not isinstance(x, str) else pathlib.Path(x).as_posix().split(self.input_directory)[1][1:]) # rel path, exclude the slash at the beginning
                 folder_renames[col] = f"input_{col}"
-        self.output_df.rename(columns=folder_renames, inplace=True) #append input_ to the column name
-        self.output_df.to_csv(self.output_df_path) #dataset.csv
+        self.output_df.rename(columns=folder_renames, inplace=True)  # append input_ to the column name
+        self.output_df.to_csv(self.output_df_path)  # dataset.csv
 
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
         # Save dataset json
-        if self.is_nnunet: #dataset.json for nnunet and .sh file to run to process it
+        if self.is_nnunet:  # dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
             # print(self.existing_roi_indices)
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
-                                pathlib.Path(self.output_directory, "imagesTr").as_posix(),
-                                images_test_location,
-                                tuple(self.nnunet_info["modalities"].keys()),
-                                {v:k for k, v in self.existing_roi_indices.items()},
-                                os.path.split(self.input_directory)[1])
+                                  pathlib.Path(self.output_directory, "imagesTr").as_posix(),
+                                  images_test_location,
+                                  tuple(self.nnunet_info["modalities"].keys()),
+                                  {v: k for k, v in self.existing_roi_indices.items()},
+                                  os.path.split(self.input_directory)[1])
             _, child = os.path.split(self.output_directory)
             shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
             if os.path.exists(shell_path):
@@ -650,7 +643,7 @@ class AutoPipeline(Pipeline):
                 output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
                 output += 'done'
                 f.write(output)
-            markdown_report_images(self.output_directory, self.total_modality_counter) #images saved to the output directory
+            markdown_report_images(self.output_directory, self.total_modality_counter)  # images saved to the output directory
         
         # Save summary info (factor into different file)
         markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
@@ -717,13 +710,14 @@ class AutoPipeline(Pipeline):
                 #     self._process_wrapper(subject_id)
                 self.broken_patients = []
                 if not self.is_nnunet:
-                    all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*"," ").as_posix()[0:-1])
+                    all_patient_names = glob.glob(pathlib.Path(self.input_directory, "*", " ").as_posix()[0:-1])
                     all_patient_names = [os.path.split(os.path.split(x)[0])[1] for x in all_patient_names]
                     for e in all_patient_names:
                         if e not in patient_ids:
                             warnings.warn(f"Patient {e} does not have proper DICOM references")
                             self.broken_patients.append(e)
                 self.save_data()
+
 
 def main():
     args = parser()
@@ -738,19 +732,19 @@ def main():
 
     print('initializing AutoPipeline...')
     pipeline = AutoPipeline(**args_dict)
-    
+
     if not args.dry_run:
-        print(f'starting AutoPipeline...')
+        print('starting AutoPipeline...')
         pipeline.run()
         print('finished AutoPipeline!')
     else:
         print('dry run complete, no processing done')
-    
+
     """Print general summary info"""
 
     """Print nnU-Net specific info here:
     * dataset.json can be found at /path/to/dataset/json
-    * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare 
+    * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare
     """
     print(f"Outputted data to {args.output_directory}")
     csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
@@ -759,6 +753,7 @@ def main():
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
         print(f"dataset.json for nnU-net can be found at {json_path}")
         print("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
+
 
 if __name__ == "__main__":
     main()

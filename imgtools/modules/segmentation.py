@@ -14,12 +14,12 @@ from typing import Dict, List, Optional, Union, Tuple, Set
 def accepts_segmentations(f):
     @wraps(f)
     def wrapper(img, *args, **kwargs):
-         result = f(img, *args, **kwargs)
-         if isinstance(img, Segmentation):
-             result = sitk.Cast(result, sitk.sitkVectorUInt8)
-             return Segmentation(result, roi_indices=img.roi_indices, raw_roi_names=img.raw_roi_names)
-         else:
-             return result
+        result = f(img, *args, **kwargs)
+        if isinstance(img, Segmentation):
+            result = sitk.Cast(result, sitk.sitkVectorUInt8)
+            return Segmentation(result, roi_indices=img.roi_indices, raw_roi_names=img.raw_roi_names)
+        else:
+            return result
     return wrapper
 
 
@@ -144,14 +144,14 @@ class Segmentation(sitk.Image):
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slice = mask_arr[i, :, :, :]
-                slice *= list(self.roi_indices.values())[i] # everything is 0 or 1, so this is fine to convert filled voxels to label indices
+                slice *= list(self.roi_indices.values())[i]  # everything is 0 or 1, so this is fine to convert filled voxels to label indices
                 if verbose:
                     res = self._max_adder(sparsemask_arr, slice)
                     sparsemask_arr = res[0]
                     for e in res[1]:
                         voxels_with_overlap.add(e)
                 else:
-                    sparsemask_arr = np.fmax(sparsemask_arr, slice) # elementwise maximum
+                    sparsemask_arr = np.fmax(sparsemask_arr, slice)  # elementwise maximum
         else:
             sparsemask_arr = mask_arr
         
@@ -179,7 +179,7 @@ class Segmentation(sitk.Image):
             The resulting array and a list of voxels that have overlapping contours in a set
         """
         res = np.zeros(arr_1.shape)
-        overlaps = {} #set of tuples of the coords that have overlap
+        overlaps = {}  # set of tuples of the coords that have overlap
         for i in range(arr_1.shape[0]):
             for j in range(arr_1.shape[1]):
                 for k in range(arr_1.shape[2]):
@@ -190,9 +190,9 @@ class Segmentation(sitk.Image):
 
     @classmethod
     def from_dicom_seg(cls, mask, meta):
-        #get duplicates
+        # get duplicates
         label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
-        raw_roi_names  = {} #{i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
+        raw_roi_names  = {}  # {i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
         for n, i in enumerate(meta.SegmentSequence):
             label = i.SegmentLabel
             num   = i.SegmentNumber
@@ -203,8 +203,5 @@ class Segmentation(sitk.Image):
                 raw_roi_names[f"{label}_{label_counters[label]}"] = num
                 label_counters[label] += 1
         
-        
         frame_groups  = meta.PerFrameFunctionalGroupsSequence
         return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)
-
-        

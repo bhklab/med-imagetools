@@ -1,9 +1,11 @@
 from typing import Tuple, List
-import os, pathlib
+import os
+import pathlib
 import glob
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 def markdown_report_images(output_folder, modality_count):
     modalities = list(modality_count.keys())
@@ -24,25 +26,29 @@ def markdown_report_images(output_folder, modality_count):
 # Division of Medical Image Computing, German Cancer Research Center (DKFZ)
 # in the nnUNet and batchgenerator repositories
 
+
 def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:
     with open(file, 'w') as f:
         json.dump(obj, f, sort_keys=sort_keys, indent=indent)
+
 
 def get_identifiers_from_splitted_files(folder: str):
     uniques = np.unique([i[:-12] for i in subfiles(folder, suffix='.nii.gz', join=False)])
     return uniques
 
+
 def subfiles(folder: str, join: bool = True, prefix: str = None, suffix: str = None, sort: bool = True) -> List[str]:
     if join:
-        l = os.path.join
+        path_fn = os.path.join
     else:
-        l = lambda x, y: y
-    res = [l(folder, i) for i in os.listdir(folder) if os.path.isfile(os.path.join(folder, i))
+        path_fn = lambda x, y: y
+    res = [path_fn(folder, i) for i in os.listdir(folder) if os.path.isfile(os.path.join(folder, i))
            and (prefix is None or i.startswith(prefix))
            and (suffix is None or i.endswith(suffix))]
     if sort:
         res.sort()
     return res
+
 
 def generate_dataset_json(output_file: str, imagesTr_dir: str, imagesTs_dir: str, modalities: Tuple,
                           labels: dict, dataset_name: str, sort_keys=True, license: str = "hands off!", dataset_description: str = "",

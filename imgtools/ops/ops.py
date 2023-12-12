@@ -15,8 +15,8 @@ ImageFilter = TypeVar('ImageFilter')
 Function = TypeVar('Function')
 StructureSet = TypeVar('StructureSet')
 
-# Base class
 
+# Base class
 class BaseOp:
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
@@ -30,7 +30,6 @@ class BaseOp:
 
 
 # Input/output
-
 class BaseInput(BaseOp):
     def __init__(self, loader):
         if not isinstance(loader, BaseLoader):
@@ -54,6 +53,7 @@ class BaseOutput(BaseOp):
 
     def __call__(self, key, *args, **kwargs):
         self._writer.put(key, *args, **kwargs)
+
 
 class BetaAutoInput(BaseInput):
     """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
@@ -84,7 +84,8 @@ class BetaAutoInput(BaseInput):
         self.modalities = modalities
         self.parent, self.dataset_name = os.path.split(self.dir_path)
 
-        ####### CRAWLER ############
+        # CRAWLER
+        # -------
         # Checks if dataset has already been indexed
         # To be changed later
         df_crawl_path   = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
@@ -92,18 +93,19 @@ class BetaAutoInput(BaseInput):
 
         if not os.path.exists(df_crawl_path) or update:
             print("Indexing the dataset...")
-            db = crawl(self.dir_path, n_jobs=n_jobs)
+            db = crawl(self.dir_path, n_jobs = n_jobs)
             print(f"Number of patients in the dataset: {len(db)}")
         else:
             print("The dataset has already been indexed.")
 
         import json
         with open(tree_crawl_path, 'r') as f:
-            tree_db = json.load(f)
+            tree_db = json.load(f)  # currently unused, TO BE implemented in the future
 
-        ####### GRAPH ##########
+        # GRAPH
+        # -----
         # Form the graph
-        edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
+        edge_path = pathlib.Path(self.parent, ".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
         graph = DataGraph(path_crawl=df_crawl_path, edge_path=edge_path, visualize=visualize)
         print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
@@ -126,6 +128,7 @@ class BetaAutoInput(BaseInput):
                                 readers=self.readers)
         
         super().__init__(loader)
+
 
 class ImageAutoInput(BaseInput):
     """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
@@ -156,7 +159,8 @@ class ImageAutoInput(BaseInput):
         self.modalities = modalities
         self.parent, self.dataset_name = os.path.split(self.dir_path)
 
-        ####### CRAWLER ############
+        # CRAWLER
+        # -------
         # Checks if dataset has already been indexed
         # To be changed later
         path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
@@ -167,7 +171,8 @@ class ImageAutoInput(BaseInput):
         else:
             print("The dataset has already been indexed.")
 
-        ####### GRAPH ##########
+        # GRAPH
+        # -----
         # Form the graph
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
@@ -188,7 +193,6 @@ class ImageAutoInput(BaseInput):
                                 readers=self.readers)
         
         super().__init__(loader)
-
 
 
 class ImageCSVInput(BaseInput):
@@ -219,7 +223,7 @@ class ImageCSVInput(BaseInput):
                  colnames: List[str] = None,
                  id_column: Optional[str] = None,
                  expand_paths: bool = True,
-                 readers: List[LoaderFunction] = None): # no mutable defaults: https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+                 readers: List[LoaderFunction] = None):  # no mutable defaults: https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
         if colnames is None:
             colnames = []
         if readers is None:
@@ -273,7 +277,7 @@ class ImageFileInput(BaseInput):
                  root_directory: str,
                  get_subject_id_from: str = "filename",
                  subdir_path: Optional[str] = None,
-                 exclude_paths: Optional[List[str]] = None, # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+                 exclude_paths: Optional[List[str]] = None,  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
                  reader: LoaderFunction = None):
         if exclude_paths is None:
             exclude_paths = []
@@ -324,7 +328,7 @@ class ImageFileOutput(BaseOutput):
         self.create_dirs = create_dirs
         self.compress = compress
         
-        if ".seg" in filename_format: #from .seg.nrrd bc it is now .nii.gz
+        if ".seg" in filename_format:  # from .seg.nrrd bc it is now .nii.gz
             writer_class = SegNrrdWriter
         else:
             writer_class = ImageFileWriter
@@ -336,54 +340,24 @@ class ImageFileOutput(BaseOutput):
         
         super().__init__(writer)
 
-class MetadataOutput(BaseOutput):
-    """MetadataOutput class outputs the metadata of processed image files in .json format.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the processed .json file will be stored.
-
-    filename_format: str, optional
-        The filename template.
-        Set to be {subject_id}.json as default.
-        {subject_id} will be replaced by each subject's ID at runtime.
-
-    create_dirs: bool, optional
-        Specify whether to create an output directory if it does not exit.
-        Set to be True as default.
-
-    """
-
-    def __init__(self,
-                 root_directory: str,
-                 filename_format: Optional[str] ="{subject_id}.json",
-                 create_dirs: Optional[bool] =True):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        writer = MetadataWriter(self.root_directory, self.filename_format, self.create_dirs)
-        super().__init__(writer)
-
 
 # Resampling ops
-
 class ImageSubjectFileOutput(BaseOutput):
 
     def __init__(self,
                  root_directory: str,
-                 filename_format: Optional[str] ="{subject_id}.nii.gz",
-                 create_dirs: Optional[bool] =True,
-                 compress: Optional[bool] =True):
+                 filename_format: Optional[str] = "{subject_id}.nii.gz",
+                 create_dirs: Optional[bool] = True,
+                 compress: Optional[bool] = True):
         self.root_directory = root_directory
         self.filename_format = filename_format
         self.create_dirs = create_dirs
         self.compress = compress
 
         writer = BaseSubjectWriter(self.root_directory,
-                              self.filename_format,
-                              self.create_dirs,
-                              self.compress)
+                                   self.filename_format,
+                                   self.create_dirs,
+                                   self.compress)
         
         super().__init__(writer)
 
@@ -410,17 +384,17 @@ class ImageAutoOutput:
         self.output = {}
         for colname in output_streams:
             # Not considering colnames ending with alphanumeric
-            colname_process = ("_").join([item for item in colname.split("_") if item.isnumeric()==False])
-            colname_process = colname #temproary force #
+            colname_process = ("_").join([item for item in colname.split("_") if not item.isnumeric()])
+            colname_process = colname  # temproary force #
             if not nnunet_info and not inference:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{subject_id}",colname_process.split(".")[0]).as_posix(),
-                                                                    filename_format="{}.nii.gz".format(colname_process))
+                                                                      filename_format="{}.nii.gz".format(colname_process))
             elif inference:
                 self.output[colname_process] = ImageSubjectFileOutput(root_directory,
-                                                                    filename_format="{subject_id}_{modality_index}.nii.gz")
+                                                                      filename_format="{subject_id}_{modality_index}.nii.gz")
             else:
                 self.output[colname_process] = ImageSubjectFileOutput(pathlib.Path(root_directory,"{label_or_image}{train_or_test}").as_posix(),
-                                                                    filename_format="{subject_id}_{modality_index}.nii.gz")
+                                                                      filename_format="{subject_id}_{modality_index}.nii.gz")
     
     def __call__(self, 
                  subject_id: str,
@@ -433,7 +407,8 @@ class ImageAutoOutput:
                  nnunet_info: Dict=None):
                  
         self.output[output_stream](subject_id, img, is_mask=is_mask, mask_label=mask_label, label_or_image=label_or_image, train_or_test=train_or_test, nnunet_info=nnunet_info)
-    
+
+
 class NumpyOutput(BaseOutput):
     """NumpyOutput class processed images as NumPy files.
 
@@ -534,7 +509,6 @@ class MetadataOutput(BaseOutput):
 
 
 # Resampling ops
-
 class Resample(BaseOp):
     """Resample operation class:
     A callable class that resamples image to a given spacing, optionally applying a transformation.
@@ -677,6 +651,7 @@ class Resize(BaseOp):
                       interpolation=self.interpolation,
                       anti_alias_sigma=self.anti_alias_sigma)
 
+
 class Zoom(BaseOp):
     """Zoom operation class: A callable class that rescales image, preserving its spatial extent.
 
@@ -773,9 +748,9 @@ class Rotate(BaseOp):
     """
 
     def __init__(self,
-                rotation_centre: Sequence[float],
-                angles: Union[float, Sequence[float]],
-                interpolation: str ="linear"):
+                 rotation_centre: Sequence[float],
+                 angles: Union[float, Sequence[float]],
+                 interpolation: str ="linear"):
         self.rotation_centre = rotation_centre
         self.angles = angles
         self.interpolation = interpolation
@@ -820,7 +795,6 @@ class InPlaneRotate(BaseOp):
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
     """
-
     def __init__(self, angle: float, interpolation: str ="linear"):
         self.angle = angle
         self.interpolation = interpolation
@@ -849,7 +823,6 @@ class InPlaneRotate(BaseOp):
 
 
 # Cropping & mask ops
-
 class Crop(BaseOp):
     """Crop operation class: A callable class that crops an image to
     the desired size around a given centre.
@@ -1003,11 +976,11 @@ class Centroid(BaseOp):
     """
 
     def __init__(self, world_coordinates: bool = False):
-        self.world_coordinates = world_coordinates
+                 self.world_coordinates = world_coordinates
 
     def __call__(self,
-                mask: sitk.Image,
-                label: Optional[int] = 1) -> tuple:
+                 mask: sitk.Image,
+                 label: Optional[int] = 1) -> tuple:
         """Centroid callable object: Finds the centroid of
         a labelled region specified by a segmentation mask.
 
@@ -1052,12 +1025,12 @@ class CropToMaskBoundingBox(BaseOp):
     """
 
     def __init__(self, margin: Union[int, Sequence[int], np.ndarray]):
-        self.margin = margin
+                 self.margin = margin
 
     def __call__(self,
-                image: sitk.Image,
-                mask: Union[int, Sequence[int], np.ndarray] = None,
-                label: Optional[int] = 1) -> Tuple[sitk.Image]:
+                 image: sitk.Image,
+                 mask: Union[int, Sequence[int], np.ndarray] = None,
+                 label: Optional[int] = 1) -> Tuple[sitk.Image]:
         """CropToMaskBoundingBox callable object:
         Crops the image using the bounding box of a region of interest specified
         by a segmentation mask.
@@ -1086,8 +1059,8 @@ class CropToMaskBoundingBox(BaseOp):
                                          margin=self.margin,
                                          label=label)
 
-# Intensity ops
 
+# Intensity ops
 class ClipIntensity(BaseOp):
     """ClipIntensity operation class:
     A callable class that clips image grey level intensities to specified range.
@@ -1194,9 +1167,9 @@ class ImageStatistics(BaseOp):
     """
 
     def __call__(self,
-                image: sitk.Image,
-                mask: Optional[sitk.Image] = None,
-                label: Optional[int] =1) -> float:
+                 image: sitk.Image,
+                 mask: Optional[sitk.Image] = None,
+                 label: Optional[int] =1) -> float:
         """ImageStatistics callable object:
         Computes the intensity statistics of an image.
 
@@ -1572,6 +1545,7 @@ class StructureSetToSegmentation(BaseOp):
                                              roi_select_first=roi_select_first,
                                              roi_separate=roi_separate)
 
+
 class FilterSegmentation():
     """FilterSegmentation operation class:
     A callable class that accepts ROI names, a Segmentation mask with all labels
@@ -1626,17 +1600,18 @@ class FilterSegmentation():
                 labels[name] = i
         else:
             for _, pattern in enumerate(names):
-                if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                if sorted(names) == sorted(list(labels.keys())):  # checks if all ROIs have already been processed.
                     break
                 if isinstance(pattern, str):
                     for i, name in enumerate(self.roi_names):
                         if re.fullmatch(pattern, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
                             cur_label += 1
-                else: # if multiple regex/names to match
+                else:  # if multiple regex/names to match
                     matched = False
                     for subpattern in pattern:
-                        if roi_select_first and matched: break # break if roi_select_first and we're matched
+                        if roi_select_first and matched: 
+                            break  # break if roi_select_first and we're matched
                         for n, name in enumerate(self.roi_names):
                             if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
                                 matched = True
@@ -1704,14 +1679,14 @@ class FilterSegmentation():
                 if isinstance(pattern, str):
                     matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
                     if matching_names:
-                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
-                elif isinstance(pattern, list): # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
+                        labels[name] = matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+                elif isinstance(pattern, list):        # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
                     labels[name] = []
                     for pattern_one in pattern:
                         matching_names = list(self._assign_labels([pattern_one], roi_select_first).keys())
                         if matching_names:
-                            labels[name].extend(matching_names) #{"GTV": ["GTV1", "GTV2"]}
-        elif isinstance(self.roi_patterns, list): # won't this always trigger after the previous?
+                            labels[name].extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
+        elif isinstance(self.roi_patterns, list):      # won't this always trigger after the previous?
             labels = self._assign_labels(self.roi_patterns, roi_select_first)
         else:
             raise ValueError(f"{self.roi_patterns} not expected datatype")
@@ -1743,7 +1718,6 @@ class FilterSegmentation():
                 self.get_mask(reference_image, seg, mask, name, label, self.continuous)
             seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
-        
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
@@ -1751,7 +1725,8 @@ class FilterSegmentation():
                             roi_indices=seg_roi_indices, 
                             existing_roi_indices=existing_roi_indices, 
                             raw_roi_names=labels)
-        
+
+
 class MapOverLabels(BaseOp):
     """MapOverLabels operation class:
 
@@ -1797,6 +1772,3 @@ class MapOverLabels(BaseOp):
                                include_background=self.include_background,
                                return_segmentation=self.return_seg,
                                **kwargs)
-
-
-

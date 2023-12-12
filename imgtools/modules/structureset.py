@@ -14,6 +14,7 @@ from ..utils import physical_points_to_idxs
 
 T = TypeVar('T')
 
+
 def _get_roi_points(rtstruct, roi_index):
     return [np.array(slc.ContourData).reshape(-1, 3) for slc in rtstruct.ROIContourSequence[roi_index].ContourSequence]
 
@@ -76,18 +77,18 @@ class StructureSet:
                 labels[name] = i
         else:
             for _, pattern in enumerate(names):
-                if sorted(names) == sorted(list(labels.keys())): #checks if all ROIs have already been processed.
+                if sorted(names) == sorted(list(labels.keys())):  # checks if all ROIs have already been processed.
                     break
                 if isinstance(pattern, str):
                     for i, name in enumerate(self.roi_names):
                         if re.fullmatch(pattern, name, flags=re.IGNORECASE):
                             labels[name] = cur_label
                             cur_label += 1
-                else: # if multiple regex/names to match
+                else:  # if multiple regex/names to match
                     matched = False
                     for subpattern in pattern:
-                        if roi_select_first and matched: break # break if roi_select_first and we're matched
-
+                        if roi_select_first and matched:  # break if roi_select_first and we're matched
+                            break
                         for n, name in enumerate(self.roi_names):
                             if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
                                 matched = True
@@ -106,10 +107,10 @@ class StructureSet:
         for contour in mask_points:
             try:
                 z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-                if len(z) == 1: # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+                if len(z) == 1:  # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
                     slice_mask = polygon2mask(size[1:], slice_points)
                     mask[z[0], :, :, idx] += slice_mask
-            except: # rounding errors for points on the boundary
+            except:  # rounding errors for points on the boundary
                 if z == mask.shape[0]:
                     z -= 1
                 elif z == -1: #?
@@ -166,23 +167,23 @@ class StructureSet:
         """
         labels = {}
         if roi_names is None or roi_names == {}:
-            roi_names = self.roi_names #all the contour names
-            labels = self._assign_labels(roi_names, roi_select_first, roi_separate) #only the ones that match the regex
+            roi_names = self.roi_names  # all the contour names
+            labels = self._assign_labels(roi_names, roi_select_first, roi_separate)  # only the ones that match the regex
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
                     matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
                     if matching_names:
-                        labels[name] = matching_names #{"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
-                elif isinstance(pattern, list): # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
+                        labels[name] = matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+                elif isinstance(pattern, list):  # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
                     labels[name] = []
                     for pattern_one in pattern:
                         matching_names = list(self._assign_labels([pattern_one], roi_select_first).keys())
                         if matching_names:
-                            labels[name].extend(matching_names) #{"GTV": ["GTV1", "GTV2"]}
+                            labels[name].extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
         if isinstance(roi_names, str):
             roi_names = [roi_names]
-        if isinstance(roi_names, list): # won't this always trigger after the previous?
+        if isinstance(roi_names, list):  # won't this always trigger after the previous?
             labels = self._assign_labels(roi_names, roi_select_first)
         print("labels:", labels)
         all_empty = True
@@ -210,11 +211,10 @@ class StructureSet:
                 self.get_mask(reference_image, mask, name, label, continuous)
             seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
-        
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
-        mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices, raw_roi_names=labels) #in the segmentation, pass all the existing roi names and then process is in the segmentation class
+        mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices, raw_roi_names=labels)  # in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
         return mask
 
