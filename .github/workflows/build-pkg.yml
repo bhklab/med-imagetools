@@ -3,7 +3,7 @@ name: pypi-on-master-push
 on:
   push:
     branches:
-      - master
+      - main
 jobs:
   bob-the-builder:
     runs-on: ubuntu-latest
