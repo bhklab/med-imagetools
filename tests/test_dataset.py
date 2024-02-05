@@ -4,6 +4,8 @@ import pandas as pd
 import torchio as tio
 import pytest
 import torch
+import urllib.request as request
+from zipfile import ZipFile
 
 from typing import List
 from torch.utils.data import DataLoader
