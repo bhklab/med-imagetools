@@ -23,7 +23,6 @@ from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
 from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
-from torch import sparse_coo_tensor
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import pandas as pd
