@@ -1,4 +1,4 @@
-import pathlib
+import pathlib, os
 import re
 import pandas as pd
 import torchio as tio
@@ -8,6 +8,36 @@ import torch
 from typing import List
 from torch.utils.data import DataLoader
 from imgtools.io import Dataset
+
+@pytest.fixture(scope="session")
+def dataset_path():
+    curr_path = pathlib.Path(__file__).parent.parent.resolve()
+    quebec_path = pathlib.Path(pathlib.Path(curr_path, "data", "Head-Neck-PET-CT").as_posix())
+    
+    if not os.path.exists(quebec_path):
+        pathlib.Path(quebec_path).mkdir(parents=True, exist_ok=True)
+        # Download QC dataset
+        print("Downloading the test dataset...")
+        quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
+        quebec_zip_path = pathlib.Path(quebec_path, "Head-Neck-PET-CT.zip").as_posix()
+        request.urlretrieve(quebec_data_url, quebec_zip_path)
+        with ZipFile(quebec_zip_path, 'r') as zipfile:
+            zipfile.extractall(quebec_path)
+        os.remove(quebec_zip_path)
+    else:
+        print("Data already downloaded...")
+    output_path = pathlib.Path(curr_path, 'tests','temp').as_posix()
+    quebec_path = quebec_path.as_posix()
+    
+    #Dataset name
+    dataset_name  = os.path.basename(quebec_path)
+    imgtools_path = pathlib.Path(os.path.dirname(quebec_path), '.imgtools')
+
+    #Defining paths for autopipeline and dataset component
+    crawl_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.csv").as_posix()
+    json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()
+    edge_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}_edges.csv").as_posix()
+    yield quebec_path, output_path, crawl_path, edge_path
 
 class select_roi_names(tio.LabelTransform):
     """
