@@ -8,9 +8,6 @@ pynrrd
 scikit-image
 SimpleITK
 tqdm
-torch
-torchio
-scikit-learn
 pyyaml
 dill
 attrs

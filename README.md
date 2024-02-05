@@ -7,10 +7,9 @@
 [![Documentation Status](https://readthedocs.org/projects/med-imagetools/badge/?version=documentation)](https://med-imagetools.readthedocs.io/en/documentation/?badge=documentation)
 ![DOI Status](https://zenodo.org/badge/243786996.svg)
 
-## Latest Updates (v1.0.3) - Oct 13th, 2022
+## Latest Updates (v1.2.0) - Feb 5th, 2024
 * Documentation is now available at: https://med-imagetools.readthedocs.io
-* Fixed relative path handling issue #53 and extra patient folder issue #57
-* Subseries crawl feature added, but not yet integrated into AutoPipeline. Will collect user data with prototypes first.
+* Dependencies have been reduced for a lighter install. `torch` and `torchio` dependencies have been moved to an extra pip install flag. Use `pip install med-imagetools[torch]` to use the Dataset feature and 
 
 #### Med-ImageTools core features
 * AutoPipeline CLI
