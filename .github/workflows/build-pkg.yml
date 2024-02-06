@@ -26,6 +26,6 @@ jobs:
       - run: echo 'Tests successful. Publishing to PyPI now.'
       - name: Build app (Ubuntu / macOS)
         env:
-          USERNAME: ${{ secrets.pypi_username }}
+          USERNAME: ${{ secrets.pypi_token }}
           KEY: ${{ secrets.pypi_api }}
         run: python -m twine upload --skip-existing -u $USERNAME -p $KEY dist/*
