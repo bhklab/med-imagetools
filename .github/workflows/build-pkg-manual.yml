@@ -21,7 +21,7 @@ jobs:
       - name: Build binary wheel and a source tarball
         run: |
           python setup.py install
-          python setup.py sdist bdist_wheel
+          python setup.py bdist_wheel
       - run: echo 'Tests successful. Publishing to PyPI now.'
       - name: Build app (Ubuntu / macOS)
         env:
