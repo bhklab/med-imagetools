@@ -6,6 +6,7 @@ pandas
 pydicom
 pynrrd
 scikit-image
+scikit-learn
 SimpleITK
 tqdm
 pyyaml
