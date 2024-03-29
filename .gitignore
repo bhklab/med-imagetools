@@ -1,6 +1,7 @@
 # test scripts
 examples/autotest.py
 .idea
+temp_outputs
 
 #vscode files
 /.idea
