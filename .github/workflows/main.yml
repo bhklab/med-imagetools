@@ -4,7 +4,7 @@ name: bob-the-builder
 on:
   push:
     # push to any branch *
-    branches: *
+    branches: '*'
   pull_request:
     branches: [ main ]
 
