@@ -36,12 +36,12 @@ jobs:
         uses: snok/install-poetry@v1
 
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --with dev
 
       - name: Test with pytest
         run: |
           # Github action runners now have 4 cores
-          poetry run pytest -s -v -n 4 --cov --cov-report xml:coverage-report/coverage.xml
+          poetry run pytest tests -s -v -n 4 --cov --cov-report xml:coverage-report/coverage.xml
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
