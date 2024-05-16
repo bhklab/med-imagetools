@@ -474,7 +474,7 @@ class AutoPipeline(Pipeline):
                         if conn_to == "CT" or conn_to == "MR":
                             img = image
                         elif conn_to == "PT":
-                            img = pet
+                            img = pet  # noqa: F821
                         
                         mask = self.make_binary_mask(structure_set, img, 
                                                      self.existing_roi_indices, 

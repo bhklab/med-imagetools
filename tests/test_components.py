@@ -35,7 +35,7 @@ def dataset_path():
 
     #Defining paths for autopipeline and dataset component
     crawl_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.csv").as_posix()
-    json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()
+    json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
     edge_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}_edges.csv").as_posix()
     yield quebec_path, output_path, crawl_path, edge_path
 

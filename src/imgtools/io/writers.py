@@ -119,7 +119,7 @@ class SegNrrdWriter(BaseWriter):
 
         origin = mask.GetOrigin()
         spacing = mask.GetSpacing()
-        direction = mask.GetDirection()
+        direction = mask.GetDirection()  # noqa: F841
 
         space = "left-posterior-superior"  # everything is ITK read/write 
 

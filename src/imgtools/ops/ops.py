@@ -100,7 +100,7 @@ class BetaAutoInput(BaseInput):
 
         import json
         with open(tree_crawl_path, 'r') as f:
-            tree_db = json.load(f)  # currently unused, TO BE implemented in the future
+            tree_db = json.load(f)  # currently unused, TO BE implemented in the future  # noqa: F841
 
         # GRAPH
         # -----
@@ -1636,7 +1636,7 @@ class FilterSegmentation():
             mask[:,:,:,idx] += seg[:,:,:,idx_seg]
         else:                                       # if 2D segmentations on 3D images
             frame        = seg.frame_groups[idx_seg]
-            ref_uid      = frame.DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID  # unused but references InstanceUID of slice
+            ref_uid      = frame.DerivationImageSequence[0].SourceImageSequence[0].ReferencedSOPInstanceUID  # unused but references InstanceUID of slice  # noqa: F841
             frame_coords = np.array(frame.PlanePositionSequence[0].ImagePositionPatient)
             img_coords   = physical_points_to_idxs(reference_image, np.expand_dims(frame_coords, (0, 1)))[0][0]
             z            = img_coords[0]

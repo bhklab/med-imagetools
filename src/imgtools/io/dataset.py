@@ -174,7 +174,7 @@ class Dataset(tio.SubjectsDataset):
                 if conn_to == "CT":
                     mask = make_binary_mask(structure_set, image)
                 elif conn_to == "PT":
-                    mask = make_binary_mask(structure_set, pet)
+                    mask = make_binary_mask(structure_set, pet)  # noqa: F821
                 else:
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 temp[f"mod_{colname}"] = tio.LabelMap.from_sitk(mask)

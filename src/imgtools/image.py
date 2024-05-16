@@ -124,9 +124,6 @@ class Image:
                              direction=self.direction,
                              spacing=self.spacing)
 
-    @property
-    def size(self):
-        return self._image.GetSize()[::-1]
 
     @property
     def ndim(self):

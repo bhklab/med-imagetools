@@ -114,7 +114,7 @@ class RADCUREPipeline(Pipeline):
 
         image = self.image_input(subject_id).image
 
-        structure_set = self.structure_set_input(subject_id)
+        structure_set = self.structure_set_input(subject_id)  # noqa: F841
         dose_set = self.rtdose_input(subject_id)
         pet_set = self.petscan_input(subject_id)
 
