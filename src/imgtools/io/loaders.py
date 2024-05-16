@@ -3,7 +3,7 @@ import pathlib
 import json
 import glob
 import re
-from typing import Optional, List
+from typing import Optional
 from collections import namedtuple
 # import copy
 

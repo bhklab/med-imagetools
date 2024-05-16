@@ -1,4 +1,5 @@
-import os, pathlib
+import os
+import pathlib
 import urllib.request as request
 from zipfile import ZipFile
 

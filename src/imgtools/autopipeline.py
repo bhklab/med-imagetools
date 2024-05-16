@@ -4,15 +4,9 @@ import pathlib
 import shutil
 import glob
 import pickle
-import struct
-from attr import has
-from matplotlib.style import available
 import numpy as np
-import sys
 import warnings
-from copy import deepcopy
 
-from argparse import ArgumentParser
 import yaml
 import json
 import SimpleITK as sitk
@@ -24,10 +18,7 @@ from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import pandas as pd
 
-from imgtools.io.common import file_name_convention
 import dill
 ###############################################################
 # Example usage:

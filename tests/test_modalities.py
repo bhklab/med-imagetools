@@ -3,20 +3,15 @@ This code is for testing functioning of different modalities
 '''
 
 
-import os, pathlib
-from posixpath import dirname
-import shutil
-import warnings
-from multiprocessing import cpu_count
+import os
+import pathlib
 
-import numpy as np
 import SimpleITK as sitk
 import pytest
 import pydicom
 
 from imgtools.io import read_dicom_auto
-from imgtools.ops import StructureSetToSegmentation, ImageAutoOutput, Resample
-from imgtools.pipeline import Pipeline
+from imgtools.ops import StructureSetToSegmentation
 
 @pytest.fixture
 def modalities_path():

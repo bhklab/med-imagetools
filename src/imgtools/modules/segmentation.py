@@ -3,12 +3,11 @@ import warnings
 
 import numpy as np
 import SimpleITK as sitk
-from pydicom import dcmread
 
 from .sparsemask import SparseMask
 
 from ..utils import array_to_image, image_to_array
-from typing import Dict, List, Optional, Union, Tuple, Set
+from typing import Optional, Tuple, Set
 
 
 def accepts_segmentations(f):

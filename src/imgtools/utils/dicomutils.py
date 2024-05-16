@@ -1,5 +1,4 @@
 import pydicom
-from pydicom import dcmread
 from typing import Dict, TypeVar, Union
 import copy
 

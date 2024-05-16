@@ -1,8 +1,7 @@
-import os, pathlib
+import pathlib
 from argparse import ArgumentParser
 
-from imgtools.io import (ImageFileLoader, ImageFileWriter,
-                         read_dicom_rtstruct, read_dicom_series, read_dicom_rtdose, read_dicom_pet)
+from imgtools.io import (read_dicom_rtstruct, read_dicom_series, read_dicom_rtdose, read_dicom_pet)
 from imgtools.ops import StructureSetToSegmentation, ImageFileInput, ImageFileOutput, Resample
 from imgtools.pipeline import Pipeline
 

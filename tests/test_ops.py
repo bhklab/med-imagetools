@@ -1,4 +1,5 @@
-import os, pathlib
+import os
+import pathlib
 import pytest
 import SimpleITK as sitk
 import numpy as np

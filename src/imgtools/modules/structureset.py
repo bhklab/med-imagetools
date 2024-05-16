@@ -1,7 +1,6 @@
 import re
 from warnings import warn
-from typing import Dict, List, Optional, Union, Tuple, Set, TypeVar
-import copy
+from typing import Dict, List, Optional, TypeVar
 
 import numpy as np
 import SimpleITK as sitk

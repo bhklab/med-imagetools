@@ -1,15 +1,13 @@
-from genericpath import exists
 import os
 import pathlib
 import ast
-from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
+from typing import List, Sequence, Tuple
 from tqdm import tqdm
 
 import SimpleITK as sitk
 import torchio as tio
 import pandas as pd
 
-from imgtools.io import file_name_convention
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
 from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed

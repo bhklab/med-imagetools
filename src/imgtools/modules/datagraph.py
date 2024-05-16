@@ -5,7 +5,6 @@ from typing import List
 from functools import reduce
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 
 class DataGraph:

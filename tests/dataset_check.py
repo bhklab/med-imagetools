@@ -1,4 +1,5 @@
-import pathlib, os
+import pathlib
+import os
 import re
 import pandas as pd
 import torchio as tio
@@ -8,7 +9,6 @@ import urllib.request as request
 from zipfile import ZipFile
 
 from typing import List
-from torch.utils.data import DataLoader
 from imgtools.io import Dataset
 
 @pytest.fixture(scope="session")
@@ -141,5 +141,5 @@ class TestDataset:
         #Get items from test loader
         #If this function fails , there is some error in formation of test
         data = next(iter(test_loader))
-        A = [item[1].shape == (2,1,96,96,40) if not "RTSTRUCT" in item[0] else item[1].shape == (2,2,96,96,40) for item in data.items()]
+        A = [item[1].shape == (2,1,96,96,40) if "RTSTRUCT" not in item[0] else item[1].shape == (2,2,96,96,40) for item in data.items()]
         assert all(A), "There is some problem in the transformation/the formation of subject object"

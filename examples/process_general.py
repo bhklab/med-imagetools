@@ -1,7 +1,4 @@
-import os, pathlib
-import glob
-from numpy import mod
-import pandas as pd
+import pathlib
 
 from argparse import ArgumentParser
 
@@ -12,7 +9,6 @@ from imgtools.modules.datagraph import DataGraph
 
 import SimpleITK as sitk
 
-import warnings
 
 
 ###############################################################
@@ -198,7 +194,7 @@ if __name__ == "__main__":
         n_jobs=args.n_jobs,
         show_progress=args.show_progress)
 
-    print(f'starting Pipeline...')
+    print('starting Pipeline...')
     # == Parallel Processing == 
     pipeline.run()
     
@@ -216,4 +212,4 @@ if __name__ == "__main__":
     # == Just Uno ==
     # Good for quickly checking on one sample. 
     # pipeline.process_one_subject(5) 
-    print(f'finished Pipeline!')
+    print('finished Pipeline!')
