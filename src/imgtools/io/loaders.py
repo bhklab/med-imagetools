@@ -101,6 +101,7 @@ def read_dicom_auto(path, series=None, file_names=None):
         dcms = [path]
     else:
         dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
+        
     for dcm in dcms:
         meta = dcmread(dcm)
         if meta.SeriesInstanceUID != series and series is not None:
