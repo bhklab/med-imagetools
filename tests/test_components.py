@@ -37,6 +37,8 @@ def dataset_path():
     crawl_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.csv").as_posix()
     json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
     edge_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}_edges.csv").as_posix()
+
+    assert os.path.exists(crawl_path) & os.path.exists(edge_path) & os.path.exists(json_path), "There was no crawler output"
     yield quebec_path, output_path, crawl_path, edge_path
 
 

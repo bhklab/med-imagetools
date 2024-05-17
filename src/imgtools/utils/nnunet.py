@@ -41,7 +41,8 @@ def subfiles(folder: str, join: bool = True, prefix: str = None, suffix: str = N
     if join:
         path_fn = os.path.join
     else:
-        path_fn = lambda x, y: y  # noqa: E731
+        def path_fn(x, y): return y
+        
     res = [path_fn(folder, i) for i in os.listdir(folder) if os.path.isfile(os.path.join(folder, i))
            and (prefix is None or i.startswith(prefix))
            and (suffix is None or i.endswith(suffix))]

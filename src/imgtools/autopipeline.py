@@ -461,7 +461,26 @@ class AutoPipeline(Pipeline):
                         metadata.update(doses.metadata)
 
                     print(subject_id, " SAVED DOSE")
-                
+                    
+                # Process PET
+                elif modality == "PT":
+                    try:
+                        # For cases with no image present
+                        pet = read_results[i].resample_pet(image)
+                    except:
+                        Warning("No CT image present. Returning PT/PET image without resampling.")
+                        pet = read_results[i]
+
+                    # output
+                    self.output(subject_id, pet, output_stream)
+                    metadata[f"size_{output_stream}"] = str(pet.GetSize())
+                    metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
+
+                    if hasattr(pet, "metadata") and pet.metadata is not None:
+                        metadata.update(pet.metadata)
+
+                    print(subject_id, " SAVED PET")
+
                 # Process contour
                 elif modality == "RTSTRUCT":
                     num_rtstructs += 1
@@ -551,24 +570,7 @@ class AutoPipeline(Pipeline):
 
                     print(subject_id, "SAVED MASK ON", conn_to)
                 
-                # Process PET
-                elif modality == "PT":
-                    try:
-                        # For cases with no image present
-                        pet = read_results[i].resample_pet(image)
-                    except:
-                        Warning("No CT image present. Returning PT/PET image without resampling.")
-                        pet = read_results[i]
-
-                    # output
-                    self.output(subject_id, pet, output_stream)
-                    metadata[f"size_{output_stream}"] = str(pet.GetSize())
-                    metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
-
-                    if hasattr(pet, "metadata") and pet.metadata is not None:
-                        metadata.update(pet.metadata)
-
-                    print(subject_id, " SAVED PET")
+                
                 
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
             

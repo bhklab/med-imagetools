@@ -124,7 +124,6 @@ class Image:
                              direction=self.direction,
                              spacing=self.spacing)
 
-
     @property
     def ndim(self):
         return len(self.size)

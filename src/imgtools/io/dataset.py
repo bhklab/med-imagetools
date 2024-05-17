@@ -166,6 +166,15 @@ class Dataset(tio.SubjectsDataset):
                     doses = read_results[i]
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(doses)
                 temp[f"metadata_{colname}"] = read_results[i].get_metadata()
+            elif modality == "PT":
+                try:
+                    # For cases with no image present
+                    pet = read_results[i].resample_pet(image)
+                except:
+                    Warning("No CT image present. Returning PT/PET image without resampling.")
+                    pet = read_results[i]
+                temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(pet)
+                temp[f"metadata_{colname}"] = read_results[i].get_metadata()
             elif modality == "RTSTRUCT":
                 # For RTSTRUCT, you need image or PT
                 structure_set = read_results[i]
@@ -179,13 +188,5 @@ class Dataset(tio.SubjectsDataset):
                     raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
                 temp[f"mod_{colname}"] = tio.LabelMap.from_sitk(mask)
                 temp[f"metadata_{colname}"] = structure_set.roi_names
-            elif modality == "PT":
-                try:
-                    # For cases with no image present
-                    pet = read_results[i].resample_pet(image)
-                except:
-                    Warning("No CT image present. Returning PT/PET image without resampling.")
-                    pet = read_results[i]
-                temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(pet)
-                temp[f"metadata_{colname}"] = read_results[i].get_metadata()
+            
         return tio.Subject(temp)
