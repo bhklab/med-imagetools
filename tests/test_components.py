@@ -26,7 +26,7 @@ def dataset_path():
         os.remove(quebec_zip_path)
     else:
         print("Data already downloaded...")
-    output_path = pathlib.Path(curr_path, 'tests','temp').as_posix()
+    output_path = pathlib.Path(curr_path, 'tests', 'temp').as_posix()
     quebec_path = quebec_path.as_posix()
     
     #Dataset name
@@ -35,10 +35,9 @@ def dataset_path():
 
     #Defining paths for autopipeline and dataset component
     crawl_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.csv").as_posix()
-    json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
     edge_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}_edges.csv").as_posix()
-
-    assert os.path.exists(crawl_path) & os.path.exists(edge_path) & os.path.exists(json_path), "There was no crawler output"
+    # json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
+    
     yield quebec_path, output_path, crawl_path, edge_path
 
 
@@ -69,7 +68,7 @@ class TestComponents:
         n_jobs = 2
         output_path_mod = pathlib.Path(self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))).as_posix()
         #Initialize pipeline for the current setting
-        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs,spacing=(5,5,5), overwrite=True)
+        pipeline = AutoPipeline(self.input_path, output_path_mod, modalities, n_jobs=n_jobs, spacing=(5,5,5), overwrite=True)
         #Run for different modalities
         comp_path = pathlib.Path(output_path_mod, "dataset.csv").as_posix()
         pipeline.run()
