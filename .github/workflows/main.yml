@@ -42,7 +42,7 @@ jobs:
       - name: Run image
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          poetry-version: 1.8.2
 
       - name: Test with pytest
         run: |
