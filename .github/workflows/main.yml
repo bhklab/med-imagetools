@@ -43,6 +43,8 @@ jobs:
         uses: abatilo/actions-poetry@v2
         with:
           poetry-version: 1.8.2
+      - name: Install the project dependencies
+        run: poetry install --with dev
 
       - name: Test with pytest
         run: |
