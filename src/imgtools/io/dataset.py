@@ -1,15 +1,13 @@
-from genericpath import exists
 import os
 import pathlib
 import ast
-from typing import List, Sequence, Optional, Callable, Iterable, Dict,Tuple
+from typing import List, Sequence, Tuple
 from tqdm import tqdm
 
 import SimpleITK as sitk
 import torchio as tio
 import pandas as pd
 
-from imgtools.io import file_name_convention
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, Resample, BaseOp
 from imgtools.pipeline import Pipeline
 from joblib import Parallel, delayed
@@ -168,19 +166,6 @@ class Dataset(tio.SubjectsDataset):
                     doses = read_results[i]
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(doses)
                 temp[f"metadata_{colname}"] = read_results[i].get_metadata()
-            elif modality == "RTSTRUCT":
-                # For RTSTRUCT, you need image or PT
-                structure_set = read_results[i]
-                conn_to = output_stream.split("_")[-1]
-                # make_binary_mask relative to ct/pet
-                if conn_to == "CT":
-                    mask = make_binary_mask(structure_set, image)
-                elif conn_to == "PT":
-                    mask = make_binary_mask(structure_set, pet)
-                else:
-                    raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
-                temp[f"mod_{colname}"] = tio.LabelMap.from_sitk(mask)
-                temp[f"metadata_{colname}"] = structure_set.roi_names
             elif modality == "PT":
                 try:
                     # For cases with no image present
@@ -190,4 +175,18 @@ class Dataset(tio.SubjectsDataset):
                     pet = read_results[i]
                 temp[f"mod_{colname}"] = tio.ScalarImage.from_sitk(pet)
                 temp[f"metadata_{colname}"] = read_results[i].get_metadata()
+            elif modality == "RTSTRUCT":
+                # For RTSTRUCT, you need image or PT
+                structure_set = read_results[i]
+                conn_to = output_stream.split("_")[-1]
+                # make_binary_mask relative to ct/pet
+                if conn_to == "CT":
+                    mask = make_binary_mask(structure_set, image)
+                elif conn_to == "PT":
+                    mask = make_binary_mask(structure_set, pet)  # noqa: F821
+                else:
+                    raise ValueError("You need to pass a reference CT or PT/PET image to map contours to.")
+                temp[f"mod_{colname}"] = tio.LabelMap.from_sitk(mask)
+                temp[f"metadata_{colname}"] = structure_set.roi_names
+            
         return tio.Subject(temp)

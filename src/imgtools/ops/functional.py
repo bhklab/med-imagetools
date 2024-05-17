@@ -4,8 +4,6 @@ import numpy as np
 from typing import Sequence, Union, Tuple, Optional
 from collections import namedtuple
 
-from imgtools.modules import segmentation
-
 from ..modules import Segmentation
 
 

@@ -1,5 +1,5 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
-[![main-ci](https://github.com/bhklab/med-imagetools/actions/workflows/main-ci.yml/badge.svg)](https://github.com/bhklab/med-imagetools/actions/workflows/main-ci.yml)
+[![CI/CD Status](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml/badge.svg)](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml)
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
 ![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
 ![GitHub stars](https://img.shields.io/github/stars/bhklab/med-imagetools?style=social)

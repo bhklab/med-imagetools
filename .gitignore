@@ -2,6 +2,9 @@
 examples/autotest.py
 .idea
 temp_outputs
+.ruff_cache
+data*
+*built_with*
 
 #vscode files
 /.idea
@@ -10,7 +13,7 @@ temp_outputs
 data
 examples/data/tcia_n*
 scratch.ipynb
-tests/temp
+tests/temp*
 
 # macOS
 .DS_Store

@@ -4,15 +4,9 @@ import pathlib
 import shutil
 import glob
 import pickle
-import struct
-from attr import has
-from matplotlib.style import available
 import numpy as np
-import sys
 import warnings
-from copy import deepcopy
 
-from argparse import ArgumentParser
 import yaml
 import json
 import SimpleITK as sitk
@@ -24,10 +18,7 @@ from imgtools.utils.args import parser
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
-import pandas as pd
 
-from imgtools.io.common import file_name_convention
 import dill
 ###############################################################
 # Example usage:
@@ -470,7 +461,26 @@ class AutoPipeline(Pipeline):
                         metadata.update(doses.metadata)
 
                     print(subject_id, " SAVED DOSE")
-                
+                    
+                # Process PET
+                elif modality == "PT":
+                    try:
+                        # For cases with no image present
+                        pet = read_results[i].resample_pet(image)
+                    except:
+                        Warning("No CT image present. Returning PT/PET image without resampling.")
+                        pet = read_results[i]
+
+                    # output
+                    self.output(subject_id, pet, output_stream)
+                    metadata[f"size_{output_stream}"] = str(pet.GetSize())
+                    metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
+
+                    if hasattr(pet, "metadata") and pet.metadata is not None:
+                        metadata.update(pet.metadata)
+
+                    print(subject_id, " SAVED PET")
+
                 # Process contour
                 elif modality == "RTSTRUCT":
                     num_rtstructs += 1
@@ -483,7 +493,7 @@ class AutoPipeline(Pipeline):
                         if conn_to == "CT" or conn_to == "MR":
                             img = image
                         elif conn_to == "PT":
-                            img = pet
+                            img = pet  # noqa: F821
                         
                         mask = self.make_binary_mask(structure_set, img, 
                                                      self.existing_roi_indices, 
@@ -560,24 +570,7 @@ class AutoPipeline(Pipeline):
 
                     print(subject_id, "SAVED MASK ON", conn_to)
                 
-                # Process PET
-                elif modality == "PT":
-                    try:
-                        # For cases with no image present
-                        pet = read_results[i].resample_pet(image)
-                    except:
-                        Warning("No CT image present. Returning PT/PET image without resampling.")
-                        pet = read_results[i]
-
-                    # output
-                    self.output(subject_id, pet, output_stream)
-                    metadata[f"size_{output_stream}"] = str(pet.GetSize())
-                    metadata[f"metadata_{colname}"] = [read_results[i].get_metadata()]
-
-                    if hasattr(pet, "metadata") and pet.metadata is not None:
-                        metadata.update(pet.metadata)
-
-                    print(subject_id, " SAVED PET")
+                
                 
                 metadata[f"output_folder_{colname}"] = pathlib.Path(subject_id, colname).as_posix()
             

@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 import numpy as np
 
-from typing import Sequence, Union, Tuple, Optional
+from typing import Sequence, Union
 
 
 INTERPOLATORS = {

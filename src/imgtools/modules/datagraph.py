@@ -5,7 +5,6 @@ from typing import List
 from functools import reduce
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 
 class DataGraph:
@@ -268,7 +267,7 @@ class DataGraph:
         '''
         # Basic processing of just one modality
         supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR', 'SEG']
-        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5, "CT,SEG": 7, "MR,SEG": 7, "MR,RTSTRUCT": 2}
+        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5, "CT,SEG": 7, "MR,SEG": 7}
         self.mods   = query_string.split(",")
         self.mods_n = len(self.mods)
 

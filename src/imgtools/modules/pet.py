@@ -7,7 +7,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 import SimpleITK as sitk
 from pydicom import dcmread
-import copy
 
 T = TypeVar('T')
 
