@@ -59,10 +59,10 @@ jobs:
     # Set up operating system
     runs-on: ubuntu-latest
 
-    outputs:
-      released: ${{ steps.release.outputs.released }}
-      version: ${{ steps.release.outputs.version }}
-      tag: ${{ steps.release.outputs.tag }}
+    # outputs:
+    #   released: ${{ steps.release.outputs.released }}
+    #   version: ${{ steps.release.outputs.version }}
+    #   tag: ${{ steps.release.outputs.tag }}
 
     # Define job steps
     steps:
@@ -125,5 +125,6 @@ jobs:
 
       - name: Install using PyPi
         run: |
-          pip install med-imagetools==${{ needs.cd.outputs.version }}
+          pip install med-imagetools
           autopipeline
+        # pip install med-imagetools ==${{ needs.cd.outputs.version }}
