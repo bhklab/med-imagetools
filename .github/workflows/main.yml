@@ -39,50 +39,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Run image
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: 1.8.2
-      # - name: Install the project dependencies
-      #   run: poetry install --with dev
-      # - name: Test with pytest
-      #   run: |
-      #     # Github action runners now have 4 cores
-      #     poetry run pytest tests -s -v -n 4 --cov --cov-report xml:coverage-report/coverage.xml
       - name: Pip install
         run: pip install .
       - name: Run tests
         run: pip install pytest && pytest tests -v
-      
-      - name: Upload coverage report artifact to be used by Codecov
-        # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: coverage-report
-
-  codecov:
-    needs: tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Download coverage.xml artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: coverage-report
-          path: coverage-report
-
-      - name: Use Codecov to track coverage
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage-report/coverage.xml
-          fail_ci_if_error: true
-          verbose: true
-          name: codecov-umbrella
 
   cd:
     permissions:
@@ -143,8 +103,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          user: ${{ secrets.pypi_token }}
+          password: ${{ secrets.pypi_api }}
 
 
   does-the-pip-squeak:
@@ -152,7 +112,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.12", "3.11", "3.10"]
 
     steps:
@@ -165,5 +125,5 @@ jobs:
 
       - name: Install using PyPi
         run: |
-          pip install nbiatoolkit==${{ needs.cd.outputs.version }}
-          NBIAToolkit
+          pip install med-imagetools==${{ needs.cd.outputs.version }}
+          autopipeline
