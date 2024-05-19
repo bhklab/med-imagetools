@@ -126,5 +126,5 @@ jobs:
       - name: Install using PyPi
         run: |
           pip install med-imagetools
-          autopipeline
+        # autopipeline
         # pip install med-imagetools ==${{ needs.cd.outputs.version }}
