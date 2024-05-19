@@ -44,7 +44,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pip install pytest pytest-cov pytest-xdist
+          pip install pytest pytest-cov
           pytest tests -s -v -n 4 --cov --cov-report xml:coverage-report/coverage.xml
 
       - name: Upload coverage report artifact to be used by Codecov

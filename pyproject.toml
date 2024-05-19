@@ -37,7 +37,6 @@ betapipeline = "imgtools.autopipeline_refactored:main"
 pytest = "^8.2.0"
 ruff = "^0.4.4"
 pytest-cov = ">=4.0.0"
-pytest-xdist = ">=3.5.0"
 
 [tool.poetry.extras]
 torch = ["torch", "torchio"]
