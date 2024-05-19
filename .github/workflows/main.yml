@@ -17,9 +17,6 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
-<<<<<<< Updated upstream
-    timeout-minutes: 15 # Consider increasing timeout
-=======
     timeout-minutes: 15
 
     strategy:
