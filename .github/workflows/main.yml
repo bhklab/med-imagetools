@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 15 # Consider increasing timeout
 =======
     timeout-minutes: 15
->>>>>>> Stashed changes
 
     strategy:
       fail-fast: false
