@@ -8,11 +8,7 @@ with open("requirements.txt", "r") as fh:
     
 setup(
     name="med-imagetools",
-<<<<<<< HEAD
     version="1.3.0.2",
-=======
-    version="1.3.0.1",
->>>>>>> bd1b3d3 (removed pytest-xdist)
     author="Sejin Kim, Michal Kazmierski, Kevin Qu, Vishwesh Ramanathan, Benjamin Haibe-Kains",
     author_email="benjamin.haibe.kains@utoronto.ca",
     description="Transparent and reproducible image processing pipelines in Python.",
