@@ -45,15 +45,7 @@ jobs:
       - name: Run tests
         run: |
           pip install pytest pytest-cov
-<<<<<<< HEAD
-<<<<<<< HEAD
           pytest tests -s -v --cov=imgtools --cov-report xml:coverage-report/coverage.xml
-=======
-          pytest tests -s -v -n 4 --cov --cov-report xml:coverage-report/coverage.xml
->>>>>>> bd1b3d3 (removed pytest-xdist)
-=======
-          pytest tests -s -v --cov --cov-report xml:coverage-report/coverage.xml
->>>>>>> 4f3acef (xdist removed, -n flag gone)
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
