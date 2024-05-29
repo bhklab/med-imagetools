@@ -2,14 +2,11 @@
 [tool.poetry]
 name = "med-imagetools"
 packages = [{ include = "imgtools", from = "src" }]
-version = "1.4.1"
+version = "1.5.0"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = ["Sejin Kim, Benjamin Haibe-Kains"]
 license = "GPL-3.0"
 readme = "README.md"
-
-[tool.semantic_release]
-version_variables = ["setup.py:__version__"]
 
 [tool.poetry.group.dev]
 optional = true
@@ -48,3 +45,17 @@ debug = ["pyvis"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_variables = ["setup.py:__version__"]
+version_toml = [
+    "pyproject.toml:tool.poetry.version",
+]
+upload_to_release = true
+remove_dist = false
+commit_message = "chore(sem-ver): {version}"
+patch_without_tag = true
+
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
