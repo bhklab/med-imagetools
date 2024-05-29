@@ -117,9 +117,8 @@ jobs:
 
   pip-squeak:
     needs: cd
-    if: 
-      - needs.cd.outputs.released == 'true'
-      - github.ref == 'refs/heads/main'
+    if: |
+      needs.cd.outputs.released == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code with tag # ${{ needs.cd.outputs.tag }}
