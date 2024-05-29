@@ -8,6 +8,9 @@ authors = ["Sejin Kim, Benjamin Haibe-Kains"]
 license = "GPL-3.0"
 readme = "README.md"
 
+[tool.semantic_release]
+version_variables = ["src/imgtools/__init__.py:__version__"]
+
 [tool.poetry.group.dev]
 optional = true
 

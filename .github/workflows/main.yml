@@ -92,10 +92,10 @@ jobs:
     # Set up operating system
     runs-on: ubuntu-latest
 
-    # outputs:
-    #   released: ${{ steps.release.outputs.released }}
-    #   version: ${{ steps.release.outputs.version }}
-    #   tag: ${{ steps.release.outputs.tag }}
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
 
     # Define job steps
     steps:
@@ -109,9 +109,16 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Python Semantic Release
+      id: release
+      uses: python-semantic-release/python-semantic-release@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
   pip-squeak:
     needs: cd
-    # if: needs.cd.outputs.released == 'true'
+    if: |
+      needs.cd.outputs.released == 'true' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code with tag # ${{ needs.cd.outputs.tag }}
