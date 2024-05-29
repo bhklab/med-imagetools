@@ -93,9 +93,9 @@ jobs:
     runs-on: ubuntu-latest
 
     # outputs:
-    #   released: ${{ steps.release.outputs.released }}
-    #   version: ${{ steps.release.outputs.version }}
-    #   tag: ${{ steps.release.outputs.tag }}
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
 
     # Define job steps
     steps:
@@ -109,15 +109,21 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Python Semantic Release
+      id: release
+      uses: python-semantic-release/python-semantic-release@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
   pip-squeak:
     needs: cd
     # if: needs.cd.outputs.released == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the code with tag # ${{ needs.cd.outputs.tag }}
+      - name: Checkout the code with tag ${{ needs.cd.outputs.tag }}
         uses: actions/checkout@v3
-        # with:
-        #   ref: ${{ needs.cd.outputs.tag }}
+        with:
+         ref: ${{ needs.cd.outputs.tag }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
