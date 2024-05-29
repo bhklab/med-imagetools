@@ -9,13 +9,13 @@ license = "GPL-3.0"
 readme = "README.md"
 
 [tool.semantic_release]
-version_variables = ["src/imgtools/__init__.py:__version__"]
+version_variables = ["setup.py:__version__"]
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.dependencies]
-python = ">=3.10 || 3.12"
+python = ">=3.10,<4"
 h5py = "^3.11.0"
 joblib = "^1.4.2"
 numpy = "^1.26.4"
@@ -39,6 +39,7 @@ betapipeline = "imgtools.autopipeline_refactored:main"
 pytest = "^8.2.0"
 ruff = "^0.4.4"
 pytest-cov = ">=4.0.0"
+python-semantic-release = "^9.8.0"
 
 [tool.poetry.extras]
 torch = ["torch", "torchio"]
