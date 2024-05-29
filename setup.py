@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+__version__ = "1.3.0.3"
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
@@ -8,7 +10,7 @@ with open("requirements.txt", "r") as fh:
     
 setup(
     name="med-imagetools",
-    version="1.3.0.2",
+    version=__version__,
     author="Sejin Kim, Michal Kazmierski, Kevin Qu, Vishwesh Ramanathan, Benjamin Haibe-Kains",
     author_email="benjamin.haibe.kains@utoronto.ca",
     description="Transparent and reproducible image processing pipelines in Python.",
