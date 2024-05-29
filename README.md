@@ -6,6 +6,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 [![Documentation Status](https://readthedocs.org/projects/med-imagetools/badge/?version=documentation)](https://med-imagetools.readthedocs.io/en/documentation/?badge=documentation)
 ![DOI Status](https://zenodo.org/badge/243786996.svg)
+[![codecov](https://codecov.io/gh/bhklab/med-imagetools/graph/badge.svg?token=clsZe4sCdx)](https://codecov.io/gh/bhklab/med-imagetools)
 
 ## Latest Updates (v1.2.0) - Feb 5th, 2024
 * Documentation is now available at: https://med-imagetools.readthedocs.io
