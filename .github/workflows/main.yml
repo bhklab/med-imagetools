@@ -117,7 +117,7 @@ jobs:
 
   pip-squeak:
     needs: cd
-    # if: needs.cd.outputs.released == 'true'
+    if: needs.cd.outputs.released == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code with tag ${{ needs.cd.outputs.tag }}
