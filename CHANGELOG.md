@@ -2,7 +2,18 @@
 
 
 
+## v1.5.1 (2024-05-29)
+
+### Fix
+
+* fix: format toml ([`269f55d`](https://github.com/bhklab/med-imagetools/commit/269f55db58322dc31a5c44ee5a5e2eb830ed3e4f))
+
+
 ## v1.5.0 (2024-05-29)
+
+### Chore
+
+* chore(sem-ver): 1.5.0 ([`69626ef`](https://github.com/bhklab/med-imagetools/commit/69626ef244aa26a8c7d5235548651cf4230e2b9a))
 
 ### Feature
 
