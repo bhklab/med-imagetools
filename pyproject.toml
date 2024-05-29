@@ -2,7 +2,7 @@
 [tool.poetry]
 name = "med-imagetools"
 packages = [{ include = "imgtools", from = "src" }]
-version = "1.5.1"
+version = "1.5.2"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = ["Sejin Kim, Benjamin Haibe-Kains"]
 license = "GPL-3.0"

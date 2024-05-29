@@ -2,7 +2,18 @@
 
 
 
+## v1.5.2 (2024-05-29)
+
+### Fix
+
+* fix: upload latest version to pypi ([`1debad3`](https://github.com/bhklab/med-imagetools/commit/1debad3836732faf1a2e3f992a9f1d76943b076e))
+
+
 ## v1.5.1 (2024-05-29)
+
+### Chore
+
+* chore(sem-ver): 1.5.1 ([`7890f36`](https://github.com/bhklab/med-imagetools/commit/7890f3638e76b449f3948ae3c8c4a9532bde10ae))
 
 ### Fix
 
