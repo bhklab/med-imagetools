@@ -92,7 +92,7 @@ jobs:
     # Set up operating system
     runs-on: ubuntu-latest
 
-    # outputs:
+    outputs:
       released: ${{ steps.release.outputs.released }}
       version: ${{ steps.release.outputs.version }}
       tag: ${{ steps.release.outputs.tag }}
