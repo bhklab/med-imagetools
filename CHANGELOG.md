@@ -2,7 +2,18 @@
 
 
 
+## v1.5.3 (2024-06-10)
+
+### Fix
+
+* fix: Clarified license in README.md (#118) ([`a4899ca`](https://github.com/bhklab/med-imagetools/commit/a4899ca15924dc9fa19f2e1f3964b7bd6c2e2d35))
+
+
 ## v1.5.2 (2024-05-29)
+
+### Chore
+
+* chore(sem-ver): 1.5.2 ([`69a651f`](https://github.com/bhklab/med-imagetools/commit/69a651f464b418c92f951be33bb865a04f0c604d))
 
 ### Fix
 
