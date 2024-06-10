@@ -106,4 +106,4 @@ If you have any questions/concerns, you can reach the following contributors at 
 
 ## License
 
-This project uses the following license: [Apache License 2.0](http://www.apache.org/licenses/)
+This project uses the following license: [GNU General Public License - Version 3](https://github.com/bhklab/med-imagetools/blob/master/LICENSE)
