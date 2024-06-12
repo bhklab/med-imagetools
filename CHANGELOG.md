@@ -2,7 +2,18 @@
 
 
 
+## v1.5.4 (2024-06-12)
+
+### Fix
+
+* fix: License updated to MIT (#119) ([`6e755dd`](https://github.com/bhklab/med-imagetools/commit/6e755ddc70738da5c7afbced6e061d4e039fbd5f))
+
+
 ## v1.5.3 (2024-06-10)
+
+### Chore
+
+* chore(sem-ver): 1.5.3 ([`7effcaf`](https://github.com/bhklab/med-imagetools/commit/7effcaffbe054995bb3111d3799bc8b7d9246300))
 
 ### Fix
 
