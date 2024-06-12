@@ -106,4 +106,4 @@ If you have any questions/concerns, you can reach the following contributors at 
 
 ## License
 
-This project uses the following license: [GNU General Public License - Version 3](https://github.com/bhklab/med-imagetools/blob/master/LICENSE)
+This project uses the following license: [MIT License](https://github.com/bhklab/med-imagetools/blob/master/LICENSE)
