@@ -19,6 +19,7 @@ class DataGraph:
     5) edge_type:4 CT(key:study) -> PT(pair: study) 
     6) edge_type:5 RTDOSE(key: ref_pl) -> RTPLAN(pair: instance)
     7) edge_type:6 RTPLAN(key: ref_rs) -> RTSTRUCT(pair: series/instance)
+    8) edge_type:7 SEG(key:ref_ct) -> CT(pair: series)
 
     Once the edge table is formed, one can query on the graph to get the desired results. For uniformity, the supported query is list of modalities to consider
     For ex:
@@ -141,6 +142,7 @@ class DataGraph:
         plan = df[df["modality"] == "RTPLAN"]
         dose = df[df["modality"] == "RTDOSE"]
         struct = df[df["modality"] == "RTSTRUCT"]
+        seg = df[df["modality"] == "SEG"]
         ct = df[df["modality"] == "CT"]
         mr = df[df["modality"] == "MR"]
         pet = df[df["modality"] == "PT"]
@@ -170,6 +172,11 @@ class DataGraph:
 
             elif edge==5:  # FORMS RTPLAN->RTDOSE on ref_pl
                 df_combined = pd.merge(plan, dose, left_on="instance_uid", right_on="reference_pl")
+
+            elif edge==7:
+                df_ct = pd.merge(ct, seg, left_on="series", right_on="reference_ct")
+                df_mr = pd.merge(mr, seg, left_on="series", right_on="reference_ct")
+                df_combined = pd.concat([df_ct, df_mr])
 
             else:
                 df_combined = pd.merge(struct, plan, left_on="instance_uid", right_on="reference_rs")
@@ -209,7 +216,7 @@ class DataGraph:
             elif edge==1:  # FORMS RTDOSE->CT 
                 df_combined = pd.merge(ct, dose, left_on="series", right_on="reference_ct")
 
-            elif edge==2:  # FORMS RTSTRUCT->CT on ref_ct to series
+            elif edge==2:  # FORMS RTSTRUCT->CT/MR on ref_ct to series
                 df_ct = pd.merge(ct, struct, left_on="series", right_on="reference_ct")
                 df_mr = pd.merge(mr, struct, left_on="series", right_on="reference_ct")
                 df_combined = pd.concat([df_ct, df_mr])
@@ -223,7 +230,7 @@ class DataGraph:
             elif edge==5:  # FORMS RTPLAN->RTDOSE on ref_pl 
                 df_combined = pd.merge(plan, dose, left_on="instance", right_on="reference_pl")
 
-            elif edge==7:  # FORMS RTSTRUCT->CT on ref_ct to series
+            elif edge==7:  # FORMS SEG->CT/MR on ref_ct to series
                 df_ct_seg = pd.merge(ct, seg, left_on="series", right_on="reference_ct")
                 df_mr_seg = pd.merge(mr, seg, left_on="series", right_on="reference_ct")
                 df_combined = pd.concat([df_ct_seg, df_mr_seg])
