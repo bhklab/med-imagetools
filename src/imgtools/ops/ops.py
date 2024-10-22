@@ -1471,7 +1471,7 @@ class StructureSetToSegmentation(BaseOp):
     reference image, and returns a Segmentation mask.
 
     To instantiate:
-        obj = StructureSet(roi_names)
+        obj = StructureSetToSegmentation(roi_names)
 
     To call:
         mask = obj(structure_set, reference_image)
@@ -1492,7 +1492,7 @@ class StructureSetToSegmentation(BaseOp):
     
     Notes
     -----
-    If `self.roi_names` contains lists of strings, each matching
+    If `roi_names` contains lists of strings, each matching
     name within a sublist will be assigned the same label. This means
     that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
     to different label assignments, depending on how many ROI names
@@ -1511,7 +1511,11 @@ class StructureSetToSegmentation(BaseOp):
     """
     def __init__(
         self, 
-        roi_names: Union[str, List[str], Dict[str, Union[str, List[str]]]], # noqa: E501
+        roi_names: Union[
+            str,
+            List[str],
+            Dict[str, Union[str, List[str]]]
+        ], 
         continuous: bool = True,
     ):
         """Initialize the op."""
