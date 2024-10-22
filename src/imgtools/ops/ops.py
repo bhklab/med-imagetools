@@ -1466,54 +1466,55 @@ class ArrayFunction(BaseOp):
 
 class StructureSetToSegmentation(BaseOp):
     """StructureSetToSegmentation operation class:
-    A callable class that accepts ROI names, a StrutureSet object, and a reference image, and
-    returns Segmentation mask.
+    
+    A callable class that accepts ROI names, a StructureSet object, and a 
+    reference image, and returns a Segmentation mask.
 
     To instantiate:
         obj = StructureSet(roi_names)
+
     To call:
         mask = obj(structure_set, reference_image)
 
     Parameters
     ----------
-    roi_names
-        List of Region of Interests
+    roi_names : Union[str, List[str], Dict[str, Union[str, List[str]]]]
+        ROI names or patterns to convert to segmentation:
+        - `str`: A single pattern (regex) to match ROI names.
+        - `List[str]`: A list of patterns where each matches ROI names.
+        - `Dict[str, str | List[str]]`: A dictionary where each key maps to a 
+          pattern (or list of patterns). The matched names are grouped under 
+          the same label.
+        Both full names and case-insensitive regular expressions are allowed.
+    continuous : bool, default=True
+        Flag passed to 'physical_points_to_idxs' in 'StructureSet.to_segmentation'. 
+        Resolves errors caused by ContinuousIndex > Index.
+    
+    Notes
+    -----
+    If `self.roi_names` contains lists of strings, each matching
+    name within a sublist will be assigned the same label. This means
+    that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
+    to different label assignments, depending on how many ROI names
+    match the pattern. E.g. if `self.roi_names = ['fooa', 'foob']`,
+    passing `roi_names=['foo(a|b)']` will result in a segmentation with 
+    two labels, but passing `roi_names=[['foo(a|b)']]` will result in
+    one label for both `'fooa'` and `'foob'`.
+
+    If `roi_names` is kept empty ([]), the pipeline will process all ROIs/contours 
+    found according to their original names.
+
+    In general, the exact ordering of the returned labels cannot be
+    guaranteed (unless all patterns in `roi_names` can only match
+    a single name or are lists of strings).
+    
     """
-
-    def __init__(self, 
-                 roi_names: Dict[str, str], 
-                 continuous: bool = True):
-        """Initialize the op.
-
-        Parameters
-        ----------
-        roi_names
-            List of ROI names to export. Both full names and
-            case-insensitive regular expressions are allowed.
-            All labels within one sublist will be assigned
-            the same label.
-        continuous
-            flag passed to 'physical_points_to_idxs' in 'StructureSet.to_segmentation'. 
-            Helps to resolve errors caused by ContinuousIndex > Index. 
-
-        Notes
-        -----
-        If `self.roi_names` contains lists of strings, each matching
-        name within a sublist will be assigned the same label. This means
-        that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
-        to different label assignments, depending on how many ROI names
-        match the pattern. E.g. if `self.roi_names = ['fooa', 'foob']`,
-        passing `roi_names=['foo(a|b)']` will result in a segmentation with 
-        two labels, but passing `roi_names=[['foo(a|b)']]` will result in
-        one label for both `'fooa'` and `'foob'`.
-
-        If `roi_names` is kept empty ([]), the pipeline will process all ROIs/contours 
-        found according to their original names.
-
-        In general, the exact ordering of the returned labels cannot be
-        guaranteed (unless all patterns in `roi_names` can only match
-        a single name or are lists of strings).
-        """
+    def __init__(
+        self, 
+        roi_names: Union[str, List[str], Dict[str, Union[str, List[str]]]], # noqa: E501
+        continuous: bool = True,
+    ):
+        """Initialize the op."""
         self.roi_names = roi_names
         self.continuous = continuous
 
