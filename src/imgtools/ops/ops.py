@@ -1478,8 +1478,9 @@ class StructureSetToSegmentation(BaseOp):
 
     Parameters
     ----------
-    roi_names : Union[str, List[str], Dict[str, Union[str, List[str]]]]
+    roi_names : Union[str, List[str], Dict[str, Union[str, List[str]]], None]
         ROI names or patterns to convert to segmentation:
+        - `None` (default): All ROIs will be loaded
         - `str`: A single pattern (regex) to match ROI names.
         - `List[str]`: A list of patterns where each matches ROI names.
         - `Dict[str, str | List[str]]`: A dictionary where each key maps to a 
@@ -1514,8 +1515,9 @@ class StructureSetToSegmentation(BaseOp):
         roi_names: Union[
             str,
             List[str],
-            Dict[str, Union[str, List[str]]]
-        ], 
+            Dict[str, Union[str, List[str]]],
+            None
+        ] = None, 
         continuous: bool = True,
     ):
         """Initialize the op."""
