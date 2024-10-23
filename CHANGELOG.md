@@ -1,11 +1,22 @@
 # CHANGELOG
 
 
+## v1.5.7 (2024-10-23)
+
+### Bug Fixes
+
+* fix: ci-cd - add id in release for pypi step ([`7abd175`](https://github.com/bhklab/med-imagetools/commit/7abd175d58894b5ea84448735c4933de4aa156bd))
+
+
 ## v1.5.6 (2024-10-23)
 
 ### Bug Fixes
 
 * fix: update ci to release to pypi ([`a92a41f`](https://github.com/bhklab/med-imagetools/commit/a92a41f56ab6d86c68d7657104f8c559b1958ffc))
+
+### Chores
+
+* chore(sem-ver): 1.5.6 ([`22881f1`](https://github.com/bhklab/med-imagetools/commit/22881f19cabf0b9a096fe3d1822cd0ed26dcb507))
 
 
 ## v1.5.5 (2024-10-23)
