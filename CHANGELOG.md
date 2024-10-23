@@ -1,6 +1,13 @@
 # CHANGELOG
 
 
+## v1.5.6 (2024-10-23)
+
+### Bug Fixes
+
+* fix: update ci to release to pypi ([`a92a41f`](https://github.com/bhklab/med-imagetools/commit/a92a41f56ab6d86c68d7657104f8c559b1958ffc))
+
+
 ## v1.5.5 (2024-10-23)
 
 ### Bug Fixes
@@ -16,6 +23,8 @@
 * refactor: remove Union import for linting ([`56ef37e`](https://github.com/bhklab/med-imagetools/commit/56ef37e492d9a4f287ed9ecb7a1c968caca29726))
 
 ### Chores
+
+* chore(sem-ver): 1.5.5 ([`9921fba`](https://github.com/bhklab/med-imagetools/commit/9921fba8c74d5bfb6d914ce7af069df3976acde0))
 
 * chore: #126 update docstring for StructureSetToSegmentation (reopen) (#128)
 

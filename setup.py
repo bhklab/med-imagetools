@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-__version__ = "1.5.5"
+__version__ = "1.5.6"
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
