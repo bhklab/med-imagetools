@@ -1,5 +1,5 @@
 import pydicom
-from typing import Dict, TypeVar, Union
+from typing import Dict, TypeVar
 import copy
 
 T = TypeVar('T')
