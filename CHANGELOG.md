@@ -1,54 +1,96 @@
 # CHANGELOG
 
 
+## v1.5.5 (2024-10-23)
+
+### Bug Fixes
+
+* fix: update ci to use semver bot ([`98e3bd0`](https://github.com/bhklab/med-imagetools/commit/98e3bd0c93fc2be20c31976092047e7a11db57fb))
+
+* fix: remove deprecated pydicom.dicomdir.DicomDir variable type option (#130)
+
+* fix: remove deprecated pydicom.dicomdir.DicomDir variable type option
+
+* style: removed Union since dicom_data can only be a FileDataset
+
+* refactor: remove Union import for linting ([`56ef37e`](https://github.com/bhklab/med-imagetools/commit/56ef37e492d9a4f287ed9ecb7a1c968caca29726))
+
+### Chores
+
+* chore: #126 update docstring for StructureSetToSegmentation (reopen) (#128)
+
+* chore: bump artifact action version
+
+* refactor: update StructureSetToSegmentation docstring and remove unused dev group in pyproject.toml
+
+* chore: fix download action in workflow to use correct artifact version
+
+* chore: correct instantiation reference and update parameter description in StructureSetToSegmentation docstring
+
+* chore: enhance StructureSetToSegmentation docstring to support None as a roi_names option for loading all ROIs ([`272078c`](https://github.com/bhklab/med-imagetools/commit/272078c937fa62fee20a700150f2ed4da7458720))
+
+### Unknown
+
+* removing old Dataset class (#122) ([`5546cec`](https://github.com/bhklab/med-imagetools/commit/5546cec94f1cfe1e3fb4a2dff28a4c1e5275216e))
+
+* Seg support (#121)
+
+* fix: License updated to MIT
+
+* Fixing datagraph module to resolve SEG compatibility issues. ([`4c03f48`](https://github.com/bhklab/med-imagetools/commit/4c03f48ec5d323c9ef0d3a7db28057769f4174c9))
+
 
 ## v1.5.4 (2024-06-12)
 
-### Fix
+### Bug Fixes
 
 * fix: License updated to MIT (#119) ([`6e755dd`](https://github.com/bhklab/med-imagetools/commit/6e755ddc70738da5c7afbced6e061d4e039fbd5f))
+
+### Chores
+
+* chore(sem-ver): 1.5.4 ([`464462c`](https://github.com/bhklab/med-imagetools/commit/464462cb1718d96652382f115b2f20ae4d8cbee8))
 
 
 ## v1.5.3 (2024-06-10)
 
-### Chore
-
-* chore(sem-ver): 1.5.3 ([`7effcaf`](https://github.com/bhklab/med-imagetools/commit/7effcaffbe054995bb3111d3799bc8b7d9246300))
-
-### Fix
+### Bug Fixes
 
 * fix: Clarified license in README.md (#118) ([`a4899ca`](https://github.com/bhklab/med-imagetools/commit/a4899ca15924dc9fa19f2e1f3964b7bd6c2e2d35))
+
+### Chores
+
+* chore(sem-ver): 1.5.3 ([`7effcaf`](https://github.com/bhklab/med-imagetools/commit/7effcaffbe054995bb3111d3799bc8b7d9246300))
 
 
 ## v1.5.2 (2024-05-29)
 
-### Chore
-
-* chore(sem-ver): 1.5.2 ([`69a651f`](https://github.com/bhklab/med-imagetools/commit/69a651f464b418c92f951be33bb865a04f0c604d))
-
-### Fix
+### Bug Fixes
 
 * fix: upload latest version to pypi ([`1debad3`](https://github.com/bhklab/med-imagetools/commit/1debad3836732faf1a2e3f992a9f1d76943b076e))
+
+### Chores
+
+* chore(sem-ver): 1.5.2 ([`69a651f`](https://github.com/bhklab/med-imagetools/commit/69a651f464b418c92f951be33bb865a04f0c604d))
 
 
 ## v1.5.1 (2024-05-29)
 
-### Chore
-
-* chore(sem-ver): 1.5.1 ([`7890f36`](https://github.com/bhklab/med-imagetools/commit/7890f3638e76b449f3948ae3c8c4a9532bde10ae))
-
-### Fix
+### Bug Fixes
 
 * fix: format toml ([`269f55d`](https://github.com/bhklab/med-imagetools/commit/269f55db58322dc31a5c44ee5a5e2eb830ed3e4f))
+
+### Chores
+
+* chore(sem-ver): 1.5.1 ([`7890f36`](https://github.com/bhklab/med-imagetools/commit/7890f3638e76b449f3948ae3c8c4a9532bde10ae))
 
 
 ## v1.5.0 (2024-05-29)
 
-### Chore
+### Chores
 
 * chore(sem-ver): 1.5.0 ([`69626ef`](https://github.com/bhklab/med-imagetools/commit/69626ef244aa26a8c7d5235548651cf4230e2b9a))
 
-### Feature
+### Features
 
 * feat: update Lock ([`26590a0`](https://github.com/bhklab/med-imagetools/commit/26590a09f71c9f797d89f6276aef1c1e416f77dc))
 
@@ -63,25 +105,25 @@
 * patch: pushing versions ([`7b4cf22`](https://github.com/bhklab/med-imagetools/commit/7b4cf22b6a981b8a3706a5034f09d4b48cf83c8c))
 
 
-## v1.4.0 (2024-05-29)
+## v1.1.0 (2024-05-29)
 
-### Chore
+### Bug Fixes
+
+* fix: add codecov badge ([`f43d042`](https://github.com/bhklab/med-imagetools/commit/f43d04231c76313d86d9e0444a6f1e26ed21b9fc))
+
+* fix: explicit module to track for code coverage ([`f15d45d`](https://github.com/bhklab/med-imagetools/commit/f15d45dd43ef2d8956c0e7cbc91eb7741e9830e3))
+
+### Chores
 
 * chore: bump version ([`58ec67f`](https://github.com/bhklab/med-imagetools/commit/58ec67f1f83eeb1f1ce1b580818f5812e1d04244))
 
-### Feature
+### Features
 
 * feat: semantic release (#114)
 
 * feat: semantic release
 
 * fix: if statement issue ([`23a2d70`](https://github.com/bhklab/med-imagetools/commit/23a2d700772449837672d671873f9db3c544cd37))
-
-### Fix
-
-* fix: add codecov badge ([`f43d042`](https://github.com/bhklab/med-imagetools/commit/f43d04231c76313d86d9e0444a6f1e26ed21b9fc))
-
-* fix: explicit module to track for code coverage ([`f15d45d`](https://github.com/bhklab/med-imagetools/commit/f15d45dd43ef2d8956c0e7cbc91eb7741e9830e3))
 
 ### Unknown
 
@@ -125,7 +167,7 @@ Automatically generated by python-semantic-release ([`fe25ff2`](https://github.c
 
 ---------
 
-Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`76cea29`](https://github.com/bhklab/med-imagetools/commit/76cea29325ed28bddee54ca9a326bf8c4017a78c))
+Co-authored-by: Jermiah Joseph <jermiahjoseph98@gmail.com> ([`76cea29`](https://github.com/bhklab/med-imagetools/commit/76cea29325ed28bddee54ca9a326bf8c4017a78c))
 
 * Dev (#111)
 
@@ -199,7 +241,7 @@ Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`76cea29`](ht
 
 * still fixing main.yml
 
-* maybe it&#39;s poetry?
+* maybe it's poetry?
 
 * oh boy!
 
@@ -209,7 +251,7 @@ Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`76cea29`](ht
 
 ---------
 
-Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`6ddc645`](https://github.com/bhklab/med-imagetools/commit/6ddc645d1ba4ab8b5945c25edbc5d52a172642c2))
+Co-authored-by: Jermiah Joseph <jermiahjoseph98@gmail.com> ([`6ddc645`](https://github.com/bhklab/med-imagetools/commit/6ddc645d1ba4ab8b5945c25edbc5d52a172642c2))
 
 * New tests, improving code coverage. (#105)
 
@@ -521,9 +563,9 @@ Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`6ddc645`](ht
 
 * added zipfile and request ([`88857bf`](https://github.com/bhklab/med-imagetools/commit/88857bf2aea946a5c033088dbbd6545e6523b8d2))
 
-* updated actions to new default branch. &#39;master&#39; branch is DEPRECATED ([`d10b5ba`](https://github.com/bhklab/med-imagetools/commit/d10b5ba32e67117771c138ebe1e457b6304460f8))
+* updated actions to new default branch. 'master' branch is DEPRECATED ([`d10b5ba`](https://github.com/bhklab/med-imagetools/commit/d10b5ba32e67117771c138ebe1e457b6304460f8))
 
-* updated version and default branch to &#39;main&#39; ([`8784b5f`](https://github.com/bhklab/med-imagetools/commit/8784b5fb9cc898d8099a4966b8faec8b6150e283))
+* updated version and default branch to 'main' ([`8784b5f`](https://github.com/bhklab/med-imagetools/commit/8784b5fb9cc898d8099a4966b8faec8b6150e283))
 
 * Flake8 linting fixes (#93)
 
@@ -537,7 +579,7 @@ Co-authored-by: Jermiah Joseph &lt;jermiahjoseph98@gmail.com&gt; ([`6ddc645`](ht
 
 ---------
 
-Co-authored-by: Umar Yousafzai &lt;umaryousafzai54@gmail.com&gt; ([`43a72fe`](https://github.com/bhklab/med-imagetools/commit/43a72fe108d5ba50559093708c1fdf15402d82b5))
+Co-authored-by: Umar Yousafzai <umaryousafzai54@gmail.com> ([`43a72fe`](https://github.com/bhklab/med-imagetools/commit/43a72fe108d5ba50559093708c1fdf15402d82b5))
 
 * convert to dicom (#89)
 
@@ -659,7 +701,7 @@ AYE AYE ([`bb4dad7`](https://github.com/bhklab/med-imagetools/commit/bb4dad72aa4
 
 * nnunet flags hotfix (#64)
 
-* autopipeline.py:164, changed or -&gt; and
+* autopipeline.py:164, changed or -> and
 
 * added orientation DICOM tag crawling
 
@@ -667,7 +709,7 @@ AYE AYE ([`bb4dad7`](https://github.com/bhklab/med-imagetools/commit/bb4dad72aa4
 
 * added orientation DICOM tag crawling (#65) ([`cc9cea1`](https://github.com/bhklab/med-imagetools/commit/cc9cea185165d4f1d718e13a0377a1dfc0ef3903))
 
-* autopipeline.py:164, changed or -&gt; and ([`f41f18d`](https://github.com/bhklab/med-imagetools/commit/f41f18d0e6c8834147c82c380248372377e3e2e1))
+* autopipeline.py:164, changed or -> and ([`f41f18d`](https://github.com/bhklab/med-imagetools/commit/f41f18d0e6c8834147c82c380248372377e3e2e1))
 
 * nnunet flags hotfix (#64) ([`ecc6939`](https://github.com/bhklab/med-imagetools/commit/ecc6939a10bcf4cca065368a62b5fe900b8c2184))
 
@@ -712,7 +754,7 @@ AYE AYE ([`bb4dad7`](https://github.com/bhklab/med-imagetools/commit/bb4dad72aa4
 
 Sw fix ([`91330f0`](https://github.com/bhklab/med-imagetools/commit/91330f063467731bc42c310d58306d5de2a16e65))
 
-* Merge branch &#39;master&#39; of github.com:bhklab/med-imagetools into sw-fix ([`c743a98`](https://github.com/bhklab/med-imagetools/commit/c743a9804382a45ec283d12e34342a48959a7a9b))
+* Merge branch 'master' of github.com:bhklab/med-imagetools into sw-fix ([`c743a98`](https://github.com/bhklab/med-imagetools/commit/c743a9804382a45ec283d12e34342a48959a7a9b))
 
 * Update build-pkg.yml ([`072d597`](https://github.com/bhklab/med-imagetools/commit/072d597dddde90a899a43f0144fc97474478752b))
 
@@ -726,13 +768,13 @@ Sw fix ([`91330f0`](https://github.com/bhklab/med-imagetools/commit/91330f063467
 
 * updated dose ([`645aae7`](https://github.com/bhklab/med-imagetools/commit/645aae7fd039bb60798ef48777b407a6e1b2fa78))
 
-* Merge branch &#39;master&#39; of github.com:bhklab/med-imagetools into sw-fix ([`c6f8376`](https://github.com/bhklab/med-imagetools/commit/c6f8376c216a4828c8746eb74e86a8ad8d39e480))
-
-* temporary dose fix loading error with Sejin ([`abb452f`](https://github.com/bhklab/med-imagetools/commit/abb452f1a1b3fd4c2ad4f7538116ca39d6adf64f))
+* Merge branch 'master' of github.com:bhklab/med-imagetools into sw-fix ([`c6f8376`](https://github.com/bhklab/med-imagetools/commit/c6f8376c216a4828c8746eb74e86a8ad8d39e480))
 
 * Update README.md (#58) ([`edb8612`](https://github.com/bhklab/med-imagetools/commit/edb86123a4eae8394bf08ecee51d0ce68ca95273))
 
 * Update build-pkg.yml ([`954b224`](https://github.com/bhklab/med-imagetools/commit/954b22468682f779b89d2ea5ed851eb30b076de9))
+
+* temporary dose fix loading error with Sejin ([`abb452f`](https://github.com/bhklab/med-imagetools/commit/abb452f1a1b3fd4c2ad4f7538116ca39d6adf64f))
 
 * multi-modality fix
 
@@ -768,7 +810,7 @@ checking patient_ID error for issue #53
 
 * Delete autopipeline.png
 
-Co-authored-by: Kevin &lt;qukevin99@gmail.com&gt; ([`2d2079c`](https://github.com/bhklab/med-imagetools/commit/2d2079c8346869588ed3531af86e5ead07ac45d4))
+Co-authored-by: Kevin <qukevin99@gmail.com> ([`2d2079c`](https://github.com/bhklab/med-imagetools/commit/2d2079c8346869588ed3531af86e5ead07ac45d4))
 
 * Delete autopipeline.png ([`6a5b7d0`](https://github.com/bhklab/med-imagetools/commit/6a5b7d0fe506abcd2bfb82fdea93e2bca84a8767))
 
@@ -830,7 +872,7 @@ Co-authored-by: Kevin &lt;qukevin99@gmail.com&gt; ([`2d2079c`](https://github.co
 
 * removed debugging prints
 
-Co-authored-by: Sejin Kim &lt;40668167+skim2257@users.noreply.github.com&gt; ([`37f89b9`](https://github.com/bhklab/med-imagetools/commit/37f89b9f111b18111674e962f9c3f86733c7833e))
+Co-authored-by: Sejin Kim <40668167+skim2257@users.noreply.github.com> ([`37f89b9`](https://github.com/bhklab/med-imagetools/commit/37f89b9f111b18111674e962f9c3f86733c7833e))
 
 * Update main-ci.yml ([`c6851d9`](https://github.com/bhklab/med-imagetools/commit/c6851d97aa4aaeda1d920799519b96998113ed65))
 
@@ -864,7 +906,7 @@ Co-authored-by: Sejin Kim &lt;40668167+skim2257@users.noreply.github.com&gt; ([`
 
 * update version to push to pypi
 
-Co-authored-by: Kevin &lt;qukevin99@gmail.com&gt; ([`3a2f742`](https://github.com/bhklab/med-imagetools/commit/3a2f7428992e6987cd5c34f99cecc1792d56be85))
+Co-authored-by: Kevin <qukevin99@gmail.com> ([`3a2f742`](https://github.com/bhklab/med-imagetools/commit/3a2f7428992e6987cd5c34f99cecc1792d56be85))
 
 * Nnunet demo (#41)
 
@@ -914,7 +956,7 @@ Former-commit-id: 2046fb64b2d129db338c3d3f2a70e3640eea80ab
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: f2480c3bd2fba4498c609ef1efc031e1d4f7e2cd
 
 * self.existing, dataset.csv fixed (#10)
@@ -935,7 +977,7 @@ Former-commit-id: f2480c3bd2fba4498c609ef1efc031e1d4f7e2cd
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -1105,7 +1147,7 @@ Former-commit-id: c17f6b55fa2949bb33a5c32cfa57c5d0b192d583
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 47f31227269208fc91d4796e0e50816a16a93ea5
 
 * PR tests - macos/ubuntu failing (#13)
@@ -1156,7 +1198,7 @@ Former-commit-id: 47f31227269208fc91d4796e0e50816a16a93ea5
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -1298,7 +1340,7 @@ Former-commit-id: 0de4a6d07c1b07618fa0e6ddd0bf5ce4553aa8ca
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 539777cd850404c9f0f85ef90b7508b1979f328c
 
 * merging new features (#16)
@@ -1343,7 +1385,7 @@ Former-commit-id: 539777cd850404c9f0f85ef90b7508b1979f328c
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -1403,7 +1445,7 @@ Former-commit-id: 26d44c87a36a8ed5cd64b5553ac8bf5a1c5e7af3
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 5c6f7b00b440c06a730ff7ee289e0dd0f146a4dd
 
 * fix path backslashes (#17)
@@ -1450,7 +1492,7 @@ Former-commit-id: 5c6f7b00b440c06a730ff7ee289e0dd0f146a4dd
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -1818,7 +1860,7 @@ Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
 
 * dataset.json for nnunet
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 * changed all mutable defaults to None
 
@@ -1902,12 +1944,12 @@ Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
 
 * custom train test split
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;40668167+skim2257@users.noreply.github.com&gt;
-Co-authored-by: Sejin Kim &lt;hello@sejin.kim&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt; ([`f3e5307`](https://github.com/bhklab/med-imagetools/commit/f3e5307f9687d070ec848d028bd949996a0d9da0))
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Sejin Kim <40668167+skim2257@users.noreply.github.com>
+Co-authored-by: Sejin Kim <hello@sejin.kim>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster> ([`f3e5307`](https://github.com/bhklab/med-imagetools/commit/f3e5307f9687d070ec848d028bd949996a0d9da0))
 
 * Nnunet demo (#40)
 
@@ -1957,7 +1999,7 @@ Former-commit-id: 2046fb64b2d129db338c3d3f2a70e3640eea80ab
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: f2480c3bd2fba4498c609ef1efc031e1d4f7e2cd
 
 * self.existing, dataset.csv fixed (#10)
@@ -1978,7 +2020,7 @@ Former-commit-id: f2480c3bd2fba4498c609ef1efc031e1d4f7e2cd
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -2148,7 +2190,7 @@ Former-commit-id: c17f6b55fa2949bb33a5c32cfa57c5d0b192d583
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 47f31227269208fc91d4796e0e50816a16a93ea5
 
 * PR tests - macos/ubuntu failing (#13)
@@ -2199,7 +2241,7 @@ Former-commit-id: 47f31227269208fc91d4796e0e50816a16a93ea5
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -2341,7 +2383,7 @@ Former-commit-id: 0de4a6d07c1b07618fa0e6ddd0bf5ce4553aa8ca
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 539777cd850404c9f0f85ef90b7508b1979f328c
 
 * merging new features (#16)
@@ -2386,7 +2428,7 @@ Former-commit-id: 539777cd850404c9f0f85ef90b7508b1979f328c
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -2446,7 +2488,7 @@ Former-commit-id: 26d44c87a36a8ed5cd64b5553ac8bf5a1c5e7af3
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 5c6f7b00b440c06a730ff7ee289e0dd0f146a4dd
 
 * fix path backslashes (#17)
@@ -2493,7 +2535,7 @@ Former-commit-id: 5c6f7b00b440c06a730ff7ee289e0dd0f146a4dd
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -2861,7 +2903,7 @@ Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
 
 * dataset.json for nnunet
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 * changed all mutable defaults to None
 
@@ -2941,12 +2983,12 @@ Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
 
 * sorted list for train test split
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;40668167+skim2257@users.noreply.github.com&gt;
-Co-authored-by: Sejin Kim &lt;hello@sejin.kim&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt; ([`31cecbe`](https://github.com/bhklab/med-imagetools/commit/31cecbeb04078bdf97beccc03682cecd0b72d918))
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Sejin Kim <40668167+skim2257@users.noreply.github.com>
+Co-authored-by: Sejin Kim <hello@sejin.kim>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster> ([`31cecbe`](https://github.com/bhklab/med-imagetools/commit/31cecbeb04078bdf97beccc03682cecd0b72d918))
 
 * Update README.md ([`c39ffe6`](https://github.com/bhklab/med-imagetools/commit/c39ffe6f4775e4bdd8218ff8b983ad21bc03cee1))
 
@@ -2988,7 +3030,7 @@ Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt; ([`31cecbe`](https://
 
 * fixed index column handling in ImageCSVLoader
 
-* Revert &#34;fixed index column handling in ImageCSVLoader&#34;
+* Revert "fixed index column handling in ImageCSVLoader"
 
 This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
@@ -3172,7 +3214,7 @@ Former-commit-id: 2b9d6d4813e05e0cec0550a4dfee47bf18b1f5fe
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -3264,7 +3306,7 @@ Former-commit-id: 735b26c9de88e0a48b468f8fca490bcc68d4cf6c
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -3342,7 +3384,7 @@ Former-commit-id: 63b9543e16a615f3cd2023a6e5457a6707835a4d
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -3393,7 +3435,7 @@ Former-commit-id: d81a74dfcdcd21f2b9248d197362a6dbaabf901b
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -3856,7 +3898,7 @@ Former-commit-id: b1144425cc6c499370d981eafdf24f7707595a23 [formerly 19f19ab7f23
 Former-commit-id: a9f0e87af14c9dd95df6253e0155a634ce775a52
 Former-commit-id: a43e9aa974b7d001e2666e5b5c08190b40debb5d
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 
 Former-commit-id: 8e33cf5a2ee0d285f2f243b72fa1d10ee1a3a77e [formerly 71e5b751d9c83e0be441a52bc314b6def1c8c53a] [formerly c8351e4cf69b47c095dcb6bbe99df634f1d801b0]
@@ -4046,7 +4088,7 @@ Former-commit-id: 67b491ac4e84139e10f18e0b94e5f482f9e72838
 
 * Fix slice matching issue when generating binary mask from RTStruct
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 
 Former-commit-id: 8e33cf5a2ee0d285f2f243b72fa1d10ee1a3a77e [formerly 71e5b751d9c83e0be441a52bc314b6def1c8c53a] [formerly c8351e4cf69b47c095dcb6bbe99df634f1d801b0]
@@ -4074,24 +4116,24 @@ Former-commit-id: f0590a6162204eb487716ea9aac9f398dee837fa [formerly e3a31a1dc01
 Former-commit-id: 04668ec3eff07b321baaedeef78adff6f840cf47
 Former-commit-id: 705ae3b7631140cbaf362e853c9c4ceb62233ec8
 
-Co-authored-by: mkazmier &lt;mkazmierski.poznan@gmail.com&gt;
-Co-authored-by: Minoru Nakano &lt;minoru.nakano@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node88.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node40.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node97.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@h4huhnlogin2.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-Air.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node38.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node49.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node53.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Benjamin Haibe-Kains &lt;bhaibeka@bhaibek1.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node89.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: fishingguy456 &lt;qukevin99@gmail.com&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt; ([`7dcea06`](https://github.com/bhklab/med-imagetools/commit/7dcea0612043d0d03b68ac335a3e4ea9e2641b4c))
+Co-authored-by: mkazmier <mkazmierski.poznan@gmail.com>
+Co-authored-by: Minoru Nakano <minoru.nakano@gmail.com>
+Co-authored-by: Sejin Kim <sejinkim@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node88.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node40.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node97.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@h4huhnlogin2.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-Air.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node38.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node49.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node53.uhnh4h.cluster>
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Benjamin Haibe-Kains <bhaibeka@bhaibek1.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node89.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: fishingguy456 <qukevin99@gmail.com>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster> ([`7dcea06`](https://github.com/bhklab/med-imagetools/commit/7dcea0612043d0d03b68ac335a3e4ea9e2641b4c))
 
 * Update README.md ([`49aa813`](https://github.com/bhklab/med-imagetools/commit/49aa813278f1b295cfc7d539fa7bbdf30af12679))
 
@@ -4148,7 +4190,7 @@ Former-commit-id: b5cc03eb55295facdd85aba570a87e613b30e2dd ([`2fba09d`](https://
 
 * fixed index column handling in ImageCSVLoader
 
-* Revert &#34;fixed index column handling in ImageCSVLoader&#34;
+* Revert "fixed index column handling in ImageCSVLoader"
 
 This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
@@ -4332,7 +4374,7 @@ Former-commit-id: f3ba678d71b569a5d4b574c2d7874c93e488ba8b [formerly 2b9d6d4813e
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -4424,7 +4466,7 @@ Former-commit-id: bfc783954909833e5fea376fcae054b01c30596b [formerly 735b26c9de8
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -4502,7 +4544,7 @@ Former-commit-id: 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 63b9543e16a
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -4553,7 +4595,7 @@ Former-commit-id: e62073999fb01b945b5203ab2511e943833f437e [formerly d81a74dfcdc
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -4911,7 +4953,7 @@ Former-commit-id: 3673c52328420b58bf5633f52592e6df48dc95af [formerly 905ebfeb972
 
 Former-commit-id: b1144425cc6c499370d981eafdf24f7707595a23 [formerly 19f19ab7f235d9848f54f99ce3afed0040ff6560] [formerly 156553f225c97b9f719a4a089584327428e65d06]
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 
 Former-commit-id: 8e33cf5a2ee0d285f2f243b72fa1d10ee1a3a77e [formerly 71e5b751d9c83e0be441a52bc314b6def1c8c53a] [formerly c8351e4cf69b47c095dcb6bbe99df634f1d801b0]
@@ -5035,24 +5077,24 @@ Former-commit-id: 6d89ab1ce84d16a9a759f45530fc87eab46962d5 [formerly 8ae957266df
 
 Former-commit-id: 980b5ea62602c4194a6a3014ce04d34e348bce8f [formerly 66542e225383a7edc3d21e06b728a17ccdf4761a] [formerly 41c8c88d93bb7a625eb9c31e400be8902500f13f]
 
-Co-authored-by: przebieglykaziu &lt;mkazmierski.poznan@gmail.com&gt;
-Co-authored-by: Minoru Nakano &lt;minoru.nakano@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node88.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node40.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node97.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@h4huhnlogin2.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-Air.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node38.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node49.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node53.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Benjamin Haibe-Kains &lt;bhaibeka@bhaibek1.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node89.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: fishingguy456 &lt;qukevin99@gmail.com&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt;
+Co-authored-by: przebieglykaziu <mkazmierski.poznan@gmail.com>
+Co-authored-by: Minoru Nakano <minoru.nakano@gmail.com>
+Co-authored-by: Sejin Kim <sejinkim@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node88.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node40.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node97.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@h4huhnlogin2.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-Air.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node38.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node49.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node53.uhnh4h.cluster>
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Benjamin Haibe-Kains <bhaibeka@bhaibek1.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node89.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: fishingguy456 <qukevin99@gmail.com>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster>
 Former-commit-id: a17183df96a623e372011e66cc7a8eef287ef497
 Former-commit-id: 9535d8f43d2c6437176fe22c7c249481b23c777c ([`4fba9bc`](https://github.com/bhklab/med-imagetools/commit/4fba9bcf83984e249c8d6eeebc3f5c8b715b32f8))
 
@@ -5102,7 +5144,7 @@ Former-commit-id: 9535d8f43d2c6437176fe22c7c249481b23c777c ([`4fba9bc`](https://
 
 * fixed index column handling in ImageCSVLoader
 
-* Revert &#34;fixed index column handling in ImageCSVLoader&#34;
+* Revert "fixed index column handling in ImageCSVLoader"
 
 This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
@@ -5262,7 +5304,7 @@ This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -5336,7 +5378,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -5396,7 +5438,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -5444,7 +5486,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -5612,7 +5654,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * dataset.json for nnunet
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 * changed all mutable defaults to None
 
@@ -5662,24 +5704,24 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * updated versions
 
-Co-authored-by: przebieglykaziu &lt;mkazmierski.poznan@gmail.com&gt;
-Co-authored-by: Minoru Nakano &lt;minoru.nakano@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node88.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node40.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node97.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@h4huhnlogin2.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-Air.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node38.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node49.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node53.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Benjamin Haibe-Kains &lt;bhaibeka@bhaibek1.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node89.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: fishingguy456 &lt;qukevin99@gmail.com&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt;
+Co-authored-by: przebieglykaziu <mkazmierski.poznan@gmail.com>
+Co-authored-by: Minoru Nakano <minoru.nakano@gmail.com>
+Co-authored-by: Sejin Kim <sejinkim@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node88.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node40.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node97.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@h4huhnlogin2.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-Air.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node38.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node49.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node53.uhnh4h.cluster>
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Benjamin Haibe-Kains <bhaibeka@bhaibek1.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node89.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: fishingguy456 <qukevin99@gmail.com>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster>
 Former-commit-id: 4fc74ad7a233bf80dd95219eea058e86d8170e90
 Former-commit-id: be0f5c830268c987ce5b3b921a1a1e0476e1f0ea
 Former-commit-id: 1f70cb08fcf0988d42babbed92c6aa53a49de7c2 ([`f0c10b6`](https://github.com/bhklab/med-imagetools/commit/f0c10b660300ab271968ec91815eba63e346263f))
@@ -5734,7 +5776,7 @@ Former-commit-id: 1f70cb08fcf0988d42babbed92c6aa53a49de7c2 ([`f0c10b6`](https://
 
 * fixed index column handling in ImageCSVLoader
 
-* Revert &#34;fixed index column handling in ImageCSVLoader&#34;
+* Revert "fixed index column handling in ImageCSVLoader"
 
 This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
@@ -5894,7 +5936,7 @@ This reverts commit ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33.
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
 
@@ -5968,7 +6010,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fixed bugs regarding multiple connections, saving of metadata and loading of metadata
 
@@ -6028,7 +6070,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * fix path backslash issues
 
@@ -6076,7 +6118,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 
 * Update main.yml
 
@@ -6244,7 +6286,7 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * dataset.json for nnunet
 
-* CLI &#34;autonew&#34;
+* CLI "autonew"
 
 * changed all mutable defaults to None
 
@@ -6292,46 +6334,36 @@ Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
 
 * refactor nnunetutils to nnunet
 
-Co-authored-by: przebieglykaziu &lt;mkazmierski.poznan@gmail.com&gt;
-Co-authored-by: Minoru Nakano &lt;minoru.nakano@gmail.com&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node88.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node40.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node97.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@h4huhnlogin2.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-Air.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node38.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node49.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;ramanav@node53.uhnh4h.cluster&gt;
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
-Co-authored-by: Benjamin Haibe-Kains &lt;bhaibeka@bhaibek1.uhn.ca&gt;
-Co-authored-by: Sejin Kim &lt;sejinkim@node89.uhnh4h.cluster&gt;
-Co-authored-by: Sejin Kim &lt;hello@sejin.kim&gt;
-Co-authored-by: Sejin Kim &lt;40668167+skim2257@users.noreply.github.com&gt;
-Co-authored-by: Vishwesh Ramanathan &lt;vishwesh@Vishweshs-MacBook-Air.local&gt;
-Co-authored-by: Kevin Qu &lt;kqu@uhnslurmbuildbox.uhnh4h.cluster&gt;
-Co-authored-by: Kevin Qu &lt;kqu@node90.uhnh4h.cluster&gt;
+Co-authored-by: przebieglykaziu <mkazmierski.poznan@gmail.com>
+Co-authored-by: Minoru Nakano <minoru.nakano@gmail.com>
+Co-authored-by: Sejin Kim <sejinkim@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node88.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node40.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@node97.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <sejinkim@h4huhnlogin2.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-Air.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node38.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node49.uhnh4h.cluster>
+Co-authored-by: Vishwesh Ramanathan <ramanav@node53.uhnh4h.cluster>
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
+Co-authored-by: Benjamin Haibe-Kains <bhaibeka@bhaibek1.uhn.ca>
+Co-authored-by: Sejin Kim <sejinkim@node89.uhnh4h.cluster>
+Co-authored-by: Sejin Kim <hello@sejin.kim>
+Co-authored-by: Sejin Kim <40668167+skim2257@users.noreply.github.com>
+Co-authored-by: Vishwesh Ramanathan <vishwesh@Vishweshs-MacBook-Air.local>
+Co-authored-by: Kevin Qu <kqu@uhnslurmbuildbox.uhnh4h.cluster>
+Co-authored-by: Kevin Qu <kqu@node90.uhnh4h.cluster>
 Former-commit-id: 8090df83dd6ea23061b5df9e32f46758adcaef7c [formerly c6f2749e73443aac15df901d317eae16b3f9bff4] [formerly 66a85e2f1dd0555b38be3fb9c35de6c2e9b9d188]
 Former-commit-id: de87e624140735955a2cab1b1f2074512901495e
 Former-commit-id: e872a2d09d3e36f0bd733158685e2cff4b8fa327 ([`208aacd`](https://github.com/bhklab/med-imagetools/commit/208aacdd7cb6d65981a3e5126a3fe3a9ba0605d8))
 
-* Merge branch &#39;master&#39; of github.com:bhklab/med-imagetools
+* Merge branch 'master' of github.com:bhklab/med-imagetools
 
 
 Former-commit-id: e4e58f13fc3759f5900902914a3662098cda2c75
 Former-commit-id: fbcbbbd93f06c759737503ec437ae96b14844c35 [formerly 87a4a66fe927bb0a4818c74e07f2fb12fe5e3941] [formerly 0cce0ee6666d052d4f76a1b6dc5d088392d309f4]
 Former-commit-id: 240701570180ceb222c72360d980dccba4f529b0
 Former-commit-id: daa9ec35a51d952dbe88a2c85c73ca050b32a70e ([`e9665f9`](https://github.com/bhklab/med-imagetools/commit/e9665f9e53c56a84a4479bb463f778d46d1ea636))
-
-* quick fixes
-
-
-Former-commit-id: d444cb8e2b63900c7747d9a405125066fb67d88e [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 8ac1dfd1340ce26440ed165fa7c2b7386034aa7a]]] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 8ac1dfd1340ce26440ed165fa7c2b7386034aa7a]] [formerly 5e118add39a6796a6d03d9c6729146981da7f44f]]
-Former-commit-id: b1c528e7b1f32acf42a18cd78f37b462bfa05171
-Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
-Former-commit-id: 5964ad41667871eed607b7da37c2c71be069fc13 [formerly beb6f1acd4eb2ffb37ac380c996d30d5ebadb2fe] [formerly 454bfde56605674af7b01909decbbdd1770a2e2e]
-Former-commit-id: a58f185604013d8d7f8f0dad406ba17936f21bbb
-Former-commit-id: 5459794e907ea5a13ebd476772fb6d1bdba292f8 ([`ca5d2a7`](https://github.com/bhklab/med-imagetools/commit/ca5d2a717553143df0a0ea347e364395608d0be5))
 
 * quick fixes
 
@@ -6346,67 +6378,16 @@ Former-commit-id: 8d2a5a0e90105a894e4b7376918500c1c96856e5 ([`97adb0b`](https://
 
 * Update setup.py
 
-Former-commit-id: 5116186cc44acffc828b7983e84ec2db49b628cb [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly 65d66d20aa91799be74eaeeab91a5f1022d95d70]]] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly 65d66d20aa91799be74eaeeab91a5f1022d95d70]] [formerly e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37] [formerly e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37] [formerly 5e93381461268785776402061d555ab02b78fda3]]]]
-Former-commit-id: e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37]
-Former-commit-id: 9bbf4aebbf1978a63dd49de045cc91e4893a5237
-Former-commit-id: 6c11e6c37f455f6f26d906ba60354097eb09a8cd [formerly 7792a3d8e92a47a49db7c5fce24ca1d7adbef8e6] [formerly 5c78dbd9d5fea2e2f199242dbad5b1c8bcceda82]
-Former-commit-id: ff962a4492773cedad0eea0c54f16c45f52bd8d8
-Former-commit-id: 0be584c76974ccd562a45ce3da7bfbd583c8633f ([`55b0015`](https://github.com/bhklab/med-imagetools/commit/55b001589ab9055699fadd89c4df78bae31aa290))
-
-* Skim2257 quick fix (#26)
-
-* Updated crawler to force String on all meta fields
-
-* Update setup.py
-
 Former-commit-id: e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37] [formerly 5e93381461268785776402061d555ab02b78fda3]
 Former-commit-id: 65d66d20aa91799be74eaeeab91a5f1022d95d70
 Former-commit-id: 8a58ea10fb3416e01953eea428dac12e97f2fb8f ([`dd6ca1b`](https://github.com/bhklab/med-imagetools/commit/dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5))
 
-* Merge branch &#39;master&#39; of github.com:bhklab/imgtools
-
-
-Former-commit-id: e545deea42a3863067169017572b482efa2bdd7e [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly 2ed78e51fd7a72c41c43c76168c1e3123c495bb5]]] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly 2ed78e51fd7a72c41c43c76168c1e3123c495bb5]] [formerly 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb] [formerly 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb] [formerly eaad718360d2bd12872b13251a5dc7f3e16aa072]]]]
-Former-commit-id: 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb]
-Former-commit-id: 3665daabe0430f5fe5b9783c5ea9555099032520
-Former-commit-id: 12c808b8d6169826c1492147910bdb85f1a894e9 [formerly 490393a0e18d3aec6c4647fc4b0489097170ce6a] [formerly 258a2421cae15e0401bf30db46962a6d93c2933b]
-Former-commit-id: b0e0ed4eed231ffbefae7e2a8aa60f365f978122
-Former-commit-id: a2f02a0f0b46be3b8343a5690aff142421f6a90a ([`ac90723`](https://github.com/bhklab/med-imagetools/commit/ac907239000666cbae42b5f9cdc163da09edf39f))
-
-* Merge branch &#39;master&#39; of github.com:bhklab/imgtools
+* Merge branch 'master' of github.com:bhklab/imgtools
 
 
 Former-commit-id: 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb] [formerly eaad718360d2bd12872b13251a5dc7f3e16aa072]
 Former-commit-id: 2ed78e51fd7a72c41c43c76168c1e3123c495bb5
 Former-commit-id: 7840154162b9d5801ce3d8d95c7397504e65bf92 ([`b9314ca`](https://github.com/bhklab/med-imagetools/commit/b9314caac62e35d51d0f0e5e246e2e3714b875ec))
-
-* preliminary MRI functionality (MR-RTSTRUCT pairs)
-
-
-Former-commit-id: 3cdc5eb2ad84488f20323b1933c4285eac78d60d [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 11971c8b1f10f60e20d62c85b208031dfa2b8310]]] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 11971c8b1f10f60e20d62c85b208031dfa2b8310]] [formerly bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly 3c01806a93d5b7ca9c6d1a1564d2c9630ff0cf85]]]]
-Former-commit-id: bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2]
-Former-commit-id: 2a0158397a55d783d6b627181a8af123952df3dc
-Former-commit-id: e00bd3a449f743635c3ff8cdf2720aee53a6c122 [formerly 5e9af8041f53e08272f10df6ee30daada4a523e2] [formerly d24cae90fcb9a583aec2a100932e3da24d27f0ac]
-Former-commit-id: c165c02fa691e7bae3714229d17f30ecef98250c
-Former-commit-id: 92f5975b3be9b2b5e742ee1c58fbab781541d8c9 ([`6bc8db1`](https://github.com/bhklab/med-imagetools/commit/6bc8db1ff885c594509ab7cf0dc489f909e20661))
-
-* preliminary MRI functionality (MR-RTSTRUCT pairs)
-
-
-Former-commit-id: bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly 3c01806a93d5b7ca9c6d1a1564d2c9630ff0cf85]
-Former-commit-id: 11971c8b1f10f60e20d62c85b208031dfa2b8310
-Former-commit-id: 50d9fa66a7bfcdd03e9bdd815b767599c85853ec ([`21edaa0`](https://github.com/bhklab/med-imagetools/commit/21edaa0d9ddbd8f2d80d4229de59e105074a0910))
-
-* Update README.md (#24)
-
-
-
-Former-commit-id: c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly 27494c03e4d95c58d6ea887e20597dbbe235c317]] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly 27494c03e4d95c58d6ea887e20597dbbe235c317]] [formerly 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62] [formerly 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62] [formerly 9aaf51bcb71b28cf062a03d873682b2ff38cee90]]]]
-Former-commit-id: 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62]
-Former-commit-id: 63106282d3b55f6d008ae03c60c4a32babcb7d1b
-Former-commit-id: b39d3e78478c710b0fd7b011f9d82686db99903a [formerly 73f8debe481b2adf9a92182a8ede3d35d38b1408] [formerly b25dc8d43440dbb2ce92892f96a599e492d7b13b]
-Former-commit-id: 03e04faeddd185ab57db82dd19fcc955465c44dd
-Former-commit-id: ef3cc2e63c8edcb05d5542f8129ca2c1fbd93a15 ([`0a23f23`](https://github.com/bhklab/med-imagetools/commit/0a23f236fb22c039f260e07dbc394b354dda6775))
 
 * Update README.md (#24)
 
@@ -6416,15 +6397,12 @@ Former-commit-id: 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef070
 Former-commit-id: 27494c03e4d95c58d6ea887e20597dbbe235c317
 Former-commit-id: d8cd3177cb0a09227a6a19e83fa131b85e597aae ([`c645115`](https://github.com/bhklab/med-imagetools/commit/c645115a7a903116ecab68814f14442e037dcb06))
 
-* updated README
+* preliminary MRI functionality (MR-RTSTRUCT pairs)
 
 
-Former-commit-id: 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly e35f91d35180b1217560b7f0bc06280bf07aebb0]] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly e35f91d35180b1217560b7f0bc06280bf07aebb0]] [formerly a256c35d6eb286e59aa625ee80e9a3201858f0ca [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801]] [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801] [formerly 0f0414533cb6667b68aa48541feb376226fd5515]]]]
-Former-commit-id: a256c35d6eb286e59aa625ee80e9a3201858f0ca [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801]]
-Former-commit-id: d353efbbdace157b77f9bedf74654b5b96cda5f9
-Former-commit-id: 8baf0623196e9472477e1ed4b5288b626f254156 [formerly a43cc3526d3559a3792ee76a1b840e678b569d27] [formerly d57189a300ff51ce26e08ba49da114a06b6194b1]
-Former-commit-id: 8a8fc0086e494077f35dbe5b48325b056a1ba20f
-Former-commit-id: 9aab9f3c5a38bd1933b218254a8d79f3cc8cbb18 ([`7e55330`](https://github.com/bhklab/med-imagetools/commit/7e55330ab0ecf661d002556d6bdb4781044b63a4))
+Former-commit-id: bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly 3c01806a93d5b7ca9c6d1a1564d2c9630ff0cf85]
+Former-commit-id: 11971c8b1f10f60e20d62c85b208031dfa2b8310
+Former-commit-id: 50d9fa66a7bfcdd03e9bdd815b767599c85853ec ([`21edaa0`](https://github.com/bhklab/med-imagetools/commit/21edaa0d9ddbd8f2d80d4229de59e105074a0910))
 
 * updated README
 
@@ -6437,27 +6415,8 @@ Former-commit-id: 9c1db1c93bdac00429775eadf36066fae99fc5a2 ([`90fb398`](https://
 
 
 
-Former-commit-id: 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly ce8e287294e44e5aeaba1c12ea31bea801083293]] [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly ce8e287294e44e5aeaba1c12ea31bea801083293]] [formerly a00e8f2ed448fecd0f5b9cccb6e04421e4952e19 [formerly a00e8f2ed448fecd0f5b9cccb6e04421e4952e19 [formerly 9e24716cfabf338fa46c4e4a4123bfd003f96918]]]]
-Former-commit-id: a00e8f2ed448fecd0f5b9cccb6e04421e4952e19
-Former-commit-id: 0cb0b099ffa6d3d67738f40e211e566049a109ca
-Former-commit-id: 2560f13f6c55e1f8ab80d700941c61f1816da9f6 [formerly 836589be5fc88a6d24e84a559484bae1fdb6438a]
-Former-commit-id: 4e4ec332bd594435c814ab30b33e04c776fc2cb1 ([`b74ca17`](https://github.com/bhklab/med-imagetools/commit/b74ca17c3c095d2f671cf0e539a3bd6abb3db927))
-
-* Update setup.py (#23)
-
-
-
 Former-commit-id: a00e8f2ed448fecd0f5b9cccb6e04421e4952e19 [formerly 9e24716cfabf338fa46c4e4a4123bfd003f96918]
 Former-commit-id: ce8e287294e44e5aeaba1c12ea31bea801083293 ([`5f3182a`](https://github.com/bhklab/med-imagetools/commit/5f3182a717903e245cc5b1d62ec5677921caf340))
-
-* Added demo
-
-
-Former-commit-id: 63a66c7821b48391ea087c554744ef1a993febbb [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 1ec696602dd46966f5f7e1d4984feab6cc26386b]] [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 1ec696602dd46966f5f7e1d4984feab6cc26386b]] [formerly e8eb00ba173df71ea56ed8accd366e1a015df864 [formerly e8eb00ba173df71ea56ed8accd366e1a015df864 [formerly 48ea411f5bea9471e83b05248ca95198e2e8a997]]]]
-Former-commit-id: e8eb00ba173df71ea56ed8accd366e1a015df864
-Former-commit-id: a054f7d9cba105a4d40f2605ad6ea5e954b4a1a1
-Former-commit-id: 5a774df68a53105a4c220503d919ec657702f8e4 [formerly f9d8f9a2844ae1dce5ecda564397488db65847fe]
-Former-commit-id: 276d4f7631aa9c363eb4c038dbd03c6eeec9cef3 ([`8ad070c`](https://github.com/bhklab/med-imagetools/commit/8ad070cff434b96d44b2952ddcc5d064db58432a))
 
 * Added demo
 
@@ -6468,30 +6427,10 @@ Former-commit-id: 1ec696602dd46966f5f7e1d4984feab6cc26386b ([`63a66c7`](https://
 * test fix
 
 
-Former-commit-id: 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly d55216a0b91076b0b0ec06def53c517a6325587b]] [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly d55216a0b91076b0b0ec06def53c517a6325587b]] [formerly 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977 [formerly 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977 [formerly 2fad37ee3a827f831e6f6b3b7e707bc7509c284b]]]]
-Former-commit-id: 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977
-Former-commit-id: 37aa5e3e74d6e25b4f8766938462a60601c29ab3
-Former-commit-id: cd7ca810f38c8c15ac7625280954d96e44d8e4a9 [formerly 6b8c112d4b039544f9fdf42f3efccefe447e2b9d]
-Former-commit-id: 08cd744182a5536c6e3aed0c35d75cf0a7643e59 ([`8b13379`](https://github.com/bhklab/med-imagetools/commit/8b133794c5c128cc12d6ed4e40d7da2a249b1200))
-
-* test fix
-
-
 Former-commit-id: 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977 [formerly 2fad37ee3a827f831e6f6b3b7e707bc7509c284b]
 Former-commit-id: d55216a0b91076b0b0ec06def53c517a6325587b ([`464e041`](https://github.com/bhklab/med-imagetools/commit/464e0418154bbc82968ed66209475b1a5ee2c453))
 
-* Merge branch &#39;add_capabilities&#39;
-
-Conflicts:
-	tests/test_autopipe.py
-
-Former-commit-id: 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 68ad7c006edcdbc5013e2ea9e17672722ace3dd4]] [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 68ad7c006edcdbc5013e2ea9e17672722ace3dd4]] [formerly b3c4025467c80f37dedb0727d2cb0daf40f0702e [formerly b3c4025467c80f37dedb0727d2cb0daf40f0702e [formerly 9931e15e6a565336f8550d951e64b50289783eeb]]]]
-Former-commit-id: b3c4025467c80f37dedb0727d2cb0daf40f0702e
-Former-commit-id: f9ba5f029d40986915fc69014a6445712287c2b3
-Former-commit-id: dd7aa9f8e5495f93b7e23d6b70a8c5da0a40965c [formerly 08265b1a721a74d7c168730bfec5156e575a4aaa]
-Former-commit-id: 15ee1ee48dcbeb58e9e5747c27e48e4c348a137f ([`27cdb7f`](https://github.com/bhklab/med-imagetools/commit/27cdb7f4a987da8135c3613a952113c836d30731))
-
-* Merge branch &#39;add_capabilities&#39;
+* Merge branch 'add_capabilities'
 
 Conflicts:
 	tests/test_autopipe.py
@@ -6502,17 +6441,517 @@ Former-commit-id: 68ad7c006edcdbc5013e2ea9e17672722ace3dd4 ([`8833ef3`](https://
 * Minor bug fixes
 
 
+Former-commit-id: 52cf95f0271fbb1cdda186db56cc6cde8a536d5d [formerly f18aa1bd415fbb25050f6d4f8206492a23a61e54]
+Former-commit-id: 7162d456ff8468c980c6a720d7100d655dc03288 ([`24d0618`](https://github.com/bhklab/med-imagetools/commit/24d06189e849822d4c203bb187f39a369f268562))
+
+* added tests for Dataset class
+
+
+Former-commit-id: 608b9c734ff0f006ede4fce6d5832f5ca0752ccd [formerly 7747a81615aa5d913284b22a623ee572ea8b293a]
+Former-commit-id: 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7 ([`fdbe97d`](https://github.com/bhklab/med-imagetools/commit/fdbe97d0af266cbd964f3aa50957337d39589ffd))
+
+* added tests for Dataset class
+
+
+Former-commit-id: c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly 8d345fb040a8c6e1725d749d9d8554f35d107013]
+Former-commit-id: abfd4dbebccc334866237362629389e79fdcba11 ([`b92645c`](https://github.com/bhklab/med-imagetools/commit/b92645cc522eb99334160bf28e3e361b83d5ed0f))
+
+* fix
+
+
+Former-commit-id: 699c46b9dc49b7af21f81c31fab891568672be3a [formerly c152b0890d6bb0e94f39a8a3f855311a12b06037]
+Former-commit-id: a242475a70abd1d5cc6a4f77ccce9051ff5bdb23 ([`549a411`](https://github.com/bhklab/med-imagetools/commit/549a41109fc8ccac52945b860e7b1f819e8484cd))
+
+* fix path backslash issues
+
+
+Former-commit-id: e62073999fb01b945b5203ab2511e943833f437e [formerly d81a74dfcdcd21f2b9248d197362a6dbaabf901b]
+Former-commit-id: c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8 ([`d531414`](https://github.com/bhklab/med-imagetools/commit/d531414ab1f307d8c451d8ef1f2d4833d5b6290c))
+
+* fixed test autopipe
+
+
+Former-commit-id: 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 63b9543e16a615f3cd2023a6e5457a6707835a4d]
+Former-commit-id: 3817bbbe40989f26078ead582ef508d58bd22d03 ([`42bb296`](https://github.com/bhklab/med-imagetools/commit/42bb296cdca9060d54fcedb2e9c7ad2d236d2d93))
+
+* fix conflicts
+
+
+Former-commit-id: f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly caad95a251fab60b5a8078bcd60987ba7dbbbd9d]
+Former-commit-id: c70d9c89cc2dd93f6c820b9b4a84577088fcb239 ([`08a58b0`](https://github.com/bhklab/med-imagetools/commit/08a58b042beba83df9649c222585f5c626211a3a))
+
+* Merge branch 'master' of github.com:bhklab/imgtools
+
+
+Former-commit-id: 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly f169a7e8f31285d19659d78e23a597cb6a3c1951]
+Former-commit-id: 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1 ([`ce2072c`](https://github.com/bhklab/med-imagetools/commit/ce2072c3f528460c32f971363781b211979039fb))
+
+* Changed dataset class returns
+
+
+Former-commit-id: 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 3c6d7f5a59865520a11ac8b0772d454f5b24bd2a]
+Former-commit-id: 180fe18d186e8909117afead0b974ecf33c0b632 ([`fe4e485`](https://github.com/bhklab/med-imagetools/commit/fe4e485bfa1d7123573563e512794d10639efef4))
+
+* added demo.py
+
+
+Former-commit-id: fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly b64491943988d84244d64f7d6001be088174e741]
+Former-commit-id: 64a7701af6ea133285259cc40df0f47bcab496ba ([`fbb0ef3`](https://github.com/bhklab/med-imagetools/commit/fbb0ef3704ed63314ba57f32525073900b8d5905))
+
+* small bug fix
+
+
+Former-commit-id: c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly 7a27ee36703947cbeae3addb99a86c2c2566d0c0]
+Former-commit-id: 43e3c6b28cecf2b33ea563904a2ac6197fab48b4 ([`d47f574`](https://github.com/bhklab/med-imagetools/commit/d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c))
+
+* fixed bugs regarding multiple connections, saving of metadata and loading of metadata
+
+
+Former-commit-id: bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly 1528efc88ca4952ce570721832a339ff8274b4fa]
+Former-commit-id: ab236e55b1de2ca583f4118dec4a250b5801e5b1 ([`9caee64`](https://github.com/bhklab/med-imagetools/commit/9caee64066bd68cc53d80a3efcfeb554c791033c))
+
+* added visualizations and some more bug fixes
+
+
+Former-commit-id: bfc783954909833e5fea376fcae054b01c30596b [formerly 735b26c9de88e0a48b468f8fca490bcc68d4cf6c]
+Former-commit-id: 2daaf02ec87a1caccd93e18e5a119c9863e940af ([`37ca2cf`](https://github.com/bhklab/med-imagetools/commit/37ca2cff8a3e699a739b1cea0594cf8f9c3f2636))
+
+* bug fixes 2
+
+
+Former-commit-id: c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly 90732d81ff1873e24cd501283e4cdd2326febd28]
+Former-commit-id: ad812ba0225fb2bff2ca5b49f307dc748ded3efe ([`c364fdc`](https://github.com/bhklab/med-imagetools/commit/c364fdc0ead6e9c3dbf398b9127282224e848887))
+
+* bug fixes 2
+
+
+Former-commit-id: d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly e7f4b424ecf5519ded2352b3d6266a7da07a5b07]
+Former-commit-id: 374041fceb9f851959a35da4d525a6930aa4837a ([`e152160`](https://github.com/bhklab/med-imagetools/commit/e15216086af12e868ba47264d7f3042b6b1aee28))
+
+* test and autopipe fixed
+
+
+Former-commit-id: 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 9cc88b1b402108310dbbc8e09a8b13730aa72102]
+Former-commit-id: 2aca0013e705864697c9df5fa1c574487e307000 ([`b0b6efa`](https://github.com/bhklab/med-imagetools/commit/b0b6efa954b4e9cb0eff438efceb60395069c059))
+
+* bug fixes_1.0
+
+
+Former-commit-id: 384794ad0cff9f35b16e01177e16422f96eef8cd [formerly d2556741284260f74609ead96c2e64621af8511a]
+Former-commit-id: a27dc3c212327be4058cc374d9b37ae005fe87e0 ([`a047ef6`](https://github.com/bhklab/med-imagetools/commit/a047ef65c17b77282b3cf5df8523f4bcaab14a8e))
+
+* Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
+
+
+Former-commit-id: 21a8546de909e2d98d23e232643588e9cfb1c956 [formerly 1cd89845970f294417d95d0792bdcb817b0324d7]
+Former-commit-id: 29118a649d990863cfbf1b059cab862913e2ab30 ([`db2e63a`](https://github.com/bhklab/med-imagetools/commit/db2e63a8fbf4e0a01a39af862ee916e14d16e445))
+
+* uncommented one line pytest
+
+
+Former-commit-id: f3ba678d71b569a5d4b574c2d7874c93e488ba8b [formerly 2b9d6d4813e05e0cec0550a4dfee47bf18b1f5fe]
+Former-commit-id: 3f878494e3be177a2784ae665bf110f562422443 ([`1c37dab`](https://github.com/bhklab/med-imagetools/commit/1c37daba97d23ab4b74681c93ac5149f8b50c67a))
+
+* uncommented one line pytest
+
+
+Former-commit-id: 797c47cbebf0ef9042ea1828f590f01a813c304f [formerly 3dc8cd388da3ab755d979987b36389dd88396801]
+Former-commit-id: 6da65ddd48d4d10f0e3ec8244581a598d886f75c ([`1f34ff3`](https://github.com/bhklab/med-imagetools/commit/1f34ff389cc9d8d889d76eb6a529ff13323a44ba))
+
+* Merge branch 'add_capabilities' of https://github.com/bhklab/imgtools into add_capabilities
+
+merging sejin's addition
+
+
+Former-commit-id: faab613797495d5181b01f12f43f41865270f6fc [formerly 66a1ffd5a899d64868216e818fffc97260a42fa1]
+Former-commit-id: 6709767dc75f8ef3a15ea704e0464aa3151e858c ([`4128410`](https://github.com/bhklab/med-imagetools/commit/412841075771927200c633890319cb084bc2e7c9))
+
+* deleted data
+
+
+Former-commit-id: 8c55bc4187dca3aee5548f17d2cb8887aa45b131 [formerly d3e6b6a8d0712dbb1aed49be5c2a00c7b919118f]
+Former-commit-id: 3d94d8618a834b40c45823ab43f3cca68d44b54e ([`672f541`](https://github.com/bhklab/med-imagetools/commit/672f541966579d7230df9baca69b02fccdd3a89e))
+
+* now checks for existing subject id
+
+
+Former-commit-id: d65b305856ae37363c742f616a83ee1836ed3dd7 [formerly bf4de755d0618dd037c32b5365a05d939878067f]
+Former-commit-id: 746bd72cc59ddac3d583655e47ab28dcd851aa45 ([`c757682`](https://github.com/bhklab/med-imagetools/commit/c7576821455bf58e27c825282ea58c3265a328a2))
+
+* now the pipeline saves on exit
+
+
+Former-commit-id: 099d6ca41b0beae20c8261942b1d9c2b91e130a2 [formerly 9cd421dd778df1afc6eb3e8a30a032f676f9b3b3]
+Former-commit-id: 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1 ([`4aa150d`](https://github.com/bhklab/med-imagetools/commit/4aa150d143e100349f0ca595747fb44734d9617c))
+
+* fixed some bugs in autopipeline.py
+
+
+Former-commit-id: f7a40316af77e38465cb511454d615001936764a [formerly e05ea389216e61ad2231757ddccfe46608535a1d]
+Former-commit-id: ce800b87f646f60a9825903520527e20b6a3a862 ([`eef51f9`](https://github.com/bhklab/med-imagetools/commit/eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b))
+
+* PT/RTDOSE metadata to csv
+
+
+Former-commit-id: 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32 [formerly 08616a5987e08a0e392d6a1b2411a035b9c89722]
+Former-commit-id: b8e88e61f6bf24971d8e5e81a836b655fa1ea187 ([`1c25fc0`](https://github.com/bhklab/med-imagetools/commit/1c25fc0ef604ba983f4af370f5eb27b5e113cf02))
+
+* uptodate with master, merged
+
+
+Former-commit-id: 3a16c640a40d9f76f9f7d046724b891fbf8f422c [formerly 4c8b72c078e331cdd2cbd26dadef836dc49129d2]
+Former-commit-id: 42a974ec43d270818dbd192e95017af691b83137 ([`7c27925`](https://github.com/bhklab/med-imagetools/commit/7c279256bc5ba6dac6872338e1c77e88392611f6))
+
+* Added test autopipeline and modalities, solved some autopipeline bugs, read_dicom_series and pet now supports series_id
+
+
+Former-commit-id: 941669ee0574c71785fd8eb07e7dbe4e0b07b484 [formerly 03f99572453723e4a3e895acac0996997f090168]
+Former-commit-id: 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44 ([`c53ee62`](https://github.com/bhklab/med-imagetools/commit/c53ee623a6f420e5575cbb0b2e97f3630213f52f))
+
+* quick fixes
+
+
+Former-commit-id: d444cb8e2b63900c7747d9a405125066fb67d88e [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 8ac1dfd1340ce26440ed165fa7c2b7386034aa7a]]] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 97adb0b95bef6714e3b3b1e0e706ab25474ca9cb [formerly 8d2a5a0e90105a894e4b7376918500c1c96856e5] [formerly 8ac1dfd1340ce26440ed165fa7c2b7386034aa7a]] [formerly 5e118add39a6796a6d03d9c6729146981da7f44f]]
+Former-commit-id: b1c528e7b1f32acf42a18cd78f37b462bfa05171
+Former-commit-id: 79e19c892e15d254c60b16b4ee67e9c16ca59f91
+Former-commit-id: 5964ad41667871eed607b7da37c2c71be069fc13 [formerly beb6f1acd4eb2ffb37ac380c996d30d5ebadb2fe] [formerly 454bfde56605674af7b01909decbbdd1770a2e2e]
+Former-commit-id: a58f185604013d8d7f8f0dad406ba17936f21bbb
+Former-commit-id: 5459794e907ea5a13ebd476772fb6d1bdba292f8 ([`ca5d2a7`](https://github.com/bhklab/med-imagetools/commit/ca5d2a717553143df0a0ea347e364395608d0be5))
+
+* Skim2257 quick fix (#26)
+
+* Updated crawler to force String on all meta fields
+
+* Update setup.py
+
+Former-commit-id: 5116186cc44acffc828b7983e84ec2db49b628cb [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly 65d66d20aa91799be74eaeeab91a5f1022d95d70]]] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly dd6ca1bd3273ffb2ac586b07441b0607ffedd4b5 [formerly 8a58ea10fb3416e01953eea428dac12e97f2fb8f] [formerly 65d66d20aa91799be74eaeeab91a5f1022d95d70]] [formerly e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37] [formerly e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37] [formerly 5e93381461268785776402061d555ab02b78fda3]]]]
+Former-commit-id: e942f7e7dd641efe61faed8a445c7b4abe6da994 [formerly d83fb0135155c4c94846c23614e75805db63cf37]
+Former-commit-id: 9bbf4aebbf1978a63dd49de045cc91e4893a5237
+Former-commit-id: 6c11e6c37f455f6f26d906ba60354097eb09a8cd [formerly 7792a3d8e92a47a49db7c5fce24ca1d7adbef8e6] [formerly 5c78dbd9d5fea2e2f199242dbad5b1c8bcceda82]
+Former-commit-id: ff962a4492773cedad0eea0c54f16c45f52bd8d8
+Former-commit-id: 0be584c76974ccd562a45ce3da7bfbd583c8633f ([`55b0015`](https://github.com/bhklab/med-imagetools/commit/55b001589ab9055699fadd89c4df78bae31aa290))
+
+* Merge branch 'master' of github.com:bhklab/imgtools
+
+
+Former-commit-id: e545deea42a3863067169017572b482efa2bdd7e [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly 2ed78e51fd7a72c41c43c76168c1e3123c495bb5]]] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly b9314caac62e35d51d0f0e5e246e2e3714b875ec [formerly 7840154162b9d5801ce3d8d95c7397504e65bf92] [formerly 2ed78e51fd7a72c41c43c76168c1e3123c495bb5]] [formerly 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb] [formerly 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb] [formerly eaad718360d2bd12872b13251a5dc7f3e16aa072]]]]
+Former-commit-id: 3af4b2251549bbca2ea985e982f3c2709b162a67 [formerly d147081d420198769fba57214409b8faa71dd8fb]
+Former-commit-id: 3665daabe0430f5fe5b9783c5ea9555099032520
+Former-commit-id: 12c808b8d6169826c1492147910bdb85f1a894e9 [formerly 490393a0e18d3aec6c4647fc4b0489097170ce6a] [formerly 258a2421cae15e0401bf30db46962a6d93c2933b]
+Former-commit-id: b0e0ed4eed231ffbefae7e2a8aa60f365f978122
+Former-commit-id: a2f02a0f0b46be3b8343a5690aff142421f6a90a ([`ac90723`](https://github.com/bhklab/med-imagetools/commit/ac907239000666cbae42b5f9cdc163da09edf39f))
+
+* Update README.md (#24)
+
+
+
+Former-commit-id: c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly 27494c03e4d95c58d6ea887e20597dbbe235c317]] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly c645115a7a903116ecab68814f14442e037dcb06 [formerly d8cd3177cb0a09227a6a19e83fa131b85e597aae] [formerly 27494c03e4d95c58d6ea887e20597dbbe235c317]] [formerly 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62] [formerly 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62] [formerly 9aaf51bcb71b28cf062a03d873682b2ff38cee90]]]]
+Former-commit-id: 213a9a7d009a2859a36988866fc031158d593b8b [formerly 4e7335ef07059daa9dd3743e0727d63610e9da62]
+Former-commit-id: 63106282d3b55f6d008ae03c60c4a32babcb7d1b
+Former-commit-id: b39d3e78478c710b0fd7b011f9d82686db99903a [formerly 73f8debe481b2adf9a92182a8ede3d35d38b1408] [formerly b25dc8d43440dbb2ce92892f96a599e492d7b13b]
+Former-commit-id: 03e04faeddd185ab57db82dd19fcc955465c44dd
+Former-commit-id: ef3cc2e63c8edcb05d5542f8129ca2c1fbd93a15 ([`0a23f23`](https://github.com/bhklab/med-imagetools/commit/0a23f236fb22c039f260e07dbc394b354dda6775))
+
+* preliminary MRI functionality (MR-RTSTRUCT pairs)
+
+
+Former-commit-id: 3cdc5eb2ad84488f20323b1933c4285eac78d60d [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 11971c8b1f10f60e20d62c85b208031dfa2b8310]]] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 21edaa0d9ddbd8f2d80d4229de59e105074a0910 [formerly 50d9fa66a7bfcdd03e9bdd815b767599c85853ec] [formerly 11971c8b1f10f60e20d62c85b208031dfa2b8310]] [formerly bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2] [formerly 3c01806a93d5b7ca9c6d1a1564d2c9630ff0cf85]]]]
+Former-commit-id: bfaaae9324716a550fcb468e137d9b4a7bfb07b6 [formerly 12b031d46c1c3ddbd1917b4037d9164ca3402ff2]
+Former-commit-id: 2a0158397a55d783d6b627181a8af123952df3dc
+Former-commit-id: e00bd3a449f743635c3ff8cdf2720aee53a6c122 [formerly 5e9af8041f53e08272f10df6ee30daada4a523e2] [formerly d24cae90fcb9a583aec2a100932e3da24d27f0ac]
+Former-commit-id: c165c02fa691e7bae3714229d17f30ecef98250c
+Former-commit-id: 92f5975b3be9b2b5e742ee1c58fbab781541d8c9 ([`6bc8db1`](https://github.com/bhklab/med-imagetools/commit/6bc8db1ff885c594509ab7cf0dc489f909e20661))
+
+* updated README
+
+
+Former-commit-id: 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly e35f91d35180b1217560b7f0bc06280bf07aebb0]] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly 90fb39871dae0b664d7297c19751d5f59c5caa76 [formerly 9c1db1c93bdac00429775eadf36066fae99fc5a2] [formerly e35f91d35180b1217560b7f0bc06280bf07aebb0]] [formerly a256c35d6eb286e59aa625ee80e9a3201858f0ca [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801]] [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801] [formerly 0f0414533cb6667b68aa48541feb376226fd5515]]]]
+Former-commit-id: a256c35d6eb286e59aa625ee80e9a3201858f0ca [formerly 4757ba85017119f8cda7fb0dea07f4e66a8629b6 [formerly c406bfc9526357e2091e1348d837c68cd5633801]]
+Former-commit-id: d353efbbdace157b77f9bedf74654b5b96cda5f9
+Former-commit-id: 8baf0623196e9472477e1ed4b5288b626f254156 [formerly a43cc3526d3559a3792ee76a1b840e678b569d27] [formerly d57189a300ff51ce26e08ba49da114a06b6194b1]
+Former-commit-id: 8a8fc0086e494077f35dbe5b48325b056a1ba20f
+Former-commit-id: 9aab9f3c5a38bd1933b218254a8d79f3cc8cbb18 ([`7e55330`](https://github.com/bhklab/med-imagetools/commit/7e55330ab0ecf661d002556d6bdb4781044b63a4))
+
+* Update setup.py (#23)
+
+
+
+Former-commit-id: 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly ce8e287294e44e5aeaba1c12ea31bea801083293]] [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly 5f3182a717903e245cc5b1d62ec5677921caf340 [formerly ce8e287294e44e5aeaba1c12ea31bea801083293]] [formerly a00e8f2ed448fecd0f5b9cccb6e04421e4952e19 [formerly a00e8f2ed448fecd0f5b9cccb6e04421e4952e19 [formerly 9e24716cfabf338fa46c4e4a4123bfd003f96918]]]]
+Former-commit-id: a00e8f2ed448fecd0f5b9cccb6e04421e4952e19
+Former-commit-id: 0cb0b099ffa6d3d67738f40e211e566049a109ca
+Former-commit-id: 2560f13f6c55e1f8ab80d700941c61f1816da9f6 [formerly 836589be5fc88a6d24e84a559484bae1fdb6438a]
+Former-commit-id: 4e4ec332bd594435c814ab30b33e04c776fc2cb1 ([`b74ca17`](https://github.com/bhklab/med-imagetools/commit/b74ca17c3c095d2f671cf0e539a3bd6abb3db927))
+
+* Added demo
+
+
+Former-commit-id: 63a66c7821b48391ea087c554744ef1a993febbb [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 1ec696602dd46966f5f7e1d4984feab6cc26386b]] [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 63a66c7821b48391ea087c554744ef1a993febbb [formerly 1ec696602dd46966f5f7e1d4984feab6cc26386b]] [formerly e8eb00ba173df71ea56ed8accd366e1a015df864 [formerly e8eb00ba173df71ea56ed8accd366e1a015df864 [formerly 48ea411f5bea9471e83b05248ca95198e2e8a997]]]]
+Former-commit-id: e8eb00ba173df71ea56ed8accd366e1a015df864
+Former-commit-id: a054f7d9cba105a4d40f2605ad6ea5e954b4a1a1
+Former-commit-id: 5a774df68a53105a4c220503d919ec657702f8e4 [formerly f9d8f9a2844ae1dce5ecda564397488db65847fe]
+Former-commit-id: 276d4f7631aa9c363eb4c038dbd03c6eeec9cef3 ([`8ad070c`](https://github.com/bhklab/med-imagetools/commit/8ad070cff434b96d44b2952ddcc5d064db58432a))
+
+* test fix
+
+
+Former-commit-id: 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly d55216a0b91076b0b0ec06def53c517a6325587b]] [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly 464e0418154bbc82968ed66209475b1a5ee2c453 [formerly d55216a0b91076b0b0ec06def53c517a6325587b]] [formerly 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977 [formerly 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977 [formerly 2fad37ee3a827f831e6f6b3b7e707bc7509c284b]]]]
+Former-commit-id: 424dc17ce0f3bd9a54c8a3ebb52bab96725d2977
+Former-commit-id: 37aa5e3e74d6e25b4f8766938462a60601c29ab3
+Former-commit-id: cd7ca810f38c8c15ac7625280954d96e44d8e4a9 [formerly 6b8c112d4b039544f9fdf42f3efccefe447e2b9d]
+Former-commit-id: 08cd744182a5536c6e3aed0c35d75cf0a7643e59 ([`8b13379`](https://github.com/bhklab/med-imagetools/commit/8b133794c5c128cc12d6ed4e40d7da2a249b1200))
+
+* Merge branch 'add_capabilities'
+
+Conflicts:
+	tests/test_autopipe.py
+
+Former-commit-id: 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 68ad7c006edcdbc5013e2ea9e17672722ace3dd4]] [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 8833ef379715c007c76dfc93b513c5eb80eafab6 [formerly 68ad7c006edcdbc5013e2ea9e17672722ace3dd4]] [formerly b3c4025467c80f37dedb0727d2cb0daf40f0702e [formerly b3c4025467c80f37dedb0727d2cb0daf40f0702e [formerly 9931e15e6a565336f8550d951e64b50289783eeb]]]]
+Former-commit-id: b3c4025467c80f37dedb0727d2cb0daf40f0702e
+Former-commit-id: f9ba5f029d40986915fc69014a6445712287c2b3
+Former-commit-id: dd7aa9f8e5495f93b7e23d6b70a8c5da0a40965c [formerly 08265b1a721a74d7c168730bfec5156e575a4aaa]
+Former-commit-id: 15ee1ee48dcbeb58e9e5747c27e48e4c348a137f ([`27cdb7f`](https://github.com/bhklab/med-imagetools/commit/27cdb7f4a987da8135c3613a952113c836d30731))
+
+* Minor bug fixes
+
+
 Former-commit-id: 24d06189e849822d4c203bb187f39a369f268562 [formerly 24d06189e849822d4c203bb187f39a369f268562 [formerly 7162d456ff8468c980c6a720d7100d655dc03288]] [formerly 24d06189e849822d4c203bb187f39a369f268562 [formerly 24d06189e849822d4c203bb187f39a369f268562 [formerly 7162d456ff8468c980c6a720d7100d655dc03288]] [formerly 52cf95f0271fbb1cdda186db56cc6cde8a536d5d [formerly 52cf95f0271fbb1cdda186db56cc6cde8a536d5d [formerly f18aa1bd415fbb25050f6d4f8206492a23a61e54]]]]
 Former-commit-id: 52cf95f0271fbb1cdda186db56cc6cde8a536d5d
 Former-commit-id: 0858b138f03a568de16d582d42509ba40dc40903
 Former-commit-id: 8d4b1f7e5534ab660345893b149ced85edef5f15 [formerly a7e482da439dd69fc3a6ceba05b2e47e50adfb4a]
 Former-commit-id: 18d8aae8e523ddbe65c74d140bae22e73df24cb2 ([`bef2d63`](https://github.com/bhklab/med-imagetools/commit/bef2d637b1d74f8ca937ffae75edec38c9634b11))
 
-* Minor bug fixes
+* added tests for Dataset class
 
 
-Former-commit-id: 52cf95f0271fbb1cdda186db56cc6cde8a536d5d [formerly f18aa1bd415fbb25050f6d4f8206492a23a61e54]
-Former-commit-id: 7162d456ff8468c980c6a720d7100d655dc03288 ([`24d0618`](https://github.com/bhklab/med-imagetools/commit/24d06189e849822d4c203bb187f39a369f268562))
+Former-commit-id: 71334289e578249681a435d7781c8955b6cabe1d [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7]]] [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7]] [formerly dc3711f510abfff00697293617bf0de36cb87e72 [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd] [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd [formerly 7747a81615aa5d913284b22a623ee572ea8b293a]]]]
+Former-commit-id: dc3711f510abfff00697293617bf0de36cb87e72 [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd]
+Former-commit-id: 21f753f606167a4258d70f8ac6f8fc23d3a8d175
+Former-commit-id: 139f540db88bf778866bafcb59b7be0602e908c9 [formerly d9b6cc340a27e69806b01f4567a04955afe42f03]
+Former-commit-id: 42bfc2b2bf889277bc6cda0b6ced59aa7d5d97d5 ([`6802ed3`](https://github.com/bhklab/med-imagetools/commit/6802ed384572010ec71f6a1c9b45f91714ea01ef))
+
+* added tests for Dataset class
+
+
+Former-commit-id: d75ee6e437692650f4a7d62833946161acb12d79 [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly abfd4dbebccc334866237362629389e79fdcba11]]] [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly abfd4dbebccc334866237362629389e79fdcba11]] [formerly c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly 8d345fb040a8c6e1725d749d9d8554f35d107013]]]]
+Former-commit-id: c44cfcd1df0f235eac6032120b8378c43cb670ff
+Former-commit-id: 3b16fbef699e13a000b61cfcc6a031c455b5abac
+Former-commit-id: bfd93a9c8daf6d7c07bf393db1c5661609f83f14 [formerly 6025ba6a47c32a8c8d20deff172a5c032ecce5ea]
+Former-commit-id: 5797d2a714d8fa9566c28214f1e02ea849bfe580 ([`594fb0e`](https://github.com/bhklab/med-imagetools/commit/594fb0ef0e187f010692af66ed3830149dece388))
+
+* fix
+
+
+Former-commit-id: 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly a242475a70abd1d5cc6a4f77ccce9051ff5bdb23]] [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly a242475a70abd1d5cc6a4f77ccce9051ff5bdb23]] [formerly 699c46b9dc49b7af21f81c31fab891568672be3a [formerly 699c46b9dc49b7af21f81c31fab891568672be3a [formerly c152b0890d6bb0e94f39a8a3f855311a12b06037]]]]
+Former-commit-id: 699c46b9dc49b7af21f81c31fab891568672be3a
+Former-commit-id: 5aae0d2d9dd7bbf3a4fd2cadbf4d3d21bf7ead57
+Former-commit-id: 8420e83ab0d2b7fbd32903dc4851e3f786dea65a [formerly d701d3f274cf2b4babd0065b3027b82d8c5488c5]
+Former-commit-id: b62ee632b62ab399e7b3c8ef35283c58998ac090 ([`c91acc9`](https://github.com/bhklab/med-imagetools/commit/c91acc93512907b7d408a1e323273094d957bf57))
+
+* fix path backslash issues
+
+
+Former-commit-id: d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8]] [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8]] [formerly e62073999fb01b945b5203ab2511e943833f437e [formerly e62073999fb01b945b5203ab2511e943833f437e [formerly d81a74dfcdcd21f2b9248d197362a6dbaabf901b]]]]
+Former-commit-id: e62073999fb01b945b5203ab2511e943833f437e
+Former-commit-id: 26d44c87a36a8ed5cd64b5553ac8bf5a1c5e7af3
+Former-commit-id: 28127b6ad933d3b6d0ef12917d83f5faba7d5985 [formerly 0f1542e8b011ff003034520d08f93ddfa00480d2]
+Former-commit-id: e5bbd11cdacdca069c9f77397962b56b2a7c1445 ([`3a67d80`](https://github.com/bhklab/med-imagetools/commit/3a67d8017283450c08397388593c7038afce259a))
+
+* fixed test autopipe
+
+
+Former-commit-id: eb71a6ece7d1b92ce1575fbf38354fde98ccc697 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 3817bbbe40989f26078ead582ef508d58bd22d03]]] [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 3817bbbe40989f26078ead582ef508d58bd22d03]] [formerly 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 63b9543e16a615f3cd2023a6e5457a6707835a4d]]]]
+Former-commit-id: 12f9098d2bf8962679440e58afb67ff1b1d240e7
+Former-commit-id: 0de4a6d07c1b07618fa0e6ddd0bf5ce4553aa8ca
+Former-commit-id: fa498b42594e64d80601659e8d408238c13b6e15 [formerly c3fcdd80e7d22950b633d2f813fb02f26312ad7e]
+Former-commit-id: 00cea5875102d7cababf34930216fabe1da03bd0 ([`f151d81`](https://github.com/bhklab/med-imagetools/commit/f151d81719678eb92596520cb85e76b3165ac03d))
+
+* fix conflicts
+
+
+Former-commit-id: 3e769f713eead224f382b5abe98f9f90c69fcc65 [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly c70d9c89cc2dd93f6c820b9b4a84577088fcb239]]] [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly c70d9c89cc2dd93f6c820b9b4a84577088fcb239]] [formerly f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly caad95a251fab60b5a8078bcd60987ba7dbbbd9d]]]]
+Former-commit-id: f2304e116f0a487ecea85c362cfac9626e5cda30
+Former-commit-id: 0cf3b71107adb75b3ebf4c2babf2ba344e7b91cd
+Former-commit-id: 14320ce590a550b5328fefc31d3d35da023f0d93 [formerly 4136956f2d87593662b3147a8ba5f7d5c3fa7fd4]
+Former-commit-id: 4f963f3d0179d2541043ffdd0178814d2aea6592 ([`be816fd`](https://github.com/bhklab/med-imagetools/commit/be816fdee0f899ff961cddc530632976db8e6425))
+
+* Merge branch 'master' of github.com:bhklab/imgtools
+
+
+Former-commit-id: 9c843ade89affffbfb224d72f62d2feca6824921 [formerly ce2072c3f528460c32f971363781b211979039fb [formerly ce2072c3f528460c32f971363781b211979039fb [formerly 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1]]] [formerly ce2072c3f528460c32f971363781b211979039fb [formerly ce2072c3f528460c32f971363781b211979039fb [formerly 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1]] [formerly 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly f169a7e8f31285d19659d78e23a597cb6a3c1951]]]]
+Former-commit-id: 974939f0558176087f44ebbd5ce062bc1013fff8
+Former-commit-id: 8ebdd739eb77f532c453e6786bd2e0a3e062d8fb
+Former-commit-id: 515f5ead5e14071c987b5dcf7a668077175f842a [formerly 5a5e3e344dcfb6c862a9951becffd0b134c07980]
+Former-commit-id: 17b26985172f1ad27cd4aebc2bd2e94715181233 ([`22bea66`](https://github.com/bhklab/med-imagetools/commit/22bea669f4a70eb4717c9a54daa3165c87555e59))
+
+* Changed dataset class returns
+
+
+Former-commit-id: caa9c4d839ff599f63c9ad68c9bc4e844d96092d [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly 180fe18d186e8909117afead0b974ecf33c0b632]]] [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly 180fe18d186e8909117afead0b974ecf33c0b632]] [formerly 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 3c6d7f5a59865520a11ac8b0772d454f5b24bd2a]]]]
+Former-commit-id: 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a
+Former-commit-id: 51ff2b743a26bfc2ec123e67a1cf8e77245aa75a
+Former-commit-id: 114ec0c81679e445eaf722c1a3414e6c7e6661d6 [formerly 3b034311e0c45261c6d58393acda56229a7e9c29]
+Former-commit-id: 0daee6f284fffc20332ec7adc7e5f7a0f7530ce8 ([`f901df2`](https://github.com/bhklab/med-imagetools/commit/f901df285189287bf933fb65c0d983d6331a9d8a))
+
+* added demo.py
+
+
+Former-commit-id: fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly 64a7701af6ea133285259cc40df0f47bcab496ba]] [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly 64a7701af6ea133285259cc40df0f47bcab496ba]] [formerly fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly b64491943988d84244d64f7d6001be088174e741]]]]
+Former-commit-id: fcd6610aa6939eeb84965d6aaf7db547d18fec2b
+Former-commit-id: 52754c4f09646cc9386b8f2699a2718edb77eaf8
+Former-commit-id: 561db07e6bd2f733abba794630866f1523ecc6e2 [formerly 636f89dfed62c8601d501aec5789643e32016fc8]
+Former-commit-id: d532c12f5a5349db8fff620fb358060c8f32ea5c ([`a32738f`](https://github.com/bhklab/med-imagetools/commit/a32738feaf78a29c816d30c06e302af0895bd695))
+
+* small bug fix
+
+
+Former-commit-id: d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly 43e3c6b28cecf2b33ea563904a2ac6197fab48b4]] [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly 43e3c6b28cecf2b33ea563904a2ac6197fab48b4]] [formerly c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly 7a27ee36703947cbeae3addb99a86c2c2566d0c0]]]]
+Former-commit-id: c5de9faa884b8ac399aed64bfb7c11e65bd7d70f
+Former-commit-id: 137b961a46c61f43f19f56f0c2564d14992a3d56
+Former-commit-id: 59ebc98aeac291ebc97bc8395f41dc7c1bdfab81 [formerly 5e3d53c0efb77113676ae9f343437e4178704760]
+Former-commit-id: bfbecf8e90e70e16fcc6fe2693f733e4a4e78dfd ([`1a99c13`](https://github.com/bhklab/med-imagetools/commit/1a99c13f8830b55146129cc4a86a1056ecf44ae5))
+
+* fixed bugs regarding multiple connections, saving of metadata and loading of metadata
+
+
+Former-commit-id: 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly ab236e55b1de2ca583f4118dec4a250b5801e5b1]] [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly ab236e55b1de2ca583f4118dec4a250b5801e5b1]] [formerly bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly 1528efc88ca4952ce570721832a339ff8274b4fa]]]]
+Former-commit-id: bf97b7fb25abd156d258a5b22d5f2ad348a382f4
+Former-commit-id: 82e0e186b9d508c398f798469326c643cd6527c2
+Former-commit-id: 572070569f96d035e7a6f223bddc027a0517a0e0 [formerly a7c15fb8edc416e70f38c58ea5b6a9802db7f0fd]
+Former-commit-id: 6fbeafeeed9aca80134c95570b89be420187b7d4 ([`2325d36`](https://github.com/bhklab/med-imagetools/commit/2325d3669f4696623826204113d14ed96ca1bd18))
+
+* added visualizations and some more bug fixes
+
+
+Former-commit-id: 68280704e6bdc7afb814166dc4d9ea1c69cc0111 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 2daaf02ec87a1caccd93e18e5a119c9863e940af]]] [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 2daaf02ec87a1caccd93e18e5a119c9863e940af]] [formerly bfc783954909833e5fea376fcae054b01c30596b [formerly bfc783954909833e5fea376fcae054b01c30596b [formerly 735b26c9de88e0a48b468f8fca490bcc68d4cf6c]]]]
+Former-commit-id: bfc783954909833e5fea376fcae054b01c30596b
+Former-commit-id: 856e72bf73fef22350f1d53fcad601fe3d76798e
+Former-commit-id: 89796d257f3a79a09a2306dae054a4eae71a8dc7 [formerly 69d688f2aef204cc68cf05f29f387bc2a69bf3bb]
+Former-commit-id: d3d7e44acf21f9b24f70bc64cda15669a7479ab4 ([`c665d93`](https://github.com/bhklab/med-imagetools/commit/c665d93b9b16df2f155a114ee3e3773679ee1cbb))
+
+* bug fixes 2
+
+
+Former-commit-id: 5ed5f32cea580aab518d28154a9e47c5b344c3c6 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly ad812ba0225fb2bff2ca5b49f307dc748ded3efe]]] [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly ad812ba0225fb2bff2ca5b49f307dc748ded3efe]] [formerly c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly 90732d81ff1873e24cd501283e4cdd2326febd28]]]]
+Former-commit-id: c0aa46eb71ee640ec4b086e715852b001dbd92fd
+Former-commit-id: ab086810cefee5270450561b6db2cfb999416c27
+Former-commit-id: 21873a61b4ca64fd54dc1879fd176ab8e81c7724 [formerly b38bbe5139e27a0ab2c84b7304c60afb562ac124]
+Former-commit-id: e1280ec69bd49a4098d0018493db3d1fa425bf4e ([`558c50b`](https://github.com/bhklab/med-imagetools/commit/558c50bfeba6dc69f7ed1fa6c4c01877b35ae51e))
+
+* bug fixes 2
+
+
+Former-commit-id: a513f1a9102c236845fa273100bb39112b092bf7 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly 374041fceb9f851959a35da4d525a6930aa4837a]]] [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly 374041fceb9f851959a35da4d525a6930aa4837a]] [formerly d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly e7f4b424ecf5519ded2352b3d6266a7da07a5b07]]]]
+Former-commit-id: d523d79396f367bd6c2b634a0602e45df0a595f9
+Former-commit-id: 4dd4c4a0b4238a97d93d3df36268108de9c7fb2a
+Former-commit-id: 98e977ddd59b5270ebb44b56703ad178fd7c970d [formerly 78385cf44365648d5c62ec1f9fcad81e37ba14c7]
+Former-commit-id: 606636e4084098804c9354039e053f12418f9057 ([`c060a99`](https://github.com/bhklab/med-imagetools/commit/c060a998a511441a4ce579671e91576da616b9cc))
+
+* test and autopipe fixed
+
+
+Former-commit-id: bbd1dc9a718bf69247befc0e1e99d1c75519eeef [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly 2aca0013e705864697c9df5fa1c574487e307000]]] [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly 2aca0013e705864697c9df5fa1c574487e307000]] [formerly 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 9cc88b1b402108310dbbc8e09a8b13730aa72102]]]]
+Former-commit-id: 2ef1bb694da65458e9eae8dea7bfeb9238f652af
+Former-commit-id: a402b01f18507176c1de523fb5e978552ea8f01c
+Former-commit-id: c206f6d5c638b50ed3981ac0946d18d3399d0414 [formerly cc2e55235011f73f0ec01ff158ecfcfec21506e2]
+Former-commit-id: 834aaa0532513bece9827a6975f9db2e5987103f ([`e321e31`](https://github.com/bhklab/med-imagetools/commit/e321e31c9d69f41d873d94eeaccd2181b33fda74))
+
+* bug fixes_1.0
+
+
+Former-commit-id: 3344042ddfb1ef709ec4fa02628c0c97a6ebd477 [formerly a047ef65c17b77282b3cf5df8523f4bcaab14a8e [formerly a27dc3c212327be4058cc374d9b37ae005fe87e0]] [formerly a047ef65c17b77282b3cf5df8523f4bcaab14a8e [formerly a27dc3c212327be4058cc374d9b37ae005fe87e0] [formerly 384794ad0cff9f35b16e01177e16422f96eef8cd [formerly d2556741284260f74609ead96c2e64621af8511a]]]
+Former-commit-id: 384794ad0cff9f35b16e01177e16422f96eef8cd
+Former-commit-id: b7161a48f3fffb445336ea2a3d827cdb5686deab
+Former-commit-id: d42919d0a2a4d695018091f5d2ed827dff4bbf96 ([`7bb87b6`](https://github.com/bhklab/med-imagetools/commit/7bb87b6f0eccef842f8aa78552993196fc3758a4))
+
+* Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
+
+
+Former-commit-id: db2e63a8fbf4e0a01a39af862ee916e14d16e445 [formerly 29118a649d990863cfbf1b059cab862913e2ab30] [formerly db2e63a8fbf4e0a01a39af862ee916e14d16e445 [formerly 29118a649d990863cfbf1b059cab862913e2ab30] [formerly 21a8546de909e2d98d23e232643588e9cfb1c956 [formerly 1cd89845970f294417d95d0792bdcb817b0324d7]]]
+Former-commit-id: 21a8546de909e2d98d23e232643588e9cfb1c956
+Former-commit-id: aa2d95a7888dd213554c627c0d76b4237a1967bf
+Former-commit-id: 2ae58c65d67dce9ed708a3cca2f15e5715f68a5f ([`4408c23`](https://github.com/bhklab/med-imagetools/commit/4408c235ff961b2443e26afd9a91a933a9d22ea6))
+
+* uncommented one line pytest
+
+
+Former-commit-id: 7aa572b0b68fa17a57d73a7b5f677af269e19154 [formerly 1c37daba97d23ab4b74681c93ac5149f8b50c67a [formerly 3f878494e3be177a2784ae665bf110f562422443]] [formerly 1c37daba97d23ab4b74681c93ac5149f8b50c67a [formerly 3f878494e3be177a2784ae665bf110f562422443] [formerly f3ba678d71b569a5d4b574c2d7874c93e488ba8b [formerly 2b9d6d4813e05e0cec0550a4dfee47bf18b1f5fe]]]
+Former-commit-id: f3ba678d71b569a5d4b574c2d7874c93e488ba8b
+Former-commit-id: 2046fb64b2d129db338c3d3f2a70e3640eea80ab
+Former-commit-id: eb1822dbe215e6185b3ce426ac1a2e9741e9bb42 ([`d54944e`](https://github.com/bhklab/med-imagetools/commit/d54944eb426956db7417c9ac85172823302bc01c))
+
+* uncommented one line pytest
+
+
+Former-commit-id: 01fb59285920aaa2fd8c3f355feab86619938568 [formerly 1f34ff389cc9d8d889d76eb6a529ff13323a44ba [formerly 6da65ddd48d4d10f0e3ec8244581a598d886f75c]] [formerly 1f34ff389cc9d8d889d76eb6a529ff13323a44ba [formerly 6da65ddd48d4d10f0e3ec8244581a598d886f75c] [formerly 797c47cbebf0ef9042ea1828f590f01a813c304f [formerly 3dc8cd388da3ab755d979987b36389dd88396801]]]
+Former-commit-id: 797c47cbebf0ef9042ea1828f590f01a813c304f
+Former-commit-id: 652bd34dc69873469e060381ef0d8995d93335b5
+Former-commit-id: f7cdcc56dcf9c64b0e7864d5c8bf438c462d215c ([`d7e7d66`](https://github.com/bhklab/med-imagetools/commit/d7e7d6644777da08873677bb343409b2bd611139))
+
+* Merge branch 'add_capabilities' of https://github.com/bhklab/imgtools into add_capabilities
+
+merging sejin's addition
+
+
+Former-commit-id: cb8975d133bc33645b641b13ce6367531dbaef78 [formerly 412841075771927200c633890319cb084bc2e7c9 [formerly 6709767dc75f8ef3a15ea704e0464aa3151e858c]] [formerly 412841075771927200c633890319cb084bc2e7c9 [formerly 6709767dc75f8ef3a15ea704e0464aa3151e858c] [formerly faab613797495d5181b01f12f43f41865270f6fc [formerly 66a1ffd5a899d64868216e818fffc97260a42fa1]]]
+Former-commit-id: faab613797495d5181b01f12f43f41865270f6fc
+Former-commit-id: 19cc853aeaa9544a9f048ce73236af56ff04ed42
+Former-commit-id: 8c2c3af8a054c0a9d80a97f09c773079eeb86ebd ([`1bb0cc4`](https://github.com/bhklab/med-imagetools/commit/1bb0cc40d7ec178d00146117c4a54f12e3f1b7d9))
+
+* deleted data
+
+
+Former-commit-id: 672f541966579d7230df9baca69b02fccdd3a89e [formerly 3d94d8618a834b40c45823ab43f3cca68d44b54e] [formerly 672f541966579d7230df9baca69b02fccdd3a89e [formerly 3d94d8618a834b40c45823ab43f3cca68d44b54e] [formerly 8c55bc4187dca3aee5548f17d2cb8887aa45b131 [formerly d3e6b6a8d0712dbb1aed49be5c2a00c7b919118f]]]
+Former-commit-id: 8c55bc4187dca3aee5548f17d2cb8887aa45b131
+Former-commit-id: c568f42b9733ee40c94df2d5ddf5507016534cdb
+Former-commit-id: 5967c699c5d7d3a17efc03e1318878391c8609d6 ([`23c543e`](https://github.com/bhklab/med-imagetools/commit/23c543ea5937cca07ba44ab5cd2788e1ec17c141))
+
+* now checks for existing subject id
+
+
+Former-commit-id: 61153678fe00f0dc2645cee7174fbb9315a119db [formerly c7576821455bf58e27c825282ea58c3265a328a2 [formerly 746bd72cc59ddac3d583655e47ab28dcd851aa45]] [formerly c7576821455bf58e27c825282ea58c3265a328a2 [formerly 746bd72cc59ddac3d583655e47ab28dcd851aa45] [formerly d65b305856ae37363c742f616a83ee1836ed3dd7 [formerly bf4de755d0618dd037c32b5365a05d939878067f]]]
+Former-commit-id: d65b305856ae37363c742f616a83ee1836ed3dd7
+Former-commit-id: 8ce34513b50d29fbdf064ee7ffa008c805329d65
+Former-commit-id: 9a5b436d9259580aa15f25a4c9d8a8ede596c04b ([`a34d702`](https://github.com/bhklab/med-imagetools/commit/a34d7025b62543ab84337d1713c59f8d2c19311d))
+
+* now the pipeline saves on exit
+
+
+Former-commit-id: 4aa150d143e100349f0ca595747fb44734d9617c [formerly 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1] [formerly 4aa150d143e100349f0ca595747fb44734d9617c [formerly 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1] [formerly 099d6ca41b0beae20c8261942b1d9c2b91e130a2 [formerly 9cd421dd778df1afc6eb3e8a30a032f676f9b3b3]]]
+Former-commit-id: 099d6ca41b0beae20c8261942b1d9c2b91e130a2
+Former-commit-id: 0e2e9ada4e52a06692df3ae6120988ef3ce83cf0
+Former-commit-id: fb3560460de9f1be962c40e5a07078983c66074d ([`d4656f0`](https://github.com/bhklab/med-imagetools/commit/d4656f01ae363f050c49bd4dc520662129d94804))
+
+* fixed some bugs in autopipeline.py
+
+
+Former-commit-id: eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b [formerly ce800b87f646f60a9825903520527e20b6a3a862] [formerly eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b [formerly ce800b87f646f60a9825903520527e20b6a3a862] [formerly f7a40316af77e38465cb511454d615001936764a [formerly e05ea389216e61ad2231757ddccfe46608535a1d]]]
+Former-commit-id: f7a40316af77e38465cb511454d615001936764a
+Former-commit-id: eafc72c0a39d04c4b2eab01d2b91af52765000de
+Former-commit-id: 4acc42796806ea928d07d381bdc5007bbe65859a ([`c637001`](https://github.com/bhklab/med-imagetools/commit/c63700153e45b96c7ccfa83a492e7e3ce5df8ba2))
+
+* PT/RTDOSE metadata to csv
+
+
+Former-commit-id: 1c25fc0ef604ba983f4af370f5eb27b5e113cf02 [formerly b8e88e61f6bf24971d8e5e81a836b655fa1ea187] [formerly 1c25fc0ef604ba983f4af370f5eb27b5e113cf02 [formerly b8e88e61f6bf24971d8e5e81a836b655fa1ea187] [formerly 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32 [formerly 08616a5987e08a0e392d6a1b2411a035b9c89722]]]
+Former-commit-id: 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32
+Former-commit-id: 286998f0619dee39a38d8bb1c0bf8dd2cfc0734a
+Former-commit-id: 1b2d49097326a58d7c3802988d95218e64556205 ([`fe91a82`](https://github.com/bhklab/med-imagetools/commit/fe91a82c75dffa28fbdc5c00c436abb9021393ca))
+
+* uptodate with master, merged
+
+
+Former-commit-id: 7c279256bc5ba6dac6872338e1c77e88392611f6 [formerly 42a974ec43d270818dbd192e95017af691b83137] [formerly 7c279256bc5ba6dac6872338e1c77e88392611f6 [formerly 42a974ec43d270818dbd192e95017af691b83137] [formerly 3a16c640a40d9f76f9f7d046724b891fbf8f422c [formerly 4c8b72c078e331cdd2cbd26dadef836dc49129d2]]]
+Former-commit-id: 3a16c640a40d9f76f9f7d046724b891fbf8f422c
+Former-commit-id: 1d20f3a5661f9c24a4758bc2cba7306e1a48d177
+Former-commit-id: a9fadd38f389505df94fb074c5e7db5c6abc5fad ([`3fbdc75`](https://github.com/bhklab/med-imagetools/commit/3fbdc756ded9e696c3b869506b63564f62a9afdf))
+
+* Added test autopipeline and modalities, solved some autopipeline bugs, read_dicom_series and pet now supports series_id
+
+
+Former-commit-id: c53ee623a6f420e5575cbb0b2e97f3630213f52f [formerly 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44] [formerly c53ee623a6f420e5575cbb0b2e97f3630213f52f [formerly 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44] [formerly 941669ee0574c71785fd8eb07e7dbe4e0b07b484 [formerly 03f99572453723e4a3e895acac0996997f090168]]]
+Former-commit-id: 941669ee0574c71785fd8eb07e7dbe4e0b07b484
+Former-commit-id: 4705b14fd0bacf2a7524a8d2a4bb13a7320041c2
+Former-commit-id: a843e69e3b38f7c08790bcee5c596402d6be99ba ([`ea4096e`](https://github.com/bhklab/med-imagetools/commit/ea4096e0da4fb7bad0b0d9e4eafff51780e8346e))
 
 * Seg.nrrd quick fix
 
@@ -6527,36 +6966,6 @@ Former-commit-id: d4b4710c9cfe238b56634e409c258ad4d8a2a86f ([`69f33a1`](https://
 * Update setup.py
 
 Former-commit-id: 7b9c3da298b4de438603e5f9be8c2a5028868e65 ([`9d21b5a`](https://github.com/bhklab/med-imagetools/commit/9d21b5a80315c1f90057ff9bde504e1cbe6709d6))
-
-* added tests for Dataset class
-
-
-Former-commit-id: 71334289e578249681a435d7781c8955b6cabe1d [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7]]] [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly fdbe97d0af266cbd964f3aa50957337d39589ffd [formerly 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7]] [formerly dc3711f510abfff00697293617bf0de36cb87e72 [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd] [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd [formerly 7747a81615aa5d913284b22a623ee572ea8b293a]]]]
-Former-commit-id: dc3711f510abfff00697293617bf0de36cb87e72 [formerly 608b9c734ff0f006ede4fce6d5832f5ca0752ccd]
-Former-commit-id: 21f753f606167a4258d70f8ac6f8fc23d3a8d175
-Former-commit-id: 139f540db88bf778866bafcb59b7be0602e908c9 [formerly d9b6cc340a27e69806b01f4567a04955afe42f03]
-Former-commit-id: 42bfc2b2bf889277bc6cda0b6ced59aa7d5d97d5 ([`6802ed3`](https://github.com/bhklab/med-imagetools/commit/6802ed384572010ec71f6a1c9b45f91714ea01ef))
-
-* added tests for Dataset class
-
-
-Former-commit-id: 608b9c734ff0f006ede4fce6d5832f5ca0752ccd [formerly 7747a81615aa5d913284b22a623ee572ea8b293a]
-Former-commit-id: 1f9c17c8bc13f52d0f12b1e79085528da1c82ec7 ([`fdbe97d`](https://github.com/bhklab/med-imagetools/commit/fdbe97d0af266cbd964f3aa50957337d39589ffd))
-
-* added tests for Dataset class
-
-
-Former-commit-id: d75ee6e437692650f4a7d62833946161acb12d79 [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly abfd4dbebccc334866237362629389e79fdcba11]]] [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly b92645cc522eb99334160bf28e3e361b83d5ed0f [formerly abfd4dbebccc334866237362629389e79fdcba11]] [formerly c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly 8d345fb040a8c6e1725d749d9d8554f35d107013]]]]
-Former-commit-id: c44cfcd1df0f235eac6032120b8378c43cb670ff
-Former-commit-id: 3b16fbef699e13a000b61cfcc6a031c455b5abac
-Former-commit-id: bfd93a9c8daf6d7c07bf393db1c5661609f83f14 [formerly 6025ba6a47c32a8c8d20deff172a5c032ecce5ea]
-Former-commit-id: 5797d2a714d8fa9566c28214f1e02ea849bfe580 ([`594fb0e`](https://github.com/bhklab/med-imagetools/commit/594fb0ef0e187f010692af66ed3830149dece388))
-
-* added tests for Dataset class
-
-
-Former-commit-id: c44cfcd1df0f235eac6032120b8378c43cb670ff [formerly 8d345fb040a8c6e1725d749d9d8554f35d107013]
-Former-commit-id: abfd4dbebccc334866237362629389e79fdcba11 ([`b92645c`](https://github.com/bhklab/med-imagetools/commit/b92645cc522eb99334160bf28e3e361b83d5ed0f))
 
 * Update README.md
 
@@ -6646,38 +7055,8 @@ Former-commit-id: 6511aea8239973d77f30a11cdd959f8ba55250df ([`a3aa08b`](https://
 
 * fix path backslash issues
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: bafe9e56aadbc5e54430757de3ac50374a6433dc ([`777f935`](https://github.com/bhklab/med-imagetools/commit/777f935bbd4a40aeb0fadb1db704dc24d0b4c391))
-
-* fix
-
-
-Former-commit-id: 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly a242475a70abd1d5cc6a4f77ccce9051ff5bdb23]] [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly 549a41109fc8ccac52945b860e7b1f819e8484cd [formerly a242475a70abd1d5cc6a4f77ccce9051ff5bdb23]] [formerly 699c46b9dc49b7af21f81c31fab891568672be3a [formerly 699c46b9dc49b7af21f81c31fab891568672be3a [formerly c152b0890d6bb0e94f39a8a3f855311a12b06037]]]]
-Former-commit-id: 699c46b9dc49b7af21f81c31fab891568672be3a
-Former-commit-id: 5aae0d2d9dd7bbf3a4fd2cadbf4d3d21bf7ead57
-Former-commit-id: 8420e83ab0d2b7fbd32903dc4851e3f786dea65a [formerly d701d3f274cf2b4babd0065b3027b82d8c5488c5]
-Former-commit-id: b62ee632b62ab399e7b3c8ef35283c58998ac090 ([`c91acc9`](https://github.com/bhklab/med-imagetools/commit/c91acc93512907b7d408a1e323273094d957bf57))
-
-* fix
-
-
-Former-commit-id: 699c46b9dc49b7af21f81c31fab891568672be3a [formerly c152b0890d6bb0e94f39a8a3f855311a12b06037]
-Former-commit-id: a242475a70abd1d5cc6a4f77ccce9051ff5bdb23 ([`549a411`](https://github.com/bhklab/med-imagetools/commit/549a41109fc8ccac52945b860e7b1f819e8484cd))
-
-* fix path backslash issues
-
-
-Former-commit-id: d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8]] [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly d531414ab1f307d8c451d8ef1f2d4833d5b6290c [formerly c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8]] [formerly e62073999fb01b945b5203ab2511e943833f437e [formerly e62073999fb01b945b5203ab2511e943833f437e [formerly d81a74dfcdcd21f2b9248d197362a6dbaabf901b]]]]
-Former-commit-id: e62073999fb01b945b5203ab2511e943833f437e
-Former-commit-id: 26d44c87a36a8ed5cd64b5553ac8bf5a1c5e7af3
-Former-commit-id: 28127b6ad933d3b6d0ef12917d83f5faba7d5985 [formerly 0f1542e8b011ff003034520d08f93ddfa00480d2]
-Former-commit-id: e5bbd11cdacdca069c9f77397962b56b2a7c1445 ([`3a67d80`](https://github.com/bhklab/med-imagetools/commit/3a67d8017283450c08397388593c7038afce259a))
-
-* fix path backslash issues
-
-
-Former-commit-id: e62073999fb01b945b5203ab2511e943833f437e [formerly d81a74dfcdcd21f2b9248d197362a6dbaabf901b]
-Former-commit-id: c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8 ([`d531414`](https://github.com/bhklab/med-imagetools/commit/d531414ab1f307d8c451d8ef1f2d4833d5b6290c))
 
 * merging new features (#16)
 
@@ -6721,68 +7100,8 @@ Former-commit-id: c9fcbbebbe082ac2b98d59515fbeb2180c79c0f8 ([`d531414`](https://
 
 * fixed test autopipe
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: bd8625cd37b114b7b26f981b8b8af5159dec9b5b ([`7833463`](https://github.com/bhklab/med-imagetools/commit/78334633d640833b0d69adefce0411c9bab5fdc1))
-
-* fixed test autopipe
-
-
-Former-commit-id: eb71a6ece7d1b92ce1575fbf38354fde98ccc697 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 3817bbbe40989f26078ead582ef508d58bd22d03]]] [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 42bb296cdca9060d54fcedb2e9c7ad2d236d2d93 [formerly 3817bbbe40989f26078ead582ef508d58bd22d03]] [formerly 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 63b9543e16a615f3cd2023a6e5457a6707835a4d]]]]
-Former-commit-id: 12f9098d2bf8962679440e58afb67ff1b1d240e7
-Former-commit-id: 0de4a6d07c1b07618fa0e6ddd0bf5ce4553aa8ca
-Former-commit-id: fa498b42594e64d80601659e8d408238c13b6e15 [formerly c3fcdd80e7d22950b633d2f813fb02f26312ad7e]
-Former-commit-id: 00cea5875102d7cababf34930216fabe1da03bd0 ([`f151d81`](https://github.com/bhklab/med-imagetools/commit/f151d81719678eb92596520cb85e76b3165ac03d))
-
-* fixed test autopipe
-
-
-Former-commit-id: 12f9098d2bf8962679440e58afb67ff1b1d240e7 [formerly 63b9543e16a615f3cd2023a6e5457a6707835a4d]
-Former-commit-id: 3817bbbe40989f26078ead582ef508d58bd22d03 ([`42bb296`](https://github.com/bhklab/med-imagetools/commit/42bb296cdca9060d54fcedb2e9c7ad2d236d2d93))
-
-* fix conflicts
-
-
-Former-commit-id: 3e769f713eead224f382b5abe98f9f90c69fcc65 [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly c70d9c89cc2dd93f6c820b9b4a84577088fcb239]]] [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly 08a58b042beba83df9649c222585f5c626211a3a [formerly c70d9c89cc2dd93f6c820b9b4a84577088fcb239]] [formerly f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly caad95a251fab60b5a8078bcd60987ba7dbbbd9d]]]]
-Former-commit-id: f2304e116f0a487ecea85c362cfac9626e5cda30
-Former-commit-id: 0cf3b71107adb75b3ebf4c2babf2ba344e7b91cd
-Former-commit-id: 14320ce590a550b5328fefc31d3d35da023f0d93 [formerly 4136956f2d87593662b3147a8ba5f7d5c3fa7fd4]
-Former-commit-id: 4f963f3d0179d2541043ffdd0178814d2aea6592 ([`be816fd`](https://github.com/bhklab/med-imagetools/commit/be816fdee0f899ff961cddc530632976db8e6425))
-
-* fix conflicts
-
-
-Former-commit-id: f2304e116f0a487ecea85c362cfac9626e5cda30 [formerly caad95a251fab60b5a8078bcd60987ba7dbbbd9d]
-Former-commit-id: c70d9c89cc2dd93f6c820b9b4a84577088fcb239 ([`08a58b0`](https://github.com/bhklab/med-imagetools/commit/08a58b042beba83df9649c222585f5c626211a3a))
-
-* Merge branch &#39;master&#39; of github.com:bhklab/imgtools
-
-
-Former-commit-id: 9c843ade89affffbfb224d72f62d2feca6824921 [formerly ce2072c3f528460c32f971363781b211979039fb [formerly ce2072c3f528460c32f971363781b211979039fb [formerly 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1]]] [formerly ce2072c3f528460c32f971363781b211979039fb [formerly ce2072c3f528460c32f971363781b211979039fb [formerly 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1]] [formerly 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly f169a7e8f31285d19659d78e23a597cb6a3c1951]]]]
-Former-commit-id: 974939f0558176087f44ebbd5ce062bc1013fff8
-Former-commit-id: 8ebdd739eb77f532c453e6786bd2e0a3e062d8fb
-Former-commit-id: 515f5ead5e14071c987b5dcf7a668077175f842a [formerly 5a5e3e344dcfb6c862a9951becffd0b134c07980]
-Former-commit-id: 17b26985172f1ad27cd4aebc2bd2e94715181233 ([`22bea66`](https://github.com/bhklab/med-imagetools/commit/22bea669f4a70eb4717c9a54daa3165c87555e59))
-
-* Merge branch &#39;master&#39; of github.com:bhklab/imgtools
-
-
-Former-commit-id: 974939f0558176087f44ebbd5ce062bc1013fff8 [formerly f169a7e8f31285d19659d78e23a597cb6a3c1951]
-Former-commit-id: 42e4a1bb16acdbf64c3c93bb7458acfaceed0fd1 ([`ce2072c`](https://github.com/bhklab/med-imagetools/commit/ce2072c3f528460c32f971363781b211979039fb))
-
-* Changed dataset class returns
-
-
-Former-commit-id: caa9c4d839ff599f63c9ad68c9bc4e844d96092d [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly 180fe18d186e8909117afead0b974ecf33c0b632]]] [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly fe4e485bfa1d7123573563e512794d10639efef4 [formerly 180fe18d186e8909117afead0b974ecf33c0b632]] [formerly 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 3c6d7f5a59865520a11ac8b0772d454f5b24bd2a]]]]
-Former-commit-id: 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a
-Former-commit-id: 51ff2b743a26bfc2ec123e67a1cf8e77245aa75a
-Former-commit-id: 114ec0c81679e445eaf722c1a3414e6c7e6661d6 [formerly 3b034311e0c45261c6d58393acda56229a7e9c29]
-Former-commit-id: 0daee6f284fffc20332ec7adc7e5f7a0f7530ce8 ([`f901df2`](https://github.com/bhklab/med-imagetools/commit/f901df285189287bf933fb65c0d983d6331a9d8a))
-
-* Changed dataset class returns
-
-
-Former-commit-id: 40c53e6226ca60dd7b51ba848af5f2f3fb8ce33a [formerly 3c6d7f5a59865520a11ac8b0772d454f5b24bd2a]
-Former-commit-id: 180fe18d186e8909117afead0b974ecf33c0b632 ([`fe4e485`](https://github.com/bhklab/med-imagetools/commit/fe4e485bfa1d7123573563e512794d10639efef4))
 
 * Create main.yml (#15)
 
@@ -6793,51 +7112,6 @@ Former-commit-id: 38035817f09e7c9a174014cb03753ddb8e96f94b ([`0a8e458`](https://
 * Ready for
 
 Former-commit-id: 5c3ce559fa5ccbab7518c28a68c3ae8a75d9c33d ([`42c2f7b`](https://github.com/bhklab/med-imagetools/commit/42c2f7b846d42ec6ad02c03ca4105c5abd996c00))
-
-* added demo.py
-
-
-Former-commit-id: fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly 64a7701af6ea133285259cc40df0f47bcab496ba]] [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly fbb0ef3704ed63314ba57f32525073900b8d5905 [formerly 64a7701af6ea133285259cc40df0f47bcab496ba]] [formerly fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly b64491943988d84244d64f7d6001be088174e741]]]]
-Former-commit-id: fcd6610aa6939eeb84965d6aaf7db547d18fec2b
-Former-commit-id: 52754c4f09646cc9386b8f2699a2718edb77eaf8
-Former-commit-id: 561db07e6bd2f733abba794630866f1523ecc6e2 [formerly 636f89dfed62c8601d501aec5789643e32016fc8]
-Former-commit-id: d532c12f5a5349db8fff620fb358060c8f32ea5c ([`a32738f`](https://github.com/bhklab/med-imagetools/commit/a32738feaf78a29c816d30c06e302af0895bd695))
-
-* added demo.py
-
-
-Former-commit-id: fcd6610aa6939eeb84965d6aaf7db547d18fec2b [formerly b64491943988d84244d64f7d6001be088174e741]
-Former-commit-id: 64a7701af6ea133285259cc40df0f47bcab496ba ([`fbb0ef3`](https://github.com/bhklab/med-imagetools/commit/fbb0ef3704ed63314ba57f32525073900b8d5905))
-
-* small bug fix
-
-
-Former-commit-id: d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly 43e3c6b28cecf2b33ea563904a2ac6197fab48b4]] [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c [formerly 43e3c6b28cecf2b33ea563904a2ac6197fab48b4]] [formerly c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly 7a27ee36703947cbeae3addb99a86c2c2566d0c0]]]]
-Former-commit-id: c5de9faa884b8ac399aed64bfb7c11e65bd7d70f
-Former-commit-id: 137b961a46c61f43f19f56f0c2564d14992a3d56
-Former-commit-id: 59ebc98aeac291ebc97bc8395f41dc7c1bdfab81 [formerly 5e3d53c0efb77113676ae9f343437e4178704760]
-Former-commit-id: bfbecf8e90e70e16fcc6fe2693f733e4a4e78dfd ([`1a99c13`](https://github.com/bhklab/med-imagetools/commit/1a99c13f8830b55146129cc4a86a1056ecf44ae5))
-
-* small bug fix
-
-
-Former-commit-id: c5de9faa884b8ac399aed64bfb7c11e65bd7d70f [formerly 7a27ee36703947cbeae3addb99a86c2c2566d0c0]
-Former-commit-id: 43e3c6b28cecf2b33ea563904a2ac6197fab48b4 ([`d47f574`](https://github.com/bhklab/med-imagetools/commit/d47f574c4c4afb79d50cbd4557f0ef5bc035dc5c))
-
-* fixed bugs regarding multiple connections, saving of metadata and loading of metadata
-
-
-Former-commit-id: 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly ab236e55b1de2ca583f4118dec4a250b5801e5b1]] [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly 9caee64066bd68cc53d80a3efcfeb554c791033c [formerly ab236e55b1de2ca583f4118dec4a250b5801e5b1]] [formerly bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly 1528efc88ca4952ce570721832a339ff8274b4fa]]]]
-Former-commit-id: bf97b7fb25abd156d258a5b22d5f2ad348a382f4
-Former-commit-id: 82e0e186b9d508c398f798469326c643cd6527c2
-Former-commit-id: 572070569f96d035e7a6f223bddc027a0517a0e0 [formerly a7c15fb8edc416e70f38c58ea5b6a9802db7f0fd]
-Former-commit-id: 6fbeafeeed9aca80134c95570b89be420187b7d4 ([`2325d36`](https://github.com/bhklab/med-imagetools/commit/2325d3669f4696623826204113d14ed96ca1bd18))
-
-* fixed bugs regarding multiple connections, saving of metadata and loading of metadata
-
-
-Former-commit-id: bf97b7fb25abd156d258a5b22d5f2ad348a382f4 [formerly 1528efc88ca4952ce570721832a339ff8274b4fa]
-Former-commit-id: ab236e55b1de2ca583f4118dec4a250b5801e5b1 ([`9caee64`](https://github.com/bhklab/med-imagetools/commit/9caee64066bd68cc53d80a3efcfeb554c791033c))
 
 * PR tests - macos/ubuntu failing (#13)
 
@@ -6887,7 +7161,7 @@ Former-commit-id: ab236e55b1de2ca583f4118dec4a250b5801e5b1 ([`9caee64`](https://
 
 * Update manual-test.yml
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 10a90b47190fb9fcbd372b30a091f56fb38ef703 ([`1de1d92`](https://github.com/bhklab/med-imagetools/commit/1de1d9200f53f84b0b647144da0b331b03a0e645))
 
 * Update manual-test.yml
@@ -6902,80 +7176,6 @@ Former-commit-id: bca2a786b94ed4bb1d04717355dd4fee0f8fc3c8 ([`b00f14d`](https://
 
 Former-commit-id: fbdb6e0c66ba11d57fcaf6beb0be6e45caebfca8 ([`f820ad4`](https://github.com/bhklab/med-imagetools/commit/f820ad4dcea5389b44afb91ff70d1b0acb1d2163))
 
-* added visualizations and some more bug fixes
-
-
-Former-commit-id: 68280704e6bdc7afb814166dc4d9ea1c69cc0111 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 2daaf02ec87a1caccd93e18e5a119c9863e940af]]] [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 37ca2cff8a3e699a739b1cea0594cf8f9c3f2636 [formerly 2daaf02ec87a1caccd93e18e5a119c9863e940af]] [formerly bfc783954909833e5fea376fcae054b01c30596b [formerly bfc783954909833e5fea376fcae054b01c30596b [formerly 735b26c9de88e0a48b468f8fca490bcc68d4cf6c]]]]
-Former-commit-id: bfc783954909833e5fea376fcae054b01c30596b
-Former-commit-id: 856e72bf73fef22350f1d53fcad601fe3d76798e
-Former-commit-id: 89796d257f3a79a09a2306dae054a4eae71a8dc7 [formerly 69d688f2aef204cc68cf05f29f387bc2a69bf3bb]
-Former-commit-id: d3d7e44acf21f9b24f70bc64cda15669a7479ab4 ([`c665d93`](https://github.com/bhklab/med-imagetools/commit/c665d93b9b16df2f155a114ee3e3773679ee1cbb))
-
-* added visualizations and some more bug fixes
-
-
-Former-commit-id: bfc783954909833e5fea376fcae054b01c30596b [formerly 735b26c9de88e0a48b468f8fca490bcc68d4cf6c]
-Former-commit-id: 2daaf02ec87a1caccd93e18e5a119c9863e940af ([`37ca2cf`](https://github.com/bhklab/med-imagetools/commit/37ca2cff8a3e699a739b1cea0594cf8f9c3f2636))
-
-* bug fixes 2
-
-
-Former-commit-id: 5ed5f32cea580aab518d28154a9e47c5b344c3c6 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly ad812ba0225fb2bff2ca5b49f307dc748ded3efe]]] [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly c364fdc0ead6e9c3dbf398b9127282224e848887 [formerly ad812ba0225fb2bff2ca5b49f307dc748ded3efe]] [formerly c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly 90732d81ff1873e24cd501283e4cdd2326febd28]]]]
-Former-commit-id: c0aa46eb71ee640ec4b086e715852b001dbd92fd
-Former-commit-id: ab086810cefee5270450561b6db2cfb999416c27
-Former-commit-id: 21873a61b4ca64fd54dc1879fd176ab8e81c7724 [formerly b38bbe5139e27a0ab2c84b7304c60afb562ac124]
-Former-commit-id: e1280ec69bd49a4098d0018493db3d1fa425bf4e ([`558c50b`](https://github.com/bhklab/med-imagetools/commit/558c50bfeba6dc69f7ed1fa6c4c01877b35ae51e))
-
-* bug fixes 2
-
-
-Former-commit-id: c0aa46eb71ee640ec4b086e715852b001dbd92fd [formerly 90732d81ff1873e24cd501283e4cdd2326febd28]
-Former-commit-id: ad812ba0225fb2bff2ca5b49f307dc748ded3efe ([`c364fdc`](https://github.com/bhklab/med-imagetools/commit/c364fdc0ead6e9c3dbf398b9127282224e848887))
-
-* bug fixes 2
-
-
-Former-commit-id: a513f1a9102c236845fa273100bb39112b092bf7 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly 374041fceb9f851959a35da4d525a6930aa4837a]]] [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly e15216086af12e868ba47264d7f3042b6b1aee28 [formerly 374041fceb9f851959a35da4d525a6930aa4837a]] [formerly d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly e7f4b424ecf5519ded2352b3d6266a7da07a5b07]]]]
-Former-commit-id: d523d79396f367bd6c2b634a0602e45df0a595f9
-Former-commit-id: 4dd4c4a0b4238a97d93d3df36268108de9c7fb2a
-Former-commit-id: 98e977ddd59b5270ebb44b56703ad178fd7c970d [formerly 78385cf44365648d5c62ec1f9fcad81e37ba14c7]
-Former-commit-id: 606636e4084098804c9354039e053f12418f9057 ([`c060a99`](https://github.com/bhklab/med-imagetools/commit/c060a998a511441a4ce579671e91576da616b9cc))
-
-* bug fixes 2
-
-
-Former-commit-id: d523d79396f367bd6c2b634a0602e45df0a595f9 [formerly e7f4b424ecf5519ded2352b3d6266a7da07a5b07]
-Former-commit-id: 374041fceb9f851959a35da4d525a6930aa4837a ([`e152160`](https://github.com/bhklab/med-imagetools/commit/e15216086af12e868ba47264d7f3042b6b1aee28))
-
-* test and autopipe fixed
-
-
-Former-commit-id: bbd1dc9a718bf69247befc0e1e99d1c75519eeef [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly 2aca0013e705864697c9df5fa1c574487e307000]]] [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly b0b6efa954b4e9cb0eff438efceb60395069c059 [formerly 2aca0013e705864697c9df5fa1c574487e307000]] [formerly 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 9cc88b1b402108310dbbc8e09a8b13730aa72102]]]]
-Former-commit-id: 2ef1bb694da65458e9eae8dea7bfeb9238f652af
-Former-commit-id: a402b01f18507176c1de523fb5e978552ea8f01c
-Former-commit-id: c206f6d5c638b50ed3981ac0946d18d3399d0414 [formerly cc2e55235011f73f0ec01ff158ecfcfec21506e2]
-Former-commit-id: 834aaa0532513bece9827a6975f9db2e5987103f ([`e321e31`](https://github.com/bhklab/med-imagetools/commit/e321e31c9d69f41d873d94eeaccd2181b33fda74))
-
-* test and autopipe fixed
-
-
-Former-commit-id: 2ef1bb694da65458e9eae8dea7bfeb9238f652af [formerly 9cc88b1b402108310dbbc8e09a8b13730aa72102]
-Former-commit-id: 2aca0013e705864697c9df5fa1c574487e307000 ([`b0b6efa`](https://github.com/bhklab/med-imagetools/commit/b0b6efa954b4e9cb0eff438efceb60395069c059))
-
-* bug fixes_1.0
-
-
-Former-commit-id: 3344042ddfb1ef709ec4fa02628c0c97a6ebd477 [formerly a047ef65c17b77282b3cf5df8523f4bcaab14a8e [formerly a27dc3c212327be4058cc374d9b37ae005fe87e0]] [formerly a047ef65c17b77282b3cf5df8523f4bcaab14a8e [formerly a27dc3c212327be4058cc374d9b37ae005fe87e0] [formerly 384794ad0cff9f35b16e01177e16422f96eef8cd [formerly d2556741284260f74609ead96c2e64621af8511a]]]
-Former-commit-id: 384794ad0cff9f35b16e01177e16422f96eef8cd
-Former-commit-id: b7161a48f3fffb445336ea2a3d827cdb5686deab
-Former-commit-id: d42919d0a2a4d695018091f5d2ed827dff4bbf96 ([`7bb87b6`](https://github.com/bhklab/med-imagetools/commit/7bb87b6f0eccef842f8aa78552993196fc3758a4))
-
-* bug fixes_1.0
-
-
-Former-commit-id: 384794ad0cff9f35b16e01177e16422f96eef8cd [formerly d2556741284260f74609ead96c2e64621af8511a]
-Former-commit-id: a27dc3c212327be4058cc374d9b37ae005fe87e0 ([`a047ef6`](https://github.com/bhklab/med-imagetools/commit/a047ef65c17b77282b3cf5df8523f4bcaab14a8e))
-
 * Update requirements.txt
 
 Former-commit-id: 3f9a7c3be559aba59c69a489ae003b553a2b5f83 ([`e665e21`](https://github.com/bhklab/med-imagetools/commit/e665e21fe6c3ca95dcd23d274baa0c863059dcaa))
@@ -6987,20 +7187,6 @@ Former-commit-id: c9a12d274d67ad911a82214a81ae6bcf588f38bf ([`9b519f4`](https://
 * Create build-ci.yml
 
 Former-commit-id: 6d5d4780b98534abb35c9996646ac41653856355 ([`49f0197`](https://github.com/bhklab/med-imagetools/commit/49f019706b2f950b65a082b07e2a3f2204c1ac30))
-
-* Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
-
-
-Former-commit-id: db2e63a8fbf4e0a01a39af862ee916e14d16e445 [formerly 29118a649d990863cfbf1b059cab862913e2ab30] [formerly db2e63a8fbf4e0a01a39af862ee916e14d16e445 [formerly 29118a649d990863cfbf1b059cab862913e2ab30] [formerly 21a8546de909e2d98d23e232643588e9cfb1c956 [formerly 1cd89845970f294417d95d0792bdcb817b0324d7]]]
-Former-commit-id: 21a8546de909e2d98d23e232643588e9cfb1c956
-Former-commit-id: aa2d95a7888dd213554c627c0d76b4237a1967bf
-Former-commit-id: 2ae58c65d67dce9ed708a3cca2f15e5715f68a5f ([`4408c23`](https://github.com/bhklab/med-imagetools/commit/4408c235ff961b2443e26afd9a91a933a9d22ea6))
-
-* Added dataset class which can load from nrrds or directly from the dataset and convert to pytorch dataset
-
-
-Former-commit-id: 21a8546de909e2d98d23e232643588e9cfb1c956 [formerly 1cd89845970f294417d95d0792bdcb817b0324d7]
-Former-commit-id: 29118a649d990863cfbf1b059cab862913e2ab30 ([`db2e63a`](https://github.com/bhklab/med-imagetools/commit/db2e63a8fbf4e0a01a39af862ee916e14d16e445))
 
 * self.existing, dataset.csv fixed (#10)
 
@@ -7020,152 +7206,8 @@ Former-commit-id: 29118a649d990863cfbf1b059cab862913e2ab30 ([`db2e63a`](https://
 
 * uncommented one line pytest
 
-Co-authored-by: Vishwesh &lt;vishweshramanathan@gmail.com&gt;
+Co-authored-by: Vishwesh <vishweshramanathan@gmail.com>
 Former-commit-id: 8ff5550b971938a3a7ad1f50c68ff606b3b54236 ([`ca98e79`](https://github.com/bhklab/med-imagetools/commit/ca98e7908705922963d88c5c68c99e931870a738))
-
-* uncommented one line pytest
-
-
-Former-commit-id: 7aa572b0b68fa17a57d73a7b5f677af269e19154 [formerly 1c37daba97d23ab4b74681c93ac5149f8b50c67a [formerly 3f878494e3be177a2784ae665bf110f562422443]] [formerly 1c37daba97d23ab4b74681c93ac5149f8b50c67a [formerly 3f878494e3be177a2784ae665bf110f562422443] [formerly f3ba678d71b569a5d4b574c2d7874c93e488ba8b [formerly 2b9d6d4813e05e0cec0550a4dfee47bf18b1f5fe]]]
-Former-commit-id: f3ba678d71b569a5d4b574c2d7874c93e488ba8b
-Former-commit-id: 2046fb64b2d129db338c3d3f2a70e3640eea80ab
-Former-commit-id: eb1822dbe215e6185b3ce426ac1a2e9741e9bb42 ([`d54944e`](https://github.com/bhklab/med-imagetools/commit/d54944eb426956db7417c9ac85172823302bc01c))
-
-* uncommented one line pytest
-
-
-Former-commit-id: f3ba678d71b569a5d4b574c2d7874c93e488ba8b [formerly 2b9d6d4813e05e0cec0550a4dfee47bf18b1f5fe]
-Former-commit-id: 3f878494e3be177a2784ae665bf110f562422443 ([`1c37dab`](https://github.com/bhklab/med-imagetools/commit/1c37daba97d23ab4b74681c93ac5149f8b50c67a))
-
-* uncommented one line pytest
-
-
-Former-commit-id: 01fb59285920aaa2fd8c3f355feab86619938568 [formerly 1f34ff389cc9d8d889d76eb6a529ff13323a44ba [formerly 6da65ddd48d4d10f0e3ec8244581a598d886f75c]] [formerly 1f34ff389cc9d8d889d76eb6a529ff13323a44ba [formerly 6da65ddd48d4d10f0e3ec8244581a598d886f75c] [formerly 797c47cbebf0ef9042ea1828f590f01a813c304f [formerly 3dc8cd388da3ab755d979987b36389dd88396801]]]
-Former-commit-id: 797c47cbebf0ef9042ea1828f590f01a813c304f
-Former-commit-id: 652bd34dc69873469e060381ef0d8995d93335b5
-Former-commit-id: f7cdcc56dcf9c64b0e7864d5c8bf438c462d215c ([`d7e7d66`](https://github.com/bhklab/med-imagetools/commit/d7e7d6644777da08873677bb343409b2bd611139))
-
-* uncommented one line pytest
-
-
-Former-commit-id: 797c47cbebf0ef9042ea1828f590f01a813c304f [formerly 3dc8cd388da3ab755d979987b36389dd88396801]
-Former-commit-id: 6da65ddd48d4d10f0e3ec8244581a598d886f75c ([`1f34ff3`](https://github.com/bhklab/med-imagetools/commit/1f34ff389cc9d8d889d76eb6a529ff13323a44ba))
-
-* Merge branch &#39;add_capabilities&#39; of https://github.com/bhklab/imgtools into add_capabilities
-
-merging sejin&#39;s addition
-
-
-Former-commit-id: cb8975d133bc33645b641b13ce6367531dbaef78 [formerly 412841075771927200c633890319cb084bc2e7c9 [formerly 6709767dc75f8ef3a15ea704e0464aa3151e858c]] [formerly 412841075771927200c633890319cb084bc2e7c9 [formerly 6709767dc75f8ef3a15ea704e0464aa3151e858c] [formerly faab613797495d5181b01f12f43f41865270f6fc [formerly 66a1ffd5a899d64868216e818fffc97260a42fa1]]]
-Former-commit-id: faab613797495d5181b01f12f43f41865270f6fc
-Former-commit-id: 19cc853aeaa9544a9f048ce73236af56ff04ed42
-Former-commit-id: 8c2c3af8a054c0a9d80a97f09c773079eeb86ebd ([`1bb0cc4`](https://github.com/bhklab/med-imagetools/commit/1bb0cc40d7ec178d00146117c4a54f12e3f1b7d9))
-
-* Merge branch &#39;add_capabilities&#39; of https://github.com/bhklab/imgtools into add_capabilities
-
-merging sejin&#39;s addition
-
-
-Former-commit-id: faab613797495d5181b01f12f43f41865270f6fc [formerly 66a1ffd5a899d64868216e818fffc97260a42fa1]
-Former-commit-id: 6709767dc75f8ef3a15ea704e0464aa3151e858c ([`4128410`](https://github.com/bhklab/med-imagetools/commit/412841075771927200c633890319cb084bc2e7c9))
-
-* now checks for existing subject id
-
-
-Former-commit-id: 61153678fe00f0dc2645cee7174fbb9315a119db [formerly c7576821455bf58e27c825282ea58c3265a328a2 [formerly 746bd72cc59ddac3d583655e47ab28dcd851aa45]] [formerly c7576821455bf58e27c825282ea58c3265a328a2 [formerly 746bd72cc59ddac3d583655e47ab28dcd851aa45] [formerly d65b305856ae37363c742f616a83ee1836ed3dd7 [formerly bf4de755d0618dd037c32b5365a05d939878067f]]]
-Former-commit-id: d65b305856ae37363c742f616a83ee1836ed3dd7
-Former-commit-id: 8ce34513b50d29fbdf064ee7ffa008c805329d65
-Former-commit-id: 9a5b436d9259580aa15f25a4c9d8a8ede596c04b ([`a34d702`](https://github.com/bhklab/med-imagetools/commit/a34d7025b62543ab84337d1713c59f8d2c19311d))
-
-* now checks for existing subject id
-
-
-Former-commit-id: d65b305856ae37363c742f616a83ee1836ed3dd7 [formerly bf4de755d0618dd037c32b5365a05d939878067f]
-Former-commit-id: 746bd72cc59ddac3d583655e47ab28dcd851aa45 ([`c757682`](https://github.com/bhklab/med-imagetools/commit/c7576821455bf58e27c825282ea58c3265a328a2))
-
-* deleted data
-
-
-Former-commit-id: 672f541966579d7230df9baca69b02fccdd3a89e [formerly 3d94d8618a834b40c45823ab43f3cca68d44b54e] [formerly 672f541966579d7230df9baca69b02fccdd3a89e [formerly 3d94d8618a834b40c45823ab43f3cca68d44b54e] [formerly 8c55bc4187dca3aee5548f17d2cb8887aa45b131 [formerly d3e6b6a8d0712dbb1aed49be5c2a00c7b919118f]]]
-Former-commit-id: 8c55bc4187dca3aee5548f17d2cb8887aa45b131
-Former-commit-id: c568f42b9733ee40c94df2d5ddf5507016534cdb
-Former-commit-id: 5967c699c5d7d3a17efc03e1318878391c8609d6 ([`23c543e`](https://github.com/bhklab/med-imagetools/commit/23c543ea5937cca07ba44ab5cd2788e1ec17c141))
-
-* deleted data
-
-
-Former-commit-id: 8c55bc4187dca3aee5548f17d2cb8887aa45b131 [formerly d3e6b6a8d0712dbb1aed49be5c2a00c7b919118f]
-Former-commit-id: 3d94d8618a834b40c45823ab43f3cca68d44b54e ([`672f541`](https://github.com/bhklab/med-imagetools/commit/672f541966579d7230df9baca69b02fccdd3a89e))
-
-* now the pipeline saves on exit
-
-
-Former-commit-id: 4aa150d143e100349f0ca595747fb44734d9617c [formerly 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1] [formerly 4aa150d143e100349f0ca595747fb44734d9617c [formerly 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1] [formerly 099d6ca41b0beae20c8261942b1d9c2b91e130a2 [formerly 9cd421dd778df1afc6eb3e8a30a032f676f9b3b3]]]
-Former-commit-id: 099d6ca41b0beae20c8261942b1d9c2b91e130a2
-Former-commit-id: 0e2e9ada4e52a06692df3ae6120988ef3ce83cf0
-Former-commit-id: fb3560460de9f1be962c40e5a07078983c66074d ([`d4656f0`](https://github.com/bhklab/med-imagetools/commit/d4656f01ae363f050c49bd4dc520662129d94804))
-
-* now the pipeline saves on exit
-
-
-Former-commit-id: 099d6ca41b0beae20c8261942b1d9c2b91e130a2 [formerly 9cd421dd778df1afc6eb3e8a30a032f676f9b3b3]
-Former-commit-id: 2b9ac7e5ee454d0d4646c81889a3324ef0fb5ed1 ([`4aa150d`](https://github.com/bhklab/med-imagetools/commit/4aa150d143e100349f0ca595747fb44734d9617c))
-
-* fixed some bugs in autopipeline.py
-
-
-Former-commit-id: eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b [formerly ce800b87f646f60a9825903520527e20b6a3a862] [formerly eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b [formerly ce800b87f646f60a9825903520527e20b6a3a862] [formerly f7a40316af77e38465cb511454d615001936764a [formerly e05ea389216e61ad2231757ddccfe46608535a1d]]]
-Former-commit-id: f7a40316af77e38465cb511454d615001936764a
-Former-commit-id: eafc72c0a39d04c4b2eab01d2b91af52765000de
-Former-commit-id: 4acc42796806ea928d07d381bdc5007bbe65859a ([`c637001`](https://github.com/bhklab/med-imagetools/commit/c63700153e45b96c7ccfa83a492e7e3ce5df8ba2))
-
-* fixed some bugs in autopipeline.py
-
-
-Former-commit-id: f7a40316af77e38465cb511454d615001936764a [formerly e05ea389216e61ad2231757ddccfe46608535a1d]
-Former-commit-id: ce800b87f646f60a9825903520527e20b6a3a862 ([`eef51f9`](https://github.com/bhklab/med-imagetools/commit/eef51f9391d54edb5f9c1fc60bf9e7fa0991ce5b))
-
-* PT/RTDOSE metadata to csv
-
-
-Former-commit-id: 1c25fc0ef604ba983f4af370f5eb27b5e113cf02 [formerly b8e88e61f6bf24971d8e5e81a836b655fa1ea187] [formerly 1c25fc0ef604ba983f4af370f5eb27b5e113cf02 [formerly b8e88e61f6bf24971d8e5e81a836b655fa1ea187] [formerly 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32 [formerly 08616a5987e08a0e392d6a1b2411a035b9c89722]]]
-Former-commit-id: 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32
-Former-commit-id: 286998f0619dee39a38d8bb1c0bf8dd2cfc0734a
-Former-commit-id: 1b2d49097326a58d7c3802988d95218e64556205 ([`fe91a82`](https://github.com/bhklab/med-imagetools/commit/fe91a82c75dffa28fbdc5c00c436abb9021393ca))
-
-* PT/RTDOSE metadata to csv
-
-
-Former-commit-id: 34b9b7f6c0c8cc50bcba03067dc70d748a0cbf32 [formerly 08616a5987e08a0e392d6a1b2411a035b9c89722]
-Former-commit-id: b8e88e61f6bf24971d8e5e81a836b655fa1ea187 ([`1c25fc0`](https://github.com/bhklab/med-imagetools/commit/1c25fc0ef604ba983f4af370f5eb27b5e113cf02))
-
-* uptodate with master, merged
-
-
-Former-commit-id: 7c279256bc5ba6dac6872338e1c77e88392611f6 [formerly 42a974ec43d270818dbd192e95017af691b83137] [formerly 7c279256bc5ba6dac6872338e1c77e88392611f6 [formerly 42a974ec43d270818dbd192e95017af691b83137] [formerly 3a16c640a40d9f76f9f7d046724b891fbf8f422c [formerly 4c8b72c078e331cdd2cbd26dadef836dc49129d2]]]
-Former-commit-id: 3a16c640a40d9f76f9f7d046724b891fbf8f422c
-Former-commit-id: 1d20f3a5661f9c24a4758bc2cba7306e1a48d177
-Former-commit-id: a9fadd38f389505df94fb074c5e7db5c6abc5fad ([`3fbdc75`](https://github.com/bhklab/med-imagetools/commit/3fbdc756ded9e696c3b869506b63564f62a9afdf))
-
-* uptodate with master, merged
-
-
-Former-commit-id: 3a16c640a40d9f76f9f7d046724b891fbf8f422c [formerly 4c8b72c078e331cdd2cbd26dadef836dc49129d2]
-Former-commit-id: 42a974ec43d270818dbd192e95017af691b83137 ([`7c27925`](https://github.com/bhklab/med-imagetools/commit/7c279256bc5ba6dac6872338e1c77e88392611f6))
-
-* Added test autopipeline and modalities, solved some autopipeline bugs, read_dicom_series and pet now supports series_id
-
-
-Former-commit-id: c53ee623a6f420e5575cbb0b2e97f3630213f52f [formerly 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44] [formerly c53ee623a6f420e5575cbb0b2e97f3630213f52f [formerly 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44] [formerly 941669ee0574c71785fd8eb07e7dbe4e0b07b484 [formerly 03f99572453723e4a3e895acac0996997f090168]]]
-Former-commit-id: 941669ee0574c71785fd8eb07e7dbe4e0b07b484
-Former-commit-id: 4705b14fd0bacf2a7524a8d2a4bb13a7320041c2
-Former-commit-id: a843e69e3b38f7c08790bcee5c596402d6be99ba ([`ea4096e`](https://github.com/bhklab/med-imagetools/commit/ea4096e0da4fb7bad0b0d9e4eafff51780e8346e))
-
-* Added test autopipeline and modalities, solved some autopipeline bugs, read_dicom_series and pet now supports series_id
-
-
-Former-commit-id: 941669ee0574c71785fd8eb07e7dbe4e0b07b484 [formerly 03f99572453723e4a3e895acac0996997f090168]
-Former-commit-id: 2d72ee4c185d5848277d8d0a52cf4ddd4e664d44 ([`c53ee62`](https://github.com/bhklab/med-imagetools/commit/c53ee623a6f420e5575cbb0b2e97f3630213f52f))
 
 * sanity changes before purging dev-20200414
 
@@ -7263,25 +7305,25 @@ merge into label_save
 
 Former-commit-id: 9e97512736e5a260e6652f3e84e80c4b06b2f9aa ([`4971b4d`](https://github.com/bhklab/med-imagetools/commit/4971b4deb008045c1591cd61157503e2ec6d7574))
 
-* Merge branch &#39;label_save&#39; of github.com:bhklab/imgtools into complete_pipe
+* Merge branch 'label_save' of github.com:bhklab/imgtools into complete_pipe
 
 
 Former-commit-id: 0cfa63a989727ff9fe16493c7c0c5adc54fad64e ([`21cda28`](https://github.com/bhklab/med-imagetools/commit/21cda286fd859a68e6d2876817622f214590363b))
+
+* added crawl.py
+
+
+Former-commit-id: 3d3bf231400a8f8ae5eb2f0b450b0adf511d2911 ([`06f4bf5`](https://github.com/bhklab/med-imagetools/commit/06f4bf50888ca4342cab6fb66cc71f8fc3ce5bf5))
 
 * more refactoring
 
 
 Former-commit-id: 8820e7c90bb1ca343ac86de716349ac7d1a39c8a ([`2e9ad24`](https://github.com/bhklab/med-imagetools/commit/2e9ad24f6194fc0ad5163a9c717c1389611e335b))
 
-* Merge branch &#39;complete_pipe&#39; of github.com:bhklab/imgtools into complete_pipe
+* Merge branch 'complete_pipe' of github.com:bhklab/imgtools into complete_pipe
 
 
 Former-commit-id: 35f92d06bec081f3334ccc52841d42ef5c225bc5 ([`16b6abc`](https://github.com/bhklab/med-imagetools/commit/16b6abc3ecc03c9af2075776392ebc61a380cdec))
-
-* major refactoring
-
-
-Former-commit-id: 525f5bc85313f8584910407d48b071c029a08542 ([`261229f`](https://github.com/bhklab/med-imagetools/commit/261229f7ef6c58afe347a817000579f54d2bc545))
 
 * Fixed dataset.csv writing issues
 
@@ -7292,6 +7334,11 @@ Former-commit-id: 46d8d7d3ca3d822a3c3b0c2afe85f914d4940df2 ([`2bd9245`](https://
 
 
 Former-commit-id: 22cd0254f6792ed848d756ba8dad5f27512eef43 ([`42d93c6`](https://github.com/bhklab/med-imagetools/commit/42d93c676255903449caec52a304db0aab1bb318))
+
+* major refactoring
+
+
+Former-commit-id: 525f5bc85313f8584910407d48b071c029a08542 ([`261229f`](https://github.com/bhklab/med-imagetools/commit/261229f7ef6c58afe347a817000579f54d2bc545))
 
 * Now missing RTDOSE references are completed by RTPLAN
 
@@ -7307,11 +7354,6 @@ Former-commit-id: 39b298376295d79beaa0fc003ed3c2c5bd79132c ([`15f958e`](https://
 
 
 Former-commit-id: bb446096a2315e8c52b2c0d74facebe8b967f7ee ([`8bd3804`](https://github.com/bhklab/med-imagetools/commit/8bd3804d67fc31b6b3fb50f35f443cdd32b1f100))
-
-* added crawl.py
-
-
-Former-commit-id: 3d3bf231400a8f8ae5eb2f0b450b0adf511d2911 ([`06f4bf5`](https://github.com/bhklab/med-imagetools/commit/06f4bf50888ca4342cab6fb66cc71f8fc3ce5bf5))
 
 * Added DataGraph, now fetching subset of dataset is supported using graph query
 
@@ -7343,16 +7385,11 @@ Former-commit-id: e4d5d3c311b26021e68370b62cda09d4a9e2e0cb ([`2b20590`](https://
 
 Former-commit-id: c2e2d1ceff9c932e2c210cc305fe2545f239eae8 ([`7991481`](https://github.com/bhklab/med-imagetools/commit/79914814e778c359f2c72af058cfdc69ec071204))
 
-* Merge branch &#39;RTdose&#39; into complete_pipe
+* Merge branch 'RTdose' into complete_pipe
 RT dose and PET done. Now focusing on the completion of pipeline
 
 
 Former-commit-id: 5725a1ca40cf21162204435f9944d84460712c21 ([`71fc6ac`](https://github.com/bhklab/med-imagetools/commit/71fc6acf309656b8c326b7c5a024627f7d8c11af))
-
-* Head-Neck-PET-CT pipeline + `read_dicom_auto`
-
-
-Former-commit-id: fa6408c11a2b9b6bd80279504ba4c79975ad3582 ([`6e6be59`](https://github.com/bhklab/med-imagetools/commit/6e6be592285e808d11798294396d0f20db562060))
 
 * PET readability added
 
@@ -7368,6 +7405,11 @@ Former-commit-id: d7b309bb898286e9c4a000511ed2c585df931045 ([`b30508d`](https://
 
 
 Former-commit-id: 716c9f682863f75a1dbcc2bd1956d3c8160757c6 ([`91a9330`](https://github.com/bhklab/med-imagetools/commit/91a9330edfbcfb42370b7cd6c58ce5ae3b7f16ad))
+
+* Head-Neck-PET-CT pipeline + `read_dicom_auto`
+
+
+Former-commit-id: fa6408c11a2b9b6bd80279504ba4c79975ad3582 ([`6e6be59`](https://github.com/bhklab/med-imagetools/commit/6e6be592285e808d11798294396d0f20db562060))
 
 * fixed structureset.py:148
 
@@ -7424,20 +7466,20 @@ Former-commit-id: 184319338f0ba88439f6145726f24903128b75ba ([`ed7918c`](https://
 
 Former-commit-id: 59c0e92d1f075574113fa5fe7dc7bc2394221d5b ([`97b00ad`](https://github.com/bhklab/med-imagetools/commit/97b00ad5fc467f134568a40fb7c2338df16333dc))
 
-* Merge branch &#39;master&#39; of https://github.com/bhklab/imgtools
+* Merge branch 'master' of https://github.com/bhklab/imgtools
 
 
 Former-commit-id: 93ac3245f2e3448a1f7e2b81086fca8b24596fdf ([`1055648`](https://github.com/bhklab/med-imagetools/commit/1055648fe9e80b2bb879625ce0803a7f800b5bb0))
-
-* [Bugfix] Fix slice number rounding when generating a mask from RTSTRUCT
-
-
-Former-commit-id: 919ea491ae01f0e6c87731bcd7ebe4d89a325042 ([`f662f90`](https://github.com/bhklab/med-imagetools/commit/f662f902df7f5de3c696969a71135bdd9976aaca))
 
 * Fix type error when passing Numpy array to rotate
 
 
 Former-commit-id: 53223da1c607294a9bc42d94a09a1c35376547fa ([`d043593`](https://github.com/bhklab/med-imagetools/commit/d0435930a8ba39ab821ce48a30304a2318168c0f))
+
+* [Bugfix] Fix slice number rounding when generating a mask from RTSTRUCT
+
+
+Former-commit-id: 919ea491ae01f0e6c87731bcd7ebe4d89a325042 ([`f662f90`](https://github.com/bhklab/med-imagetools/commit/f662f902df7f5de3c696969a71135bdd9976aaca))
 
 * Fix spurious mixin in ops
 
@@ -7498,7 +7540,7 @@ Former-commit-id: 45af80b94a7343d452970cce620cc0310781766e ([`6eb93ba`](https://
 
 Former-commit-id: ccb2673a341395a6d13c8c26ffa74a8354a4cff7 ([`9fb9b67`](https://github.com/bhklab/med-imagetools/commit/9fb9b6793a578c7264d4055c48dd17781c0ae595))
 
-* Revert &#34;fixed index column handling in ImageCSVLoader&#34;
+* Revert "fixed index column handling in ImageCSVLoader"
 
 This reverts commit 5561121c00024f8ebf72b83b9605a6ffe655eb23 [formerly ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33].
 
@@ -7515,10 +7557,20 @@ Former-commit-id: ac9b8d1aec53ec3f989cbfbb89fae353d2b94e33 ([`5561121`](https://
 
 Former-commit-id: 61cec9cdb9d05bdf9693c33b0a12cac14da31da0 ([`2b5c9f3`](https://github.com/bhklab/med-imagetools/commit/2b5c9f3f7e0e96daa1130944284a23a45ea0a9a6))
 
-* Merge branch &#39;master&#39; of https://github.com/bhklab/imgtools
+* Merge branch 'master' of https://github.com/bhklab/imgtools
 
 
 Former-commit-id: aee62cb868378e8437033ae82a422c060d4ff854 ([`5e33ff5`](https://github.com/bhklab/med-imagetools/commit/5e33ff50ff3afd5941cee62a83e248de7b4549eb))
+
+* Merge branch 'master' of https://github.com/bhklab/imgtools
+
+
+Former-commit-id: 1286866b657ff7fd44a10ce8da7f53fac06c1411 ([`673fe68`](https://github.com/bhklab/med-imagetools/commit/673fe68b54312918211389bc128682baedabff05))
+
+* [In Progress] Adding documentation to ops.py
+
+
+Former-commit-id: 0463acabdfb879de5467f813d90bae6c537e957f ([`3b706fa`](https://github.com/bhklab/med-imagetools/commit/3b706fabfaaabbe86ed9b4c5ca9801abb3267298))
 
 * image CSV loader now accepts pandas DataFrames
 
@@ -7529,16 +7581,6 @@ Former-commit-id: 5f25bfdb51761b8bb4d870e682991492c900852a ([`84c7c77`](https://
 
 
 Former-commit-id: 57b944e8dbd4d74d09f72baac19bd090af220c15 ([`006b352`](https://github.com/bhklab/med-imagetools/commit/006b35282d0360a54ba34b4ab67e0b09eb34fc32))
-
-* Merge branch &#39;master&#39; of https://github.com/bhklab/imgtools
-
-
-Former-commit-id: 1286866b657ff7fd44a10ce8da7f53fac06c1411 ([`673fe68`](https://github.com/bhklab/med-imagetools/commit/673fe68b54312918211389bc128682baedabff05))
-
-* [In Progress] Adding documentation to ops.py
-
-
-Former-commit-id: 0463acabdfb879de5467f813d90bae6c537e957f ([`3b706fa`](https://github.com/bhklab/med-imagetools/commit/3b706fabfaaabbe86ed9b4c5ca9801abb3267298))
 
 * fixed label handling in image statistics computation
 
@@ -7700,7 +7742,7 @@ Former-commit-id: b824998eee88ade67538d714c4199437e2faa9fd ([`7b8db79`](https://
 
 Former-commit-id: 302b2a7077a12e6459b4b18d6a6ff1b8d772bb02 ([`623313b`](https://github.com/bhklab/med-imagetools/commit/623313be4b47e3d5a4f2f2e176b42192fd46e2ad))
 
-* added example data &amp; updated example pipeline
+* added example data & updated example pipeline
 
 
 Former-commit-id: 0a86231503f56c579e2ea7dc8e3a97d225effa1a ([`5ebdce5`](https://github.com/bhklab/med-imagetools/commit/5ebdce5c012715014a1203e83f07f38050e4778d))
@@ -7713,11 +7755,11 @@ Former-commit-id: 0a86231503f56c579e2ea7dc8e3a97d225effa1a ([`5ebdce5`](https://
 
 * updated arguments in resample op ([`d5e5268`](https://github.com/bhklab/med-imagetools/commit/d5e5268c42d1130d1958b8573b50acaa2ea7533e))
 
-* Merge branch &#39;master&#39; of https://github.com/bhklab/imgtools ([`ebd0717`](https://github.com/bhklab/med-imagetools/commit/ebd07173f9b8745f6ea750e53a7d15fd57b7badf))
+* Merge branch 'master' of https://github.com/bhklab/imgtools ([`ebd0717`](https://github.com/bhklab/med-imagetools/commit/ebd07173f9b8745f6ea750e53a7d15fd57b7badf))
+
+* [quick fix] removed a syntax error, = that was added with __init__ function's output_directory parameter ([`8657727`](https://github.com/bhklab/med-imagetools/commit/865772722d9c1f2ad582fbe021c23866692dfa6d))
 
 * updated readme with development mode installation instructions ([`2fe5e95`](https://github.com/bhklab/med-imagetools/commit/2fe5e956147556de0d6e4ffb369d211efd30d3c6))
-
-* [quick fix] removed a syntax error, = that was added with __init__ function&#39;s output_directory parameter ([`8657727`](https://github.com/bhklab/med-imagetools/commit/865772722d9c1f2ad582fbe021c23866692dfa6d))
 
 * added zoom operation ([`0426d0e`](https://github.com/bhklab/med-imagetools/commit/0426d0edbb6425f6a41f4b557d065539ef11d1c9))
 
@@ -7725,7 +7767,7 @@ Former-commit-id: 0a86231503f56c579e2ea7dc8e3a97d225effa1a ([`5ebdce5`](https://
 
 * refactored image statistics computation ([`265e19a`](https://github.com/bhklab/med-imagetools/commit/265e19a7ce232f15738f870ba870b1196a58ca23))
 
-* minor documentation &amp; type annotation fixes ([`01b5295`](https://github.com/bhklab/med-imagetools/commit/01b5295fb1cd03c8f5cf3957ee8c2786225cfb07))
+* minor documentation & type annotation fixes ([`01b5295`](https://github.com/bhklab/med-imagetools/commit/01b5295fb1cd03c8f5cf3957ee8c2786225cfb07))
 
 * fixed standard scaling function ([`f74a78f`](https://github.com/bhklab/med-imagetools/commit/f74a78fbea6df123784898692a27e53e9b10454d))
 
@@ -7741,11 +7783,11 @@ Former-commit-id: 0a86231503f56c579e2ea7dc8e3a97d225effa1a ([`5ebdce5`](https://
 
 * moved examples outside package code ([`a5fd368`](https://github.com/bhklab/med-imagetools/commit/a5fd368455673f328255b5c43c2a83cd42067ba8))
 
-* Revert &#34;minor fixes in RADCURE example&#34;
+* Revert "minor fixes in RADCURE example"
 
 This reverts commit 3ed090c6554e61eee35d4d3161ca5489a56b49ee. ([`b68c6f4`](https://github.com/bhklab/med-imagetools/commit/b68c6f4b89abc74586f11417fb6b2e8ccb424f75))
 
-* Revert &#34;moved examples outside package code&#34;
+* Revert "moved examples outside package code"
 
 This reverts commit 0014e6526bf37062ef6e3bb686f42538d8d075a0. ([`25cf496`](https://github.com/bhklab/med-imagetools/commit/25cf4965c8d9bf293c30c2b7d854b6af46a8a656))
 
@@ -7767,7 +7809,9 @@ This reverts commit 0014e6526bf37062ef6e3bb686f42538d8d075a0. ([`25cf496`](https
 
 * minor fixes in RADCURE example ([`3ed090c`](https://github.com/bhklab/med-imagetools/commit/3ed090c6554e61eee35d4d3161ca5489a56b49ee))
 
-* Merge branch &#39;master&#39; of https://github.com/bhklab/imgtools ([`f617f7e`](https://github.com/bhklab/med-imagetools/commit/f617f7e0330c06b035ace3e503884bea8e5a7ec3))
+* Merge branch 'master' of https://github.com/bhklab/imgtools ([`f617f7e`](https://github.com/bhklab/med-imagetools/commit/f617f7e0330c06b035ace3e503884bea8e5a7ec3))
+
+* Update README.md ([`1dc8d33`](https://github.com/bhklab/med-imagetools/commit/1dc8d33cde8048e57318ff77a11030ba61e11796))
 
 * lazy import matplotlib in imageutils ([`eefaef6`](https://github.com/bhklab/med-imagetools/commit/eefaef6c0fa6520cbe0851c667d3746fa19343db))
 
@@ -7780,8 +7824,6 @@ This reverts commit 0014e6526bf37062ef6e3bb686f42538d8d075a0. ([`25cf496`](https
 * fixed subject id handling in ImageFileLoader when subdir path is passed ([`0d4d117`](https://github.com/bhklab/med-imagetools/commit/0d4d117fc40ee7667553e28bd0a764319962250b))
 
 * updated conda installation instructions ([`8f34ea3`](https://github.com/bhklab/med-imagetools/commit/8f34ea3baddd62dbf333ae8f51717ebdc4261528))
-
-* Update README.md ([`1dc8d33`](https://github.com/bhklab/med-imagetools/commit/1dc8d33cde8048e57318ff77a11030ba61e11796))
 
 * added README ([`01f04c4`](https://github.com/bhklab/med-imagetools/commit/01f04c49dda61860834111a0cc2d7ed129e27134))
 
