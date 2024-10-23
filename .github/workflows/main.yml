@@ -78,11 +78,14 @@ jobs:
           name: codecov-umbrella
   
   cd:
+    concurrency: release
     permissions:
-        contents: write
-        packages: write
-        issues: write
-        pull-requests: write
+      id-token: write
+      actions: read
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
 
     needs: [tests]
 
@@ -99,6 +102,12 @@ jobs:
 
     # Define job steps
     steps:
+    - uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ vars.SEMVERPOLICE_ID }}
+        private-key: ${{ secrets.SEMVER_APP_KEY }}
+        
     - name: Set up Python 3.12
       uses: actions/setup-python@v2
       with:
@@ -110,10 +119,11 @@ jobs:
         fetch-depth: 0
 
     - name: Python Semantic Release
-      id: release
       uses: python-semantic-release/python-semantic-release@master
       with:
+        root_options: -v
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        git_committer_name: 'gh-actions-semver'
 
   pip-squeak:
     needs: cd
