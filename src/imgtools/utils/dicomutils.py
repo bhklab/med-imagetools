@@ -1,5 +1,5 @@
 import pydicom
-from typing import Dict, TypeVar, Union
+from typing import Dict, TypeVar
 import copy
 
 T = TypeVar('T')
@@ -59,7 +59,7 @@ def get_modality_metadata(dicom_data, modality: str):
     return metadata
 
 
-def all_modalities_metadata(dicom_data: Union[pydicom.dataset.FileDataset, pydicom.dicomdir.DicomDir]) -> Dict[str, T]:
+def all_modalities_metadata(dicom_data: pydicom.dataset.FileDataset) -> Dict[str, T]:
     metadata = get_modality_metadata(dicom_data, 'ALL')
     
     if hasattr(dicom_data, 'PixelSpacing') and hasattr(dicom_data, 'SliceThickness'):
