@@ -147,7 +147,7 @@ class DataGraph:
         mr = df[df["modality"] == "MR"]
         pet = df[df["modality"] == "PT"]
 
-        edge_types = np.arange(7)
+        edge_types = np.arange(8)
         for edge in edge_types:
             if edge==0:    # FORMS RTDOSE->RTSTRUCT, can be formed on both series and instance uid
                 df_comb1    = pd.merge(struct, dose, left_on="instance_uid", right_on="reference_rs")
@@ -314,6 +314,23 @@ class DataGraph:
                     #Search for subgraphs with edges 2 or (1 and 0)
                     regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
                     final_df = self.graph_query(regex_term, edge_list, "RTDOSE") 
+            elif edge_type==7: # SEG->CT/MR
+                # keep final_df as is
+                final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type].copy()
+                node_dest, node_origin = valid.split(",")
+                final_df.rename(
+                    columns={
+                        "study_x": "study",
+                        "patient_ID_x": "patient_ID",
+                        "series_x": f"series_{node_dest}",
+                        "series_y": f"series_{node_origin}",
+                        "folder_x": f"folder_{node_dest}",
+                        "folder_y": f"folder_{node_origin}",
+                        "subseries_x": f"subseries_{node_dest}",
+                        "subseries_y": f"subseries_{node_origin}",
+                    },
+                    inplace=True,
+                )
             else:
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type, ["study","patient_ID_x", "study_x", "study_y", "series_x","folder_x","series_y","folder_y", "subseries_x", "subseries_y"]]
                 node_dest = valid.split(",")[0]
