@@ -22,7 +22,7 @@ simpleitk = "^2.3.1"
 tqdm = "^4.66.4"
 pyyaml = "^6.0.1"
 dill = "^0.3.8"
-attrs = "^23.2.0"
+attrs = ">=23.2.0"
 
 [tool.poetry.scripts]
 autopipeline = "imgtools.autopipeline:main"
