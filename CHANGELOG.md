@@ -1,11 +1,26 @@
 # CHANGELOG
 
 
+## v1.5.8 (2024-10-25)
+
+### Bug Fixes
+
+* fix(datagraph): iteration through edge_types wasnt updated for seg (#131)
+
+* fix(datagraph): update edge_types to 8 and handle new edge type for SEG->CT/MR mapping in final dataframe processing
+
+* fix(pyproject): update attrs version constraint to allow all 23.x versions and above ([`e7cca2a`](https://github.com/bhklab/med-imagetools/commit/e7cca2a8a2542e6f82ddae221b298094ebf3c022))
+
+
 ## v1.5.7 (2024-10-23)
 
 ### Bug Fixes
 
 * fix: ci-cd - add id in release for pypi step ([`7abd175`](https://github.com/bhklab/med-imagetools/commit/7abd175d58894b5ea84448735c4933de4aa156bd))
+
+### Chores
+
+* chore(sem-ver): 1.5.7 ([`c9a10bb`](https://github.com/bhklab/med-imagetools/commit/c9a10bbbfe7cc0e026c6a1719c07361bb7f3187f))
 
 
 ## v1.5.6 (2024-10-23)
