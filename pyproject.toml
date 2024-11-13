@@ -39,21 +39,6 @@ betapipeline = "imgtools.autopipeline_refactored:main"
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
-
-# [tool.poetry.scripts]
-# autopipeline = "imgtools.autopipeline:main"
-# betapipeline = "imgtools.autopipeline_refactored:main"
-
-# [tool.poetry.group.dev.dependencies]
-# pytest = "^8.2.0"
-# ruff = "^0.4.4"
-# pytest-cov = ">=4.0.0"
-# python-semantic-release = "^9.8.0"
-
-# [tool.poetry.extras]
-# torch = ["torch", "torchio"]
-# debug = ["pyvis"]
-
 [tool.semantic_release]
 version_variables = ["setup.py:__version__"]
 version_toml = ["pyproject.toml:tool.poetry.version"]
@@ -67,6 +52,6 @@ match = "(main|master)"
 
 [tool.semantic_release.branches.dev]
 # any branch that contains "dev" will be considered a dev branch
-match = "*dev*"
+match = ".*dev.*"
 prerelease = true
 prerelease_token = "rc"

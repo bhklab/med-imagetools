@@ -4,13 +4,17 @@ channels = ["conda-forge"]
 description = "Add a short description here"
 name = "med-imagetools"
 platforms = ["osx-arm64"]
-version = "0.1.0"
 
 [pypi-dependencies]
 med-imagetools = { path = ".", editable = true }
 
 [environments]
-default = { features = ["test", "style", "build", "dev"], solve-group = "default" }
+default = { features = [
+  "test",
+  "style",
+  "build",
+  "dev",
+], solve-group = "default" }
 py310 = ["py310", "test"]
 py311 = ["py311", "test"]
 py312 = ["py312", "test"]
@@ -41,7 +45,7 @@ pytest-xdist = "*"
 [feature.test.tasks.test]
 cmd = [
   "pytest",
-  "--numprocesses=auto",
+  # "--numprocesses=auto", 
   "-s",
   "--verbose",
   "--cov=imgtools",
@@ -67,18 +71,14 @@ pre-commit = ">=3.7.1,<3.8"
 
 #################################### RELEASE & BUILD ###############################################
 
-[feature.release.dependencies]
-python-semantic-release = "*"
 
 [feature.build.dependencies]
+python-semantic-release = "*"
 hatch = "*"
 
-[feature.release.tasks]
+[feature.build.tasks]
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
 
-
-
-[feature.build.tasks]
 build = { cmd = [
   "hatch",
   "build",
