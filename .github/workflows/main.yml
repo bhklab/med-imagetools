@@ -26,7 +26,7 @@ jobs:
         uses: prefix-dev/setup-pixi@v0.8.1
         with:
           environments: ${{ matrix.env }}
-          pixi-version: v0.33.0
+          pixi-version: v0.36.0
           cache: true
           locked: false # wont be the same because of the tag
 

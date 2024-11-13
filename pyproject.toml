@@ -39,6 +39,14 @@ betapipeline = "imgtools.autopipeline_refactored:main"
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
+[tool.hatch.build]
+directory = "dist"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/imgtools"]
+include = ["pyproject.toml", "README.md", "src/**"]
+
+
 [tool.semantic_release]
 version_variables = ["setup.py:__version__"]
 version_toml = ["pyproject.toml:tool.poetry.version"]
