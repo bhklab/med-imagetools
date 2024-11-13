@@ -1,12 +1,7 @@
 name: bob-the-builder
 
 # only run on pushes to main or pull requests
-on:
-  push:
-    # push to any branch *
-    branches: '*'
-  pull_request:
-    branches: [ main ]
+
 
 jobs:
   lint:

@@ -1,46 +1,58 @@
-[tool.poetry]
+[project]
 name = "med-imagetools"
-packages = [{ include = "imgtools", from = "src" }]
 version = "1.5.8"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
-authors = ["Sejin Kim, Benjamin Haibe-Kains"]
-license = "GPL-3.0"
+authors = [{ name = "Sejin Kim" }, { name = "Benjamin Haibe-Kains" }]
+license = "MIT"
 readme = "README.md"
+requires-python = ">=3.10,<4"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4"
-h5py = "^3.11.0"
-joblib = "^1.4.2"
-numpy = "^1.26.4"
-matplotlib = "^3.8.4"
-pandas = "^2.2.2"
-pydicom = "^2.4.4"
-pynrrd = "^1.0.0"
-scikit-image = "^0.23.2"
-scikit-learn = "^1.4.2"
-simpleitk = "^2.3.1"
-tqdm = "^4.66.4"
-pyyaml = "^6.0.1"
-dill = "^0.3.8"
-attrs = ">=23.2.0"
+# Standard dependencies
+dependencies = [
+  "h5py>=3.11.0,<4",
+  "joblib>=1.4.2,<2",
+  "numpy>=1.26.4,<2",
+  "matplotlib>=3.8.4,<4",
+  "pandas>=2.2.2,<3",
+  "pydicom>=2.4.4,<3",
+  "pynrrd>=1.0.0,<2",
+  "scikit-image>=0.23.2,<1",
+  "scikit-learn>=1.4.2,<2",
+  "simpleitk>=2.3.1,<3",
+  "tqdm>=4.66.4,<5",
+  "pyyaml>=6.0.1,<7",
+  "dill>=0.3.8,<1",
+  "attrs>=23.2.0",
+]
 
-[tool.poetry.scripts]
-autopipeline = "imgtools.autopipeline:main"
-betapipeline = "imgtools.autopipeline_refactored:main"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.0"
-ruff = "^0.4.4"
-pytest-cov = ">=4.0.0"
-python-semantic-release = "^9.8.0"
-
-[tool.poetry.extras]
+# Optional dependencies (extras)
+[project.optional-dependencies]
 torch = ["torch", "torchio"]
 debug = ["pyvis"]
 
+# Entry points for CLI commands
+[project.scripts]
+autopipeline = "imgtools.autopipeline:main"
+betapipeline = "imgtools.autopipeline_refactored:main"
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+
+# [tool.poetry.scripts]
+# autopipeline = "imgtools.autopipeline:main"
+# betapipeline = "imgtools.autopipeline_refactored:main"
+
+# [tool.poetry.group.dev.dependencies]
+# pytest = "^8.2.0"
+# ruff = "^0.4.4"
+# pytest-cov = ">=4.0.0"
+# python-semantic-release = "^9.8.0"
+
+# [tool.poetry.extras]
+# torch = ["torch", "torchio"]
+# debug = ["pyvis"]
 
 [tool.semantic_release]
 version_variables = ["setup.py:__version__"]
@@ -52,3 +64,9 @@ patch_without_tag = true
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
+
+[tool.semantic_release.branches.dev]
+# any branch that contains "dev" will be considered a dev branch
+match = "*dev*"
+prerelease = true
+prerelease_token = "rc"
