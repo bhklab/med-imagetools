@@ -2,6 +2,7 @@ import click
 import pathlib
 from imgtools.crawl.crawl import crawl_directory
 from imgtools.logging import logger
+import json
 
 @click.command()
 @click.argument(
@@ -16,7 +17,13 @@ from imgtools.logging import logger
 def main(directory: pathlib.Path):
     logger.debug("Crawling directory...", directory=directory)
     db = crawl_directory(directory)
-    print("# patients:", len(db))
+    
+    # Save list of dicts to JSON file
+    output = pathlib.Path("database.json")
+    with open(output.as_posix(), "w") as f:
+        logger.debug("Saving database to JSON file...", file=output)
+        f.write(json.dumps(db, indent=4))
+
 
 
 if __name__ == "__main__":
