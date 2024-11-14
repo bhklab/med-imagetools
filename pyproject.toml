@@ -49,7 +49,7 @@ include = ["pyproject.toml", "README.md", "src/**"]
 
 [tool.semantic_release]
 version_variables = ["setup.py:__version__"]
-version_toml = ["pyproject.toml:tool.poetry.version"]
+version_toml = ["pyproject.toml:project.version"]
 upload_to_release = true
 remove_dist = false
 commit_message = "chore(sem-ver): {version}"
