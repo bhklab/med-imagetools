@@ -42,18 +42,9 @@ def get_reference(meta):
         )
     elif meta.Modality == "RTDOSE":
         return ReferenceInfo(
-            reference_rs=get_str(
-                getattr(meta, "ReferencedStructureSetSequence")[0],
-                "ReferencedSOPInstanceUID",
-            ),
-            reference_ct=get_str(
-                getattr(meta, "ReferencedImageSequence")[0],
-                "ReferencedSOPInstanceUID",
-            ),
-            reference_pl=get_str(
-                getattr(meta, "ReferencedRTPlanSequence")[0],
-                "ReferencedSOPInstanceUID",
-            ),
+            reference_rs=get_str(meta, "ReferencedStructureSetSequence"),
+            reference_ct=get_str(meta, "ReferencedImageSequence"),
+            reference_pl=get_str(meta, "ReferencedRTPlanSequence"),
         )
     elif meta.Modality == "SEG":
         return ReferenceInfo(
@@ -61,6 +52,7 @@ def get_reference(meta):
         )
     else:
         return ReferenceInfo()
+
 
 def parse_dicom(dcm_path: pathlib.Path) -> Dict[str, str]:
     desired_attributes = [
@@ -85,22 +77,49 @@ def parse_dicom(dcm_path: pathlib.Path) -> Dict[str, str]:
         sys.exit(1)
 
 
-def crawl_directory(top: pathlib.Path, n_jobs: int = -1) -> list:
+def crawl_directory(
+    top: pathlib.Path,
+    extension: str = "dcm",
+    case_sensitive: bool = False,
+    n_jobs: int = -1,
+) -> list:
     # top is the input directory in the argument parser from autotest.py
-    dcms = [file for file in pathlib.Path(top).rglob("*.dcm") if file.is_file()]
-    logger.info(f"Found {len(dcms)} DICOM files in {top}")
-    database_list = []
-    with ProcessPoolExecutor(n_jobs if n_jobs > 0 else os.cpu_count()) as executor:
-        with logging_redirect_tqdm([logging.getLogger("imgtools")]):
-            with tqdm(total=len(dcms), desc="Processing DICOM files") as pbar:
-                for database, dcm_path in executor.map(parse_dicom, dcms):
-                    database_list.append(
-                        {
-                            **database,
-                            "path": dcm_path.relative_to(top).as_posix(),
-                        }
-                    )
+    logger.info(
+        "Lookging for DICOM files",
+        top=top,
+        search_extension=extension,
+        case_sensitive=case_sensitive,
+    )
 
-                    pbar.update(1)
+    dcms = [
+        file
+        for file in top.rglob(f"*.{extension}", case_sensitive=case_sensitive)
+        if file.is_file()
+    ]
+    logger.info(f"Found {len(dcms)} DICOM files")
+
+    database_list = []
+    N_WORKERS = n_jobs if n_jobs > 0 else os.cpu_count()
+
+    logger.info(
+        f"Using {N_WORKERS} workers for parallel processing",
+        param_n_jobs=n_jobs,
+        os_cpu_count=os.cpu_count(),
+    )
+
+    with (
+        ProcessPoolExecutor(N_WORKERS) as executor,
+        logging_redirect_tqdm([logging.getLogger("imgtools")]),
+        tqdm(total=len(dcms), desc="Processing DICOM files") as pbar,
+    ):
+        for database, dcm_path in executor.map(parse_dicom, dcms):
+            database_list.append(
+                {
+                    **database,
+                    "path": dcm_path.relative_to(top).as_posix(),
+                }
+            )
+
+            pbar.update(1)
 
     return database_list

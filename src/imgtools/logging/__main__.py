@@ -5,9 +5,6 @@ import logging
 from tqdm import trange
 from tqdm.contrib.logging import logging_redirect_tqdm, tqdm_logging_redirect
 
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.DEBUG)
-
 
 @click.command()
 def main():
@@ -38,12 +35,7 @@ def main():
     except ZeroDivisionError:
         logger.exception("This is an exception message")
 
-    root_logger.info("This is a root logger message")
-    root_logger.warning("This is a root logger warning message")
-    root_logger.error("This is a root logger error message")
-
-
-    # To use tqdm with logger, 
+    # To use tqdm with logger,
     # you need to get the logger from base logging instead of structlog
     imgtools_logger = logging.getLogger("imgtools")
     imgtools_logger.info("This is an imgtools logger message")
@@ -54,10 +46,8 @@ def main():
         for i in trange(4):
             imgtools_logger.info(f"This is a tqdm logger message {i}")
             time.sleep(0.5)
-            if i ==3:
+            if i == 3:
                 1 / 0
-
-
 
 
 if __name__ == "__main__":
@@ -65,4 +55,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.exception(e)
-        

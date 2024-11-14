@@ -32,7 +32,9 @@ from imgtools.logging.processors import (
 )
 from pathlib import Path
 from typing import Optional
+import os
 
+DEFAULT_LOG_LEVEL = "DEBUG"
 
 class LoggingManager:
     """
@@ -44,18 +46,20 @@ class LoggingManager:
 
     def __init__(
         self,
+        name: str,
         base_dir: Optional[Path] = None,
-        level: str = "DEBUG",
+        level: str = os.environ.get("IMGTOOLS_LOG_LEVEL", DEFAULT_LOG_LEVEL),
+        json_logging: bool = os.getenv("IMGTOOLS_JSON_LOGGING", "false").lower() == "true",
     ):
+        self.name = name
         self.base_dir = base_dir or Path.cwd()
         self.level = level
+        self.json_logging = json_logging
         self.logger = None
         self._initialize_logger()
 
+    # Modify _initialize_logger method to consider new options
     def _initialize_logger(self):
-        """
-        Initializes the logger with the appropriate processors based on the output format.
-        """
         pre_chain = [
             structlog.stdlib.add_log_level,
             ESTTimeStamper(),
@@ -81,22 +85,24 @@ class LoggingManager:
         logging_config["version"] = 1
         logging_config["disable_existing_loggers"] = False
 
-        logging_config["formatters"] = {
-            "console": {
-                "()": structlog.stdlib.ProcessorFormatter,
-                "processors": [
-                    CallPrettifier(concise=True),
-                    structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                    structlog.dev.ConsoleRenderer(
-                        # pad_event=50,
-                        exception_formatter=structlog.dev.RichTracebackFormatter(
-                            width=-1, show_locals=False
-                        ),
+        # Configure formatters based on `console_logging` and `json_logging`
+        logging_config["formatters"] = {}
+        logging_config["formatters"]["console"] = {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processors": [
+                CallPrettifier(concise=True),
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.dev.ConsoleRenderer(
+                    exception_formatter=structlog.dev.RichTracebackFormatter(
+                        width=-1, show_locals=False
                     ),
-                ],
-                "foreign_pre_chain": pre_chain,
-            },
-            "json": {
+                ),
+            ],
+            "foreign_pre_chain": pre_chain,
+        }
+
+        if self.json_logging:
+            logging_config["formatters"]["json"] = {
                 "()": structlog.stdlib.ProcessorFormatter,
                 "processors": [
                     CallPrettifier(concise=False),
@@ -107,37 +113,36 @@ class LoggingManager:
                     ),
                 ],
                 "foreign_pre_chain": pre_chain,
-            },
+            }
+
+        # Configure handlers based on available formatters
+        logging_config["handlers"] = {}
+
+        logging_config["handlers"]["console"] = {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
         }
 
-        logging_config["handlers"] = {
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "console",
-            },
-            "json": {
+        if self.json_logging:
+            logging_config["handlers"]["json"] = {
                 "class": "logging.FileHandler",
                 "formatter": "json",
                 "filename": self.base_dir / "imgtools.log",
-            },
-        }
-
+            }
         logging_config["loggers"] = {
-            # TURN THIS ON IF YOU WANT ROOT LOGGER TO PRINT NICE LOGS AS WELL!
-            # "": {
-            #     "handlers": ["console"],
-            #     "level": self.level,
-            #     "propagate": False,
-            # },
-            "imgtools": {
-                "handlers": ["console", "json"],
+            self.name: {
+                "handlers": [
+                    handler
+                    for handler in ("console", "json")
+                    if handler in logging_config["handlers"]
+                ],
                 "level": self.level,
                 "propagate": False,
             },
         }
-        logging.config.dictConfig(logging_config)
 
-        structlog.configure_once(
+        logging.config.dictConfig(logging_config)
+        structlog.configure(
             processors=[
                 *processors,
                 structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
@@ -146,24 +151,33 @@ class LoggingManager:
             wrapper_class=structlog.stdlib.BoundLogger,
             cache_logger_on_first_use=False,
         )
-        self.logger = structlog.get_logger("imgtools")
-        # self.logger = logging.getLogger("imgtools")
+        self.logger = structlog.get_logger(self.name)
 
     def get_logger(self) -> structlog.stdlib.BoundLogger:
-        """
-        Returns the initialized logger.
-
-        Returns:
-            structlog.BoundLogger: The initialized logger.
-
-        Raises:
-            RuntimeError: If the logger has not been initialized.
-        """
         if not self.logger:
             raise RuntimeError("Logger has not been initialized.")
         return self.logger
 
+    # Add a method to dynamically adjust logging
+    def configure_logging(
+        self, json_logging: Optional[bool] = None, level: str = None
+    ) -> structlog.BoundLogger:
+        if level is not None:
+            self.level = level.upper()
 
-logging_manager = LoggingManager()
+        if self.level not in ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"):
+            raise ValueError(f"Invalid logging level: {self.level}")
 
-logger = logging_manager.get_logger()
+        if json_logging is not None:
+            self.json_logging = json_logging
+        self._initialize_logger()
+
+        return self.get_logger()
+
+LOGGER_NAME = "imgtools"
+logging_manager = LoggingManager(LOGGER_NAME)
+
+def get_logger(LEVEL: str = "INFO") -> logging.Logger:
+    return logging_manager.configure_logging(level=LEVEL)
+
+logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
