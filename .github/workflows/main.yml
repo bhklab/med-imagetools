@@ -67,74 +67,6 @@ jobs:
           verbose: true
           name: codecov-umbrella
 
-# jobs:
-#   lint:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v3
-#       - uses: chartboost/ruff-action@v1
-
-#   tests:
-#     runs-on: ${{ matrix.os }}
-#     timeout-minutes: 15
-
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         os:
-#           - ubuntu-latest
-#           - macos-latest
-#           - windows-latest
-#         python-version:
-#           - "3.10"
-#           - "3.11"
-#           - "3.12"
-
-#     steps:
-#       - uses: actions/checkout@v3
-
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: ${{ matrix.python-version }}
-
-#       - name: Pip install
-#         run: pip install .
-
-#       - name: Run tests
-#         run: |
-#           pip install pytest pytest-cov
-#           pytest tests -s -v --cov=imgtools --cov-report xml:coverage-report/coverage.xml
-
-#       - name: Upload coverage report artifact to be used by Codecov
-#         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-#         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: coverage-report
-#           path: coverage-report
-
-#   codecov:
-#     needs: tests
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v3
-
-#       - name: Download coverage report artifact
-#         uses: actions/download-artifact@v4
-#         with:
-#           name: coverage-report
-#           path: coverage-report
-
-#       - name: Upload coverage to Codecov
-#         uses: codecov/codecov-action@v3
-#         with:
-#           token: ${{ secrets.CODECOV_TOKEN }}
-#           files: ./coverage-report/coverage.xml
-#           fail_ci_if_error: true
-#           verbose: true
-#           name: codecov-umbrella
 
   cd:
     concurrency: release
@@ -146,7 +78,7 @@ jobs:
       issues: write
       pull-requests: write
 
-    needs: [tests]
+    needs: Unit-Tests
 
     # if pulling to main, deploy to PyPI
     if: github.ref == 'refs/heads/main'
