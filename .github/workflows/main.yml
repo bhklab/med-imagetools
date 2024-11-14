@@ -80,8 +80,7 @@ jobs:
 
     needs: Unit-Tests
 
-    # if pulling to main, deploy to PyPI
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/devel'
 
     # Set up operating system
     runs-on: ubuntu-latest
