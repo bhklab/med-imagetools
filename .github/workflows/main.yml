@@ -136,82 +136,82 @@ jobs:
 #           verbose: true
 #           name: codecov-umbrella
 
-#   cd:
-#     concurrency: release
-#     permissions:
-#       id-token: write
-#       actions: read
-#       contents: write
-#       packages: write
-#       issues: write
-#       pull-requests: write
+  cd:
+    concurrency: release
+    permissions:
+      id-token: write
+      actions: read
+      contents: write
+      packages: write
+      issues: write
+      pull-requests: write
 
-#     needs: [tests]
+    needs: [tests]
 
-#     # if pulling to main, deploy to PyPI
-#     if: github.ref == 'refs/heads/main'
+    # if pulling to main, deploy to PyPI
+    if: github.ref == 'refs/heads/main'
 
-#     # Set up operating system
-#     runs-on: ubuntu-latest
+    # Set up operating system
+    runs-on: ubuntu-latest
 
-#     outputs:
-#       released: ${{ steps.release.outputs.released }}
-#       version: ${{ steps.release.outputs.version }}
-#       tag: ${{ steps.release.outputs.tag }}
+    outputs:
+      released: ${{ steps.release.outputs.released }}
+      version: ${{ steps.release.outputs.version }}
+      tag: ${{ steps.release.outputs.tag }}
 
-#     # Define job steps
-#     steps:
-#       - uses: actions/create-github-app-token@v1
-#         id: app-token
-#         with:
-#           app-id: ${{ vars.SEMVERPOLICE_ID }}
-#           private-key: ${{ secrets.SEMVER_APP_KEY }}
+    # Define job steps
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.SEMVERPOLICE_ID }}
+          private-key: ${{ secrets.SEMVER_APP_KEY }}
 
-#       - name: Set up Python 3.12
-#         uses: actions/setup-python@v2
-#         with:
-#           python-version: 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
 
-#       - name: Check-out repository
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
+      - name: Check-out repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-#       - name: Python Semantic Release
-#         uses: python-semantic-release/python-semantic-release@master
-#         id: release
-#         with:
-#           root_options: -v
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           git_committer_name: "gh-actions-semver"
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@master
+        id: release
+        with:
+          root_options: -v
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "gh-actions-semver"
 
-#   pip-squeak:
-#     needs: cd
-#     if: needs.cd.outputs.released == 'true'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout the code with tag ${{ needs.cd.outputs.tag }}
-#         uses: actions/checkout@v4
-#         with:
-#           ref: ${{ needs.cd.outputs.tag }}
+  pip-squeak:
+    needs: cd
+    if: needs.cd.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code with tag ${{ needs.cd.outputs.tag }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.cd.outputs.tag }}
 
-#       - name: Set up Python 3.12
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: 3.12
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-#       - name: Install Package Builder
-#         run: python3 -m pip install build
+      - name: Install Package Builder
+        run: python3 -m pip install build
 
-#       - name: Build package
-#         run: python3 -m build --sdist --wheel --outdir dist/
+      - name: Build package
+        run: python3 -m build --sdist --wheel --outdir dist/
 
-#       - name: Publish to PyPI
-#         uses: pypa/gh-action-pypi-publish@release/v1
-#         with:
-#           verbose: true
-#           user: ${{ secrets.pypi_token }}
-#           password: ${{ secrets.pypi_api }}
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          user: ${{ secrets.pypi_token }}
+          password: ${{ secrets.pypi_api }}
 
 #   does-the-pip-squeak:
 #     needs: pip-squeak
