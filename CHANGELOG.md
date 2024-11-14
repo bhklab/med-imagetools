@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v1.6.0-rc.2 (2024-11-14)
+
+### Bug Fixes
+
+- Update version_toml path in pyproject.toml for semantic release
+  ([`0dacfee`](https://github.com/bhklab/med-imagetools/commit/0dacfee32c75950c104104057a0cef6c6ab536cd))
+
+
 ## v1.6.0-rc.1 (2024-11-14)
 
 ### Bug Fixes
@@ -17,6 +25,9 @@
   ([`6382dbf`](https://github.com/bhklab/med-imagetools/commit/6382dbfe0c37a031f9017130464f5895e11c792c))
 
 ### Chores
+
+- **sem-ver**: 1.6.0-rc.1
+  ([`cff36b9`](https://github.com/bhklab/med-imagetools/commit/cff36b99d2739d761b12c5264d487bbea983628d))
 
 - Update GitHub Actions workflow to deploy from both main and devel branches, and refresh
   dependencies in pixi.lock
