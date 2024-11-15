@@ -17,7 +17,11 @@ extend-exclude = [
   "src/imgtools/image.py",
 ]
 
+
+line-length = 100
+
 [lint]
+
 select = [
   ###########################################################################
   # TYPE ANNOTATIONS

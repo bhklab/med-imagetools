@@ -1,7 +1,7 @@
 import click
 
 from imgtools import __version__
-from imgtools.cli.crawl import main as crawl
+from imgtools.cli.index import index
 from imgtools.logging import logger
 
 
@@ -17,7 +17,7 @@ def set_logging_level(verbosity: int) -> None:
 	'--verbose',
 	'-v',
 	count=True,
-	help='Increase verbosity level (use up to 3 times for maximum verbosity).',
+	help='Increase verbosity (up to 3 times).',
 )
 @click.version_option(
 	version=__version__,
@@ -33,7 +33,7 @@ def cli(verbose: int) -> None:
 	set_logging_level(verbose)
 
 
-cli.add_command(crawl, name='crawl')
+cli.add_command(index, name='index')
 
 if __name__ == '__main__':
 	cli()
