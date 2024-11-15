@@ -83,8 +83,8 @@ lint.description = "Run ruff check"
 
 
 [feature.build.dependencies]
-python-semantic-release = "*"
-hatch = "*"
+python-semantic-release = ">=9.14"
+hatch = ">=1.13"
 
 [feature.build.tasks]
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
