@@ -68,6 +68,16 @@ description = "Run pytest and generate coverage report"
 ruff = ">=0.4.4"
 pre-commit = ">=3.7.1,<3.8"
 
+[feature.style.tasks]
+lint.cmd = [
+  "ruff",
+  "--config",
+  "config/ruff.toml",
+  "check",
+  "src",
+]
+lint.inputs = ["config/ruff.toml", "src"]
+lint.description = "Run ruff check"
 
 #################################### RELEASE & BUILD ###############################################
 
