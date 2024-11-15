@@ -3,7 +3,7 @@ from imgtools.logging import logger
 import click
 import logging
 from tqdm import trange
-from tqdm.contrib.logging import logging_redirect_tqdm, tqdm_logging_redirect
+from tqdm.contrib.logging import logging_redirect_tqdm 
 
 
 @click.command()
