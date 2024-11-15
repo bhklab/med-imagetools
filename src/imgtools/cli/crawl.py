@@ -67,11 +67,12 @@ def main(
 
 	logger.info('DICOMS per Modality', modalities=modality_counts)
 
-	logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts.keys()))
+	logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts))
+	# logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts.keys()))
 
 	# Save list of dicts to JSON file
 	output = pathlib.Path('database.json')
-	with open(output.as_posix(), 'w') as f:
+	with output.open('w') as f:
 		logger.debug('Saving database to JSON file...', file=output)
 		f.write(json.dumps(db, indent=4))
 

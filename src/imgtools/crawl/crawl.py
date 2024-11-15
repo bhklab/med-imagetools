@@ -40,7 +40,7 @@ def get_reference(meta: pydicom.dataset.FileDataset) -> ReferenceInfo:
 			reference_ct=meta.ReferencedFrameOfReferenceSequence[0]
 			.RTReferencedStudySequence[0]
 			.RTReferencedSeriesSequence[0]
-			.SeriesInstanceUID
+			.SeriesInstanceUID,
 		)
 	elif meta.Modality == 'RTDOSE':
 		return ReferenceInfo(
@@ -50,7 +50,7 @@ def get_reference(meta: pydicom.dataset.FileDataset) -> ReferenceInfo:
 		)
 	elif meta.Modality == 'SEG':
 		return ReferenceInfo(
-			reference_ct=meta.ReferencedSeriesSequence[0].SeriesInstanceUID
+			reference_ct=meta.ReferencedSeriesSequence[0].SeriesInstanceUID,
 		)
 	else:
 		return ReferenceInfo()
@@ -74,7 +74,10 @@ def parse_dicom(dcm_path: pathlib.Path) -> Dict[str, str]:
 		return {attr: get_str(meta, attr) for attr in desired_attributes}, dcm_path
 	except Exception as e:
 		logger.exception(
-			'Error processing file', exception=e, path=dcm_path, modality=meta.Modality
+			'Error processing file',
+			exception=e,
+			path=dcm_path,
+			modality=meta.Modality,
 		)
 		sys.exit(1)
 
@@ -119,7 +122,7 @@ def crawl_directory(
 				{
 					**database,
 					'path': dcm_path.relative_to(top).as_posix(),
-				}
+				},
 			)
 
 			pbar.update(1)
