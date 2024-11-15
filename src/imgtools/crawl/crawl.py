@@ -1,13 +1,15 @@
-from dataclasses import asdict, dataclass, field
-import sys
 import os
 import pathlib
+import sys
+from concurrent.futures import ProcessPoolExecutor
+from dataclasses import asdict, dataclass, field
 from typing import Dict, List
+
 import pydicom
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
+
 from imgtools.logging import logger, logging
-from concurrent.futures import ProcessPoolExecutor
 
 
 def get_first(meta, attribute_name):  # noqa: ANN001, ANN201
