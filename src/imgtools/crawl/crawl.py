@@ -87,17 +87,35 @@ def crawl_directory(
 	top: pathlib.Path,
 	extension: str = 'dcm',
 	case_sensitive: bool = False,
+	recursive: bool = True,
+	check_header: bool = False,
 	n_jobs: int = -1,
 ) -> List:
-	logger.info(
-		'Lookging for DICOM files',
-		top=top,
-		search_extension=extension,
-		case_sensitive=case_sensitive,
-	)
+	import time
 
-	dcms = find_dicoms(top, extension, case_sensitive)
-	logger.info(f'Found {len(dcms)} DICOM files')
+	start = time.time()
+
+	try:
+		dcms = find_dicoms(
+			directory=top,
+			case_sensitive=case_sensitive,
+			recursive=recursive,
+			check_header=check_header,
+			extension=extension,
+		)
+	except Exception as e:
+		logger.exception(
+			'Error finding DICOM files',
+			exception=e,
+			directory=top,
+			case_sensitive=case_sensitive,
+			recursive=recursive,
+			check_header=check_header,
+			extension=extension,
+		)
+		sys.exit(1)
+
+	logger.info(f'Found {len(dcms)} DICOM files in {time.time() - start:.2f} seconds')
 
 	database_list = []
 	num_workers = n_jobs if n_jobs > 0 else os.cpu_count()

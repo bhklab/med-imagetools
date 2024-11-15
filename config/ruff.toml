@@ -84,10 +84,15 @@ select = [
 ]
 
 ignore = [
+  # allow self to not need type annotations
+  "ANN101",
+  # Allow too many arguments for functions
+  "PLR0913",
   # Public Module Docstrings
   "D100",
   # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules 
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
+
 ]
 
 [format]

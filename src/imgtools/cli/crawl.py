@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import sys
 from collections import Counter
@@ -20,15 +21,27 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 )
 @click.option(
 	'--case-sensitive',
-	'-cs',
 	is_flag=True,
 	help='Search for files case-sensitively.',
+)
+@click.option(
+	'--recursive',
+	'-r',
+	default=True,
+	is_flag=True,
+	help='Search for files recursively.',
+)
+@click.option(
+	'--check-header',
+	is_flag=True,
+	default=False,
+	help='Check for DICOM header after preamble.',
 )
 @click.option(
 	'--n-jobs',
 	'-j',
 	default=-1,
-	help='Number of parallel jobs to use (default: number of CPU cores).',
+	help=f'Number of parallel jobs to use (default:{os.cpu_count()}).',
 )
 @click.argument(
 	'directory',
@@ -55,6 +68,8 @@ def main(
 	directory: pathlib.Path,
 	output_file: pathlib.Path,
 	extension: str,
+	check_header: bool,
+	recursive: bool,
 	case_sensitive: bool,
 	n_jobs: int,
 ) -> None:
@@ -65,8 +80,12 @@ def main(
 		top=directory,
 		extension=extension,
 		case_sensitive=case_sensitive,
+		recursive=recursive,
+		check_header=check_header,
 		n_jobs=n_jobs,
 	)
+
+	# NOTE: these stats are temporary and will be remove
 
 	# Group by PatientID and count occurrences
 	patient_counts = Counter(entry['PatientID'] for entry in db)
@@ -82,7 +101,8 @@ def main(
 	logger.info('DICOMS per Modality', modalities=modality_counts)
 
 	logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts))
-	# logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts.keys()))
+
+	# NOTE: End note.
 
 	# Save list of dicts to JSON file
 	logger.debug('Saving database to JSON file...', file=output_file)
