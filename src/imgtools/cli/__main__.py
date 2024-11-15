@@ -1,5 +1,6 @@
 import click
 
+from imgtools import __version__
 from imgtools.cli.crawl import main as crawl
 from imgtools.logging import logger
 
@@ -11,19 +12,25 @@ def set_logging_level(verbosity: int) -> None:
 	logger.setLevel(level)
 
 
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-
-@click.group(context_settings=CONTEXT_SETTINGS)
+@click.group()
 @click.option(
 	'--verbose',
 	'-v',
 	count=True,
 	help='Increase verbosity level (use up to 3 times for maximum verbosity).',
 )
+@click.version_option(
+	version=__version__,
+	package_name='med-imagetools',
+	prog_name='mit',
+	message='%(package)s:%(prog)s:%(version)s',
+)
+@click.help_option(
+	'-h',
+	'--help',
+)
 def cli(verbose: int) -> None:
 	set_logging_level(verbose)
-	pass
 
 
 cli.add_command(crawl, name='crawl')

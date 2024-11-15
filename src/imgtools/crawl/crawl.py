@@ -88,7 +88,6 @@ def crawl_directory(
 	case_sensitive: bool = False,
 	n_jobs: int = -1,
 ) -> List:
-	# top is the input directory in the argument parser from autotest.py
 	logger.info(
 		'Lookging for DICOM files',
 		top=top,

@@ -1,5 +1,6 @@
 import json
 import pathlib
+import sys
 from collections import Counter
 
 import click
@@ -36,10 +37,23 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 		path_type=pathlib.Path,
 		resolve_path=True,
 		file_okay=False,
+		readable=True,
+	),
+)
+@click.argument(
+	'output_file',
+	type=click.Path(
+		exists=False,
+		path_type=pathlib.Path,
+		resolve_path=True,
+		file_okay=True,
+		writable=True,
+		dir_okay=False,
 	),
 )
 def main(
 	directory: pathlib.Path,
+	output_file: pathlib.Path,
 	extension: str,
 	case_sensitive: bool,
 	n_jobs: int,
@@ -71,10 +85,22 @@ def main(
 	# logger.info('Series per Modality', counts=Counter(m for m, _ in pair_counts.keys()))
 
 	# Save list of dicts to JSON file
-	output = pathlib.Path('database.json')
-	with output.open('w') as f:
-		logger.debug('Saving database to JSON file...', file=output)
-		f.write(json.dumps(db, indent=4))
+	logger.debug('Saving database to JSON file...', file=output_file)
+	try:
+		with output_file.open('w') as f:
+			f.write(json.dumps(db, indent=4))
+	except PermissionError as pe:
+		logger.exception(
+			'Permission denied to write to file', exception=pe, file=output_file
+		)
+		sys.exit(1)
+	except IsADirectoryError as iade:
+		logger.exception(
+			'output_file is a directory already',
+			exception=iade,
+			file=output_file,
+		)
+		sys.exit(1)
 
 
 if __name__ == '__main__':
