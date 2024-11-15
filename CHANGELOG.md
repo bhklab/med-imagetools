@@ -1,51 +1,49 @@
 # CHANGELOG
 
 
-## v1.6.0-rc.2 (2024-11-14)
-
-### Bug Fixes
-
-- Update version_toml path in pyproject.toml for semantic release
-  ([`0dacfee`](https://github.com/bhklab/med-imagetools/commit/0dacfee32c75950c104104057a0cef6c6ab536cd))
-
-
-## v1.6.0-rc.1 (2024-11-14)
-
-### Bug Fixes
-
-- Added linux to pixi
-  ([`023a111`](https://github.com/bhklab/med-imagetools/commit/023a111d3bf2b83175d971c02641a786de6b91f9))
-
-- Explicitly direct location of package code and update pixi in pipeline
-  ([`6767ced`](https://github.com/bhklab/med-imagetools/commit/6767ced27ed52eb6171243534c1364d91728baf5))
-
-### Build System
-
-- Added coverage to gha
-  ([`6382dbf`](https://github.com/bhklab/med-imagetools/commit/6382dbfe0c37a031f9017130464f5895e11c792c))
-
-### Chores
-
-- **sem-ver**: 1.6.0-rc.1
-  ([`cff36b9`](https://github.com/bhklab/med-imagetools/commit/cff36b99d2739d761b12c5264d487bbea983628d))
-
-- Update GitHub Actions workflow to deploy from both main and devel branches, and refresh
-  dependencies in pixi.lock
-  ([`60350d6`](https://github.com/bhklab/med-imagetools/commit/60350d64f287085b2f1489af934702d6ad5e7c15))
-
-- Clean up GitHub Actions workflow by removing commented-out jobs and updating dependencies
-  ([`8274e4d`](https://github.com/bhklab/med-imagetools/commit/8274e4d3d36f461c41698174696d902fb8e1fa45))
-
-- Update GitHub Actions workflow for improved deployment process
-  ([`ddad006`](https://github.com/bhklab/med-imagetools/commit/ddad0067796ed0b8539e21a0e380e6325853f886))
+## v1.6.0 (2024-11-15)
 
 ### Features
 
-- Updated test suite for pixi and started refactor of cicd
-  ([`cc94817`](https://github.com/bhklab/med-imagetools/commit/cc9481735c9ea19dc534973d345042a77ebecafb))
+- Transfer project management to Pixi ([#133](https://github.com/bhklab/med-imagetools/pull/133),
+  [`a268211`](https://github.com/bhklab/med-imagetools/commit/a26821164b55579aa42e87c28386db6c9398f2d6))
 
-- Started port to pixi
-  ([`0ff9b90`](https://github.com/bhklab/med-imagetools/commit/0ff9b90f1327fee183025ef40c204168fb9810e2))
+* feat: started port to pixi
+
+* feat: updated test suite for pixi and started refactor of cicd
+
+* build: added coverage to gha
+
+* fix: explicitly direct location of package code and update pixi in pipeline
+
+* fix: added linux to pixi
+
+* chore: update GitHub Actions workflow for improved deployment process
+
+* chore: clean up GitHub Actions workflow by removing commented-out jobs and updating dependencies
+
+* chore: update GitHub Actions workflow to deploy from both main and devel branches, and refresh
+  dependencies in pixi.lock
+
+* chore(sem-ver): 1.6.0-rc.1
+
+* fix: update version_toml path in pyproject.toml for semantic release
+
+* chore(sem-ver): 1.6.0-rc.2
+
+* chore: remove requirements.txt file and poetry.lock
+
+* chore: update authors and maintainers in pyproject.toml, and add __version__ in __init__.py
+
+* chore: remove setup.py file as part of project restructuring
+
+* chore: update pixi.lock and add ruff configuration for linting
+
+* chore: fix some recommendations from coderabbit
+
+---------
+
+Co-authored-by: semantic-release <semantic-release>
 
 
 ## v1.5.8 (2024-10-25)
