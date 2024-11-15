@@ -1,74 +1,64 @@
-name: bob-the-builder
+name: Test
 
 # only run on pushes to main or pull requests
 on:
   push:
-    # push to any branch *
-    branches: '*'
+    branches: ["*"]
   pull_request:
-    branches: [ main ]
+    branches: ["*"]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@v1
-
-  tests:
+  ################################################################################################
+  # Unit-Tests: Run unit tests using pytest
+  ################################################################################################
+  Unit-Tests:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-
+    timeout-minutes: 15 # Consider increasing timeout
     strategy:
-      fail-fast: false
       matrix:
-        os: 
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        python-version:
-          - '3.10'
-          - '3.11'
-          - '3.12'
+        os: [ubuntu-latest, macos-latest, macos-14] # , windows-latest removed for now
+        env: ["py310", "py311", "py312"]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
         with:
-          python-version: ${{ matrix.python-version }}
+          environments: ${{ matrix.env }}
+          pixi-version: v0.36.0
+          cache: true
+          locked: false # wont be the same because of the tag
 
-      - name: Pip install
-        run: pip install .
-
-      - name: Run tests
+      - name: Run pytest
         run: |
-          pip install pytest pytest-cov
-          pytest tests -s -v --cov=imgtools --cov-report xml:coverage-report/coverage.xml
+          pixi run -e ${{ matrix.env }} test
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage-report
 
-  codecov:
-    needs: tests
+  ################################################################################################
+  # Codecov: Run codecov to check coverage
+  ################################################################################################
+  Code-Coverage:
+    needs: Unit-Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Download coverage report artifact
+      - name: Download coverage.xml artifact
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
           path: coverage-report
 
-      - name: Upload coverage to Codecov
+      - name: Use Codecov to track coverage
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -76,7 +66,8 @@ jobs:
           fail_ci_if_error: true
           verbose: true
           name: codecov-umbrella
-  
+
+
   cd:
     concurrency: release
     permissions:
@@ -87,10 +78,9 @@ jobs:
       issues: write
       pull-requests: write
 
-    needs: [tests]
+    needs: Unit-Tests
 
-    # if pulling to main, deploy to PyPI
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/devel'
 
     # Set up operating system
     runs-on: ubuntu-latest
@@ -102,29 +92,29 @@ jobs:
 
     # Define job steps
     steps:
-    - uses: actions/create-github-app-token@v1
-      id: app-token
-      with:
-        app-id: ${{ vars.SEMVERPOLICE_ID }}
-        private-key: ${{ secrets.SEMVER_APP_KEY }}
-        
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.12
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.SEMVERPOLICE_ID }}
+          private-key: ${{ secrets.SEMVER_APP_KEY }}
 
-    - name: Check-out repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
 
-    - name: Python Semantic Release
-      uses: python-semantic-release/python-semantic-release@master
-      id: release
-      with:
-        root_options: -v
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        git_committer_name: 'gh-actions-semver'
+      - name: Check-out repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@master
+        id: release
+        with:
+          root_options: -v
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "gh-actions-semver"
 
   pip-squeak:
     needs: cd
@@ -142,12 +132,10 @@ jobs:
           python-version: 3.12
 
       - name: Install Package Builder
-        run:
-          python3 -m pip install build
+        run: python3 -m pip install build
 
       - name: Build package
-        run:
-          python3 -m build --sdist --wheel --outdir dist/
+        run: python3 -m build --sdist --wheel --outdir dist/
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -156,25 +144,24 @@ jobs:
           user: ${{ secrets.pypi_token }}
           password: ${{ secrets.pypi_api }}
 
+#   does-the-pip-squeak:
+#     needs: pip-squeak
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         os: [ubuntu-latest, macos-latest, windows-latest]
+#         python-version: ["3.12", "3.11", "3.10"]
 
-  does-the-pip-squeak:
-    needs: pip-squeak
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.12", "3.11", "3.10"]
+#     steps:
+#       - uses: actions/checkout@v3
 
-    steps:
-      - uses: actions/checkout@v3
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: ${{ matrix.python-version }}
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install using PyPi
-        run: |
-          pip install med-imagetools
-        # autopipeline
-        # pip install med-imagetools ==${{ needs.cd.outputs.version }}
+#       - name: Install using PyPi
+#         run: |
+#           pip install med-imagetools
+#         # autopipeline
+#         # pip install med-imagetools ==${{ needs.cd.outputs.version }}

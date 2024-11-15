@@ -1,0 +1,101 @@
+[project]
+authors = ["Jermiah Joseph <jermiahjoseph98@gmail.com>"]
+channels = ["conda-forge"]
+description = "Add a short description here"
+name = "med-imagetools"
+platforms = ["linux-64", "osx-arm64"]
+
+[pypi-dependencies]
+med-imagetools = { path = ".", editable = true }
+
+[environments]
+default = { features = [
+  "test",
+  "style",
+  "build",
+  "dev",
+], solve-group = "default" }
+py310 = ["py310", "test"]
+py311 = ["py311", "test"]
+py312 = ["py312", "test"]
+
+############################################## DEV ###############################################
+[feature.dev.dependencies]
+python = "3.12.*"
+ipython = "*"
+ipykernel = "*"
+jupyterlab = "*"
+
+############################################## PYTHON ###############################################
+
+[feature.py310.dependencies]
+python = "3.10.*"
+[feature.py311.dependencies]
+python = "3.11.*"
+[feature.py312.dependencies]
+python = "3.12.*"
+
+############################################## TEST ################################################
+
+[feature.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+
+[feature.test.tasks.test]
+cmd = [
+  "pytest",
+  # "--numprocesses=auto", 
+  "-s",
+  "--verbose",
+  "--cov=imgtools",
+  "--cov-report=xml:coverage-report/coverage.xml",
+  "--cov-config=config/coverage.toml",
+]
+inputs = ["src", "tests", "config/coverage.toml"]
+outputs = ["coverage-report/coverage.xml"]
+description = "Run pytest (Note: run `coverage` task to do both)"
+
+[feature.test.tasks.coverage]
+cmd = "coverage report --rcfile=config/coverage.toml"
+inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
+depends-on = ["test"]
+description = "Run pytest and generate coverage report"
+
+############################################## STYLE ###############################################
+# See config/ruff.toml for the configuration
+[feature.style.dependencies]
+ruff = ">=0.4.4"
+pre-commit = ">=3.7.1,<3.8"
+
+[feature.style.tasks]
+lint.cmd = [
+  "ruff",
+  "--config",
+  "config/ruff.toml",
+  "check",
+  "src",
+]
+lint.inputs = ["config/ruff.toml", "src"]
+lint.description = "Run ruff check"
+
+#################################### RELEASE & BUILD ###############################################
+
+
+[feature.build.dependencies]
+python-semantic-release = ">=9.14"
+hatch = ">=1.13"
+
+[feature.build.tasks]
+semver = 'echo "Next Version is: $(semantic-release version --print)"'
+
+build = { cmd = [
+  "hatch",
+  "build",
+  "--clean",
+], inputs = [
+  "src",
+  "pyproject.toml",
+], outputs = [
+  "dist/*",
+], description = "Build the package" }
