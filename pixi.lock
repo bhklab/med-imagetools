@@ -2559,30 +2559,6 @@ packages:
   - tomli >=1.2.2
   - trove-classifiers
   license: MIT
-  purls:
-  - pkg:pypi/hatchling?source=hash-mapping
-  size: 56816
-  timestamp: 1731469419003
-- kind: conda
-  name: hatchling
-  version: 1.26.3
-  build: pypyhff2d567_0
-  subdir: noarch
-  noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/hatchling-1.26.3-pypyhff2d567_0.conda
-  sha256: bcd1e3b68ed11c11c974c890341ec03784354c68f6e2fcc518eb3ce8e90d452a
-  md5: 31c57e2a780803fd44aba9b726398058
-  depends:
-  - editables >=0.3
-  - importlib-metadata
-  - packaging >=21.3
-  - pathspec >=0.10.1
-  - pluggy >=1.0.0
-  - python >=3.7
-  - python >=3.8
-  - tomli >=1.2.2
-  - trove-classifiers
-  license: MIT
   license_family: MIT
   purls:
   - pkg:pypi/hatchling?source=hash-mapping
@@ -4191,9 +4167,9 @@ packages:
   timestamp: 1704317789138
 - kind: pypi
   name: med-imagetools
-  version: 1.5.8
+  version: 1.6.0rc2
   path: .
-  sha256: fb65e57569df77d962e1ce6ca6b2d03ec953742795a5d30b2f8f93c1073779b0
+  sha256: 6decc7cb0fefe88ea6c28eec9ad5d9cf865e10470323ee836c6f5851810fe78a
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
