@@ -32,9 +32,9 @@ dependencies = [
   "tqdm>=4.66.4,<5",
   "pyyaml>=6.0.1,<7",
   "dill>=0.3.8,<1",
-  "attrs>=23.2.0",
-  "structlog>=24.0",
-  "click",
+  "attrs>=24.2.0,<25",
+  "structlog>=24.0,<25",
+  "click>=8.1,<9",
 ]
 
 classifiers = [
