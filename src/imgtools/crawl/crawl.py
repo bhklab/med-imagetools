@@ -100,16 +100,16 @@ def crawl_directory(
 	logger.info(f'Found {len(dcms)} DICOM files')
 
 	database_list = []
-	N_WORKERS = n_jobs if n_jobs > 0 else os.cpu_count()
+	num_workers = n_jobs if n_jobs > 0 else os.cpu_count()
 
 	logger.info(
-		f'Using {N_WORKERS} workers for parallel processing',
+		f'Using {num_workers} workers for parallel processing',
 		param_n_jobs=n_jobs,
 		os_cpu_count=os.cpu_count(),
 	)
 
 	with (
-		ProcessPoolExecutor(N_WORKERS) as executor,
+		ProcessPoolExecutor(num_workers) as executor,
 		logging_redirect_tqdm([logging.getLogger('imgtools')]),
 		tqdm(total=len(dcms), desc='Processing DICOM files') as pbar,
 	):
