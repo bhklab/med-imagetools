@@ -6,6 +6,7 @@
 include = ["src/imgtools/crawl/**/*.py", "src/imgtools/cli/**/*.py"]
 
 extend-exclude = [
+  ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/**/*.py",
   "src/imgtools/io/**/*.py",

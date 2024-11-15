@@ -36,7 +36,7 @@ from imgtools.logging import logger
 	help='Check for DICOM header after preamble.',
 )
 @click.option(
-	'--n-jobs',
+	'--jobs',
 	'-j',
 	default=os.cpu_count(),
 	help=f'Number of parallel jobs to use (default:{os.cpu_count()}).',
@@ -67,7 +67,7 @@ def index(
 	check_header: bool,
 	recursive: bool,
 	case_sensitive: bool,
-	n_jobs: int,
+	jobs: int,
 ) -> None:
 	"""Generate an index of DICOM files in a directory.
 
@@ -85,7 +85,7 @@ def index(
 			Whether to crawl directories recursively.
 	case_sensitive : bool
 			Whether the file extension matching is case sensitive.
-	n_jobs : int
+	jobs : int
 			The number of parallel jobs to use for processing.
 
 	Returns
@@ -105,7 +105,7 @@ def index(
 		case_sensitive=case_sensitive,
 		recursive=recursive,
 		check_header=check_header,
-		n_jobs=n_jobs,
+		n_jobs=jobs,
 	)
 
 	output_file = directory / 'dataset.json'
