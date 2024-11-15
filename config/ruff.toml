@@ -19,12 +19,17 @@ extend-exclude = [
 
 [lint]
 select = [
+  ###########################################################################
+  # TYPE ANNOTATIONS
   # Ensure all functions have type annotations
   # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
   "ANN",
   # Use type hinting consistently
   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
   "TCH",
+
+  ###########################################################################
+  # IMPORTS
   # Sort imports naturally
   # https://docs.astral.sh/ruff/rules/#isort-i
   "I",
@@ -34,6 +39,9 @@ select = [
   # Clean up and organize imports
   # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
   "TID",
+
+  ###########################################################################
+  # CODE QUALITY
   # Detect possible bugs, like unused variables or exception handling issues
   # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
   "B",
@@ -52,6 +60,9 @@ select = [
   # Provide clear and explanatory error messages
   # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
   "EM",
+
+  ###########################################################################
+  # STANDARDS & STYLE
   # Prefer pathlib for path manipulation
   # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
   "PTH",
@@ -64,9 +75,17 @@ select = [
   # errors like undefined names and unused imports without enforcing style rules.
   # https://docs.astral.sh/ruff/rules/#pyflakes-f
   "F",
+  #
+  # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+  "N",
+  # Pydocstyle
+  # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+  # "D",
 ]
 
 ignore = [
+  # Public Module Docstrings
+  "D100",
   # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules 
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
 ]
