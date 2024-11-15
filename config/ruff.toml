@@ -21,46 +21,49 @@ extend-exclude = [
 select = [
   # Ensure all functions have type annotations
   # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
-  "ANN", 
+  "ANN",
   # Use type hinting consistently
   # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
-  "TCH", 
+  "TCH",
   # Sort imports naturally
   # https://docs.astral.sh/ruff/rules/#isort-i
-  "I",   
+  "I",
   # Follow import conventions
   # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
-  "ICN", 
+  "ICN",
   # Clean up and organize imports
   # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
-  "TID", 
+  "TID",
   # Detect possible bugs, like unused variables or exception handling issues
   # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-  "B",   
+  "B",
   # Avoid using Python builtins incorrectly
   # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
-  "A",   
+  "A",
   # Enforce correct usage of commas in lists, tuples, etc.
   # https://docs.astral.sh/ruff/rules/#flake8-commas-com
-  "COM", 
+  "COM",
   # Prevent use of debugging code, like breakpoints
   # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
-  "T10", 
+  "T10",
   # Disallow print statements
   # https://docs.astral.sh/ruff/rules/#flake8-print-t20
-  "T20", 
+  "T20",
   # Provide clear and explanatory error messages
   # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
-  "EM",  
+  "EM",
   # Prefer pathlib for path manipulation
   # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
-  "PTH", 
+  "PTH",
   # Adhere to Pylint conventions
   # https://docs.astral.sh/ruff/rules/#pylint-pl
-  "PL",  
+  "PL",
   # Simplify code to reduce complexity
   # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
-  "SIM", 
+  "SIM",
+  # errors like undefined names and unused imports without enforcing style rules.
+  # https://docs.astral.sh/ruff/rules/#pyflakes-f
+  "F",
 ]
 
 ignore = [

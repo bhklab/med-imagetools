@@ -34,7 +34,7 @@ from pathlib import Path
 from typing import Optional
 import os
 
-DEFAULT_LOG_LEVEL = "DEBUG"
+DEFAULT_LOG_LEVEL = "INFO"
 
 class LoggingManager:
     """

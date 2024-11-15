@@ -9,6 +9,7 @@ import pydicom
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
+from imgtools.crawl.find_dicoms import find_dicoms
 from imgtools.logging import logger, logging
 
 
@@ -95,11 +96,7 @@ def crawl_directory(
 		case_sensitive=case_sensitive,
 	)
 
-	dcms = [
-		file
-		for file in top.rglob(f'*.{extension}', case_sensitive=case_sensitive)
-		if file.is_file()
-	]
+	dcms = find_dicoms(top, extension, case_sensitive)
 	logger.info(f'Found {len(dcms)} DICOM files')
 
 	database_list = []
