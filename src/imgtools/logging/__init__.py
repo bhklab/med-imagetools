@@ -100,15 +100,21 @@ class LoggingManager:
 			structlog.processors.StackInfoRenderer(),
 		]
 
-		if self.json_logging:
-			try:
-				log_dir = self.base_dir / '.imgtools' / 'logs'
-				log_dir.mkdir(parents=True, exist_ok=True)
-			except (PermissionError, OSError) as err:
-				msg = f'Failed to create log directory at {log_dir}: {err}'
-				raise RuntimeError(msg) from err
-			json_log_file = str(log_dir / 'imgtools.log')
+    LOG_DIR_NAME = '.imgtools/logs'
+    DEFAULT_LOG_FILENAME = 'imgtools.log'
 
+    if self.json_logging:
+        try:
+            log_dir = self.base_dir / self.LOG_DIR_NAME
+            log_dir.mkdir(parents=True, exist_ok=True)
+            json_log_file = log_dir / self.DEFAULT_LOG_FILENAME
+            # Verify the log file is writable
+            if json_log_file.exists() and not os.access(json_log_file, os.W_OK):
+                raise PermissionError(f"Log file {json_log_file} is not writable")
+        except (PermissionError, OSError) as err:
+            msg = f'Failed to create log directory at {log_dir}: {err}'
+            raise RuntimeError(msg) from err
+        json_log_file = str(json_log_file)
 		logging_config = {
 			'version': 1,
 			'disable_existing_loggers': False,
