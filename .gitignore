@@ -220,4 +220,4 @@ data/
 # pixi environments
 .pixi
 
-**/*.log
+.imgtools/**/*.log
