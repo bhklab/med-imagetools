@@ -101,13 +101,12 @@ class LoggingManager:
 		]
 
 		if self.json_logging:
-			log_dir = self.base_dir / '.imgtools' / 'logs'
 			try:
+				log_dir = self.base_dir / '.imgtools' / 'logs'
 				log_dir.mkdir(parents=True, exist_ok=True)
-			except PermissionError as err:
-				raise RuntimeError(f"Cannot create log directory at {log_dir}: {err}") from err
-			except OSError as err:
-				raise RuntimeError(f"Failed to create log directory at {log_dir}: {err}") from err
+			except (PermissionError, OSError) as err:
+				msg = f'Failed to create log directory at {log_dir}: {err}'
+				raise RuntimeError(msg) from err
 			json_log_file = str(log_dir / 'imgtools.log')
 
 		logging_config = {
