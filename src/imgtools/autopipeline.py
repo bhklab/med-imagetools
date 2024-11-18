@@ -28,7 +28,7 @@ import dill
 ###############################################################
 
 
-logger = get_logger(level="INFO")
+logger = get_logger(level=os.environ.get('IMGTOOLS_LOG_LEVEL', "INFO"))
 
 
 class AutoPipeline(Pipeline):
