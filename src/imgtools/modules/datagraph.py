@@ -5,7 +5,7 @@ from typing import List
 from functools import reduce
 import numpy as np
 import pandas as pd
-
+from imgtools.logging import logger
 
 class DataGraph:
     '''
@@ -29,7 +29,8 @@ class DataGraph:
     def __init__(self,
                  path_crawl: str,
                  edge_path: str = "./patient_id_full_edges.csv",
-                 visualize: bool = False) -> None:
+                 visualize: bool = False,
+                 update: bool = False) -> None:
         '''
         Parameters
         ----------
@@ -42,11 +43,15 @@ class DataGraph:
         self.df = pd.read_csv(path_crawl, index_col=0)
         self.edge_path = edge_path
         self.df_new = None
-        if os.path.exists(self.edge_path):
-            print("Edge table is already present. Loading the data...")
+
+        if not os.path.exists(self.edge_path):
+            logger.info("Edge table not present. Forming the edge table based on the crawl data...")
+            self.form_graph()
+        elif not update:
+            logger.info("Edge table is already present. Loading the data...", path = self.edge_path)
             self.df_edges = pd.read_csv(self.edge_path)
         else:
-            print("Edge table not present. Forming the edge table based on the crawl data...")
+            logger.info("Edge table present, but force updating...", edge_path=edge_path)
             self.form_graph()
         if visualize:
             self.visualize_graph()
@@ -74,8 +79,6 @@ class DataGraph:
 
         # Get all study ids
         # all_study = df_filter.study.unique()
-        start = time.time()
-
         # Defining Master df to store all the Edge dataframes
         # self.df_master = []
 
@@ -85,15 +88,14 @@ class DataGraph:
         # df_edge_patient = form_edge_study(df,all_study,i)
         
         self.df_edges = self._form_edges(self.df)  # pd.concat(self.df_master, axis=0, ignore_index=True)
-        end = time.time()
-        print(f"\nTotal time taken: {end - start}")
+
 
 
         self.df_edges.loc[self.df_edges.study_x.isna(),"study_x"] = self.df_edges.loc[self.df_edges.study_x.isna(), "study"]
         # dropping some columns
         self.df_edges.drop(columns=["study_y", "patient_ID_y", "series_description_y", "study_description_y", "study"],inplace=True)
         self.df_edges.sort_values(by="patient_ID_x", ascending=True)
-        print(f"Saving edge table in {self.edge_path}")
+        logger.info(f"Saving edge table in {self.edge_path}")
         self.df_edges.to_csv(self.edge_path, index=False)
 
     def visualize_graph(self):
@@ -101,7 +103,7 @@ class DataGraph:
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
         from pyvis.network import Network  # type: ignore (PyLance)
-        print("Generating visualizations...")
+        logger.info("Generating visualizations...")
         data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
 
         sources = self.df_edges["series_y"]
