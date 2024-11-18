@@ -3,7 +3,7 @@ import os
 import pathlib
 import re
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
-
+import time 
 import numpy as np
 import SimpleITK as sitk
 
@@ -203,7 +203,7 @@ class ImageAutoInput(BaseInput):
         self.dir_path = dir_path
         self.modalities = modalities
         self.parent, self.dataset_name = os.path.split(self.dir_path)
-
+        start = time.time()
         # CRAWLER
         # -------
         # Checks if dataset has already been indexed
@@ -222,16 +222,17 @@ class ImageAutoInput(BaseInput):
         # Form the graph
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
         logger.debug("Creating edge path", edge_path=edge_path)
-        graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
+        graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
+
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
         logger.info(f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
-
+        logger.info(f"Total time taken: {time.time() - start:.2f} seconds")
         loader = ImageCSVLoader(self.df_combined,
                                 colnames=self.column_names,
                                 seriesnames=self.series_names,
