@@ -219,3 +219,5 @@ data/
 
 # pixi environments
 .pixi
+
+**/*.log
