@@ -54,23 +54,37 @@ from imgtools.logging.processors import (
 DEFAULT_LOG_LEVEL = 'INFO'
 LOG_DIR_NAME = '.imgtools/logs'
 DEFAULT_LOG_FILENAME = 'imgtools.log'
+VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
 
 
 class LoggingManager:
 	"""
 	Manages the configuration and initialization of the logger.
 
+	Attributes:
+		name (str): Name of the logger.
+		base_dir (Path): The base directory for path prettification, defaults to the current working directory.
+		level (str): The log level to be set for the logger.
+		json_logging (bool): Flag to determine if logging should use JSON format.
+
+	Methods:
+		_initialize_logger: Initializes the logger with the specified configurations.
+		_setup_json_logging: Sets up JSON logging configuration and ensures the log file is writable.
+
 	Args:
-	    base_dir (Optional[Path]): The base directory for path prettification. Defaults to the current working directory.
-				i.e if base_dir is /home/user/project and a path is /home/user/project/data/CT/1.dcm then the path will be data/CT/1.dcm for clarity
+		name (str): The name of the logger instance.
+		level (str): The log level to be set for the logger. Defaults to the environment variable 'IMGTOOLS_LOG_LEVEL' or 'INFO'.
+		json_logging (bool): If True, the logger will output logs in JSON format. Defaults to the environment variable 'IMGTOOLS_JSON_LOGGING' converted to a boolean.
+		base_dir (Optional[Path]): The base directory for path prettification. Defaults to the current working directory.
+			i.e if base_dir is /home/user/project and a path is /home/user/project/data/CT/1.dcm then the path will be data/CT/1.dcm for clarity
 	"""
 
 	def __init__(
 		self,
 		name: str,
-		base_dir: Optional[Path] = None,
 		level: str = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL),
 		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower() == 'true',
+		base_dir: Optional[Path] = None,
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
@@ -149,9 +163,11 @@ class LoggingManager:
 		}
 		json_handler = {
 			'json': {
-				'class': 'logging.FileHandler',
+				'class': 'logging.handlers.RotatingFileHandler',
 				'formatter': 'json',
 				'filename': json_log_file,
+				'maxBytes': 10485760,  # 10MB
+				'backupCount': 5,
 			},
 		}
 
@@ -209,7 +225,7 @@ class LoggingManager:
 		if level is not None:
 			self.level = level.upper()
 
-		if self.level not in ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'):
+		if self.level not in VALID_LOG_LEVELS:
 			error_message = f'Invalid logging level: {self.level}'
 			raise ValueError(error_message)
 
