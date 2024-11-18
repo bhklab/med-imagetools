@@ -159,7 +159,7 @@ class BetaAutoInput(BaseInput):
         self.study_names  = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "study"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
         self.subseries_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "subseries"]
-        logger.info(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
+        logger.info(f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
 
@@ -228,7 +228,7 @@ class ImageAutoInput(BaseInput):
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
-        logger.info(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
+        logger.info(f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
 
