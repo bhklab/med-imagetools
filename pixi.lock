@@ -4191,7 +4191,7 @@ packages:
   name: med-imagetools
   version: 1.6.0
   path: .
-  sha256: da0a7c5917e7fa7a66abe923da34dfdcdbc1f03826bf997428d2b1f72980cab0
+  sha256: e23a6928e51ab87386cf70cf8e78e48f730b1785106f253715b940b5c0ddd2a1
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
@@ -6096,6 +6096,7 @@ packages:
   - python >=3.9
   - six >=1.5
   license: Apache-2.0
+  license_family: APACHE
   purls:
   - pkg:pypi/python-dateutil?source=hash-mapping
   size: 221925

@@ -5,18 +5,18 @@ call information formatting, and timestamping in Eastern Standard Time.
 Usage:
     Import the logger and use it directly:
     >>> from imgtools.logging import logger
-    >>> logger.info("This is an info message", extra_field="extra_value")
+    >>> logger.info('This is an info message', extra_field='extra_value')
 
     Or configure the logger with custom settings:
     >>> from imgtools.logging import get_logger, logging_manager
-    
+
     # Change log level
     >>> logger = get_logger(level='DEBUG')
-    
+
     # Configure multiple settings
     >>> logger = logging_manager.configure_logging(
     ...     json_logging=True,  # Enable JSON output to file
-    ...     level='DEBUG'       # Set logging level
+    ...     level='DEBUG',  # Set logging level
     ... )
 
 Configuration:
@@ -39,7 +39,6 @@ Configuration:
 import json as jsonlib
 import logging.config
 import os
-from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
@@ -61,6 +60,7 @@ class LoggingManager:
 
 	Args:
 	    base_dir (Optional[Path]): The base directory for path prettification. Defaults to the current working directory.
+				i.e if base_dir is /home/user/project and a path is /home/user/project/data/CT/1.dcm then the path will be data/CT/1.dcm for clarity
 	"""
 
 	def __init__(
@@ -68,12 +68,11 @@ class LoggingManager:
 		name: str,
 		base_dir: Optional[Path] = None,
 		level: str = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL),
-		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower()
-		== 'true',
+		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower() == 'true',
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
-		self.level = level
+		self.level = level.upper()
 		self.json_logging = json_logging
 		self.logger = None
 		self._initialize_logger()
@@ -101,63 +100,74 @@ class LoggingManager:
 			structlog.processors.StackInfoRenderer(),
 		]
 
-		logging_config = defaultdict()
-		logging_config['version'] = 1
-		logging_config['disable_existing_loggers'] = False
+		if self.json_logging:
+			try:
+				log_dir = self.base_dir / '.imgtools' / 'logs'
+				log_dir.mkdir(parents=True, exist_ok=True)
+			except (PermissionError, OSError) as err:
+				msg = f'Failed to create log directory at {log_dir}: {err}'
+				raise RuntimeError(msg) from err
+			json_log_file = str(log_dir / 'imgtools.log')
 
-		# Configure formatters based on `console_logging` and `json_logging`
-		logging_config['formatters'] = {}
-		logging_config['formatters']['console'] = {
-			'()': structlog.stdlib.ProcessorFormatter,
-			'processors': [
-				CallPrettifier(concise=True),
-				structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-				structlog.dev.ConsoleRenderer(
-					exception_formatter=structlog.dev.RichTracebackFormatter(
-						width=-1, show_locals=False
-					),
+		logging_config = {
+			'version': 1,
+			'disable_existing_loggers': False,
+			'formatters': {
+				'console': {
+					'()': structlog.stdlib.ProcessorFormatter,
+					'processors': [
+						CallPrettifier(concise=True),
+						structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+						structlog.dev.ConsoleRenderer(
+							exception_formatter=structlog.dev.RichTracebackFormatter(
+								width=-1, show_locals=False
+							),
+						),
+					],
+					'foreign_pre_chain': pre_chain,
+				},
+				**(
+					{
+						'json': {
+							'()': structlog.stdlib.ProcessorFormatter,
+							'processors': [
+								CallPrettifier(concise=False),
+								structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+								structlog.processors.dict_tracebacks,
+								structlog.processors.JSONRenderer(
+									serializer=jsonlib.dumps, indent=2
+								),
+							],
+							'foreign_pre_chain': pre_chain,
+						}
+					}
+					if self.json_logging
+					else {}
 				),
-			],
-			'foreign_pre_chain': pre_chain,
-		}
-
-		if self.json_logging:
-			logging_config['formatters']['json'] = {
-				'()': structlog.stdlib.ProcessorFormatter,
-				'processors': [
-					CallPrettifier(concise=False),
-					structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-					structlog.processors.dict_tracebacks,
-					structlog.processors.JSONRenderer(
-						serializer=jsonlib.dumps, indent=2
-					),
-				],
-				'foreign_pre_chain': pre_chain,
-			}
-
-		# Configure handlers based on available formatters
-		logging_config['handlers'] = {}
-
-		logging_config['handlers']['console'] = {
-			'class': 'logging.StreamHandler',
-			'formatter': 'console',
-		}
-
-		if self.json_logging:
-			logging_config['handlers']['json'] = {
-				'class': 'logging.FileHandler',
-				'formatter': 'json',
-				'filename': self.base_dir / 'imgtools.log',
-			}
-		logging_config['loggers'] = {
-			self.name: {
-				'handlers': [
-					handler
-					for handler in ('console', 'json')
-					if handler in logging_config['handlers']
-				],
-				'level': self.level,
-				'propagate': False,
+			},
+			'handlers': {
+				'console': {
+					'class': 'logging.StreamHandler',
+					'formatter': 'console',
+				},
+				**(
+					{
+						'json': {
+							'class': 'logging.FileHandler',
+							'formatter': 'json',
+							'filename': json_log_file,
+						}
+					}
+					if self.json_logging
+					else {}
+				),
+			},
+			'loggers': {
+				self.name: {
+					'handlers': ['console'] + (['json'] if self.json_logging else []),
+					'level': self.level,
+					'propagate': False,
+				},
 			},
 		}
 
@@ -201,8 +211,12 @@ LOGGER_NAME = 'imgtools'
 logging_manager = LoggingManager(LOGGER_NAME)
 
 
-def get_logger(level: str = 'INFO') -> logging.Logger:
-	return logging_manager.configure_logging(level=level)
-
-
 logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
+
+
+def get_logger(level: str = 'INFO') -> logging.Logger:
+	env_level = os.environ.get('IMGTOOLS_LOG_LEVEL', None)
+	if env_level != level and env_level is not None:
+		msg = f'environment variable IMGTOOLS_LOG_LEVEL is {env_level} but you are setting it to {level}'
+		logger.warning(msg)
+	return logging_manager.configure_logging(level=level)

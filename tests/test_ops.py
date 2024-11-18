@@ -5,7 +5,7 @@ import SimpleITK as sitk
 import numpy as np
 import h5py
 from imgtools.ops import *
-
+import copy
 @pytest.fixture(scope="session")
 def output_path():
     curr_path = pathlib.Path(__file__).parent.parent.resolve()

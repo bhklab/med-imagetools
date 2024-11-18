@@ -7,7 +7,7 @@ import pandas as pd
 from pydicom import dcmread
 from tqdm import tqdm
 from joblib import Parallel, delayed
-
+from imgtools.logging import logger
 
 def crawl_one(folder):
     folder_path = pathlib.Path(folder)
@@ -180,9 +180,10 @@ def crawl(top,
     # top is the input directory in the argument parser from autotest.py
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
-    
+    logger.info(f"Crawling {len(folders)} folders in {top}")
     database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
 
+    logger.info(f"Converting list to dictionary")
     # convert list to dictionary
     database_dict = {}
     for db in database_list:
@@ -200,13 +201,17 @@ def crawl(top,
         except:
             pass
     
+
     # save as json
-    with open(pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json').as_posix(), 'w') as f:
+    json_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json')
+    logger.info(f"Saving as json to {json_path}")
+    with open(json_path.as_posix(), 'w') as f:
         json.dump(database_dict, f, indent=4)
     
     # save as dataframe
-    df = to_df(database_dict)
     df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
+    logger.info(f"Saving as dataframe to {df_path}")
+    df = to_df(database_dict)
     df.to_csv(df_path)
     
     return database_dict
