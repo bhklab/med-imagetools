@@ -345,11 +345,10 @@ class LoggingManager:
 		    If an invalid log level is specified.
 		"""
 		if level is not None:
+			if level not in VALID_LOG_LEVELS:
+				msg = f'Invalid logging level: {self.level}'
+				raise ValueError(msg)
 			self.level = level.upper()
-
-		if self.level not in VALID_LOG_LEVELS:
-			msg = f'Invalid logging level: {self.level}'
-			raise ValueError(msg)
 
 		if json_logging is not None:
 			self.json_logging = json_logging
