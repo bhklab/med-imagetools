@@ -1,39 +1,58 @@
 """
-This module provides a logging setup using structlog with custom processors for path prettification,
-call information formatting, and timestamping in Eastern Standard Time.
+Logging setup using structlog for path prettification, call information formatting,
+and timestamping in Eastern Standard Time (EST).
 
-Usage:
-    Import the logger and use it directly:
+This module provides a flexible and configurable logging framework with support for
+human-readable console output and machine-parseable JSON logs.
+
+Usage
+-----
+Basic usage:
     >>> from imgtools.logging import logger
     >>> logger.info('This is an info message', extra_field='extra_value')
 
-    Or configure the logger with custom settings:
+Custom configuration:
     >>> from imgtools.logging import get_logger, logging_manager
 
-    # Change log level
+    Change log level
+
     >>> logger = get_logger(level='DEBUG')
 
-    # Configure multiple settings
+    Enable JSON logging
+
     >>> logger = logging_manager.configure_logging(
-    ...     json_logging=True,  # Enable JSON output to file
+    ...     json_logging=True,  # Enable JSON output
     ...     level='DEBUG',  # Set logging level
     ... )
 
-Configuration:
-    Environment variables:
-    - IMGTOOLS_LOG_LEVEL: Set the default log level (default: 'INFO')
-    - IMGTOOLS_JSON_LOGGING: Enable JSON logging to file (default: 'false')
+Configuration
+-------------
+Environment variables:
+    IMGTOOLS_LOG_LEVEL : str, optional
+        Default log level. Defaults to 'INFO'.
+    IMGTOOLS_JSON_LOGGING : str, optional
+        Enable JSON logging. Defaults to 'false'.
 
-    Output formats:
-    - JSON output: Machine-parseable logs written to 'imgtools.log'
-    - Console output: Human-readable logs with color-coded levels
+Output formats:
+    - JSON: Machine-parseable logs written to `imgtools.log`.
+    - Console: Human-readable logs with color-coded levels.
 
-    Log Levels:
-    - DEBUG: Detailed information for debugging
-    - INFO: General operational information
-    - WARNING: Minor issues that don't affect operation
-    - ERROR: Serious issues that affect operation
-    - CRITICAL: Critical issues that require immediate attention
+Log Levels:
+    - DEBUG: Detailed information for debugging.
+    - INFO: General operational information.
+    - WARNING: Minor issues that don't affect operation.
+    - ERROR: Serious issues that affect operation.
+    - CRITICAL: Critical issues requiring immediate attention.
+
+Classes
+-------
+LoggingManager
+    Manages the configuration and initialization of the logger.
+
+Functions
+---------
+get_logger(level: str = 'INFO') -> logging.Logger
+    Retrieve a logger instance with the specified log level.
 """
 
 import json as jsonlib
@@ -59,24 +78,61 @@ VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
 
 class LoggingManager:
 	"""
-	Manages the configuration and initialization of the logger.
+	Manages the configuration and initialization of a structured logger.
 
-	Attributes:
-		name (str): Name of the logger.
-		base_dir (Path): The base directory for path prettification, defaults to the current working directory.
-		level (str): The log level to be set for the logger.
-		json_logging (bool): Flag to determine if logging should use JSON format.
+	This class provides flexible options for configuring log levels, formats,
+	and output destinations. Logs can be human-readable or in JSON format for
+	automated systems.
 
-	Methods:
-		_initialize_logger: Initializes the logger with the specified configurations.
-		_setup_json_logging: Sets up JSON logging configuration and ensures the log file is writable.
+	Parameters
+	----------
+	name : str
+	    Name of the logger instance.
+	level : str, optional
+	    Log level for the logger. Defaults to the environment variable
+	    'IMGTOOLS_LOG_LEVEL' or 'INFO'.
+	json_logging : bool, optional
+	    Whether to enable JSON logging. Defaults to the environment variable
+	    'IMGTOOLS_JSON_LOGGING' or `False`.
+	base_dir : Path, optional
+	    Base directory for relative path prettification. Defaults to the
+	    current working directory.
 
-	Args:
-		name (str): The name of the logger instance.
-		level (str): The log level to be set for the logger. Defaults to the environment variable 'IMGTOOLS_LOG_LEVEL' or 'INFO'.
-		json_logging (bool): If True, the logger will output logs in JSON format. Defaults to the environment variable 'IMGTOOLS_JSON_LOGGING' converted to a boolean.
-		base_dir (Optional[Path]): The base directory for path prettification. Defaults to the current working directory.
-			i.e if base_dir is /home/user/project and a path is /home/user/project/data/CT/1.dcm then the path will be data/CT/1.dcm for clarity
+	Attributes
+	----------
+	name : str
+	    Name of the logger instance.
+	base_dir : Path
+	    Base directory for path prettification.
+	level : str
+	    Log level for the logger.
+	json_logging : bool
+	    Whether JSON logging is enabled.
+
+	Methods
+	-------
+	get_logger()
+	    Retrieve the configured logger instance.
+	configure_logging(json_logging=None, level=None)
+	    Dynamically adjust logging settings.
+
+	Raises
+	------
+	ValueError
+	    If an invalid log level is provided.
+	RuntimeError
+	    If the log directory or file cannot be created.
+
+	Examples
+	--------
+	Initialize with default settings:
+	    >>> manager = LoggingManager(name='mylogger')
+	    >>> logger = manager.get_logger()
+	    >>> logger.info('Info message')
+
+	Enable JSON logging:
+	    >>> manager = LoggingManager(name='mylogger', json_logging=True)
+	    >>> logger = manager.get_logger()
 	"""
 
 	def __init__(
@@ -93,11 +149,27 @@ class LoggingManager:
 		self._initialize_logger()
 
 	def _setup_json_logging(self) -> str:
+		"""
+		Set up the logging configuration for JSON output.
+
+		Ensures that the log directory exists and the log file is writable.
+
+		Returns
+		-------
+		str
+		    The path to the JSON log file.
+
+		Raises
+		------
+		PermissionError
+		    If the log file is not writable.
+		RuntimeError
+		    If the log directory cannot be created.
+		"""
 		try:
 			log_dir = self.base_dir / LOG_DIR_NAME
 			log_dir.mkdir(parents=True, exist_ok=True)
 			json_log_file = log_dir / DEFAULT_LOG_FILENAME
-			# Verify the log file is writable
 			if json_log_file.exists() and not os.access(json_log_file, os.W_OK):
 				msg = f'Log file {json_log_file} is not writable'
 				raise PermissionError(msg)
@@ -106,9 +178,19 @@ class LoggingManager:
 			raise RuntimeError(msg) from err
 		return str(json_log_file)
 
-	def _create_base_logging_config(self, pre_chain: List) -> dict:
+	def _create_base_logging_config(self, pre_chain: List) -> Dict:
 		"""
-		Create the basic logging configuration without JSON-related settings.
+		Create the basic logging configuration without JSON-specific settings.
+
+		Parameters
+		----------
+		pre_chain : list
+		    List of processors for structured logging.
+
+		Returns
+		-------
+		dict
+		    Base logging configuration.
 		"""
 		return {
 			'version': 1,
@@ -147,7 +229,21 @@ class LoggingManager:
 		self, logging_config: Dict, pre_chain: List, json_log_file: str
 	) -> Dict:
 		"""
-		Add JSON-related configurations to the logging configuration.
+		Add JSON logging settings to the logging configuration.
+
+		Parameters
+		----------
+		logging_config : dict
+		    Existing logging configuration.
+		pre_chain : list
+		    List of processors for structured logging.
+		json_log_file : str
+		    Path to the JSON log file.
+
+		Returns
+		-------
+		dict
+		    Updated logging configuration.
 		"""
 		json_formatter = {
 			'json': {
@@ -166,19 +262,20 @@ class LoggingManager:
 				'class': 'logging.handlers.RotatingFileHandler',
 				'formatter': 'json',
 				'filename': json_log_file,
-				'maxBytes': 10485760,  # 10MB
+				'maxBytes': 10485760,
 				'backupCount': 5,
 			},
 		}
 
-		# Update the existing config
 		logging_config['formatters'].update(json_formatter)
 		logging_config['handlers'].update(json_handler)
 		logging_config['loggers'][self.name]['handlers'].append('json')
 		return logging_config
 
-	# Modify _initialize_logger method to consider new options
 	def _initialize_logger(self) -> None:
+		"""
+		Initialize the logger with the current configuration.
+		"""
 		pre_chain = [
 			structlog.stdlib.add_log_level,
 			ESTTimeStamper(),
@@ -196,10 +293,8 @@ class LoggingManager:
 			structlog.processors.StackInfoRenderer(),
 		]
 
-		# Create the base logging configuration
 		logging_config = self._create_base_logging_config(pre_chain)
 
-		# Add JSON-specific configuration if enabled
 		if self.json_logging:
 			json_log_file = self._setup_json_logging()
 			logging_config = self._add_json_logging_config(logging_config, pre_chain, json_log_file)
@@ -216,18 +311,45 @@ class LoggingManager:
 		)
 
 	def get_logger(self) -> structlog.stdlib.BoundLogger:
+		"""
+		Retrieve the logger instance.
+
+		Returns
+		-------
+		structlog.stdlib.BoundLogger
+		    Configured logger instance.
+		"""
 		return structlog.get_logger(self.name)
 
-	# Add a method to dynamically adjust logging
 	def configure_logging(
 		self, json_logging: Optional[bool] = None, level: str = None
-	) -> structlog.BoundLogger:
+	) -> structlog.stdlib.BoundLogger:
+		"""
+		Dynamically adjust logging settings.
+
+		Parameters
+		----------
+		json_logging : bool, optional
+		    Enable or disable JSON logging.
+		level : str, optional
+		    Set the log level.
+
+		Returns
+		-------
+		structlog.stdlib.BoundLogger
+		    Updated logger instance.
+
+		Raises
+		------
+		ValueError
+		    If an invalid log level is specified.
+		"""
 		if level is not None:
 			self.level = level.upper()
 
 		if self.level not in VALID_LOG_LEVELS:
-			error_message = f'Invalid logging level: {self.level}'
-			raise ValueError(error_message)
+			msg = f'Invalid logging level: {self.level}'
+			raise ValueError(msg)
 
 		if json_logging is not None:
 			self.json_logging = json_logging
@@ -238,14 +360,27 @@ class LoggingManager:
 
 LOGGER_NAME = 'imgtools'
 logging_manager = LoggingManager(LOGGER_NAME)
-
-
 logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
 
 
 def get_logger(level: str = 'INFO') -> logging.Logger:
+	"""
+	Retrieve a logger with the specified log level.
+
+	Parameters
+	----------
+	level : str
+	    Desired logging level.
+
+	Returns
+	-------
+	logging.Logger
+	    Configured logger instance.
+	"""
 	env_level = os.environ.get('IMGTOOLS_LOG_LEVEL', None)
 	if env_level != level and env_level is not None:
-		msg = f'environment variable IMGTOOLS_LOG_LEVEL is {env_level} but you are setting it to {level}'
-		logger.warning(msg)
+		logger.warning(
+			f'Environment variable IMGTOOLS_LOG_LEVEL is {env_level} '
+			f'but you are setting it to {level}'
+		)
 	return logging_manager.configure_logging(level=level)
