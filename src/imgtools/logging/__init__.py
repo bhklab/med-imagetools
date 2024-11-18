@@ -39,7 +39,6 @@ Configuration:
 import json as jsonlib
 import logging.config
 import os
-from collections import defaultdict
 from pathlib import Path
 from typing import Optional
 
@@ -61,6 +60,7 @@ class LoggingManager:
 
 	Args:
 	    base_dir (Optional[Path]): The base directory for path prettification. Defaults to the current working directory.
+				i.e if base_dir is /home/user/project and a path is /home/user/project/data/CT/1.dcm then the path will be data/CT/1.dcm for clarity
 	"""
 
 	def __init__(
@@ -100,61 +100,70 @@ class LoggingManager:
 			structlog.processors.StackInfoRenderer(),
 		]
 
-		logging_config = defaultdict()
-		logging_config['version'] = 1
-		logging_config['disable_existing_loggers'] = False
+		if self.json_logging:
+			log_dir = self.base_dir / '.imgtools' / 'logs'
+			log_dir.mkdir(parents=True, exist_ok=True)
+			json_log_file = str(log_dir / 'imgtools.log')
 
-		# Configure formatters based on `console_logging` and `json_logging`
-		logging_config['formatters'] = {}
-		logging_config['formatters']['console'] = {
-			'()': structlog.stdlib.ProcessorFormatter,
-			'processors': [
-				CallPrettifier(concise=True),
-				structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-				structlog.dev.ConsoleRenderer(
-					exception_formatter=structlog.dev.RichTracebackFormatter(
-						width=-1, show_locals=False
-					),
+		logging_config = {
+			'version': 1,
+			'disable_existing_loggers': False,
+			'formatters': {
+				'console': {
+					'()': structlog.stdlib.ProcessorFormatter,
+					'processors': [
+						CallPrettifier(concise=True),
+						structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+						structlog.dev.ConsoleRenderer(
+							exception_formatter=structlog.dev.RichTracebackFormatter(
+								width=-1, show_locals=False
+							),
+						),
+					],
+					'foreign_pre_chain': pre_chain,
+				},
+				**(
+					{
+						'json': {
+							'()': structlog.stdlib.ProcessorFormatter,
+							'processors': [
+								CallPrettifier(concise=False),
+								structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+								structlog.processors.dict_tracebacks,
+								structlog.processors.JSONRenderer(
+									serializer=jsonlib.dumps, indent=2
+								),
+							],
+							'foreign_pre_chain': pre_chain,
+						}
+					}
+					if self.json_logging
+					else {}
 				),
-			],
-			'foreign_pre_chain': pre_chain,
-		}
-
-		if self.json_logging:
-			logging_config['formatters']['json'] = {
-				'()': structlog.stdlib.ProcessorFormatter,
-				'processors': [
-					CallPrettifier(concise=False),
-					structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-					structlog.processors.dict_tracebacks,
-					structlog.processors.JSONRenderer(serializer=jsonlib.dumps, indent=2),
-				],
-				'foreign_pre_chain': pre_chain,
-			}
-
-		# Configure handlers based on available formatters
-		logging_config['handlers'] = {}
-
-		logging_config['handlers']['console'] = {
-			'class': 'logging.StreamHandler',
-			'formatter': 'console',
-		}
-
-		if self.json_logging:
-			logging_config['handlers']['json'] = {
-				'class': 'logging.FileHandler',
-				'formatter': 'json',
-				'filename': self.base_dir / 'imgtools.log',
-			}
-		logging_config['loggers'] = {
-			self.name: {
-				'handlers': [
-					handler
-					for handler in ('console', 'json')
-					if handler in logging_config['handlers']
-				],
-				'level': self.level,
-				'propagate': False,
+			},
+			'handlers': {
+				'console': {
+					'class': 'logging.StreamHandler',
+					'formatter': 'console',
+				},
+				**(
+					{
+						'json': {
+							'class': 'logging.FileHandler',
+							'formatter': 'json',
+							'filename': json_log_file,
+						}
+					}
+					if self.json_logging
+					else {}
+				),
+			},
+			'loggers': {
+				self.name: {
+					'handlers': ['console'] + (['json'] if self.json_logging else []),
+					'level': self.level,
+					'propagate': False,
+				},
 			},
 		}
 
