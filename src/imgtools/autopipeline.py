@@ -15,6 +15,8 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
 from imgtools.utils.args import parser
+from imgtools.logging import get_logger
+
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
 from sklearn.model_selection import train_test_split
@@ -24,6 +26,9 @@ import dill
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
 ###############################################################
+
+
+logger = get_logger(level="INFO")
 
 
 class AutoPipeline(Pipeline):
@@ -164,9 +169,7 @@ class AutoPipeline(Pipeline):
             if not os.path.exists(self.output_directory):
                 os.makedirs(self.output_directory)
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
-            # print(all_nnunet_folders)
             numbers = [int(os.path.split(os.path.split(folder)[0])[1][4:7]) for folder in all_nnunet_folders if os.path.split(os.path.split(folder)[0])[1].startswith("Task")]
-            # print(numbers, continue_processing)
             if (len(numbers) == 0 and continue_processing) or not continue_processing or not os.path.exists(pathlib.Path(self.output_directory, f"Task{max(numbers)}_{study_name}", ".temp").as_posix()):
                 available_numbers = list(range(500, 1000))
                 for folder in all_nnunet_folders:
@@ -612,7 +615,6 @@ class AutoPipeline(Pipeline):
         if self.is_nnunet:  # dataset.json for nnunet and .sh file to run to process it
             imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
             images_test_location = imagests_path if os.path.exists(imagests_path) else None
-            # print(self.existing_roi_indices)
             generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
                                   pathlib.Path(self.output_directory, "imagesTr").as_posix(),
                                   images_test_location,
@@ -694,6 +696,7 @@ class AutoPipeline(Pipeline):
             # not supported yet, since they cannot be pickled
             if os.path.exists(self.output_df_path) and not self.overwrite:
                 print("Dataset already processed...")
+                logger.info("Dataset already processed...")
                 shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
             else:
                 Parallel(n_jobs=self.n_jobs, verbose=verbose, require='sharedmem')(
@@ -720,17 +723,17 @@ def main():
             with open(pathlib.Path(args.output_directory, ".temp", "init_parameters.pkl").as_posix(), "rb") as f:
                 args_dict = dill.load(f)
         except:
-            print("Could not resume processing. Starting processing from the beginning.")
-
-    print('initializing AutoPipeline...')
+            logger.info("Could not resume processing. Starting processing from the beginning.")
+    logger.debug("Starting main:", args=args_dict)
+    logger.info('Initializing AutoPipeline...')
     pipeline = AutoPipeline(**args_dict)
 
     if not args.dry_run:
-        print('starting AutoPipeline...')
+        logger.info('Starting AutoPipeline...')
         pipeline.run()
-        print('finished AutoPipeline!')
+        logger.info('Finished AutoPipeline!')
     else:
-        print('dry run complete, no processing done')
+        logger.info('Dry run complete, no processing done')
 
     """Print general summary info"""
 
@@ -738,13 +741,13 @@ def main():
     * dataset.json can be found at /path/to/dataset/json
     * You can train nnU-Net by cloning /path/to/nnunet/repo and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare
     """
-    print(f"Outputted data to {args.output_directory}")
+    logger.info(f"Outputted data to {args.output_directory}")
     csv_path = pathlib.Path(args.output_directory, "dataset.csv").as_posix()
-    print(f"Dataset info found at {csv_path}")
+    logger.info(f"Dataset info found at {csv_path}")
     if args.nnunet:
         json_path = pathlib.Path(args.output_directory, "dataset.json").as_posix()
-        print(f"dataset.json for nnU-net can be found at {json_path}")
-        print("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
+        logger.info(f"dataset.json for nnU-net can be found at {json_path}")
+        logger.info("You can train nnU-net by cloning https://github.com/MIC-DKFZ/nnUNet/ and run `nnUNet_plan_and_preprocess -t taskID` to let the nnU-Net package prepare")
 
 
 if __name__ == "__main__":

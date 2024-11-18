@@ -1,5 +1,4 @@
 import re
-from warnings import warn
 from typing import Dict, List, Optional, TypeVar
 
 import numpy as np
@@ -8,8 +7,9 @@ from pydicom import dcmread
 from itertools import groupby
 from skimage.draw import polygon2mask
 
-from .segmentation import Segmentation
-from ..utils import physical_points_to_idxs
+from imgtools.modules.segmentation import Segmentation
+from imgtools.utils import physical_points_to_idxs
+from imgtools.logging import logger
 
 T = TypeVar('T')
 
@@ -45,7 +45,7 @@ class StructureSet:
             try:
                 roi_points[name] = _get_roi_points(rtstruct, i)
             except AttributeError:
-                warn(f"Could not get points for ROI {name} (in {rtstruct_path}).")
+                logger.warning(f"Could not get points for ROI `{name}` (in {rtstruct_path}).")
 
         metadata = {}
         
@@ -184,7 +184,7 @@ class StructureSet:
             roi_names = [roi_names]
         if isinstance(roi_names, list):  # won't this always trigger after the previous?
             labels = self._assign_labels(roi_names, roi_select_first)
-        print("labels:", labels)
+        logger.debug(f"Found {len(labels)} labels", labels=labels)
         all_empty = True
         for v in labels.values():
             if v != []:

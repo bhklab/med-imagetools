@@ -1,14 +1,57 @@
-from typing import List, TypeVar, Sequence, Union, Tuple, Optional, Any
+import json
+import os
+import pathlib
+import re
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 import SimpleITK as sitk
 
-from .functional import *
-from ..io import *
-from ..utils import image_to_array, array_to_image, crawl, physical_points_to_idxs
-from ..modules import map_over_labels
-from ..modules import DataGraph
+# from ..io import *
+from imgtools.io.loaders import (
+    BaseLoader,
+    ImageCSVLoader,
+    ImageFileLoader,
+    read_dicom_auto,
+    read_image,
+)
+from imgtools.io.writers import (
+    BaseSubjectWriter,
+    BaseWriter,
+    HDF5Writer,
+    ImageFileWriter,
+    MetadataWriter,
+    NumpyWriter,
+    SegNrrdWriter,
+)
+from imgtools.logging import logger
 
+# from ..modules import DataGraph
+# from ..modules import map_over_labels
+from imgtools.modules.datagraph import DataGraph
+from imgtools.modules.segmentation import Segmentation, map_over_labels
+
+# from .functional import *
+from imgtools.ops.functional import (
+    bounding_box,
+    centroid,
+    clip_intensity,
+    crop,
+    crop_to_mask_bounding_box,
+    image_statistics,
+    min_max_scale,
+    resample,
+    resize,
+    rotate,
+    standard_scale,
+    window_intensity,
+    zoom,
+)
+
+# from ..utils import image_to_array, array_to_image, crawl, physical_points_to_idxs
+from imgtools.utils import crawl
+from imgtools.utils.arrayutils import array_to_image
+from imgtools.utils.imageutils import image_to_array, physical_points_to_idxs
 
 LoaderFunction = TypeVar('LoaderFunction')
 ImageFilter = TypeVar('ImageFilter')
@@ -92,13 +135,14 @@ class BetaAutoInput(BaseInput):
         tree_crawl_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.json").as_posix()
 
         if not os.path.exists(df_crawl_path) or update:
-            print("Indexing the dataset...")
+            logger.debug("Output exists, force updating.", path=df_crawl_path)
+            logger.info("Indexing the dataset")
             db = crawl(self.dir_path, n_jobs = n_jobs)
-            print(f"Number of patients in the dataset: {len(db)}")
+            logger.info(f"Number of patients in the dataset: {len(db)}")
         else:
-            print("The dataset has already been indexed.")
+            logger.info("The dataset has already been indexed.")
 
-        import json
+
         with open(tree_crawl_path, 'r') as f:
             tree_db = json.load(f)  # currently unused, TO BE implemented in the future
             assert tree_db is not None, "There was no crawler output" # dodging linter
@@ -107,15 +151,15 @@ class BetaAutoInput(BaseInput):
         # -----
         # Form the graph
         edge_path = pathlib.Path(self.parent, ".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
+        logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         graph = DataGraph(path_crawl=df_crawl_path, edge_path=edge_path, visualize=visualize)
-        print(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.study_names  = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "study"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
         self.subseries_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "subseries"]
-        print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
+        logger.info(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
 
@@ -166,23 +210,25 @@ class ImageAutoInput(BaseInput):
         # To be changed later
         path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
         if not os.path.exists(path_crawl) or update:
-            print("Indexing the dataset...")
+            logger.debug("Output exists, force updating.", path=path_crawl)
+            logger.info("Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
-            print(f"Number of patients in the dataset: {len(db)}")
+            logger.info(f"Number of patients in the dataset: {len(db)}")
         else:
-            print("The dataset has already been indexed.")
+            logger.warning("The dataset has already been indexed. Use --update to force update.")
 
         # GRAPH
         # -----
         # Form the graph
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
+        logger.debug("Creating edge path", edge_path=edge_path)
         graph = DataGraph(path_crawl=path_crawl, edge_path=edge_path, visualize=visualize)
-        print(f"Forming the graph based on the given modalities: {self.modalities}")
+        logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
-        print(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
+        logger.info(f"There are {len(self.df_combined)} cases containing all {modalities} modalities.")
 
         self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
 
@@ -1700,7 +1746,7 @@ class FilterSegmentation():
             labels = self._assign_labels(self.roi_patterns, roi_select_first)
         else:
             raise ValueError(f"{self.roi_patterns} not expected datatype")
-        print("labels:", labels)
+        logger.debug(f"Found {len(labels)} labels", labels=labels)
         
         # removing empty labels from dictionary to prevent processing empty masks
         all_empty = True
