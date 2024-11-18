@@ -40,7 +40,7 @@ import json as jsonlib
 import logging.config
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Dict, List, Optional
 
 import structlog
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
@@ -52,6 +52,8 @@ from imgtools.logging.processors import (
 )
 
 DEFAULT_LOG_LEVEL = 'INFO'
+LOG_DIR_NAME = '.imgtools/logs'
+DEFAULT_LOG_FILENAME = 'imgtools.log'
 
 
 class LoggingManager:
@@ -74,8 +76,90 @@ class LoggingManager:
 		self.base_dir = base_dir or Path.cwd()
 		self.level = level.upper()
 		self.json_logging = json_logging
-		self.logger = None
 		self._initialize_logger()
+
+	def _setup_json_logging(self) -> str:
+		try:
+			log_dir = self.base_dir / LOG_DIR_NAME
+			log_dir.mkdir(parents=True, exist_ok=True)
+			json_log_file = log_dir / DEFAULT_LOG_FILENAME
+			# Verify the log file is writable
+			if json_log_file.exists() and not os.access(json_log_file, os.W_OK):
+				msg = f'Log file {json_log_file} is not writable'
+				raise PermissionError(msg)
+		except (PermissionError, OSError) as err:
+			msg = f'Failed to create log directory at {log_dir}: {err}'
+			raise RuntimeError(msg) from err
+		return str(json_log_file)
+
+	def _create_base_logging_config(self, pre_chain: List) -> dict:
+		"""
+		Create the basic logging configuration without JSON-related settings.
+		"""
+		return {
+			'version': 1,
+			'disable_existing_loggers': False,
+			'formatters': {
+				'console': {
+					'()': structlog.stdlib.ProcessorFormatter,
+					'processors': [
+						CallPrettifier(concise=True),
+						structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+						structlog.dev.ConsoleRenderer(
+							exception_formatter=structlog.dev.RichTracebackFormatter(
+								width=-1, show_locals=False
+							),
+						),
+					],
+					'foreign_pre_chain': pre_chain,
+				},
+			},
+			'handlers': {
+				'console': {
+					'class': 'logging.StreamHandler',
+					'formatter': 'console',
+				},
+			},
+			'loggers': {
+				self.name: {
+					'handlers': ['console'],
+					'level': self.level,
+					'propagate': False,
+				},
+			},
+		}
+
+	def _add_json_logging_config(
+		self, logging_config: Dict, pre_chain: List, json_log_file: str
+	) -> Dict:
+		"""
+		Add JSON-related configurations to the logging configuration.
+		"""
+		json_formatter = {
+			'json': {
+				'()': structlog.stdlib.ProcessorFormatter,
+				'processors': [
+					CallPrettifier(concise=False),
+					structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+					structlog.processors.dict_tracebacks,
+					structlog.processors.JSONRenderer(serializer=jsonlib.dumps, indent=2),
+				],
+				'foreign_pre_chain': pre_chain,
+			},
+		}
+		json_handler = {
+			'json': {
+				'class': 'logging.FileHandler',
+				'formatter': 'json',
+				'filename': json_log_file,
+			},
+		}
+
+		# Update the existing config
+		logging_config['formatters'].update(json_formatter)
+		logging_config['handlers'].update(json_handler)
+		logging_config['loggers'][self.name]['handlers'].append('json')
+		return logging_config
 
 	# Modify _initialize_logger method to consider new options
 	def _initialize_logger(self) -> None:
@@ -93,107 +177,30 @@ class LoggingManager:
 			),
 			PathPrettifier(base_dir=self.base_dir),
 			structlog.stdlib.ExtraAdder(),
-		]
-
-		processors = [
-			*pre_chain,
 			structlog.processors.StackInfoRenderer(),
 		]
 
-    LOG_DIR_NAME = '.imgtools/logs'
-    DEFAULT_LOG_FILENAME = 'imgtools.log'
+		# Create the base logging configuration
+		logging_config = self._create_base_logging_config(pre_chain)
 
-    if self.json_logging:
-        try:
-            log_dir = self.base_dir / self.LOG_DIR_NAME
-            log_dir.mkdir(parents=True, exist_ok=True)
-            json_log_file = log_dir / self.DEFAULT_LOG_FILENAME
-            # Verify the log file is writable
-            if json_log_file.exists() and not os.access(json_log_file, os.W_OK):
-                raise PermissionError(f"Log file {json_log_file} is not writable")
-        except (PermissionError, OSError) as err:
-            msg = f'Failed to create log directory at {log_dir}: {err}'
-            raise RuntimeError(msg) from err
-        json_log_file = str(json_log_file)
-		logging_config = {
-			'version': 1,
-			'disable_existing_loggers': False,
-			'formatters': {
-				'console': {
-					'()': structlog.stdlib.ProcessorFormatter,
-					'processors': [
-						CallPrettifier(concise=True),
-						structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-						structlog.dev.ConsoleRenderer(
-							exception_formatter=structlog.dev.RichTracebackFormatter(
-								width=-1, show_locals=False
-							),
-						),
-					],
-					'foreign_pre_chain': pre_chain,
-				},
-				**(
-					{
-						'json': {
-							'()': structlog.stdlib.ProcessorFormatter,
-							'processors': [
-								CallPrettifier(concise=False),
-								structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-								structlog.processors.dict_tracebacks,
-								structlog.processors.JSONRenderer(
-									serializer=jsonlib.dumps, indent=2
-								),
-							],
-							'foreign_pre_chain': pre_chain,
-						}
-					}
-					if self.json_logging
-					else {}
-				),
-			},
-			'handlers': {
-				'console': {
-					'class': 'logging.StreamHandler',
-					'formatter': 'console',
-				},
-				**(
-					{
-						'json': {
-							'class': 'logging.FileHandler',
-							'formatter': 'json',
-							'filename': json_log_file,
-						}
-					}
-					if self.json_logging
-					else {}
-				),
-			},
-			'loggers': {
-				self.name: {
-					'handlers': ['console'] + (['json'] if self.json_logging else []),
-					'level': self.level,
-					'propagate': False,
-				},
-			},
-		}
+		# Add JSON-specific configuration if enabled
+		if self.json_logging:
+			json_log_file = self._setup_json_logging()
+			logging_config = self._add_json_logging_config(logging_config, pre_chain, json_log_file)
 
 		logging.config.dictConfig(logging_config)
 		structlog.configure(
 			processors=[
-				*processors,
+				*pre_chain,
 				structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
 			],
 			logger_factory=structlog.stdlib.LoggerFactory(),
 			wrapper_class=structlog.stdlib.BoundLogger,
-			cache_logger_on_first_use=False,
+			cache_logger_on_first_use=True,
 		)
-		self.logger = structlog.get_logger(self.name)
 
 	def get_logger(self) -> structlog.stdlib.BoundLogger:
-		if not self.logger:
-			error_message = 'Logger has not been initialized.'
-			raise RuntimeError(error_message)
-		return self.logger
+		return structlog.get_logger(self.name)
 
 	# Add a method to dynamically adjust logging
 	def configure_logging(

@@ -48,10 +48,10 @@ class DataGraph:
             logger.info("Edge table not present. Forming the edge table based on the crawl data...")
             self.form_graph()
         elif not update:
-            logger.info("Edge table is already present. Loading the data...", path = self.edge_path)
+            logger.info("Edge table is already present. Loading the data...")
             self.df_edges = pd.read_csv(self.edge_path)
         else:
-            logger.info("Edge table present, but force updating...", edge_path=edge_path)
+            logger.info("Edge table present, but force updating...")
             self.form_graph()
         if visualize:
             self.visualize_graph()

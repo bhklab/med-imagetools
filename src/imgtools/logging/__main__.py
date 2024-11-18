@@ -1,4 +1,5 @@
 import logging
+import pathlib
 import time
 
 import click
@@ -22,6 +23,7 @@ def main() -> None:
 		'This is an info message',
 		user='user123',
 		action='info_action',
+		path=pathlib.Path('/path/to/file.txt'),
 	)
 	logger.warning(
 		'This is a warning message',
