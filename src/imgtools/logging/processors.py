@@ -13,7 +13,7 @@ class PathPrettifier:
 	A processor to convert absolute paths to relative paths based on a base directory.
 
 	Args:
-	    base_dir (Optional[Path]): The base directory to which paths should be made relative. Defaults to the current working directory.
+		base_dir (Optional[Path]): The base directory to which paths should be made relative. Defaults to the current working directory.
 	"""
 
 	def __init__(self, base_dir: Optional[Path] = None) -> None:
@@ -24,12 +24,12 @@ class PathPrettifier:
 		Process the event dictionary to convert Path objects to relative paths.
 
 		Args:
-		    _: Unused positional argument.
-		    __: Unused positional argument.
-		    event_dict (EventDict): The event dictionary containing log information.
+			_: Unused positional argument.
+			__: Unused positional argument.
+			event_dict (EventDict): The event dictionary containing log information.
 
 		Returns:
-		    EventDict: The modified event dictionary with relative paths.
+			EventDict: The modified event dictionary with relative paths.
 		"""
 		if not isinstance(event_dict, dict):
 			msg = 'event_dict must be a dictionary'
@@ -39,7 +39,7 @@ class PathPrettifier:
 			if isinstance(path, Path):
 				with contextlib.suppress(ValueError):
 					relative_path = path.relative_to(self.base_dir)
-				event_dict[key] = str(relative_path)
+					event_dict[key] = str(relative_path)
 		return event_dict
 
 
@@ -53,12 +53,12 @@ class JSONFormatter:
 		Process the event dictionary to separate core fields from extra fields.
 
 		Args:
-		    _: Unused positional argument.
-		    __: Unused positional argument.
-		    event_dict (EventDict): The event dictionary containing log information.
+			_: Unused positional argument.
+			__: Unused positional argument.
+			event_dict (EventDict): The event dictionary containing log information.
 
 		Returns:
-		    EventDict: The modified event dictionary with core fields and extra fields separated.
+			EventDict: The modified event dictionary with core fields and extra fields separated.
 		"""
 		if not isinstance(event_dict, dict):
 			msg = 'event_dict must be a dictionary'
@@ -78,7 +78,7 @@ class CallPrettifier:
 	A processor to format call information in the event dictionary.
 
 	Args:
-	    concise (bool): Whether to use a concise format for call information. Defaults to True.
+		concise (bool): Whether to use a concise format for call information. Defaults to True.
 	"""
 
 	def __init__(self, concise: bool = True) -> None:
@@ -89,12 +89,12 @@ class CallPrettifier:
 		Process the event dictionary to format call information.
 
 		Args:
-		    _: Unused positional argument.
-		    __: Unused positional argument.
-		    event_dict (EventDict): The event dictionary containing log information.
+			_: Unused positional argument.
+			__: Unused positional argument.
+			event_dict (EventDict): The event dictionary containing log information.
 
 		Returns:
-		    EventDict: The modified event dictionary with formatted call information.
+			EventDict: The modified event dictionary with formatted call information.
 		"""
 		if not isinstance(event_dict, dict):
 			msg = 'event_dict must be a dictionary'
@@ -117,7 +117,7 @@ class ESTTimeStamper:
 	A processor to add a timestamp in Eastern Standard Time to the event dictionary.
 
 	Args:
-	    fmt (str): The format string for the timestamp. Defaults to "%Y-%m-%dT%H:%M:%S%z".
+		fmt (str): The format string for the timestamp. Defaults to "%Y-%m-%dT%H:%M:%S%z".
 	"""
 
 	def __init__(self, fmt: str = '%Y-%m-%dT%H:%M:%S%z') -> None:
@@ -129,12 +129,12 @@ class ESTTimeStamper:
 		Process the event dictionary to add a timestamp in Eastern Standard Time.
 
 		Args:
-		    _: Unused positional argument.
-		    __: Unused positional argument.
-		    event_dict (EventDict): The event dictionary containing log information.
+			_: Unused positional argument.
+			__: Unused positional argument.
+			event_dict (EventDict): The event dictionary containing log information.
 
 		Returns:
-		    EventDict: The modified event dictionary with the added timestamp.
+			EventDict: The modified event dictionary with the added timestamp.
 		"""
 		if not isinstance(event_dict, dict):
 			msg = 'event_dict must be a dictionary'
