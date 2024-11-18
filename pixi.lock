@@ -6096,6 +6096,7 @@ packages:
   - python >=3.9
   - six >=1.5
   license: Apache-2.0
+  license_family: APACHE
   purls:
   - pkg:pypi/python-dateutil?source=hash-mapping
   size: 221925
