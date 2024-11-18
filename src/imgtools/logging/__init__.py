@@ -5,18 +5,18 @@ call information formatting, and timestamping in Eastern Standard Time.
 Usage:
     Import the logger and use it directly:
     >>> from imgtools.logging import logger
-    >>> logger.info("This is an info message", extra_field="extra_value")
+    >>> logger.info('This is an info message', extra_field='extra_value')
 
     Or configure the logger with custom settings:
     >>> from imgtools.logging import get_logger, logging_manager
-    
+
     # Change log level
     >>> logger = get_logger(level='DEBUG')
-    
+
     # Configure multiple settings
     >>> logger = logging_manager.configure_logging(
     ...     json_logging=True,  # Enable JSON output to file
-    ...     level='DEBUG'       # Set logging level
+    ...     level='DEBUG',  # Set logging level
     ... )
 
 Configuration:
@@ -68,8 +68,7 @@ class LoggingManager:
 		name: str,
 		base_dir: Optional[Path] = None,
 		level: str = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL),
-		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower()
-		== 'true',
+		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower() == 'true',
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
@@ -128,9 +127,7 @@ class LoggingManager:
 					CallPrettifier(concise=False),
 					structlog.stdlib.ProcessorFormatter.remove_processors_meta,
 					structlog.processors.dict_tracebacks,
-					structlog.processors.JSONRenderer(
-						serializer=jsonlib.dumps, indent=2
-					),
+					structlog.processors.JSONRenderer(serializer=jsonlib.dumps, indent=2),
 				],
 				'foreign_pre_chain': pre_chain,
 			}
@@ -201,8 +198,12 @@ LOGGER_NAME = 'imgtools'
 logging_manager = LoggingManager(LOGGER_NAME)
 
 
-def get_logger(level: str = 'INFO') -> logging.Logger:
-	return logging_manager.configure_logging(level=level)
-
-
 logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
+
+
+def get_logger(level: str = 'INFO') -> logging.Logger:
+	env_level = os.environ.get('IMGTOOLS_LOG_LEVEL', None)
+	if env_level != level and env_level is not None:
+		msg = f'environment variable IMGTOOLS_LOG_LEVEL is {env_level} but you are setting it to {level}'
+		logger.warning(msg)
+	return logging_manager.configure_logging(level=level)
