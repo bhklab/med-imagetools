@@ -3,19 +3,37 @@ This module provides a logging setup using structlog with custom processors for 
 call information formatting, and timestamping in Eastern Standard Time.
 
 Usage:
-    Import the logger and use it to log messages in your package.
+    Import the logger and use it directly:
+    >>> from imgtools.logging import logger
+    >>> logger.info("This is an info message", extra_field="extra_value")
 
-    from readii.logging import logger
+    Or configure the logger with custom settings:
+    >>> from imgtools.logging import get_logger, logging_manager
+    
+    # Change log level
+    >>> logger = get_logger(level='DEBUG')
+    
+    # Configure multiple settings
+    >>> logger = logging_manager.configure_logging(
+    ...     json_logging=True,  # Enable JSON output to file
+    ...     level='DEBUG'       # Set logging level
+    ... )
 
-    logger.info("This is an info message", extra_field="extra_value")
+Configuration:
+    Environment variables:
+    - IMGTOOLS_LOG_LEVEL: Set the default log level (default: 'INFO')
+    - IMGTOOLS_JSON_LOGGING: Enable JSON logging to file (default: 'false')
 
-    The logger can output in JSON format or console format based on whether the output is a TTY.
+    Output formats:
+    - JSON output: Machine-parseable logs written to 'imgtools.log'
+    - Console output: Human-readable logs with color-coded levels
 
-    - JSON output: Suitable for structured logging and machine parsing.
-    - Console output: Suitable for human-readable logs during development.
-
-Classes:
-    LoggingManager: Manages the configuration and initialization of the logger.
+    Log Levels:
+    - DEBUG: Detailed information for debugging
+    - INFO: General operational information
+    - WARNING: Minor issues that don't affect operation
+    - ERROR: Serious issues that affect operation
+    - CRITICAL: Critical issues that require immediate attention
 """
 
 import json as jsonlib
