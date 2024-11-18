@@ -44,8 +44,8 @@ class StructureSet:
         for i, name in enumerate(roi_names):
             try:
                 roi_points[name] = _get_roi_points(rtstruct, i)
-            except AttributeError:
-                logger.warning(f"Could not get points for ROI `{name}` (in {rtstruct_path}).")
+            except AttributeError as ae:
+                logger.warning(f"Could not get points for ROI `{name}`.", rtstruct_path=rtstruct_path, error=ae)
 
         metadata = {}
         
