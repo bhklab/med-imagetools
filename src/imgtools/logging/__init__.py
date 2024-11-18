@@ -72,7 +72,7 @@ class LoggingManager:
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
-		self.level = level
+		self.level = level.upper()
 		self.json_logging = json_logging
 		self.logger = None
 		self._initialize_logger()
