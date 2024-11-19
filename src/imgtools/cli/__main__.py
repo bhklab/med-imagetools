@@ -17,7 +17,7 @@ def set_logging_level(verbosity: int) -> None:
 	'--verbose',
 	'-v',
 	count=True,
-	help='Increase verbosity (up to 3 times).',
+	help='Increase verbosity of logging, overrides environment variable. (0-3: ERROR, WARNING, INFO, DEBUG).',
 )
 @click.version_option(
 	version=__version__,
@@ -29,7 +29,8 @@ def set_logging_level(verbosity: int) -> None:
 	'-h',
 	'--help',
 )
-def cli(verbose: int) -> None:
+@click.option('--debug/--no-debug', default=False)
+def cli(verbose: int, debug: bool) -> None:
 	set_logging_level(verbose)
 
 
