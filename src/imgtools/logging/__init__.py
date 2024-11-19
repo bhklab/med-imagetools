@@ -59,7 +59,7 @@ import json as jsonlib
 import logging.config
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 import structlog
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
@@ -69,6 +69,9 @@ from imgtools.logging.processors import (
 	ESTTimeStamper,
 	PathPrettifier,
 )
+
+if TYPE_CHECKING:
+	from structlog.typing import Processor
 
 DEFAULT_LOG_LEVEL = 'INFO'
 LOG_DIR_NAME = '.imgtools/logs'
@@ -140,7 +143,7 @@ class LoggingManager:
 		name: str,
 		level: str = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL),
 		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower() == 'true',
-		base_dir: Optional[Path] = None,
+		base_dir: Path | None = None,
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
@@ -276,7 +279,7 @@ class LoggingManager:
 		"""
 		Initialize the logger with the current configuration.
 		"""
-		pre_chain = [
+		pre_chain: List[Processor] = [
 			structlog.stdlib.add_log_level,
 			ESTTimeStamper(),
 			structlog.stdlib.add_logger_name,
@@ -322,14 +325,14 @@ class LoggingManager:
 		return structlog.get_logger(self.name)
 
 	def configure_logging(
-		self, json_logging: Optional[bool] = None, level: str = None
+		self, json_logging: bool = False, level: str = DEFAULT_LOG_LEVEL
 	) -> structlog.stdlib.BoundLogger:
 		"""
 		Dynamically adjust logging settings.
 
 		Parameters
 		----------
-		json_logging : bool, optional
+		json_logging : bool, default=False
 		    Enable or disable JSON logging.
 		level : str, optional
 		    Set the log level.
@@ -346,7 +349,7 @@ class LoggingManager:
 		"""
 		if level is not None:
 			if level not in VALID_LOG_LEVELS:
-				msg = f'Invalid logging level: {self.level}'
+				msg = f'Invalid logging level: {level}'
 				raise ValueError(msg)
 			self.level = level.upper()
 
@@ -362,7 +365,7 @@ logging_manager = LoggingManager(LOGGER_NAME)
 logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
 
 
-def get_logger(level: str = 'INFO') -> logging.Logger:
+def get_logger(level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	"""
 	Retrieve a logger with the specified log level.
 

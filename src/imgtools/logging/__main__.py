@@ -67,4 +67,5 @@ if __name__ == '__main__':
 	try:
 		main()
 	except Exception as e:
-		logger.exception(e)
+		msg = 'An error occurred while running the example'
+		logger.exception(msg, exc_info=e)
