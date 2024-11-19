@@ -11,7 +11,7 @@ med-imagetools = { path = ".", editable = true }
 [environments]
 default = { features = [
   "test",
-  "style",
+  "quality",
   "build",
   "dev",
 ], solve-group = "default" }
@@ -25,6 +25,7 @@ python = "3.12.*"
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+
 
 ############################################## PYTHON ###############################################
 
@@ -62,9 +63,9 @@ inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
-############################################## STYLE ###############################################
+############################################## QUALITY ###############################################
 # See config/ruff.toml for the configuration
-[feature.style.dependencies]
+[feature.quality.dependencies]
 ruff = ">=0.4.4"
 pre-commit = ">=3.7.1,<3.8"
 
