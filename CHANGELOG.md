@@ -1,7 +1,92 @@
 # CHANGELOG
 
 
+## v1.7.0 (2024-11-19)
+
+### Features
+
+- Implement logging and some standards for ruff config
+  ([#134](https://github.com/bhklab/med-imagetools/pull/134),
+  [`7c31019`](https://github.com/bhklab/med-imagetools/commit/7c310196f87e4e3ba8503d12c45f799c831954e1))
+
+* feat(logging): add structlog integration with custom processors and example logger
+
+* chore: remove star imports
+
+* feat(lint): update ruff configuration to include new linting rules and extend exclusions
+
+* refactor: update pixi.lock and pixi.toml for ruff command structure and remove unused betapipeline
+  entry
+
+* refactor(logging): standardize string quotes and improve logger configuration handling
+
+* feat(logging): integrate structured logging and enhance debug information in AutoPipeline and
+  StructureSet
+
+* fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1846958744
+
+* fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1846958749
+
+* fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1846958747
+
+* refactor(logging): streamline logging configuration and ensure log directory creation
+
+* chore: add log files to .gitignore to prevent tracking of generated logs
+
+* fix: Update src/imgtools/logging/__init__.py
+
+Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
+
+* fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1847024952
+
+Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
+
+* chore: update .gitignore to include log files in imgtools directory
+
+* feat(datagraph): integrate logging for edge table processing and visualization
+
+* feat(ops): add timing for graph formation and update DataGraph initialization
+
+* chore: rename workflow from Test to CI-CD and restrict push triggers to main branch
+
+* feat(crawl): integrate logging for folder crawling and data saving processes
+
+* fix(structureset): enhance logging for ROI point retrieval errors
+
+* fix(autopipeline): update logger level to use environment variable for flexibility
+
+* fix(logging): streamline error handling for log directory creation
+
+* fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1847278305
+
+Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
+
+* refactor(logging): enhance logging configuration and streamline JSON setup
+
+* chore(pixi.lock): add license_family field for clarity
+
+* refactor(logging): enhance LoggingManager with valid log levels and improve JSON logging setup
+
+* refactor(logging): enhance documentation and improve LoggingManager configuration options
+
+* refactor(logging): validate log level assignment before setting self.level
+
+* feat(logging): add mypy and type-checking support; refactor logging manager and improve error
+  handling
+
+* refactor(logging): remove unused Optional import from typing
+
+---------
+
+Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
+
+
 ## v1.6.0 (2024-11-15)
+
+### Chores
+
+- **sem-ver**: 1.6.0
+  ([`1549be9`](https://github.com/bhklab/med-imagetools/commit/1549be986f235ec346d7c8cb37d5a582c61d20a7))
 
 ### Features
 
