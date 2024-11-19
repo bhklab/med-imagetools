@@ -59,7 +59,7 @@ import json as jsonlib
 import logging.config
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 import structlog
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
