@@ -197,7 +197,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2024.10.21.16-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/types-python-dateutil-2.9.0.20241003-pyhff2d567_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2024.2.0.20241003-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.66.0.20240417-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-requests-2.32.0.20241016-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.67.0.20241119-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.12.2-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.12.2-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_utils-0.1.0-pyhd8ed1ab_0.tar.bz2
@@ -421,7 +422,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/trove-classifiers-2024.10.21.16-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/types-python-dateutil-2.9.0.20241003-pyhff2d567_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2024.2.0.20241003-pyhd8ed1ab_0.conda
-      - conda: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.66.0.20240417-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-requests-2.32.0.20241016-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.67.0.20241119-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.12.2-hd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.12.2-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_utils-0.1.0-pyhd8ed1ab_0.tar.bz2
@@ -4197,9 +4199,9 @@ packages:
   timestamp: 1704317789138
 - kind: pypi
   name: med-imagetools
-  version: 1.6.0
+  version: 1.7.0
   path: .
-  sha256: fa37e4dc0853cfaa342913ba426bdf01b8a6ce9848ac46344075aac35701fe8d
+  sha256: e41fd44c0c14d090b1945cc961cb3ac219b418b13896ed8b972b356205f18e06
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
@@ -8317,22 +8319,39 @@ packages:
   size: 18634
   timestamp: 1727940306315
 - kind: conda
-  name: types-tqdm
-  version: 4.66.0.20240417
+  name: types-requests
+  version: 2.32.0.20241016
   build: pyhd8ed1ab_0
   subdir: noarch
   noarch: python
-  url: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.66.0.20240417-pyhd8ed1ab_0.conda
-  sha256: aeb2a8542e111e5313f31f5c59fdf2fdc2a9a8d8320edb2611d6965c2313d3de
-  md5: 497bb7a2b7c9ebb6911bac629edb33e8
+  url: https://conda.anaconda.org/conda-forge/noarch/types-requests-2.32.0.20241016-pyhd8ed1ab_0.conda
+  sha256: b2c58c36589a7670e4131f96fbe779cb943c0acb01192ae0f0e3954d1257cbd4
+  md5: 5569933ebb375e7b561bdf64062c1658
+  depends:
+  - python >=3.8
+  - urllib3 >=2
+  license: Apache-2.0 AND MIT
+  purls:
+  - pkg:pypi/types-requests?source=hash-mapping
+  size: 26313
+  timestamp: 1729102626972
+- kind: conda
+  name: types-tqdm
+  version: 4.67.0.20241119
+  build: pyhd8ed1ab_0
+  subdir: noarch
+  noarch: python
+  url: https://conda.anaconda.org/conda-forge/noarch/types-tqdm-4.67.0.20241119-pyhd8ed1ab_0.conda
+  sha256: 745b3374fe6f201e2b0cd4875fdf468e3166852010dc7f90eb3f847cbc8678b1
+  md5: 7ecd505911930e13199613c439073f74
   depends:
   - python >=3.7
+  - types-requests
   license: Apache-2.0
-  license_family: APACHE
   purls:
   - pkg:pypi/types-tqdm?source=hash-mapping
-  size: 25708
-  timestamp: 1713339105137
+  size: 25628
+  timestamp: 1732003544434
 - kind: pypi
   name: typing-extensions
   version: 4.12.2

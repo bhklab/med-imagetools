@@ -82,12 +82,12 @@ ruff-format.inputs = ["config/ruff.toml", "src"]
 ruff-format.depends_on = ["ruff-check"]
 ruff-format.description = "Run ruff format, run check first"
 
-lint.depends_on = ["ruff-format", "ruff-check"]
-lint.description = "Run ruff check and format"
-
 type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
 type-check.inputs = ["config/mypy.ini", "src"]
 type-check.description = "Run mypy type check."
+
+lint.depends_on = ["ruff-format", "ruff-check", "type-check"]
+lint.description = "Run ruff check + format and mypy type check"
 
 #################################### RELEASE & BUILD ###############################################
 
