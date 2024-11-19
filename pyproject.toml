@@ -33,6 +33,8 @@ dependencies = [
   "pyyaml>=6.0.1,<7",
   "dill>=0.3.8,<1",
   "attrs>=23.2.0",
+  "structlog>=24.0,<25",
+  "click>=8.1,<9",
 ]
 
 classifiers = [
@@ -53,7 +55,6 @@ debug = ["pyvis"]
 # Entry points for CLI commands
 [project.scripts]
 autopipeline = "imgtools.autopipeline:main"
-betapipeline = "imgtools.autopipeline_refactored:main"
 
 [build-system]
 build-backend = "hatchling.build"

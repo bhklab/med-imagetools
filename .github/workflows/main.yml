@@ -1,9 +1,9 @@
-name: Test
+name: CI-CD
 
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["*"]
+    branches: ["main"]
   pull_request:
     branches: ["*"]
 
