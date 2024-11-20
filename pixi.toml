@@ -5,26 +5,30 @@ description = "Add a short description here"
 name = "med-imagetools"
 platforms = ["linux-64", "osx-arm64"]
 
+
+[dependencies]
+python = "3.12.*"
+
+
 [pypi-dependencies]
 med-imagetools = { path = ".", editable = true }
 
 [environments]
-default = { features = [
+dev = [
   "test",
   "quality",
   "build",
   "dev",
   "docs",
-], solve-group = "default" }
-docs = ["docs"]
+]
+docs =  ["docs"]
 test = ["test", "quality"]
-py310 = ["py310", "test"]
-py311 = ["py311", "test"]
-py312 = ["py312", "test"]
+py310 =  {features = ["py310", "test"], no-default-feature = true}
+py311 =  {features = ["py311", "test"], no-default-feature = true}
+py312 =  {features = ["py312", "test"], no-default-feature = true}
 
 ############################################## DEV ###############################################
 [feature.dev.dependencies]
-python = "3.12.*"
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
@@ -45,6 +49,8 @@ python = "3.12.*"
 pytest = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
+pytest-mock = ">=3.14.0,<4"
+
 
 [feature.test.tasks.test]
 cmd = [
@@ -79,6 +85,16 @@ mike = ">=2.1.2,<3"
 
 [feature.docs.pypi-dependencies]
 mkdocs-awesome-pages-plugin = ">=2.9.3, <3"
+
+[feature.docs.tasks]
+build.description = "Build the documentation using MkDocs"
+build.cmd = "mkdocs build -f mkdocs.yml"
+build.inputs = ["docs", "mkdocs.yml"]
+build.outputs = ["site"]
+
+serve.description = "Serve the documentation to http://localhost:8000/"
+serve.cmd = "mkdocs serve -f mkdocs.yml"
+
 
 ############################################## QUALITY ###############################################
 # Quality includes linting, type checking, and formatting
