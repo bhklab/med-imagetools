@@ -169,7 +169,7 @@ class SorterBase(ABC):
 		Returns
 		-------
 		Dict[Path, Path]
-				A list of resolved paths, each preserving the original filename.
+				A dictionary mapping source paths to their resolved target paths, each preserving the original filename.
 		"""
 		pass
 
