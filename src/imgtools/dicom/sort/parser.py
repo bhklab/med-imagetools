@@ -25,8 +25,7 @@ class PatternParser:
 	pattern : str
 	    The pattern string to parse.
 	pattern_parser : Pattern, optional
-	    Custom regex pattern for parsing, by default
-	    `re.compile(r"%([A-Za-z]+)|\\{([A-Za-z]+)\\}")`.
+	    Custom regex pattern for parsing
 
 	Attributes
 	----------

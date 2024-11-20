@@ -42,7 +42,6 @@ DICOMSorter
     files by metadata-driven patterns.
 """
 
-import contextlib
 import re
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from os.path import commonpath
@@ -91,8 +90,6 @@ class DICOMSorter(SorterBase):
 	    DICOM tags from the pattern that are invalid.
 	format : str
 	    The parsed format string with placeholders for keys.
-	console : Console
-	    Rich console object for highlighting and printing.
 	"""
 
 	def __init__(
@@ -127,7 +124,7 @@ class DICOMSorter(SorterBase):
 			)
 			_error = f'Invalid DICOM key: [bold red]{key}[/bold red].{suggestion}'
 			self._console.print(f'{_error}')
-		self.console.print(f'Parsed Path: `{self.pattern_preview}`')
+		self._console.print(f'Parsed Path: `{self.pattern_preview}`')
 		errmsg = 'Invalid DICOM Keys found.'
 		raise InvalidDICOMKeyError(errmsg)
 
@@ -156,21 +153,6 @@ class DICOMSorter(SorterBase):
 		    The set of invalid keys.
 		"""
 		return {key for key in self.keys if not tag_exists(key)}
-
-	@contextlib.contextmanager
-	def _progress_bar(self):
-		"""Context manager for creating a progress bar."""
-		with progress.Progress(
-			'[progress.description]{task.description}',
-			progress.BarColumn(),
-			'[progress.percentage]{task.percentage:>3.0f}%',
-			progress.MofNCompleteColumn(),
-			'Time elapsed:',
-			progress.TimeElapsedColumn(),
-			console=self.console,
-			transient=True,
-		) as progress_bar:
-			yield progress_bar
 
 	def execute(
 		self,
@@ -246,9 +228,14 @@ class DICOMSorter(SorterBase):
 					for source_path, resolved_path in file_map.items()
 				}
 				for future in as_completed(future_to_file):
-					result = future.result()
-					new_paths.append(result)
-					progress_bar.update(task_files, advance=1)
+					try:
+						result = future.result()
+						new_paths.append(result)
+						progress_bar.update(task_files, advance=1)
+					except Exception as e:
+						self.logger.exception(
+							'Failed to handle file', exc_info=e, file=future_to_file[future]
+						)
 
 	def _check_duplicates(self, file_map: Dict[Path, Path]) -> Dict[Path, Path]:
 		"""
@@ -327,7 +314,7 @@ class DICOMSorter(SorterBase):
 
 	def _dry_run(self, file_map: Dict[Path, Path]) -> None:
 		"""Perform a dry run without making any changes."""
-		self.console.print(
+		self._console.print(
 			'[bold green]:double_exclamation_mark: Dry run mode enabled. No files will be moved or copied. :double_exclamation_mark: [/bold green]'
 		)
 
@@ -341,7 +328,7 @@ class DICOMSorter(SorterBase):
 		self._generate_tree_structure(
 			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(), tree
 		)
-		self.build_tree(new_paths, tree, common_prefix)
+		self._build_tree(new_paths, tree, common_prefix)
 		self._console.print(
 			'[bold]Preview of the [magenta]parsed pattern[/magenta] and sample paths as directories:[/bold]\n'
 		)
@@ -367,7 +354,7 @@ class DICOMSorter(SorterBase):
 			),
 		)
 
-	def build_tree(
+	def _build_tree(
 		self, paths: List[Path], tree: Tree, common_prefix: Path, max_children: int = 3
 	) -> None:
 		"""

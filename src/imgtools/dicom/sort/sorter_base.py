@@ -33,10 +33,11 @@ The `SorterBase` class ensures that only the directory structure is
 adjusted based on metadata, leaving the original filename intact.
 """
 
+import contextlib
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, Pattern, Set, Tuple
+from typing import Dict, Iterator, Pattern, Set, Tuple
 
 from rich import progress
 from rich.console import Console
@@ -70,7 +71,11 @@ def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Pat
 	    The source path and resolved path.
 	"""
 	tags: Dict[str, str] = read_tags(path, list(keys), truncate=True, sanitize=True)
-	resolved_path = Path(format_str % tags, path.name).resolve()
+	try:
+		resolved_path = Path(format_str % tags, path.name).resolve()
+	except KeyError as e:
+		errmsg = f'Missing tag {e.args[0]} in {path}'
+		raise SorterBaseError(errmsg) from e
 	return path, resolved_path
 
 
@@ -89,7 +94,7 @@ class SorterBase(ABC):
 	    The directory containing the files to be sorted.
 	target_pattern : str
 	    The pattern string for sorting files.
-	parse_pattern : Pattern, optional
+	pattern_parser : Pattern, optional
 	    Custom regex pattern for parsing patterns uses default that
 			matches placeholders in the format of `%KEY` or `{KEY}`:
 	    `re.compile(r"%([A-Za-z]+)|\\{([A-Za-z]+)\\}")`.
@@ -111,6 +116,10 @@ class SorterBase(ABC):
 		target_pattern: str,
 		pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
 	) -> None:
+		if not source_directory.exists() or not source_directory.is_dir():
+			errmsg = f'Source directory {source_directory} does not exist or is not a directory.'
+			raise SorterBaseError(errmsg)
+
 		self.source_directory = source_directory
 		self._target_pattern = target_pattern
 		self._keys: Set[str] = set()
@@ -159,13 +168,16 @@ class SorterBase(ABC):
 
 		Returns
 		-------
-		Dict[Path]
-				A list of resolved paths, each preserving the original filename.
+		Dict[Path, Path]
+				A dictionary mapping source paths to their resolved target paths, each preserving the original filename.
 		"""
 		pass
 
-	def _generate_tree_structure(self, path: str, tree: Tree) -> None:
+	def _generate_tree_structure(self, path: str, tree: Tree, depth: int = 0) -> None:
 		"""Generate a tree structure from the pattern path."""
+		max_depth = 10
+		if depth > max_depth:  # Prevent infinite recursion
+			return
 		if not path:
 			return
 		parts = path.split('/')
@@ -176,7 +188,7 @@ class SorterBase(ABC):
 		highlighted_label = Text(parts[0], style=style)
 		highlighted_label.highlight_regex(r'\{[a-zA-Z0-9_]+\}', 'bold magenta')
 		branch = tree.add(highlighted_label, style=style, guide_style=style)
-		self._generate_tree_structure('/'.join(parts[1:]), branch)
+		self._generate_tree_structure('/'.join(parts[1:]), branch, depth + 1)
 
 	def _setup_tree(self, base_dir: Path | None = None) -> Tree:
 		"""
@@ -211,11 +223,6 @@ class SorterBase(ABC):
 		return self.format % replacements
 
 	@property
-	def console(self) -> Console:
-		"""Get the rich console object."""
-		return self._console
-
-	@property
 	def format(self) -> str:
 		"""Get the formatted pattern string."""
 		return self._format
@@ -247,3 +254,18 @@ class SorterBase(ABC):
 		except Exception as e:
 			errmsg = 'Failed to generate tree visualization.'
 			raise SorterBaseError(errmsg) from e
+
+	@contextlib.contextmanager
+	def _progress_bar(self) -> Iterator[progress.Progress]:
+		"""Context manager for creating a progress bar."""
+		with progress.Progress(
+			'[progress.description]{task.description}',
+			progress.BarColumn(),
+			'[progress.percentage]{task.percentage:>3.0f}%',
+			progress.MofNCompleteColumn(),
+			'Time elapsed:',
+			progress.TimeElapsedColumn(),
+			console=self._console,
+			transient=True,
+		) as progress_bar:
+			yield progress_bar

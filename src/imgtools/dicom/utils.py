@@ -58,7 +58,7 @@ def find_dicoms(
 	directory: Path,
 	recursive: bool,
 	check_header: bool,
-	extension: str = 'dcm',
+	extension: Optional[str] = None,
 ) -> List[Path]:
 	"""
 	Find DICOM files in a directory.
@@ -76,7 +76,7 @@ def find_dicoms(
 	check_header : bool
 	    If True, validate files by checking for a valid DICOM header.
 	extension : str, optional
-	    File extension to search for (default is 'dcm').
+	    File extension to search for. If None, all files are considered (default is None).
 
 	Returns
 	-------
@@ -98,7 +98,7 @@ def find_dicoms(
 	    >>> find_dicoms(Path('/data'), recursive=False, check_header=False)
 	    [PosixPath('/data/scan1.dcm')]
 	"""
-	pattern = f'*.{extension}'
+	pattern = f'*.{extension}' if extension else '*'
 
 	glob_method = directory.rglob if recursive else directory.glob
 
