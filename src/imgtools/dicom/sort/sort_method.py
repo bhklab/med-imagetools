@@ -142,10 +142,15 @@ def handle_file(  # noqa: PLR0912
 	>>> handle_file(Path('source.txt'), Path('copy.txt'), action=FileAction.COPY, overwrite=True)
 	"""
 
-	# Check if the destination exists
-	if resolved_path.exists() and not overwrite:
-		msg = f'Destination exists: {resolved_path}'
-		raise FileExistsError(msg)
+	# Handle file existence atomically
+	if not overwrite:
+		try:
+			# Open with exclusive creation flag
+			resolved_path.open('x').close()
+			resolved_path.unlink()  # Remove the temporary file
+		except FileExistsError:
+			msg = f'Destination exists: {resolved_path}'
+			raise FileExistsError(msg)
 
 	# Check if the source exists
 	if not source_path.exists():
