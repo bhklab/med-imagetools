@@ -18,46 +18,50 @@ from imgtools.dicom import lookup_tag, similar_tags, tag_exists, find_dicoms
 
 @pytest.fixture
 def temp_dir_with_files():
-	with TemporaryDirectory() as temp_dir:
-		temp_path = Path(temp_dir)
-		# Create dummy DICOM files
-		(temp_path / "file1.dcm").touch()
-		(temp_path / "file2.dcm").touch()
-		# Create a subdirectory with more DICOM files
-		sub_dir = temp_path / "subdir"
-		sub_dir.mkdir()
-		(sub_dir / "file3.dcm").touch()
-		(sub_dir / "file4.dcm").touch()
-		yield temp_path
+    with TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        # Create dummy DICOM files
+        (temp_path / "file1.dcm").touch()
+        (temp_path / "file2.dcm").touch()
+        # Create a subdirectory with more DICOM files
+        sub_dir = temp_path / "subdir"
+        sub_dir.mkdir()
+        (sub_dir / "file3.dcm").touch()
+        (sub_dir / "file4.dcm").touch()
+        yield temp_path
+
 
 class TestFindDicoms:
-	def test_non_recursive_no_header_check(self, temp_dir_with_files):
-		result = find_dicoms(temp_dir_with_files, recursive=False, check_header=False)
-		assert len(result) == 2
-		assert all(file.suffix == ".dcm" for file in result)
+    def test_non_recursive_no_header_check(self, temp_dir_with_files):
+        result = find_dicoms(temp_dir_with_files, recursive=False, check_header=False)
+        assert len(result) == 2
+        assert all(file.suffix == ".dcm" for file in result)
 
-	def test_recursive_no_header_check(self, temp_dir_with_files):
-		result = find_dicoms(temp_dir_with_files, recursive=True, check_header=False)
-		assert len(result) == 4
-		assert all(file.suffix == ".dcm" for file in result)
+    def test_recursive_no_header_check(self, temp_dir_with_files):
+        result = find_dicoms(temp_dir_with_files, recursive=True, check_header=False)
+        assert len(result) == 4
+        assert all(file.suffix == ".dcm" for file in result)
 
-	def test_non_recursive_with_header_check(self, temp_dir_with_files, mocker):
-		mocker.patch('imgtools.dicom.utils.is_dicom', return_value=True)
-		result = find_dicoms(temp_dir_with_files, recursive=False, check_header=True)
-		assert len(result) == 2
-		assert all(file.suffix == ".dcm" for file in result)
+    def test_non_recursive_with_header_check(self, temp_dir_with_files, mocker):
+        mocker.patch("imgtools.dicom.utils.is_dicom", return_value=True)
+        result = find_dicoms(temp_dir_with_files, recursive=False, check_header=True)
+        assert len(result) == 2
+        assert all(file.suffix == ".dcm" for file in result)
 
-	def test_recursive_with_header_check(self, temp_dir_with_files, mocker):
-		mocker.patch('imgtools.dicom.utils.is_dicom', return_value=True)
-		result = find_dicoms(temp_dir_with_files, recursive=True, check_header=True)
-		assert len(result) == 4
-		assert all(file.suffix == ".dcm" for file in result)
+    def test_recursive_with_header_check(self, temp_dir_with_files, mocker):
+        mocker.patch("imgtools.dicom.utils.is_dicom", return_value=True)
+        result = find_dicoms(temp_dir_with_files, recursive=True, check_header=True)
+        assert len(result) == 4
+        assert all(file.suffix == ".dcm" for file in result)
 
-	def test_search_with_specific_extension(self, temp_dir_with_files):
-		(temp_dir_with_files / "file5.txt").touch()
-		result = find_dicoms(temp_dir_with_files, recursive=True, check_header=False, extension="dcm")
-		assert len(result) == 4
-		assert all(file.suffix == ".dcm" for file in result)
+    def test_search_with_specific_extension(self, temp_dir_with_files):
+        (temp_dir_with_files / "file5.txt").touch()
+        result = find_dicoms(
+            temp_dir_with_files, recursive=True, check_header=False, extension="dcm"
+        )
+        assert len(result) == 4
+        assert all(file.suffix == ".dcm" for file in result)
+
 
 def test_similar_tags():
     """Test the similar_tags function."""
@@ -83,7 +87,6 @@ def test_lookup_tag():
 def test_tag_exists():
     """Test the tag_exists function."""
     assert tag_exists("PatientID")
-
 
 
 ########################################################################
@@ -172,4 +175,3 @@ def test_tag_exists():
 #     sorter = MockSorter("%invalidKey/{validKey}")
 #     with pytest.raises(InvalidPatternError, match="Invalid keys found: invalidKey"):
 #         sorter.validate_keys()
-

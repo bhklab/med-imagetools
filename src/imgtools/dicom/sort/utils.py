@@ -122,28 +122,28 @@ def read_tags(
 	Parameters
 	----------
 	file : Path
-					Path to the DICOM file.
+	                                Path to the DICOM file.
 	tags : list of str
-					List of DICOM tags to read.
+	                                List of DICOM tags to read.
 	truncate : bool, optional
-					If True, truncate UIDs to the last 5 characters (default is True).
+	                                If True, truncate UIDs to the last 5 characters (default is True).
 	sanitize : bool, optional
-					If True, sanitize tag values to remove disallowed characters
-					(default is True).
+	                                If True, sanitize tag values to remove disallowed characters
+	                                (default is True).
 
 	Returns
 	-------
 	dict of str : str
-					A dictionary mapping tags to their values.
+	                                A dictionary mapping tags to their values.
 
 	Raises
 	------
 	TypeError
-					If there is a type error while reading the DICOM file.
+	                                If there is a type error while reading the DICOM file.
 	InvalidDicomError
-					If the file is not a valid DICOM file.
+	                                If the file is not a valid DICOM file.
 	ValueError
-					If there is a value error while reading the file.
+	                                If there is a value error while reading the file.
 
 	Notes
 	-----

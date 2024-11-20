@@ -161,18 +161,18 @@ class DICOMSorter(SorterBase):
 		Parameters
 		----------
 		action : FileAction, default: FileAction.MOVE
-			The action to apply to the DICOM files (e.g., move, copy).
+		        The action to apply to the DICOM files (e.g., move, copy).
 		overwrite : bool, default: False
-			If True, overwrite existing files at the destination.
+		        If True, overwrite existing files at the destination.
 		dry_run : bool, default: False
-			If True, perform a dry run without making any changes.
+		        If True, perform a dry run without making any changes.
 		num_workers : int, default: 1
-			The number of worker threads to use for processing files.
+		        The number of worker threads to use for processing files.
 
 		Raises
 		------
 		ValueError
-			If the provided action is not a valid FileAction.
+		        If the provided action is not a valid FileAction.
 		"""
 		if not isinstance(action, FileAction):
 			action = FileAction.validate(action)
@@ -219,7 +219,9 @@ class DICOMSorter(SorterBase):
 						progress_bar.update(task_files, advance=1)
 					except Exception as e:
 						self.logger.exception(
-							'Failed to handle file', exc_info=e, file=future_to_file[future]
+							'Failed to handle file',
+							exc_info=e,
+							file=future_to_file[future],
 						)
 
 	def _check_duplicates(self, file_map: Dict[Path, Path]) -> Dict[Path, Path]:
@@ -272,14 +274,14 @@ class DICOMSorter(SorterBase):
 		Parameters
 		----------
 		progress_bar : progress.Progress
-			Progress bar to use for tracking the progress of the operation.
+		        Progress bar to use for tracking the progress of the operation.
 		num_workers : int, default=1
-			Number of threads to use for parallel processing.
+		        Number of threads to use for parallel processing.
 
 		Returns
 		-------
 		Dict[Path, Path]
-			A mapping of source paths to resolved paths.
+		        A mapping of source paths to resolved paths.
 		"""
 		task = progress_bar.add_task('Resolving paths', total=len(self.dicom_files))
 
@@ -311,7 +313,8 @@ class DICOMSorter(SorterBase):
 		)
 		tree = self._setup_tree(Path(common_prefix))
 		self._generate_tree_structure(
-			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(), tree
+			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(),
+			tree,
 		)
 		self._build_tree(new_paths, tree, common_prefix)
 		self._console.print(
@@ -348,11 +351,11 @@ class DICOMSorter(SorterBase):
 		Parameters
 		----------
 		paths : List[Path]
-				List of pathlib.Path objects representing the proposed paths.
+		                List of pathlib.Path objects representing the proposed paths.
 		tree : Tree
-				A Rich Tree object where the directory structure will be added.
+		                A Rich Tree object where the directory structure will be added.
 		common_prefix : Path
-				The common prefix for all paths. Used to normalize the input paths.
+		                The common prefix for all paths. Used to normalize the input paths.
 		"""
 
 		# Make all paths relative to the common prefix and sort them

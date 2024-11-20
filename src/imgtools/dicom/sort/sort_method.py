@@ -47,28 +47,64 @@ import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Type
+import os
+
+import shutil
+from pathlib import Path
+from enum import Enum
 
 
 class FileAction(Enum):
-	"""
-	Enum for file actions.
-
-	Attributes
-	----------
-	MOVE : str
-	    Move the file from source to destination.
-	COPY : str
-	    Copy the file from source to destination.
-	SYMLINK : str
-	    Create a symbolic link at the destination pointing to the source.
-	HARDLINK : str
-	    Create a hard link at the destination pointing to the source.
-	"""
-
 	MOVE = 'move'
 	COPY = 'copy'
 	SYMLINK = 'symlink'
 	HARDLINK = 'hardlink'
+
+	def move_file(self, source_path, resolved_path):
+		try:
+			source_path.rename(resolved_path)
+		except OSError as e:
+			errmsg = f'Failed to move file: {source_path} to {resolved_path}'
+			raise RuntimeError(errmsg) from e
+
+	def copy_file(self, source_path, resolved_path):
+		try:
+			shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
+		except OSError as e:
+			errmsg = f'Failed to copy file: {source_path} to {resolved_path}'
+			raise RuntimeError(errmsg) from e
+
+	def create_symlink(self, source_path, resolved_path):
+		try:
+			real_source = source_path.resolve(strict=True)
+			if not real_source.is_relative_to(Path.cwd()):
+				errmsg = f'Source path {source_path} points outside current directory'
+				raise ValueError(errmsg)
+		except (FileNotFoundError, RuntimeError) as e:
+			errmsg = f'Invalid source path {source_path}: possible symlink loop'
+			raise ValueError(errmsg) from e
+		resolved_path.symlink_to(source_path, target_is_directory=False)
+
+	def create_hardlink(self, source_path, resolved_path):
+		try:
+			resolved_path.hardlink_to(source_path)
+		except OSError as e:
+			errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
+			raise RuntimeError(errmsg) from e
+
+	def handle(self, source_path, resolved_path):
+		match self:
+			case FileAction.MOVE:
+				self.move_file(source_path, resolved_path)
+			case FileAction.COPY:
+				self.copy_file(source_path, resolved_path)
+			case FileAction.SYMLINK:
+				self.create_symlink(source_path, resolved_path)
+			case FileAction.HARDLINK:
+				self.create_hardlink(source_path, resolved_path)
+			case _:
+				msg = f'Invalid action: {self} must be one of {FileAction.__members__}'
+				raise ValueError(msg)
 
 	@classmethod
 	def validate(cls: Type['FileAction'], action: str) -> 'FileAction':
@@ -87,70 +123,7 @@ class FileAction(Enum):
 		return [action.value for action in FileAction]
 
 
-def handle_file(  # noqa: PLR0912, PLR0915
-	source_path: Path,
-	resolved_path: Path,
-	action: FileAction = FileAction.MOVE,
-	overwrite: bool = False,
-) -> Path:
-	"""
-	Handle file operations such as move, copy, symlink, or hardlink.
-
-	Parameters
-	----------
-	source_path : Path
-	    The source file path.
-	resolved_path : Path
-	    The destination file path.
-	action : FileAction, optional
-	    The action to perform on the file (default is MOVE).
-	overwrite : bool, optional
-	    If True, overwrite the destination file if it exists (default is False).
-
-	Returns
-	-------
-	Path
-	    The resolved path of the destination file.
-
-	Raises
-	------
-	ValueError
-	    If an invalid action is specified.
-	FileExistsError
-	    If the destination file exists and overwrite is False.
-	FileNotFoundError
-	    If the source file does not exist.
-	RuntimeError
-	    If the file operation fails.
-
-	Notes
-	-----
-	- Symlinks create a shortcut to the original file, while hard links create an
-	  additional reference to the same file data.
-	- Moving a file changes its location. Copying a file duplicates it.
-
-	Examples
-	--------
-	Move a file:
-	>>> from pathlib import Path
-	>>> handle_file(Path('source.txt'), Path('destination.txt'), action=FileAction.MOVE)
-
-	Create a symbolic link:
-	>>> handle_file(Path('source.txt'), Path('symlink.txt'), action=FileAction.SYMLINK)
-
-	Copy a file with overwrite:
-	>>> handle_file(Path('source.txt'), Path('copy.txt'), action=FileAction.COPY, overwrite=True)
-	"""
-
-	# Handle file existence atomically
-	if not overwrite:
-		try:
-			# Open with exclusive creation flag
-			resolved_path.open('x').close()
-			resolved_path.unlink()  # Remove the temporary file
-		except FileExistsError as fee:
-			msg = f'Destination exists: {resolved_path}'
-			raise FileExistsError(msg) from fee
+def handle_file(source_path, resolved_path, action: FileAction, overwrite=False):
 
 	# Check if the source exists
 	if not source_path.exists():
@@ -165,57 +138,4 @@ def handle_file(  # noqa: PLR0912, PLR0915
 		raise PermissionError(errmsg) from e
 
 	# Perform the file operation
-	match action:
-		case FileAction.MOVE:
-			try:
-				source_path.rename(resolved_path)
-			except OSError as e:
-				errmsg = f'Failed to move file: {source_path} to {resolved_path}'
-				raise RuntimeError(errmsg) from e
-		case FileAction.COPY:
-			try:
-				shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
-			except OSError as e:
-				errmsg = f'Failed to copy file: {source_path} to {resolved_path}'
-				raise RuntimeError(errmsg) from e
-		case FileAction.SYMLINK:
-			try:
-				real_source = source_path.resolve(strict=True)
-				if not real_source.is_relative_to(Path.cwd()):
-					errmsg = f'Source path {source_path} points outside current directory'
-					raise ValueError(errmsg)
-			except (FileNotFoundError, RuntimeError) as e:
-				errmsg = f'Invalid source path {source_path}: possible symlink loop'
-				raise ValueError(errmsg) from e
-			resolved_path.symlink_to(source_path, target_is_directory=False)
-		case FileAction.HARDLINK:
-			try:
-				resolved_path.hardlink_to(source_path)
-			except OSError as e:
-				errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
-				raise RuntimeError(errmsg) from e
-		case _:
-			msg = f'Invalid action: {action} must be one of {FileAction.__members__}'
-			raise ValueError(msg)
-
-	# Verify that the operation succeeded
-	if not resolved_path.exists():
-		msg = f'Failed to perform file operation: action={action} on source_path={source_path} to resolved_path={resolved_path}'
-		raise RuntimeError(msg)
-
-	return resolved_path
-
-
-if __name__ == '__main__':
-	import time
-
-	start = time.time()
-	source_path = Path('./data/hi.txt')
-	assert source_path.exists() and source_path.is_file()
-	resolved_path = Path('./data/hi-renamed.txt')
-	handle_file(
-		source_path=source_path,
-		resolved_path=resolved_path,
-		action=FileAction.COPY,
-		overwrite=False,
-	)
+	action.handle(source_path, resolved_path)

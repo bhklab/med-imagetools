@@ -97,7 +97,7 @@ class SorterBase(ABC):
 	    The pattern string for sorting files.
 	pattern_parser : Pattern, optional
 	    Custom regex pattern for parsing patterns uses default that
-			matches placeholders in the format of `%KEY` or `{KEY}`:
+	                matches placeholders in the format of `%KEY` or `{KEY}`:
 	    `re.compile(r"%([A-Za-z]+)|\\{([A-Za-z]+)\\}")`.
 
 	Attributes
@@ -178,7 +178,7 @@ class SorterBase(ABC):
 		Returns
 		-------
 		Dict[Path, Path]
-				A dictionary mapping source paths to their resolved target paths, each preserving the original filename.
+		                A dictionary mapping source paths to their resolved target paths, each preserving the original filename.
 		"""
 		pass
 
