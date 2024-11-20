@@ -100,8 +100,10 @@ ignore = [
   "D100",
   # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules 
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
-
+  "D206"
 ]
+[lint.pydocstyle]
+convention = "numpy"
 
 [format]
 

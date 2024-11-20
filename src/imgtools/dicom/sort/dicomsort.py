@@ -67,9 +67,7 @@ DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
 
 
 class DICOMSorter(SorterBase):
-	"""
-	A specialized implementation of the `SorterBase` for sorting
-	DICOM files by metadata.
+	"""A specialized implementation of the `SorterBase` for sorting DICOM files by metadata.
 
 	This class resolves paths for DICOM files based on specified
 	target patterns, using metadata extracted from the files. The
@@ -99,6 +97,11 @@ class DICOMSorter(SorterBase):
 		self.logger.debug('All DICOM Keys are Valid in target pattern', keys=self.keys)
 
 	def validate_keys(self) -> None:
+		"""Validate the DICOM keys in the target pattern.
+
+		If any invalid keys are found, it
+		suggests similar valid keys and raises an error.
+		"""
 		if not self.invalid_keys:
 			return
 
@@ -149,6 +152,24 @@ class DICOMSorter(SorterBase):
 		dry_run: bool = False,
 		num_workers: int = 1,
 	) -> None:
+		"""Execute the file action on DICOM files.
+
+		Parameters
+		----------
+		action : FileAction
+			The action to apply to the DICOM files (e.g., move, copy).
+		overwrite : bool
+			If True, overwrite existing files at the destination.
+		dry_run : bool
+			If True, perform a dry run without making any changes.
+		num_workers : int
+			The number of worker threads to use for processing files.
+
+		Raises
+		------
+		ValueError
+			If the provided action is not a valid FileAction.
+		"""
 		if not isinstance(action, FileAction):
 			try:
 				action = FileAction(action)
@@ -217,6 +238,11 @@ class DICOMSorter(SorterBase):
 		-------
 		Dict[Path, Path]
 		    A dictionary mapping source paths to resolved paths.
+
+		Raises
+		------
+		ValueError
+		    If any of the resolved paths are duplicates.
 		"""
 		# opposite of the file_map
 		# key: resolved path, value: list of source paths
@@ -244,20 +270,20 @@ class DICOMSorter(SorterBase):
 	def resolve_new_paths(
 		self, progress_bar: progress.Progress, num_workers: int = 1
 	) -> Dict[Path, Path]:
-		"""
-		Resolve the new paths for all DICOM files using parallel processing.
+		"""Resolve the new paths for all DICOM files using parallel processing.
 
 		Parameters
 		----------
-		num_workers : int, optional
-				Number of threads to use for parallel processing.
+		progress_bar : progress.Progress
+			Progress bar to use for tracking the progress of the operation.
+		num_workers : int
+			Number of threads to use for parallel processing.
 
 		Returns
 		-------
 		Dict[Path, Path]
-				A mapping of source paths to resolved paths.
+			A mapping of source paths to resolved paths.
 		"""
-
 		task = progress_bar.add_task('Resolving paths', total=len(self.dicom_files))
 
 		# Use ProcessPoolExecutor for parallel processing
