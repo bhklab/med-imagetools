@@ -55,6 +55,7 @@ debug = ["pyvis"]
 # Entry points for CLI commands
 [project.scripts]
 autopipeline = "imgtools.autopipeline:main"
+imgtools = "imgtools.cli.__main__:cli"
 
 [build-system]
 build-backend = "hatchling.build"

@@ -100,12 +100,7 @@ class SorterBase(ABC):
 	    The directory containing the files to be sorted.
 	format : str
 	    The parsed format string with placeholders for keys.
-	keys : set of str
-	    Keys extracted from the target pattern.
-	console : Console
-	    Rich console object for highlighting and printing.
-	logger : Logger
-	    The instance logger bound with the source directory context.
+
 	dicom_files : list of Path
 	    The list of DICOM files to be sorted.
 	"""
@@ -157,7 +152,7 @@ class SorterBase(ABC):
 		pass
 
 	@abstractmethod
-	def resolve_new_paths(
+	def _resolve_new_paths(
 		self, progress_bar: progress.Progress, num_workers: int = 1
 	) -> Dict[Path, Path]:
 		"""Resolve the new path based on the extracted keys.
