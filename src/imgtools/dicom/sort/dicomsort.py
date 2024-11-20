@@ -75,12 +75,22 @@ class DICOMSorter(SorterBase):
 
 	Attributes
 	----------
+	source_dirctory : Path
+	    The directory containing the files to be sorted.
+	logger : Logger
+	    The instance logger bound with the source directory context.
+	dicom_files : list of Path
+	    The list of DICOM files found in the `source_directory`.
 	format : str
 	    The parsed format string with placeholders for DICOM tags.
-	keys : set of str
+	keys : Set[str] 
 	    DICOM tags extracted from the target pattern.
-	invalid_keys : set of str
+	invalid_keys : Set[str] 
 	    DICOM tags from the pattern that are invalid.
+	format : str
+	    The parsed format string with placeholders for keys.
+	console : Console
+	    Rich console object for highlighting and printing.
 	"""
 
 	def __init__(
@@ -154,15 +164,25 @@ class DICOMSorter(SorterBase):
 	) -> None:
 		"""Execute the file action on DICOM files.
 
+		Users are encouraged to use FileAction.HARDLINK for 
+		efficient storage and performance for large dataset, as well as
+		protection against lost data. 
+
+		Using hard links can save disk space and improve performance by
+		creating multiple directory entries (links) for a single file
+		instead of duplicating the file content. This is particularly
+		useful when working with large datasets, such as DICOM files,
+		where storage efficiency is crucial.
+
 		Parameters
 		----------
-		action : FileAction
+		action : FileAction, default: FileAction.MOVE
 			The action to apply to the DICOM files (e.g., move, copy).
-		overwrite : bool
+		overwrite : bool, default: False
 			If True, overwrite existing files at the destination.
-		dry_run : bool
+		dry_run : bool, default: False
 			If True, perform a dry run without making any changes.
-		num_workers : int
+		num_workers : int, default: 1
 			The number of worker threads to use for processing files.
 
 		Raises
@@ -194,7 +214,7 @@ class DICOMSorter(SorterBase):
 			################################################################################
 			# Resolve new paths
 			################################################################################
-			file_map: Dict[Path, Path] = self.resolve_new_paths(
+			file_map: Dict[Path, Path] = self._resolve_new_paths(
 				progress_bar=progress_bar, num_workers=num_workers
 			)
 			self.console.print('Finished resolving paths')
@@ -267,7 +287,7 @@ class DICOMSorter(SorterBase):
 
 		return file_map
 
-	def resolve_new_paths(
+	def _resolve_new_paths(
 		self, progress_bar: progress.Progress, num_workers: int = 1
 	) -> Dict[Path, Path]:
 		"""Resolve the new paths for all DICOM files using parallel processing.
@@ -276,7 +296,7 @@ class DICOMSorter(SorterBase):
 		----------
 		progress_bar : progress.Progress
 			Progress bar to use for tracking the progress of the operation.
-		num_workers : int
+		num_workers : int, default=1
 			Number of threads to use for parallel processing.
 
 		Returns

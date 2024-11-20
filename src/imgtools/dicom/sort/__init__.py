@@ -1,5 +1,6 @@
 """Some functions to get DICOM tags from keywords."""
 
+from imgtools.dicom.sort.dicomsort import DICOMSorter
 from imgtools.dicom.sort.exceptions import (
 	DICOMSortError,
 	InvalidDICOMKeyError,
@@ -24,4 +25,5 @@ __all__ = [
 	'FileAction',
 	'handle_file',
 	'resolve_path',
+	'DICOMSorter',
 ]
