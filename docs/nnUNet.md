@@ -18,7 +18,8 @@ autopipeline\
 
 Modalities can also be set to `--modalities MR,RTSTRUCT`
 
-AutoPipeline offers many more options and features for you to customize your outputs: <https://github.com/bhklab/med-imagetools/imgtools/README.md>.
+AutoPipeline offers many more options and features for you to customize your outputs: <<https://github.com/bhklab/med-imagetools/tree/main/README.md>  
+>.
 
 ## nnUNet Preprocess and Train
 

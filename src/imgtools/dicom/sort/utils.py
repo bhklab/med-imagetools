@@ -101,6 +101,8 @@ def truncate_uid(uid: str, last_digits: int = 5) -> str:
 	assert uid is not None
 	assert isinstance(uid, str)
 	assert isinstance(last_digits, int)
+	if last_digits >= len(uid) or last_digits <= 0:
+		return uid
 
 	return uid[-last_digits:]
 
@@ -163,6 +165,9 @@ def read_tags(
 	[warn] No value for tag: NonexistentTag in file: sample.dcm
 	{'NonexistentTag': 'UNKNOWN'}
 	"""
+	assert isinstance(file, Path)
+	assert isinstance(tags, list) and all(isinstance(tag, str) for tag in tags) and tags is not None
+
 	try:
 		dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True)
 	except TypeError as te:
@@ -176,6 +181,7 @@ def read_tags(
 		raise ValueError(errmsg) from ve
 
 	result = {}
+	is_rtstruct = dicom.get('Modality') == 'RTSTRUCT' if 'InstanceNumber' in tags else False
 	for tag in tags:
 		value = (
 			truncate_uid(str(dicom.get(tag, '')))
@@ -183,15 +189,7 @@ def read_tags(
 			else str(dicom.get(tag, 'UNKNOWN'))
 		)
 		if value == 'UNKNOWN':
-			if (
-				tag == 'InstanceNumber'
-				and dcmread(
-					file,
-					specific_tags=['Modality'],
-					stop_before_pixels=True,
-				).get('Modality')
-				== 'RTSTRUCT'
-			):
+			if tag == 'InstanceNumber' and is_rtstruct:
 				value = '1'
 			else:
 				logger.warning(f'No value for tag: `{tag}` in file: {file}')

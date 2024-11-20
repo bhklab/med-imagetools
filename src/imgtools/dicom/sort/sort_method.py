@@ -153,20 +153,45 @@ def handle_file(
 		raise FileNotFoundError(msg)
 
 	# Ensure the parent directory exists
-	resolved_path.parent.mkdir(parents=True, exist_ok=True)
+	try:
+		resolved_path.parent.mkdir(parents=True, exist_ok=True)
+	except PermissionError as e:
+		errmsg = f'Failed to create parent directory: {resolved_path.parent}'
+		raise PermissionError(errmsg) from e
 
 	# Perform the file operation
 	match action:
 		case FileAction.MOVE:
-			source_path.rename(resolved_path)
+			try:
+				source_path.rename(resolved_path)
+			except OSError as e:
+				errmsg = f'Failed to move file: {source_path} to {resolved_path}'
+				raise RuntimeError(errmsg) from e
 		case FileAction.COPY:
-			shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
+			try:
+				shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
+			except OSError as e:
+				errmsg = f'Failed to copy file: {source_path} to {resolved_path}'
+				raise RuntimeError(errmsg) from e
 		case FileAction.SYMLINK:
+			try:
+				real_source = source_path.resolve(strict=True)
+				if not real_source.is_relative_to(Path.cwd()):
+					errmsg = f'Source path {source_path} points outside current directory'
+					raise ValueError(errmsg)
+			except (FileNotFoundError, RuntimeError) as e:
+				errmsg = f'Invalid source path {source_path}: possible symlink loop'
+				raise ValueError(errmsg) from e
 			resolved_path.symlink_to(source_path, target_is_directory=False)
 		case FileAction.HARDLINK:
-			resolved_path.hardlink_to(source_path)
+			try:
+				resolved_path.hardlink_to(source_path)
+			except OSError as e:
+				errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
+				raise RuntimeError(errmsg) from e
 		case _:
 			msg = f'Invalid action: {action} must be one of {FileAction.__members__}'
+			raise ValueError(msg)
 
 	# Verify that the operation succeeded
 	if not resolved_path.exists():
