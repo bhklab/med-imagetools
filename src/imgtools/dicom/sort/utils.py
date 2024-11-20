@@ -189,10 +189,13 @@ def read_tags(
 			else str(dicom.get(tag, 'UNKNOWN'))
 		)
 		if value == 'UNKNOWN':
-			if tag == 'InstanceNumber' and is_rtstruct:
+			if tag in ['InstanceNumber', 'AccessionNumber'] and is_rtstruct:
 				value = '1'
 			else:
 				logger.warning(f'No value for tag: `{tag}` in file: {file}')
+		elif value == '':
+			logger.warning(f'Empty value for tag: `{tag}` in file: {file}')
+			value = 'UNKNOWN'
 		result[tag] = sanitize_file_name(value) if sanitize else value
 
 	return result

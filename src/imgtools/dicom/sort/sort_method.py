@@ -87,7 +87,7 @@ class FileAction(Enum):
 		return [action.value for action in FileAction]
 
 
-def handle_file(  # noqa: PLR0912
+def handle_file(  # noqa: PLR0912, PLR0915
 	source_path: Path,
 	resolved_path: Path,
 	action: FileAction = FileAction.MOVE,

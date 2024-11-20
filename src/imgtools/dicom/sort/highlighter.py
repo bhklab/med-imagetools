@@ -1,7 +1,7 @@
 from rich.highlighter import RegexHighlighter
 
 
-class DicomKeyHighlighter(RegexHighlighter):
+class TagHighlighter(RegexHighlighter):
 	"""
 	Highlights DICOM keys and forward slashes when printing with Rich.
 
@@ -15,25 +15,21 @@ class DicomKeyHighlighter(RegexHighlighter):
 	Examples
 	--------
 	>>> from rich.console import Console
-	>>> highlighter = DicomKeyHighlighter()
+	>>> highlighter = TagHighlighter()
 	>>> console = Console(
 	        highlighter=highlighter,
 	        theme=Theme(
 	            {
-	                "example.DicomTag": "bold magenta",
+	                "example.Tag": "bold magenta",
 	            }
 	        ),
 	    )
 	>>> console.print('%(PatientID)s/%(StudyID)s')
-
-	Notes
-	-----
-	I dont know what is going on here, but it works lol
 	"""
 
 	base_style = 'example.'
 	highlights = [
-		r'%\((?P<DicomTag>[a-zA-Z0-9_]+)\)s',
+		r'%\((?P<Tag>[a-zA-Z0-9_]+)\)s',
 		r'(?P<ForwardSlash>/)',
 		r'(?P<Braces>\{[a-zA-Z0-9_]+\})',
 	]

@@ -35,6 +35,7 @@ dependencies = [
   "attrs>=23.2.0",
   "structlog>=24.0,<25",
   "click>=8.1,<9",
+  "rich>=13.9.4", 
 ]
 
 classifiers = [

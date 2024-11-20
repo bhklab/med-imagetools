@@ -50,7 +50,7 @@ def _is_valid_dicom(file: Path, check_header: bool) -> bool:
 	- Ensuring the file exists and is not a directory (if `check_header` is False).
 	"""
 	if check_header:
-		return is_dicom(file)
+		return is_dicom(file) and file.is_file()
 	return file.is_file()
 
 

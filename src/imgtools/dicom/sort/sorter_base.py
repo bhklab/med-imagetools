@@ -42,10 +42,11 @@ from typing import Dict, Iterator, Pattern, Set, Tuple
 from rich import progress
 from rich.console import Console
 from rich.text import Text
+from rich.theme import Theme
 from rich.tree import Tree
 
 from imgtools.dicom import find_dicoms
-from imgtools.dicom.sort import PatternParser, SorterBaseError
+from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
 from imgtools.dicom.sort.utils import read_tags
 from imgtools.logging import logger
 
@@ -147,10 +148,18 @@ class SorterBase(ABC):
 			raise SorterBaseError(errmsg) from e
 		self.validate_keys()
 
-	@abstractmethod
 	def _initialize_console(self) -> Console:
 		"""Initialize a rich console with optional highlighting."""
-		pass
+		return Console(
+			highlighter=TagHighlighter(),
+			theme=Theme(
+				{
+					'example.Tag': 'bold magenta',
+					'example.ForwardSlash': 'bold green',
+					'example.Braces': 'bold magenta',
+				}
+			),
+		)
 
 	@abstractmethod
 	def validate_keys(self) -> None:

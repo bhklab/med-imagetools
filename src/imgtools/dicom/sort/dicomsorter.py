@@ -49,14 +49,11 @@ from pathlib import Path
 from typing import Dict, List, Pattern, Set
 
 from rich import progress
-from rich.console import Console
 from rich.text import Text
-from rich.theme import Theme
 from rich.tree import Tree
 
 from imgtools.dicom import similar_tags, tag_exists
 from imgtools.dicom.sort import (
-	DicomKeyHighlighter,
 	FileAction,
 	InvalidDICOMKeyError,
 	SorterBase,
@@ -127,18 +124,6 @@ class DICOMSorter(SorterBase):
 		self._console.print(f'Parsed Path: `{self.pattern_preview}`')
 		errmsg = 'Invalid DICOM Keys found.'
 		raise InvalidDICOMKeyError(errmsg)
-
-	def _initialize_console(self) -> Console:
-		return Console(
-			highlighter=DicomKeyHighlighter(),
-			theme=Theme(
-				{
-					'example.DicomTag': 'bold magenta',
-					'example.ForwardSlash': 'bold green',
-					'example.Braces': 'bold magenta',
-				}
-			),
-		)
 
 	@property
 	def invalid_keys(self) -> Set[str]:

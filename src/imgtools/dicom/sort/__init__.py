@@ -7,7 +7,7 @@ from imgtools.dicom.sort.exceptions import (
 	InvalidPatternError,
 	SorterBaseError,
 )
-from imgtools.dicom.sort.highlighter import DicomKeyHighlighter
+from imgtools.dicom.sort.highlighter import TagHighlighter
 from imgtools.dicom.sort.parser import PatternParser
 from imgtools.dicom.sort.sort_method import FileAction, handle_file
 from imgtools.dicom.sort.sorter_base import SorterBase, resolve_path
@@ -15,7 +15,7 @@ from imgtools.dicom.sort.utils import read_tags
 from imgtools.dicom.sort.dicomsorter import DICOMSorter
 
 __all__ = [
-	'DicomKeyHighlighter',
+	'TagHighlighter',
 	'DICOMSortError',
 	'InvalidDICOMKeyError',
 	'InvalidPatternError',
