@@ -1,0 +1,26 @@
+site_name: Med-ImageTools Documentation
+site_url: https://bhklab.github.io/med-imagetools
+nav:
+    - Home: index.md
+    - AutoPipeline: AutoPipeline.md
+    - nnUNet: nnUNet.md
+    - dicomsort: dicomsort.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  
+theme: 
+    name: material
+    features:
+    - content.code.annotate
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
