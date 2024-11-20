@@ -85,7 +85,7 @@ class SorterBase(ABC):
 
 	Parameters
 	----------
-	source_dirctory : Path
+	source_directory : Path
 	    The directory containing the files to be sorted.
 	target_pattern : str
 	    The pattern string for sorting files.
@@ -96,7 +96,7 @@ class SorterBase(ABC):
 
 	Attributes
 	----------
-	source_dirctory : Path
+	source_directory : Path
 	    The directory containing the files to be sorted.
 	format : str
 	    The parsed format string with placeholders for keys.
@@ -107,19 +107,19 @@ class SorterBase(ABC):
 
 	def __init__(
 		self,
-		source_dirctory: Path,
+		source_directory: Path,
 		target_pattern: str,
 		pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
 	) -> None:
-		self.source_dirctory = source_dirctory
+		self.source_directory = source_directory
 		self._target_pattern = target_pattern
 		self._keys: Set[str] = set()
 		self._console: Console = self._initialize_console()
-		self.logger = logger.bind(source_dirctory=self.source_dirctory)
+		self.logger = logger.bind(source_directory=self.source_directory)
 
 		try:
 			self.dicom_files = find_dicoms(
-				directory=self.source_dirctory,
+				directory=self.source_directory,
 				check_header=False,
 				recursive=True,
 				extension='dcm',

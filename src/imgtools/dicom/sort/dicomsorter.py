@@ -75,7 +75,7 @@ class DICOMSorter(SorterBase):
 
 	Attributes
 	----------
-	source_dirctory : Path
+	source_directory : Path
 	    The directory containing the files to be sorted.
 	logger : Logger
 	    The instance logger bound with the source directory context.
@@ -83,9 +83,9 @@ class DICOMSorter(SorterBase):
 	    The list of DICOM files found in the `source_directory`.
 	format : str
 	    The parsed format string with placeholders for DICOM tags.
-	keys : Set[str] 
+	keys : Set[str]
 	    DICOM tags extracted from the target pattern.
-	invalid_keys : Set[str] 
+	invalid_keys : Set[str]
 	    DICOM tags from the pattern that are invalid.
 	format : str
 	    The parsed format string with placeholders for keys.
@@ -95,12 +95,12 @@ class DICOMSorter(SorterBase):
 
 	def __init__(
 		self,
-		source_dirctory: Path,
+		source_directory: Path,
 		target_pattern: str,
 		pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
 	) -> None:
 		super().__init__(
-			source_dirctory=source_dirctory,
+			source_directory=source_directory,
 			target_pattern=target_pattern,
 			pattern_parser=pattern_parser,
 		)
@@ -164,9 +164,9 @@ class DICOMSorter(SorterBase):
 	) -> None:
 		"""Execute the file action on DICOM files.
 
-		Users are encouraged to use FileAction.HARDLINK for 
+		Users are encouraged to use FileAction.HARDLINK for
 		efficient storage and performance for large dataset, as well as
-		protection against lost data. 
+		protection against lost data.
 
 		Using hard links can save disk space and improve performance by
 		creating multiple directory entries (links) for a single file
@@ -191,12 +191,7 @@ class DICOMSorter(SorterBase):
 			If the provided action is not a valid FileAction.
 		"""
 		if not isinstance(action, FileAction):
-			try:
-				action = FileAction(action)
-			except ValueError as e:
-				valid_actions = ', '.join([f'`{a.value}`' for a in FileAction])
-				msg = f'Invalid action: {action}. Must be one of: {valid_actions}'
-				raise ValueError(msg) from e
+			action = FileAction.validate(action)
 
 		self.logger.debug(f'Mapping {len(self.dicom_files)} files to new paths')
 
@@ -229,7 +224,7 @@ class DICOMSorter(SorterBase):
 			################################################################################
 
 			if dry_run:
-				print(file_map)
+				self._dry_run()
 			else:
 				task_files = progress_bar.add_task('Handling files', total=len(file_map))
 				new_paths = []
@@ -320,6 +315,16 @@ class DICOMSorter(SorterBase):
 
 		return results
 
+	def _dry_run(self) -> None:
+		"""Perform a dry run without making any changes."""
+		self.console.print('Dry run mode enabled. No files will be moved or copied.')
+		self.console.print('Files that would be affected:')
+		starting_files = len(self.dicom_files)
+		self.console.print(f'Found {starting_files} files in the source directory.')
+
+		self.print_tree()
+		self.console.print('Dry run complete. No files were moved or copied.')
+
 
 if __name__ == '__main__':
 	import time
@@ -333,21 +338,6 @@ if __name__ == '__main__':
 	print('\n\nUsing another correct pattern:')
 	correct_pattern = './data/dicoms/sorted/images/%PatientID/Study-%StudyInstanceUID/%Modality_Series-%SeriesInstanceUID/'
 	sorter = DICOMSorter(input_dir, correct_pattern)
-	# This will be useful for dry-run option
-	# sorter.print_tree()
-
-	# start = time.time()
-	# sorter.execute(FileAction.COPY, overwrite=False)
-
-	# print(f'Time taken: {time.time() - start:.2f} seconds')
-
-	# # Delete the data/dicoms/sorted directory
-	# # shutil.rmtree(Path('./data/dicoms/sorted'))
-
-	# start = time.time()
-	# sorter.execute(FileAction.COPY, overwrite=False, num_workers=4)
-
-	# print(f'Time taken: {time.time() - start:.2f} seconds')
 
 	# # Delete the data/dicoms/sorted directory
 	with contextlib.suppress(Exception):

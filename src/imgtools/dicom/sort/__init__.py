@@ -1,6 +1,6 @@
+# ruff: noqa: I001
 """Some functions to get DICOM tags from keywords."""
 
-from imgtools.dicom.sort.dicomsort import DICOMSorter
 from imgtools.dicom.sort.exceptions import (
 	DICOMSortError,
 	InvalidDICOMKeyError,
@@ -12,6 +12,7 @@ from imgtools.dicom.sort.parser import PatternParser
 from imgtools.dicom.sort.sort_method import FileAction, handle_file
 from imgtools.dicom.sort.sorter_base import SorterBase, resolve_path
 from imgtools.dicom.sort.utils import read_tags
+from imgtools.dicom.sort.dicomsorter import DICOMSorter
 
 __all__ = [
 	'DicomKeyHighlighter',

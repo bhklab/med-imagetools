@@ -46,6 +46,7 @@ Copy a file:
 import shutil
 from enum import Enum
 from pathlib import Path
+from typing import Type
 
 
 class FileAction(Enum):
@@ -68,6 +69,22 @@ class FileAction(Enum):
 	COPY = 'copy'
 	SYMLINK = 'symlink'
 	HARDLINK = 'hardlink'
+
+	@classmethod
+	def validate(cls: Type['FileAction'], action: str) -> 'FileAction':
+		if not isinstance(action, cls):
+			try:
+				return cls(action)
+			except ValueError as e:
+				valid_actions = ', '.join([f'`{a.value}`' for a in cls])
+				msg = f'Invalid action: {action}. Must be one of: {valid_actions}'
+				raise ValueError(msg) from e
+		return action
+
+	@staticmethod
+	def choices() -> list[str]:
+		"""Return a list of valid file actions."""
+		return [action.value for action in FileAction]
 
 
 def handle_file(
