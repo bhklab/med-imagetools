@@ -51,7 +51,7 @@ from imgtools.logging import logger
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
 
 
-def worker(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Path]:
+def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Path]:
 	"""
 	Worker function to resolve a single path.
 

@@ -42,6 +42,7 @@ DICOMSorter
     files by metadata-driven patterns.
 """
 
+import contextlib
 import re
 import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -59,7 +60,7 @@ from imgtools.dicom.sort import (
 	InvalidDICOMKeyError,
 	SorterBase,
 	handle_file,
-	worker,
+	resolve_path,
 )
 
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
@@ -263,7 +264,7 @@ class DICOMSorter(SorterBase):
 		results: Dict[Path, Path] = {}
 		with ProcessPoolExecutor(max_workers=num_workers) as executor:
 			future_to_path = {
-				executor.submit(worker, path, self.keys, self.format): path
+				executor.submit(resolve_path, path, self.keys, self.format): path
 				for path in self.dicom_files
 			}
 			for future in as_completed(future_to_path):
@@ -303,10 +304,8 @@ if __name__ == '__main__':
 	# print(f'Time taken: {time.time() - start:.2f} seconds')
 
 	# # Delete the data/dicoms/sorted directory
-	try:
+	with contextlib.suppress(Exception):
 		shutil.rmtree(Path('./data/dicoms/sorted'))
-	except:
-		pass
 
 	start = time.time()
 	sorter.execute(FileAction.SYMLINK, overwrite=False, num_workers=10)
