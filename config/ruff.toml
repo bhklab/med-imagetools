@@ -5,6 +5,7 @@
 
 include = [
   "src/imgtools/logging/**/*.py", 
+  "src/imgtools/cli/**/*.py",
   "src/imgtools/dicom/**/*.py",
 ]
 

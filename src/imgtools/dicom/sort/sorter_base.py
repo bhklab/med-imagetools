@@ -85,7 +85,7 @@ class SorterBase(ABC):
 
 	Parameters
 	----------
-	source_dirctory : Path
+	source_directory : Path
 	    The directory containing the files to be sorted.
 	target_pattern : str
 	    The pattern string for sorting files.
@@ -96,7 +96,7 @@ class SorterBase(ABC):
 
 	Attributes
 	----------
-	source_dirctory : Path
+	source_directory : Path
 	    The directory containing the files to be sorted.
 	format : str
 	    The parsed format string with placeholders for keys.
@@ -107,19 +107,19 @@ class SorterBase(ABC):
 
 	def __init__(
 		self,
-		source_dirctory: Path,
+		source_directory: Path,
 		target_pattern: str,
 		pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
 	) -> None:
-		self.source_dirctory = source_dirctory
+		self.source_directory = source_directory
 		self._target_pattern = target_pattern
 		self._keys: Set[str] = set()
 		self._console: Console = self._initialize_console()
-		self.logger = logger.bind(source_dirctory=self.source_dirctory)
+		self.logger = logger.bind(source_directory=self.source_directory)
 
 		try:
 			self.dicom_files = find_dicoms(
-				directory=self.source_dirctory,
+				directory=self.source_directory,
 				check_header=False,
 				recursive=True,
 				extension='dcm',
@@ -178,7 +178,7 @@ class SorterBase(ABC):
 		branch = tree.add(highlighted_label, style=style, guide_style=style)
 		self._generate_tree_structure('/'.join(parts[1:]), branch)
 
-	def _setup_tree(self, base_dir: Path) -> Tree:
+	def _setup_tree(self, base_dir: Path | None = None) -> Tree:
 		"""
 		Set up the initial tree for visualization.
 
@@ -193,7 +193,6 @@ class SorterBase(ABC):
 		    The initialized tree object.
 		"""
 		tree = Tree(f':file_folder: {base_dir}/', guide_style='bold bright_blue')
-		self._generate_tree_structure(self.pattern_preview, tree)
 		return tree
 
 	@property
@@ -226,9 +225,14 @@ class SorterBase(ABC):
 		"""Get the set of keys extracted from the pattern."""
 		return self._keys
 
-	def print_tree(self) -> None:
+	def print_tree(self, base_dir: Path | None = None) -> None:
 		"""
 		Display the pattern structure as a tree visualization.
+
+		Notes
+		-----
+		This only prints the target pattern, parsed and formatted.
+		Performing a dry-run execute will display more information.
 
 		Raises
 		------
@@ -236,8 +240,9 @@ class SorterBase(ABC):
 		    If the tree visualization fails to generate.
 		"""
 		try:
-			base_dir = Path().cwd().resolve()
+			base_dir = base_dir or Path().cwd().resolve()
 			tree = self._setup_tree(base_dir)
+			self._generate_tree_structure(self.pattern_preview, tree)
 			self._console.print(tree)
 		except Exception as e:
 			errmsg = 'Failed to generate tree visualization.'

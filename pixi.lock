@@ -4877,7 +4877,7 @@ packages:
   name: med-imagetools
   version: 1.7.0
   path: .
-  sha256: e41fd44c0c14d090b1945cc961cb3ac219b418b13896ed8b972b356205f18e06
+  sha256: d3eef64f82188951f43b474047a681d2acf32d1d55efb7b73e09ba49faa1b038
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
