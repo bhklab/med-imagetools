@@ -148,9 +148,9 @@ def handle_file(  # noqa: PLR0912
 			# Open with exclusive creation flag
 			resolved_path.open('x').close()
 			resolved_path.unlink()  # Remove the temporary file
-		except FileExistsError:
+		except FileExistsError as fee:
 			msg = f'Destination exists: {resolved_path}'
-			raise FileExistsError(msg)
+			raise FileExistsError(msg) from fee
 
 	# Check if the source exists
 	if not source_path.exists():

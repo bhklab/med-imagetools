@@ -1,6 +1,6 @@
 site_name: Med-ImageTools Documentation
 site_url: https://bhklab.github.io/med-imagetools
-
+watch: [docs, src, mkdocs.yml]
 
 markdown_extensions:
   - pymdownx.highlight:
