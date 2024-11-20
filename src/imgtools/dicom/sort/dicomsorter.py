@@ -44,14 +44,16 @@ DICOMSorter
 
 import contextlib
 import re
-import shutil
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from os.path import commonpath
 from pathlib import Path
 from typing import Dict, List, Pattern, Set
 
 from rich import progress
 from rich.console import Console
+from rich.text import Text
 from rich.theme import Theme
+from rich.tree import Tree
 
 from imgtools.dicom import similar_tags, tag_exists
 from imgtools.dicom.sort import (
@@ -155,6 +157,21 @@ class DICOMSorter(SorterBase):
 		"""
 		return {key for key in self.keys if not tag_exists(key)}
 
+	@contextlib.contextmanager
+	def _progress_bar(self):
+		"""Context manager for creating a progress bar."""
+		with progress.Progress(
+			'[progress.description]{task.description}',
+			progress.BarColumn(),
+			'[progress.percentage]{task.percentage:>3.0f}%',
+			progress.MofNCompleteColumn(),
+			'Time elapsed:',
+			progress.TimeElapsedColumn(),
+			console=self.console,
+			transient=True,
+		) as progress_bar:
+			yield progress_bar
+
 	def execute(
 		self,
 		action: FileAction = FileAction.MOVE,
@@ -195,50 +212,43 @@ class DICOMSorter(SorterBase):
 
 		self.logger.debug(f'Mapping {len(self.dicom_files)} files to new paths')
 
-		# Create a progress bar that can be used to track eveerything
-		with progress.Progress(
-			'[progress.description]{task.description}',
-			progress.BarColumn(),
-			'[progress.percentage]{task.percentage:>3.0f}%',
-			progress.MofNCompleteColumn(),
-			'Time elapsed:',
-			progress.TimeElapsedColumn(),
-			console=self.console,
-			transient=True,
-		) as progress_bar:
+		# Create a progress bar that can be used to track everything
+		with self._progress_bar() as progress_bar:
 			################################################################################
 			# Resolve new paths
 			################################################################################
 			file_map: Dict[Path, Path] = self._resolve_new_paths(
 				progress_bar=progress_bar, num_workers=num_workers
 			)
-			self.console.print('Finished resolving paths')
-			################################################################################
-			# Check if any of the resolved paths are duplicates
-			################################################################################
-			file_map = self._check_duplicates(file_map)
-			self.console.print('Finished checking for duplicates')
+		self.logger.info('Finished resolving paths')
 
-			################################################################################
-			# Handle files
-			################################################################################
+		################################################################################
+		# Check if any of the resolved paths are duplicates
+		################################################################################
+		file_map = self._check_duplicates(file_map)
+		self.logger.info('Finished checking for duplicates')
 
-			if dry_run:
-				self._dry_run()
-			else:
-				task_files = progress_bar.add_task('Handling files', total=len(file_map))
-				new_paths = []
-				with ProcessPoolExecutor(max_workers=num_workers) as executor:
-					future_to_file = {
-						executor.submit(
-							handle_file, source_path, resolved_path, action, overwrite
-						): source_path
-						for source_path, resolved_path in file_map.items()
-					}
-					for future in as_completed(future_to_file):
-						result = future.result()
-						new_paths.append(result)
-						progress_bar.update(task_files, advance=1)
+		################################################################################
+		# Handle files
+		################################################################################
+		if dry_run:
+			self._dry_run(file_map)
+			return
+
+		with self._progress_bar() as progress_bar:
+			task_files = progress_bar.add_task('Handling files', total=len(file_map))
+			new_paths = []
+			with ProcessPoolExecutor(max_workers=num_workers) as executor:
+				future_to_file = {
+					executor.submit(
+						handle_file, source_path, resolved_path, action, overwrite
+					): source_path
+					for source_path, resolved_path in file_map.items()
+				}
+				for future in as_completed(future_to_file):
+					result = future.result()
+					new_paths.append(result)
+					progress_bar.update(task_files, advance=1)
 
 	def _check_duplicates(self, file_map: Dict[Path, Path]) -> Dict[Path, Path]:
 		"""
@@ -315,35 +325,109 @@ class DICOMSorter(SorterBase):
 
 		return results
 
-	def _dry_run(self) -> None:
+	def _dry_run(self, file_map: Dict[Path, Path]) -> None:
 		"""Perform a dry run without making any changes."""
-		self.console.print('Dry run mode enabled. No files will be moved or copied.')
-		self.console.print('Files that would be affected:')
-		starting_files = len(self.dicom_files)
-		self.console.print(f'Found {starting_files} files in the source directory.')
+		self.console.print(
+			'[bold green]:double_exclamation_mark: Dry run mode enabled. No files will be moved or copied. :double_exclamation_mark: [/bold green]'
+		)
 
-		self.print_tree()
-		self.console.print('Dry run complete. No files were moved or copied.')
+		new_paths = sorted(list(file_map.values()))
+		common_prefix: Path = self._common_prefix(new_paths)
 
+		self._console.print(
+			f'\nCommon Prefix: :file_folder:[bold yellow]{common_prefix}[/bold yellow]\n\n'
+		)
+		tree = self._setup_tree(Path(common_prefix))
+		self._generate_tree_structure(
+			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(), tree
+		)
+		self.build_tree(new_paths, tree, common_prefix)
+		self._console.print(
+			'[bold]Preview of the [magenta]parsed pattern[/magenta] and sample paths as directories:[/bold]\n'
+		)
+		self._console.print(tree)
 
-if __name__ == '__main__':
-	import time
+	@staticmethod
+	def _common_prefix(paths: List[Path]) -> Path:
+		"""Find the common prefix for a list of paths.
 
-	from rich import print
+		Parameters
+		----------
+		paths : List[Path]
+		    A list of paths.
 
-	print('Using incorrect pattern:')
-	input_dir = Path('data/unsorted/unzipped/TCGA-LGG')
-	assert input_dir.exists() and input_dir.is_dir()
-	# shutil.rmtree(Path('./data/dicoms/sorted'))
-	print('\n\nUsing another correct pattern:')
-	correct_pattern = './data/dicoms/sorted/images/%PatientID/Study-%StudyInstanceUID/%Modality_Series-%SeriesInstanceUID/'
-	sorter = DICOMSorter(input_dir, correct_pattern)
+		Returns
+		-------
+		str
+		    The common prefix of the paths.
+		"""
+		return Path(
+			commonpath(
+				[str(path) for path in paths],
+			),
+		)
 
-	# # Delete the data/dicoms/sorted directory
-	with contextlib.suppress(Exception):
-		shutil.rmtree(Path('./data/dicoms/sorted'))
+	def build_tree(
+		self, paths: List[Path], tree: Tree, common_prefix: Path, max_children: int = 3
+	) -> None:
+		"""
+		Build a tree view given a set of paths (all having a common prefix).
 
-	start = time.time()
-	sorter.execute(FileAction.SYMLINK, overwrite=False, num_workers=10)
+		Parameters
+		----------
+		paths : List[Path]
+				List of pathlib.Path objects representing the proposed paths.
+		tree : Tree
+				A Rich Tree object where the directory structure will be added.
+		common_prefix : Path
+				The common prefix for all paths. Used to normalize the input paths.
+		"""
 
-	print(f'Time taken: {time.time() - start:.2f} seconds')
+		# Make all paths relative to the common prefix and sort them
+		paths = [path.relative_to(common_prefix) for path in paths]
+		# Create a dictionary to hold references to tree nodes
+		node_map: Dict[Path, Tree] = {Path(): tree}  # Start with the root tree
+		depth_counts: Dict[int, Set] = {0: set()}  # Track the number of nodes at each depth
+		for path in paths:
+			parts = list(path.parts)
+			for depth, part in enumerate(parts):
+				current_path = Path(*parts[: depth + 1])
+				# Add the current path to the tree if it's not already in the map
+				if current_path in node_map:
+					continue
+
+				# add depth to the depth_counts
+				depth_counts.setdefault(depth, set()).add(part)
+				parent_path = Path(*parts[:depth])  # Determine parent path
+				parent_node = node_map[parent_path]  # Get the parent Tree node
+
+				if len(parent_node.children) < max_children:
+					# Add the current node to the tree
+					node_map[current_path] = parent_node.add(part)
+					break
+				# Check if the parent has 3+ children already
+				# If no "..." placeholder exists, add it and replace the 3rd child
+				if not any(child.label == '...' for child in parent_node.children):
+					third_child = parent_node.children.pop(2)  # Remove the 3rd child
+					parent_node.add('...')  # Add the "..." placeholder
+					parent_node.add(third_child)  # Add the 3rd child back
+
+				# Replace the last child after the "..." placeholder
+				_ = parent_node.children.pop()  # Remove the last child
+				node_map[current_path] = parent_node.add(part)
+				break
+
+		# Add counts to the first child and its children recursively
+		def add_counts(node: Tree, depth: int) -> None:
+			if depth in depth_counts:
+				node.label = Text.assemble(
+					node.label,  # type: ignore
+					Text(
+						f' ({len(depth_counts[depth])} unique)',
+						style='bold yellow',
+					),
+				)
+			for child in node.children:
+				add_counts(child, depth + 1)
+
+		add_counts(tree.children[0], 0)

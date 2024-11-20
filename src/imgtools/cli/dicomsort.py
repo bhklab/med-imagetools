@@ -72,10 +72,16 @@ def dicomsort(
 	logger.info(f'Sorting DICOM files in {source_directory}.')
 	logger.debug('Debug Args', args=locals())
 	# TODO: eagerly validate target pattern somehow?
-	sorter = DICOMSorter(
-		source_directory=source_directory,
-		target_pattern=target_directory,
-	)
+
+	try:
+		sorter = DICOMSorter(
+			source_directory=source_directory,
+			target_pattern=target_directory,
+		)
+	except Exception as e:
+		logger.exception('Failed to initialize DICOMSorter')
+		raise click.Abort() from e
+
 	sorter.execute(
 		action=action,
 		overwrite=overwrite,
