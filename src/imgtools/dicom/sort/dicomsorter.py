@@ -204,7 +204,7 @@ class DICOMSorter(SorterBase):
 
 		with self._progress_bar() as progress_bar:
 			task_files = progress_bar.add_task('Handling files', total=len(file_map))
-			new_paths = []
+			new_paths: List[Path | None] = []
 			with ProcessPoolExecutor(max_workers=num_workers) as executor:
 				future_to_file = {
 					executor.submit(

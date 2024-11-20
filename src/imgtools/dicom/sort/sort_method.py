@@ -46,12 +46,7 @@ Copy a file:
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Type
-import os
-
-import shutil
-from pathlib import Path
-from enum import Enum
+from typing import List, Type
 
 
 class FileAction(Enum):
@@ -60,21 +55,21 @@ class FileAction(Enum):
 	SYMLINK = 'symlink'
 	HARDLINK = 'hardlink'
 
-	def move_file(self, source_path, resolved_path):
+	def move_file(self, source_path: Path, resolved_path: Path) -> None:
 		try:
 			source_path.rename(resolved_path)
 		except OSError as e:
 			errmsg = f'Failed to move file: {source_path} to {resolved_path}'
 			raise RuntimeError(errmsg) from e
 
-	def copy_file(self, source_path, resolved_path):
+	def copy_file(self, source_path: Path, resolved_path: Path) -> None:
 		try:
 			shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
 		except OSError as e:
 			errmsg = f'Failed to copy file: {source_path} to {resolved_path}'
 			raise RuntimeError(errmsg) from e
 
-	def create_symlink(self, source_path, resolved_path):
+	def create_symlink(self, source_path: Path, resolved_path: Path) -> None:
 		try:
 			real_source = source_path.resolve(strict=True)
 			if not real_source.is_relative_to(Path.cwd()):
@@ -85,14 +80,14 @@ class FileAction(Enum):
 			raise ValueError(errmsg) from e
 		resolved_path.symlink_to(source_path, target_is_directory=False)
 
-	def create_hardlink(self, source_path, resolved_path):
+	def create_hardlink(self, source_path: Path, resolved_path: Path) -> None:
 		try:
 			resolved_path.hardlink_to(source_path)
 		except OSError as e:
 			errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
 			raise RuntimeError(errmsg) from e
 
-	def handle(self, source_path, resolved_path):
+	def handle(self, source_path: Path, resolved_path: Path) -> None:
 		match self:
 			case FileAction.MOVE:
 				self.move_file(source_path, resolved_path)
@@ -118,13 +113,14 @@ class FileAction(Enum):
 		return action
 
 	@staticmethod
-	def choices() -> list[str]:
+	def choices() -> List[str]:
 		"""Return a list of valid file actions."""
 		return [action.value for action in FileAction]
 
 
-def handle_file(source_path, resolved_path, action: FileAction, overwrite=False):
-
+def handle_file(
+	source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool = False
+) -> None:
 	# Check if the source exists
 	if not source_path.exists():
 		msg = f'Source does not exist: {source_path}'
