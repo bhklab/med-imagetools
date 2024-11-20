@@ -168,13 +168,16 @@ class SorterBase(ABC):
 
 		Returns
 		-------
-		Dict[Path]
+		Dict[Path, Path]
 				A list of resolved paths, each preserving the original filename.
 		"""
 		pass
 
-	def _generate_tree_structure(self, path: str, tree: Tree) -> None:
+	def _generate_tree_structure(self, path: str, tree: Tree, depth: int = 0) -> None:
 		"""Generate a tree structure from the pattern path."""
+		max_depth = 10
+		if depth > max_depth:  # Prevent infinite recursion
+			return
 		if not path:
 			return
 		parts = path.split('/')
@@ -185,7 +188,7 @@ class SorterBase(ABC):
 		highlighted_label = Text(parts[0], style=style)
 		highlighted_label.highlight_regex(r'\{[a-zA-Z0-9_]+\}', 'bold magenta')
 		branch = tree.add(highlighted_label, style=style, guide_style=style)
-		self._generate_tree_structure('/'.join(parts[1:]), branch)
+		self._generate_tree_structure('/'.join(parts[1:]), branch, depth + 1)
 
 	def _setup_tree(self, base_dir: Path | None = None) -> Tree:
 		"""

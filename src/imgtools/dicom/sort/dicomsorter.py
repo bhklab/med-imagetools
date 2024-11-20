@@ -90,8 +90,6 @@ class DICOMSorter(SorterBase):
 	    DICOM tags from the pattern that are invalid.
 	format : str
 	    The parsed format string with placeholders for keys.
-	console : Console
-	    Rich console object for highlighting and printing.
 	"""
 
 	def __init__(
@@ -330,7 +328,7 @@ class DICOMSorter(SorterBase):
 		self._generate_tree_structure(
 			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(), tree
 		)
-		self.build_tree(new_paths, tree, common_prefix)
+		self._build_tree(new_paths, tree, common_prefix)
 		self._console.print(
 			'[bold]Preview of the [magenta]parsed pattern[/magenta] and sample paths as directories:[/bold]\n'
 		)
@@ -356,7 +354,7 @@ class DICOMSorter(SorterBase):
 			),
 		)
 
-	def build_tree(
+	def _build_tree(
 		self, paths: List[Path], tree: Tree, common_prefix: Path, max_children: int = 3
 	) -> None:
 		"""
