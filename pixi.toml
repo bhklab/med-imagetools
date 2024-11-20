@@ -16,6 +16,8 @@ default = { features = [
   "dev",
   "docs",
 ], solve-group = "default" }
+docs = ["docs"]
+test = ["test", "quality"]
 py310 = ["py310", "test"]
 py311 = ["py311", "test"]
 py312 = ["py312", "test"]
@@ -70,8 +72,12 @@ mkdocs = "*"
 mkdocs-material = ">=9.5.44,<10"
 mkdocstrings = ">=0.27.0,<0.28"
 mkdocstrings-python = ">=1.12.2,<2"
+mkdocs-git-authors-plugin = ">=0.9.0,<0.10"
+mkdocs-git-revision-date-localized-plugin = ">=1.2.9,<2"
+griffe-inherited-docstrings = ">=1.1.1,<2"
 
-
+[feature.docs.pypi-dependencies]
+mkdocs-awesome-pages-plugin = ">=2.9.3, <3"
 
 ############################################## QUALITY ###############################################
 # Quality includes linting, type checking, and formatting
