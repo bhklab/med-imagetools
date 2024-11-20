@@ -68,7 +68,7 @@ class BaseSubjectWriter(BaseWriter):
         
         if is_mask:
             # remove illegal characters for Windows/Unix
-            badboys = '<>:"/\|?*'
+            badboys = r'<>:"/\|?*'
             for char in badboys: 
                 mask_label = mask_label.replace(char, "")
 
