@@ -75,7 +75,7 @@ def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Pat
 
 
 class SorterBase(ABC):
-	"""
+	r"""
 	Abstract base class for sorting files based on customizable patterns.
 
 	This class provides functionalities for:
