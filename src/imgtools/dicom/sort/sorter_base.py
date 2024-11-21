@@ -53,7 +53,9 @@ from imgtools.logging import logger
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
 
 
-def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Path]:
+def resolve_path(
+	path: Path, keys: Set[str], format_str: str, check_existing: bool = True
+) -> Tuple[Path, Path]:
 	"""
 	Worker function to resolve a single path.
 
@@ -65,6 +67,8 @@ def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Pat
 	    The DICOM keys required for resolving the path.
 	format_str : str
 	    The format string for the resolved path.
+	check_existing : bool, optional
+			If True, check if the resolved path already exists (default is True).
 
 	Returns
 	-------
@@ -73,7 +77,13 @@ def resolve_path(path: Path, keys: Set[str], format_str: str) -> Tuple[Path, Pat
 	"""
 	tags: Dict[str, str] = read_tags(path, list(keys), truncate=True, sanitize=True)
 	try:
-		resolved_path = Path(format_str % tags, path.name).resolve()
+		resolved_path = Path(format_str % tags, path.name)
+		if check_existing and not resolved_path.exists():
+			resolved_path = resolved_path.resolve()
+		else:
+			errmsg = f'Path {resolved_path} already exists.'
+			logger.error(errmsg, source_path=path, resolved_path=resolved_path)
+			raise FileExistsError(errmsg)
 	except KeyError as e:
 		errmsg = f'Missing tag {e.args[0]} in {path}'
 		raise SorterBaseError(errmsg) from e
@@ -123,6 +133,7 @@ class SorterBase(ABC):
 
 		self.source_directory = source_directory
 		self._target_pattern = target_pattern
+		self._pattern_parser = pattern_parser
 		self._keys: Set[str] = set()
 		self._console: Console = self._initialize_console()
 		self.logger = logger.bind(source_directory=self.source_directory)
@@ -140,7 +151,7 @@ class SorterBase(ABC):
 			raise SorterBaseError(errmsg) from e
 
 		try:
-			self._parser = PatternParser(target_pattern, pattern_parser)
+			self._parser = PatternParser(self._target_pattern, self._pattern_parser)
 			self._format, parsed_keys = self._parser.parse()
 			self._keys = set(parsed_keys)
 		except Exception as e:

@@ -43,6 +43,7 @@ Copy a file:
     >>> handle_file(Path('source.txt'), Path('copy.txt'), action=FileAction.COPY, overwrite=True)
 """
 
+import os
 import shutil
 from enum import Enum
 from pathlib import Path
@@ -125,13 +126,19 @@ def handle_file(
 	if not source_path.exists():
 		msg = f'Source does not exist: {source_path}'
 		raise FileNotFoundError(msg)
-
-	# Ensure the parent directory exists
+	# Ensure the parent directory exists and has write permission
 	try:
 		resolved_path.parent.mkdir(parents=True, exist_ok=True)
+		if not os.access(resolved_path.parent, os.W_OK):
+			msg = f'No write permission for directory: {resolved_path.parent}'
+			raise PermissionError(msg)
 	except PermissionError as e:
-		errmsg = f'Failed to create parent directory: {resolved_path.parent}'
+		errmsg = f'Failed to create parent directory or no write permission: {resolved_path.parent}'
 		raise PermissionError(errmsg) from e
 
 	# Perform the file operation
-	action.handle(source_path, resolved_path)
+	try:
+		action.handle(source_path, resolved_path)
+	except Exception as e:
+		errmsg = f'Failed to {action.value} file: {source_path} to {resolved_path}'
+		raise RuntimeError(errmsg) from e

@@ -85,8 +85,6 @@ class DICOMSorter(SorterBase):
 	    DICOM tags extracted from the target pattern.
 	invalid_keys : Set[str]
 	    DICOM tags from the pattern that are invalid.
-	format : str
-	    The parsed format string with placeholders for keys.
 	"""
 
 	def __init__(
@@ -307,11 +305,10 @@ class DICOMSorter(SorterBase):
 
 		new_paths = sorted(list(file_map.values()))
 		common_prefix: Path = self._common_prefix(new_paths)
+		common_prefix_styled = f'[bold yellow]{common_prefix}[/bold yellow]'
+		self._console.print(f'\nCommon Prefix: :file_folder:{common_prefix_styled}\n\n')
 
-		self._console.print(
-			f'\nCommon Prefix: :file_folder:[bold yellow]{common_prefix}[/bold yellow]\n\n'
-		)
-		tree = self._setup_tree(Path(common_prefix))
+		tree = self._setup_tree(Path(common_prefix_styled))
 		self._generate_tree_structure(
 			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(),
 			tree,
@@ -399,7 +396,7 @@ class DICOMSorter(SorterBase):
 					node.label,  # type: ignore
 					Text(
 						f' ({len(depth_counts[depth])} unique)',
-						style='bold yellow',
+						style='bold green',
 					),
 				)
 			for child in node.children:

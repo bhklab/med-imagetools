@@ -5,6 +5,18 @@ import click
 from imgtools.dicom.sort import DICOMSorter, FileAction
 from imgtools.logging import logger
 
+""" TODO: Implement overwrite option
+
+Until we implement proper handling of overwrite behavior
+The overwrite option could lead to data loss. Consider adding additional safety measures:
+
+Require an additional confirmation when overwrite is enabled
+Add a backup mechanism for overwritten files
+Log all overwritten files for audit purposes
+
+"""
+DEFAULT_OVERWRITE_BEHAVIOR = False
+
 
 @click.command()
 @click.argument(
@@ -40,15 +52,6 @@ from imgtools.logging import logger
 	help='Do not move or copy files, just print what would be done. Always recommended to use this first to confirm the operation!',
 )
 @click.option(
-	'-o',
-	'--overwrite',
-	is_flag=True,
-	default=False,
-	show_default=True,
-	help='Force overwrite any files that already exist in the target directory. '
-	'NOT RECOMMENDED! if two files from source resolve to the same target path, data loss may occur.',
-)
-@click.option(
 	'-j',
 	'--num-workers',
 	type=int,
@@ -65,7 +68,6 @@ def dicomsort(
 	target_directory: str,
 	action: FileAction,
 	dry_run: bool,
-	overwrite: bool,
 	num_workers: int,
 ) -> None:
 	"""Sorts DICOM files into directories based on their tags."""
@@ -84,7 +86,7 @@ def dicomsort(
 
 	sorter.execute(
 		action=action,
-		overwrite=overwrite,
+		overwrite=DEFAULT_OVERWRITE_BEHAVIOR,
 		dry_run=dry_run,
 		num_workers=num_workers,
 	)

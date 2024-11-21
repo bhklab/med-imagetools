@@ -34,8 +34,10 @@ class PatternParser:
 	"""
 
 	def __init__(self, pattern: str, pattern_parser: Pattern) -> None:
+		assert isinstance(pattern, str), 'Pattern must be a string.'
 		self._pattern = pattern
 		self._keys: List[str] = []
+		assert isinstance(pattern_parser, Pattern), 'Pattern parser must be a regex pattern.'
 		self._parser: Pattern = pattern_parser
 
 	def parse(self) -> Tuple[str, List[str]]:
