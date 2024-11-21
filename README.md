@@ -1,4 +1,5 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
+
 [![CI/CD Status](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml/badge.svg)](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml)
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
 ![GitHub contributors](https://img.shields.io/github/contributors/bhklab/med-imagetools)
@@ -6,6 +7,26 @@
 ![GitHub forks](https://img.shields.io/github/forks/bhklab/med-imagetools?style=social)
 [![Documentation Status](https://readthedocs.org/projects/med-imagetools/badge/?version=documentation)](https://med-imagetools.readthedocs.io/en/documentation/?badge=documentation)
 ![DOI Status](https://zenodo.org/badge/243786996.svg)
+
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/med-imagetools)](https://pypi.org/project/med-imagetools/)
+[![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools)](https://pypi.org/project/med-imagetools/)
+[![Pre-Release](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/bhklab/med-imagetools/refs/heads/devel/pyproject.toml&query=project.version&label=pre-release&color=orange/)](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/bhklab/med-imagetools/refs/heads/devel/pyproject.toml&query=project.version&label=pre-release&color=orange/)
+
+[![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
+[![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
+
+## Latest Updates Nov 21st, 2024
+
+### New CLI entry point `imgtools`
+
+![imgtools](images/imgtools_help.png)
+
+### Feature: DICOMSort
+
+> [!WARNING]
+> **Warning**: This feature is still in beta. Use with caution and report any issues on [GitHub](https://github.com/bhklab/med-imagetools/issues).
+
+![alt text](images/dicomsort_help.png)
 
 ## Latest Updates (v1.2.0) - Feb 5th, 2024
 * Documentation is now available at: https://med-imagetools.readthedocs.io
