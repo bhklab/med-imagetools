@@ -11,7 +11,7 @@ FileAction(Enum)
 
 Functions
 ---------
-handle_file(source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool) -> Path
+handle_file(source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool) -> None
     Perform specified file operations (move, copy, symlink, hardlink) on a file.
 
 Notes
