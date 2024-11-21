@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v1.8.1 (2024-11-21)
+
+### Bug Fixes
+
+- Common prefix for tree
+  ([`a940969`](https://github.com/bhklab/med-imagetools/commit/a94096910b3b95629e96e809ec21a705505fe841))
+
+
 ## v1.8.0 (2024-11-21)
+
+### Chores
+
+- **sem-ver**: 1.8.0
+  ([`f5d97d0`](https://github.com/bhklab/med-imagetools/commit/f5d97d01f45d58d5478e49429be4754f62b3e80c))
 
 ### Features
 
