@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v1.8.0 (2024-11-21)
+
+### Features
+
+- Add dicomsorting cli entry
+  ([`d435f93`](https://github.com/bhklab/med-imagetools/commit/d435f93f0f2fda67094e4aeaa8a1828a570c534d))
+
+
 ## v1.7.0 (2024-11-19)
+
+### Chores
+
+- **sem-ver**: 1.7.0
+  ([`d579680`](https://github.com/bhklab/med-imagetools/commit/d579680f37b4f37f299fbe0e69d7dd653ae52000))
 
 ### Features
 
