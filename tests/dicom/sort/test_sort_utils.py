@@ -144,3 +144,41 @@ class TestReadTags:
             file=dicom_test_file, tags=tags, truncate=True, sanitize=False
         )
         assert result["StudyDescription"] == "CT ABD & PELVIS W/O &"
+    
+    def test_none_file(self):
+        with pytest.raises(AssertionError):
+            read_tags(file=None, tags=["PatientID"], truncate=True, sanitize=True)
+
+    def test_invalid_dicom_file(self):
+        inv_file = Path("invalid.dcm")
+        inv_file.touch()
+        with pytest.raises(InvalidDicomError):
+            read_tags(file=Path(inv_file), tags=["PatientID"], truncate=True, sanitize=True)
+
+class TestTruncateUid:
+    def test_truncate_uid_with_default_last_digits(self):
+        uid = "1.2.840.10008.1.2.1"
+        result = truncate_uid(uid)
+        assert result == "1.2.1"
+
+    def test_truncate_uid_with_custom_last_digits(self):
+        uid = "1.2.840.10008.1.2.1"
+        result = truncate_uid(uid, last_digits=10)
+        assert result == "0008.1.2.1"
+
+    def test_truncate_uid_with_short_uid(self):
+        uid = "12345"
+        result = truncate_uid(uid, last_digits=10)
+        assert result == "12345"
+
+    def test_truncate_uid_with_zero_last_digits(self):
+        uid = "1.2.840.10008.1.2.1"
+        result = truncate_uid(uid, last_digits=0)
+        assert result == "1.2.840.10008.1.2.1"
+
+    def test_truncate_uid_with_negative_last_digits(self):
+        uid = "1.2.840.10008.1.2.1"
+        result = truncate_uid(uid, last_digits=-5)
+        assert result == "1.2.840.10008.1.2.1"
+
+

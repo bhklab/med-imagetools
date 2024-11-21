@@ -8,7 +8,7 @@ class DICOMSortError(Exception):
 class InvalidPatternError(DICOMSortError):
 	"""Raised when the target pattern is invalid."""
 
-	def __init__(self, pattern: str = None) -> None:
+	def __init__(self, pattern: str | None = None) -> None:
 		message = f'Invalid target pattern: {pattern}' if pattern else 'Invalid target pattern'
 		super().__init__(message)
 
@@ -16,7 +16,7 @@ class InvalidPatternError(DICOMSortError):
 class InvalidDICOMKeyError(DICOMSortError):
 	"""Raised when a DICOM key is invalid."""
 
-	def __init__(self, key: str = None) -> None:
+	def __init__(self, key: str | None = None) -> None:
 		message = f'Invalid DICOM key: {key}' if key else 'Invalid DICOM key'
 		super().__init__(message)
 

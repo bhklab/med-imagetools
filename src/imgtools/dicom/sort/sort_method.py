@@ -43,7 +43,6 @@ Copy a file:
     >>> handle_file(Path('source.txt'), Path('copy.txt'), action=FileAction.COPY, overwrite=True)
 """
 
-import os
 import shutil
 from enum import Enum
 from pathlib import Path
@@ -55,38 +54,6 @@ class FileAction(Enum):
 	COPY = 'copy'
 	SYMLINK = 'symlink'
 	HARDLINK = 'hardlink'
-
-	def move_file(self, source_path: Path, resolved_path: Path) -> None:
-		try:
-			source_path.rename(resolved_path)
-		except OSError as e:
-			errmsg = f'Failed to move file: {source_path} to {resolved_path}'
-			raise RuntimeError(errmsg) from e
-
-	def copy_file(self, source_path: Path, resolved_path: Path) -> None:
-		try:
-			shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
-		except OSError as e:
-			errmsg = f'Failed to copy file: {source_path} to {resolved_path}'
-			raise RuntimeError(errmsg) from e
-
-	def create_symlink(self, source_path: Path, resolved_path: Path) -> None:
-		try:
-			real_source = source_path.resolve(strict=True)
-			if not real_source.is_relative_to(Path.cwd()):
-				errmsg = f'Source path {source_path} points outside current directory'
-				raise ValueError(errmsg)
-		except (FileNotFoundError, RuntimeError) as e:
-			errmsg = f'Invalid source path {source_path}: possible symlink loop'
-			raise ValueError(errmsg) from e
-		resolved_path.symlink_to(source_path, target_is_directory=False)
-
-	def create_hardlink(self, source_path: Path, resolved_path: Path) -> None:
-		try:
-			resolved_path.hardlink_to(source_path)
-		except OSError as e:
-			errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
-			raise RuntimeError(errmsg) from e
 
 	def handle(self, source_path: Path, resolved_path: Path) -> None:
 		match self:
@@ -101,6 +68,27 @@ class FileAction(Enum):
 			case _:
 				msg = f'Invalid action: {self} must be one of {FileAction.__members__}'
 				raise ValueError(msg)
+
+	def move_file(self, source_path: Path, resolved_path: Path) -> None:
+		source_path.rename(resolved_path)
+
+	def copy_file(self, source_path: Path, resolved_path: Path) -> None:
+		shutil.copy2(source_path, resolved_path)  # shutil.copy2 preserves metadata
+
+	def create_symlink(self, source_path: Path, resolved_path: Path) -> None:
+		try:
+			real_source = source_path.resolve(strict=True)
+		except (FileNotFoundError, RuntimeError, OSError) as e:
+			errmsg = f'Invalid source path {source_path}: possible symlink loop'
+			raise RuntimeError(errmsg) from e
+		resolved_path.symlink_to(real_source, target_is_directory=False)
+
+	def create_hardlink(self, source_path: Path, resolved_path: Path) -> None:
+		try:
+			resolved_path.hardlink_to(source_path)
+		except OSError as e:
+			errmsg = f'Failed to create hard link: {source_path} to {resolved_path}'
+			raise RuntimeError(errmsg) from e
 
 	@classmethod
 	def validate(cls: Type['FileAction'], action: str) -> 'FileAction':
@@ -122,23 +110,21 @@ class FileAction(Enum):
 def handle_file(
 	source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool = False
 ) -> None:
+	action = FileAction.validate(action)
+
 	# Check if the source exists
 	if not source_path.exists():
 		msg = f'Source does not exist: {source_path}'
 		raise FileNotFoundError(msg)
-	# Ensure the parent directory exists and has write permission
+
 	try:
+		if not overwrite and resolved_path.exists():
+			msg = f'Destination already exists: {resolved_path}'
+			raise FileExistsError(msg)
+		# Ensure the parent directory exists and has write permission
 		resolved_path.parent.mkdir(parents=True, exist_ok=True)
-		if not os.access(resolved_path.parent, os.W_OK):
-			msg = f'No write permission for directory: {resolved_path.parent}'
-			raise PermissionError(msg)
 	except PermissionError as e:
 		errmsg = f'Failed to create parent directory or no write permission: {resolved_path.parent}'
 		raise PermissionError(errmsg) from e
 
-	# Perform the file operation
-	try:
-		action.handle(source_path, resolved_path)
-	except Exception as e:
-		errmsg = f'Failed to {action.value} file: {source_path} to {resolved_path}'
-		raise RuntimeError(errmsg) from e
+	action.handle(source_path, resolved_path)

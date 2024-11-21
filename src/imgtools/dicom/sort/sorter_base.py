@@ -54,7 +54,12 @@ DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
 
 
 def resolve_path(
-	path: Path, keys: Set[str], format_str: str, check_existing: bool = True
+	path: Path,
+	keys: Set[str],
+	format_str: str,
+	check_existing: bool = True,
+	truncate: bool = True,
+	sanitize: bool = True,
 ) -> Tuple[Path, Path]:
 	"""
 	Worker function to resolve a single path.
@@ -69,24 +74,25 @@ def resolve_path(
 	    The format string for the resolved path.
 	check_existing : bool, optional
 			If True, check if the resolved path already exists (default is True).
+	truncate : bool, optional
+			If True, truncate long values in the resolved path (default is True).
+	sanitize : bool, optional
+			If True, sanitize the resolved path (default is True).
 
 	Returns
 	-------
 	Tuple[Path, Path]
 	    The source path and resolved path.
 	"""
-	tags: Dict[str, str] = read_tags(path, list(keys), truncate=True, sanitize=True)
-	try:
-		resolved_path = Path(format_str % tags, path.name)
-		if check_existing and not resolved_path.exists():
-			resolved_path = resolved_path.resolve()
-		else:
-			errmsg = f'Path {resolved_path} already exists.'
-			logger.error(errmsg, source_path=path, resolved_path=resolved_path)
-			raise FileExistsError(errmsg)
-	except KeyError as e:
-		errmsg = f'Missing tag {e.args[0]} in {path}'
-		raise SorterBaseError(errmsg) from e
+	tags: Dict[str, str] = read_tags(path, list(keys), truncate=truncate, sanitize=sanitize)
+	resolved_path = Path(format_str % tags, path.name)
+	if check_existing and not resolved_path.exists():
+		resolved_path = resolved_path.resolve()
+	else:
+		errmsg = f'Path {resolved_path} already exists.'
+		logger.error(errmsg, source_path=path, resolved_path=resolved_path)
+		raise FileExistsError(errmsg)
+
 	return path, resolved_path
 
 

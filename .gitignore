@@ -221,3 +221,5 @@ data/
 .pixi
 
 .imgtools/**/*.log
+
+*.dcm

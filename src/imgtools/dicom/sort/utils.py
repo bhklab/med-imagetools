@@ -170,9 +170,9 @@ def read_tags(
 
 	try:
 		dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True)
-	except TypeError as te:
-		errmsg = f'Type error reading DICOM file: {file}'
-		raise TypeError(errmsg) from te
+	except FileNotFoundError as fnfe:
+		errmsg = f'File not found: {file}'
+		raise FileNotFoundError(errmsg) from fnfe
 	except InvalidDicomError as ide:
 		errmsg = f'Invalid DICOM file: {file}'
 		raise InvalidDicomError(errmsg) from ide
@@ -182,6 +182,8 @@ def read_tags(
 
 	result = {}
 	is_rtstruct = dicom.get('Modality') == 'RTSTRUCT' if 'InstanceNumber' in tags else False
+	# TODO: this logic isnt robust...
+
 	for tag in tags:
 		value = (
 			truncate_uid(str(dicom.get(tag, '')))
