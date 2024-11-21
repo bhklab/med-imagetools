@@ -1,0 +1,5 @@
+nav:
+  - Home: index.md
+  - AutoPipeline: AutoPipeline.md
+  - nnUNet: nnUNet.md
+  - API Reference: reference

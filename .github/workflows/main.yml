@@ -43,6 +43,32 @@ jobs:
           path: coverage-report
 
   ################################################################################################
+  # Unit-Tests: Run unit tests using pytest
+  ################################################################################################
+  Build-Docs:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15 # Consider increasing timeout
+    strategy:
+      matrix:
+        os: [ubuntu-latest] # , windows-latest removed for now
+        env: ["docs"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: ${{ matrix.env }}
+          pixi-version: v0.36.0
+          cache: true
+          locked: false # wont be the same because of the tag
+
+      - name: Run pytest
+        run: |
+          pixi run -e ${{ matrix.env }} doc-build
+
+  ################################################################################################
   # Codecov: Run codecov to check coverage
   ################################################################################################
   Code-Coverage:

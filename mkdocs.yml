@@ -1,0 +1,92 @@
+site_name: Med-ImageTools Documentation
+site_url: https://bhklab.github.io/med-imagetools
+watch: [docs, src, mkdocs.yml]
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  
+theme: 
+    name: material
+    features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
+
+plugins:
+  - awesome-pages                     # simplifies configuring page titles and their order
+  - search                            # necessary for search functionality to work
+  - git-authors                       # adds authors to pages using git history
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src/imgtools/dicom/sort]
+          options:
+            extensions:
+              - griffe_inherited_docstrings:
+                  merge: true
+            # docstrings
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: true     # Ignore the first line in __init__ methods' docstrings.
+              warn_unknown_params: true     # Warn about parameters documented in docstrings that do not appear in the signature. Default: true.
+            show_docstring_examples: true
+            show_docstring_raises: false
+            docstring_section_style: table
+            filters: ["!^_"]
+            # heading_level: 1
+            merge_init_into_class: true  
+            inherited_members: true
+            parameter_headings: true
+            relative_crossrefs: true
+            scoped_crossrefs: true
+            show_bases: false
+            show_inheritance_diagram: true
+            show_root_heading: true
+            show_root_full_path: true
+            # Signatures
+            annotations_path: brief
+            modernize_annotations: true    # https://mkdocstrings.github.io/python/usage/configuration/signatures/#modernize_annotations
+            separate_signature: true        # https://mkdocstrings.github.io/python/usage/configuration/signatures/#separate_signature
+            show_signature_annotations: true
+            signature_crossrefs: true
+            unwrap_annotated: true
+            # show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: 
+              functions: true

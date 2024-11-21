@@ -73,7 +73,7 @@ from imgtools.logging.processors import (
 if TYPE_CHECKING:
 	from structlog.typing import Processor
 
-DEFAULT_LOG_LEVEL = 'INFO'
+DEFAULT_LOG_LEVEL = 'WARNING'
 LOG_DIR_NAME = '.imgtools/logs'
 DEFAULT_LOG_FILENAME = 'imgtools.log'
 VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}

@@ -5,23 +5,30 @@ description = "Add a short description here"
 name = "med-imagetools"
 platforms = ["linux-64", "osx-arm64"]
 
+
+[dependencies]
+python = "3.12.*"
+
+
 [pypi-dependencies]
 med-imagetools = { path = ".", editable = true }
 
 [environments]
-default = { features = [
+dev = [
   "test",
   "quality",
   "build",
   "dev",
-], solve-group = "default" }
-py310 = ["py310", "test"]
-py311 = ["py311", "test"]
-py312 = ["py312", "test"]
+  "docs",
+]
+docs =  ["docs"]
+test = ["test", "quality"]
+py310 =  {features = ["py310", "test"], no-default-feature = true}
+py311 =  {features = ["py311", "test"], no-default-feature = true}
+py312 =  {features = ["py312", "test"], no-default-feature = true}
 
 ############################################## DEV ###############################################
 [feature.dev.dependencies]
-python = "3.12.*"
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
@@ -42,16 +49,18 @@ python = "3.12.*"
 pytest = "*"
 pytest-cov = "*"
 pytest-xdist = "*"
+pytest-mock = ">=3.14.0,<4"
+
+[feature.test.pypi-dependencies]
+med-imagetools = { path = ".", editable = true }
 
 [feature.test.tasks.test]
 cmd = [
   "pytest",
-  # "--numprocesses=auto", 
-  # "-s",
-  # "--verbose",
   "--cov=imgtools",
   "--cov-report=xml:coverage-report/coverage.xml",
   "--cov-config=config/coverage.toml",
+  "-c", "./config/pytest.ini",
 ]
 inputs = ["src", "tests", "config/coverage.toml"]
 outputs = ["coverage-report/coverage.xml"]
@@ -63,14 +72,40 @@ inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
+############################################## DOCS ###############################################
+[feature.docs.dependencies]
+mkdocs = "*"
+mkdocs-material = ">=9.5.44,<10"
+mkdocstrings = ">=0.27.0,<0.28"
+mkdocstrings-python = ">=1.12.2,<2"
+mkdocs-git-authors-plugin = ">=0.9.0,<0.10"
+mkdocs-git-revision-date-localized-plugin = ">=1.2.9,<2"
+griffe-inherited-docstrings = ">=1.1.1,<2"
+mike = ">=2.1.2,<3"
+
+[feature.docs.pypi-dependencies]
+mkdocs-awesome-pages-plugin = ">=2.9.3, <3"
+
+[feature.docs.tasks]
+doc-build.description = "Build the documentation using MkDocs"
+doc-build.cmd = "mkdocs build -f mkdocs.yml"
+doc-build.inputs = ["docs", "mkdocs.yml"]
+doc-build.outputs = ["site"]
+
+serve.description = "Serve the documentation to http://localhost:8000/"
+serve.cmd = "mkdocs serve -f mkdocs.yml"
+
+
 ############################################## QUALITY ###############################################
-# See config/ruff.toml for the configuration
+# Quality includes linting, type checking, and formatting
 [feature.quality.dependencies]
 ruff = ">=0.4.4"
-pre-commit = ">=3.7.1,<3.8"
 mypy = ">=1.13.0,<2"
 types-pytz = ">=2024.2.0.20241003,<2025"
 types-tqdm = ">=4.66.0.20240417,<5"
+
+[feature.quality.pypi-dependencies]
+pydoctest = ">=0.2.1, <0.3"
 
 [feature.quality.tasks]
 ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
@@ -82,12 +117,12 @@ ruff-format.inputs = ["config/ruff.toml", "src"]
 ruff-format.depends_on = ["ruff-check"]
 ruff-format.description = "Run ruff format, run check first"
 
-lint.depends_on = ["ruff-format", "ruff-check"]
-lint.description = "Run ruff check and format"
-
 type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
 type-check.inputs = ["config/mypy.ini", "src"]
 type-check.description = "Run mypy type check."
+
+lint.depends_on = ["ruff-format", "ruff-check", "type-check"]
+lint.description = "Run ruff check + format and mypy type check"
 
 #################################### RELEASE & BUILD ###############################################
 
