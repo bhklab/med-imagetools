@@ -260,13 +260,16 @@ class DICOMSorter(SorterBase):
 		)
 
 		new_paths = sorted(list(file_map.values()))
-		common_prefix: Path = self._common_prefix(new_paths)
+		ppa = Path(self.pattern_preview).absolute()
+		common_prefix: Path = self._common_prefix([ppa, *new_paths])
 		common_prefix_styled = f'[bold yellow]{common_prefix}[/bold yellow]'
 		self._console.print(f'\nCommon Prefix: :file_folder:{common_prefix_styled}\n\n')
 
 		tree = self._setup_tree(Path(common_prefix_styled))
+
+		root = ppa.relative_to(common_prefix).as_posix()
 		self._generate_tree_structure(
-			Path(self.pattern_preview).absolute().relative_to(common_prefix).as_posix(),
+			root,
 			tree,
 		)
 		self._build_tree(new_paths, tree, common_prefix)
