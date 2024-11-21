@@ -87,10 +87,10 @@ mike = ">=2.1.2,<3"
 mkdocs-awesome-pages-plugin = ">=2.9.3, <3"
 
 [feature.docs.tasks]
-build.description = "Build the documentation using MkDocs"
-build.cmd = "mkdocs build -f mkdocs.yml"
-build.inputs = ["docs", "mkdocs.yml"]
-build.outputs = ["site"]
+doc-build.description = "Build the documentation using MkDocs"
+doc-build.cmd = "mkdocs build -f mkdocs.yml"
+doc-build.inputs = ["docs", "mkdocs.yml"]
+doc-build.outputs = ["site"]
 
 serve.description = "Serve the documentation to http://localhost:8000/"
 serve.cmd = "mkdocs serve -f mkdocs.yml"
