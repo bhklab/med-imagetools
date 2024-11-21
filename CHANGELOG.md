@@ -1,12 +1,25 @@
 # CHANGELOG
 
 
+## v1.8.2 (2024-11-21)
+
+### Bug Fixes
+
+- Update README with new CLI point and reorganize, and formatting
+  ([`96c6ab6`](https://github.com/bhklab/med-imagetools/commit/96c6ab60488f97ee3830c7d4be8f96f1ebad0cac))
+
+
 ## v1.8.1 (2024-11-21)
 
 ### Bug Fixes
 
 - Common prefix for tree
   ([`a940969`](https://github.com/bhklab/med-imagetools/commit/a94096910b3b95629e96e809ec21a705505fe841))
+
+### Chores
+
+- **sem-ver**: 1.8.1
+  ([`3e1c40d`](https://github.com/bhklab/med-imagetools/commit/3e1c40d1441e305dc55c3256e0563c3317765299))
 
 
 ## v1.8.0 (2024-11-21)
