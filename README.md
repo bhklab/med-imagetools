@@ -10,29 +10,12 @@
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools)](https://pypi.org/project/med-imagetools/)
-[![Pre-Release](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/bhklab/med-imagetools/refs/heads/devel/pyproject.toml&query=project.version&label=pre-release&color=orange/)](https://img.shields.io/badge/dynamic/toml?url=https://raw.githubusercontent.com/bhklab/med-imagetools/refs/heads/devel/pyproject.toml&query=project.version&label=pre-release&color=orange/)
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
 
-## Latest Updates Nov 21st, 2024
-
-### New CLI entry point `imgtools`
-
-![imgtools](images/imgtools_help.png)
-
-### Feature: DICOMSort
-
-> [!WARNING]
-> **Warning**: This feature is still in beta. Use with caution and report any issues on [GitHub](https://github.com/bhklab/med-imagetools/issues).
-
-![alt text](images/dicomsort_help.png)
-
-## Latest Updates (v1.2.0) - Feb 5th, 2024
-* Documentation is now available at: https://med-imagetools.readthedocs.io
-* Dependencies have been reduced for a lighter install. `torch` and `torchio` dependencies have been moved to an extra pip install flag. Use `pip install med-imagetools[torch]` to use the Dataset feature and 
-
 #### Med-ImageTools core features
+
 * AutoPipeline CLI
 * `nnunet` nnU-Net compatibility mode
 * Built-in train/test split for both normal/nnU-Net modes
@@ -45,21 +28,28 @@
 Med-Imagetools, a python package offers the perfect tool to transform messy medical dataset folders to deep learning ready format in few lines of code. It not only processes DICOMs consisting of different modalities (like CT, PET, RTDOSE and RTSTRUCTS), it also transforms them into deep learning ready subject based format taking the dependencies of these modalities into consideration.  
 
 ## Introduction
+
 A medical dataset, typically contains multiple different types of scans for a single patient in a single study. As seen in the figure below, the different scans containing DICOM of different modalities are interdependent on each other. For making effective machine learning models, one ought to take different modalities into account.
 
-<img src="https://github.com/bhklab/med-imagetools/blob/master/images/graph.png" align="center" width="480" ><figcaption>Fig.1 - Different network topology for different studies of different patients</figcaption></a>  
+![graph](https://github.com/bhklab/med-imagetools/blob/main/images/graph.png?raw=true)
+
+Fig.1 - Different network topology for different studies of different patients
 
 Med-Imagetools is a unique tool, which focuses on subject based Machine learning. It crawls the dataset and makes a network by connecting different modalities present in the dataset. Based on the user defined modalities, med-imagetools, queries the graph and process the queried raw DICOMS. The processed DICOMS are saved as nrrds, which med-imagetools converts to torchio subject dataset and eventually torch dataloader for ML pipeline.
 
-<img src="https://github.com/bhklab/med-imagetools/blob/master/images/autopipeline.png" align="center" width="500"><figcaption>Fig.2 - Med-Imagetools AutoPipeline diagram</figcaption></a>  
+![graph](https://github.com/bhklab/med-imagetools/blob/main/images/autopipeline.png?raw=true)
+
+Fig.2 - Med-Imagetools AutoPipeline diagram
 
 ## Installing med-imagetools
 
-```
+```console
 pip install med-imagetools
 ```
+
 ### (recommended) Create new conda virtual environment
-```
+
+```console
 conda create -n mit
 conda activate mit
 pip install med-imagetools
@@ -67,17 +57,39 @@ pip install med-imagetools
 
 ### (optional) Install in development mode
 
-```
+```console
 conda create -n mit
 conda activate mit
 pip install -e git+https://github.com/bhklab/med-imagetools.git
 ```
+
 This will install the package in editable mode, so that the installed package will update when the code is changed.
 
+## Latest Updates Nov 21st, 2024
+
+### New CLI entry point `imgtools`
+
+![imgtools](https://github.com/bhklab/med-imagetools/blob/main/images/imgtools_help.png?raw=true)
+
+### Feature: DICOMSort
+
+> [!WARNING]
+> **Warning**: This feature is still in beta. Use with caution and report any issues on [GitHub](https://github.com/bhklab/med-imagetools/issues).
+
+![imgtools](https://github.com/bhklab/med-imagetools/blob/main/images/dicomsort_help.png?raw=true)
+
+## Latest Updates (v1.2.0) - Feb 5th, 2024
+
+* Documentation is now available at: [https://med-imagetools.readthedocs.io](https://med-imagetools.readthedocs.io)
+* Dependencies have been reduced for a lighter install. `torch` and `torchio` dependencies have been moved to an extra pip install flag. Use `pip install med-imagetools[torch]`.
+
 ## Getting Started
+
 Med-Imagetools takes two step approch to turn messy medical raw dataset to ML ready dataset.  
+
 1. ***Autopipeline***: Crawls the raw dataset, forms a network and performs graph query, based on the user defined modalities. The relevant DICOMS, get processed and saved as nrrds
-    ```
+
+    ```console
     autopipeline\
       [INPUT DIRECTORY] \
       [OUTPUT DIRECTORY] \
@@ -92,8 +104,10 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
       --continue_processing [flag]\
       --dry_run [flag]
     ```
+
 2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
-    ```
+
+    ```console
     from imgtools.io import Dataset
     
     subjects = Dataset.load_from_nrrd(output_directory, ignore_multi=True)
@@ -102,12 +116,14 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
     ```
 
 ## Demo (Outdated as of v0.4)
+
 These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
-#### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
+
+### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
 
 [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
 
-#### Tutorial 2: Machine Learning with med-imagetools and torchio
+### Tutorial 2: Machine Learning with med-imagetools and torchio
 
 [![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
 
