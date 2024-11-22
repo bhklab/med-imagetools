@@ -128,7 +128,7 @@ def dicom_finder(
 			return
 
 	if not dicom_files:
-		warningmsg = f'Search input "{search_input}" did not match any of the {len(dicom_files)} DICOM files.'
+		warningmsg = f'Search input "{search_input}" did not match any DICOM files.'
 		logger.warning(warningmsg)
 		return
 
