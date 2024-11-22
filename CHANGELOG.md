@@ -1,12 +1,38 @@
 # CHANGELOG
 
 
+## v1.9.0 (2024-11-22)
+
+### Features
+
+- Dicom-finder cli tool, and improve documentation
+  ([#142](https://github.com/bhklab/med-imagetools/pull/142),
+  [`2981baa`](https://github.com/bhklab/med-imagetools/commit/2981baac719da97d6ec6c3c444c046389d44baf3))
+
+* docs: add mkdocs-include-markdown plugin for Markdown file inclusion
+
+* docs: add tag helpers documentation for DICOM utilities
+
+* docs: add documentation for finding DICOM files
+
+* Update src/imgtools/cli/dicomfind.py
+
+* feat: add regex filtering and improved logging for dicom_finder function
+
+* chore: exclude CLI files from coverage reporting
+
+
 ## v1.8.2 (2024-11-21)
 
 ### Bug Fixes
 
 - Update README with new CLI point and reorganize, and formatting
   ([`96c6ab6`](https://github.com/bhklab/med-imagetools/commit/96c6ab60488f97ee3830c7d4be8f96f1ebad0cac))
+
+### Chores
+
+- **sem-ver**: 1.8.2
+  ([`359cc09`](https://github.com/bhklab/med-imagetools/commit/359cc09a910b00e617157a0474d5b16f44b3253a))
 
 
 ## v1.8.1 (2024-11-21)
