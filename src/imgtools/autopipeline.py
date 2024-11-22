@@ -15,7 +15,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
 from imgtools.utils.args import parser
-from imgtools.logging import get_logger
+from imgtools.logging import logger
 
 from joblib import Parallel, delayed
 from imgtools.modules import Segmentation
@@ -26,9 +26,6 @@ import dill
 # Example usage:
 # python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
 ###############################################################
-
-
-logger = get_logger(level=os.environ.get('IMGTOOLS_LOG_LEVEL', "INFO"))
 
 
 class AutoPipeline(Pipeline):
