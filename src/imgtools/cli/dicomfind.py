@@ -100,13 +100,17 @@ def dicom_finder(
 
 	# Filter by multiple search patterns
 	for search in search_input:
-		pattern = re.compile(search)
-		dicom_files = [f for f in dicom_files if pattern.search(str(f))]
-		logger.info(
-			f'Filtered files based on search_input "{search}".',
-			search_input=search,
-			filtered_count=len(dicom_files),
-		)
+		try:
+			pattern = re.compile(search)
+			dicom_files = [f for f in dicom_files if pattern.search(str(f))]
+			logger.info(
+				f'Filtered files based on search_input "{search}".',
+				search_input=search,
+				filtered_count=len(dicom_files),
+			)
+		except re.error as e:
+			logger.error(f'Invalid regex pattern "{search}": {str(e)}')
+			raise click.BadParameter(f'Invalid regex pattern "{search}": {str(e)}')
 
 	if count:
 		click.echo(f'Number of DICOM files found: {len(dicom_files)}')
