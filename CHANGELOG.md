@@ -1,12 +1,35 @@
 # CHANGELOG
 
 
+## v1.9.2 (2024-11-22)
+
+### Bug Fixes
+
+- Pipeline entry no longer needs to manually configure loglevel
+  ([`66f8119`](https://github.com/bhklab/med-imagetools/commit/66f8119e6e2e1356c1e3b154e7ad2143cb77ea52))
+
+### Chores
+
+- **deps**: Update med-imagetools to version 1.9.1 and update sha256 checksum
+  ([`ab77c58`](https://github.com/bhklab/med-imagetools/commit/ab77c5887e5bb8ae1fa477d2780b94dcdf3297a6))
+
+### Refactoring
+
+- **logging**: Simplify logger configuration and enhance environment variable handling
+  ([`c1f624b`](https://github.com/bhklab/med-imagetools/commit/c1f624b7dc14d85176d97bf22918fb2f49dc4a8b))
+
+
 ## v1.9.1 (2024-11-22)
 
 ### Bug Fixes
 
 - Downstream bug where datagraph.py was missing from wheel due to data* being ignored in .gitignore
   ([`2dbb245`](https://github.com/bhklab/med-imagetools/commit/2dbb2455e1edcbf663effd8d40b6bff88dc92082))
+
+### Chores
+
+- **sem-ver**: 1.9.1
+  ([`711934c`](https://github.com/bhklab/med-imagetools/commit/711934cc211bd53347ad5c46cb873dae441f1796))
 
 ### Documentation
 
