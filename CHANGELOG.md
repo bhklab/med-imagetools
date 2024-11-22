@@ -1,7 +1,25 @@
 # CHANGELOG
 
 
+## v1.9.1 (2024-11-22)
+
+### Bug Fixes
+
+- Downstream bug where datagraph.py was missing from wheel due to data* being ignored in .gitignore
+  ([`2dbb245`](https://github.com/bhklab/med-imagetools/commit/2dbb2455e1edcbf663effd8d40b6bff88dc92082))
+
+### Documentation
+
+- Fix broken images
+  ([`a7d0e3a`](https://github.com/bhklab/med-imagetools/commit/a7d0e3a70959e9a754efcade9f9f3aa75206c9ad))
+
+
 ## v1.9.0 (2024-11-22)
+
+### Chores
+
+- **sem-ver**: 1.9.0
+  ([`b597892`](https://github.com/bhklab/med-imagetools/commit/b597892041fb5dc096d43a757b3482bb20ba5293))
 
 ### Features
 
