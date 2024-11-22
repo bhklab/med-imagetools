@@ -1,60 +1,3 @@
-"""
-Logging setup using structlog for path prettification, call information formatting,
-and timestamping in Eastern Standard Time (EST).
-
-This module provides a flexible and configurable logging framework with support for
-human-readable console output and machine-parseable JSON logs.
-
-Usage
------
-Basic usage:
-    >>> from imgtools.logging import logger
-    >>> logger.info('This is an info message', extra_field='extra_value')
-
-Custom configuration:
-    >>> from imgtools.logging import get_logger, logging_manager
-
-    Change log level
-
-    >>> logger = get_logger(level='DEBUG')
-
-    Enable JSON logging
-
-    >>> logger = logging_manager.configure_logging(
-    ...     json_logging=True,  # Enable JSON output
-    ...     level='DEBUG',  # Set logging level
-    ... )
-
-Configuration
--------------
-Environment variables:
-    IMGTOOLS_LOG_LEVEL : str, optional
-        Default log level. Defaults to 'INFO'.
-    IMGTOOLS_JSON_LOGGING : str, optional
-        Enable JSON logging. Defaults to 'false'.
-
-Output formats:
-    - JSON: Machine-parseable logs written to `imgtools.log`.
-    - Console: Human-readable logs with color-coded levels.
-
-Log Levels:
-    - DEBUG: Detailed information for debugging.
-    - INFO: General operational information.
-    - WARNING: Minor issues that don't affect operation.
-    - ERROR: Serious issues that affect operation.
-    - CRITICAL: Critical issues requiring immediate attention.
-
-Classes
--------
-LoggingManager
-    Manages the configuration and initialization of the logger.
-
-Functions
----------
-get_logger(level: str = 'INFO') -> logging.Logger
-    Retrieve a logger instance with the specified log level.
-"""
-
 import json as jsonlib
 import logging.config
 import os
@@ -74,8 +17,8 @@ if TYPE_CHECKING:
 	from structlog.typing import Processor
 
 DEFAULT_LOG_LEVEL = 'WARNING'
-LOG_DIR_NAME = '.imgtools/logs'
-DEFAULT_LOG_FILENAME = 'imgtools.log'
+LOG_DIR_NAME = '.logs'
+DEFAULT_LOG_FILENAME = 'application.log'
 VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
 
 
@@ -91,12 +34,6 @@ class LoggingManager:
 	----------
 	name : str
 	    Name of the logger instance.
-	level : str, optional
-	    Log level for the logger. Defaults to the environment variable
-	    'IMGTOOLS_LOG_LEVEL' or 'INFO'.
-	json_logging : bool, optional
-	    Whether to enable JSON logging. Defaults to the environment variable
-	    'IMGTOOLS_JSON_LOGGING' or `False`.
 	base_dir : Path, optional
 	    Base directory for relative path prettification. Defaults to the
 	    current working directory.
@@ -129,27 +66,46 @@ class LoggingManager:
 	Examples
 	--------
 	Initialize with default settings:
-	    >>> manager = LoggingManager(name='mylogger')
+	    >>> manager = LoggingManager(name='mypackage')
 	    >>> logger = manager.get_logger()
 	    >>> logger.info('Info message')
 
 	Enable JSON logging:
-	    >>> manager = LoggingManager(name='mylogger', json_logging=True)
+	    >>> manager = LoggingManager(name='mypackage', json_logging=True)
 	    >>> logger = manager.get_logger()
 	"""
 
 	def __init__(
 		self,
 		name: str,
-		level: str = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL),
-		json_logging: bool = os.getenv('IMGTOOLS_JSON_LOGGING', 'false').lower() == 'true',
 		base_dir: Path | None = None,
 	) -> None:
 		self.name = name
 		self.base_dir = base_dir or Path.cwd()
-		self.level = level.upper()
-		self.json_logging = json_logging
+		self.level = self._get_env_variable(f'{name}_LOG_LEVEL', DEFAULT_LOG_LEVEL).upper()
+		self.json_logging = (
+			self._get_env_variable(f'{name}_JSON_LOGGING', 'false').lower() == 'true'
+		)
 		self._initialize_logger()
+
+	@staticmethod
+	def _get_env_variable(variable: str, default: str) -> str:
+		"""
+		Retrieve an environment variable value with a fallback default.
+
+		Parameters
+		----------
+		variable : str
+		    The name of the environment variable.
+		default : str
+		    The default value if the environment variable is not set.
+
+		Returns
+		-------
+		str
+		    The value of the environment variable or the default.
+		"""
+		return os.environ.get(variable.upper(), default)
 
 	def _setup_json_logging(self) -> str:
 		"""
@@ -360,17 +316,14 @@ class LoggingManager:
 		return self.get_logger()
 
 
-LOGGER_NAME = 'imgtools'
-logging_manager = LoggingManager(LOGGER_NAME)
-logger = logging_manager.configure_logging(level=DEFAULT_LOG_LEVEL)
-
-
-def get_logger(level: str = 'INFO') -> structlog.stdlib.BoundLogger:
+def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	"""
 	Retrieve a logger with the specified log level.
 
 	Parameters
 	----------
+	name : str
+			Name of Logger Instance
 	level : str
 	    Desired logging level.
 
@@ -379,10 +332,29 @@ def get_logger(level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	logging.Logger
 	    Configured logger instance.
 	"""
-	env_level = os.environ.get('IMGTOOLS_LOG_LEVEL', None)
+	logging_manager = LoggingManager(name)
+	env_level = os.environ.get(f'{name}_LOG_LEVEL', None)
 	if env_level != level and env_level is not None:
-		logger.warning(
-			f'Environment variable IMGTOOLS_LOG_LEVEL is {env_level} '
+		logging_manager.get_logger().warning(
+			f'Environment variable {name}_LOG_LEVEL is {env_level} '
 			f'but you are setting it to {level}'
 		)
 	return logging_manager.configure_logging(level=level)
+
+
+logger = get_logger('imgtools', DEFAULT_LOG_LEVEL)
+
+
+if __name__ == '__main__':
+	# Example usage of the logging manager
+	logger.debug('This is a debug message')
+	logger.info('This is an info message')
+	logger.warning('This is a warning message')
+	logger.error('This is an error message')
+	logger.critical('This is a critical message')
+
+	readii_logger = get_logger('readii', 'DEBUG')
+	readii_logger.debug('This is a debug message')
+	readii_logger.info('This is an info message')
+	readii_logger.warning('This is a warning message')
+	readii_logger.error('This is an error message')
