@@ -1,4 +1,5 @@
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
+<!--intro-start-->
 
 [![CI/CD Status](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml/badge.svg)](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml)
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
@@ -14,7 +15,7 @@
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
 
-#### Med-ImageTools core features
+## Med-ImageTools core features
 
 * AutoPipeline CLI
 * `nnunet` nnU-Net compatibility mode
@@ -64,7 +65,7 @@ pip install -e git+https://github.com/bhklab/med-imagetools.git
 ```
 
 This will install the package in editable mode, so that the installed package will update when the code is changed.
-
+<!--intro-end-->
 ## Latest Updates Nov 21st, 2024
 
 ### New CLI entry point `imgtools`

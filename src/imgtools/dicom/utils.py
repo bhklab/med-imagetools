@@ -6,27 +6,6 @@ This module provides utilities for:
 - Looking up DICOM tags by keywords with optional hexadecimal formatting.
 - Checking the existence of DICOM tags.
 - Finding similar DICOM tags.
-
-Examples
---------
-Find DICOM files in a directory:
-    >>> from pathlib import Path
-    >>> from imgtools.dicom.utils import find_dicoms
-    >>> files = find_dicoms(Path('/data/dicoms'), recursive=True, check_header=True)
-    >>> len(files)
-    10
-
-Lookup a DICOM tag:
-    >>> from imgtools.dicom.utils import lookup_tag
-    >>> lookup_tag('PatientID')
-    '1048608'
-    >>> lookup_tag('PatientID', hex_format=True)
-    '0x100020'
-
-Find similar DICOM tags:
-    >>> from imgtools.dicom.utils import similar_tags
-    >>> similar_tags('PatinetID')  # Misspelled keyword
-    ['PatientID', 'PatientName', 'PatientBirthDate']
 """
 
 import difflib
@@ -60,44 +39,63 @@ def find_dicoms(
 	check_header: bool,
 	extension: Optional[str] = None,
 ) -> List[Path]:
-	"""
-	Find DICOM files in a directory.
+	"""Locate DICOM files in a specified directory.
 
-	This function searches for files with a specified extension in the provided directory.
-	It supports recursive search and optional DICOM header validation.
+	This function scans a directory for files matching the specified extension
+	and validates them as DICOM files based on the provided options. It supports
+	recursive search and optional header validation to confirm file validity.
 
 	Parameters
 	----------
 	directory : Path
-	    Directory to search for DICOM files.
+	    The directory in which to search for DICOM files.
 	recursive : bool
-	    If True, search subdirectories recursively.
-	    If False, search only the specified directory.
+	    Whether to include subdirectories in the search.
+
+	    - If `True`, recursively search all subdirectories.
+	    - If `False`, search only the specified directory.
 	check_header : bool
-	    If True, validate files by checking for a valid DICOM header.
+	    Whether to validate files by checking for a valid DICOM header.
+
+	    - If `True`, perform DICOM header validation (slower but more accurate).
+	    - If `False`, skip header validation and rely on extension.
+
 	extension : str, optional
-	    File extension to search for. If None, all files are considered (default is None).
+	    File extension to search for (e.g., "dcm"). If `None`, consider all files
+	    regardless of extension.
 
 	Returns
 	-------
 	List[Path]
-	    List of file paths to valid DICOM files.
+	    A list of valid DICOM file paths found in the directory.
 
 	Notes
 	-----
-	- If `check_header` is True, this function may be slower due to header validation.
+	- If `check_header` is enabled, the function checks each file for a valid
+	  DICOM header, which may slow down the search process.
 
 	Examples
 	--------
-	Find DICOM files with header validation:
-	    >>> from pathlib import Path
-	    >>> find_dicoms(Path('/data'), recursive=True, check_header=True)
-	    [PosixPath('/data/scan1.dcm'), PosixPath('/data/scan2.dcm')]
+	Setup
 
-	Find files without recursive search:
-	    >>> find_dicoms(Path('/data'), recursive=False, check_header=False)
-	    [PosixPath('/data/scan1.dcm')]
+	>>> from pathlib import Path
+	>>> from imgtools.dicom.utils import find_dicoms
+
+	Find DICOM files recursively without header validation:
+
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=False)
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.dcm')]
+
+	Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
+
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=True)
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+
+	Find DICOM files without recursion:
+	>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
+	[PosixPath('/data/scan1.dcm')]
 	"""
+
 	pattern = f'*.{extension}' if extension else '*'
 
 	glob_method = directory.rglob if recursive else directory.glob
@@ -139,13 +137,16 @@ def lookup_tag(keyword: str, hex_format: bool = False) -> Optional[str]:
 
 	Examples
 	--------
+
 	Lookup a DICOM tag in decimal format:
-	    >>> lookup_tag('PatientID')
-	    '1048608'
+
+	>>> lookup_tag('PatientID')
+	'1048608'
 
 	Lookup a DICOM tag in hexadecimal format:
-	    >>> lookup_tag('PatientID', hex_format=True)
-	    '0x100020'
+
+	>>> lookup_tag('PatientID', hex_format=True)
+	'0x100020'
 	"""
 	if (tag := tag_for_keyword(keyword)) is None:
 		return None
@@ -154,8 +155,7 @@ def lookup_tag(keyword: str, hex_format: bool = False) -> Optional[str]:
 
 @functools.lru_cache(maxsize=1024)
 def tag_exists(keyword: str) -> bool:
-	"""
-	Check if a DICOM tag exists for a given keyword.
+	"""Boolean check if a DICOM tag exists for a given keyword.
 
 	Parameters
 	----------
@@ -169,8 +169,10 @@ def tag_exists(keyword: str) -> bool:
 
 	Examples
 	--------
+
 	>>> tag_exists('PatientID')
 	True
+
 	>>> tag_exists('InvalidKeyword')
 	False
 	"""
@@ -179,8 +181,9 @@ def tag_exists(keyword: str) -> bool:
 
 @functools.lru_cache(maxsize=1024)
 def similar_tags(keyword: str, n: int = 3, threshold: float = 0.6) -> List[str]:
-	"""
-	Find similar DICOM tags for a given keyword.
+	"""Find similar DICOM tags for a given keyword.
+
+	Useful for User Interface to suggest similar tags based on a misspelled keyword.
 
 	Parameters
 	----------
@@ -199,11 +202,13 @@ def similar_tags(keyword: str, n: int = 3, threshold: float = 0.6) -> List[str]:
 	Examples
 	--------
 	Find similar tags for a misspelled keyword:
-	    >>> similar_tags('PatinetID')
-	    ['PatientID', 'PatientName', 'PatientBirthDate']s
+
+	>>> similar_tags('PatinetID')
+	['PatientID', 'PatientName', 'PatientBirthDate']
 
 	Adjust the number of results and threshold:
-	    >>> similar_tags('PatinetID', n=5, threshold=0.7)
-	    ['PatientID', 'PatientName']
+
+	>>> similar_tags('PatinetID', n=5, threshold=0.7)
+	['PatientID', 'PatientName']
 	"""
 	return difflib.get_close_matches(keyword, ALL_DICOM_TAGS, n, threshold)
