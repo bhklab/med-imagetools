@@ -51,6 +51,7 @@ plugins:
   - awesome-pages                     # simplifies configuring page titles and their order
   - search                            # necessary for search functionality to work
   - git-authors                       # adds authors to pages using git history
+  - include-markdown                  # allows for including Markdown files into another Markdown file
   - mkdocstrings:
       handlers:
         python:
