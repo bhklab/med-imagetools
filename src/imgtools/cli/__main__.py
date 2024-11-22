@@ -53,7 +53,7 @@ def cli(verbose: int) -> None:
 
 
 cli.add_command(dicomsort)
-cli.add_command(dicom_finder, 'dicom-find')
+cli.add_command(dicom_finder, 'find-dicoms')
 
 if __name__ == '__main__':
 	cli()

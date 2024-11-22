@@ -110,7 +110,8 @@ class FileAction(Enum):
 def handle_file(
 	source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool = False
 ) -> None:
-	action = FileAction.validate(action)
+	if not isinstance(action, FileAction):
+		action = FileAction.validate(action)
 
 	# Check if the source exists
 	if not source_path.exists():

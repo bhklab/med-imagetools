@@ -26,8 +26,9 @@ def natural_sort_key(s: str) -> list:
 )
 @click.argument(
 	'search_input',
-	required=False,
+	nargs=-1,  # Allow multiple search inputs
 	type=str,
+	required=False,
 )
 @click.option(
 	'-e',
@@ -35,13 +36,6 @@ def natural_sort_key(s: str) -> list:
 	default='dcm',
 	show_default=True,
 	help='File extension to look for.',
-)
-@click.option(
-	'--check-header',
-	is_flag=True,
-	default=False,
-	show_default=True,
-	help='Whether to check DICOM header for "DICM" signature.',
 )
 @click.option(
 	'-c',
@@ -60,6 +54,15 @@ def natural_sort_key(s: str) -> list:
 	help='The limit of results to return.',
 )
 @click.option(
+	'-ch',
+	'--check-header',
+	is_flag=True,
+	default=False,
+	show_default=True,
+	help='Whether to check DICOM header for "DICM" signature.',
+)
+@click.option(
+	'-s',
 	'--sorted',
 	'sort_results',
 	is_flag=True,
@@ -72,15 +75,19 @@ def natural_sort_key(s: str) -> list:
 	'--help',
 )
 def dicom_finder(
-	path: pathlib.Path,
 	search_input: str,
+	path: pathlib.Path,
 	extension: str,
 	check_header: bool,
 	count: bool,
 	limit: int,
 	sort_results: bool,
 ) -> None:
-	"""A tool to find DICOM files."""
+	"""A tool to find DICOM files.
+
+	PATH is the directory to search for DICOM files.
+
+	"""
 	logger.info('Searching for DICOM files.', args=locals())
 
 	dicom_files = find_dicoms(
@@ -91,17 +98,28 @@ def dicom_finder(
 	)
 	logger.info('DICOM find successful.', count=len(dicom_files))
 
+	# Filter by multiple search patterns
+	for search in search_input:
+		pattern = re.compile(search)
+		dicom_files = [f for f in dicom_files if pattern.search(str(f))]
+		logger.info(
+			f'Filtered files based on search_input "{search}".',
+			search_input=search,
+			filtered_count=len(dicom_files),
+		)
+
+	if count:
+		click.echo(f'Number of DICOM files found: {len(dicom_files)}')
+		return
+
 	if sort_results:
-		dicom_files = sorted(dicom_files, key=natural_sort_key)
+		dicom_files = sorted(dicom_files, key=lambda p: natural_sort_key(str(p)))
 
 	if limit:
 		dicom_files = dicom_files[:limit]
 
-	if count:
-		click.echo(f'Number of DICOM files found: {len(dicom_files)}')
-	else:
-		for dicom_file in dicom_files:
-			click.echo(dicom_file)
+	for dicom_file in dicom_files:
+		click.echo(dicom_file)
 
 	logger.info('Search complete.')
 
