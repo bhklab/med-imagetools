@@ -5,6 +5,7 @@ import click
 from click.decorators import FC
 
 from imgtools import __version__
+from imgtools.cli.dicomfind import dicom_finder
 from imgtools.cli.dicomsort import dicomsort
 from imgtools.logging import logger
 
@@ -52,6 +53,7 @@ def cli(verbose: int) -> None:
 
 
 cli.add_command(dicomsort)
+cli.add_command(dicom_finder, 'dicom-find')
 
 if __name__ == '__main__':
 	cli()
