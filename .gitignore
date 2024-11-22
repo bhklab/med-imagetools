@@ -3,14 +3,12 @@ examples/autotest.py
 .idea
 temp_outputs
 .ruff_cache
-data*
 *built_with*
 
 #vscode files
 /.idea
 
 # data
-data
 examples/data/tcia_n*
 scratch.ipynb
 tests/temp*
@@ -215,7 +213,7 @@ examples/process_one.py
 
 tests/temp_folder*
 examples/data_test
-data/
+data/**
 
 # pixi environments
 .pixi

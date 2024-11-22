@@ -8,6 +8,7 @@ platforms = ["linux-64", "osx-arm64"]
 
 [dependencies]
 python = "3.12.*"
+pip = ">=24.3.1,<25"
 
 
 [pypi-dependencies]
