@@ -87,6 +87,8 @@ def dicom_finder(
 
 	PATH is the directory to search for DICOM files.
 
+	SEARCH_INPUT is an optional list of regex patterns to filter the search results.
+
 	"""
 	logger.info('Searching for DICOM files.', args=locals())
 
@@ -96,6 +98,18 @@ def dicom_finder(
 		recursive=True,
 		extension=extension,
 	)
+
+	if not dicom_files:
+		warningmsg = f'No DICOM files found in {path}.'
+		logger.warning(
+			warningmsg,
+			directory=path,
+			check_header=check_header,
+			recursive=True,
+			extension=extension,
+		)
+		return
+
 	logger.info('DICOM find successful.', count=len(dicom_files))
 
 	# Filter by multiple search patterns
@@ -109,8 +123,14 @@ def dicom_finder(
 				filtered_count=len(dicom_files),
 			)
 		except re.error as e:
-			logger.error(f'Invalid regex pattern "{search}": {str(e)}')
-			raise click.BadParameter(f'Invalid regex pattern "{search}": {str(e)}')
+			errmsg = f'Invalid regex pattern "{search}": {str(e)}'
+			logger.exception(errmsg)
+			return
+
+	if not dicom_files:
+		warningmsg = f'Search input "{search_input}" did not match any of the {len(dicom_files)} DICOM files.'
+		logger.warning(warningmsg)
+		return
 
 	if count:
 		click.echo(f'Number of DICOM files found: {len(dicom_files)}')
