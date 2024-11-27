@@ -608,16 +608,21 @@ class AutoPipeline(Pipeline):
 
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
-        # Save dataset json
-        if self.is_nnunet:  # dataset.json for nnunet and .sh file to run to process it
-            imagests_path = pathlib.Path(self.output_directory, "imagesTs").as_posix()
-            images_test_location = imagests_path if os.path.exists(imagests_path) else None
-            generate_dataset_json(pathlib.Path(self.output_directory, "dataset.json").as_posix(),
-                                  pathlib.Path(self.output_directory, "imagesTr").as_posix(),
-                                  images_test_location,
-                                  tuple(self.nnunet_info["modalities"].keys()),
-                                  {v: k for k, v in self.existing_roi_indices.items()},
-                                  os.path.split(self.input_directory)[1])
+        if self.is_nnunet: 
+            # Generate the dataset JSON
+            channel_names_mapping = { # Earlier generated as {"CT": ""0000"} now needed as {"0": "CT"}
+                self.nnunet_info["modalities"][k].lstrip('0') or '0': k  
+                for k in self.nnunet_info["modalities"].keys()
+            }
+            generate_dataset_json(
+                output_folder=pathlib.Path(self.output_directory).as_posix(), 
+                channel_names=channel_names_mapping,
+                labels=self.existing_roi_indices,     
+                file_ending='.nii.gz',
+                num_training_cases=len(self.train)               
+            )
+
+            # .sh file for training
             _, child = os.path.split(self.output_directory)
             shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
             if os.path.exists(shell_path):
