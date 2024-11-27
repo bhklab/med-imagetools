@@ -19,7 +19,7 @@ autopipeline\
 Modalities can also be set to `--modalities MR,RTSTRUCT`
 
 AutoPipeline offers many more options and features for you to customize your outputs: <<https://github.com/bhklab/med-imagetools/tree/main/README.md>  
->.
+
 
 ## nnUNet Preprocess and Train
 
@@ -114,4 +114,4 @@ To run inference, run the command:
 nnUNet_predict -i INPUT_FOLDER -o OUTPUT_FOLDER -t TASK_NAME_OR_ID -m CONFIGURATION
 ```
 
-In this case, the `INPUT_FOLDER` of nnUNet is the `OUTPUT_DIRECTORY` of Med-ImageTools.# Preparing Data for nnUNet
+In this case, the `INPUT_FOLDER` of nnUNet is the `OUTPUT_DIRECTORY` of Med-ImageTools.
