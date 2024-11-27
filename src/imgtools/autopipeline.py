@@ -148,7 +148,6 @@ class AutoPipeline(Pipeline):
         if not nnunet and continue_processing and not os.path.exists(pathlib.Path(output_directory, ".temp").as_posix()):
             raise FileNotFoundError(f"Cannot continue processing. .temp directory does not exist in {output_directory}. Run without --continue_processing to start from scratch.")
 
-        study_name = os.path.split(self.input_directory)[1]
         if nnunet_inference:
             roi_yaml_path = ""
             custom_train_test_split = False
@@ -165,25 +164,44 @@ class AutoPipeline(Pipeline):
                                                  "nnUNet_raw_data").as_posix()
             if not os.path.exists(self.output_directory):
                 os.makedirs(self.output_directory)
+
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
-            numbers = [int(os.path.split(os.path.split(folder)[0])[1][4:7]) for folder in all_nnunet_folders if os.path.split(os.path.split(folder)[0])[1].startswith("Task")]
-            if (len(numbers) == 0 and continue_processing) or not continue_processing or not os.path.exists(pathlib.Path(self.output_directory, f"Task{max(numbers)}_{study_name}", ".temp").as_posix()):
-                available_numbers = list(range(500, 1000))
-                for folder in all_nnunet_folders:
-                    folder_name = os.path.split(os.path.split(folder)[0])[1]
-                    if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
-                        available_numbers.remove(int(folder_name[4:7]))
-                if len(available_numbers) == 0:
-                    raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
-                task_folder_name = f"Task{available_numbers[0]}_{study_name}"
-                self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
-                self.task_id = available_numbers[0]
+
+            # Extract used dataset IDs from folder names that match the "Dataset###_" format
+            used_ids = {
+                int(pathlib.Path(folder).parent.parent.name[7:10]) 
+                for folder in all_nnunet_folders
+                if pathlib.Path(folder).parent.parent.name.startswith("Dataset")
+            }
+
+            study_name = pathlib.Path(self.input_directory).name
+            new_dataset_required = (
+                not used_ids  # No existing datasets
+                or not continue_processing  # Processing shouldn't continue with existing datasets
+                or not pathlib.Path(self.output_directory, f"Dataset{max(used_ids):03}_{study_name}", ".temp").exists()  # Temp folder missing
+            )
+
+            if new_dataset_required:
+                all_ids = set(range(1, 1000))
+                available_ids = sorted(all_ids - used_ids)
+                if not available_ids:
+                    raise Error(
+                        "There are not enough dataset IDs for the nnUNet output. "
+                        "Please ensure at least one dataset ID is available between 001 and 999, inclusive."
+                    )
+                dataset_id = available_ids[0]  # Assign the first available dataset ID
             else:
-                self.task_id = max(numbers)
-                task_folder_name = f"Task{self.task_id}_{study_name}"
-                self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
-            if not os.path.exists(pathlib.Path(self.output_directory, ".temp").as_posix()):
-                os.makedirs(pathlib.Path(self.output_directory, ".temp").as_posix())
+                dataset_id = max(used_ids)  # Reuse the highest existing dataset ID
+
+            self.dataset_id = dataset_id 
+
+            # Create the dataset folder name and update the output directory path
+            dataset_folder_name = f"Dataset{self.dataset_id:03}_{study_name}"
+            self.output_directory = pathlib.Path(self.output_directory, dataset_folder_name).as_posix()
+
+            temp_folder_path = pathlib.Path(self.output_directory, ".temp")
+            if not temp_folder_path.exists():
+                os.makedirs(temp_folder_path.as_posix())
         
         if not dry_run:
             # Make a directory
@@ -633,7 +651,7 @@ class AutoPipeline(Pipeline):
                 output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
                 output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
                 output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
-                output += f'nnUNet_plan_and_preprocess -t {self.task_id} --verify_dataset_integrity\n\n'
+                output += f'nnUNet_plan_and_preprocess -t {self.dataset_id} --verify_dataset_integrity\n\n'
                 output += 'for (( i=0; i<5; i++ ))\n'
                 output += 'do\n'
                 output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
