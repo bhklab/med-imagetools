@@ -376,7 +376,6 @@ class AutoPipeline(Pipeline):
             if os.path.exists(pathlib.Path(self.output_directory,".temp",f'temp_{subject_id}.pkl').as_posix()):
                 print(f"{subject_id} already processed")
                 return
-
             print("Processing:", subject_id)
 
             read_results = self.input(subject_id)
@@ -427,6 +426,9 @@ class AutoPipeline(Pipeline):
                     # update the metadata for this image
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
+
+                    if self.is_nnunet or self.is_nnunet_inference:
+                        subject_id = f"{subject_id.split('_')[1]}_{subject_id.split('_')[0]:03}"
 
                     # modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
