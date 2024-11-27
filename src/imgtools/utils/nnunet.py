@@ -27,6 +27,44 @@ def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:
     with open(file, 'w') as f:
         json.dump(obj, f, sort_keys=sort_keys, indent=indent)
 
+def create_train_script(output_directory, dataset_id):
+    """
+    Creates a bash script (`train.sh`) for running nnUNet training, with paths for raw data,
+    preprocessed data, and trained models. The script ensures environment variables are set and 
+    executes the necessary training commands.
+
+    Parameters:
+    - output_directory (str): The directory where the output and subdirectories are located.
+    - dataset_id (int): The ID of the dataset to be processed.
+    """
+    # Define paths using pathlib
+    output_directory = pathlib.Path(output_directory)
+    shell_path = output_directory / 'train.sh'
+    base_dir = output_directory.parent.parent
+
+    if shell_path.exists():
+        shell_path.unlink()
+
+    # Define the environment variables and the script commands
+    script_content = f"""#!/bin/bash
+set -e
+
+export nnUNet_raw="{base_dir}/nnUNet_raw"
+export nnUNet_preprocessed="{base_dir}/nnUNet_preprocessed"
+export nnUNet_results="{base_dir}/nnUNet_trained_models"
+
+nnUNet_plan_and_preprocess -t {dataset_id} --verify_dataset_integrity
+
+for (( i=0; i<5; i++ ))
+do
+    nnUNet_train 3d_fullres nnUNetTrainerV2 {output_directory.name} $i --npz
+done
+"""
+
+    # Write the script content to the file
+    with open(shell_path, "w", newline="\n") as f:
+        f.write(script_content)
+
 # Code take from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/dataset_conversion/generate_dataset_json.py
 
 def generate_dataset_json(output_folder: str,

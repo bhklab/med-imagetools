@@ -13,7 +13,7 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
+from imgtools.utils.nnunet import generate_dataset_json, create_train_script, markdown_report_images
 from imgtools.utils.args import parser
 from imgtools.logging import logger
 
@@ -155,15 +155,12 @@ class AutoPipeline(Pipeline):
             if modalities != "CT" and modalities != "MR":
                 raise ValueError("nnUNet inference can only be run on image files. Please set modalities to 'CT' or 'MR'")
         if nnunet:
-            self.base_output_directory = self.output_directory
-            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix()):
-                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_preprocessed").as_posix())
-            if not os.path.exists(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix()):
-                os.makedirs(pathlib.Path(self.output_directory, "nnUNet_trained_models").as_posix())
-            self.output_directory = pathlib.Path(self.output_directory, "nnUNet_raw_data_base",
-                                                 "nnUNet_raw_data").as_posix()
-            if not os.path.exists(self.output_directory):
-                os.makedirs(self.output_directory)
+        
+            pathlib.Path(self.output_directory, "nnUNet_results").mkdir(parents=True, exist_ok=True)
+            pathlib.Path(self.output_directory, "nnUNet_preprocessed").mkdir(parents=True, exist_ok=True)
+            raw_path = pathlib.Path(self.output_directory, "nnUNet_raw")
+            raw_path.mkdir(parents=True, exist_ok=True)
+            self.output_directory = raw_path.as_posix()
 
             all_nnunet_folders = glob.glob(pathlib.Path(self.output_directory, "*", " ").as_posix())
 
@@ -627,7 +624,6 @@ class AutoPipeline(Pipeline):
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
         if self.is_nnunet: 
-            # Generate the dataset JSON
             channel_names_mapping = { # Earlier generated as {"CT": ""0000"} now needed as {"0": "CT"}
                 self.nnunet_info["modalities"][k].lstrip('0') or '0': k  
                 for k in self.nnunet_info["modalities"].keys()
@@ -639,25 +635,8 @@ class AutoPipeline(Pipeline):
                 file_ending='.nii.gz',
                 num_training_cases=len(self.train)               
             )
-
-            # .sh file for training
-            _, child = os.path.split(self.output_directory)
-            shell_path = pathlib.Path(self.output_directory, child.split("_")[1]+".sh").as_posix()
-            if os.path.exists(shell_path):
-                os.remove(shell_path)
-            with open(shell_path, "w", newline="\n") as f:
-                output = "#!/bin/bash\n"
-                output += "set -e"
-                output += f'export nnUNet_raw_data_base="{self.base_output_directory}/nnUNet_raw_data_base"\n'
-                output += f'export nnUNet_preprocessed="{self.base_output_directory}/nnUNet_preprocessed"\n'
-                output += f'export RESULTS_FOLDER="{self.base_output_directory}/nnUNet_trained_models"\n\n'
-                output += f'nnUNet_plan_and_preprocess -t {self.dataset_id} --verify_dataset_integrity\n\n'
-                output += 'for (( i=0; i<5; i++ ))\n'
-                output += 'do\n'
-                output += f'    nnUNet_train 3d_fullres nnUNetTrainerV2 {os.path.split(self.output_directory)[1]} $i --npz\n'
-                output += 'done'
-                f.write(output)
-            markdown_report_images(self.output_directory, self.total_modality_counter)  # images saved to the output directory
+            create_train_script(self.output_directory, self.dataset_id)
+            markdown_report_images(self.output_directory, self.total_modality_counter)
         
         # Save summary info (factor into different file)
         markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
