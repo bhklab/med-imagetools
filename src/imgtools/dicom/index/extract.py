@@ -1,19 +1,17 @@
-import json
-from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, List, Optional, Type, Union
 
 import pandas as pd
 import tqdm
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, create_engine
-from sqlalchemy.orm import DeclarativeMeta, declarative_base, relationship, sessionmaker
+from sqlalchemy.orm import DeclarativeMeta, Session, declarative_base, relationship, sessionmaker
 
 from imgtools.dicom import find_dicoms
 from imgtools.dicom.sort.utils import read_tags
-from imgtools.logging import logger
+from imgtools.logging import get_logger
 
-logger.setLevel('DEBUG')
+logger = get_logger("extract", "DEBUG")
+
 Base: DeclarativeMeta = declarative_base()
 
 class Patient(Base):
@@ -88,7 +86,7 @@ class DatabaseHandler:
 		Base.metadata.create_all(self.engine)  # Create tables
 		self.Session = sessionmaker(bind=self.engine)
 
-	def get_session(self):
+	def get_session(self) -> Session:
 		"""
 		Create a new SQLAlchemy session.
 
