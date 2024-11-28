@@ -182,7 +182,7 @@ class AutoPipeline(Pipeline):
                 all_ids = set(range(1, 1000))
                 available_ids = sorted(all_ids - used_ids)
                 if not available_ids:
-                    raise Error(
+                    raise ValueError(
                         "There are not enough dataset IDs for the nnUNet output. "
                         "Please ensure at least one dataset ID is available between 001 and 999, inclusive."
                     )
@@ -197,8 +197,7 @@ class AutoPipeline(Pipeline):
             self.output_directory = pathlib.Path(self.output_directory, dataset_folder_name).as_posix()
 
             temp_folder_path = pathlib.Path(self.output_directory, ".temp")
-            if not temp_folder_path.exists():
-                os.makedirs(temp_folder_path.as_posix())
+            temp_folder_path.mkdir(parents=True, exist_ok=True)
         
         if not dry_run:
             # Make a directory
@@ -319,7 +318,7 @@ class AutoPipeline(Pipeline):
                 raise FileNotFoundError(f"No file named {dataset_json_path} found. Image modality definitions are required for nnUNet inference")
             else:
                 with open(dataset_json_path, "r") as f:
-                    self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["modality"].items()}
+                    self.nnunet_info["modalities"] = {v: k.zfill(4) for k, v in json.load(f)["channel_names"].items()}
 
         # Input operations
         self.input = ImageAutoInput(input_directory, modalities, n_jobs, visualize, update)

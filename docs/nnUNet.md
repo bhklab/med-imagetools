@@ -53,7 +53,7 @@ nnUNet requires that environment variables be set before any commands are execut
 ```sh
 export nnUNet_raw="/OUTPUT_DIRECTORY/nnUNet_raw"
 export nnUNet_preprocessed="/OUTPUT_DIRECTORY/nnUNet_preprocessed"
-export nnUNet_results=="/OUTPUT_DIRECTORY/nnUNet_results"
+export nnUNet_results="/OUTPUT_DIRECTORY/nnUNet_results"
 ```
 
 To permanently set these environment variables, make sure that in your `~/.bashrc` file, these environment variables are set for nnUNet. The `nnUNet_preprocessed` and `nnUNet_results` folders are generated as empty folders for you by Med-ImageTools. `nnUNet_raw` is populated with the required raw data files. Add this to the file:
@@ -81,7 +81,7 @@ nnUNetv2_plan_and_preprocess -d X --verify_dataset_integrity -c 3d_fullres
 Once nnUNet has finished preprocessing, you may begin training your nnUNet model. To train your model, run the following command. Learn more about nnUNet's options here: <https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/how_to_use_nnunet.md>
 
 ```sh
-nnUNetv2_train nnUNetv2_train DATASET_NAME_OR_ID UNET_CONFIGURATION FOLD
+nnUNetv2_train DATASET_NAME_OR_ID UNET_CONFIGURATION FOLD
 ```
 
 ## nnUNet Inference

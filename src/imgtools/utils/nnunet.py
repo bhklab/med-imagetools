@@ -1,8 +1,12 @@
-from typing import Tuple, List
-import os, pathlib, glob, json
+from typing import Tuple, Dict
+import pathlib, json
 import matplotlib.pyplot as plt
 
-def markdown_report_images(output_folder, modality_count, train_total, test_total):
+def markdown_report_images(
+    output_folder: str | pathlib.Path, 
+    modality_count: Dict[str, int], 
+    train_total: int, 
+    test_total: int) -> None:
     output_folder = pathlib.Path(output_folder)
     images_folder = output_folder / "markdown_images"
 
@@ -31,13 +35,19 @@ def markdown_report_images(output_folder, modality_count, train_total, test_tota
     plt.close()
 
 
-def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:
+def save_json(
+    obj: str,
+    file: str | pathlib.Path,  
+    indent: int = 4, 
+    sort_keys: bool = True) -> None:
     with open(file, 'w') as f:
         json.dump(obj, f, sort_keys=sort_keys, indent=indent)
 
-def create_train_script(output_directory, dataset_id):
+def create_train_script(
+        output_directory: str | pathlib.Path,
+        dataset_id: int):
     """
-    Creates a bash script (`train.sh`) for running nnUNet training, with paths for raw data,
+    Creates a bash script (`nnunet_preprocess_and_train.sh`) for running nnUNet training, with paths for raw data,
     preprocessed data, and trained models. The script ensures environment variables are set and 
     executes the necessary training commands.
 
@@ -47,7 +57,7 @@ def create_train_script(output_directory, dataset_id):
     """
     # Define paths using pathlib
     output_directory = pathlib.Path(output_directory)
-    shell_path = output_directory / 'train.sh'
+    shell_path = output_directory / 'nnunet_preprocess_and_train.sh'
     base_dir = output_directory.parent.parent
 
     if shell_path.exists():
@@ -59,7 +69,7 @@ set -e
 
 export nnUNet_raw="{base_dir}/nnUNet_raw"
 export nnUNet_preprocessed="{base_dir}/nnUNet_preprocessed"
-export nnUNet_results="{base_dir}/nnUNet_trained_models"
+export nnUNet_results="{base_dir}/nnUNet_results"
 
 nnUNetv2_plan_and_preprocess -d {dataset_id} --verify_dataset_integrity -c 3d_fullres
 
@@ -70,20 +80,24 @@ done
 """
 
     # Write the script content to the file
-    with open(shell_path, "w", newline="\n") as f:
+    with shell_path.open("w", newline="\n") as f:
         f.write(script_content)
 
 # Code take from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/dataset_conversion/generate_dataset_json.py
 
 def generate_dataset_json(output_folder: str,
-                          channel_names: dict,
-                          labels: dict,
-                          num_training_cases,
+                          channel_names: Dict[str, str],
+                          labels: Dict[str, int],
+                          num_training_cases: int,
                           file_ending: str,
                           regions_class_order: Tuple[int, ...] = None,
-                          dataset_name: str = None, reference: str = None, release: str = None, license: str = 'hands off!',
+                          dataset_name: str = None, 
+                          reference: str = None, 
+                          release: str = None, 
+                          usage_license: str = 'hands off!',
                           description: str = None,
-                          overwrite_image_reader_writer: str = None, **kwargs):
+                          overwrite_image_reader_writer: str = None, 
+                          **kwargs):
     """
     Generates a dataset.json file in the output folder
 
@@ -130,47 +144,33 @@ def generate_dataset_json(output_folder: str,
 
     has_regions: bool = any([isinstance(i, (tuple, list)) and len(i) > 1 for i in labels.values()])
     if has_regions:
-        assert regions_class_order is not None, f"You have defined regions but regions_class_order is not set. " \
-                                                f"You need that."
-    # channel names need strings as keys
-    keys = list(channel_names.keys())
-    for k in keys:
-        if not isinstance(k, str):
-            channel_names[str(k)] = channel_names[k]
-            del channel_names[k]
-
-    # labels need ints as values
-    for l in labels.keys():
-        value = labels[l]
-        if isinstance(value, (tuple, list)):
-            value = tuple([int(i) for i in value])
-            labels[l] = value
-        else:
-            labels[l] = int(labels[l])
+        assert regions_class_order is not None, "You have defined regions but regions_class_order is not set. " \
+                                                "You need that."
 
     dataset_json = {
-        'channel_names': channel_names,  # previously this was called 'modality'. I didn't like this so this is
-        # channel_names now. Live with it.
+        'channel_names': channel_names, 
         'labels': labels,
         'numTraining': num_training_cases,
         'file_ending': file_ending,
     }
 
-    if dataset_name is not None:
-        dataset_json['name'] = dataset_name
-    if reference is not None:
-        dataset_json['reference'] = reference
-    if release is not None:
-        dataset_json['release'] = release
-    if license is not None:
-        dataset_json['licence'] = license
-    if description is not None:
-        dataset_json['description'] = description
-    if overwrite_image_reader_writer is not None:
-        dataset_json['overwrite_image_reader_writer'] = overwrite_image_reader_writer
-    if regions_class_order is not None:
-        dataset_json['regions_class_order'] = regions_class_order
+    # Construct the dataset JSON structure  
+    dataset_json = {  
+        "channel_names": channel_names,  
+        "labels": labels,  
+        "numTraining": num_training_cases,  
+        "file_ending": file_ending,  
+        "name": dataset_name,  
+        "reference": reference,  
+        "release": release,  
+        "licence": usage_license,  
+        "description": description,  
+        "overwrite_image_reader_writer": overwrite_image_reader_writer,  
+        "regions_class_order": regions_class_order,  
+    }   
 
-    dataset_json.update(kwargs)
+    dataset_json = {k: v for k, v in dataset_json.items() if v is not None}  
+
+    dataset_json.update(kwargs) 
 
     save_json(dataset_json, pathlib.Path(output_folder) / 'dataset.json', sort_keys=False)
