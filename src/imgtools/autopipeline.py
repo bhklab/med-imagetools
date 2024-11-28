@@ -430,6 +430,8 @@ class AutoPipeline(Pipeline):
                     if self.is_nnunet or self.is_nnunet_inference: # Going from {SUBJECT_NUM}_{SUBJECT_NAME} -> {SUBJECT_NAME}_{SUBJECT_NUM}
                         subject_id = f"{subject_id.split('_')[1]}_{subject_id.split('_')[0]:03}"
 
+                    subject_name = "_".join(subject_id.split("_")[:-1]) # Extracts {SUBJECT_NAME}
+
                     # modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
                         if modality == "MR":  # MR images can have various modalities like FLAIR, T1, etc.
@@ -446,7 +448,7 @@ class AutoPipeline(Pipeline):
                                 self.total_modality_counter[modality] = 1
                             else:
                                 self.total_modality_counter[modality] += 1
-                        if "_".join(subject_id.split("_")[1::]) in self.train:
+                        if subject_name in self.train:
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
                         else:
                             self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
@@ -556,7 +558,7 @@ class AutoPipeline(Pipeline):
                         sparse_mask = np.transpose(mask.generate_sparse_mask().mask_array)
                         sparse_mask = sitk.GetImageFromArray(sparse_mask)  # convert the nparray to sitk image
                         sparse_mask.CopyInformation(image)
-                        if "_".join(subject_id.split("_")[1::]) in self.train:
+                        if subject_name in self.train:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels")  # rtstruct is label for nnunet
                         else:
                             self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
@@ -595,7 +597,7 @@ class AutoPipeline(Pipeline):
             metadata["Modalities"] = str(list(subject_modalities))
             metadata["numRTSTRUCTs"] = num_rtstructs
             if self.is_nnunet:
-                metadata["Train or Test"] = "train" if "_".join(subject_id.split("_")[1::]) in self.train else "test"
+                metadata["Train or Test"] = "train" if subject_name in self.train else "test"
             with open(pathlib.Path(self.output_directory,".temp",f'{subject_id}.pkl').as_posix(),'wb') as f:  # the continue flag depends on this being the last line in this method
                 pickle.dump(metadata,f)
             return 

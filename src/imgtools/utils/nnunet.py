@@ -61,11 +61,11 @@ export nnUNet_raw="{base_dir}/nnUNet_raw"
 export nnUNet_preprocessed="{base_dir}/nnUNet_preprocessed"
 export nnUNet_results="{base_dir}/nnUNet_trained_models"
 
-nnUNet_plan_and_preprocess -t {dataset_id} --verify_dataset_integrity
+nnUNetv2_plan_and_preprocess -d {dataset_id} --verify_dataset_integrity -c 3d_fullres
 
 for (( i=0; i<5; i++ ))
 do
-    nnUNet_train 3d_fullres nnUNetTrainerV2 {output_directory.name} $i --npz
+    nnUNetv2_train {dataset_id} 3d_fullres $i
 done
 """
 
