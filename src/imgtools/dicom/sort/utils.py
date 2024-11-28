@@ -31,7 +31,7 @@ Read tags from a DICOM file:
 
 import re
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydicom import dcmread
 from pydicom.errors import InvalidDicomError
@@ -112,6 +112,7 @@ def read_tags(
 	tags: List[str],
 	truncate: bool = True,
 	sanitize: bool = True,
+	default: Optional[str] = '',
 ) -> Dict[str, str]:
 	"""
 	Read the specified tags from a DICOM file.
@@ -181,23 +182,16 @@ def read_tags(
 		raise ValueError(errmsg) from ve
 
 	result = {}
-	is_rtstruct = dicom.get('Modality') == 'RTSTRUCT' if 'InstanceNumber' in tags else False
-	# TODO: this logic isnt robust...
+	# is_rtstruct = dicom.get('Modality') == 'RTSTRUCT' if 'InstanceNumber' in tags else False
 
 	for tag in tags:
-		value = (
-			truncate_uid(str(dicom.get(tag, '')))
-			if tag.endswith('UID') and truncate
-			else str(dicom.get(tag, 'UNKNOWN'))
-		)
-		if value == 'UNKNOWN':
-			if tag in ['InstanceNumber', 'AccessionNumber'] and is_rtstruct:
-				value = '1'
-			else:
-				logger.warning(f'No value for tag: `{tag}` in file: {file}')
-		elif value == '':
-			logger.warning(f'Empty value for tag: `{tag}` in file: {file}')
-			value = 'UNKNOWN'
-		result[tag] = sanitize_file_name(value) if sanitize else value
+		value = str(dicom.get(tag, default=default))
 
+		if truncate and tag.endswith('UID'):
+			value = truncate_uid(value)
+		
+		if sanitize:
+			value = sanitize_file_name(value)
+
+		result[tag] = value
 	return result
