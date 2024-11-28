@@ -36,7 +36,7 @@ def markdown_report_images(
 
 
 def save_json(
-    obj: str,
+    obj: dict,
     file: str | pathlib.Path,  
     indent: int = 4, 
     sort_keys: bool = True) -> None:
@@ -146,13 +146,6 @@ def generate_dataset_json(output_folder: str,
     if has_regions:
         assert regions_class_order is not None, "You have defined regions but regions_class_order is not set. " \
                                                 "You need that."
-
-    dataset_json = {
-        'channel_names': channel_names, 
-        'labels': labels,
-        'numTraining': num_training_cases,
-        'file_ending': file_ending,
-    }
 
     # Construct the dataset JSON structure  
     dataset_json = {  
