@@ -1,26 +1,34 @@
 from typing import Tuple, List
-import os
-import pathlib
-import glob
-import json
-import numpy as np
+import os, pathlib, glob, json
 import matplotlib.pyplot as plt
 
+def markdown_report_images(output_folder, modality_count, train_total, test_total):
+    output_folder = pathlib.Path(output_folder)
+    images_folder = output_folder / "markdown_images"
 
-def markdown_report_images(output_folder, modality_count):
+    images_folder.mkdir(parents=True, exist_ok=True)
+
+    # Bar plot for modality counts
     modalities = list(modality_count.keys())
     modality_totals = list(modality_count.values())
-    if not os.path.exists(pathlib.Path(output_folder, "markdown_images").as_posix()):
-        os.makedirs(pathlib.Path(output_folder, "markdown_images").as_posix())
-    plt.figure(1)
+    plt.figure()  
     plt.bar(modalities, modality_totals)
-    plt.savefig(pathlib.Path(output_folder, "markdown_images", "nnunet_modality_count.png").as_posix())
+    plt.title("Modality Counts")
+    plt.xlabel("Modalities")
+    plt.ylabel("Counts")
+    plt.savefig(images_folder / "nnunet_modality_count.png")
+    plt.close()  
 
-    plt.figure(2)
-    train_total = len(glob.glob(pathlib.Path(output_folder, "labelsTr", "*.nii.gz").as_posix()))
-    test_total = len(glob.glob(pathlib.Path(output_folder, "labelsTs", "*.nii.gz").as_posix()))
-    plt.pie([train_total, test_total], labels=[f"Train - {train_total}", f"Test - {test_total}"])
-    plt.savefig(pathlib.Path(output_folder, "markdown_images", "nnunet_train_test_pie.png").as_posix())
+    # Pie chart for train/test distribution
+    plt.figure()
+    plt.pie(
+        [train_total, test_total],
+        labels=[f"Train - {train_total}", f"Test - {test_total}"],
+        autopct='%1.1f%%', 
+    )
+    plt.title("Train/Test Distribution")
+    plt.savefig(images_folder / "nnunet_train_test_pie.png")
+    plt.close()
 
 
 def save_json(obj, file: str, indent: int = 4, sort_keys: bool = True) -> None:

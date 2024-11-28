@@ -427,7 +427,7 @@ class AutoPipeline(Pipeline):
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
 
-                    if self.is_nnunet or self.is_nnunet_inference:
+                    if self.is_nnunet or self.is_nnunet_inference: # Going from {SUBJECT_NUM}_{SUBJECT_NAME} -> {SUBJECT_NAME}_{SUBJECT_NUM}
                         subject_id = f"{subject_id.split('_')[1]}_{subject_id.split('_')[0]:03}"
 
                     # modality is MR and the user has selected to have nnunet output
@@ -638,7 +638,12 @@ class AutoPipeline(Pipeline):
                 num_training_cases=len(self.train)               
             )
             create_train_script(self.output_directory, self.dataset_id)
-            markdown_report_images(self.output_directory, self.total_modality_counter)
+            markdown_report_images(
+                self.output_directory, 
+                self.total_modality_counter, 
+                len(self.train), 
+                len(self.test)
+            )
         
         # Save summary info (factor into different file)
         markdown_path = pathlib.Path(self.output_directory, "report.md").as_posix()
