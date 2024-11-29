@@ -169,45 +169,45 @@ class LoggingManager:
 		"""
 		return structlog.get_logger(self.name)
 
-def configure_logging(
-    self, level: str = DEFAULT_LOG_LEVEL
-) -> structlog.stdlib.BoundLogger:
-    """
-    Dynamically adjust logging settings.
+	def configure_logging(
+			self, level: str = DEFAULT_LOG_LEVEL
+	) -> structlog.stdlib.BoundLogger:
+			"""
+			Dynamically adjust logging settings.
 
-    Parameters
-    ----------
-    level : str, optional
-        Set the log level.
+			Parameters
+			----------
+			level : str, optional
+					Set the log level.
 
-    Returns
-    -------
-    structlog.stdlib.BoundLogger
-        Updated logger instance.
+			Returns
+			-------
+			structlog.stdlib.BoundLogger
+					Updated logger instance.
 
-    Raises
-    ------
-    ValueError
-        If an invalid log level is specified.
-    """
-    level_upper = level.upper()
-    if level_upper not in VALID_LOG_LEVELS:
-        msg = f'Invalid logging level: {level}'
-        raise ValueError(msg)
-    
-    # Store the old level for logging the change
-    old_level = self.level
-    self.level = level_upper
+			Raises
+			------
+			ValueError
+					If an invalid log level is specified.
+			"""
+			level_upper = level.upper()
+			if level_upper not in VALID_LOG_LEVELS:
+					msg = f'Invalid logging level: {level}'
+					raise ValueError(msg)
+			
+			# Store the old level for logging the change
+			old_level = self.level
+			self.level = level_upper
 
-    self._initialize_logger()
-    logger = self.get_logger()
-    
-    # Log the level change
-    if old_level != self.level:
-        logger.info(
-            "Log level changed",
-            old_level=old_level,
-            new_level=self.level
-        )
+			self._initialize_logger()
+			logger = self.get_logger()
+			
+			# Log the level change
+			if old_level != self.level:
+					logger.info(
+							"Log level changed",
+							old_level=old_level,
+							new_level=self.level
+					)
 
-    return logger
+			return logger
