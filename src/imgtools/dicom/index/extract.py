@@ -1,12 +1,12 @@
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import tqdm
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeMeta, Session, declarative_base, relationship, sessionmaker
 
-from imgtools.dicom import find_dicoms
+# from imgtools.dicom import find_dicoms
 from imgtools.dicom.sort.utils import read_tags
 from imgtools.logging import get_logger
 
@@ -23,7 +23,7 @@ class Patient(Base):
 	PatientName = Column(String, nullable=True)
 	DOB = Column(Date, nullable=True)
 
-	studies = relationship("Study", back_populates="patient")
+	studies: relationship = relationship("Study", back_populates="patient")
 
 
 class Study(Base):
@@ -36,8 +36,8 @@ class Study(Base):
 	StudyDate = Column(Date, nullable=True)
 	Description = Column(String, nullable=True)
 
-	patient = relationship("Patient", back_populates="studies")
-	series = relationship("Series", back_populates="study")
+	patient: relationship = relationship("Patient", back_populates="studies")
+	series: relationship = relationship("Series", back_populates="study")
 
 
 class Series(Base):
@@ -50,8 +50,8 @@ class Series(Base):
 	Modality = Column(String, nullable=False)
 	Description = Column(String, nullable=True)
 
-	study = relationship("Study", back_populates="series")
-	files = relationship("File", back_populates="series")
+	study: relationship = relationship("Study", back_populates="series")
+	files: relationship = relationship("File", back_populates="series")
 
 
 class File(Base):
@@ -65,7 +65,7 @@ class File(Base):
 	InstanceNumber = Column(Integer, nullable=True)
 	AcquisitionDateTime = Column(String, nullable=True)
 
-	series = relationship("Series", back_populates="files")
+	series: relationship = relationship("Series", back_populates="files")
 
 
 class DatabaseHandler:
@@ -176,55 +176,121 @@ class DICOMIndexer:
 		session.commit()
 		session.close()
 
-def main() -> None:
-	db_path = Path('dicom_index.sqlite')
-	db_handler = DatabaseHandler(db_path=db_path)
+class DICOMDatabase:
+	"""
+	Provides an interface to interact with the DICOM database.
+	"""
 
-	indexer = DICOMIndexer(db_handler=db_handler)
+	def __init__(self, db_handler: DatabaseHandler) -> None:
+		"""
+		Initialize the DICOMDatabase.
 
-	# Example: Process DICOM files
-	directory = Path("/Users/bhklab/dev/radiomics/med-imagetools/data/nbia/images/unzipped")
-	dicom_files = [file for file in directory.rglob("*.dcm")]
+		Parameters
+		----------
+		db_handler : DatabaseHandler
+			An instance of DatabaseHandler for managing database operations.
+		"""
+		self.db_handler = db_handler
 
-	logger.info(f"Found {len(dicom_files)} DICOM files.")
+	def get_patients(self) -> List[Patient]:
+		"""
+		Retrieve all patients from the database.
 
-	# Build index
-	indexer.build_index_from_files(dicom_files)
+		Returns
+		-------
+		List[Patient]
+			A list of Patient instances.
+		"""
+		with self.db_handler.get_session() as session:
+			return session.query(Patient).all()
 
-	# Query the database
-	session = db_handler.get_session()
-	patients = session.query(Patient).all()
-	logger.info(f"Patients: {[p.PatientID for p in patients]}")
+	def get_studies(self) -> List[Study]:
+		"""
+		Retrieve all studies from the database.
 
-	# Extract all the info for each file and make it a single row in a dataframe
-	query = session.query(
-		File.SOPInstanceUID,
-		File.FilePath,
-		File.InstanceNumber,
-		File.AcquisitionDateTime,
-		Series.SeriesInstanceUID,
-		Series.Modality,
-		Series.Description.label('SeriesDescription'),
-		Study.StudyInstanceUID,
-		Study.StudyDate,
-		Study.Description.label('StudyDescription'),
-		Patient.PatientID,
-		Patient.PatientName,
-		Patient.DOB
-	).join(Series, File.SeriesInstanceUID == Series.SeriesInstanceUID)\
-	 .join(Study, Series.StudyInstanceUID == Study.StudyInstanceUID)\
-	 .join(Patient, Study.PatientID == Patient.PatientID)
+		Returns
+		-------
+		List[Study]
+			A list of Study instances.
+		"""
+		with self.db_handler.get_session() as session:
+			return session.query(Study).all()
 
-	df = pd.read_sql(query.statement, session.bind)
+	def get_series(self) -> List[Series]:
+		"""
+		Retrieve all series from the database.
 
-	# Save the dataframe to a CSV file
-	output_csv_path = Path('dicom_metadata.csv')
-	df.to_csv(output_csv_path, index=False)
+		Returns
+		-------
+		List[Series]
+			A list of Series instances.
+		"""
+		with self.db_handler.get_session() as session:
+			return session.query(Series).all()
 
-	logger.info(f"Metadata saved to {output_csv_path}")
+	def get_files(self) -> List[File]:
+		"""
+		Retrieve all files from the database.
 
-	session.close()
+		Returns
+		-------
+		List[File]
+			A list of File instances.
+		"""
+		with self.db_handler.get_session() as session:
+			return session.query(File).all()
+
+# def main() -> None:
+# 	db_path = Path('dicom_index.sqlite')
+# 	db_handler = DatabaseHandler(db_path=db_path)
+
+# 	indexer = DICOMIndexer(db_handler=db_handler)
+
+# 	# Example: Process DICOM files
+# 	directory = Path("/Users/bhklab/dev/radiomics/med-imagetools/data/nbia/images/unzipped")
+# 	dicom_files = [file for file in directory.rglob("*.dcm")]
+
+# 	logger.info(f"Found {len(dicom_files)} DICOM files.")
+
+# 	# Build index
+# 	indexer.build_index_from_files(dicom_files)
+
+# 	# Query the database
+# 	dicom_db = DICOMDatabase(db_handler=db_handler)
+
+# 	# Example usage of DICOMDatabase
+# 	patients = dicom_db.get_patients()
+# 	logger.info(f"Patients: {[p.PatientID for p in patients]}")
+
+# 	# Extract all the info for each file and make it a single row in a dataframe
+# 	query = session.query(
+# 		File.SOPInstanceUID,
+# 		File.FilePath,
+# 		File.InstanceNumber,
+# 		File.AcquisitionDateTime,
+# 		Series.SeriesInstanceUID,
+# 		Series.Modality,
+# 		Series.Description.label('SeriesDescription'),
+# 		Study.StudyInstanceUID,
+# 		Study.StudyDate,
+# 		Study.Description.label('StudyDescription'),
+# 		Patient.PatientID,
+# 		Patient.PatientName,
+# 		Patient.DOB
+# 	).join(Series, File.SeriesInstanceUID == Series.SeriesInstanceUID)\
+# 	 .join(Study, Series.StudyInstanceUID == Study.StudyInstanceUID)\
+# 	 .join(Patient, Study.PatientID == Patient.PatientID)
+
+# 	df = pd.read_sql(query.statement, session.bind)
+
+# 	# Save the dataframe to a CSV file
+# 	output_csv_path = Path('dicom_metadata.csv')
+# 	df.to_csv(output_csv_path, index=False)
+
+# 	logger.info(f"Metadata saved to {output_csv_path}")
+
+# 	session.close()
 
 
-if __name__ == "__main__":
-	main()
+# if __name__ == "__main__":
+# 	main()
