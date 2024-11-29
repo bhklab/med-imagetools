@@ -5052,45 +5052,9 @@ packages:
   timestamp: 1704317789138
 - kind: pypi
   name: med-imagetools
-<<<<<<< HEAD
-  version: 1.9.3
-||||||| parent of 78d63ac (feat: enhance logging verbosity control and update DICOM file search functionality)
-<<<<<<< HEAD
-  version: 1.9.2
-||||||| 22d8fb7
-  version: 1.9.1
-=======
-  version: 1.9.3
->>>>>>> origin
-=======
   version: 1.9.4
->>>>>>> 78d63ac (feat: enhance logging verbosity control and update DICOM file search functionality)
   path: .
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-  sha256: b5b9144ec69de8c3d512c3f790ca62c6565acef44fed384aa8991714e14a5a6a
-||||||| parent of afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
-  sha256: d055cab65bdbd2ac8cf404e59ceaf09ad5c5888a06ffab580b92082b71f7dfc0
-=======
-  sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
->>>>>>> afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
-||||||| parent of 45cddb4 (fix: update GitHub Actions workflow for concurrency and permissions;)
-  sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
-=======
-  sha256: 49a886cc43bd9a5b1781c81cad04ebfd2e8828f5c694aa89ca0b7aeccb5a281c
->>>>>>> 45cddb4 (fix: update GitHub Actions workflow for concurrency and permissions;)
-||||||| parent of 78d63ac (feat: enhance logging verbosity control and update DICOM file search functionality)
-<<<<<<< HEAD
-  sha256: b5b9144ec69de8c3d512c3f790ca62c6565acef44fed384aa8991714e14a5a6a
-||||||| 22d8fb7
-  sha256: d055cab65bdbd2ac8cf404e59ceaf09ad5c5888a06ffab580b92082b71f7dfc0
-=======
-  sha256: 49a886cc43bd9a5b1781c81cad04ebfd2e8828f5c694aa89ca0b7aeccb5a281c
->>>>>>> origin
-=======
   sha256: eb2e317de0d6b10278b6b16b34685e571bda4014191d9aa1e4f2b2ac8e68b6a9
->>>>>>> 78d63ac (feat: enhance logging verbosity control and update DICOM file search functionality)
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
