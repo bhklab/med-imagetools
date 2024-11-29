@@ -97,6 +97,19 @@ class Patient:
 				"""
 				return sum(len(study.series) for study in self.studies)
 
+		@property
+		def modalities(self) -> Dict[str, int]:
+				"""
+				Get the list of modalities for the patient.
+
+				Returns
+				-------
+				List[str]
+						The list of modalities.
+				"""
+				modalities = [modality for study in self.studies for modality in study.modalities]
+				return dict(Counter(modalities))
+
 
 # Study Table
 @repr_mixin

@@ -37,7 +37,8 @@ dependencies = [
   "click>=8.1,<9",
   "rich>=13.9.4", 
   "sqlitedict>=2.0",
-  "sqlalchemy>=2.0.0"
+  "sqlalchemy>=2.0.0",
+  "tabulate>=0.8.9",
 ]
 
 classifiers = [
