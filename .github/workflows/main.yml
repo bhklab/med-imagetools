@@ -74,6 +74,14 @@ jobs:
   Publish-Docs:
     needs: Build-Docs
     if: github.ref == 'refs/heads/main' 
+    
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    permissions:
+      # Need to give the action permission to write to the repository to deploy the docs
+      contents: write
+      
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -83,6 +91,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Configure Git Credentials
         run: |

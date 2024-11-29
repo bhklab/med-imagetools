@@ -5052,8 +5052,9 @@ packages:
   timestamp: 1704317789138
 - kind: pypi
   name: med-imagetools
-  version: 1.9.2
+  version: 1.9.3
   path: .
+<<<<<<< HEAD
 <<<<<<< HEAD
   sha256: b5b9144ec69de8c3d512c3f790ca62c6565acef44fed384aa8991714e14a5a6a
 ||||||| parent of afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
@@ -5061,6 +5062,11 @@ packages:
 =======
   sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
 >>>>>>> afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
+||||||| parent of 45cddb4 (fix: update GitHub Actions workflow for concurrency and permissions;)
+  sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
+=======
+  sha256: 49a886cc43bd9a5b1781c81cad04ebfd2e8828f5c694aa89ca0b7aeccb5a281c
+>>>>>>> 45cddb4 (fix: update GitHub Actions workflow for concurrency and permissions;)
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
