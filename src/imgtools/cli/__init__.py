@@ -1,9 +1,11 @@
-from typing import Any, Callable
-from click.decorators import FC
 from logging import getLevelName
+from typing import Any, Callable
 
 import click
+from click.decorators import FC
+
 from imgtools.logging import logger
+
 
 def set_log_verbosity(
 	*param_decls: str,
@@ -14,7 +16,19 @@ def set_log_verbosity(
 	def callback(ctx: click.Context, param: click.Parameter, value: int) -> None:
 		levels = {0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}
 		level = levels.get(value, 'DEBUG')  # Default to DEBUG if verbosity is high
-		logger.setLevel(getLevelName(level))
+		
+		levelvalue = getLevelName(level)
+		env_level = logger.level
+
+		# pretty much if a user passes -v or -vv or -vvv, it will override the environment variable
+		# if no verbosity is passed, it will default to the environment variable or the default level in the logging module
+		if levelvalue > env_level and value != 0:
+			logger.warning(
+				f'Environment variable {logger.name.upper()}_LOG_LEVEL is {getLevelName(env_level)} but you are setting it to {getLevelName(levelvalue)}'
+			)
+			logger.setLevel(levelvalue)
+		else:
+			logger.setLevel(min(levelvalue, env_level))
 
 	if not param_decls:
 		param_decls = ('--verbose', '-v')

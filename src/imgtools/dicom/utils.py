@@ -10,6 +10,7 @@ This module provides utilities for:
 
 import difflib
 import functools
+from itertools import islice
 from pathlib import Path
 from typing import FrozenSet, List, Optional
 
@@ -38,77 +39,96 @@ def find_dicoms(
 	recursive: bool,
 	check_header: bool,
 	extension: Optional[str] = None,
+	limit: Optional[int] = None,
+	search_input: Optional[List[str]] = None,
 ) -> List[Path]:
 	"""Locate DICOM files in a specified directory.
 
-	This function scans a directory for files matching the specified extension
-	and validates them as DICOM files based on the provided options. It supports
-	recursive search and optional header validation to confirm file validity.
+		This function scans a directory for files matching the specified extension
+		and validates them as DICOM files based on the provided options. It supports
+		recursive search and optional header validation to confirm file validity.
 
-	Parameters
-	----------
-	directory : Path
-	    The directory in which to search for DICOM files.
-	recursive : bool
-	    Whether to include subdirectories in the search.
+		Parameters
+		----------
+		directory : Path
+				The directory in which to search for DICOM files.
+		recursive : bool
+				Whether to include subdirectories in the search.
 
-	    - If `True`, recursively search all subdirectories.
-	    - If `False`, search only the specified directory.
-	check_header : bool
-	    Whether to validate files by checking for a valid DICOM header.
+				- If `True`, recursively search all subdirectories.
+				- If `False`, search only the specified directory.
+		check_header : bool
+				Whether to validate files by checking for a valid DICOM header.
 
-	    - If `True`, perform DICOM header validation (slower but more accurate).
-	    - If `False`, skip header validation and rely on extension.
+				- If `True`, perform DICOM header validation (slower but more accurate).
+				- If `False`, skip header validation and rely on extension.
 
-	extension : str, optional
-	    File extension to search for (e.g., "dcm"). If `None`, consider all files
-	    regardless of extension.
+		extension : str, optional
+				File extension to search for (e.g., "dcm"). If `None`, consider all files
+				regardless of extension.
 
-	Returns
-	-------
-	List[Path]
-	    A list of valid DICOM file paths found in the directory.
+		limit : int, optional
+				Maximum number of DICOM files to return. If `None`, return all found files.
 
-	Notes
-	-----
-	- If `check_header` is enabled, the function checks each file for a valid
-	  DICOM header, which may slow down the search process.
+		Returns
+		-------
+		List[Path]
+				A list of valid DICOM file paths found in the directory.
 
-	Examples
-	--------
-	Setup
+		Notes
+		-----
+		- If `check_header` is enabled, the function checks each file for a valid
+			DICOM header, which may slow down the search process.
 
-	>>> from pathlib import Path
-	>>> from imgtools.dicom.utils import find_dicoms
+		Examples
+		--------
+		Setup
 
-	Find DICOM files recursively without header validation:
+		>>> from pathlib import Path
+		>>> from imgtools.dicom.utils import find_dicoms
 
-	>>> find_dicoms(Path('/data'), recursive=True, check_header=False)
-	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.dcm')]
+		Find DICOM files recursively without header validation:
 
-	Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=False)
+		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.dcm')]
 
-	>>> find_dicoms(Path('/data'), recursive=True, check_header=True)
-	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+		Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
 
-	Find DICOM files without recursion:
-	>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
-	[PosixPath('/data/scan1.dcm')]
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=True)
+		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+
+		Find DICOM files without recursion:
+		>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
+		[PosixPath('/data/scan1.dcm')]
 	"""
 
-	pattern = f'*.{extension}' if extension else '*'
+	if search_input:
+		search_input_pattern = "".join([f'{"[{si}]"}' for si in search_input])
+		pattern = f'*{search_input_pattern}*.{extension}' if extension else f'*{search_input_pattern}*'
+	else:
+		pattern = f'*.{extension}' if extension else '*'
 
 	glob_method = directory.rglob if recursive else directory.glob
 
 	logger.debug(
-		'Looking for DICOM files',
-		directory=directory,
-		recursive=recursive,
-		search_pattern=pattern,
-		check_header=check_header,
+			'Looking for DICOM files',
+			directory=directory,
+			recursive=recursive,
+			search_pattern=pattern,
+			check_header=check_header,
+			limit=limit,
+			search_input=search_input,
 	)
 
-	return [file.resolve() for file in glob_method(pattern) if _is_valid_dicom(file, check_header)]
+	files = (
+		file.resolve()
+		for file in glob_method(pattern)
+		if _is_valid_dicom(file, check_header)
+		# and (not search_input or all(term in file.as_posix() for term in search_input))
+	)
+
+
+	return list(islice(files, limit)) if limit else list(files)
 
 
 ###############################################################################
@@ -126,14 +146,14 @@ def lookup_tag(keyword: str, hex_format: bool = False) -> Optional[str]:
 	Parameters
 	----------
 	keyword : str
-	    The DICOM keyword to look up.
+			The DICOM keyword to look up.
 	hex_format : bool, optional
-	    If True, return the tag in hexadecimal format (default is False).
+			If True, return the tag in hexadecimal format (default is False).
 
 	Returns
 	-------
 	str or None
-	    The DICOM tag as a string, or None if the keyword is invalid.
+			The DICOM tag as a string, or None if the keyword is invalid.
 
 	Examples
 	--------
@@ -160,12 +180,12 @@ def tag_exists(keyword: str) -> bool:
 	Parameters
 	----------
 	keyword : str
-	    The DICOM keyword to check.
+			The DICOM keyword to check.
 
 	Returns
 	-------
 	bool
-	    True if the tag exists, False otherwise.
+			True if the tag exists, False otherwise.
 
 	Examples
 	--------
@@ -188,16 +208,16 @@ def similar_tags(keyword: str, n: int = 3, threshold: float = 0.6) -> List[str]:
 	Parameters
 	----------
 	keyword : str
-	    The keyword to search for similar tags.
+			The keyword to search for similar tags.
 	n : int, optional
-	    Maximum number of similar tags to return (default is 3).
+			Maximum number of similar tags to return (default is 3).
 	threshold : float, optional
-	    Minimum similarity ratio (default is 0.6).
+			Minimum similarity ratio (default is 0.6).
 
 	Returns
 	-------
 	List[str]
-	    A list of up to `n` similar DICOM tags.
+			A list of up to `n` similar DICOM tags.
 
 	Examples
 	--------

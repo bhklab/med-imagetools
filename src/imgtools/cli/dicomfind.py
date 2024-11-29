@@ -1,5 +1,6 @@
 import pathlib
 import re
+from typing import List
 
 import click
 
@@ -75,7 +76,7 @@ def natural_sort_key(s: str) -> list:
 	'--help',
 )
 def dicom_finder(
-	search_input: str,
+	search_input: List[str],
 	path: pathlib.Path,
 	extension: str,
 	check_header: bool,
@@ -97,6 +98,8 @@ def dicom_finder(
 		check_header=check_header,
 		recursive=True,
 		extension=extension,
+		limit=limit,  # Pass limit parameter
+		search_input=search_input,
 	)
 
 	if not dicom_files:
@@ -107,25 +110,27 @@ def dicom_finder(
 			check_header=check_header,
 			recursive=True,
 			extension=extension,
+			limit=limit,
+			search_input=search_input,
 		)
 		return
 
 	logger.info('DICOM find successful.', count=len(dicom_files))
 
-	# Filter by multiple search patterns
-	for search in search_input:
-		try:
-			pattern = re.compile(search)
-			dicom_files = [f for f in dicom_files if pattern.search(str(f))]
-			logger.info(
-				f'Filtered files based on search_input "{search}".',
-				search_input=search,
-				filtered_count=len(dicom_files),
-			)
-		except re.error as e:
-			errmsg = f'Invalid regex pattern "{search}": {str(e)}'
-			logger.exception(errmsg)
-			return
+	# # Filter by multiple search patterns
+	# for search in search_input:
+	# 	try:
+	# 		pattern = re.compile(search)
+	# 		dicom_files = [f for f in dicom_files if pattern.search(str(f))]
+	# 		logger.info(
+	# 			f'Filtered files based on search_input "{search}".',
+	# 			search_input=search,
+	# 			filtered_count=len(dicom_files),
+	# 		)
+	# 	except re.error as e:
+	# 		errmsg = f'Invalid regex pattern "{search}": {str(e)}'
+	# 		logger.exception(errmsg)
+	# 		return
 
 	if not dicom_files:
 		warningmsg = f'Search input "{search_input}" did not match any DICOM files.'
@@ -139,13 +144,11 @@ def dicom_finder(
 	if sort_results:
 		dicom_files = sorted(dicom_files, key=lambda p: natural_sort_key(str(p)))
 
-	if limit:
-		dicom_files = dicom_files[:limit]
+	logger.info('Search complete.')
 
 	for dicom_file in dicom_files:
 		click.echo(dicom_file)
 
-	logger.info('Search complete.')
 
 
 if __name__ == '__main__':
