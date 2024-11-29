@@ -1,20 +1,17 @@
 import time
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Generator, List, TypeVar
 
 import tqdm
 from pydicom import dcmread
 from pydicom.errors import InvalidDicomError
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
 
+from imgtools.dicom.index.database import DatabaseHandler
 from imgtools.dicom.index.models import (
 	File,
 	Patient,
 	Series,
 	Study,
-	mapper_registry,
 )
 from imgtools.logging import get_logger
 
@@ -41,48 +38,6 @@ def _extract_metadata(file_path: Path, tags: List[str]) -> Dict[str, str]:
 	return {tag: str(dicom.get(tag, '')) for tag in tags}
 
 
-class DatabaseHandler:
-	"""
-	Manages database operations using SQLAlchemy ORM.
-	"""
-
-	def __init__(self, db_path: Path, force_delete: bool = False) -> None:
-		"""
-		Initialize the DatabaseHandler with an SQLite database.
-
-		Parameters
-		----------
-		db_path : Path
-			Path to the SQLite database file.
-		force_delete : bool
-			Whether to delete the existing database file if it exists.
-		"""
-		if force_delete and db_path.exists():
-			db_path.unlink()  # Delete the existing database file
-
-		self.engine = create_engine(f'sqlite:///{db_path}', future=True)
-		mapper_registry.metadata.create_all(self.engine)  # Create tables
-		self.Session = sessionmaker(bind=self.engine)
-
-	@contextmanager
-	def session(self) -> Generator[Session, None, None]:
-		"""
-		Create a new SQLAlchemy session.
-
-		Yields
-		------
-		Session
-			A SQLAlchemy session object.
-		"""
-		session = self.Session()
-		try:
-			yield session
-			session.commit()  # Commit the transaction
-		except Exception:
-			session.rollback()  # Rollback on exception
-			raise
-		finally:
-			session.close()
 
 class DICOMIndexer:
 	"""
@@ -185,7 +140,7 @@ class DICOMIndexer:
 					_ = self._insert_study(session, metadata)
 					series = self._insert_series(session, metadata)
 					file = self._insert_file(session, metadata, file_path)
-					# series.files.append(file)
+					series.files.append(file)
 					tqdm_files.update(1)
 		except Exception as e:
 			logger.exception(f'Error: {e}')
@@ -223,12 +178,6 @@ class DICOMDatabaseInterface:
 	@property
 	def series(self) -> List[Series]:
 		return self.session.query(Series).all()
-
-	
-
-
-
-
 
 if __name__ == '__main__':
 	from pathlib import Path
