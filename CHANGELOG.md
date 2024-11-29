@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v1.9.4 (2024-11-29)
+
+### Bug Fixes
+
+- Update GitHub Actions workflow for concurrency and permissions;
+  ([`45cddb4`](https://github.com/bhklab/med-imagetools/commit/45cddb4fd65be0df14a7f9d2a28261c5cc36159b))
+
+- Configure Git credentials for GitHub Actions and update documentation deployment step
+  ([`adf4e04`](https://github.com/bhklab/med-imagetools/commit/adf4e0431533d7434780951edd6ec82737cac21e))
+
+
 ## v1.9.3 (2024-11-29)
 
 ### Bug Fixes
@@ -32,6 +43,11 @@ Introduce an environment variable for debug logging and set the default log leve
 - **Bug Fixes** - Improved handling of logging level discrepancies with user-specified settings.
 
 - **Documentation** - Updated docstrings and comments for clarity on new logging setup and features.
+
+### Chores
+
+- **sem-ver**: 1.9.3
+  ([`d9d1fd0`](https://github.com/bhklab/med-imagetools/commit/d9d1fd0f7d9817ca2c0d4e9d1d5132673b2478c3))
 
 
 ## v1.9.2 (2024-11-22)
