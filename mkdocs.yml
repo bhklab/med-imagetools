@@ -5,9 +5,11 @@ watch: [docs, src, mkdocs.yml]
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
+  - attr_list
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - mkdocs-click
   
 theme: 
     name: material

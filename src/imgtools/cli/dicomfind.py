@@ -4,7 +4,7 @@ from typing import List
 
 import click
 
-from imgtools.dicom import find_dicoms
+from imgtools.dicom import find_dicoms as find_dicoms_util
 from imgtools.logging import logger
 
 
@@ -75,7 +75,7 @@ def natural_sort_key(s: str) -> list:
 	'-h',
 	'--help',
 )
-def dicom_finder(
+def find_dicoms(
 	search_input: List[str],
 	path: pathlib.Path,
 	extension: str,
@@ -93,7 +93,7 @@ def dicom_finder(
 	"""
 	logger.info('Searching for DICOM files.', args=locals())
 
-	dicom_files = find_dicoms(
+	dicom_files = find_dicoms_util(
 		directory=path,
 		check_header=check_header,
 		recursive=True,
@@ -135,4 +135,4 @@ def dicom_finder(
 
 
 if __name__ == '__main__':
-	dicom_finder()
+	find_dicoms()

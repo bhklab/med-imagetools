@@ -2,7 +2,7 @@ import click
 
 from imgtools import __version__
 from imgtools.cli import set_log_verbosity
-from imgtools.cli.dicomfind import dicom_finder
+from imgtools.cli.dicomfind import find_dicoms
 from imgtools.cli.dicomsort import dicomsort
 
 
@@ -20,13 +20,13 @@ from imgtools.cli.dicomsort import dicomsort
 	'-h',
 	'--help',
 )
-def cli(verbose: int) -> None:
+def cli(verbose: int, quiet: bool) -> None:
 	"""A collection of tools for working with medical imaging data."""
 	pass
 
 
 cli.add_command(dicomsort)
-cli.add_command(dicom_finder, 'find-dicoms')
+cli.add_command(find_dicoms, 'find-dicoms')
 
 if __name__ == '__main__':
 	cli()
