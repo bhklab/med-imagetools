@@ -2,30 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/AutoPipeline/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/nnUNet/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/find-dicoms/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/tag-helpers/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicomsort/dicomsorter/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicomsort/patternparser/</loc>
-         <lastmod>2024-11-22</lastmod>
+         <lastmod>2024-11-29</lastmod>
     </url>
 </urlset>
