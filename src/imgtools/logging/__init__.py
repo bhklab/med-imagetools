@@ -16,10 +16,14 @@ from imgtools.logging.processors import (
 if TYPE_CHECKING:
 	from structlog.typing import Processor
 
-DEFAULT_LOG_LEVEL = 'WARNING'
-LOG_DIR_NAME = '.logs'
-DEFAULT_LOG_FILENAME = 'application.log'
 VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
+DEFAULT_LOG_LEVEL = 'WARNING'
+
+# Set the default log level from the environment variable or use the default
+DEFAULT_OR_ENV = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL)
+
+LOG_DIR_NAME = Path('.imgtools/logs')
+DEFAULT_LOG_FILENAME = 'imgtools.log'
 
 
 class LoggingManager:
@@ -333,7 +337,7 @@ def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	    Configured logger instance.
 	"""
 	logging_manager = LoggingManager(name)
-	env_level = os.environ.get(f'{name}_LOG_LEVEL', None)
+	env_level = os.environ.get(f'{name}_LOG_LEVEL'.upper(), None)
 	if env_level != level and env_level is not None:
 		logging_manager.get_logger().warning(
 			f'Environment variable {name}_LOG_LEVEL is {env_level} '
@@ -341,8 +345,7 @@ def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 		)
 	return logging_manager.configure_logging(level=level)
 
-
-logger = get_logger('imgtools', DEFAULT_LOG_LEVEL)
+logger = get_logger('imgtools', DEFAULT_OR_ENV)
 
 
 if __name__ == '__main__':
