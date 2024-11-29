@@ -5054,7 +5054,13 @@ packages:
   name: med-imagetools
   version: 1.9.2
   path: .
+<<<<<<< HEAD
   sha256: b5b9144ec69de8c3d512c3f790ca62c6565acef44fed384aa8991714e14a5a6a
+||||||| parent of afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
+  sha256: d055cab65bdbd2ac8cf404e59ceaf09ad5c5888a06ffab580b92082b71f7dfc0
+=======
+  sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
+>>>>>>> afdcc98 (fix: improve logging maintainability and temporarily remove json logging configuration  (#146))
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2

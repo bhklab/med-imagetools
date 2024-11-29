@@ -221,4 +221,6 @@ data/**
 .imgtools/**/*.log
 
 *.dcm
+
+
 **/*.sqlite
