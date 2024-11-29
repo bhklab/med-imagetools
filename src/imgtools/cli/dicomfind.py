@@ -104,6 +104,9 @@ def dicom_finder(
 
 	if not dicom_files:
 		warningmsg = f'No DICOM files found in {path}.'
+		if not dicom_files:
+			warningmsg += f' Search input "{search_input}" did not match any DICOM files.'
+			warningmsg += ' Note: ALL search inputs must match to return a result.'
 		logger.warning(
 			warningmsg,
 			directory=path,
@@ -116,26 +119,6 @@ def dicom_finder(
 		return
 
 	logger.info('DICOM find successful.', count=len(dicom_files))
-
-	# # Filter by multiple search patterns
-	# for search in search_input:
-	# 	try:
-	# 		pattern = re.compile(search)
-	# 		dicom_files = [f for f in dicom_files if pattern.search(str(f))]
-	# 		logger.info(
-	# 			f'Filtered files based on search_input "{search}".',
-	# 			search_input=search,
-	# 			filtered_count=len(dicom_files),
-	# 		)
-	# 	except re.error as e:
-	# 		errmsg = f'Invalid regex pattern "{search}": {str(e)}'
-	# 		logger.exception(errmsg)
-	# 		return
-
-	if not dicom_files:
-		warningmsg = f'Search input "{search_input}" did not match any DICOM files.'
-		logger.warning(warningmsg)
-		return
 
 	if count:
 		click.echo(f'Number of DICOM files found: {len(dicom_files)}')

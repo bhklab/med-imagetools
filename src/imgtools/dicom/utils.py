@@ -100,13 +100,24 @@ def find_dicoms(
 		Find DICOM files without recursion:
 		>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
 		[PosixPath('/data/scan1.dcm')]
-	"""
 
-	if search_input:
-		search_input_pattern = "".join([f'{"[{si}]"}' for si in search_input])
-		pattern = f'*{search_input_pattern}*.{extension}' if extension else f'*{search_input_pattern}*'
-	else:
-		pattern = f'*.{extension}' if extension else '*'
+		Find DICOM files with a specific extension:
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, extension='dcm')
+		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+
+		Find DICOM files with a search input:
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, search_input=['scan1', 'scan2'])
+		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+
+		Find DICOM files with a limit:
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, limit=1)
+		[PosixPath('/data/scan1.dcm')]
+
+		Find DICOM files with all options:
+		>>> find_dicoms(Path('/data'), recursive=True, check_header=True, extension='dcm', limit=2, search_input=['scan'])
+		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+	"""
+	pattern = f'*.{extension}' if extension else '*'
 
 	glob_method = directory.rglob if recursive else directory.glob
 
@@ -121,15 +132,13 @@ def find_dicoms(
 	)
 
 	files = (
-		file.resolve()
+		file.absolute()
 		for file in glob_method(pattern)
 		if _is_valid_dicom(file, check_header)
-		# and (not search_input or all(term in file.as_posix() for term in search_input))
+		and (not search_input or all(term in str(file.as_posix()) for term in search_input))
 	)
 
-
 	return list(islice(files, limit)) if limit else list(files)
-
 
 ###############################################################################
 # DICOM TAG UTILITIES
