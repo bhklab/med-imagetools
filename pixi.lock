@@ -4935,9 +4935,9 @@ packages:
   timestamp: 1704317789138
 - kind: pypi
   name: med-imagetools
-  version: 1.9.1
+  version: 1.9.2
   path: .
-  sha256: d055cab65bdbd2ac8cf404e59ceaf09ad5c5888a06ffab580b92082b71f7dfc0
+  sha256: a1aebfd80c0b91365342a5abc10558154cb83e532357bab7b878df1daf36093c
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
