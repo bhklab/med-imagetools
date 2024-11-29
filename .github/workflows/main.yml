@@ -94,8 +94,7 @@ jobs:
 
       - name: Publish docs using mike
         run: |
-          pixi run -e ${{ matrix.env }} mike deploy --push dev devel
-
+          pixi run -e ${{ matrix.env }} mike deploy --push --update-aliases dev latest
 
 
   ################################################################################################
