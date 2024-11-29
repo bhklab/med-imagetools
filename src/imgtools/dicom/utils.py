@@ -44,91 +44,100 @@ def find_dicoms(
 ) -> List[Path]:
 	"""Locate DICOM files in a specified directory.
 
-		This function scans a directory for files matching the specified extension
-		and validates them as DICOM files based on the provided options. It supports
-		recursive search and optional header validation to confirm file validity.
+	This function scans a directory for files matching the specified extension
+	and validates them as DICOM files based on the provided options. It supports
+	recursive search and optional header validation to confirm file validity.
 
-		Parameters
-		----------
-		directory : Path
-				The directory in which to search for DICOM files.
-		recursive : bool
-				Whether to include subdirectories in the search.
+	Parameters
+	----------
+	directory : Path
+			The directory in which to search for DICOM files.
+	recursive : bool
+			Whether to include subdirectories in the search.
 
-				- If `True`, recursively search all subdirectories.
-				- If `False`, search only the specified directory.
-		check_header : bool
-				Whether to validate files by checking for a valid DICOM header.
+			- If `True`, recursively search all subdirectories.
+			- If `False`, search only the specified directory.
+	check_header : bool
+			Whether to validate files by checking for a valid DICOM header.
 
-				- If `True`, perform DICOM header validation (slower but more accurate).
-				- If `False`, skip header validation and rely on extension.
+			- If `True`, perform DICOM header validation (slower but more accurate).
+			- If `False`, skip header validation and rely on extension.
 
-		extension : str, optional
-				File extension to search for (e.g., "dcm"). If `None`, consider all files
-				regardless of extension.
+	extension : str, optional
+			File extension to search for (e.g., "dcm"). If `None`, consider all files
+			regardless of extension.
 
-		limit : int, optional
-				Maximum number of DICOM files to return. If `None`, return all found files.
+	limit : int, optional
+			Maximum number of DICOM files to return. If `None`, return all found files.
 
-		Returns
-		-------
-		List[Path]
-				A list of valid DICOM file paths found in the directory.
+	Returns
+	-------
+	List[Path]
+			A list of valid DICOM file paths found in the directory.
 
-		Notes
-		-----
-		- If `check_header` is enabled, the function checks each file for a valid
-			DICOM header, which may slow down the search process.
+	Notes
+	-----
+	- If `check_header` is enabled, the function checks each file for a valid
+		DICOM header, which may slow down the search process.
 
-		Examples
-		--------
-		Setup
+	Examples
+	--------
+	Setup
 
-		>>> from pathlib import Path
-		>>> from imgtools.dicom.utils import find_dicoms
+	>>> from pathlib import Path
+	>>> from imgtools.dicom.utils import find_dicoms
 
-		Find DICOM files recursively without header validation:
+	Find DICOM files recursively without header validation:
 
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=False)
-		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.dcm')]
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=False)
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.dcm')]
 
-		Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
+	Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
 
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=True)
-		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=True)
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
-		Find DICOM files without recursion:
-		>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
-		[PosixPath('/data/scan1.dcm')]
+	Find DICOM files without recursion:
+	>>> find_dicoms(Path('/data'), recursive=False, check_header=False)
+	[PosixPath('/data/scan1.dcm')]
 
-		Find DICOM files with a specific extension:
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, extension='dcm')
-		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+	Find DICOM files with a specific extension:
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=False, extension='dcm')
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
-		Find DICOM files with a search input:
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, search_input=['scan1', 'scan2'])
-		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+	Find DICOM files with a search input:
+	>>> find_dicoms(
+	...     Path('/data'), recursive=True, check_header=False, search_input=['scan1', 'scan2']
+	... )
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
-		Find DICOM files with a limit:
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=False, limit=1)
-		[PosixPath('/data/scan1.dcm')]
+	Find DICOM files with a limit:
+	>>> find_dicoms(Path('/data'), recursive=True, check_header=False, limit=1)
+	[PosixPath('/data/scan1.dcm')]
 
-		Find DICOM files with all options:
-		>>> find_dicoms(Path('/data'), recursive=True, check_header=True, extension='dcm', limit=2, search_input=['scan'])
-		[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
+	Find DICOM files with all options:
+	>>> find_dicoms(
+	...     Path('/data'),
+	...     recursive=True,
+	...     check_header=True,
+	...     extension='dcm',
+	...     limit=2,
+	...     search_input=['scan'],
+	... )
+	[PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 	"""
 	pattern = f'*.{extension}' if extension else '*'
 
 	glob_method = directory.rglob if recursive else directory.glob
 
 	logger.debug(
-			'Looking for DICOM files',
-			directory=directory,
-			recursive=recursive,
-			search_pattern=pattern,
-			check_header=check_header,
-			limit=limit,
-			search_input=search_input,
+		'Looking for DICOM files',
+		directory=directory,
+		recursive=recursive,
+		search_pattern=pattern,
+		check_header=check_header,
+		limit=limit,
+		search_input=search_input,
 	)
 
 	files = (
@@ -139,6 +148,7 @@ def find_dicoms(
 	)
 
 	return list(islice(files, limit)) if limit else list(files)
+
 
 ###############################################################################
 # DICOM TAG UTILITIES

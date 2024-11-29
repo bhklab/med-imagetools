@@ -36,8 +36,6 @@ from typing import Dict, List, Optional
 from pydicom import dcmread
 from pydicom.errors import InvalidDicomError
 
-from imgtools.logging import logger
-
 
 def sanitize_file_name(filename: str) -> str:
 	"""
@@ -189,7 +187,7 @@ def read_tags(
 
 		if truncate and tag.endswith('UID'):
 			value = truncate_uid(value)
-		
+
 		if sanitize:
 			value = sanitize_file_name(value)
 

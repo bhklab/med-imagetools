@@ -1,4 +1,3 @@
-
 from pathlib import Path
 
 import click
@@ -11,8 +10,8 @@ from imgtools.logging import logger
 @click.command()
 @set_log_verbosity()
 @click.option(
-	"--directory",
-	"-d",
+	'--directory',
+	'-d',
 	type=click.Path(
 		exists=True,
 		file_okay=False,
@@ -21,11 +20,10 @@ from imgtools.logging import logger
 		resolve_path=True,
 		path_type=Path,
 	),
-	help="Directory to search for DICOM files",
-	required=True
+	help='Directory to search for DICOM files',
+	required=True,
 )
 def main(directory: Path, verbose: int) -> None:
-
 	extension = 'dcm'
 	check_header = False
 	logger.info('Searching for DICOM files.', args=locals())
@@ -35,7 +33,7 @@ def main(directory: Path, verbose: int) -> None:
 		check_header=check_header,
 		recursive=True,
 		extension=extension,
-		)
+	)
 	if not dicom_files:
 		warningmsg = f'No DICOM files found in {directory}.'
 		logger.warning(
@@ -50,10 +48,8 @@ def main(directory: Path, verbose: int) -> None:
 	logger.info('DICOM find successful.', count=len(dicom_files))
 
 
-
-if __name__=="__main__":
+if __name__ == '__main__':
 	main()
-
 
 
 # import pathlib

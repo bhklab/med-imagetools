@@ -1,14 +1,15 @@
 import time
 from pathlib import Path
-from typing import Dict, Generator, List, TypeVar
+from typing import Dict, List, TypeVar
 
 import tqdm
 from pydicom import dcmread
 from pydicom.errors import InvalidDicomError
+from sqlalchemy.orm import Session
 
 from imgtools.dicom.index.database import DatabaseHandler
 from imgtools.dicom.index.models import (
-	File,
+	Image,
 	Patient,
 	Series,
 	Study,
@@ -36,7 +37,6 @@ def _extract_metadata(file_path: Path, tags: List[str]) -> Dict[str, str]:
 		raise ValueError(errmsg) from ve
 
 	return {tag: str(dicom.get(tag, '')) for tag in tags}
-
 
 
 class DICOMIndexer:
@@ -87,10 +87,10 @@ class DICOMIndexer:
 			session.add(series)
 		return series
 
-	def _insert_file(self, session: Session, metadata: Dict[str, str], file_path: Path) -> File:
-		file = session.query(File).filter_by(SOPInstanceUID=metadata['SOPInstanceUID']).first()
+	def _insert_image(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Image:
+		file = session.query(Image).filter_by(SOPInstanceUID=metadata['SOPInstanceUID']).first()
 		if not file:
-			file = File.from_metadata(metadata, file_path)
+			file = Image.from_metadata(metadata, file_path)
 			session.add(file)
 		return file
 
@@ -105,7 +105,7 @@ class DICOMIndexer:
 				A list of file paths.
 		"""
 		with self.db_handler.session() as session:
-			return [Path(file.FilePath) for file in session.query(File.FilePath).all()]
+			return [Path(file.FilePath) for file in session.query(Image.FilePath).all()]
 
 	def build_index_from_files(self, files: List[Path]) -> None:
 		"""
@@ -139,14 +139,15 @@ class DICOMIndexer:
 					_ = self._insert_patient(session, metadata)
 					_ = self._insert_study(session, metadata)
 					series = self._insert_series(session, metadata)
-					file = self._insert_file(session, metadata, file_path)
-					series.files.append(file)
+					image = self._insert_image(session, metadata, file_path)
+					series.images.append(image)
 					tqdm_files.update(1)
 		except Exception as e:
 			logger.exception(f'Error: {e}')
 			raise e
 		finally:
 			logger.info(f'Indexing complete in {time.time() - start:.2f} seconds.')
+
 
 T = TypeVar('T')  # Generic type for table models
 
@@ -179,6 +180,7 @@ class DICOMDatabaseInterface:
 	def series(self) -> List[Series]:
 		return self.session.query(Series).all()
 
+
 if __name__ == '__main__':
 	from pathlib import Path
 
@@ -202,24 +204,22 @@ if __name__ == '__main__':
 	)
 	logger.info(f'Found {len(dicom_files)} DICOM files.')
 
-
 	indexer = DICOMIndexer(db_handler=db_handler)
 
 	# Build index
 	indexer.build_index_from_files(dicom_files)
 
-
 	# Query the database
 	db = DICOMDatabaseInterface(db_handler=db_handler)
-	from rich import print
+	from rich import print  # noqa: A004
 
 	start = time.time()
 	print(db.patients[0])
-	print('-'*50)
+	print('-' * 50)
 	print(db.studies[0])
-	print('-'*50)
+	print('-' * 50)
 	print(db.series[0])
-	print('-'*50)
-	print(db.series[0].files[0])
+	print('-' * 50)
+	print(db.series[0].images[0])
 	print(f'Querying complete in {time.time() - start:.2f} seconds.')
-	print(db.series[0].files[0].series.study.patient)
+	print(db.series[0].images[0].series.study.patient)

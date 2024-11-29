@@ -1,6 +1,5 @@
 nav:
   - Home: index.md
-  - AutoPipeline: AutoPipeline.md
-  - nnUNet: nnUNet.md
+  - ... 
   - CLI Reference: cli
   - API Reference: reference

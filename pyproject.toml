@@ -24,7 +24,7 @@ dependencies = [
   "numpy>=1.26.4,<2",
   "matplotlib>=3.8.4,<4",
   "pandas>=2.2.2,<3",
-  "pydicom>=2.4.4,<3",
+  "pydicom>=2.4.4",
   "pynrrd>=1.0.0,<2",
   "scikit-image>=0.23.2,<1",
   "scikit-learn>=1.4.2,<2",
@@ -38,7 +38,6 @@ dependencies = [
   "rich>=13.9.4", 
   "sqlitedict>=2.0",
   "sqlalchemy>=2.0.0",
-  "tabulate>=0.8.9",
 ]
 
 classifiers = [

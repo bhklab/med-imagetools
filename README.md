@@ -138,10 +138,6 @@ Thanks to the following people who have contributed to this project:
 * [@Vishwesh4](https://github.com/Vishwesh4)
 * [@mnakano](https://github.com/mnakano)
 
-## Contact
-
-If you have any questions/concerns, you can reach the following contributors at sejin.kim@uhnresearch.ca
-
 ## License
 
 This project uses the following license: [MIT License](https://github.com/bhklab/med-imagetools/blob/master/LICENSE)

@@ -11,6 +11,7 @@ DEFAULT_OR_ENV = os.environ.get('IMGTOOLS_LOG_LEVEL', DEFAULT_LOG_LEVEL)
 LOG_DIR_NAME = Path('.imgtools/logs')
 DEFAULT_LOG_FILENAME = 'imgtools.log'
 
+
 def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	"""
 	Retrieve a logger with the specified log level.
@@ -30,12 +31,13 @@ def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	logging_manager = LoggingManager(name)
 	env_level = logging_manager.env_level
 
-	if env_level != level and env_level != DEFAULT_LOG_LEVEL:
+	if env_level not in (level, DEFAULT_LOG_LEVEL):
 		logging_manager.get_logger().warning(
 			f'Environment variable {name}_LOG_LEVEL is {env_level} '
 			f'but you are setting it to {level}'
 		)
 	return logging_manager.configure_logging(level=level)
+
 
 logger = get_logger('imgtools', DEFAULT_OR_ENV)
 

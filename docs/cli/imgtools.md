@@ -1,4 +1,4 @@
-# CLI Reference
+# `imgtools` CLI
 
 ::: mkdocs-click
     :module: imgtools.cli.__main__
