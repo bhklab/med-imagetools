@@ -62,6 +62,26 @@ class TestFindDicoms:
         assert len(result) == 4
         assert all(file.suffix == ".dcm" for file in result)
 
+    def test_limit_results(self, temp_dir_with_files):
+        result = find_dicoms(temp_dir_with_files, recursive=True, check_header=False, limit=2)
+        assert len(result) == 2
+        assert all(file.suffix == ".dcm" for file in result)
+
+    def test_search_with_input(self, temp_dir_with_files):
+        (temp_dir_with_files / "scan1.dcm").touch()
+        (temp_dir_with_files / "scan2.dcm").touch()
+        result = find_dicoms(temp_dir_with_files, recursive=True, check_header=False, search_input=["scan"])
+        assert len(result) == 2
+        assert all("scan" in file.name for file in result)
+
+    def test_combined_options(self, temp_dir_with_files, mocker):
+        mocker.patch("imgtools.dicom.utils.is_dicom", return_value=True)
+        (temp_dir_with_files / "scan1.dcm").touch()
+        result = find_dicoms(temp_dir_with_files, recursive=True, check_header=True, extension="dcm", limit=3, search_input=["scan"])
+        assert len(result) == 1
+        assert all(file.suffix == ".dcm" for file in result)
+        assert all("scan" in file.name for file in result)
+
 
 def test_similar_tags():
     """Test the similar_tags function."""
@@ -88,90 +108,3 @@ def test_tag_exists():
     """Test the tag_exists function."""
     assert tag_exists("PatientID")
 
-
-########################################################################
-# Helper classes
-########################################################################
-
-
-# class MockSorter(SorterBase):
-#     """
-#     A mock implementation of SorterBase for testing purposes.
-
-#     This class implements `_create_highlighter` and `validate_keys`.
-#     """
-
-#     def _create_highlighter(self):
-#         """
-#         Create a simple highlighter for testing purposes.
-#         """
-#         from rich.highlighter import RegexHighlighter
-
-#         class TestHighlighter(RegexHighlighter):
-#             base_style = "example."
-#             highlights = [
-#                 r"%\((?P<Key>[a-zA-Z0-9_]+)\)s",
-#                 r"(?P<ForwardSlash>/)",
-#             ]
-
-#         return TestHighlighter()
-
-#     def validate_keys(self):
-#         """
-#         Perform a dummy validation. In this test case, all keys are valid unless they start with 'invalid'.
-#         """
-#         invalid_keys = {key for key in self.keys if key.startswith("invalid")}
-#         if invalid_keys:
-#             raise InvalidPatternError(f"Invalid keys found: {', '.join(invalid_keys)}")
-
-
-# def test_initialize_with_valid_pattern():
-#     """Test initializing SorterBase with a valid pattern."""
-#     sorter = MockSorter("%ParentDir/%SubDir/{FileName}")
-#     assert sorter.format == "%(ParentDir)s/%(SubDir)s/%(FileName)s"
-#     assert sorter.keys == {"ParentDir", "SubDir", "FileName"}
-
-
-# def test_initialize_with_empty_pattern():
-#     """Test initializing SorterBase with an empty pattern."""
-#     with pytest.raises(SorterBaseError):
-#         MockSorter("")
-
-
-# def test_initialize_with_invalid_pattern():
-#     """Test initializing SorterBase with a pattern that has no placeholders."""
-#     with pytest.raises(SorterBaseError):
-#         MockSorter("ParentDir/SubDir/FileName")
-
-
-# def test_tree_visualization():
-#     """Test generating a tree visualization."""
-#     sorter = MockSorter("%ParentDir/%SubDir/{FileName}")
-#     try:
-#         sorter.print_tree()
-#     except SorterBaseError:
-#         pytest.fail("print_tree() raised SorterBaseError unexpectedly.")
-
-
-# def test_replace_key():
-#     """Test replacing placeholders with formatted keys."""
-#     sorter = MockSorter("%Dir/{File}")
-#     formatted, keys = sorter.format, sorter.keys
-#     assert formatted == "%(Dir)s/%(File)s"
-#     assert keys == {"Dir", "File"}
-
-
-# def test_validate_keys_with_valid_keys():
-#     """Test validate_keys with all valid keys."""
-#     sorter = MockSorter("%Dir/{File}")
-#     try:
-#         sorter.validate_keys()
-#     except InvalidPatternError:
-#         pytest.fail("validate_keys() raised InvalidPatternError unexpectedly.")
-
-
-# def test_validate_keys_with_invalid_keys():
-#     """Test validate_keys with invalid keys."""
-#     sorter = MockSorter("%invalidKey/{validKey}")
-#     with pytest.raises(InvalidPatternError, match="Invalid keys found: invalidKey"):
-#         sorter.validate_keys()
