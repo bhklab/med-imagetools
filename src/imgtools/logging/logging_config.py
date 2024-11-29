@@ -68,7 +68,7 @@ class LoggingManager:
 		name: str,
 		base_dir: Path | None = None,
 	) -> None:
-		self.name = name.upper()
+		self.name = name
 		self.base_dir = base_dir or Path.cwd()
 		self.level = self.env_level
 		self._initialize_logger()
