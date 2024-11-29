@@ -426,10 +426,10 @@ class AutoPipeline(Pipeline):
                     if hasattr(read_results[i], "metadata") and read_results[i].metadata is not None:
                         metadata.update(read_results[i].metadata)
 
-                    if self.is_nnunet or self.is_nnunet_inference: # Going from {SUBJECT_NUM}_{SUBJECT_NAME} -> {SUBJECT_NAME}_{SUBJECT_NUM}
-                        subject_id = f"{subject_id.split('_')[1]}_{subject_id.split('_')[0]:03}"
+                    if self.is_nnunet or self.is_nnunet_inference: 
+                        nnunet_subject_name = f"{pathlib.Path(self.input_directory).name}_{subject_id.split('_')[0]:>03}"
 
-                    subject_name = "_".join(subject_id.split("_")[:-1]) # Extracts {SUBJECT_NAME}
+                    subject_name = "_".join(subject_id.split("_")[1::]) # Extracts {SUBJECT_NAME}
 
                     # modality is MR and the user has selected to have nnunet output
                     if self.is_nnunet:
@@ -448,14 +448,14 @@ class AutoPipeline(Pipeline):
                             else:
                                 self.total_modality_counter[modality] += 1
                         if subject_name in self.train:
-                            self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
+                            self.output(nnunet_subject_name, image, output_stream, nnunet_info=self.nnunet_info)
                         else:
-                            self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
+                            self.output(nnunet_subject_name, image, output_stream, nnunet_info=self.nnunet_info, train_or_test="Ts")
                     elif self.is_nnunet_inference:
                         self.nnunet_info["current_modality"] = modality if modality == "CT" else metadata["AcquisitionContrast"]
                         if self.nnunet_info["current_modality"] not in self.nnunet_info["modalities"].keys():
                             raise ValueError(f"The modality {self.nnunet_info['current_modality']} is not in the list of modalities that are present in dataset.json.")
-                        self.output(subject_id, image, output_stream, nnunet_info=self.nnunet_info)
+                        self.output(nnunet_subject_name, image, output_stream, nnunet_info=self.nnunet_info)
                     else:
                         self.output(subject_id, image, output_stream)
 
@@ -536,7 +536,7 @@ class AutoPipeline(Pipeline):
                                 all_files = glob.glob(pathlib.Path(image_train_path, "*.nii.gz").as_posix())
                                 # print(all_files)
                                 for file in all_files:
-                                    if subject_id in os.path.split(file)[1]:
+                                    if nnunet_subject_name in os.path.split(file)[1]:
                                         os.remove(file)
                             warnings.warn(f"Patient {subject_id} is missing a complete image-label pair")
                             self.patients_with_missing_labels.add("".join(subject_id.split("_")[1:]))
@@ -558,9 +558,9 @@ class AutoPipeline(Pipeline):
                         sparse_mask = sitk.GetImageFromArray(sparse_mask)  # convert the nparray to sitk image
                         sparse_mask.CopyInformation(image)
                         if subject_name in self.train:
-                            self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels")  # rtstruct is label for nnunet
+                            self.output(nnunet_subject_name, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels")  # rtstruct is label for nnunet
                         else:
-                            self.output(subject_id, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
+                            self.output(nnunet_subject_name, sparse_mask, output_stream, nnunet_info=self.nnunet_info, label_or_image="labels", train_or_test="Ts")
                     else:
                         # if there is only one ROI, sitk.GetArrayFromImage() will return a 3d array instead of a 4d array with one slice
                         if len(mask_arr.shape) == 3:
@@ -627,23 +627,34 @@ class AutoPipeline(Pipeline):
         shutil.rmtree(pathlib.Path(self.output_directory, ".temp").as_posix())
 
         if self.is_nnunet: 
+            train_dir = ((pathlib.Path(self.output_directory)) / 'imagesTr')
+            num_training_cases = sum( # This can be different from len(self.train) if regex of ROI not matched
+                1 for file in train_dir.iterdir() 
+                if file.suffixes == ['.nii', '.gz']
+                )
+            test_dir = ((pathlib.Path(self.output_directory)) / 'imagesTs')
+            num_test_cases = sum( # This can be different from len(self.test) if regex of ROI not matched
+                1 for file in test_dir.iterdir() 
+                if file.suffixes == ['.nii', '.gz']
+                ) if test_dir.exists() else 0 # no testing data
+            
             channel_names_mapping = { # Earlier generated as {"CT": ""0000"} now needed as {"0": "CT"}
                 self.nnunet_info["modalities"][k].lstrip('0') or '0': k  
                 for k in self.nnunet_info["modalities"].keys()
             }
             generate_dataset_json(
-                output_folder=pathlib.Path(self.output_directory).as_posix(), 
+                output_folder=pathlib.Path(self.output_directory), 
                 channel_names=channel_names_mapping,
                 labels=self.existing_roi_indices,     
                 file_ending='.nii.gz',
-                num_training_cases=len(self.train)               
+                num_training_cases=num_training_cases
             )
             create_train_script(self.output_directory, self.dataset_id)
             markdown_report_images(
                 self.output_directory, 
                 self.total_modality_counter, 
-                len(self.train), 
-                len(self.test)
+                num_training_cases, 
+                num_test_cases
             )
         
         # Save summary info (factor into different file)
