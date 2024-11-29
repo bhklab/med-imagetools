@@ -30,7 +30,7 @@ def get_logger(name: str, level: str = 'INFO') -> structlog.stdlib.BoundLogger:
 	logging_manager = LoggingManager(name)
 	env_level = logging_manager.env_level
 
-	if env_level != level and env_level is not DEFAULT_LOG_LEVEL:
+	if env_level != level and env_level != DEFAULT_LOG_LEVEL:
 		logging_manager.get_logger().warning(
 			f'Environment variable {name}_LOG_LEVEL is {env_level} '
 			f'but you are setting it to {level}'
