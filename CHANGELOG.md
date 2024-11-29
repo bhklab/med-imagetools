@@ -1,6 +1,39 @@
 # CHANGELOG
 
 
+## v1.9.3 (2024-11-29)
+
+### Bug Fixes
+
+- Improve logging maintainability and temporarily remove json logging configuration
+  ([#146](https://github.com/bhklab/med-imagetools/pull/146),
+  [`afdcc98`](https://github.com/bhklab/med-imagetools/commit/afdcc98a6f3fbd9e26da579fa39b37de7dbfd600))
+
+Refactor logging code for improved maintainability by temporarily removing JSON logging
+  functionality.
+
+Update the .gitignore to exclude .dcm and .sqlite files.
+
+Introduce an environment variable for debug logging and set the default log level based on this
+  variable.
+
+## Summary by CodeRabbit
+
+- **New Features** - Introduced a new `LoggingManager` class for structured logging management. -
+  Added support for JSON logging configuration (currently commented out). - Added a new environment
+  variable for logging level configuration in development. 	- New entries in `.gitignore` to ignore
+  `.dcm` and `.sqlite` files. - Enhanced CI/CD pipeline with new jobs for building and publishing
+  documentation.
+
+- **Improvements** - Enhanced logging control by utilizing environment variables for log levels. -
+  Updated logging directory structure and default log filename for better organization. 	- Improved
+  management of logging levels based on verbosity settings.
+
+- **Bug Fixes** - Improved handling of logging level discrepancies with user-specified settings.
+
+- **Documentation** - Updated docstrings and comments for clarity on new logging setup and features.
+
+
 ## v1.9.2 (2024-11-22)
 
 ### Bug Fixes
@@ -9,6 +42,9 @@
   ([`66f8119`](https://github.com/bhklab/med-imagetools/commit/66f8119e6e2e1356c1e3b154e7ad2143cb77ea52))
 
 ### Chores
+
+- **sem-ver**: 1.9.2
+  ([`22d8fb7`](https://github.com/bhklab/med-imagetools/commit/22d8fb77f1d2c47d26967b1578e9be41d829dbb1))
 
 - **deps**: Update med-imagetools to version 1.9.1 and update sha256 checksum
   ([`ab77c58`](https://github.com/bhklab/med-imagetools/commit/ab77c5887e5bb8ae1fa477d2780b94dcdf3297a6))
