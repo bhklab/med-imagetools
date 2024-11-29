@@ -34,6 +34,8 @@ ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
 
+[feature.dev.activation.env]
+IMGTOOLS_JSON_LOGGING = "DEBUG"
 
 ############################################## PYTHON ###############################################
 
