@@ -191,7 +191,7 @@ class LoggingManager:
 		    If an invalid log level is specified.
 		"""
 		if level is not None:
-			if level not in VALID_LOG_LEVELS:
+			if level.upper() not in VALID_LOG_LEVELS:
 				msg = f'Invalid logging level: {level}'
 				raise ValueError(msg)
 			self.level = level.upper()
