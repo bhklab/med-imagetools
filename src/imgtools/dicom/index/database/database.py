@@ -14,9 +14,7 @@ from imgtools.dicom.index.models import (
 	Series,
 	Study,
 )
-from imgtools.logging import get_logger
-
-logger = get_logger('DICOMIndexer', 'DEBUG')
+from imgtools.logging import logger
 
 
 def _extract_metadata(file_path: Path, tags: List[str]) -> Dict[str, str]:
@@ -39,7 +37,42 @@ def _extract_metadata(file_path: Path, tags: List[str]) -> Dict[str, str]:
 	return {tag: str(dicom.get(tag, '')) for tag in tags}
 
 
-class DICOMIndexer:
+class DICOMInsertMixin:
+	def _insert_patient(self, session: Session, metadata: Dict[str, str]) -> Patient:
+		patient = session.query(Patient).filter_by(PatientID=metadata['PatientID']).first()
+		if not patient:
+			patient = Patient.from_metadata(metadata)
+			session.add(patient)
+		return patient
+
+	def _insert_study(self, session: Session, metadata: Dict[str, str]) -> Study:
+		study = (
+			session.query(Study).filter_by(StudyInstanceUID=metadata['StudyInstanceUID']).first()
+		)
+		if not study:
+			study = Study.from_metadata(metadata)
+			session.add(study)
+		return study
+
+	def _insert_series(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Series:
+		series = (
+			session.query(Series).filter_by(SeriesInstanceUID=metadata['SeriesInstanceUID']).first()
+		)
+		if series:
+			return series
+		series = Series.from_metadata(metadata, file_path)
+		session.add(series)
+		return series
+
+	def _insert_image(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Image:
+		file = session.query(Image).filter_by(SOPInstanceUID=metadata['SOPInstanceUID']).first()
+		if not file:
+			file = Image.from_metadata(metadata, file_path)
+			session.add(file)
+		return file
+
+
+class DICOMIndexer(DICOMInsertMixin):
 	"""
 	A tool to index DICOM files and insert metadata into the database.
 	"""
@@ -61,38 +94,6 @@ class DICOMIndexer:
 			'Modality',
 			'SOPInstanceUID',
 		]
-
-	def _insert_patient(self, session: Session, metadata: Dict[str, str]) -> Patient:
-		patient = session.query(Patient).filter_by(PatientID=metadata['PatientID']).first()
-		if not patient:
-			patient = Patient.from_metadata(metadata)
-			session.add(patient)
-		return patient
-
-	def _insert_study(self, session: Session, metadata: Dict[str, str]) -> Study:
-		study = (
-			session.query(Study).filter_by(StudyInstanceUID=metadata['StudyInstanceUID']).first()
-		)
-		if not study:
-			study = Study.from_metadata(metadata)
-			session.add(study)
-		return study
-
-	def _insert_series(self, session: Session, metadata: Dict[str, str]) -> Series:
-		series = (
-			session.query(Series).filter_by(SeriesInstanceUID=metadata['SeriesInstanceUID']).first()
-		)
-		if not series:
-			series = Series.from_metadata(metadata)
-			session.add(series)
-		return series
-
-	def _insert_image(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Image:
-		file = session.query(Image).filter_by(SOPInstanceUID=metadata['SOPInstanceUID']).first()
-		if not file:
-			file = Image.from_metadata(metadata, file_path)
-			session.add(file)
-		return file
 
 	@property
 	def existing_files(self) -> List[Path]:
@@ -138,7 +139,7 @@ class DICOMIndexer:
 					metadata = _extract_metadata(file_path, self.mytags)
 					_ = self._insert_patient(session, metadata)
 					_ = self._insert_study(session, metadata)
-					series = self._insert_series(session, metadata)
+					series = self._insert_series(session, metadata, file_path)
 					image = self._insert_image(session, metadata, file_path)
 					series.images.append(image)
 					tqdm_files.update(1)
@@ -181,45 +182,43 @@ class DICOMDatabaseInterface:
 		return self.session.query(Series).all()
 
 
-if __name__ == '__main__':
-	from pathlib import Path
+# if __name__ == '__main__':
+# 	from pathlib import Path
 
-	from imgtools.dicom import find_dicoms
-	from imgtools.logging import get_logger
+# 	from imgtools.dicom import find_dicoms
 
-	logger = get_logger('INDEXER', 'DEBUG')
 
-	directory = Path('/Users/bhklab/dev/radiomics/med-imagetools/data/nbia/images/unzipped')
-	db_path = Path('dicom_index.sqlite')
-	db_handler = DatabaseHandler(db_path=db_path)
-	check_header = False
-	extension = 'dcm'
+# 	directory = Path('/Users/bhklab/dev/radiomics/med-imagetools/data/nbia/images/unzipped')
+# 	db_path = Path('dicom_index.sqlite')
+# 	db_handler = DatabaseHandler(db_path=db_path)
+# 	check_header = False
+# 	extension = 'dcm'
 
-	logger.info('Finding DICOM files...')
-	dicom_files = find_dicoms(
-		directory=directory,
-		check_header=check_header,
-		recursive=True,
-		extension=extension,
-	)
-	logger.info(f'Found {len(dicom_files)} DICOM files.')
+# 	logger.info('Finding DICOM files...')
+# 	dicom_files = find_dicoms(
+# 		directory=directory,
+# 		check_header=check_header,
+# 		recursive=True,
+# 		extension=extension,
+# 	)
+# 	logger.info(f'Found {len(dicom_files)} DICOM files.')
 
-	indexer = DICOMIndexer(db_handler=db_handler)
+# 	indexer = DICOMIndexer(db_handler=db_handler)
 
-	# Build index
-	indexer.build_index_from_files(dicom_files)
+# 	# Build index
+# 	indexer.build_index_from_files(dicom_files[:1000])
 
-	# Query the database
-	db = DICOMDatabaseInterface(db_handler=db_handler)
-	from rich import print  # noqa: A004
+# 	# Query the database
+# 	db = DICOMDatabaseInterface(db_handler=db_handler)
+# 	from rich import print  # noqa: A004
 
-	start = time.time()
-	print(db.patients[0])
-	print('-' * 50)
-	print(db.studies[0])
-	print('-' * 50)
-	print(db.series[0])
-	print('-' * 50)
-	print(db.series[0].images[0])
-	print(f'Querying complete in {time.time() - start:.2f} seconds.')
-	print(db.series[0].images[0].series.study.patient)
+# 	start = time.time()
+# 	print(db.patients[0])
+# 	print('-' * 50)
+# 	print(db.studies[0])
+# 	print('-' * 50)
+# 	print(db.series[0])
+# 	print('-' * 50)
+# 	print(db.series[0].images[0])
+# 	print(f'Querying complete in {time.time() - start:.2f} seconds.')
+# 	print(db.series[0].images[0].series.study.patient)

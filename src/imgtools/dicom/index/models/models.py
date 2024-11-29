@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Dict, List, Optional
 
-from sqlalchemy import Column, ForeignKey, String, Table
+from pydicom import dcmread
+from sqlalchemy import JSON, Column, ForeignKey, String, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.decl_api import registry
+
+from imgtools.logging import logger
 
 if TYPE_CHECKING:
 	from pathlib import Path
@@ -35,6 +38,9 @@ def repr_mixin(cls) -> type:  # type: ignore  # noqa: ANN001
 	cls.__repr__ = __repr_method__
 	return cls
 
+####################################################################################################
+# PATIENT
+####################################################################################################
 
 # Patient Table
 @repr_mixin
@@ -115,6 +121,34 @@ class Patient:
 		modalities = [modality for study in self.studies for modality in study.modalities]
 		return dict(Counter(modalities))
 
+	@property
+	def series(self) -> List[Series]:
+		"""
+		Get the series for the patient.
+
+		Returns
+		-------
+		List[Series]
+				The series.
+		"""
+		return [series for study in self.studies for series in study.series]
+
+	@property
+	def rtstructs(self) -> List[Series]:
+		"""
+		Get the RTSTRUCT series for the patient.
+
+		Returns
+		-------
+		List[Series]
+				The RTSTRUCT series.
+		"""
+		return [series for series in self.series if series.Modality == 'RTSTRUCT']
+
+
+####################################################################################################
+# STUDY
+####################################################################################################
 
 # Study Table
 @repr_mixin
@@ -124,7 +158,7 @@ class Study:
 	__table__ = Table(
 		'studies',
 		mapper_registry.metadata,
-		Column('StudyInstanceUID', String, primary_key=True),  # PRIMARY KEY
+		Column('StudyInstanceUID', String, primary_key=True, index=True),  # PRIMARY KEY
 		Column('PatientID', String, ForeignKey('patients.PatientID'), nullable=False),
 	)
 
@@ -202,7 +236,11 @@ class Study:
 		return list(self.modalities.keys())
 
 
-# Series Table
+####################################################################################################
+# SERIES, RTSTRUCTSERIES, ...
+####################################################################################################
+
+
 @repr_mixin
 @mapper_registry.mapped
 @dataclass
@@ -210,15 +248,19 @@ class Series:
 	__table__ = Table(
 		'series',
 		mapper_registry.metadata,
-		Column('SeriesInstanceUID', String, primary_key=True),  # PRIMARY KEY
+		Column('SeriesInstanceUID', String, primary_key=True, index=True),  # PRIMARY KEY
 		Column('StudyInstanceUID', String, ForeignKey('studies.StudyInstanceUID'), nullable=False),
 		Column('Modality', String, nullable=False),
+		Column('_RTSTRUCT', JSON, nullable=True),
+		Column('_MR', JSON, nullable=True),
 	)
 
 	# Metadata from DICOM
 	SeriesInstanceUID: str = field(init=True)  # PRIMARY KEY
 	StudyInstanceUID: str = field(init=True)  # FOREIGN KEY
 	Modality: str = field(init=True)
+	_RTSTRUCT: Optional[Dict[str, str]] = field(default_factory=dict)
+	_MR: Optional[Dict[str, str]] = field(default_factory=dict)
 
 	# Relationships
 	study: Study = field(init=False)
@@ -228,42 +270,77 @@ class Series:
 		'properties': {
 			'study': relationship('Study', back_populates='series'),
 			'images': relationship('Image', back_populates='series'),
-		}
+		},
 	}
 
 	@classmethod
-	def from_metadata(cls, metadata: Dict[str, str]) -> Series:
-		"""
-		Create a Series instance from metadata.
+	def from_metadata(cls, metadata: Dict[str, str], file_path: Path) -> Series:
 
-		Parameters
-		----------
-		metadata : Dict[str, Optional[str]]
-				Series metadata.
-
-		Returns
-		-------
-		Series
-				A Series instance.
-		"""
-		return cls(
+		base_cls = cls(
 			SeriesInstanceUID=metadata['SeriesInstanceUID'],
 			StudyInstanceUID=metadata['StudyInstanceUID'],
 			Modality=metadata['Modality'],
 		)
 
+		match metadata['Modality']:
+			case 'RTSTRUCT':
+				try:
+					ds = dcmread(file_path, stop_before_pixels=True)
+					logger.info(f'Reading RTSTRUCT file: {file_path}')
+					roi_names = [roi.ROIName for roi in ds.StructureSetROISequence]
+					rfrs = ds.ReferencedFrameOfReferenceSequence[0]
+					ref_series_seq = rfrs.RTReferencedStudySequence[0]\
+						.RTReferencedSeriesSequence[0]\
+						.SeriesInstanceUID
+					frame_of_reference = rfrs.FrameOfReferenceUID
+					base_cls._RTSTRUCT = {
+						'ROINames': ",".join(roi_names),
+						'RTReferencedSeriesUID': ref_series_seq,
+						'FrameOfReferenceUID': frame_of_reference,
+					}
+				except Exception as e:
+					logger.exception(f'Error reading RTSTRUCT file: {file_path}', error=str(e))
+					raise e
+			case 'MR':
+				try:
+					ds = dcmread(file_path, stop_before_pixels=True)
+					logger.info(f'Reading MR file: {file_path}')
+					_mr = {
+						'RepetitionTime': ds.RepetitionTime,
+						'EchoTime': ds.EchoTime,
+						'SliceThickness': ds.SliceThickness,
+						'ScanningSequence': ds.ScanningSequence,
+						'MagneticFieldStrength': ds.MagneticFieldStrength,
+						'ImagedNucleus': ds.ImagedNucleus,
+					}
+
+					base_cls._MR = {k: str(v) for k, v in _mr.items()}
+				except Exception as e:
+					logger.exception(f'Error reading MR file: {file_path}', error=str(e))
+					raise e
+			case _:
+				pass
+
+		return base_cls
+
 	@property
 	def num_files(self) -> int:
-		"""
-		Get the number of files in the series.
-
-		Returns
-		-------
-		int
-				The number of files.
-		"""
 		return len(self.images)
 
+	@property
+	def RTReferencedSeriesUID(self) -> Optional[str]:  # noqa: N802
+		return self._RTSTRUCT.get('RTReferencedSeriesUID', None) if self._RTSTRUCT else None
+
+	@property
+	def ROINames(self) -> Optional[str]: # noqa: N802
+		return self._RTSTRUCT.get('ROINames', None) if self._RTSTRUCT else None
+
+
+
+
+####################################################################################################
+# IMAGE
+####################################################################################################
 
 # Image Table
 @repr_mixin
@@ -271,9 +348,9 @@ class Series:
 @dataclass
 class Image:
 	__table__ = Table(
-		'files',
+		'images',
 		mapper_registry.metadata,
-		Column('FilePath', String, primary_key=True),  # PRIMARY KEY
+		Column('FilePath', String, primary_key=True, index=True),  # PRIMARY KEY
 		Column('SOPInstanceUID', String, nullable=False),
 		Column('SeriesInstanceUID', String, ForeignKey('series.SeriesInstanceUID'), nullable=False),
 	)
@@ -288,7 +365,7 @@ class Image:
 
 	__mapper_args__ = {  # type: ignore
 		'properties': {
-			'series': relationship('Series', back_populates='files'),
+			'series': relationship('Series', back_populates='images'),
 		}
 	}
 

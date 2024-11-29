@@ -46,6 +46,7 @@ python = "3.11.*"
 [feature.py312.dependencies]
 python = "3.12.*"
 
+
 ############################################## TEST ################################################
 
 [feature.test.dependencies]
@@ -114,21 +115,21 @@ types-tqdm = ">=4.66.0.20240417,<5"
 pydoctest = ">=0.2.1, <0.3"
 
 [feature.quality.tasks]
-ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
-ruff-check.inputs = ["config/ruff.toml", "src"]
-ruff-check.description = "Run ruff check"
+_ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
+_ruff-check.inputs = ["config/ruff.toml", "src"]
+_ruff-check.description = "Run ruff check"
 
-ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
-ruff-format.inputs = ["config/ruff.toml", "src"]
-ruff-format.depends_on = ["ruff-check"]
-ruff-format.description = "Run ruff format, run check first"
+_ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
+_ruff-format.inputs = ["config/ruff.toml", "src"]
+_ruff-format.depends_on = ["ruff-check"]
+_ruff-format.description = "Run ruff format, run check first"
 
-type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
-type-check.inputs = ["config/mypy.ini", "src"]
-type-check.description = "Run mypy type check."
+_type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
+_type-check.inputs = ["config/mypy.ini", "src"]
+_type-check.description = "Run mypy type check."
 
-lint.depends_on = ["ruff-format", "ruff-check", "type-check"]
-lint.description = "Run ruff check + format and mypy type check"
+qc.depends_on = ["_ruff-format", "_ruff-check", "_type-check"]
+qc.description = "Quality check: ruff & mypy"
 
 #################################### RELEASE & BUILD ###############################################
 
@@ -140,6 +141,8 @@ hatch = ">=1.13"
 [feature.build.tasks]
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
 
+
+
 build = { cmd = [
   "hatch",
   "build",
@@ -149,4 +152,5 @@ build = { cmd = [
   "pyproject.toml",
 ], outputs = [
   "dist/*",
-], description = "Build the package" }
+], description = "🛠️ Builds the packages" }
+
