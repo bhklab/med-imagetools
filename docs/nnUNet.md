@@ -103,9 +103,9 @@ Modalities can also be set to `--modalities MR`.
 The directory structue will look like:
 
 ```sh
-OUTPUT_DIRECTORY
-├── subject1_000_0000.nii.gz
-└── ...
+    OUTPUT_DIRECTORY
+    ├── {DATASET}_{SUBJECT_NUM}_{MODALITY}.nii.gz
+    └── ...
 ```
 
 To run inference, run the command:
