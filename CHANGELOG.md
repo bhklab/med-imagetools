@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v1.10.1 (2024-12-03)
+
+### Bug Fixes
+
+- Update .gitignore to exclude SQLite and database files
+  ([`95a2179`](https://github.com/bhklab/med-imagetools/commit/95a217913798b2f1f4aa2555f1f8fddc65b5b44d))
+
+
 ## v1.10.0 (2024-12-03)
+
+### Chores
+
+- **sem-ver**: 1.10.0
+  ([`0efa004`](https://github.com/bhklab/med-imagetools/commit/0efa0048b135e06d8ebe99db45d00781f0786b86))
 
 ### Features
 
