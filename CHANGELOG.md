@@ -1,15 +1,43 @@
 # CHANGELOG
 
 
+## v1.10.0 (2024-12-03)
+
+### Features
+
+- Begin indexing database, update find-dicoms cli, add cli documentation
+  ([#148](https://github.com/bhklab/med-imagetools/pull/148),
+  [`48598e7`](https://github.com/bhklab/med-imagetools/commit/48598e7206c14bcd856e8a64b41cb88369647454))
+
+## Release Notes
+
+- **New Features** - Enhanced `find_dicoms` function to support limiting results and filtering by
+  search input.
+
+- **Documentation** - Updated installation instructions and expanded "Getting Started" section in
+  the README. - Improved navigation structure in documentation, adding new entries for CLI
+  reference.
+
+- **Bug Fixes** - Streamlined error handling and logging for various functions, ensuring clearer
+  outputs and improved functionality.
+
+- **Chores** - Updated dependencies and configuration files for better management and performance.
+
+
 ## v1.9.4 (2024-11-29)
 
 ### Bug Fixes
 
+- Configure Git credentials for GitHub Actions and update documentation deployment step
+  ([`adf4e04`](https://github.com/bhklab/med-imagetools/commit/adf4e0431533d7434780951edd6ec82737cac21e))
+
 - Update GitHub Actions workflow for concurrency and permissions;
   ([`45cddb4`](https://github.com/bhklab/med-imagetools/commit/45cddb4fd65be0df14a7f9d2a28261c5cc36159b))
 
-- Configure Git credentials for GitHub Actions and update documentation deployment step
-  ([`adf4e04`](https://github.com/bhklab/med-imagetools/commit/adf4e0431533d7434780951edd6ec82737cac21e))
+### Chores
+
+- **sem-ver**: 1.9.4
+  ([`6d283aa`](https://github.com/bhklab/med-imagetools/commit/6d283aa8167574ed6848a7b5c5558b63c5ee6568))
 
 
 ## v1.9.3 (2024-11-29)
@@ -59,11 +87,11 @@ Introduce an environment variable for debug logging and set the default log leve
 
 ### Chores
 
-- **sem-ver**: 1.9.2
-  ([`22d8fb7`](https://github.com/bhklab/med-imagetools/commit/22d8fb77f1d2c47d26967b1578e9be41d829dbb1))
-
 - **deps**: Update med-imagetools to version 1.9.1 and update sha256 checksum
   ([`ab77c58`](https://github.com/bhklab/med-imagetools/commit/ab77c5887e5bb8ae1fa477d2780b94dcdf3297a6))
+
+- **sem-ver**: 1.9.2
+  ([`22d8fb7`](https://github.com/bhklab/med-imagetools/commit/22d8fb77f1d2c47d26967b1578e9be41d829dbb1))
 
 ### Refactoring
 
@@ -197,8 +225,6 @@ Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.git
 
 * fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1847024952
 
-Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
-
 * chore: update .gitignore to include log files in imgtools directory
 
 * feat(datagraph): integrate logging for edge table processing and visualization
@@ -217,8 +243,6 @@ Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.git
 
 * fix: https://github.com/bhklab/med-imagetools/pull/134#discussion_r1847278305
 
-Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
-
 * refactor(logging): enhance logging configuration and streamline JSON setup
 
 * chore(pixi.lock): add license_family field for clarity
@@ -235,8 +259,6 @@ Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.git
 * refactor(logging): remove unused Optional import from typing
 
 ---------
-
-Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
 
 
 ## v1.6.0 (2024-11-15)
@@ -338,9 +360,6 @@ Co-authored-by: semantic-release <semantic-release>
 
 ### Bug Fixes
 
-- Update ci to use semver bot
-  ([`98e3bd0`](https://github.com/bhklab/med-imagetools/commit/98e3bd0c93fc2be20c31976092047e7a11db57fb))
-
 - Remove deprecated pydicom.dicomdir.DicomDir variable type option
   ([#130](https://github.com/bhklab/med-imagetools/pull/130),
   [`56ef37e`](https://github.com/bhklab/med-imagetools/commit/56ef37e492d9a4f287ed9ecb7a1c968caca29726))
@@ -351,10 +370,10 @@ Co-authored-by: semantic-release <semantic-release>
 
 * refactor: remove Union import for linting
 
-### Chores
+- Update ci to use semver bot
+  ([`98e3bd0`](https://github.com/bhklab/med-imagetools/commit/98e3bd0c93fc2be20c31976092047e7a11db57fb))
 
-- **sem-ver**: 1.5.5
-  ([`9921fba`](https://github.com/bhklab/med-imagetools/commit/9921fba8c74d5bfb6d914ce7af069df3976acde0))
+### Chores
 
 - #126 update docstring for StructureSetToSegmentation (reopen)
   ([#128](https://github.com/bhklab/med-imagetools/pull/128),
@@ -372,6 +391,9 @@ Co-authored-by: semantic-release <semantic-release>
 
 * chore: enhance StructureSetToSegmentation docstring to support None as a roi_names option for
   loading all ROIs
+
+- **sem-ver**: 1.5.5
+  ([`9921fba`](https://github.com/bhklab/med-imagetools/commit/9921fba8c74d5bfb6d914ce7af069df3976acde0))
 
 
 ## v1.5.4 (2024-06-12)
