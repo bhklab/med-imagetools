@@ -225,4 +225,7 @@ data/**
 **/*.db
 
 **/*.sqlite
+**/*.db
+
+test_data
 
