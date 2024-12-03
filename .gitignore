@@ -222,5 +222,7 @@ data/**
 
 *.dcm
 
+**/*.db
 
 **/*.sqlite
+
