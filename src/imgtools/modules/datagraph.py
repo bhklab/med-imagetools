@@ -427,7 +427,10 @@ class DataGraph:
             self._form_agg()  # Form aggregates
         
         # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
-        relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
+        # relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
+        relevant_study_id = self.df_new.loc[
+            self.df_new.edge_type.str.contains(f"(?:{regex_term})", regex=True), "study_x"
+        ].unique()
         
         # Based on the correct study ids, fetches the relevant edges
         df_processed = self.df_edges.loc[self.df_edges.study_x.isin(relevant_study_id) & (self.df_edges.edge_type.isin(edge_list))]
