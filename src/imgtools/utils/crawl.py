@@ -181,7 +181,7 @@ def crawl(top,
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
     logger.info(f"Crawling {len(folders)} folders in {top}")
-    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders))
+    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders, desc="Crawling folders", leave=False))
 
     logger.info(f"Converting list to dictionary")
     # convert list to dictionary
