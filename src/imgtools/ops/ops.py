@@ -216,11 +216,13 @@ class ImageAutoInput(BaseInput):
             logger.info(f"Number of patients in the dataset: {len(db)}")
         else:
             logger.warning("The dataset has already been indexed. Use --update to force update.")
+        self.crawl_path = path_crawl
 
         # GRAPH
         # -----
         # Form the graph
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
+        self.edge_path = edge_path
         logger.debug("Creating edge path", edge_path=edge_path)
         graph = DataGraph(path_crawl=path_crawl.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
