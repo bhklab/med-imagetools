@@ -224,9 +224,9 @@ class ImageAutoInput(BaseInput):
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
         self.edge_path = edge_path
         logger.debug("Creating edge path", edge_path=edge_path)
-        graph = DataGraph(path_crawl= self.csv_path.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
+        self.graph = DataGraph(path_crawl= self.csv_path.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
-        self.df_combined = graph.parser(self.modalities)
+        self.df_combined = self.graph.parser(self.modalities)
 
         self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
