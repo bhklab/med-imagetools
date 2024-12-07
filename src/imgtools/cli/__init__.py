@@ -1,14 +1,13 @@
-from logging import ERROR, getLevelName
+from logging import ERROR, getLevelName, getLogger
 from typing import Any, Callable
 
 import click
 from click.decorators import FC
 
-from imgtools.logging import logger
-
 
 def set_log_verbosity(
 	*param_decls: str,
+	logger_name: str = 'imgtools',
 	quiet_decl: tuple = ('--quiet', '-q'),
 	**kwargs: Any,  # noqa
 ) -> Callable[[FC], FC]:
@@ -34,7 +33,7 @@ def set_log_verbosity(
 	def callback(ctx: click.Context, param: click.Parameter, value: int) -> None:
 		levels = {0: 'ERROR', 1: 'WARNING', 2: 'INFO', 3: 'DEBUG'}
 		level = levels.get(value, 'DEBUG')  # Default to DEBUG if verbosity is high
-
+		logger = getLogger(logger_name)
 		# Check if `--quiet` is passed
 		if ctx.params.get('quiet', False):
 			logger.setLevel(ERROR)
