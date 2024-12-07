@@ -208,15 +208,15 @@ class ImageAutoInput(BaseInput):
         # -------
         # Checks if dataset has already been indexed
         # To be changed later
-        path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
-        if not path_crawl.exists() or update:
-            logger.debug("Output exists, force updating.", path=path_crawl)
+        self.csv_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
+        if not self.csv_path.exists() or update:
+            logger.debug("Output exists, force updating.", path=self.csv_path)
             logger.info("Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
             logger.info(f"Number of patients in the dataset: {len(db)}")
         else:
             logger.warning("The dataset has already been indexed. Use --update to force update.")
-        self.crawl_path = path_crawl
+        self.json_path =  pathlib.Path(self.parent, ".imgtools", f'imgtools_{self.dataset}.json')
 
         # GRAPH
         # -----
@@ -224,7 +224,7 @@ class ImageAutoInput(BaseInput):
         edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
         self.edge_path = edge_path
         logger.debug("Creating edge path", edge_path=edge_path)
-        graph = DataGraph(path_crawl=path_crawl.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
+        graph = DataGraph(path_crawl= self.csv_path.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = graph.parser(self.modalities)
 
