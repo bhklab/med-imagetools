@@ -10,6 +10,7 @@ from imgtools.logging import logger
 DEFAULT_DB_DIR = Path('.imgtools')
 DEFAULT_DB_NAME = 'imgtools.db'
 
+
 @click.command()
 @set_log_verbosity()
 @click.option(
@@ -35,16 +36,18 @@ DEFAULT_DB_NAME = 'imgtools.db'
 )
 @click.option(
 	'--limit',
-	'-l', 
+	'-l',
 	type=int,
 	default=0,
 	help='Number of files to index, 0 for all',
 )
-def index(directory: Path, update_db: bool = False, verbose: int = 0, quiet: bool = False, limit: int = 0 ) -> None:
-	""" Index DICOM files in a directory. 
-	
+def index(
+	directory: Path, update_db: bool = False, verbose: int = 0, quiet: bool = False, limit: int = 0
+) -> None:
+	"""Index DICOM files in a directory.
+
 	For now, creates a database in the current directory at .imgtools/imgtools.db.
-	
+
 	"""
 	extension = 'dcm'
 	check_header = False
@@ -82,14 +85,14 @@ def index(directory: Path, update_db: bool = False, verbose: int = 0, quiet: boo
 
 	logger.debug('Building index.', count=len(dicom_files), limit=limit)
 	# Build index
-	indexer.build_index_from_files(dicom_files)	
-	
+	indexer.build_index_from_files(dicom_files)
+
 	_ = DICOMDatabaseInterface(db_handler=db_handler)
 
 	logger.info('Indexing complete.')
 
 	click.echo(f'Indexed {len(dicom_files)} files to {db_path}')
 
+
 if __name__ == '__main__':
 	index()
-

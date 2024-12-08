@@ -121,7 +121,7 @@ _ruff-check.description = "Run ruff check"
 
 _ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
 _ruff-format.inputs = ["config/ruff.toml", "src"]
-_ruff-format.depends_on = ["ruff-check"]
+_ruff-format.depends_on = ["_ruff-check"]
 _ruff-format.description = "Run ruff format, run check first"
 
 _type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]

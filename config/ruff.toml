@@ -7,19 +7,7 @@ include = [
   "src/imgtools/logging/**/*.py", 
   # "src/imgtools/cli/**/*.py",
   "src/imgtools/dicom/**/*.py",
-]
-
-extend-exclude = [
-  ".pixi/**/*",
-  "tests/**/*.py",
-  "src/imgtools/ops/**/*.py",
-  "src/imgtools/io/**/*.py",
-  "src/imgtools/utils/**/*.py",
-  "src/imgtools/modules/**/*.py",
-  "src/imgtools/transforms/**/*.py",
-  "src/imgtools/autopipeline.py",
-  "src/imgtools/pipeline.py",
-  "src/imgtools/image.py",
+  "src/imgtools/utils/crawl.py",
 ]
 
 
@@ -93,8 +81,6 @@ select = [
 ]
 
 ignore = [
-  # allow self to not need type annotations
-  "ANN101",
   # Allow too many arguments for functions
   "PLR0913",
   # Public Module Docstrings
