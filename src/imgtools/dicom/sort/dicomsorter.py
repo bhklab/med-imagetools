@@ -95,7 +95,7 @@ class DICOMSorter(SorterBase):
 
 	def execute(
 		self,
-		action: FileAction = FileAction.MOVE,
+		action: FileAction | str = FileAction.MOVE,
 		overwrite: bool = False,
 		dry_run: bool = False,
 		num_workers: int = 1,

@@ -65,9 +65,6 @@ class FileAction(Enum):
 				self.create_symlink(source_path, resolved_path)
 			case FileAction.HARDLINK:
 				self.create_hardlink(source_path, resolved_path)
-			case _:
-				msg = f'Invalid action: {self} must be one of {FileAction.__members__}'
-				raise ValueError(msg)
 
 	def move_file(self, source_path: Path, resolved_path: Path) -> None:
 		source_path.rename(resolved_path)
@@ -108,7 +105,7 @@ class FileAction(Enum):
 
 
 def handle_file(
-	source_path: Path, resolved_path: Path, action: FileAction, overwrite: bool = False
+	source_path: Path, resolved_path: Path, action: FileAction | str, overwrite: bool = False
 ) -> None:
 	if not isinstance(action, FileAction):
 		action = FileAction.validate(action)

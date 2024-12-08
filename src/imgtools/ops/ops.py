@@ -136,9 +136,9 @@ class ImageAutoInput(BaseInput):
         # self.csv_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
         # self.json_path =  pathlib.Path(self.parent, ".imgtools", f'imgtools_{self.dataset}.json')
         # self.edge_path  = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
-        self.csv_path = self.parent / imgtools_dir / f"imgtools_{self.dataset_name}.csv"
-        self.json_path = self.parent / imgtools_dir / f'imgtools_{self.dataset_name}.json'
-        self.edge_path = self.parent / imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
+        self.csv_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
+        self.json_path = self.parent / self.imgtools_dir / f'imgtools_{self.dataset_name}.json'
+        self.edge_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
 
         start = time.time()
         # CRAWLER
@@ -156,7 +156,7 @@ class ImageAutoInput(BaseInput):
         # -----
         # Form the graph
         logger.debug("Creating edge path", edge_path=self.edge_path)
-        self.graph = DataGraph(path_crawl= self.csv_path.resolve(), edge_path=self.edge_path.as_posix(), visualize=visualize, update=update)
+        self.graph = DataGraph(path_crawl= self.csv_path.resolve().as_posix(), edge_path=self.edge_path.as_posix(), visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = self.graph.parser(self.modalities)
 
