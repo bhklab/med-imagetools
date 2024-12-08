@@ -60,16 +60,9 @@ sqlalchemy-stubs = ">=0.4,<0.5"
 med-imagetools = { path = ".", editable = true }
 
 [feature.test.tasks.test]
-cmd = [
-  "pytest",
-  "--cov=imgtools",
-  "--cov-report=xml:coverage-report/coverage.xml",
-  "--cov-config=config/coverage.toml",
-  "-c", "./config/pytest.ini",
-]
-inputs = ["src", "tests", "config/coverage.toml"]
-outputs = ["coverage-report/coverage.xml"]
-description = "Run pytest (Note: run `coverage` task to do both)"
+cmd = "pytest -c config/pytest.ini"
+inputs = ["src", "tests", "config/pytest.ini", "config/coverage.toml"]
+description = "Run pytest"
 
 [feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
