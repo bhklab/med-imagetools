@@ -38,9 +38,11 @@ def repr_mixin(cls) -> type:  # type: ignore  # noqa: ANN001
 	cls.__repr__ = __repr_method__
 	return cls
 
+
 ####################################################################################################
 # PATIENT
 ####################################################################################################
+
 
 # Patient Table
 @repr_mixin
@@ -149,6 +151,7 @@ class Patient:
 ####################################################################################################
 # STUDY
 ####################################################################################################
+
 
 # Study Table
 @repr_mixin
@@ -275,7 +278,6 @@ class Series:
 
 	@classmethod
 	def from_metadata(cls, metadata: Dict[str, str], file_path: Path) -> Series:
-
 		base_cls = cls(
 			SeriesInstanceUID=metadata['SeriesInstanceUID'],
 			StudyInstanceUID=metadata['StudyInstanceUID'],
@@ -289,12 +291,14 @@ class Series:
 					logger.info(f'Reading RTSTRUCT file: {file_path}')
 					roi_names = [roi.ROIName for roi in ds.StructureSetROISequence]
 					rfrs = ds.ReferencedFrameOfReferenceSequence[0]
-					ref_series_seq = rfrs.RTReferencedStudySequence[0]\
-						.RTReferencedSeriesSequence[0]\
+					ref_series_seq = (
+						rfrs.RTReferencedStudySequence[0]
+						.RTReferencedSeriesSequence[0]
 						.SeriesInstanceUID
+					)
 					frame_of_reference = rfrs.FrameOfReferenceUID
 					base_cls._RTSTRUCT = {
-						'ROINames': ",".join(roi_names),
+						'ROINames': ','.join(roi_names),
 						'RTReferencedSeriesUID': ref_series_seq,
 						'FrameOfReferenceUID': frame_of_reference,
 					}
@@ -332,15 +336,14 @@ class Series:
 		return self._RTSTRUCT.get('RTReferencedSeriesUID', None) if self._RTSTRUCT else None
 
 	@property
-	def ROINames(self) -> Optional[str]: # noqa: N802
+	def ROINames(self) -> Optional[str]:  # noqa: N802
 		return self._RTSTRUCT.get('ROINames', None) if self._RTSTRUCT else None
-
-
 
 
 ####################################################################################################
 # IMAGE
 ####################################################################################################
+
 
 # Image Table
 @repr_mixin

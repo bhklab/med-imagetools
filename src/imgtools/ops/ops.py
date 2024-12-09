@@ -2,8 +2,9 @@ import json
 import os
 import pathlib
 import re
+import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
-import time 
+
 import numpy as np
 import SimpleITK as sitk
 
@@ -98,83 +99,6 @@ class BaseOutput(BaseOp):
         self._writer.put(key, *args, **kwargs)
 
 
-class BetaAutoInput(BaseInput):
-    """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
-    which stores the relation between all the modalities.
-    Based on the user provided modalities, this class loads the information of the user provided modalities
-
-    Parameters
-    ----------
-    dir_path: str
-        Path to dataset top-level directory. The crawler/indexer will start at this directory.
-
-    modalities: str
-        List of modalities to process. Only samples with ALL modalities will be processed. Make sure there are no space between list elements as it is parsed as a string.
-
-    visualize: bool
-        Whether to return visualization of the data graph
-
-    update: bool
-        Whether to update crawled index
-    """
-    def __init__(self,
-                 dir_path: str,
-                 modalities: str,
-                 n_jobs: int = -1,
-                 visualize: bool = False,
-                 update: bool = False):
-        self.dir_path = dir_path
-        self.modalities = modalities
-        self.parent, self.dataset_name = os.path.split(self.dir_path)
-
-        # CRAWLER
-        # -------
-        # Checks if dataset has already been indexed
-        # To be changed later
-        df_crawl_path   = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv").as_posix()
-        tree_crawl_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.json").as_posix()
-
-        if not os.path.exists(df_crawl_path) or update:
-            logger.debug("Output exists, force updating.", path=df_crawl_path)
-            logger.info("Indexing the dataset")
-            db = crawl(self.dir_path, n_jobs = n_jobs)
-            logger.info(f"Number of patients in the dataset: {len(db)}")
-        else:
-            logger.info("The dataset has already been indexed.")
-
-
-        with open(tree_crawl_path, 'r') as f:
-            tree_db = json.load(f)  # currently unused, TO BE implemented in the future
-            assert tree_db is not None, "There was no crawler output" # dodging linter
-
-        # GRAPH
-        # -----
-        # Form the graph
-        edge_path = pathlib.Path(self.parent, ".imgtools",f"imgtools_{self.dataset_name}_edges.csv").as_posix()
-        logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
-        graph = DataGraph(path_crawl=df_crawl_path, edge_path=edge_path, visualize=visualize)
-        self.df_combined = graph.parser(self.modalities)
-        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
-        self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
-        self.study_names  = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "study"]
-        self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
-        self.subseries_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "subseries"]
-        logger.info(f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities.")
-
-        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
-
-        loader = ImageCSVLoader(self.df_combined,
-                                col_names=self.column_names,
-                                study_names=self.study_names,
-                                series_names=self.series_names,
-                                subseries_names=self.subseries_names,
-                                id_column=None,
-                                expand_paths=False,
-                                readers=self.readers)
-        
-        super().__init__(loader)
-
-
 class ImageAutoInput(BaseInput):
     """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified directory and crawls through it as the first step. Using the crawled output data, a graph on modalties present in the dataset is formed
     which stores the relation between all the modalities.
@@ -194,23 +118,34 @@ class ImageAutoInput(BaseInput):
     update: bool
         Whether to update crawled index
     """
+
+    imgtools_dir : str = ".imgtools"
+
     def __init__(self,
                  dir_path: str,
                  modalities: str,
                  n_jobs: int = -1,
                  visualize: bool = False,
                  update: bool = False):
-        self.dir_path = dir_path
         self.modalities = modalities
-        self.parent, self.dataset_name = os.path.split(self.dir_path)
+
+        self.dir_path = pathlib.Path(dir_path)
+        self.parent = self.dir_path.parent
+        self.dataset_name = self.dir_path.name
+
+        # self.csv_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
+        # self.json_path =  pathlib.Path(self.parent, ".imgtools", f'imgtools_{self.dataset}.json')
+        # self.edge_path  = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
+        self.csv_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
+        self.json_path = self.parent / self.imgtools_dir / f'imgtools_{self.dataset_name}.json'
+        self.edge_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
+
         start = time.time()
         # CRAWLER
         # -------
         # Checks if dataset has already been indexed
-        # To be changed later
-        path_crawl = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
-        if not path_crawl.exists() or update:
-            logger.debug("Output exists, force updating.", path=path_crawl)
+        if not self.csv_path.exists() or update:
+            logger.debug("Output exists, force updating.", path=self.csv_path)
             logger.info("Indexing the dataset...")
             db = crawl(self.dir_path, n_jobs=n_jobs)
             logger.info(f"Number of patients in the dataset: {len(db)}")
@@ -220,13 +155,17 @@ class ImageAutoInput(BaseInput):
         # GRAPH
         # -----
         # Form the graph
-        edge_path = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
-        logger.debug("Creating edge path", edge_path=edge_path)
-        graph = DataGraph(path_crawl=path_crawl.resolve(), edge_path=edge_path.as_posix(), visualize=visualize, update=update)
+        logger.debug("Creating edge path", edge_path=self.edge_path)
+        self.graph = DataGraph(path_crawl= self.csv_path.resolve().as_posix(), edge_path=self.edge_path.as_posix(), visualize=visualize, update=update)
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
-        self.df_combined = graph.parser(self.modalities)
+        self.df_combined = self.graph.parser(self.modalities)
 
-        self.output_streams = [("_").join(cols.split("_")[1:]) for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
+        self.output_streams = [
+            ("_").join(cols.split("_")[1:]) 
+            for cols in self.df_combined.columns 
+            if cols.split("_")[0] == "folder"
+        ]
+
         self.column_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"]
         self.series_names = [cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"]
         logger.info(f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities.")

@@ -37,7 +37,7 @@ class StructureSet:
             self.metadata = {}
 
     @classmethod
-    def from_dicom_rtstruct(cls, rtstruct_path: str) -> 'StructureSet':
+    def from_dicom_rtstruct(cls, rtstruct_path: str, suppress_warnings: bool = False) -> 'StructureSet':
         rtstruct = dcmread(rtstruct_path, force=True)
         roi_names = [roi.ROIName for roi in rtstruct.StructureSetROISequence]
         roi_points = {}
@@ -45,7 +45,8 @@ class StructureSet:
             try:
                 roi_points[name] = _get_roi_points(rtstruct, i)
             except AttributeError as ae:
-                logger.warning(f"Could not get points for ROI `{name}`.", rtstruct_path=rtstruct_path, error=ae)
+                if not suppress_warnings:
+                    logger.warning(f"Could not get points for ROI `{name}`.", rtstruct_path=rtstruct_path, error=ae)
 
         metadata = {}
         

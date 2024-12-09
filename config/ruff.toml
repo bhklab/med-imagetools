@@ -7,19 +7,23 @@ include = [
   "src/imgtools/logging/**/*.py", 
   # "src/imgtools/cli/**/*.py",
   "src/imgtools/dicom/**/*.py",
+  # "src/imgtools/utils/crawl.py",
 ]
 
 extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
-  "src/imgtools/ops/**/*.py",
+  "src/imgtools/ops/ops.py",
   "src/imgtools/io/**/*.py",
-  "src/imgtools/utils/**/*.py",
   "src/imgtools/modules/**/*.py",
   "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
   "src/imgtools/image.py",
+]
+
+extend-include = [
+  "src/imgtools/ops/functional.py",
 ]
 
 
@@ -93,18 +97,19 @@ select = [
 ]
 
 ignore = [
-  # allow self to not need type annotations
-  "ANN101",
   # Allow too many arguments for functions
   "PLR0913",
+  "PLR2004",
   # Public Module Docstrings
   "D100",
   # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules 
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
-  "D206"
+  "D206",
+  "N813", 
 ]
 [lint.pydocstyle]
 convention = "numpy"
+
 
 [format]
 

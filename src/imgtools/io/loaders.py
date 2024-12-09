@@ -77,8 +77,8 @@ def read_dicom_scan(path, series_id=None, recursive: bool=False, file_names=None
     return Scan(image, {})
 
 
-def read_dicom_rtstruct(path):
-    return StructureSet.from_dicom_rtstruct(path)
+def read_dicom_rtstruct(path, suppress_warnings=False):
+    return StructureSet.from_dicom_rtstruct(path, suppress_warnings=suppress_warnings)
 
 
 def read_dicom_rtdose(path):
