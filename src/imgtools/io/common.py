@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import Dict, Generator
+from typing import Dict
 
 from pydicom.misc import is_dicom
 def file_name_convention() -> Dict:
