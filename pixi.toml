@@ -82,6 +82,7 @@ griffe-inherited-docstrings = ">=1.1.1,<2"
 mike = ">=2.1.2,<3"
 mkdocs-include-markdown-plugin = ">=7.1.1,<8"
 mkdocs-click = ">=0.6.0,<0.7"
+black = ">=24.10.0,<25"
 
 [feature.docs.pypi-dependencies]
 mkdocs-awesome-pages-plugin = ">=2.9.3, <3"
