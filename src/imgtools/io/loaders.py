@@ -77,24 +77,24 @@ def read_dicom_scan(path, series_id=None, recursive: bool=False, file_names=None
     return Scan(image, {})
 
 
-def read_dicom_rtstruct(path, suppress_warnings=False):
+def read_dicom_rtstruct(path, suppress_warnings=False) -> StructureSet:
     return StructureSet.from_dicom_rtstruct(path, suppress_warnings=suppress_warnings)
 
 
-def read_dicom_rtdose(path):
+def read_dicom_rtdose(path) -> Dose:
     return Dose.from_dicom_rtdose(path)
 
 
-def read_dicom_pet(path, series=None):
+def read_dicom_pet(path, series=None) -> PET:
     return PET.from_dicom_pet(path, series, "SUV")
 
 
-def read_dicom_seg(path, meta, series=None):
+def read_dicom_seg(path, meta, series=None) -> Segmentation:
     seg_img = read_dicom_series(path, series)
     return Segmentation.from_dicom_seg(seg_img, meta)
 
 
-def read_dicom_auto(path, series=None, file_names=None):
+def read_dicom_auto(path, series=None, file_names=None, suppress_warnings=False) -> Union[Scan, PET, StructureSet, Dose, Segmentation]:
     if path is None:
         return None
     if path.endswith(".dcm"):
@@ -113,7 +113,7 @@ def read_dicom_auto(path, series=None, file_names=None):
         elif modality == 'PT':
             obj = read_dicom_pet(path, series)
         elif modality == 'RTSTRUCT':
-            obj = read_dicom_rtstruct(dcm)
+            obj = read_dicom_rtstruct(dcm, suppress_warnings=suppress_warnings)
         elif modality == 'RTDOSE':
             obj = read_dicom_rtdose(dcm)
         elif modality == 'SEG':
