@@ -1,10 +1,10 @@
-import os
-import time
-import pathlib
-from typing import List
+from pathlib import Path
 from functools import reduce
+from typing import List, Tuple
+
 import numpy as np
 import pandas as pd
+
 from imgtools.logging import logger
 
 class DataGraph:
@@ -27,8 +27,8 @@ class DataGraph:
     (RTDOSE->RTSTRUCT->CT<-PT<-RTSTRUCT)
     '''
     def __init__(self,
-                 path_crawl: str,
-                 edge_path: str = "./patient_id_full_edges.csv",
+                 path_crawl: str | Path,
+                 edge_path: str | Path = "./patient_id_full_edges.csv",
                  visualize: bool = False,
                  update: bool = False) -> None:
         '''
@@ -41,10 +41,10 @@ class DataGraph:
             This path denotes where the graph in the form of edge table is stored or to be stored
         '''
         self.df = pd.read_csv(path_crawl, index_col=0)
-        self.edge_path = edge_path
+        self.edge_path = Path(edge_path)
         self.df_new = None
 
-        if not os.path.exists(self.edge_path):
+        if not self.edge_path.exists():
             logger.info("Edge table not present. Forming the edge table based on the crawl data...")
             self.form_graph()
         elif not update:
@@ -56,7 +56,7 @@ class DataGraph:
         if visualize:
             self.visualize_graph()
     
-    def form_graph(self):
+    def form_graph(self) -> None:
         '''
         Forms edge table based on the crawled data
         '''
@@ -98,7 +98,7 @@ class DataGraph:
         logger.info(f"Saving edge table in {self.edge_path}")
         self.df_edges.to_csv(self.edge_path, index=False)
 
-    def visualize_graph(self):
+    def visualize_graph(self) -> None:
         """
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
@@ -130,10 +130,10 @@ class DataGraph:
             node["title"] += "<br>Number of connections: {}".format(len(neigbour_map[node['id']])) 
             node["value"] = len(neigbour_map[node['id']])
 
-        vis_path = pathlib.Path(os.path.dirname(self.edge_path),"datanet.html").as_posix()
+        vis_path = self.edge_path.parent / "datanet.html"
         data_net.show(vis_path)
 
-    def _form_edges(self, df):
+    def _form_edges(self, df: pd.DataFrame) -> pd.DataFrame:
         '''
         For a given study id forms edge table
         '''
@@ -189,7 +189,7 @@ class DataGraph:
         df_edges = pd.concat(df_list, axis=0, ignore_index=True)
         return df_edges
 
-    def _form_edge_study(self, df, all_study, study_id):
+    def _form_edge_study(self, df: pd.DataFrame, all_study, study_id) -> None:
         '''
         For a given study id forms edge table
         '''
@@ -286,15 +286,15 @@ class DataGraph:
             final_df.rename(columns = {"series": f"series_{query_string}", 
                                        "study": f"study_{query_string}", 
                                        "folder": f"folder_{query_string}",
-                                       "subseries": f"subseries_{query_string}", }, inplace=True)
+                                       "subseries": f"subseries_{query_string}"}, inplace=True)
         
         elif self.mods_n == 2:
             # Reverse the query string
             query_string_rev = (",").join(self.mods[::-1])
-            if query_string in edge_def.keys():
+            if query_string in edge_def:
                 edge_type = edge_def[query_string]
                 valid = query_string
-            elif query_string_rev in edge_def.keys():
+            elif query_string_rev in edge_def:
                 edge_type = edge_def[query_string_rev]
                 valid = query_string_rev
             else:
@@ -348,7 +348,7 @@ class DataGraph:
                                          "folder_y": f"folder_{node_origin}",
                                          
                                          "subseries_x": f"subseries_{node_dest}", 
-                                         "subseries_y": f"subseries_{node_origin}", }, inplace=True)
+                                         "subseries_y": f"subseries_{node_origin}"}, inplace=True)
 
         elif self.mods_n > 2:
             # Processing of combinations of modality
@@ -389,7 +389,7 @@ class DataGraph:
         for col in final_df.columns:
             if col.startswith("folder"):
                 # print(self.edge_path, os.path.dirname(self.edge_path))
-                final_df[col] = final_df[col].apply(lambda x: pathlib.Path(os.path.split(os.path.dirname(self.edge_path))[0], x).as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
+                final_df[col] = final_df[col].apply(lambda x: (self.edge_path.parent.parent / x).as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
         return final_df
     
     def graph_query(self, 
@@ -397,7 +397,7 @@ class DataGraph:
                     edge_list: List[int],
                     change_df: List[str],
                     return_components: bool = False,
-                    remove_less_comp: bool = True):
+                    remove_less_comp: bool = True) -> pd.DataFrame | list:
         '''
         Based on the regex forms the final dataframe. You can 
         query the edge table based on the regex to get the 
@@ -449,7 +449,7 @@ class DataGraph:
         else:
             return final_df
 
-    def _form_agg(self):
+    def _form_agg(self) -> None:
         '''
         Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
         '''
@@ -459,9 +459,9 @@ class DataGraph:
         self.df_new["edge_type"] = self.df_new["edge_type_str"]
 
     def _get_df(self, 
-                df_edges_processed,
-                rel_studyids,
-                remove_less_comp = True):
+                df_edges_processed: pd.DataFrame,
+                rel_studyids: np.ndarray,
+                remove_less_comp: bool = True) -> pd.DataFrame:
     
         '''
         Assumption
@@ -499,21 +499,18 @@ class DataGraph:
         mods_wanted = set(self.mods)
         
         # Determine the number of components
-        for i, study in enumerate(rel_studyids): # per study_id
+        for _, study in enumerate(rel_studyids): # per study_id
             df_temp   = df_edges_processed.loc[df_edges_processed.study_x == study]
-            CT_locs   = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
-            CT_series = CT_locs.series_x.unique()
-            A = []
+            ct_locs   = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
+            ct_series = ct_locs.series_x.unique()
+            comp = []
             save_folder_comp = []
             
             # Initialization. For each component intialize a dictionary with the CTs and their connections
-            for ct in CT_series:
-                df_connections = CT_locs.loc[CT_locs.series_x == ct]
+            for ct in ct_series:
+                df_connections = ct_locs.loc[ct_locs.series_x == ct]
                 
-                if len(df_connections) > 0:
-                    row = df_connections.iloc[0]
-                else:
-                    row = df_connections
+                row = df_connections.iloc[0] if len(df_connections) > 0 else df_connections
                     
                 series   = row.series_x
                 modality = row.modality_x
@@ -546,15 +543,15 @@ class DataGraph:
                     folder_save[key_series] = series_y
                     folder_save[key] = folder_y
                 
-                A.append(temp)
+                comp.append(temp)
                 save_folder_comp.append(folder_save)
                        
             # For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
             rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]            
             for j in range(len(rest_locs)):
                 edge = rest_locs.iloc[j]
-                for k in range(len(CT_series)):
-                    A[k][edge['series_y']] = {"modality": edge['modality_y'], 
+                for k in range(len(ct_series)):
+                    comp[k][edge['series_y']] = {"modality": edge['modality_y'], 
                                               "folder": edge['folder_y'], 
                                               "conn_to": edge['modality_x']}
                     modality_origin = edge['modality_x']
@@ -570,32 +567,32 @@ class DataGraph:
 
             remove_index = []
             if remove_less_comp:
-                for j in range(len(CT_series)):
+                for j in range(len(ct_series)):
                     # Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
-                    mods_present = set([items.split("_")[1] for items in save_folder_comp[j].keys() if items.split("_")[0] == "folder"])
+                    mods_present = set([items.split("_")[1] for items in save_folder_comp[j] if items.split("_")[0] == "folder"])
                     # Checking if all the read modalities are present in a component
                     if mods_wanted.issubset(mods_present):
                         remove_index.append(j)
                 save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        
-                A = [A[idx] for idx in remove_index]    
+                comp = [comp[idx] for idx in remove_index]    
 
-            self.final_dict.extend(A)
+            self.final_dict.extend(comp)
             final_df.extend(save_folder_comp)
         
         final_df = pd.DataFrame(final_df)
         return final_df
     
     @staticmethod
-    def _check_save(save_dict,node,dest):
+    def _check_save(save_dict: dict, node, dest) -> Tuple[str, str]:
         key = f"folder_{node}_{dest}"
         key_series = f"series_{node}_{dest}"
         i = 1
-        while key in save_dict.keys():
+        while key in save_dict:
             key = f"folder_{node}_{dest}_{i}"
             key_series = f"series_{node}_{dest}_{i}"
             i +=1
-        return key,key_series
+        return key, key_series
     
     @staticmethod
-    def list_edges(series):
+    def list_edges(series) -> str:
         return reduce(lambda x, y:str(x) + str(y), series)
