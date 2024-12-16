@@ -1,5 +1,4 @@
 import json
-import os
 import pathlib
 import re
 import time
@@ -117,6 +116,9 @@ class ImageAutoInput(BaseInput):
 
     update: bool
         Whether to update crawled index
+
+    n_jobs: int
+        Number of jobs to run in parallel when crawling. If -1, then the number of jobs is set to the number of CPU cores
     """
 
     imgtools_dir : str = ".imgtools"
@@ -133,12 +135,12 @@ class ImageAutoInput(BaseInput):
         self.parent = self.dir_path.parent
         self.dataset_name = self.dir_path.name
 
-        # self.csv_path = pathlib.Path(self.parent, ".imgtools", f"imgtools_{self.dataset_name}.csv")
-        # self.json_path =  pathlib.Path(self.parent, ".imgtools", f'imgtools_{self.dataset}.json')
-        # self.edge_path  = pathlib.Path(self.parent,".imgtools",f"imgtools_{self.dataset_name}_edges.csv")
         self.csv_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
         self.json_path = self.parent / self.imgtools_dir / f'imgtools_{self.dataset_name}.json'
         self.edge_path = self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
+
+        # The result of the crawl
+        self.db: Dict[str, Any]
 
         start = time.time()
         # CRAWLER
@@ -147,16 +149,29 @@ class ImageAutoInput(BaseInput):
         if not self.csv_path.exists() or update:
             logger.debug("Output exists, force updating.", path=self.csv_path)
             logger.info("Indexing the dataset...")
-            db = crawl(self.dir_path, n_jobs=n_jobs)
-            logger.info(f"Number of patients in the dataset: {len(db)}")
+            self.db = crawl(self.dir_path, n_jobs=n_jobs)
+            logger.info(f"Number of patients in the dataset: {len(self.db)}")
         else:
+            logger.info("Output exists, loading existing index.")
+            if not self.json_path.exists():
+                raise FileNotFoundError(f"Index file {self.json_path} not found, please re-index the dataset.")
+
+            with json_path.open("r") as f:
+                self.db = json.load(f)
             logger.warning("The dataset has already been indexed. Use --update to force update.")
 
         # GRAPH
         # -----
         # Form the graph
         logger.debug("Creating edge path", edge_path=self.edge_path)
-        self.graph = DataGraph(path_crawl= self.csv_path.resolve().as_posix(), edge_path=self.edge_path.as_posix(), visualize=visualize, update=update)
+        self.graph = DataGraph(
+            path_crawl = self.csv_path.resolve().as_posix(),
+            edge_path=self.edge_path.as_posix(), 
+            visualize=visualize, 
+            update=update
+        )
+        self.df_edges = self.graph.df_edges
+
         logger.info(f"Forming the graph based on the given modalities: {self.modalities}")
         self.df_combined = self.graph.parser(self.modalities)
 
@@ -366,7 +381,7 @@ class ImageAutoOutput:
                  root_directory: str,
                  output_streams: List[str],
                  nnunet_info: Dict = None,
-                 inference: bool = False,):
+                 inference: bool = False):
                  
         self.output = {}
         for colname in output_streams:
