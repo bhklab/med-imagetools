@@ -85,7 +85,7 @@ done
 
 # Code take from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunetv2/dataset_conversion/generate_dataset_json.py
 
-def generate_dataset_json(output_folder: str,
+def generate_dataset_json(output_folder: pathlib.Path | str,
                           channel_names: Dict[str, str],
                           labels: Dict[str, int],
                           num_training_cases: int,
