@@ -531,7 +531,7 @@ class DataGraph:
                     }
 
                     # RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                    modality_origin = "CT" if edge['modality_y'] == "RTDOSE" else modality_origin = edge['modality_x']
+                    modality_origin = "CT" if edge['modality_y'] == "RTDOSE" else edge['modality_x']
 
                     key, key_series = self._check_save(save_folder_comp[k], edge['modality_y'], modality_origin)
                     save_folder_comp[k][key_series] = edge['series_y']
