@@ -93,28 +93,30 @@ class DataGraph:
         """
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
-        from pyvis.network import Network  # type: ignore (PyLance)
+        from pyvis.network import Network  
         logger.info("Generating visualizations...")
         data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
 
-        sources = self.df_edges["series_y"]
-        targets = self.df_edges["series_x"]
-        name_src = self.df_edges["modality_y"] 
-        name_tar = self.df_edges["modality_x"]
+        source_series = self.df_edges["series_y"]
+        target_series = self.df_edges["series_x"]
+        source_modality = self.df_edges["modality_y"] 
+        target_modality = self.df_edges["modality_x"]
         patient_id = self.df_edges["patient_ID_x"]
         reference_ct = self.df_edges["reference_ct_y"]
         reference_rs = self.df_edges["reference_rs_y"]
 
-        data_zip = zip(sources,targets,name_src,name_tar,patient_id,reference_ct,reference_rs)
+        data_zip = zip(source_series, target_series, source_modality, target_modality, patient_id, reference_ct, reference_rs)
 
-        for i in data_zip:
-            data_net.add_node(i[0],i[2],title=i[2],group=i[4])
-            data_net.add_node(i[1],i[3],title=i[3],group=i[4])
-            data_net.add_edge(i[0],i[1])
-            node = data_net.get_node(i[0])
-            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(i[4],i[0],i[5],i[6])
-            node = data_net.get_node(i[1])
-            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(i[4],i[1],i[5],i[6])
+        for src_s, targ_s, src_m, targ_m, p_id, ref_ct, ref_rs in data_zip:
+            data_net.add_node(src_s, src_m, title=src_m, group=p_id)
+            data_net.add_node(targ_s, targ_m, title=targ_m, group=p_id)
+            data_net.add_edge(src_s, targ_s)
+
+            node = data_net.get_node(src_s)
+            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(p_id, src_s, ref_ct, ref_rs)
+
+            node = data_net.get_node(targ_s)
+            node["title"] = "<br>Patient_id: {}<br>Series: {}<br>reference_ct: {}<br>reference_rs: {}".format(p_id, targ_s, ref_ct, ref_rs)
 
         neigbour_map = data_net.get_adj_list()
         for node in data_net.nodes:
@@ -122,6 +124,7 @@ class DataGraph:
             node["value"] = len(neigbour_map[node['id']])
 
         vis_path = self.edge_path.parent / "datanet.html"
+        logger.info(f"Saving HTML of visualization at {vis_path}")
         data_net.show(vis_path)
 
     def _form_edges(self, df: pd.DataFrame) -> pd.DataFrame:
