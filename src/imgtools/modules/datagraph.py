@@ -60,39 +60,32 @@ class DataGraph:
         '''
         Forms edge table based on the crawled data
         '''
-        # enforce string type to all columns to prevent dtype merge errors for empty columns
+        # Enforce string type to all columns to prevent dtype merge errors for empty columns
         self.df = self.df.astype(str)
         
-        #Get reference_rs information from RTDOSE-RTPLAN connections    
-        df_filter = pd.merge(self.df, 
-                             self.df[["instance_uid","reference_rs"]], 
-                             left_on="reference_pl", 
-                             right_on="instance_uid", 
-                             how="left")
+        # Get reference_rs information from RTDOSE-RTPLAN connections    
+        df_filter = pd.merge(
+            self.df, 
+            self.df[["instance_uid","reference_rs"]], 
+            left_on="reference_pl", 
+            right_on="instance_uid", 
+            how="left"
+        )
         
-        df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_x"] = df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_y"].values
+        df_filter.loc[(df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_x"] = df_filter.loc[
+            (df_filter.reference_rs_x.isna()) & (~df_filter.reference_rs_y.isna()),"reference_rs_y"
+        ].values
         df_filter.drop(columns=["reference_rs_y", "instance_uid_y"], inplace=True)
         df_filter.rename(columns={"reference_rs_x":"reference_rs", "instance_uid_x":"instance_uid"}, inplace=True)
         
-        # Remove entries with no RTDOSE reference, for extra check, such cases are mostprobably removed in the earlier step
+        # Remove entries with no RTDOSE reference, for extra check, such cases are most probably removed in the earlier step
         df_filter = df_filter.loc[~((df_filter["modality"] == "RTDOSE") & (df_filter["reference_ct"].isna()) & (df_filter["reference_rs"].isna()))]
-
-        # Get all study ids
-        # all_study = df_filter.study.unique()
-        # Defining Master df to store all the Edge dataframes
-        # self.df_master = []
-
-        # for i in tqdm(range(len(all_study))):
-        #     self._form_edge_study(df_filter, all_study, i)
-
-        # df_edge_patient = form_edge_study(df,all_study,i)
         
-        self.df_edges = self._form_edges(self.df)  # pd.concat(self.df_master, axis=0, ignore_index=True)
-
+        self.df_edges = self._form_edges(self.df)
         self.df_edges.loc[self.df_edges.study_x.isna(),"study_x"] = self.df_edges.loc[self.df_edges.study_x.isna(), "study"]
-        # dropping some columns
         self.df_edges.drop(columns=["study_y", "patient_ID_y", "series_description_y", "study_description_y", "study"],inplace=True)
         self.df_edges.sort_values(by="patient_ID_x", ascending=True)
+
         logger.info(f"Saving edge table in {self.edge_path}")
         self.df_edges.to_csv(self.edge_path, index=False)
 
