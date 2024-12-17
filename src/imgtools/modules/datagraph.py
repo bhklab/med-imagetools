@@ -61,11 +61,11 @@ class DataGraph:
         Forms edge table based on the crawled data
         '''
         # enforce string type to all columns to prevent dtype merge errors for empty columns
-        for col in self.df:
-            self.df[col] = self.df[col].astype(str)
+        self.df = self.df.astype(str)
         
         #Get reference_rs information from RTDOSE-RTPLAN connections    
-        df_filter = pd.merge(self.df, self.df[["instance_uid","reference_rs"]].apply(lambda x: x.astype(str), axis=1), 
+        df_filter = pd.merge(self.df, 
+                             self.df[["instance_uid","reference_rs"]], 
                              left_on="reference_pl", 
                              right_on="instance_uid", 
                              how="left")
@@ -88,8 +88,6 @@ class DataGraph:
         # df_edge_patient = form_edge_study(df,all_study,i)
         
         self.df_edges = self._form_edges(self.df)  # pd.concat(self.df_master, axis=0, ignore_index=True)
-
-
 
         self.df_edges.loc[self.df_edges.study_x.isna(),"study_x"] = self.df_edges.loc[self.df_edges.study_x.isna(), "study"]
         # dropping some columns
@@ -189,7 +187,7 @@ class DataGraph:
         df_edges = pd.concat(df_list, axis=0, ignore_index=True)
         return df_edges
 
-    def _form_edge_study(self, df: pd.DataFrame, all_study, study_id) -> None:
+    def _form_edge_study(self, df: pd.DataFrame, all_study, study_id) -> None: # UNUSED FUNCTION + VARIATION OF _form_edges
         '''
         For a given study id forms edge table
         '''
@@ -259,7 +257,7 @@ class DataGraph:
             Query string based on which dataset will be formed
         
         Query ideas:
-        There are four basic supported modalities are RTDOSE, RTSTRUCT, CT, PT, MRI
+        There are four basic supported modalities are RTDOSE, RTSTRUCT, CT, PT, MR
         The options are, the string can be in any order:
         1) RTDOSE
         2) RTSTRUCT
@@ -274,52 +272,65 @@ class DataGraph:
         11) RTSTRUCT,CT,PT
         12) RTDOSE,RTSTRUCT,CT,PT
         '''
-        # Basic processing of just one modality
-        supp_mods   = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR', 'SEG']
-        edge_def    = {"RTSTRUCT,RTDOSE" : 0, "CT,RTDOSE" : 1, "CT,RTSTRUCT" : 2, "PET,RTSTRUCT" : 3, "CT,PT" : 4, 'MR,RTSTRUCT': 2, "RTPLAN,RTSTRUCT": 6, "RTPLAN,RTDOSE": 5, "CT,SEG": 7, "MR,SEG": 7}
-        self.mods   = query_string.split(",")
-        self.mods_n = len(self.mods)
 
-        # Deals with single node queries
-        if query_string in supp_mods:
-            final_df = self.df.loc[self.df.modality == query_string, ["study", "patient_ID", "series", "folder", "subseries"]]
-            final_df.rename(columns = {"series": f"series_{query_string}", 
-                                       "study": f"study_{query_string}", 
-                                       "folder": f"folder_{query_string}",
-                                       "subseries": f"subseries_{query_string}"}, inplace=True)
-        
-        elif self.mods_n == 2:
-            # Reverse the query string
-            query_string_rev = (",").join(self.mods[::-1])
-            if query_string in edge_def:
-                edge_type = edge_def[query_string]
-                valid = query_string
-            elif query_string_rev in edge_def:
-                edge_type = edge_def[query_string_rev]
-                valid = query_string_rev
-            else:
+        # Supported modalities and edge definitions
+        supported_modalities = ["RTDOSE", "RTSTRUCT", "CT", "PT", 'MR', 'SEG']
+        edge_definitions = {
+            "RTSTRUCT,RTDOSE" : 0, 
+            "CT,RTDOSE" : 1, 
+            "CT,RTSTRUCT" : 2,
+            "MR,RTSTRUCT": 2,  
+            "PET,RTSTRUCT" : 3, 
+            "CT,PT" : 4, 
+            "RTPLAN,RTDOSE": 5,
+            "RTPLAN,RTSTRUCT": 6, 
+            "CT,SEG": 7, 
+            "MR,SEG": 7
+        }
+                        
+        self.queried_modalities = query_string.split(",")
+
+        # Handle single-modality queries
+        if query_string in supported_modalities:
+            final_df = self.df.loc[
+                self.df["modality"] == query_string, 
+                ["study", "patient_ID", "series", "folder", "subseries"]
+            ]
+            final_df.rename(
+                columns = 
+                    {"series": f"series_{query_string}", 
+                    "study": f"study_{query_string}", 
+                    "folder": f"folder_{query_string}",
+                    "subseries": f"subseries_{query_string}"}, 
+                inplace=True
+            )
+        # Handle pair-modality queries
+        elif len(self.queried_modalities) == 2:
+            # Determine the valid query by checking the original and reversed modality pairs in edge definitions
+            valid_query = query_string if query_string in edge_definitions else ",".join(self.queried_modalities[::-1])
+            edge_type = edge_definitions.get(valid_query)
+
+            if edge_type is None:
                 raise ValueError("Invalid Query. Select valid pairs.")
             
             # For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
-            if edge_type in [0, 1, 2]:
-                edge_list = [0, 1, 2]
-                if edge_type==0:
-                    # Search for subgraphs with edges 0 or (1 and 2)
-                    regex_term = '(((?=.*0)|(?=.*5)(?=.*6))|((?=.*1)(?=.*2)))'
-                    mod = [i for i in self.mods if i in ['CT', 'MR']][0]  # making folder_mod CT/MR agnostic <-- still needs testing
-                    final_df = self.graph_query(regex_term, edge_list, f"folder_{mod}")
-                elif edge_type==1:
-                    # Search for subgraphs with edges 1 or (0 and 2)
-                    regex_term = '((?=.*1)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTSTRUCT")
-                elif edge_type==2:
-                    #Search for subgraphs with edges 2 or (1 and 0)
-                    regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
-                    final_df = self.graph_query(regex_term, edge_list, "RTDOSE") 
+            if edge_type==0:
+                # Search for subgraphs with edges 0 or (1 and 2)
+                regex_term = '(((?=.*0)|(?=.*5)(?=.*6))|((?=.*1)(?=.*2)))'
+                mod = [i for i in self.queried_modalities if i in ['CT', 'MR']][0]  # making folder_mod CT/MR agnostic <-- still needs testing
+                final_df = self.graph_query(regex_term, [0, 1, 2], f"folder_{mod}")
+            elif edge_type==1:
+                # Search for subgraphs with edges 1 or (0 and 2)
+                regex_term = '((?=.*1)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
+                final_df = self.graph_query(regex_term, [0, 1, 2], "RTSTRUCT")
+            elif edge_type==2:
+                #Search for subgraphs with edges 2 or (1 and 0)
+                regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
+                final_df = self.graph_query(regex_term, [0, 1, 2], "RTDOSE") 
             elif edge_type==7: # SEG->CT/MR
                 # keep final_df as is
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type].copy()
-                node_dest, node_origin = valid.split(",")
+                node_dest, node_origin = valid_query.split(",")
                 final_df.rename(
                     columns={
                         "study_x": "study",
@@ -334,24 +345,29 @@ class DataGraph:
                     inplace=True,
                 )
             else:
-                final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type, ["study","patient_ID_x", "study_x", "study_y", "series_x","folder_x","series_y","folder_y", "subseries_x", "subseries_y"]]
-                node_dest = valid.split(",")[0]
-                node_origin = valid.split(",")[1]
-                final_df.rename(columns={"study": "study", 
-                                         "patient_ID_x": "patient_ID",
-                                         "series_x": f"series_{node_dest}", 
-                                         "series_y": f"series_{node_origin}", 
-                                         
-                                         "study_x": f"study_{node_dest}", 
-                                         "study_y": f"study_{node_origin}", 
-                                         "folder_x": f"folder_{node_dest}", 
-                                         "folder_y": f"folder_{node_origin}",
-                                         
-                                         "subseries_x": f"subseries_{node_dest}", 
-                                         "subseries_y": f"subseries_{node_origin}"}, inplace=True)
-
-        elif self.mods_n > 2:
-            # Processing of combinations of modality
+                final_df = self.df_edges.loc[
+                    self.df_edges.edge_type == edge_type, 
+                    ["study","patient_ID_x", "study_x", "study_y", "series_x","folder_x","series_y","folder_y", "subseries_x", "subseries_y"]
+                ]
+                node_dest = valid_query.split(",")[0]
+                node_origin = valid_query.split(",")[1]
+                final_df.rename(
+                    columns={
+                        "study": "study", 
+                        "patient_ID_x": "patient_ID",
+                        "series_x": f"series_{node_dest}", 
+                        "series_y": f"series_{node_origin}", 
+                        "study_x": f"study_{node_dest}", 
+                        "study_y": f"study_{node_origin}", 
+                        "folder_x": f"folder_{node_dest}", 
+                        "folder_y": f"folder_{node_origin}",
+                        "subseries_x": f"subseries_{node_dest}", 
+                        "subseries_y": f"subseries_{node_origin}"}, 
+                        inplace=True
+                )
+        # Handle combinations of modality
+        elif len(self.queried_modalities) > 2:
+            
             bads = ["RTPLAN"]
             # CT/MR,RTSTRUCT,RTDOSE
             if (("CT" in query_string) or ('MR' in query_string)) & ("RTSTRUCT" in query_string) & ("RTDOSE" in query_string) & ("PT" not in query_string):
@@ -385,11 +401,12 @@ class DataGraph:
         final_df["index_chng"] = final_df.index.astype(str) + "_" + final_df["patient_ID"].astype(str)
         final_df.set_index("index_chng", inplace=True)
         final_df.rename_axis(None, inplace=True)
-        # change relative paths to absolute paths
+
+        # Change relative paths to absolute paths
         for col in final_df.columns:
             if col.startswith("folder"):
-                # print(self.edge_path, os.path.dirname(self.edge_path))
                 final_df[col] = final_df[col].apply(lambda x: (self.edge_path.parent.parent / x).as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
+        
         return final_df
     
     def graph_query(self, 
@@ -496,7 +513,7 @@ class DataGraph:
         self.final_dict = []
         final_df = []
         # For checking later if all the required modalities are present in a component or not
-        mods_wanted = set(self.mods)
+        mods_wanted = set(self.queried_modalities)
         
         # Determine the number of components
         for _, study in enumerate(rel_studyids): # per study_id
