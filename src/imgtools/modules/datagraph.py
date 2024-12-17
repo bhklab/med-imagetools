@@ -354,7 +354,7 @@ class DataGraph:
         # Change relative paths to absolute paths
         for col in final_df.columns:
             if col.startswith("folder"):
-                final_df[col] = final_df[col].apply(lambda x: (self.edge_path.parent.parent / x).as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
+                final_df[col] = final_df[col].apply(lambda x: (self.edge_path.parent.parent / x).resolve().as_posix() if isinstance(x, str) else x)  # input folder joined with the rel path
         
         return final_df
     
