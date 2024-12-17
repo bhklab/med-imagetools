@@ -34,11 +34,17 @@ class DataGraph:
         '''
         Parameters
         ----------
-        path_crawl
+        path_crawl: str | Path
             The csv returned by the crawler
 
-        edge_path
+        edge_path: str | Path, default = "./patient_id_full_edges.csv"
             This path denotes where the graph in the form of edge table is stored or to be stored
+        
+        visualize: bool, default = False
+            Whether to generate graph visualization using Pyviz
+        
+        update: bool, default = False
+            Whether to force update existing edge table
         '''
         self.df = pd.read_csv(path_crawl, index_col=0)
         self.edge_path = Path(edge_path)
@@ -196,11 +202,7 @@ class DataGraph:
         For a given query string(Check the documentation), returns the dataframe consisting of two columns namely modality and folder location of the connected nodes
         Parameters
         ----------
-        df
-            Dataframe consisting of the crawled data
-        df_edges
-            Processed Dataframe forming a graph, stored in the form of edge table
-        query_string
+        query_string: str
             Query string based on which dataset will be formed
         
         Query ideas:
@@ -372,26 +374,25 @@ class DataGraph:
         
         Parameters
         ----------
-        regex_term
+        regex_term: str
             To search the string in edge_type column of self.df_new which is aggregate of all the edges in a single study
 
-        edge_list
+        edge_list: List[int]
             The list of edges that should be returned in the subgraph
 
-        return_components
-            True to return the dictionary of the componets present with the condition present in the regex
-
-        change_df
+        change_df: List[str]
             Use only when you want to remove columns containing that string
 
-        remove_less_comp
+        return_components: bool, default = False
+            True to return the dictionary of the componets present with the condition present in the regex
+
+        remove_less_comp: bool, default = True
             False when you want to keep components with modalities less than the modalitiy listed in the query
         '''
         if self.df_new is None:
             self._form_agg()  # Form aggregates
         
         # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
-        # relevant_study_id = self.df_new.loc[(self.df_new.edge_type.str.contains(regex_term)), "study_x"].unique()
         relevant_study_id = self.df_new.loc[
             self.df_new.edge_type.str.contains(f"(?:{regex_term})", regex=True), "study_x"
         ].unique()
@@ -441,14 +442,14 @@ class DataGraph:
 
         Parameters
         ----------
-        df_edges_processed
+        df_edges_processed: pd.Dataframe
             Dataframe processed containing only the desired edges from the full graph
 
-        rel_studyids
+        rel_studyids: np.ndarray
             Relevant study ids to process(This operation is a bit costly 
             so better not to perform on full graph for maximum performance)
 
-        remove_less_comp
+        remove_less_comp: bool, default = True
             True for removing components with less number of edges than the query
 
         Changelog
@@ -456,51 +457,56 @@ class DataGraph:
         * June 14th, 2022: Changing from studyID-based to sample-based for loop
         * Oct 11th, 2022: Reverted to studyID-based loop + improved readability and make CT,RTSTRUCT,RTDOSE mode pass tests
         '''
-        # Storing all the components across all the studies
         self.final_dict = []
         final_df = []
-        # For checking later if all the required modalities are present in a component or not
-        mods_wanted = set(self.queried_modalities)
+        desired_modalities = set(self.queried_modalities) 
         
         # Determine the number of components
-        for _, study in enumerate(rel_studyids): # per study_id
-            df_temp   = df_edges_processed.loc[df_edges_processed.study_x == study]
-            ct_locs   = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
+        for _, study in enumerate(rel_studyids): 
+            df_temp = df_edges_processed.loc[df_edges_processed["study_x"] == study]
+
+            ct_locs = df_temp.loc[df_temp.modality_x.isin(['CT', 'MR'])]
             ct_series = ct_locs.series_x.unique()
-            comp = []
-            save_folder_comp = []
+
+            comp, save_folder_comp = [], []
             
-            # Initialization. For each component intialize a dictionary with the CTs and their connections
+            # Initialization - For each component intialize a dictionary with the CTs and their connections
             for ct in ct_series:
                 df_connections = ct_locs.loc[ct_locs.series_x == ct]
-                
                 row = df_connections.iloc[0] if len(df_connections) > 0 else df_connections
                     
-                series   = row.series_x
+                series = row.series_x
                 modality = row.modality_x
-                folder   = row.folder_x
+                folder = row.folder_x
                 
                 # For each component, this loop stores the CT and its connections
-                temp = {"study": study,
-                          ct: {"modality": modality,
-                               "folder": folder}}
+                temp = {
+                    "study": study,
+                    ct: {
+                        "modality": modality,
+                        "folder": folder
+                    }
+                }
                 
                 # For saving the components in a format easier for the main pipeline
-                folder_save = {"study": study,
-                               'patient_ID': row.patient_ID_x,
-                                f'series_{modality}': series,
-                                f'folder_{modality}': folder}
-                
+                folder_save = {
+                    "study": study,
+                    'patient_ID': row.patient_ID_x,
+                    f'series_{modality}': series,
+                    f'folder_{modality}': folder
+                }
+    
                 # This loop stores connection of the CT
-                for k in range(len(df_connections)):
-                    row_y      = df_connections.iloc[k]
-                    series_y   = row_y.series_y
-                    folder_y   = row_y.folder_y
+                for _, row_y in df_connections.iterrows():
+                    series_y = row_y.series_y
+                    folder_y = row_y.folder_y
                     modality_y = row_y.modality_y
                     
-                    temp[row.series_y] = {"modality": modality_y,
-                                          "folder": folder_y,
-                                          "conn_to": modality}
+                    temp[row.series_y] = {
+                        "modality": modality_y,
+                        "folder": folder_y,
+                        "conn_to": modality
+                    }
 
                     # Checks if there is already existing connection
                     key, key_series = self._check_save(folder_save, modality_y, modality) #CT/MR                    
@@ -512,30 +518,28 @@ class DataGraph:
                        
             # For rest of the edges left out, the connections are formed by going through the dictionary. For cases such as RTstruct-RTDose and PET-RTstruct
             rest_locs = df_temp.loc[~df_temp.modality_x.isin(['CT', 'MR']), ["series_x", "modality_x","folder_x", "series_y", "modality_y", "folder_y"]]            
-            for j in range(len(rest_locs)):
-                edge = rest_locs.iloc[j]
+            for _, edge in rest_locs.iterrows():
                 for k in range(len(ct_series)):
-                    comp[k][edge['series_y']] = {"modality": edge['modality_y'], 
-                                              "folder": edge['folder_y'], 
-                                              "conn_to": edge['modality_x']}
-                    modality_origin = edge['modality_x']
+                    comp[k][edge['series_y']] = {
+                        "modality": edge['modality_y'], 
+                        "folder": edge['folder_y'], 
+                        "conn_to": edge['modality_x']
+                    }
 
                     # RTDOSE is connected via either RTstruct or/and CT, but we usually don't care, so naming it commonly
-                    if edge['modality_y'] == "RTDOSE":
-                        modality_origin = "CT"
+                    modality_origin = "CT" if edge['modality_y'] == "RTDOSE" else modality_origin = edge['modality_x']
 
                     key, key_series = self._check_save(save_folder_comp[k], edge['modality_y'], modality_origin)
                     save_folder_comp[k][key_series] = edge['series_y']
                     save_folder_comp[k][key] = edge['folder_y']
-                    # flag = False
 
             remove_index = []
             if remove_less_comp:
                 for j in range(len(ct_series)):
                     # Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
-                    mods_present = set([items.split("_")[1] for items in save_folder_comp[j] if items.split("_")[0] == "folder"])
+                    present_modalities = set([items.split("_")[1] for items in save_folder_comp[j] if items.split("_")[0] == "folder"])
                     # Checking if all the read modalities are present in a component
-                    if mods_wanted.issubset(mods_present):
+                    if desired_modalities.issubset(present_modalities):
                         remove_index.append(j)
                 save_folder_comp = [save_folder_comp[idx] for idx in remove_index]        
                 comp = [comp[idx] for idx in remove_index]    
