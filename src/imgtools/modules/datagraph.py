@@ -418,8 +418,12 @@ class DataGraph:
         '''
         Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
         '''
+
+        def list_edges(series) -> str:
+            return reduce(lambda x, y:str(x) + str(y), series)
+
         self.df_edges['edge_type_str'] = self.df_edges['edge_type'].astype(str)
-        self.df_new = self.df_edges.groupby("study_x").agg({'edge_type_str':self.list_edges})
+        self.df_new = self.df_edges.groupby("study_x").agg({'edge_type_str':list_edges})
         self.df_new.reset_index(level=0, inplace=True) 
         self.df_new["edge_type"] = self.df_new["edge_type_str"]
 
@@ -550,8 +554,7 @@ class DataGraph:
         final_df = pd.DataFrame(final_df)
         return final_df
     
-    @staticmethod
-    def _check_save(save_dict: dict, node, dest) -> Tuple[str, str]:
+    def _check_save(self, save_dict: dict, node: str, dest: str) -> Tuple[str, str]:
         key = f"folder_{node}_{dest}"
         key_series = f"series_{node}_{dest}"
         i = 1
@@ -561,6 +564,3 @@ class DataGraph:
             i +=1
         return key, key_series
     
-    @staticmethod
-    def list_edges(series) -> str:
-        return reduce(lambda x, y:str(x) + str(y), series)
