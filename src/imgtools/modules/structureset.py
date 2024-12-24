@@ -27,24 +27,28 @@ labeling schemes, such as those based on regular expressions, and supports
 multiple output formats for segmentation masks. It also integrates robust
 error handling and logging to handle malformed or incomplete DICOM files.
 """
+
 import re
+from itertools import groupby
 from typing import Dict, List, Optional, TypeVar, Union
+
 import numpy as np
-from pydicom.dataset import FileDataset
 import SimpleITK as sitk
 from pydicom import dcmread
-from itertools import groupby
+from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
+from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
-from imgtools.logging import logger
 
 T = TypeVar('T')
 
 
 class StructureSet:
-	def __init__(self, roi_points: Dict[str, List[np.ndarray]], metadata: Optional[Dict[str, T]] = None) -> None:
+	def __init__(
+		self, roi_points: Dict[str, List[np.ndarray]], metadata: Optional[Dict[str, T]] = None
+	) -> None:
 		"""Initialize the StructureSet class containing contour points.
 
 		Parameters
@@ -58,15 +62,17 @@ class StructureSet:
 
 		Examples
 		--------
-		>>> roi_points = {"GTV": [np.array([[0, 0, 0], [1, 1, 1]])]}
-		>>> metadata = {"PatientName": "John Doe"}
+		>>> roi_points = {'GTV': [np.array([[0, 0, 0], [1, 1, 1]])]}
+		>>> metadata = {'PatientName': 'John Doe'}
 		>>> structure_set = StructureSet(roi_points, metadata)
 		"""
 		self.roi_points: Dict[str, List[np.ndarray]] = roi_points
 		self.metadata: Dict[str, T] = metadata if metadata is not None else {}
 
 	@classmethod
-	def from_dicom_rtstruct(cls, rtstruct_path: str, suppress_warnings: bool = False) -> 'StructureSet':
+	def from_dicom_rtstruct(
+		cls, rtstruct_path: str, suppress_warnings: bool = False
+	) -> 'StructureSet':
 		"""Create a StructureSet instance from a DICOM RTSTRUCT file.
 
 		Parameters
@@ -90,7 +96,7 @@ class StructureSet:
 
 		Examples
 		--------
-		>>> structure_set = StructureSet.from_dicom_rtstruct("path/to/rtstruct.dcm")
+		>>> structure_set = StructureSet.from_dicom_rtstruct('path/to/rtstruct.dcm')
 		"""
 		# Load the RTSTRUCT file
 		rtstruct: FileDataset = dcmread(rtstruct_path, force=True)
@@ -105,7 +111,7 @@ class StructureSet:
 			except AttributeError as ae:
 				if not suppress_warnings:
 					logger.warning(
-						f"Could not get points for ROI `{name}`.",
+						f'Could not get points for ROI `{name}`.',
 						rtstruct_path=rtstruct_path,
 						error=ae,
 					)
@@ -115,7 +121,7 @@ class StructureSet:
 
 		# Return the StructureSet instance
 		return cls(roi_points, metadata)
-	
+
 	@staticmethod
 	def _get_roi_points(rtstruct: FileDataset, roi_index: int) -> List[np.ndarray]:
 		"""Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
@@ -140,21 +146,23 @@ class StructureSet:
 
 		Examples
 		--------
-		>>> rtstruct = dcmread("path/to/rtstruct.dcm", force=True)
+		>>> rtstruct = dcmread('path/to/rtstruct.dcm', force=True)
 		>>> points = StructureSet._get_roi_points(rtstruct, 0)
 		"""
 		# Check for ROIContourSequence
-		if not hasattr(rtstruct, "ROIContourSequence"):
+		if not hasattr(rtstruct, 'ROIContourSequence'):
 			raise AttributeError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
-		
+
 		# Check if ROI index exists in the sequence
 		if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
-			raise AttributeError(f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'.")
+			raise AttributeError(
+				f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
+			)
 
 		roi_contour = rtstruct.ROIContourSequence[roi_index]
 
 		# Check for ContourSequence in the specified ROI
-		if not hasattr(roi_contour, "ContourSequence"):
+		if not hasattr(roi_contour, 'ContourSequence'):
 			raise AttributeError(f"ROI at index {roi_index} is missing 'ContourSequence'.")
 
 		contour_sequence = roi_contour.ContourSequence
@@ -162,7 +170,7 @@ class StructureSet:
 		# Check for ContourData in each contour
 		contour_points = []
 		for i, slc in enumerate(contour_sequence):
-			if not hasattr(slc, "ContourData"):
+			if not hasattr(slc, 'ContourData'):
 				raise AttributeError(
 					f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
 				)
@@ -174,7 +182,6 @@ class StructureSet:
 	def roi_names(self) -> List[str]:
 		"""List of all ROI (Region of Interest) names."""
 		return list(self.roi_points.keys())
-
 
 	def _assign_labels(
 		self,
@@ -216,27 +223,27 @@ class StructureSet:
 		Examples
 		--------
 		Lets say we have the following ROI names:
-		>>> self.roi_names = ["GTV", "PTV", "CTV_0", "CTV_1"]
+		>>> self.roi_names = ['GTV', 'PTV', 'CTV_0', 'CTV_1']
 
 		Case 1: Default behavior
 		All matching ROIs for each pattern are assigned the same label(number).
 		note how the CTV ROIs are assigned the same label: 1
-		>>> self._assign_labels(["GTV", "CTV.*"])
+		>>> self._assign_labels(['GTV', 'CTV.*'])
 		{'GTV': 0, 'CTV_0': 1, 'CTV_1': 1}
 
 		Case 2: Select only the first match for each pattern
 		Subsequent matches are ignored.
-		>>> self._assign_labels(["GTV", "CTV.*"], roi_select_first=True)
+		>>> self._assign_labels(['GTV', 'CTV.*'], roi_select_first=True)
 		{'GTV': 0, 'CTV_0': 1}
 
 		Case 3: Separate labels for each match
 		Even if a pattern matches multiple ROIs, each ROI gets a separate label.
 		note how now the CTV ROIs are assigned different labels: 1 and 2
-		>>> self._assign_labels(["GTV", "CTV.*"], roi_separate=True)
+		>>> self._assign_labels(['GTV', 'CTV.*'], roi_separate=True)
 		{'GTV': 0, 'CTV_0': 1, 'CTV_1': 2}
 
 		# Case 4: Grouped patterns
-		>>> self._assign_labels([["GTV", "PTV"], "CTV.*"])
+		>>> self._assign_labels([['GTV', 'PTV'], 'CTV.*'])
 		{'GTV': 0, 'PTV': 0, 'CTV_0': 1, 'CTV_1': 1}
 		"""
 		if not names:
@@ -280,50 +287,57 @@ class StructureSet:
 						if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
 							matched = True
 							if roi_separate:
-								labels[f"{name}_{i}"] = cur_label
+								labels[f'{name}_{i}'] = cur_label
 							else:
 								labels[name] = cur_label
 				cur_label += 1
 
 		# Validate output
 		if not labels:
-			raise ValueError(f"No matching ROIs found for the provided patterns: {names}")
+			raise ValueError(f'No matching ROIs found for the provided patterns: {names}')
 
 		return labels
 
 	def get_mask(self, reference_image, mask, label, idx, continuous):
 		size = reference_image.GetSize()[::-1]
 		physical_points = self.roi_points.get(label, np.array([]))
-		mask_points = physical_points_to_idxs(reference_image, physical_points, continuous=continuous)
+		mask_points = physical_points_to_idxs(
+			reference_image, physical_points, continuous=continuous
+		)
 		for contour in mask_points:
 			try:
 				z, slice_points = np.unique(contour[:, 0]), contour[:, 1:]
-				if len(z) == 1:  # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
+				if (
+					len(z) == 1
+				):  # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
 					slice_mask = polygon2mask(size[1:], slice_points)
 					mask[z[0], :, :, idx] += slice_mask
 			except:  # rounding errors for points on the boundary
 				if z == mask.shape[0]:
 					z -= 1
-				elif z == -1: #?
+				elif z == -1:  # ?
 					z += 1
 				elif z > mask.shape[0] or z < -1:
-					raise IndexError(f"{z} index is out of bounds for image sized {mask.shape}.")
-				
-				# if the contour spans only 1 z-slice 
+					raise IndexError(f'{z} index is out of bounds for image sized {mask.shape}.')
+
+				# if the contour spans only 1 z-slice
 				if len(z) == 1:
 					z_idx = int(np.floor(z[0]))
 					slice_mask = polygon2mask(size[1:], slice_points)
 					mask[z_idx, :, :, idx] += slice_mask
 				else:
-					raise ValueError("This contour is corrupted and spans across 2 or more slices.")
+					raise ValueError('This contour is corrupted and spans across 2 or more slices.')
 
-	def to_segmentation(self, reference_image: sitk.Image,
-						roi_names: Dict[str, str] = None,
-						continuous: bool = True,
-						existing_roi_indices: Dict[str, int] = None,
-						ignore_missing_regex: bool = False,
-						roi_select_first: bool = False,
-						roi_separate: bool = False) -> Segmentation:
+	def to_segmentation(
+		self,
+		reference_image: sitk.Image,
+		roi_names: Dict[str, str] = None,
+		continuous: bool = True,
+		existing_roi_indices: Dict[str, int] = None,
+		ignore_missing_regex: bool = False,
+		roi_select_first: bool = False,
+		roi_separate: bool = False,
+	) -> Segmentation:
 		"""Convert the structure set to a Segmentation object.
 
 		Parameters
@@ -348,7 +362,7 @@ class StructureSet:
 		that `roi_names=['pat']` and `roi_names=[['pat']]` can lead
 		to different label assignments, depending on how many ROI names
 		match the pattern. E.g. if `self.roi_names = ['fooa', 'foob']`,
-		passing `roi_names=['foo(a|b)']` will result in a segmentation with 
+		passing `roi_names=['foo(a|b)']` will result in a segmentation with
 		two labels, but passing `roi_names=[['foo(a|b)']]` will result in
 		one label for both `'fooa'` and `'foob'`.
 
@@ -359,34 +373,42 @@ class StructureSet:
 		labels = {}
 		if roi_names is None or roi_names == {}:
 			roi_names = self.roi_names  # all the contour names
-			labels = self._assign_labels(roi_names, roi_select_first, roi_separate)  # only the ones that match the regex
+			labels = self._assign_labels(
+				roi_names, roi_select_first, roi_separate
+			)  # only the ones that match the regex
 		elif isinstance(roi_names, dict):
 			for name, pattern in roi_names.items():
 				if isinstance(pattern, str):
 					matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
 					if matching_names:
-						labels[name] = matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
-				elif isinstance(pattern, list):  # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
+						labels[name] = (
+							matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+						)
+				elif isinstance(
+					pattern, list
+				):  # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
 					labels[name] = []
 					for pattern_one in pattern:
-						matching_names = list(self._assign_labels([pattern_one], roi_select_first).keys())
+						matching_names = list(
+							self._assign_labels([pattern_one], roi_select_first).keys()
+						)
 						if matching_names:
 							labels[name].extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
 		if isinstance(roi_names, str):
 			roi_names = [roi_names]
 		if isinstance(roi_names, list):  # won't this always trigger after the previous?
 			labels = self._assign_labels(roi_names, roi_select_first)
-		logger.debug(f"Found {len(labels)} labels", labels=labels)
+		logger.debug(f'Found {len(labels)} labels', labels=labels)
 		all_empty = True
 		for v in labels.values():
 			if v != []:
 				all_empty = False
 		if all_empty:
 			if not ignore_missing_regex:
-				raise ValueError(f"No ROIs matching {roi_names} found in {self.roi_names}.")
+				raise ValueError(f'No ROIs matching {roi_names} found in {self.roi_names}.')
 			else:
 				return None
-		labels = {k:v for (k,v) in labels.items() if v != [] }
+		labels = {k: v for (k, v) in labels.items() if v != []}
 		size = reference_image.GetSize()[::-1] + (len(labels),)
 		mask = np.zeros(size, dtype=np.uint8)
 
@@ -400,16 +422,21 @@ class StructureSet:
 		else:
 			for name, label in labels.items():
 				self.get_mask(reference_image, mask, name, label, continuous)
-			seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
+			seg_roi_indices = {'_'.join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
 		mask[mask > 1] = 1
 		mask = sitk.GetImageFromArray(mask, isVector=True)
 		mask.CopyInformation(reference_image)
-		mask = Segmentation(mask, roi_indices=seg_roi_indices, existing_roi_indices=existing_roi_indices, raw_roi_names=labels)  # in the segmentation, pass all the existing roi names and then process is in the segmentation class
+		mask = Segmentation(
+			mask,
+			roi_indices=seg_roi_indices,
+			existing_roi_indices=existing_roi_indices,
+			raw_roi_names=labels,
+		)  # in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
 		return mask
 
 	def __repr__(self):
 		# return f"<StructureSet with ROIs: {self.roi_names!r}>"
 		sorted_rois = sorted(self.roi_names)
-		return f"<StructureSet with ROIs: {sorted_rois!r}>"
+		return f'<StructureSet with ROIs: {sorted_rois!r}>'
