@@ -155,15 +155,15 @@ class StructureSet:
 
 		# Check if ROI index exists in the sequence
 		if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
-			raise AttributeError(
-				f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
-			)
+			msg = f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
+			raise AttributeError(msg)
 
 		roi_contour = rtstruct.ROIContourSequence[roi_index]
 
 		# Check for ContourSequence in the specified ROI
 		if not hasattr(roi_contour, 'ContourSequence'):
-			raise AttributeError(f"ROI at index {roi_index} is missing 'ContourSequence'.")
+			msg = f"ROI at index {roi_index} is missing 'ContourSequence'."
+			raise AttributeError(msg)
 
 		contour_sequence = roi_contour.ContourSequence
 
@@ -171,9 +171,8 @@ class StructureSet:
 		contour_points = []
 		for i, slc in enumerate(contour_sequence):
 			if not hasattr(slc, 'ContourData'):
-				raise AttributeError(
-					f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
-				)
+				msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
+				raise AttributeError(msg)
 			contour_points.append(np.array(slc.ContourData).reshape(-1, 3))
 
 		return contour_points
@@ -264,18 +263,22 @@ class StructureSet:
 
 		# Case 2: Iterate over `names` (could contain regex patterns or sublists)
 		for pattern in names:
-			# Skip further processing if all names have been assigned
-			if sorted(names) == sorted(labels.keys()):
-				break
+			# TODO: refactor this to use a generator function for better readability
+			# and to avoid code duplication
 
 			# Single pattern: string or regex
 			if isinstance(pattern, str):
-				for i, name in enumerate(self.roi_names):
-					if re.fullmatch(pattern, name, flags=re.IGNORECASE):
-						labels[name] = cur_label
+				matched = False
+				for _, roi_name in enumerate(self.roi_names):
+					if re.fullmatch(pattern, roi_name, flags=re.IGNORECASE):
+						matched = True
+						# Group all matches under the same label
+						labels[roi_name] = cur_label
 						if roi_select_first:
 							break
-				cur_label += 1
+				# Increment label counter only if at least one match occurred
+				if matched:
+					cur_label += 1
 
 			# Nested patterns: list of strings or regexes
 			elif isinstance(pattern, list):
@@ -283,18 +286,23 @@ class StructureSet:
 				for subpattern in pattern:
 					if roi_select_first and matched:
 						break
-					for i, name in enumerate(self.roi_names):
-						if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
+					for i, roi_name in enumerate(self.roi_names):
+						if re.fullmatch(subpattern, roi_name, flags=re.IGNORECASE):
 							matched = True
 							if roi_separate:
-								labels[f'{name}_{i}'] = cur_label
+								labels[f'{roi_name}_{i}'] = cur_label
 							else:
-								labels[name] = cur_label
+								labels[roi_name] = cur_label
 				cur_label += 1
+
+			else:
+				msg = f'Invalid pattern type: {type(pattern)}, expected str or list.'
+				raise ValueError(msg)
 
 		# Validate output
 		if not labels:
-			raise ValueError(f'No matching ROIs found for the provided patterns: {names}')
+			msg = f'No matching ROIs found for the provided patterns: {names}'
+			raise ValueError(msg)
 
 		return labels
 

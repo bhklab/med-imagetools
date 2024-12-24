@@ -103,6 +103,7 @@ ignore = [
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
   "D206",
   "N813",
+  "EM101",
 ]
 [lint.pydocstyle]
 convention = "numpy"
