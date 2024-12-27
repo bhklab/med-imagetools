@@ -7,14 +7,14 @@ include = [
   "src/imgtools/logging/**/*.py",
   "src/imgtools/modules/segmentation.py",
   "src/imgtools/dicom/**/*.py",
-  # "src/imgtools/utils/crawl.py",
+  "src/imgtools/io/loaders.py",
 ]
 
 extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
-  "src/imgtools/io/**/*.py",
+  # "src/imgtools/io/**/*.py",
   "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
@@ -112,5 +112,6 @@ convention = "numpy"
 [format]
 
 quote-style = "single"
-indent-style = "tab"
+indent-style = "space"
+
 docstring-code-format = true
