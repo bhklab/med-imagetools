@@ -1878,8 +1878,6 @@ packages:
   - platformdirs >=2
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
-  arch: x86_64
-  platform: linux
   license: MIT
   license_family: MIT
   purls:
@@ -1898,8 +1896,6 @@ packages:
   - python >=3.12,<3.13.0a0
   - python >=3.12,<3.13.0a0 *_cpython
   - python_abi 3.12.* *_cp312
-  arch: arm64
-  platform: osx
   license: MIT
   license_family: MIT
   purls:
@@ -4238,11 +4234,11 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 1.10.1
-  sha256: 36c89ab6bd709d3ac6f2690c2b116b394aad288c8c5408d5e18d5b233af3891f
+  sha256: afabb0f166a2eafe410cc4f32c6a1c6ef3043cead1eb5c61057941ada5b02634
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
-  - numpy>=1.26.4,<2
+  - numpy>=1.26.4
   - matplotlib>=3.8.4,<4
   - pandas>=2.2.2,<3
   - pydicom>=2.4.4
