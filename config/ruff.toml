@@ -94,6 +94,11 @@ select = [
   # Pydocstyle
   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
   # "D",
+
+  ###########################################################################
+  # MIGRATION TO NUMPY2
+  # https://numpy.org/doc/stable/numpy_2_0_migration_guide.html
+  "NPY201",
 ]
 
 ignore = [

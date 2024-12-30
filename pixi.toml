@@ -100,7 +100,7 @@ serve.cmd = "mkdocs serve -f mkdocs.yml"
 ############################################## QUALITY ###############################################
 # Quality includes linting, type checking, and formatting
 [feature.quality.dependencies]
-ruff = ">=0.4.4"
+ruff = ">=0.4.8"
 mypy = ">=1.13.0,<2"
 types-pytz = ">=2024.2.0.20241003,<2025"
 types-tqdm = ">=4.66.0.20240417,<5"
