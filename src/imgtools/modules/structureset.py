@@ -47,7 +47,9 @@ T = TypeVar('T')
 
 class StructureSet:
     def __init__(
-        self, roi_points: Dict[str, List[np.ndarray]], metadata: Optional[Dict[str, T]] = None
+        self,
+        roi_points: Dict[str, List[np.ndarray]],
+        metadata: Optional[Dict[str, T]] = None,
     ) -> None:
         """Initialize the StructureSet class containing contour points.
 
@@ -184,7 +186,7 @@ class StructureSet:
         """List of all ROI (Region of Interest) names."""
         return list(self.roi_points.keys())
 
-    def _assign_labels(
+    def _assign_labels(  # noqa
         self,
         names: List[Union[str, List[str]]],
         roi_select_first: bool = False,
@@ -308,7 +310,7 @@ class StructureSet:
 
         return labels
 
-    def get_mask(self, reference_image, mask, label, idx, continuous) -> None:
+    def get_mask(self, reference_image, mask, label, idx, continuous) -> None:  # noqa
         size = reference_image.GetSize()[::-1]
         physical_points = self.roi_points.get(label, np.array([]))
         mask_points = physical_points_to_idxs(
@@ -322,14 +324,14 @@ class StructureSet:
                 ):  # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
                     slice_mask = polygon2mask(size[1:], slice_points)
                     mask[z[0], :, :, idx] += slice_mask
-            except:  # rounding errors for points on the boundary
+            except Exception as e:  # rounding errors for points on the boundary
                 if z == mask.shape[0]:
                     z -= 1
                 elif z == -1:  # ?
                     z += 1
                 elif z > mask.shape[0] or z < -1:
                     msg = f'{z} index is out of bounds for image sized {mask.shape}.'
-                    raise IndexError(msg)
+                    raise IndexError(msg) from e
 
                 # if the contour spans only 1 z-slice
                 if len(z) == 1:
@@ -337,9 +339,11 @@ class StructureSet:
                     slice_mask = polygon2mask(size[1:], slice_points)
                     mask[z_idx, :, :, idx] += slice_mask
                 else:
-                    raise ValueError('This contour is corrupted and spans across 2 or more slices.')
+                    raise ValueError(
+                        'This contour is corrupted and spans across 2 or more slices.'
+                    ) from e
 
-    def to_segmentation(
+    def to_segmentation(  # noqa
         self,
         reference_image: sitk.Image,
         roi_names: Dict[str, str] = None,

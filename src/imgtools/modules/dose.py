@@ -5,7 +5,8 @@ from typing import Dict, Optional, TypeVar, Union
 import numpy as np
 import SimpleITK as sitk
 from matplotlib import pyplot as plt
-from pydicom import dcmread, Dataset
+from pydicom import Dataset, dcmread
+
 from imgtools.logging import logger
 
 T = TypeVar('T')
@@ -105,7 +106,7 @@ class Dose(sitk.Image):
         }
         """
         try:
-            n_ROI = len(self.df.DVHSequence)
+            num_roi = len(self.df.DVHSequence)
             self.dvh = {}
             # These properties are uniform across all the ROIs
             self.dvh['dvh_type'] = self.df.DVHSequence[0].DVHType
@@ -113,23 +114,23 @@ class Dose(sitk.Image):
             self.dvh['dose_type'] = self.df.DVHSequence[0].DoseType
             self.dvh['vol_units'] = self.df.DVHSequence[0].DVHVolumeUnits
             # ROI specific properties
-            for i in range(n_ROI):
+            for i in range(num_roi):
                 raw_data = np.array(self.df.DVHSequence[i].DVHData)
                 n = len(raw_data)
 
                 # ROI ID
-                ROI_reference = (
+                roi_reference = (
                     self.df.DVHSequence[i].DVHReferencedROISequence[0].ReferencedROINumber
                 )
 
                 # Make dictionary for each ROI ID
-                self.dvh[ROI_reference] = {}
+                self.dvh[roi_reference] = {}
 
                 # DVH specifc properties
                 doses_bin = np.cumsum(raw_data[0:n:2])
                 vol = raw_data[1:n:2]
-                self.dvh[ROI_reference]['dose_bins'] = doses_bin.tolist()
-                self.dvh[ROI_reference]['vol'] = vol.tolist()
+                self.dvh[roi_reference]['dose_bins'] = doses_bin.tolist()
+                self.dvh[roi_reference]['vol'] = vol.tolist()
 
                 # ROI specific properties
                 tot_vol = np.sum(vol)
@@ -137,10 +138,10 @@ class Dose(sitk.Image):
                 min_dose = doses_bin[non_zero_index[0]]
                 max_dose = doses_bin[non_zero_index[-1]]
                 mean_dose = np.sum(doses_bin * (vol / np.sum(vol)))
-                self.dvh[ROI_reference]['max_dose'] = max_dose
-                self.dvh[ROI_reference]['mean_dose'] = mean_dose
-                self.dvh[ROI_reference]['min_dose'] = min_dose
-                self.dvh[ROI_reference]['total_vol'] = tot_vol
+                self.dvh[roi_reference]['max_dose'] = max_dose
+                self.dvh[roi_reference]['mean_dose'] = mean_dose
+                self.dvh[roi_reference]['min_dose'] = min_dose
+                self.dvh[roi_reference]['total_vol'] = tot_vol
         except AttributeError:
             logger.warning('No DVH information present in the DICOM. Returning empty dictionary')
             self.dvh = {}
