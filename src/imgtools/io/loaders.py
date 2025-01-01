@@ -16,7 +16,19 @@ from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.utils.dicomutils import get_modality_metadata
 
 
-def read_image(path):
+def read_image(path: str) -> sitk.Image:
+    """Read an image from the specified file path using SimpleITK.
+
+    Parameters
+    ----------
+    path : str
+        The file path to the image.
+
+    Returns
+    -------
+    sitk.Image
+        The image read from the file.
+    """
     return sitk.ReadImage(path)
 
 
@@ -25,7 +37,7 @@ def read_dicom_series(
     series_id: Optional[str] = None,
     recursive: bool = False,
     file_names: list = None,
-):
+) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 
     Parameters

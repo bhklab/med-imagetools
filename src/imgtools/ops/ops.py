@@ -1,5 +1,3 @@
-import json
-import os
 import pathlib
 import re
 import time
@@ -8,7 +6,6 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 import numpy as np
 import SimpleITK as sitk
 
-# from ..io import *
 from imgtools.io.loaders import (
     BaseLoader,
     ImageCSVLoader,
@@ -26,13 +23,8 @@ from imgtools.io.writers import (
     SegNrrdWriter,
 )
 from imgtools.logging import logger
-
-# from ..modules import DataGraph
-# from ..modules import map_over_labels
 from imgtools.modules.datagraph import DataGraph
-from imgtools.modules.segmentation import Segmentation, map_over_labels
-
-# from .functional import *
+from imgtools.modules import Segmentation, map_over_labels, StructureSet
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
@@ -48,16 +40,16 @@ from imgtools.ops.functional import (
     window_intensity,
     zoom,
 )
-
-# from ..utils import image_to_array, array_to_image, crawl, physical_points_to_idxs
-from imgtools.utils import crawl
-from imgtools.utils.arrayutils import array_to_image
-from imgtools.utils.imageutils import image_to_array, physical_points_to_idxs
+from imgtools.utils import (
+    array_to_image,
+    crawl,
+    image_to_array,
+    physical_points_to_idxs,
+)
 
 LoaderFunction = TypeVar("LoaderFunction")
 ImageFilter = TypeVar("ImageFilter")
 Function = TypeVar("Function")
-StructureSet = TypeVar("StructureSet")
 
 
 # Base class
