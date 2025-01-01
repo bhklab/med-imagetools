@@ -2,7 +2,7 @@ from typing import Dict, TypeVar
 
 import SimpleITK as sitk
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 class Scan:

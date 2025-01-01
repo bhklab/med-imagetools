@@ -10,14 +10,12 @@ import SimpleITK as sitk
 from matplotlib import pyplot as plt
 from pydicom import dcmread
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 def read_image(path: str, series_id: Optional[str] = None):
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(
-        path, seriesID=series_id if series_id else ""
-    )
+    dicom_names = reader.GetGDCMSeriesFileNames(path, seriesID=series_id if series_id else '')
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -26,9 +24,7 @@ def read_image(path: str, series_id: Optional[str] = None):
 
 
 class PET(sitk.Image):
-    def __init__(
-        self, img_pet, df, factor, calc, metadata: Optional[Dict[str, T]] = None
-    ) -> None:
+    def __init__(self, img_pet, df, factor, calc, metadata: Optional[Dict[str, T]] = None) -> None:
         super().__init__(img_pet)
         self.img_pet = img_pet
         self.df = df
@@ -40,7 +36,7 @@ class PET(sitk.Image):
             self.metadata = {}
 
     @classmethod
-    def from_dicom_pet(cls, path, series_id=None, type="SUV"):
+    def from_dicom_pet(cls, path, series_id=None, type='SUV'):
         """
         Reads the PET scan and returns the data frame and the image dosage in SITK format
         There are two types of existing formats which has to be mentioned in the type
@@ -58,13 +54,13 @@ class PET(sitk.Image):
         df = dcmread(path_one)
         calc = False
         try:
-            if type == "SUV":
-                factor = df.to_json_dict()["70531000"]["Value"][0]
+            if type == 'SUV':
+                factor = df.to_json_dict()['70531000']['Value'][0]
             else:
-                factor = df.to_json_dict()["70531009"]["Value"][0]
+                factor = df.to_json_dict()['70531009']['Value'][0]
         except:
             warnings.warn(
-                "Scale factor not available in DICOMs. Calculating based on metadata, may contain errors"
+                'Scale factor not available in DICOMs. Calculating based on metadata, may contain errors'
             )
             factor = cls.calc_factor(df, type)
             calc = True
@@ -92,27 +88,25 @@ class PET(sitk.Image):
         """
         self.metadata = {}
         with contextlib.suppress(Exception):
-            self.metadata["weight"] = float(self.df.PatientWeight)
+            self.metadata['weight'] = float(self.df.PatientWeight)
         try:
-            self.metadata["scan_time"] = datetime.datetime.strptime(
-                self.df.AcquisitionTime, "%H%M%S.%f"
+            self.metadata['scan_time'] = datetime.datetime.strptime(
+                self.df.AcquisitionTime, '%H%M%S.%f'
             )
-            self.metadata["injection_time"] = datetime.datetime.strptime(
-                self.df.RadiopharmaceuticalInformationSequence[
-                    0
-                ].RadiopharmaceuticalStartTime,
-                "%H%M%S.%f",
+            self.metadata['injection_time'] = datetime.datetime.strptime(
+                self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
+                '%H%M%S.%f',
             )
-            self.metadata["half_life"] = float(
+            self.metadata['half_life'] = float(
                 self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
             )
-            self.metadata["injected_dose"] = float(
+            self.metadata['injected_dose'] = float(
                 self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
             )
         except:
             pass
-        self.metadata["factor"] = self.factor
-        self.metadata["Values_Assumed"] = self.calc
+        self.metadata['factor'] = self.factor
+        self.metadata['Values_Assumed'] = self.calc
         return self.metadata
 
     def resample_pet(self, ct_scan: sitk.Image) -> sitk.Image:
@@ -131,7 +125,7 @@ class PET(sitk.Image):
         overlay
         """
         resampled_pt = self.resample_pet(ct_scan)
-        fig = plt.figure("Overlayed image", figsize=[15, 10])
+        fig = plt.figure('Overlayed image', figsize=[15, 10])
         pt_arr = sitk.GetArrayFromImage(resampled_pt)
         plt.subplot(1, 3, 1)
         plt.imshow(pt_arr[slice_number, :, :])
@@ -152,19 +146,15 @@ class PET(sitk.Image):
         try:
             weight = float(df.PatientWeight) * 1000
         except:
-            warnings.warn("Patient Weight Not Present. Taking 75Kg")
+            warnings.warn('Patient Weight Not Present. Taking 75Kg')
             weight = 75000
         try:
-            scan_time = datetime.datetime.strptime(df.AcquisitionTime, "%H%M%S.%f")
+            scan_time = datetime.datetime.strptime(df.AcquisitionTime, '%H%M%S.%f')
             injection_time = datetime.datetime.strptime(
-                df.RadiopharmaceuticalInformationSequence[
-                    0
-                ].RadiopharmaceuticalStartTime,
-                "%H%M%S.%f",
+                df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
+                '%H%M%S.%f',
             )
-            half_life = float(
-                df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
-            )
+            half_life = float(df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife)
             injected_dose = float(
                 df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
             )
@@ -175,14 +165,12 @@ class PET(sitk.Image):
             # Calculate SUV factor
             injected_dose_decay = a * injected_dose
         except:
-            warnings.warn("Not enough data available, taking average values")
-            a = np.exp(
-                -np.log(2) * (1.75 * 3600) / 6588
-            )  # 90 min waiting time, 15 min preparation
+            warnings.warn('Not enough data available, taking average values')
+            a = np.exp(-np.log(2) * (1.75 * 3600) / 6588)  # 90 min waiting time, 15 min preparation
             injected_dose_decay = 420000000 * a  # 420 MBq
 
         suv = weight / injected_dose_decay
-        if type == "SUV":
+        if type == 'SUV':
             return suv
         else:
             return 1 / a

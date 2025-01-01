@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 from pydicom import dcmread, Dataset
 from imgtools.logging import logger
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 def read_image(path: str) -> sitk.Image:  # noqa
@@ -38,7 +38,7 @@ class Dose(sitk.Image):
         """
         Reads the data and returns the data frame and the image dosage in SITK format
         """
-        dose = sitk.ReadImage(path) if ".dcm" in path else read_image(path)
+        dose = sitk.ReadImage(path) if '.dcm' in path else read_image(path)
 
         # if 4D, make 3D
         if dose.GetDimension() == 4:
@@ -72,7 +72,7 @@ class Dose(sitk.Image):
         overlay
         """
         resampled_dose = self.resample_dose(ct_scan)
-        fig = plt.figure("Overlayed RTdose image", figsize=[15, 10])
+        fig = plt.figure('Overlayed RTdose image', figsize=[15, 10])
         dose_arr = sitk.GetArrayFromImage(resampled_dose)
         plt.subplot(1, 3, 1)
         plt.imshow(dose_arr[slice_number, :, :])
@@ -108,10 +108,10 @@ class Dose(sitk.Image):
             n_ROI = len(self.df.DVHSequence)
             self.dvh = {}
             # These properties are uniform across all the ROIs
-            self.dvh["dvh_type"] = self.df.DVHSequence[0].DVHType
-            self.dvh["dose_units"] = self.df.DVHSequence[0].DoseUnits
-            self.dvh["dose_type"] = self.df.DVHSequence[0].DoseType
-            self.dvh["vol_units"] = self.df.DVHSequence[0].DVHVolumeUnits
+            self.dvh['dvh_type'] = self.df.DVHSequence[0].DVHType
+            self.dvh['dose_units'] = self.df.DVHSequence[0].DoseUnits
+            self.dvh['dose_type'] = self.df.DVHSequence[0].DoseType
+            self.dvh['vol_units'] = self.df.DVHSequence[0].DVHVolumeUnits
             # ROI specific properties
             for i in range(n_ROI):
                 raw_data = np.array(self.df.DVHSequence[i].DVHData)
@@ -119,9 +119,7 @@ class Dose(sitk.Image):
 
                 # ROI ID
                 ROI_reference = (
-                    self.df.DVHSequence[i]
-                    .DVHReferencedROISequence[0]
-                    .ReferencedROINumber
+                    self.df.DVHSequence[i].DVHReferencedROISequence[0].ReferencedROINumber
                 )
 
                 # Make dictionary for each ROI ID
@@ -130,8 +128,8 @@ class Dose(sitk.Image):
                 # DVH specifc properties
                 doses_bin = np.cumsum(raw_data[0:n:2])
                 vol = raw_data[1:n:2]
-                self.dvh[ROI_reference]["dose_bins"] = doses_bin.tolist()
-                self.dvh[ROI_reference]["vol"] = vol.tolist()
+                self.dvh[ROI_reference]['dose_bins'] = doses_bin.tolist()
+                self.dvh[ROI_reference]['vol'] = vol.tolist()
 
                 # ROI specific properties
                 tot_vol = np.sum(vol)
@@ -139,14 +137,12 @@ class Dose(sitk.Image):
                 min_dose = doses_bin[non_zero_index[0]]
                 max_dose = doses_bin[non_zero_index[-1]]
                 mean_dose = np.sum(doses_bin * (vol / np.sum(vol)))
-                self.dvh[ROI_reference]["max_dose"] = max_dose
-                self.dvh[ROI_reference]["mean_dose"] = mean_dose
-                self.dvh[ROI_reference]["min_dose"] = min_dose
-                self.dvh[ROI_reference]["total_vol"] = tot_vol
+                self.dvh[ROI_reference]['max_dose'] = max_dose
+                self.dvh[ROI_reference]['mean_dose'] = mean_dose
+                self.dvh[ROI_reference]['min_dose'] = min_dose
+                self.dvh[ROI_reference]['total_vol'] = tot_vol
         except AttributeError:
-            logger.warning(
-                "No DVH information present in the DICOM. Returning empty dictionary"
-            )
+            logger.warning('No DVH information present in the DICOM. Returning empty dictionary')
             self.dvh = {}
 
         return self.dvh
