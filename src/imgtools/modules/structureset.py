@@ -306,7 +306,7 @@ class StructureSet:
 
 		return labels
 
-	def get_mask(self, reference_image, mask, label, idx, continuous):
+	def get_mask(self, reference_image, mask, label, idx, continuous) -> None:
 		size = reference_image.GetSize()[::-1]
 		physical_points = self.roi_points.get(label, np.array([]))
 		mask_points = physical_points_to_idxs(
@@ -326,7 +326,8 @@ class StructureSet:
 				elif z == -1:  # ?
 					z += 1
 				elif z > mask.shape[0] or z < -1:
-					raise IndexError(f'{z} index is out of bounds for image sized {mask.shape}.')
+					msg = f'{z} index is out of bounds for image sized {mask.shape}.'
+					raise IndexError(msg)
 
 				# if the contour spans only 1 z-slice
 				if len(z) == 1:
@@ -413,7 +414,8 @@ class StructureSet:
 				all_empty = False
 		if all_empty:
 			if not ignore_missing_regex:
-				raise ValueError(f'No ROIs matching {roi_names} found in {self.roi_names}.')
+				msg = f'No ROIs matching {roi_names} found in {self.roi_names}.'
+				raise ValueError(msg)
 			else:
 				return None
 		labels = {k: v for (k, v) in labels.items() if v != []}
@@ -444,7 +446,7 @@ class StructureSet:
 
 		return mask
 
-	def __repr__(self):
+	def __repr__(self) -> str:
 		# return f"<StructureSet with ROIs: {self.roi_names!r}>"
 		sorted_rois = sorted(self.roi_names)
 		return f'<StructureSet with ROIs: {sorted_rois!r}>'

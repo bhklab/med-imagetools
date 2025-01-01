@@ -1,11 +1,12 @@
-from pathlib import Path
 from functools import reduce
+from pathlib import Path
 from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
 
 from imgtools.logging import logger
+
 
 class DataGraph:
     '''
@@ -99,7 +100,7 @@ class DataGraph:
         """
         Generates visualization using Pyviz, a wrapper around visJS. The visualization can be found at datanet.html
         """
-        from pyvis.network import Network  
+        from pyvis.network import Network
         logger.info("Generating visualizations...")
         data_net = Network(height='100%', width='100%', bgcolor='#222222', font_color='white')
 
@@ -197,7 +198,7 @@ class DataGraph:
         df_edges = pd.concat(df_list, axis=0, ignore_index=True)
         return df_edges
     
-    def parser(self, query_string: str) -> pd.DataFrame:
+    def parser(self, query_string: str) -> pd.DataFrame: # noqa
         '''
         For a given query string(Check the documentation), returns the dataframe consisting of two columns namely modality and folder location of the connected nodes
         Parameters
@@ -419,7 +420,7 @@ class DataGraph:
         Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
         '''
 
-        def list_edges(series) -> str:
+        def list_edges(series) -> str: # noqa
             return reduce(lambda x, y:str(x) + str(y), series)
 
         self.df_edges['edge_type_str'] = self.df_edges['edge_type'].astype(str)
