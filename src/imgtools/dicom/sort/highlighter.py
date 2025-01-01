@@ -14,7 +14,9 @@ class TagHighlighter(RegexHighlighter):
 
     Examples
     --------
-    >>> from rich.console import Console
+    >>> from rich.console import (
+    ...     Console,
+    ... )
     >>> highlighter = TagHighlighter()
     >>> console = Console(
                     highlighter=highlighter,

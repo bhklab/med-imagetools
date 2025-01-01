@@ -33,14 +33,29 @@ Symlinks vs. Hardlinks:
 Examples
 --------
 Move a file:
-    >>> from pathlib import Path
-    >>> handle_file(Path('source.txt'), Path('destination.txt'), action=FileAction.MOVE)
+    >>> from pathlib import (
+    ...     Path,
+    ... )
+    >>> handle_file(
+    ...     Path('source.txt'),
+    ...     Path('destination.txt'),
+    ...     action=FileAction.MOVE,
+    ... )
 
 Create a symlink:
-    >>> handle_file(Path('source.txt'), Path('symlink.txt'), action=FileAction.SYMLINK)
+    >>> handle_file(
+    ...     Path('source.txt'),
+    ...     Path('symlink.txt'),
+    ...     action=FileAction.SYMLINK,
+    ... )
 
 Copy a file:
-    >>> handle_file(Path('source.txt'), Path('copy.txt'), action=FileAction.COPY, overwrite=True)
+    >>> handle_file(
+    ...     Path('source.txt'),
+    ...     Path('copy.txt'),
+    ...     action=FileAction.COPY,
+    ...     overwrite=True,
+    ... )
 """
 
 import shutil

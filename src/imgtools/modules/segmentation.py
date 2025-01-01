@@ -34,7 +34,13 @@ Notes
 Examples
 --------
 # Creating a Segmentation object from a SimpleITK.Image
->>> seg = Segmentation(image, roi_indices={'GTV': 1, 'PTV': 2})
+>>> seg = Segmentation(
+...     image,
+...     roi_indices={
+...         'GTV': 1,
+...         'PTV': 2,
+...     },
+... )
 
 # Extracting an individual label
 >>> gtv_mask = seg.get_label(name='GTV')
@@ -46,7 +52,10 @@ Examples
 >>> def compute_statistics(label_image):
 >>>     return sitk.LabelStatisticsImageFilter().Execute(label_image)
 
->>> stats = map_over_labels(segmentation=seg, f=compute_statistics)
+>>> stats = map_over_labels(
+...     segmentation=seg,
+...     f=compute_statistics,
+... )
 """
 
 from __future__ import annotations
@@ -86,11 +95,24 @@ def accepts_segmentations(f: Callable) -> Callable:
     Examples
     --------
     >>> @accepts_segmentations
-    ... def some_processing_function(img, *args, **kwargs):
+    ... def some_processing_function(
+    ...     img,
+    ...     *args,
+    ...     **kwargs,
+    ... ):
     ...     return img  # Perform some operation on the image
-    >>> segmentation = Segmentation(image, roi_indices={'ROI1': 1, 'ROI2': 2})
+    >>> segmentation = Segmentation(
+    ...     image,
+    ...     roi_indices={
+    ...         'ROI1': 1,
+    ...         'ROI2': 2,
+    ...     },
+    ... )
     >>> result = some_processing_function(segmentation)
-    >>> isinstance(result, Segmentation)
+    >>> isinstance(
+    ...     result,
+    ...     Segmentation,
+    ... )
     True
     """
 
@@ -148,11 +170,30 @@ def map_over_labels(
 
     Examples
     --------
-    >>> def threshold(label_img, threshold=0.5):
-    ...     return sitk.BinaryThreshold(label_img, lowerThreshold=threshold)
-    >>> segmentation = Segmentation(image, roi_indices={'ROI1': 1, 'ROI2': 2})
-    >>> result = map_over_labels(segmentation, threshold, threshold=0.5)
-    >>> isinstance(result, Segmentation)
+    >>> def threshold(
+    ...     label_img,
+    ...     threshold=0.5,
+    ... ):
+    ...     return sitk.BinaryThreshold(
+    ...         label_img,
+    ...         lowerThreshold=threshold,
+    ...     )
+    >>> segmentation = Segmentation(
+    ...     image,
+    ...     roi_indices={
+    ...         'ROI1': 1,
+    ...         'ROI2': 2,
+    ...     },
+    ... )
+    >>> result = map_over_labels(
+    ...     segmentation,
+    ...     threshold,
+    ...     threshold=0.5,
+    ... )
+    >>> isinstance(
+    ...     result,
+    ...     Segmentation,
+    ... )
     True
     """
     if include_background:

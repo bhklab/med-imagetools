@@ -19,13 +19,24 @@ Sanitize a filename:
     'test_file_name.dcm'
 
 Truncate a UID:
-    >>> truncate_uid('1.2.840.10008.1.2.1', last_digits=5)
+    >>> truncate_uid(
+    ...     '1.2.840.10008.1.2.1',
+    ...     last_digits=5,
+    ... )
     '.1.2.1'
 
 Read tags from a DICOM file:
-    >>> from pathlib import Path
-    >>> tags = ['PatientID', 'StudyInstanceUID']
-    >>> read_tags(Path('sample.dcm'), tags)
+    >>> from pathlib import (
+    ...     Path,
+    ... )
+    >>> tags = [
+    ...     'PatientID',
+    ...     'StudyInstanceUID',
+    ... ]
+    >>> read_tags(
+    ...     Path('sample.dcm'),
+    ...     tags,
+    ... )
     {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
 """
 
@@ -91,9 +102,15 @@ def truncate_uid(uid: str, last_digits: int = 5) -> str:
 
     Examples
     --------
-    >>> truncate_uid('1.2.840.10008.1.2.1', last_digits=5)
+    >>> truncate_uid(
+    ...     '1.2.840.10008.1.2.1',
+    ...     last_digits=5,
+    ... )
     '.1.2.1'
-    >>> truncate_uid('12345', last_digits=10)
+    >>> truncate_uid(
+    ...     '12345',
+    ...     last_digits=10,
+    ... )
     '12345'
     """
     assert uid is not None
@@ -151,16 +168,34 @@ def read_tags(
     Examples
     --------
     Read tags from a valid DICOM file with truncation:
-    >>> from pathlib import Path
-    >>> read_tags(Path('sample.dcm'), ['PatientID', 'StudyInstanceUID'])
+    >>> from pathlib import (
+    ...     Path,
+    ... )
+    >>> read_tags(
+    ...     Path('sample.dcm'),
+    ...     [
+    ...         'PatientID',
+    ...         'StudyInstanceUID',
+    ...     ],
+    ... )
     {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
 
     Read tags without truncating UIDs:
-    >>> read_tags(Path('sample.dcm'), ['PatientID', 'StudyInstanceUID'], truncate=False)
+    >>> read_tags(
+    ...     Path('sample.dcm'),
+    ...     [
+    ...         'PatientID',
+    ...         'StudyInstanceUID',
+    ...     ],
+    ...     truncate=False,
+    ... )
     {'PatientID': '12345', 'StudyInstanceUID': '1.2.840.10008.1.2.1'}
 
     Handle missing tags:
-    >>> read_tags(Path('sample.dcm'), ['NonexistentTag'])
+    >>> read_tags(
+    ...     Path('sample.dcm'),
+    ...     ['NonexistentTag'],
+    ... )
     [warn] No value for tag: NonexistentTag in file: sample.dcm
     {'NonexistentTag': 'UNKNOWN'}
     """

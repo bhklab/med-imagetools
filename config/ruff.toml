@@ -110,12 +110,22 @@ ignore = [
   "N813",
   "EM101",
 ]
+
+[lint.mccabe]
+max-complexity = 10
+
 [lint.pydocstyle]
 convention = "numpy"
 
+[lint.isort]
+known-first-party = ["imgtools", "readii"]
+force-wrap-aliases = true
+combine-as-imports = true
+relative-imports-order = "closest-to-furthest"
 
 [format]
 
 quote-style = "single"
 indent-style = "space"
 docstring-code-format = true
+docstring-code-line-length = 71

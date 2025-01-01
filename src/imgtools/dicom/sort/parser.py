@@ -19,17 +19,28 @@ Examples
 ***Setup:***
 
 >>> import re
->>> from imgtools.dicom.sort.parser import PatternParser
+>>> from imgtools.dicom.sort.parser import (
+...     PatternParser,
+... )
 
 ***Example 1***: Suppose you want to parse a target pattern like `{Key1}-{Key2}`
 and replace the placeholders with values from a dictionary:
 
->>> key_values = {'Key1': 'John', 'Key2': 'Doe'}
+>>> key_values = {
+...     'Key1': 'John',
+...     'Key2': 'Doe',
+... }
 
 >>> pattern = '{Key1}-{Key2}'
 >>> pattern_parser = re.compile(r'\{(\w+)\}')
->>> parser = PatternParser(pattern, pattern_parser)
->>> formatted_pattern, keys = parser.parse()
+>>> parser = PatternParser(
+...     pattern,
+...     pattern_parser,
+... )
+>>> (
+...     formatted_pattern,
+...     keys,
+... ) = parser.parse()
 >>> print(formatted_pattern)
 '%(Key1)s-%(Key2)s'
 >>> print(keys)
@@ -45,12 +56,21 @@ Now you can use the formatted pattern to replace the placeholders:
 ***Example 2***: Suppose you want to parse a target pattern like `%<Key1> and {Key2}`
 and replace the placeholders with values from a dictionary:
 
->>> key_values = {'Key1': 'Alice', 'Key2': 'Bob'}
+>>> key_values = {
+...     'Key1': 'Alice',
+...     'Key2': 'Bob',
+... }
 
 >>> pattern = '%<Key1> and {Key2}'
 >>> pattern_parser = re.compile(r'%<(\w+)>|\{(\w+)\}')
->>> parser = PatternParser(pattern, pattern_parser)
->>> formatted_pattern, keys = parser.parse()
+>>> parser = PatternParser(
+...     pattern,
+...     pattern_parser,
+... )
+>>> (
+...     formatted_pattern,
+...     keys,
+... ) = parser.parse()
 >>> print(formatted_pattern)
 '%(Key1)s and %(Key2)s'
 >>> print(keys)
@@ -66,12 +86,21 @@ Now you can use the formatted pattern to replace the placeholders:
 ***Example 3***: Suppose you want to parse a target pattern like `/path/to/{Key1}/and/{Key2}`
 and replace the placeholders with values from a dictionary:
 
->>> key_values = {'Key1': 'folder1', 'Key2': 'folder2'}
+>>> key_values = {
+...     'Key1': 'folder1',
+...     'Key2': 'folder2',
+... }
 
 >>> pattern = '/path/to/{Key1}/and/{Key2}'
 >>> pattern_parser = re.compile(r'\{(\w+)\}')
->>> parser = PatternParser(pattern, pattern_parser)
->>> formatted_pattern, keys = parser.parse()
+>>> parser = PatternParser(
+...     pattern,
+...     pattern_parser,
+... )
+>>> (
+...     formatted_pattern,
+...     keys,
+... ) = parser.parse()
 >>> print(formatted_pattern)
 '/path/to/%(Key1)s/and/%(Key2)s'
 >>> print(keys)
@@ -113,13 +142,24 @@ class PatternParser:
     Examples
     --------
     >>> import re
-    >>> from imgtools.dicom.sort.parser import PatternParser
+    >>> from imgtools.dicom.sort.parser import (
+    ...     PatternParser,
+    ... )
 
-    >>> key_values = {'Key1': 'Value1', 'Key2': 'Value2'}
+    >>> key_values = {
+    ...     'Key1': 'Value1',
+    ...     'Key2': 'Value2',
+    ... }
     >>> pattern = '{Key1}-{Key2}'
     >>> pattern_parser = re.compile(r'\{(\w+)\}')
-    >>> parser = PatternParser(pattern, pattern_parser)
-    >>> formatted_pattern, keys = parser.parse()
+    >>> parser = PatternParser(
+    ...     pattern,
+    ...     pattern_parser,
+    ... )
+    >>> (
+    ...     formatted_pattern,
+    ...     keys,
+    ... ) = parser.parse()
     >>> print(formatted_pattern)
     '%(Key1)s-%(Key2)s'
     >>> print(keys)
