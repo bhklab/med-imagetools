@@ -7,6 +7,8 @@ include = [
   "src/imgtools/logging/**/*.py",
   "src/imgtools/modules/*.py",
   "src/imgtools/dicom/**/*.py",
+  "src/imgtools/io/writers/*.py",
+  "src/imgtools/io/pattern_parser.py",
   # "src/imgtools/utils/crawl.py",
 ]
 
@@ -14,7 +16,6 @@ extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
-  "src/imgtools/io/**/*.py",
   "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
