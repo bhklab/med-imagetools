@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import ABC, abstractmethod
 
 import glob
 import json
@@ -148,15 +149,17 @@ def read_dicom_auto(path, series=None, file_names=None):
         return obj
 
 
-class BaseLoader:
+class BaseLoader(ABC):
+    @abstractmethod
     def __getitem__(self, subject_id):
-        raise NotImplementedError
+        pass
 
     def __len__(self):
         return len(self.keys())
 
+    @abstractmethod
     def keys(self):
-        raise NotImplementedError
+        pass
 
     def items(self):
         return ((k, self[k]) for k in self.keys())

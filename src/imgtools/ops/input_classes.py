@@ -13,6 +13,7 @@ from imgtools.io.loaders import (
 from imgtools.logging import logger
 from imgtools.modules.datagraph import DataGraph
 from imgtools.utils import crawl
+
 import time
 from .base_classes import BaseInput
 
@@ -38,7 +39,7 @@ class CrawlGraphInput(BaseInput):
         Directory name for imgtools output files. Default is ".imgtools".
 
     db : dict
-        Dictionary containing the indexed dataset.
+        Dictionary containing the indexed dataset, created by the crawler.
 
     graph : DataGraph
         DataGraph object containing the dataset graph.
@@ -60,10 +61,11 @@ class CrawlGraphInput(BaseInput):
         imgtools_dir: str = ".imgtools",
     ):
         self.dir_path = pathlib.Path(dir_path)
-        self.parent = self.dir_path.parent
         self.dataset_name = self.dir_path.name
         self.n_jobs = n_jobs
         self.update_crawl = update_crawl
+        self.imgtools_dir = imgtools_dir
+
         self.csv_path = self._create_path(f"imgtools_{self.dataset_name}.csv")
         self.json_path = self._create_path(f"imgtools_{self.dataset_name}.json")
         self.edge_path = self._create_path(f"imgtools_{self.dataset_name}_edges.csv")
@@ -75,8 +77,11 @@ class CrawlGraphInput(BaseInput):
         logger.info("Crawl and graph completed", time=time.time() - start)
 
     def _create_path(self, file_name: str) -> pathlib.Path:
-        """Helper function to create paths."""
-        return self.parent / self.imgtools_dir / file_name
+        """Helper function to create paths.
+
+        TODO: would be nice to allow users to specify this better
+        """
+        return self.dir_path.parent / self.imgtools_dir / file_name
 
     def _crawl(self) -> dict:
         # CRAWLER
