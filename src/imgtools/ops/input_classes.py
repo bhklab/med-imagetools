@@ -3,8 +3,11 @@ Input classes refactored to use the BaseInput abstract base class.
 """
 
 import pathlib
+import time
 from typing import Any, List, Optional
+
 import pandas as pd
+
 from imgtools.io.loaders import (
     ImageCSVLoader,
     ImageFileLoader,
@@ -14,7 +17,6 @@ from imgtools.logging import logger
 from imgtools.modules.datagraph import DataGraph
 from imgtools.utils import crawl
 
-import time
 from .base_classes import BaseInput
 
 
@@ -87,7 +89,7 @@ class CrawlGraphInput(BaseInput):
         # CRAWLER
         # -------
         # Checks if dataset has already been indexed
-        if not self.csv_path.exists() or self.update:
+        if not self.csv_path.exists() or self.update_crawl:
             logger.debug("Output exists, force updating.", path=self.csv_path)
             logger.info("Indexing the dataset...")
             db = crawl(
@@ -99,8 +101,12 @@ class CrawlGraphInput(BaseInput):
             logger.info(f"Number of patients in the dataset: {len(db)}")
         else:
             logger.warning(
-                "The dataset has already been indexed. Use --update to force update."
+                "The dataset has already been indexed. Use update_crawl=True to force update."
             )
+            import json
+
+            with self.json_path.open("r") as f:
+                db = json.load(f)
         return db
 
     def parse_graph(self, modalities: str | List[str]) -> pd.DataFrame:
@@ -125,7 +131,7 @@ class CrawlGraphInput(BaseInput):
         modalities = modalities if isinstance(modalities, str) else ",".join(modalities)
         logger.info("Querying graph", modality=modalities)
         self.df_combined = self.graph.parser(modalities)
-        return self.df_combined
+        return self.df_combined.dropna(axis=1, how="any")
 
     def _init_graph(self) -> DataGraph:
         # GRAPH

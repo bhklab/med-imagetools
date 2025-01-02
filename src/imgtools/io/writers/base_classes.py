@@ -279,7 +279,7 @@ class AbstractBaseWriter(ABC):
         import re
 
         # Replace bad characters with underscores
-        sanitized = re.sub(r'[<>:"/\\|?*]', "_", filename)
+        sanitized = re.sub(r'[<>:"\\|?*]', "_", filename)
 
         # Optionally trim leading/trailing spaces or periods
         sanitized = sanitized.strip(" .")
