@@ -4,8 +4,8 @@
 # slowly fix everything
 
 include = [
-  "src/imgtools/logging/**/*.py", 
-  # "src/imgtools/cli/**/*.py",
+  "src/imgtools/logging/**/*.py",
+  "src/imgtools/modules/*.py",
   "src/imgtools/dicom/**/*.py",
   # "src/imgtools/utils/crawl.py",
 ]
@@ -15,16 +15,13 @@ extend-exclude = [
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
   "src/imgtools/io/**/*.py",
-  "src/imgtools/modules/**/*.py",
   "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
   "src/imgtools/image.py",
 ]
 
-extend-include = [
-  "src/imgtools/ops/functional.py",
-]
+extend-include = ["src/imgtools/ops/functional.py"]
 
 
 line-length = 100
@@ -94,6 +91,11 @@ select = [
   # Pydocstyle
   # https://docs.astral.sh/ruff/rules/#pydocstyle-d
   # "D",
+
+  ###########################################################################
+  # MIGRATION TO NUMPY2
+  # https://numpy.org/doc/stable/numpy_2_0_migration_guide.html
+  "NPY201",
 ]
 
 ignore = [
@@ -105,14 +107,25 @@ ignore = [
   # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules 
   "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
   "D206",
-  "N813", 
+  "N813",
+  "EM101",
 ]
+
+[lint.mccabe]
+max-complexity = 10
+
 [lint.pydocstyle]
 convention = "numpy"
 
+[lint.isort]
+known-first-party = ["imgtools", "readii"]
+force-wrap-aliases = true
+combine-as-imports = true
+relative-imports-order = "closest-to-furthest"
 
 [format]
 
 quote-style = "single"
-indent-style = "tab"
+indent-style = "space"
 docstring-code-format = true
+docstring-code-line-length = 71

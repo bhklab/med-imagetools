@@ -77,10 +77,10 @@ while the basename `1-1.dcm` remains unchanged.
 """
 
 from imgtools.dicom.sort.exceptions import (
-	DICOMSortError,
-	InvalidDICOMKeyError,
-	InvalidPatternError,
-	SorterBaseError,
+    DICOMSortError,
+    InvalidDICOMKeyError,
+    InvalidPatternError,
+    SorterBaseError,
 )
 from imgtools.dicom.sort.highlighter import TagHighlighter
 from imgtools.dicom.sort.parser import PatternParser
@@ -90,16 +90,16 @@ from imgtools.dicom.sort.utils import read_tags
 from imgtools.dicom.sort.dicomsorter import DICOMSorter
 
 __all__ = [
-	'TagHighlighter',
-	'DICOMSortError',
-	'InvalidDICOMKeyError',
-	'InvalidPatternError',
-	'SorterBaseError',
-	'PatternParser',
-	'SorterBase',
-	'read_tags',
-	'FileAction',
-	'handle_file',
-	'resolve_path',
-	'DICOMSorter',
+    'TagHighlighter',
+    'DICOMSortError',
+    'InvalidDICOMKeyError',
+    'InvalidPatternError',
+    'SorterBaseError',
+    'PatternParser',
+    'SorterBase',
+    'read_tags',
+    'FileAction',
+    'handle_file',
+    'resolve_path',
+    'DICOMSorter',
 ]
