@@ -454,7 +454,13 @@ class DataGraph:
         else:
             raise ValueError('Please enter the correct query')
 
+        # Reset index and set index to patient_ID
+        # drop means the old index is removed
         final_df.reset_index(drop=True, inplace=True)
+        # Set the index to the format of "{index}_{patient_ID}"
+        # i.e "0_JohnDoe-34" "1_JohnDoe-34"
+        # This helps separate the same patient with multiple edges / connections
+        # aka if multiple Studies are present
         final_df['index_chng'] = (
             final_df.index.astype(str) + '_' + final_df['patient_ID'].astype(str)
         )

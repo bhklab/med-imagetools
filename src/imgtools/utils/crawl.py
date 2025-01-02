@@ -9,6 +9,8 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 from imgtools.logging import logger
 
+
+# fmt: off
 def crawl_one(folder):
     folder_path = pathlib.Path(folder)
     database = {}
@@ -19,19 +21,27 @@ def crawl_one(folder):
         # instance (slice) information
         for dcm in dicoms:
             try:
-                dcm_path  = pathlib.Path(dcm)
+                dcm_path = pathlib.Path(dcm)
                 # parent    = dcm_path.parent#.as_posix()
-                fname     = dcm_path.name
-                rel_path  = dcm_path.relative_to(folder_path.parent.parent)                                        # rel_path of dicom from folder
-                rel_posix = rel_path.parent.as_posix()     # folder name + until parent folder of dicom
+                fname = dcm_path.name
+                rel_path = dcm_path.relative_to(
+                    folder_path.parent.parent
+                )  # rel_path of dicom from folder
+                rel_posix = (
+                    rel_path.parent.as_posix()
+                )  # folder name + until parent folder of dicom
 
-                meta      = dcmread(dcm, force=True, stop_before_pixels=True)
-                patient   = str(meta.PatientID)
-                study     = str(meta.StudyInstanceUID)
-                series    = str(meta.SeriesInstanceUID)
-                instance  = str(meta.SOPInstanceUID)
+                meta = dcmread(dcm, force=True, stop_before_pixels=True)
+                patient = str(meta.PatientID)
+                study = str(meta.StudyInstanceUID)
+                series = str(meta.SeriesInstanceUID)
+                instance = str(meta.SOPInstanceUID)
 
-                reference_ct, reference_rs, reference_pl,  = "", "", ""
+                (
+                    reference_ct,
+                    reference_rs,
+                    reference_pl,
+                ) = "", "", ""
                 tr, te, tesla, scan_seq, elem = "", "", "", "", ""
                 try:
                     orientation = str(meta.ImageOrientationPatient)  # (0020, 0037)
@@ -39,29 +49,48 @@ def crawl_one(folder):
                     orientation = ""
 
                 try:
-                    orientation_type = str(meta.AnatomicalOrientationType)  # (0010, 2210)
+                    orientation_type = str(
+                        meta.AnatomicalOrientationType
+                    )  # (0010, 2210)
                 except:
                     orientation_type = ""
 
                 try:  # RTSTRUCT
-                    reference_ct = str(meta.ReferencedFrameOfReferenceSequence[0].RTReferencedStudySequence[0].RTReferencedSeriesSequence[0].SeriesInstanceUID)
-                except: 
-                    try: # SEGMENTATION
-                        reference_ct = str(meta.ReferencedSeriesSequence[0].SeriesInstanceUID)
+                    reference_ct = str(
+                        meta.ReferencedFrameOfReferenceSequence[0]
+                        .RTReferencedStudySequence[0]
+                        .RTReferencedSeriesSequence[0]
+                        .SeriesInstanceUID
+                    )
+                except:
+                    try:  # SEGMENTATION
+                        reference_ct = str(
+                            meta.ReferencedSeriesSequence[0].SeriesInstanceUID
+                        )
                     except:
                         try:  # RTDOSE
-                            reference_rs = str(meta.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)
+                            reference_rs = str(
+                                meta.ReferencedStructureSetSequence[
+                                    0
+                                ].ReferencedSOPInstanceUID
+                            )
                         except:
                             pass
                         try:
-                            reference_ct = str(meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID)
+                            reference_ct = str(
+                                meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
+                            )
                         except:
                             pass
                         try:
-                            reference_pl = str(meta.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)
+                            reference_pl = str(
+                                meta.ReferencedRTPlanSequence[
+                                    0
+                                ].ReferencedSOPInstanceUID
+                            )
                         except:
                             pass
-                
+
                 # MRI Tags
                 try:
                     tr = float(meta.RepetitionTime)
@@ -83,16 +112,20 @@ def crawl_one(folder):
                     elem = str(meta.ImagedNucleus)
                 except:
                     pass
-                
+
                 # Frame of Reference UIDs
                 try:
                     reference_frame = str(meta.FrameOfReferenceUID)
                 except:
                     try:
-                        reference_frame = str(meta.ReferencedFrameOfReferenceSequence[0].FrameOfReferenceUID)
+                        reference_frame = str(
+                            meta.ReferencedFrameOfReferenceSequence[
+                                0
+                            ].FrameOfReferenceUID
+                        )
                     except:
                         reference_frame = ""
-        
+
                 try:
                     study_description = str(meta.StudyDescription)
                 except:
@@ -111,13 +144,15 @@ def crawl_one(folder):
                 if patient not in database:
                     database[patient] = {}
                 if study not in database[patient]:
-                    database[patient][study] = {'description': study_description}
+                    database[patient][study] = {"description": study_description}
                 if series not in database[patient][study]:
                     rel_crawl_path = rel_posix
-                    if meta.Modality == 'RTSTRUCT':
+                    if meta.Modality == "RTSTRUCT":
                         rel_crawl_path = os.path.join(rel_crawl_path, fname)
-                    
-                    database[patient][study][series] = {'description': series_description}
+
+                    database[patient][study][series] = {
+                        "description": series_description
+                    }
                 if subseries not in database[patient][study][series]:
                     database[patient][study][series][subseries] = {'instances': {},
                                                                    'instance_uid': instance,
@@ -136,29 +171,32 @@ def crawl_one(folder):
                                                                    'imaged_nucleus': elem,
                                                                    'fname': rel_path.as_posix()  # temporary until we switch to json-based loading
                                                                    }
-                database[patient][study][series][subseries]['instances'][instance] = rel_path.as_posix()
+                database[patient][study][series][subseries]["instances"][instance] = (
+                    rel_path.as_posix()
+                )
             except Exception as e:
                 print(folder, e)
                 pass
-    
+
     return database
 
 
 def to_df(database_dict):
     df = pd.DataFrame()
-    for pat in database_dict:
-        for study in database_dict[pat]:
-            for series in database_dict[pat][study]:
-                if series != 'description':  # skip description key in dict
-                    for subseries in database_dict[pat][study][series]:
-                        if subseries != 'description':  # skip description key in dict
-                            columns = ['patient_ID', 'study', 'study_description', 
+    columns = ['patient_ID', 'study', 'study_description',  # noqa
                                        'series', 'series_description', 'subseries', 'modality', 
                                        'instances', 'instance_uid', 
                                        'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder',
                                        'orientation', 'orientation_type', 'MR_repetition_time', 'MR_echo_time', 
                                        'MR_scan_sequence', 'MR_magnetic_field_strength', 'MR_imaged_nucleus', 'file_path']
-                            values = [pat, study, database_dict[pat][study]['description'], 
+    for pat in database_dict:
+        for study in database_dict[pat]:
+            for series in database_dict[pat][study]:
+                if series != "description":  # skip description key in dict
+                    for subseries in database_dict[pat][study][series]:
+                        if subseries != 'description':  # skip description key in dict
+                            
+                            values = [pat, study, database_dict[pat][study]['description'], # noqa
                                       series, database_dict[pat][study][series]['description'], 
                                       subseries, database_dict[pat][study][series][subseries]['modality'], 
                                       len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
@@ -174,58 +212,67 @@ def to_df(database_dict):
                             df = pd.concat([df, df_add], ignore_index=True)
     return df
 
+# fmt: on
 
-def crawl(top, 
-          n_jobs: int = -1):
-    # top is the input directory in the argument parser from autotest.py
+
+def crawl(
+    top: pathlib.Path,
+    n_jobs: int = -1,
+    csv_path: pathlib.Path | None = None,
+    json_path: pathlib.Path | None = None,
+) -> dict:
+
     database_list = []
     folders = glob.glob(pathlib.Path(top, "*").as_posix())
     logger.info(f"Crawling {len(folders)} folders in {top}")
-    database_list = Parallel(n_jobs=n_jobs)(delayed(crawl_one)(pathlib.Path(top, folder).as_posix()) for folder in tqdm(folders, desc="Crawling folders", leave=False))
+    database_list = Parallel(n_jobs=n_jobs)(
+        delayed(crawl_one)(pathlib.Path(top, folder).as_posix())
+        for folder in tqdm(folders, desc="Crawling folders", leave=False)
+    )
 
-    logger.info(f"Converting list to dictionary")
+    logger.info("Converting list to dictionary")
     # convert list to dictionary
     database_dict = {}
     for db in database_list:
         for key in db:
             database_dict[key] = db[key]
-    
-    # save one level above imaging folders
-    parent, dataset  = os.path.split(top)
 
-    parent_imgtools = pathlib.Path(parent, ".imgtools").as_posix()
+    # configure json path
+    if json_path is None:
+        json_path = top.parent / ".imgtools" / f"imgtools_{top.name}.json"
 
-    if not os.path.exists(parent_imgtools):
-        try:
-            os.makedirs(parent_imgtools)
-        except:
-            pass
-    
+    json_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # save as json
-    json_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.json')
+    # configure csv path
+    if csv_path is None:
+        csv_path = top.parent / ".imgtools" / f"imgtools_{top.name}.csv"
+
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Save as json
     logger.info(f"Saving as json to {json_path}")
-    with open(json_path.as_posix(), 'w') as f:
+    with json_path.open("w") as f:
         json.dump(database_dict, f, indent=4)
-    
-    # save as dataframe
-    df_path = pathlib.Path(parent_imgtools, f'imgtools_{dataset}.csv').as_posix()
-    logger.info(f"Saving as dataframe to {df_path}")
+
+    # Save as dataframe
+    logger.info(f"Saving as dataframe to {csv_path}")
     df = to_df(database_dict)
-    df.to_csv(df_path)
-    
+    df.to_csv(csv_path)
+
     return database_dict
 
 
 if __name__ == "__main__":
     parser = ArgumentParser("Dataset DICOM Crawler")
-    parser.add_argument("directory",
-                        type=str,
-                        help="Top-level directory of the dataset.")
-    parser.add_argument("--n_jobs",
-                        type=int,
-                        default=16,
-                        help="Number of parallel processes for multiprocessing.")
+    parser.add_argument(
+        "directory", type=str, help="Top-level directory of the dataset."
+    )
+    parser.add_argument(
+        "--n_jobs",
+        type=int,
+        default=os.cpu_count() - 2,
+        help="Number of parallel processes for multiprocessing.",
+    )
 
     args = parser.parse_args()
     db = crawl(args.directory, n_jobs=args.n_jobs)
