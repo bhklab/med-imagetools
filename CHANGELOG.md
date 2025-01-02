@@ -1,12 +1,49 @@
 # CHANGELOG
 
 
+## v1.11.0 (2025-01-02)
+
+### Features
+
+- Minor grade refactoring ([#158](https://github.com/bhklab/med-imagetools/pull/158),
+  [`0dff0f4`](https://github.com/bhklab/med-imagetools/commit/0dff0f403d802d517614105b50f1c4008945e32d))
+
+Co-authored-by: Joshua Siraj <joshua.siraj@ryerson.ca>
+
+### Refactoring
+
+- Improve logging, logic, and type annotations
+  ([#151](https://github.com/bhklab/med-imagetools/pull/151),
+  [`ef4d0e7`](https://github.com/bhklab/med-imagetools/commit/ef4d0e7c8f6b5e52c395916d0235645517a7ca03))
+
+- **New Features** - Enhanced logging flexibility with new parameters for specifying logger names. -
+  Improved progress reporting in the folder crawling process with descriptive progress bars.
+
+- **Bug Fixes** - Updated error handling for invalid file actions and DICOM tag checks for clearer
+  user feedback.
+
+- **Documentation** 	- Improved docstring clarity and formatting across multiple functions.
+
+- **Refactor** 	- Streamlined configuration files for testing and linting processes. - Restructured
+  class and function definitions for better readability and maintainability.
+
+- **Style** 	- Consistent formatting applied to function signatures and docstrings.
+
+- Modules/datagraph.py ([#153](https://github.com/bhklab/med-imagetools/pull/153),
+  [`41a7c88`](https://github.com/bhklab/med-imagetools/commit/41a7c88992525c8cdfd690ef287ab5f76dc8e588))
+
+
 ## v1.10.1 (2024-12-03)
 
 ### Bug Fixes
 
 - Update .gitignore to exclude SQLite and database files
   ([`95a2179`](https://github.com/bhklab/med-imagetools/commit/95a217913798b2f1f4aa2555f1f8fddc65b5b44d))
+
+### Chores
+
+- **sem-ver**: 1.10.1
+  ([`07a41fe`](https://github.com/bhklab/med-imagetools/commit/07a41fe073f9ce6a88aaa032caf69a7fb6086314))
 
 
 ## v1.10.0 (2024-12-03)
