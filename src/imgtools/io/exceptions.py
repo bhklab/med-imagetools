@@ -1,0 +1,2 @@
+class DirectoryNotFoundError(Exception):
+    pass
