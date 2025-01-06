@@ -4203,13 +4203,13 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 1.10.1
-  sha256: 2fb59140f1401533d1bdc6e07b61a329e04f7430132ee149f9f8f7125510b4b5
+  sha256: c073ca91c80d3c58a48ef5f06203b4dc7e002a047970b8f54cf57eded7ccf75c
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
-  - numpy>=2.0.0,<3
+  - numpy<3
   - matplotlib>=3.8.4,<4
-  - pandas>=2.2.2,<3
+  - pandas<3
   - pydicom>=2.4.4
   - pynrrd>=1.0.0,<2
   - scikit-image>=0.23.2,<1
