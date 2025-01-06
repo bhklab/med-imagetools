@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from types import TracebackType
 from typing import Any, Generator, NoReturn, Optional, Dict
-from enum import StrEnum, auto
+from enum import Enum, auto
 import SimpleITK as sitk
 from contextlib import contextmanager
 from imgtools.types import PathLike
@@ -16,7 +16,7 @@ from imgtools.logging import logger
 from ..exceptions import DirectoryNotFoundError
 
 
-class ExistingFileMode(StrEnum):
+class ExistingFileMode(Enum):
     """Enum to specify handling behavior for existing files."""
 
     # log as debug, and continue with the operation
@@ -96,7 +96,7 @@ class AbstractBaseWriter(ABC):
 
         # if the existing_file_mode is a string, convert it to the Enum
         if isinstance(self.existing_file_mode, str):
-            self.existing_file_mode = ExistingFileMode(self.existing_file_mode)
+            self.existing_file_mode = ExistingFileMode[self.existing_file_mode.upper()]
 
     @abstractmethod
     def save(self, *args: Any, **kwargs: Any) -> Path:  # noqa
