@@ -86,5 +86,5 @@ class NiftiWriter(AbstractBaseWriter):
             msg = f"Error writing image to file {out_path}: {e}"
             raise NiftiWriterIOError(msg) from e
         else:
-            logger.info("Image saved successfully.", out_path=out_path)
+            logger.debug("Image saved successfully.", out_path=out_path, params=kwargs)
             return out_path
