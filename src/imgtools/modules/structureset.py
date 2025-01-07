@@ -10,14 +10,14 @@ pipelines.
 Classes
 -------
 StructureSet
-        Represents a DICOM RTSTRUCT file, allowing operations such as loading
+    Represents a DICOM RTSTRUCT file, allowing operations such as loading
         ROI contours, converting physical points to masks, and exporting to
         segmentation objects.
 
 Functions
 ---------
 _get_roi_points(rtstruct, roi_index)
-        Extracts and reshapes contour points for a specific ROI in an RTSTRUCT
+    Extracts and reshapes contour points for a specific ROI in an RTSTRUCT
         file.
 
 Notes
@@ -42,7 +42,7 @@ from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class StructureSet:
@@ -56,11 +56,11 @@ class StructureSet:
         Parameters
         ----------
         roi_points : Dict[str, List[np.ndarray]]
-                A dictionary mapping ROI (Region of Interest) names to a list of 2D arrays.
-                Each array contains the 3D physical coordinates of the contour points for a slice.
+            A dictionary mapping ROI (Region of Interest) names to a list of 2D arrays.
+            Each array contains the 3D physical coordinates of the contour points for a slice.
         metadata : Optional[Dict[str, T]], optional
-                A dictionary containing additional metadata from the DICOM RTSTRUCT file.
-                Default is an empty dictionary.
+            A dictionary containing additional metadata from the DICOM RTSTRUCT file.
+            Default is an empty dictionary.
 
         Examples
         --------
@@ -74,27 +74,27 @@ class StructureSet:
     @classmethod
     def from_dicom_rtstruct(
         cls, rtstruct_path: str, suppress_warnings: bool = False
-    ) -> 'StructureSet':
+    ) -> "StructureSet":
         """Create a StructureSet instance from a DICOM RTSTRUCT file.
 
         Parameters
         ----------
         rtstruct_path : str
-                Path to the DICOM RTSTRUCT file.
+            Path to the DICOM RTSTRUCT file.
         suppress_warnings : bool, optional
-                If True, suppresses warnings for missing or invalid ROI data. Default is False.
+            If True, suppresses warnings for missing or invalid ROI data. Default is False.
 
         Returns
         -------
         StructureSet
-                An instance of the StructureSet class containing the ROI data and metadata.
+            An instance of the StructureSet class containing the ROI data and metadata.
 
         Raises
         ------
         FileNotFoundError
-                If the specified RTSTRUCT file does not exist.
+            If the specified RTSTRUCT file does not exist.
         ValueError
-                If the RTSTRUCT file is invalid or cannot be read.
+            If the RTSTRUCT file is invalid or cannot be read.
 
         Examples
         --------
@@ -115,7 +115,7 @@ class StructureSet:
             except AttributeError as ae:
                 if not suppress_warnings:
                     logger.warning(
-                        f'Could not get points for ROI `{name}`.',
+                        f"Could not get points for ROI `{name}`.",
                         rtstruct_path=rtstruct_path,
                         error=ae,
                     )
@@ -154,18 +154,22 @@ class StructureSet:
         >>> points = StructureSet._get_roi_points(rtstruct, 0)
         """
         # Check for ROIContourSequence
-        if not hasattr(rtstruct, 'ROIContourSequence'):
-            raise AttributeError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
+        if not hasattr(rtstruct, "ROIContourSequence"):
+            raise AttributeError(
+                "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
+            )
 
         # Check if ROI index exists in the sequence
         if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
-            msg = f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
+            msg = (
+                f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
+            )
             raise AttributeError(msg)
 
         roi_contour = rtstruct.ROIContourSequence[roi_index]
 
         # Check for ContourSequence in the specified ROI
-        if not hasattr(roi_contour, 'ContourSequence'):
+        if not hasattr(roi_contour, "ContourSequence"):
             msg = f"ROI at index {roi_index} is missing 'ContourSequence'."
             raise AttributeError(msg)
 
@@ -174,8 +178,10 @@ class StructureSet:
         # Check for ContourData in each contour
         contour_points = []
         for i, slc in enumerate(contour_sequence):
-            if not hasattr(slc, 'ContourData'):
-                msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
+            if not hasattr(slc, "ContourData"):
+                msg = (
+                    f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
+                )
                 raise AttributeError(msg)
             contour_points.append(np.array(slc.ContourData).reshape(-1, 3))
 
@@ -294,18 +300,18 @@ class StructureSet:
                         if re.fullmatch(subpattern, roi_name, flags=re.IGNORECASE):
                             matched = True
                             if roi_separate:
-                                labels[f'{roi_name}_{i}'] = cur_label
+                                labels[f"{roi_name}_{i}"] = cur_label
                             else:
                                 labels[roi_name] = cur_label
                 cur_label += 1
 
             else:
-                msg = f'Invalid pattern type: {type(pattern)}, expected str or list.'
+                msg = f"Invalid pattern type: {type(pattern)}, expected str or list."
                 raise ValueError(msg)
 
         # Validate output
         if not labels:
-            msg = f'No matching ROIs found for the provided patterns: {names}'
+            msg = f"No matching ROIs found for the provided patterns: {names}"
             raise ValueError(msg)
 
         return labels
@@ -330,7 +336,7 @@ class StructureSet:
                 elif z == -1:  # ?
                     z += 1
                 elif z > mask.shape[0] or z < -1:
-                    msg = f'{z} index is out of bounds for image sized {mask.shape}.'
+                    msg = f"{z} index is out of bounds for image sized {mask.shape}."
                     raise IndexError(msg) from e
 
                 # if the contour spans only 1 z-slice
@@ -340,7 +346,7 @@ class StructureSet:
                     mask[z_idx, :, :, idx] += slice_mask
                 else:
                     raise ValueError(
-                        'This contour is corrupted and spans across 2 or more slices.'
+                        "This contour is corrupted and spans across 2 or more slices."
                     ) from e
 
     def to_segmentation(  # noqa
@@ -394,7 +400,9 @@ class StructureSet:
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
-                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
+                    matching_names = list(
+                        self._assign_labels([pattern], roi_select_first).keys()
+                    )
                     if matching_names:
                         labels[name] = (
                             matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
@@ -408,19 +416,21 @@ class StructureSet:
                             self._assign_labels([pattern_one], roi_select_first).keys()
                         )
                         if matching_names:
-                            labels[name].extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
+                            labels[name].extend(
+                                matching_names
+                            )  # {"GTV": ["GTV1", "GTV2"]}
         if isinstance(roi_names, str):
             roi_names = [roi_names]
         if isinstance(roi_names, list):  # won't this always trigger after the previous?
             labels = self._assign_labels(roi_names, roi_select_first)
-        logger.debug(f'Found {len(labels)} labels', labels=labels)
+        logger.debug(f"Found {len(labels)} labels", labels=labels)
         all_empty = True
         for v in labels.values():
             if v != []:
                 all_empty = False
         if all_empty:
             if not ignore_missing_regex:
-                msg = f'No ROIs matching {roi_names} found in {self.roi_names}.'
+                msg = f"No ROIs matching {roi_names} found in {self.roi_names}."
                 raise ValueError(msg)
             else:
                 return None
@@ -438,7 +448,9 @@ class StructureSet:
         else:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {'_'.join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
+            seg_roi_indices = {
+                "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
+            }
 
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
@@ -455,4 +467,4 @@ class StructureSet:
     def __repr__(self) -> str:
         # return f"<StructureSet with ROIs: {self.roi_names!r}>"
         sorted_rois = sorted(self.roi_names)
-        return f'<StructureSet with ROIs: {sorted_rois!r}>'
+        return f"<StructureSet with ROIs: {sorted_rois!r}>"
