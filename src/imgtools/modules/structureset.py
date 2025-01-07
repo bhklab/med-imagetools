@@ -28,6 +28,8 @@ multiple output formats for segmentation masks. It also integrates robust
 error handling and logging to handle malformed or incomplete DICOM files.
 """
 
+from __future__ import annotations
+
 import re
 from itertools import groupby
 from typing import Dict, List, Optional, TypeVar, Union
@@ -43,6 +45,18 @@ from imgtools.modules.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
 T = TypeVar("T")
+
+
+def _get_rtstruct_reference_ct(
+    rtstruct: FileDataset,
+) -> str:
+    """Given an RTSTRUCT file, return the ReferencedCT SeriesInstanceUID."""
+    return str(
+        rtstruct.ReferencedFrameOfReferenceSequence[0]
+        .RTReferencedStudySequence[0]
+        .RTReferencedSeriesSequence[0]
+        .SeriesInstanceUID
+    )
 
 
 class StructureSet:
@@ -69,12 +83,14 @@ class StructureSet:
         >>> structure_set = StructureSet(roi_points, metadata)
         """
         self.roi_points: Dict[str, List[np.ndarray]] = roi_points
-        self.metadata: Dict[str, T] = metadata if metadata is not None else {}
+        self.metadata: Dict[str, T] = metadata or {}
 
     @classmethod
     def from_dicom_rtstruct(
-        cls, rtstruct_path: str, suppress_warnings: bool = False
-    ) -> "StructureSet":
+        cls,
+        rtstruct_path: str,
+        suppress_warnings: bool = False,
+    ) -> StructureSet:
         """Create a StructureSet instance from a DICOM RTSTRUCT file.
 
         Parameters
@@ -104,6 +120,7 @@ class StructureSet:
         """
         # Load the RTSTRUCT file
         rtstruct: FileDataset = dcmread(rtstruct_path, force=True)
+        assert rtstruct.Modality == "RTSTRUCT", f"The file is not an RTSTRUCT file {rtstruct.Modality=}"
 
         # Extract ROI names and points
         roi_names: List[str] = [roi.ROIName for roi in rtstruct.StructureSetROISequence]
@@ -120,8 +137,19 @@ class StructureSet:
                         error=ae,
                     )
 
+        # sort the dictionary by the keys
+        roi_points = dict(sorted(roi_points.items()))
+
         # Initialize metadata (can be extended later to extract more useful fields)
-        metadata: Dict[str, Union[str, int, float]] = {}
+        metadata: Dict[str, Union[str, int, float]] = {
+            "PatientID": rtstruct.PatientID,
+            "StudyInstanceUID": rtstruct.StudyInstanceUID,
+            "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
+            "NumberOfROIs": len(roi_points.keys()),  # not all ROIs have points
+            "OriginalNumberOfROIs": len(roi_names),
+            "Modality" : rtstruct.Modality,
+            "ReferencedSeriesInstanceUID": _get_rtstruct_reference_ct(rtstruct),
+        }
 
         # Return the StructureSet instance
         return cls(roi_points, metadata)
@@ -133,25 +161,25 @@ class StructureSet:
         Parameters
         ----------
         rtstruct : FileDataset
-                The loaded DICOM RTSTRUCT file.
+            The loaded DICOM RTSTRUCT file.
         roi_index : int
-                The index of the ROI in the ROIContourSequence.
+            The index of the ROI in the ROIContourSequence.
 
         Returns
         -------
         List[np.ndarray]
-                A list of numpy arrays where each array contains the 3D physical coordinates
-                of the contour points for a specific slice.
+            A list of numpy arrays where each array contains the 3D physical coordinates
+            of the contour points for a specific slice.
 
         Raises
         ------
         AttributeError
-                If the ROIContourSequence, ContourSequence, or ContourData is missing or malformed.
+            If the ROIContourSequence, ContourSequence, or ContourData is missing or malformed.
 
         Examples
         --------
         >>> rtstruct = dcmread('path/to/rtstruct.dcm', force=True)
-        >>> points = StructureSet._get_roi_points(rtstruct, 0)
+        >>> StructureSet._get_roi_points(rtstruct, 0)
         """
         # Check for ROIContourSequence
         if not hasattr(rtstruct, "ROIContourSequence"):
@@ -192,6 +220,33 @@ class StructureSet:
         """List of all ROI (Region of Interest) names."""
         return list(self.roi_points.keys())
 
+    def search_roi(self, pattern: str, ignore_case: bool = False) -> bool:
+        """Search for an ROI name based on a regular expression pattern.
+
+        Parameters
+        ----------
+        pattern : str
+            The regular expression pattern to search for.
+        flags : int, optional
+            Flags to modify the regular expression matching behavior. Default is re.IGNORECASE.
+
+        Returns
+        -------
+        bool
+            True if the pattern matches any ROI name, False otherwise.
+
+        Examples
+        --------
+        Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
+        >>> structure_set = StructureSet.from_dicom_rtstruct('path/to/rtstruct.dcm')
+        >>> structure_set.search_roi('GTV.*')
+        True
+        >>> structure_set.search_roi('ctv.*')
+        True
+        """
+        _flags = re.IGNORECASE if ignore_case else 0
+        return any(re.fullmatch(pattern, name, flags=_flags) for name in self.roi_names)
+
     def _assign_labels(  # noqa
         self,
         names: List[Union[str, List[str]]],
@@ -208,26 +263,26 @@ class StructureSet:
         Parameters
         ----------
         names : List[Union[str, List[str]]]
-                A list of ROI names or regex patterns. Can be:
-                        - A list of strings representing exact matches or regex patterns.
-                        - A nested list of regex patterns, where all matching ROIs within the same sublist
-                        are assigned the same label.
+            A list of ROI names or regex patterns. Can be:
+                    - A list of strings representing exact matches or regex patterns.
+                    - A nested list of regex patterns, where all matching ROIs within the same sublist
+                    are assigned the same label.
         roi_select_first : bool, optional
-                If True, selects only the first matching ROI for each regex pattern or name.
-                Default is False.
+            If True, selects only the first matching ROI for each regex pattern or name.
+            Default is False.
         roi_separate : bool, optional
-                If True, assigns separate labels to each matching ROI within a regex pattern, appending
-                a numerical suffix to the ROI name (e.g., "CTV_0", "CTV_1"). Default is False.
+            If True, assigns separate labels to each matching ROI within a regex pattern, appending
+            a numerical suffix to the ROI name (e.g., "CTV_0", "CTV_1"). Default is False.
 
         Returns
         -------
         Dict[str, int]
-                A dictionary mapping ROI names to their assigned integer labels.
+            A dictionary mapping ROI names to their assigned integer labels.
 
         Raises
         ------
         ValueError
-                If `names` is empty or does not match any ROIs.
+            If `names` is empty or does not match any ROIs.
 
         Examples
         --------
@@ -364,17 +419,17 @@ class StructureSet:
         Parameters
         ----------
         reference_image
-                Image used as reference geometry.
+            Image used as reference geometry.
         roi_names
-                List of ROI names to export. Both full names and
-                case-insensitive regular expressions are allowed.
-                All labels within one sublist will be assigned
-                the same label.
+            List of ROI names to export. Both full names and
+            case-insensitive regular expressions are allowed.
+            All labels within one sublist will be assigned
+            the same label.
 
         Returns
         -------
         Segmentation
-                The segmentation object.
+            The segmentation object.
 
         Notes
         -----
@@ -455,16 +510,25 @@ class StructureSet:
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
         mask.CopyInformation(reference_image)
+
         mask = Segmentation(
             mask,
             roi_indices=seg_roi_indices,
             existing_roi_indices=existing_roi_indices,
             raw_roi_names=labels,
+            metadata=self.metadata,
         )  # in the segmentation, pass all the existing roi names and then process is in the segmentation class
 
         return mask
 
     def __repr__(self) -> str:
-        # return f"<StructureSet with ROIs: {self.roi_names!r}>"
         sorted_rois = sorted(self.roi_names)
-        return f"<StructureSet with ROIs: {sorted_rois!r}>"
+        metadata_str_parts = []
+        for k, v in self.metadata.items():
+            if k.endswith("UID"):
+                metadata_str_parts.append(f"{k}: {v[-5:]}")
+            else:
+                metadata_str_parts.append(f"{k}: {v}")
+        metadata_str = "\n\t".join(metadata_str_parts)
+
+        return f"\n<StructureSet with ROIs: {sorted_rois!r}>\nMetadata:\n\t{metadata_str}"
