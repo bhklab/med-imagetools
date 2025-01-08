@@ -340,18 +340,18 @@ class DataGraph:
             # For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
             if edge_type == 0:
                 # Search for subgraphs with edges 0 or (1 and 2)
-                regex_term = '(((?=.*0)|(?=.*5)(?=.*6))|((?=.*1)(?=.*2)))'
+                regex_term = '(?:(?:(?=.*0)|(?=.*5)(?=.*6))|(?:(?=.*1)(?=.*2)))'
                 mod = [i for i in self.queried_modalities if i in ['CT', 'MR']][
                     0
                 ]  # making folder_mod CT/MR agnostic <-- still needs testing
                 final_df = self.graph_query(regex_term, [0, 1, 2], f'folder_{mod}')
             elif edge_type == 1:
                 # Search for subgraphs with edges 1 or (0 and 2)
-                regex_term = '((?=.*1)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
+                regex_term = '(?:(?=.*1)|(?:(?:(?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
                 final_df = self.graph_query(regex_term, [0, 1, 2], 'RTSTRUCT')
             elif edge_type == 2:
                 # Search for subgraphs with edges 2 or (1 and 0)
-                regex_term = '((?=.*2)|(((?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
+                regex_term = '(?:(?=.*2)|(?:(?:(?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
                 final_df = self.graph_query(regex_term, [0, 1, 2], 'RTDOSE')
             elif edge_type == 7:  # SEG->CT/MR
                 # keep final_df as is
@@ -414,7 +414,7 @@ class DataGraph:
                 & ('PT' not in query_string)
             ):
                 # Fetch the required data. Checks whether each study has edge 2 and (1 or 0)
-                regex_term = '((?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)'
+                regex_term = '(?:(?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)'
                 edge_list = [0, 1, 2, 5, 6]
             # CT/MR,RTSTRUCT,RTDOSE,PT
             elif (
@@ -424,7 +424,7 @@ class DataGraph:
                 & ('PT' in query_string)
             ):
                 # Fetch the required data. Checks whether each study has edge 2,3,4 and (1 or 0)
-                regex_term = '((?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)(?=.*3)(?=.*4)'  # fix
+                regex_term = '(?:(?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)(?=.*3)(?=.*4)'  # fix
                 edge_list = [0, 1, 2, 3, 4]
             # CT/MR,RTSTRUCT,PT
             elif (
@@ -444,7 +444,7 @@ class DataGraph:
                 & ('RTDOSE' in query_string)
             ):
                 # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Remove RTSTRUCT later
-                regex_term = '(?=.*4)((?=.*1)|((?=.*2)((?=.*0)|(?=.*5)(?=.*6))))'
+                regex_term = '(?=.*4)(?:(?=.*1)|(?:(?=.*2)(?:(?=.*0)|(?=.*5)(?=.*6))))'
                 edge_list = [0, 1, 2, 4, 5, 6]
                 bads.append('RTSTRUCT')
             else:
