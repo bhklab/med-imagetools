@@ -80,7 +80,7 @@ def resample(
         new_spacing = np.where(spacing == 0, original_spacing, spacing)
 
     if not output_size:
-        new_size = np.floor(original_size * original_spacing / new_spacing).astype(int)
+        new_size = np.round(original_size * original_spacing / new_spacing, decimals=0).astype(int)
     else:
         new_size = np.asarray(output_size)
 
