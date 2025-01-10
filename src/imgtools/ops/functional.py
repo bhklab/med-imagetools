@@ -165,7 +165,7 @@ def resize(
         anti_alias=anti_alias,
         anti_alias_sigma=anti_alias_sigma,
         interpolation=interpolation,
-        output_size=new_size
+        output_size=new_size.astype(int)
     )
 
 
