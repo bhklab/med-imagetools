@@ -1,7 +1,37 @@
 # CHANGELOG
 
 
+## v1.11.1 (2025-01-11)
+
+### Bug Fixes
+
+- Rounding error in resample function ([#163](https://github.com/bhklab/med-imagetools/pull/163),
+  [`f57a747`](https://github.com/bhklab/med-imagetools/commit/f57a7473b2dd5e14b12f4cdd833b9ecc1b60e6ad))
+
+When output_size was not provided to `resample` function, the size was determined based on the
+  spacing but was floored. This would sometimes incorrectly shrink the image size. Changed to use
+  `np.round` instead.
+
+Additionally, added the `output_size` argument to the `resample` call in the `resize` function. The
+  output size is already available in the function as `new_size`, so it doesn't make sense to
+  recalculate it in the `resample` function.
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
+- **Bug Fixes** - Improved image resampling and resizing functions with more precise rounding and
+  type handling. - Enhanced parameter validation to ensure consistent integer conversion.
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+
 ## v1.11.0 (2025-01-02)
+
+### Chores
+
+- **sem-ver**: 1.11.0
+  ([`cb71fa1`](https://github.com/bhklab/med-imagetools/commit/cb71fa15f0578b77b4ddde0749e95849f5af9102))
 
 ### Features
 
