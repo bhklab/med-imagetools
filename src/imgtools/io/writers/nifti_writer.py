@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Any
 
 import numpy as np
 import SimpleITK as sitk
@@ -36,6 +36,11 @@ class NiftiWriter(AbstractBaseWriter):
         },
     )
 
+    truncate_uid: int = field(
+        default=0,
+        metadata={"help": "Truncate any key that ends in UID from the end of the UID"},
+    )
+
     # Make extensions immutable
     VALID_EXTENSIONS: ClassVar[list[str]] = [
         ".nii",
@@ -56,6 +61,17 @@ class NiftiWriter(AbstractBaseWriter):
             msg = f"Invalid compression level {self.compression_level}. "
             msg += "Must be between {self.MIN_COMPRESSION_LEVEL} and {self.MAX_COMPRESSION_LEVEL}."
             raise NiftiWriterValidationError(msg)
+
+    def resolve_path(self, **kwargs: Any) -> Path:  # noqa
+        """Adjust UID keywords args, then let AbstractBaseWriter handle normally."""
+        updated_kwargs = dict()
+
+        for key, value in kwargs.items():
+            if key.endswith("UID") and self.truncate_uid > 0:
+                updated_kwargs[key] = value[-self.truncate_uid :]
+            else:
+                updated_kwargs[key] = value
+        return super().resolve_path(**updated_kwargs)
 
     def save(self, image: sitk.Image | np.ndarray, **kwargs: str | int) -> Path:
         """Write the SimpleITK image to a NIFTI file."""

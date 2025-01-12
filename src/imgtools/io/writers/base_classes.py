@@ -157,8 +157,8 @@ class AbstractBaseWriter(ABC):
         FileExistsError
             If the file exists and the mode is FAIL.
         """
-        self.set_context(**kwargs)
         out_path = self.resolve_path(**kwargs)
+        self.set_context(**kwargs)
         logger.debug(f"Resolved path: {out_path} and {out_path.exists()=}")
 
         if out_path.exists():
