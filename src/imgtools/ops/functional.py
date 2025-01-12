@@ -79,8 +79,8 @@ def resample(
         spacing = np.asarray(spacing)
         new_spacing = np.where(spacing == 0, original_spacing, spacing)
 
-    if not output_size:
-        new_size = np.floor(original_size * original_spacing / new_spacing).astype(int)
+    if output_size is None:
+        new_size = np.round(original_size * original_spacing / new_spacing, decimals=0).astype(int)
     else:
         new_size = np.asarray(output_size)
 
@@ -165,6 +165,7 @@ def resize(
         anti_alias=anti_alias,
         anti_alias_sigma=anti_alias_sigma,
         interpolation=interpolation,
+        output_size=new_size.astype(int)
     )
 
 
