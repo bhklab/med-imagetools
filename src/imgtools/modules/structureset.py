@@ -456,7 +456,7 @@ class StructureSet:
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,
         roi_separate: bool = False,
-    ) -> Segmentation:
+    ) -> Segmentation | None:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -482,8 +482,9 @@ class StructureSet:
 
         Returns
         -------
-        Segmentation
-            The segmentation object.
+        Segmentation | None
+            The segmentation object containing the masks for the selected ROIs.
+            If no ROIs match the provided patterns, returns None if `ignore_missing_regex` is True.
 
         Notes
         -----
@@ -500,7 +501,7 @@ class StructureSet:
         guaranteed (unless all patterns in `roi_names` can only match
         a single name or are lists of strings).
         """
-        labels: dict[str, int] = {}
+        labels: dict[str, list] = {}
         if not roi_names:
             labels = self._assign_labels(
                 list(self.roi_names), roi_select_first, roi_separate
@@ -533,33 +534,30 @@ class StructureSet:
             roi_names = [roi_names]
 
         logger.debug(f"Found {len(labels)} labels", labels=labels)
-        all_empty = True
-        for v in labels.values():
-            if v != []:
-                all_empty = False
-        if all_empty:
+
+        labels = {k: v for (k, v) in labels.items() if v != []}
+        if not labels:
             if not ignore_missing_regex:
                 msg = f"No ROIs matching {roi_names} found in {self.roi_names}."
                 raise ValueError(msg)
             else:
                 return None
-        labels = {k: v for (k, v) in labels.items() if v != []}
+
         size = reference_image.GetSize()[::-1] + (len(labels),)
         mask = np.zeros(size, dtype=np.uint8)
 
         seg_roi_indices = {}
-        if roi_names != {} and isinstance(roi_names, dict):
-            for i, (name, label_list) in enumerate(labels.items()):
-                for label in label_list:
-                    self.get_mask(reference_image, mask, label, i, continuous)
-                seg_roi_indices[name] = i
-
-        else:
+        if not roi_names:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
             seg_roi_indices = {
                 "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
             }
+        elif isinstance(roi_names, dict):
+            for i, (name, label_list) in enumerate(labels.items()):
+                for label in label_list:
+                    self.get_mask(reference_image, mask, label, i, continuous)
+                seg_roi_indices[name] = i
 
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
