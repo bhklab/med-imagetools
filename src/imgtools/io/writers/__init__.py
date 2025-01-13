@@ -13,13 +13,13 @@ from .old_writers import (
 )
 
 __all__ = [
-    "ExistingFileMode",
-    "AbstractBaseWriter",
-    "BaseWriter",
-    "BaseSubjectWriter",
-    "ImageFileWriter",
-    "SegNrrdWriter",
-    "HDF5Writer",
-    "MetadataWriter",
-    "NumpyWriter",
+    'ExistingFileMode',
+    'AbstractBaseWriter',
+    'BaseWriter',
+    'BaseSubjectWriter',
+    'ImageFileWriter',
+    'SegNrrdWriter',
+    'HDF5Writer',
+    'MetadataWriter',
+    'NumpyWriter',
 ]

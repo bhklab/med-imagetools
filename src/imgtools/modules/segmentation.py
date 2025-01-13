@@ -247,7 +247,7 @@ class Segmentation(sitk.Image):
         self.frame_groups = frame_groups
 
         if not roi_indices:
-            self.roi_indices = {f"label_{i}": i for i in range(1, self.num_labels + 1)}
+            self.roi_indices = {f'label_{i}': i for i in range(1, self.num_labels + 1)}
         else:
             self.roi_indices = roi_indices
             if 0 in self.roi_indices.values():
@@ -256,7 +256,7 @@ class Segmentation(sitk.Image):
         if len(self.roi_indices) != self.num_labels:
             for i in range(1, self.num_labels + 1):
                 if i not in self.roi_indices.values():
-                    self.roi_indices[f"label_{i}"] = i
+                    self.roi_indices[f'label_{i}'] = i
 
         self.existing_roi_indices = existing_roi_indices
 
@@ -291,7 +291,7 @@ class Segmentation(sitk.Image):
 
         if label is None:
             if name is None:
-                msg = "Must pass either label or name."
+                msg = 'Must pass either label or name.'
                 raise ValueError(msg)
             # Retrieve the label index from the name
             label = self.roi_indices[name]
@@ -300,9 +300,7 @@ class Segmentation(sitk.Image):
             # Background is stored implicitly and needs to be computed
             label_arr = sitk.GetArrayViewFromImage(self)
             # Create a binary image where background is 1 and other regions are 0
-            label_img = sitk.GetImageFromArray(
-                (label_arr.sum(-1) == 0).astype(np.uint8)
-            )
+            label_img = sitk.GetImageFromArray((label_arr.sum(-1) == 0).astype(np.uint8))
         else:
             # Retrieve the label image for the given label index
             label_img = sitk.VectorIndexSelectionCast(self, label - 1)
@@ -331,13 +329,11 @@ class Segmentation(sitk.Image):
     def __getitem__(self, idx: Union[int, slice]) -> Union[Segmentation, Any]:  # noqa
         res = super().__getitem__(idx)
         if isinstance(res, sitk.Image):
-            res = Segmentation(
-                res, roi_indices=self.roi_indices, raw_roi_names=self.raw_roi_names
-            )
+            res = Segmentation(res, roi_indices=self.roi_indices, raw_roi_names=self.raw_roi_names)
         return res
 
     def __repr__(self) -> str:  # noqa # type: ignore
-        return f"<Segmentation with ROIs: {self.roi_indices!r}>"
+        return f'<Segmentation with ROIs: {self.roi_indices!r}>'
 
     def generate_sparse_mask(self, verbose: bool = False) -> SparseMask:
         """
@@ -365,9 +361,7 @@ class Segmentation(sitk.Image):
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slc = mask_arr[i, :, :, :]
-                slc *= list(
-                    self.roi_indices.values()
-                )[
+                slc *= list(self.roi_indices.values())[
                     i
                 ]  # everything is 0 or 1, so this is fine to convert filled voxels to label indices
                 if verbose:
@@ -383,7 +377,7 @@ class Segmentation(sitk.Image):
         sparsemask = SparseMask(sparsemask_arr, self.roi_indices)
 
         if verbose and len(voxels_with_overlap) != 0:
-            msg = f"{len(voxels_with_overlap)} voxels have overlapping contours."
+            msg = f'{len(voxels_with_overlap)} voxels have overlapping contours.'
             logger.warning(msg)
         return sparsemask
 
@@ -427,7 +421,7 @@ class Segmentation(sitk.Image):
             if label not in raw_roi_names:
                 raw_roi_names[label] = num
             else:
-                raw_roi_names[f"{label}_{label_counters[label]}"] = num
+                raw_roi_names[f'{label}_{label_counters[label]}'] = num
                 label_counters[label] += 1
 
         frame_groups = meta.PerFrameFunctionalGroupsSequence

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import ClassVar, Any
+from typing import Any, ClassVar
 
 import numpy as np
 import SimpleITK as sitk
@@ -59,7 +59,7 @@ class NiftiWriter(AbstractBaseWriter):
             <= self.MAX_COMPRESSION_LEVEL
         ):
             msg = f"Invalid compression level {self.compression_level}. "
-            msg += "Must be between {self.MIN_COMPRESSION_LEVEL} and {self.MAX_COMPRESSION_LEVEL}."
+            msg += f"Must be between {self.MIN_COMPRESSION_LEVEL} and {self.MAX_COMPRESSION_LEVEL}."
             raise NiftiWriterValidationError(msg)
 
     def resolve_path(self, **kwargs: Any) -> Path:  # noqa
@@ -68,7 +68,7 @@ class NiftiWriter(AbstractBaseWriter):
 
         for key, value in kwargs.items():
             if key.endswith("UID") and self.truncate_uid > 0:
-                updated_kwargs[key] = value[-self.truncate_uid :]
+                updated_kwargs[key] = str(value)[-self.truncate_uid :]
             else:
                 updated_kwargs[key] = value
         return super().resolve_path(**updated_kwargs)
@@ -81,7 +81,7 @@ class NiftiWriter(AbstractBaseWriter):
             case np.ndarray():
                 image = sitk.GetImageFromArray(image)
             case _:
-                msg = "Input must be a SimpleITK Image or a numpy array"
+                msg = "Input must be a SimpleITK Image or a numpy array" # type: ignore
                 raise NiftiWriterValidationError(msg)
 
         out_path = self.resolve_path(**kwargs)

@@ -1,9 +1,9 @@
 import click
 
 from imgtools import __version__
-from imgtools.cli import set_log_verbosity
-from imgtools.cli.dicomfind import find_dicoms
-from imgtools.cli.dicomsort import dicomsort
+from . import set_log_verbosity
+from .dicomfind import find_dicoms
+from .dicomsort import dicomsort
 
 
 @click.group(

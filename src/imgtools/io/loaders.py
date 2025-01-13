@@ -1,11 +1,11 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 
 import glob
 import json
 import os
 import pathlib
 import re
+from abc import ABC, abstractmethod
 from collections import namedtuple
 from typing import Optional
 
@@ -37,7 +37,7 @@ def read_dicom_series(
     path: str,
     series_id: Optional[str] = None,
     recursive: bool = False,
-    file_names: list = None,
+    file_names: list | None = None,
 ) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 

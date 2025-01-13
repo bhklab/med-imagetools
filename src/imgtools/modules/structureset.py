@@ -32,19 +32,21 @@ import re
 from io import BytesIO
 from itertools import groupby
 from pathlib import Path
-from typing import Dict, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union
 
 import numpy as np
 import SimpleITK as sitk
 from pydicom import dcmread
-from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from pydicom.dataset import FileDataset
+
+T = TypeVar('T')
 
 
 def _get_rtstruct_reference_series(
@@ -136,7 +138,9 @@ class StructureSet:
         Examples
         --------
         Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
-        >>> structure_set = StructureSet.from_dicom_rtstruct('path/to/rtstruct.dcm')
+        >>> structure_set = StructureSet.from_dicom_rtstruct(
+        ...     'path/to/rtstruct.dcm'
+        ... )
         >>> structure_set.search_roi('GTV.*')
         True
         >>> structure_set.search_roi('ctv.*')
@@ -185,12 +189,12 @@ class StructureSet:
             dcm = dcmread(rt_bytes, force=True)
         else:
             msg = "Invalid type for 'rtstruct_path'. Must be str, Path, or FileDataset."
-            msg += f" Received: {type(rtstruct_path)}"
+            msg += f' Received: {type(rtstruct_path)}'
             raise ValueError(msg)
 
         assert (
-            dcm.Modality == "RTSTRUCT"
-        ), f"The dicom provided is not an RTSTRUCT file {dcm.Modality=}"
+            dcm.Modality == 'RTSTRUCT'
+        ), f'The dicom provided is not an RTSTRUCT file {dcm.Modality=}'
 
         # Extract ROI names and points
         roi_names: List[str] = [roi.ROIName for roi in dcm.StructureSetROISequence]
@@ -204,7 +208,7 @@ class StructureSet:
             except AttributeError as ae:
                 if not suppress_warnings:
                     logger.warning(
-                        f"Could not get points for ROI `{name}`.",
+                        f'Could not get points for ROI `{name}`.',
                         rtstruct_series=dcm.SeriesInstanceUID,
                         error=ae,
                     )
@@ -222,13 +226,13 @@ class StructureSet:
     def _extract_metadata(rtstruct: FileDataset) -> Dict[str, Union[str, int, float]]:
         """Extract metadata from the RTSTRUCT file."""
         return {
-            "PatientID": rtstruct.PatientID,
-            "StudyInstanceUID": rtstruct.StudyInstanceUID,
-            "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
-            "NumberOfROIs": len(rtstruct.StructureSetROISequence),
-            "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
-            "Modality": rtstruct.Modality,
-            "ReferencedSeriesInstanceUID": _get_rtstruct_reference_series(rtstruct),
+            'PatientID': rtstruct.PatientID,
+            'StudyInstanceUID': rtstruct.StudyInstanceUID,
+            'SeriesInstanceUID': rtstruct.SeriesInstanceUID,
+            'NumberOfROIs': len(rtstruct.StructureSetROISequence),
+            'OriginalNumberOfROIs': len(rtstruct.StructureSetROISequence),
+            'Modality': rtstruct.Modality,
+            'ReferencedSeriesInstanceUID': _get_rtstruct_reference_series(rtstruct),
         }
 
     @staticmethod
@@ -259,22 +263,18 @@ class StructureSet:
         >>> StructureSet._get_roi_points(rtstruct, 0)
         """
         # Check for ROIContourSequence
-        if not hasattr(rtstruct, "ROIContourSequence"):
-            raise AttributeError(
-                "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
-            )
+        if not hasattr(rtstruct, 'ROIContourSequence'):
+            raise AttributeError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
 
         # Check if ROI index exists in the sequence
         if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
-            msg = (
-                f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
-            )
+            msg = f"ROI index {roi_index} is out of bounds for the 'ROIContourSequence'."
             raise AttributeError(msg)
 
         roi_contour = rtstruct.ROIContourSequence[roi_index]
 
         # Check for ContourSequence in the specified ROI
-        if not hasattr(roi_contour, "ContourSequence"):
+        if not hasattr(roi_contour, 'ContourSequence'):
             msg = f"ROI at index {roi_index} is missing 'ContourSequence'."
             raise AttributeError(msg)
 
@@ -283,10 +283,8 @@ class StructureSet:
         # Check for ContourData in each contour
         contour_points = []
         for i, slc in enumerate(contour_sequence):
-            if not hasattr(slc, "ContourData"):
-                msg = (
-                    f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
-                )
+            if not hasattr(slc, 'ContourData'):
+                msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
                 raise AttributeError(msg)
             contour_points.append(np.array(slc.ContourData).reshape(-1, 3))
 
@@ -399,22 +397,29 @@ class StructureSet:
                         if re.fullmatch(subpattern, roi_name, flags=re.IGNORECASE):
                             matched = True
                             if roi_separate:
-                                labels[f"{roi_name}_{i}"] = cur_label
+                                labels[f'{roi_name}_{i}'] = cur_label
                             else:
                                 labels[roi_name] = cur_label
                 cur_label += 1
             else:
-                msg = f"Invalid pattern type: {type(pattern)}, expected str or list."
+                msg = f'Invalid pattern type: {type(pattern)}, expected str or list.'
                 raise ValueError(msg)
 
         # Validate output
         if not labels:
-            msg = f"No matching ROIs found for the provided patterns: {names}"
+            msg = f'No matching ROIs found for the provided patterns: {names}'
             raise ValueError(msg)
 
         return labels
 
-    def get_mask(self, reference_image, mask, label, idx, continuous) -> None:  # type: ignore
+    def get_mask(
+        self,
+        reference_image: sitk.Image,
+        mask: np.ndarray,
+        label: str,
+        idx: int,
+        continuous: bool,
+    ) -> None:
         size = reference_image.GetSize()[::-1]
         physical_points = self.roi_points.get(label, np.array([]))
         mask_points = physical_points_to_idxs(
@@ -434,7 +439,7 @@ class StructureSet:
                 elif z == -1:  # ?
                     z += 1
                 elif z > mask.shape[0] or z < -1:
-                    msg = f"{z} index is out of bounds for image sized {mask.shape}."
+                    msg = f'{z} index is out of bounds for image sized {mask.shape}.'
                     raise IndexError(msg) from e
 
                 # if the contour spans only 1 z-slice
@@ -444,7 +449,7 @@ class StructureSet:
                     mask[z_idx, :, :, idx] += slice_mask
                 else:
                     raise ValueError(
-                        "This contour is corrupted and spans across 2 or more slices."
+                        'This contour is corrupted and spans across 2 or more slices.'
                     ) from e
 
     def to_segmentation(  # noqa
@@ -511,9 +516,7 @@ class StructureSet:
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
-                    matching_names = list(
-                        self._assign_labels([pattern], roi_select_first).keys()
-                    )
+                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
                     if matching_names:
                         # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
                         labels[name] = matching_names
@@ -526,19 +529,17 @@ class StructureSet:
                             self._assign_labels([pattern_one], roi_select_first).keys()
                         )
                         if matching_names:
-                            extracted_labels.extend(
-                                matching_names
-                            )  # {"GTV": ["GTV1", "GTV2"]}
+                            extracted_labels.extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
                     labels[name] = extracted_labels
         if isinstance(roi_names, str):
             roi_names = [roi_names]
 
-        logger.debug(f"Found {len(labels)} labels", labels=labels)
+        logger.debug(f'Found {len(labels)} labels', labels=labels)
 
         labels = {k: v for (k, v) in labels.items() if v != []}
         if not labels:
             if not ignore_missing_regex:
-                msg = f"No ROIs matching {roi_names} found in {self.roi_names}."
+                msg = f'No ROIs matching {roi_names} found in {self.roi_names}.'
                 raise ValueError(msg)
             else:
                 return None
@@ -550,9 +551,7 @@ class StructureSet:
         if not roi_names:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {
-                "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
-            }
+            seg_roi_indices = {'_'.join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
         elif isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
@@ -580,12 +579,10 @@ class StructureSet:
 
         # Truncate the UID values for better readability
         for k, v in self.metadata.items():
-            if k.endswith("UID"):
-                metadata_str_parts.append(f"{k}: {v[-5:]}")
+            if k.endswith('UID'):
+                metadata_str_parts.append(f'{k}: {v[-5:]}')
             else:
-                metadata_str_parts.append(f"{k}: {v}")
-        metadata_str = "\n\t".join(metadata_str_parts)
+                metadata_str_parts.append(f'{k}: {v}')
+        metadata_str = '\n\t'.join(metadata_str_parts)
 
-        return (
-            f"\n<StructureSet with ROIs: {sorted_rois!r}>\nMetadata:\n\t{metadata_str}"
-        )
+        return f'\n<StructureSet with ROIs: {sorted_rois!r}>\nMetadata:\n\t{metadata_str}'

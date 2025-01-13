@@ -1,3 +1,15 @@
+"""Base classes for writing data to files with customizable paths and filenames.
+
+As of 1.11.0, the BaseWriter class has been deprecated in favor of the AbstractBaseWriter class.
+
+However, the BaseWriter class is still available for backwards compatibility with existing code.
+The following classes are available in this module:
+
+    - AbstractBaseWriter: Abstract base class for managing file writing with customizable paths and filenames.
+    - BaseWriter: Deprecated class for writing data to files with customizable paths and filenames.
+    - BaseSubjectWriter: Deprecated class for writing subject data to files with customizable paths and filenames.
+"""
+
 from __future__ import annotations
 import os
 import shutil
@@ -10,7 +22,6 @@ from typing import Any, Generator, NoReturn, Optional, Dict
 from enum import Enum, auto
 import SimpleITK as sitk
 from contextlib import contextmanager
-from imgtools.types import PathLike
 from imgtools.io.pattern_parser import PatternResolver
 from imgtools.logging import logger
 from ..exceptions import DirectoryNotFoundError
@@ -38,17 +49,15 @@ class AbstractBaseWriter(ABC):
 
     # Any subclass has to be initialized with a root directory and a filename format
     # Gets converted to a Path object in __post_init__
-    root_directory: PathLike = field(
-        metadata={"help": "Root directory where files will be saved."}
-    )
+    root_directory: Path = field(metadata={'help': 'Root directory where files will be saved.'})
 
     # The filename format string with placeholders for context variables
     # e.g. "{subject_id}_{date}/{disease}.txt"
     filename_format: str = field(
         metadata={
-            "help": (
-                "Format string defining the directory and filename structure. "
-                "Supports placeholders for context variables. "
+            'help': (
+                'Format string defining the directory and filename structure. '
+                'Supports placeholders for context variables. '
                 "e.g. '{subject_id}_{date}/{disease}.txt'"
             )
         }
@@ -57,9 +66,7 @@ class AbstractBaseWriter(ABC):
     # optionally, you can set create_dirs to False if you want to handle the directory creation yourself
     create_dirs: bool = field(
         default=True,
-        metadata={
-            "help": "If True, creates necessary directories if they don't exist."
-        },
+        metadata={'help': "If True, creates necessary directories if they don't exist."},
     )
 
     # class-level pattern resolver instance shared across all instances
@@ -67,15 +74,13 @@ class AbstractBaseWriter(ABC):
     existing_file_mode: ExistingFileMode = field(
         default=ExistingFileMode.FAIL,
         metadata={
-            "help": "Behavior when a file already exists. Options: OVERWRITE, SKIP, FAIL, RAISE_WARNING."
+            'help': 'Behavior when a file already exists. Options: OVERWRITE, SKIP, FAIL, RAISE_WARNING.'
         },
     )
 
     sanitize_filenames: bool = field(
         default=True,
-        metadata={
-            "help": "If True, replaces illegal characters from filenames with underscores."
-        },
+        metadata={'help': 'If True, replaces illegal characters from filenames with underscores.'},
     )
 
     # Internal context storage for pre-checking
@@ -90,7 +95,7 @@ class AbstractBaseWriter(ABC):
         if self.create_dirs:
             self.root_directory.mkdir(parents=True, exist_ok=True)
         elif not self.root_directory.exists():
-            msg = f"Root directory {self.root_directory} does not exist."
+            msg = f'Root directory {self.root_directory} does not exist.'
             raise DirectoryNotFoundError(msg)
         self.pattern_resolver = PatternResolver(self.filename_format)
 
@@ -119,9 +124,9 @@ class AbstractBaseWriter(ABC):
         """Free to use date-time context values."""
         now = datetime.now(timezone.utc)
         return {
-            "date": now.strftime("%Y-%m-%d"),
-            "time": now.strftime("%H%M%S"),
-            "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
+            'date': now.strftime('%Y-%m-%d'),
+            'time': now.strftime('%H%M%S'),
+            'date_time': now.strftime('%Y-%m-%d_%H%M%S'),
         }
 
     def resolve_path(self, **kwargs: Any) -> Path:  # noqa
@@ -159,19 +164,19 @@ class AbstractBaseWriter(ABC):
         """
         out_path = self.resolve_path(**kwargs)
         self.set_context(**kwargs)
-        logger.debug(f"Resolved path: {out_path} and {out_path.exists()=}")
+        logger.debug(f'Resolved path: {out_path} and {out_path.exists()=}')
 
         if out_path.exists():
             match self.existing_file_mode:
                 case ExistingFileMode.SKIP:
-                    logger.debug(f"File {out_path} exists. Skipping.")
+                    logger.debug(f'File {out_path} exists. Skipping.')
                     return None
                 case ExistingFileMode.FAIL:
-                    raise FileExistsError(f"File {out_path} already exists.")
+                    raise FileExistsError(f'File {out_path} already exists.')
                 case ExistingFileMode.RAISE_WARNING:
-                    logger.warning(f"File {out_path} exists. Proceeding anyway.")
+                    logger.warning(f'File {out_path} exists. Proceeding anyway.')
                 case ExistingFileMode.OVERWRITE:
-                    logger.debug(f"File {out_path} exists. Overwriting.")
+                    logger.debug(f'File {out_path} exists. Overwriting.')
         return out_path
 
     def validate_path(self, **kwargs: Any) -> Optional[Path]:
@@ -207,12 +212,12 @@ class AbstractBaseWriter(ABC):
         FileExistsError
             If the file exists and the mode is FAIL.
         """
-        logger.debug("validate_path")
+        logger.debug('validate_path')
         try:
-            logger.debug("try")
+            logger.debug('try')
             resolved_path = self.resolve_and_validate_path(**kwargs)
         except FileExistsError as e:
-            logger.exception(f"Error in {self.__class__.__name__} during pre-check.")
+            logger.exception(f'Error in {self.__class__.__name__} during pre-check.')
             raise e
         return resolved_path
 
@@ -224,11 +229,11 @@ class AbstractBaseWriter(ABC):
         Useful if the writer needs to perform setup actions, such as
         opening connections or preparing resources.
         """
-        logger.debug(f"Entering context manager for {self.__class__.__name__}")
+        logger.debug(f'Entering context manager for {self.__class__.__name__}')
         return self
 
     def __exit__(
-        self: "BaseWriter",
+        self: AbstractBaseWriter,
         exc_type: Optional[type],
         exc_value: Optional[BaseException],
         traceback: Optional[TracebackType],
@@ -247,10 +252,10 @@ class AbstractBaseWriter(ABC):
         """
         if exc_type:
             logger.exception(
-                f"Exception raised in {self.__class__.__name__} while in context manager.",
+                f'Exception raised in {self.__class__.__name__} while in context manager.',
                 exc_info=exc_value,
             )
-        logger.debug(f"Exiting context manager for {self.__class__.__name__}")
+        logger.debug(f'Exiting context manager for {self.__class__.__name__}')
 
         # if the root directory is empty, aka we created it but didn't write anything, delete it
         if (
@@ -258,7 +263,7 @@ class AbstractBaseWriter(ABC):
             and self.root_directory.exists()
             and not any(self.root_directory.iterdir())
         ):
-            logger.debug(f"Deleting empty directory {self.root_directory}")
+            logger.debug(f'Deleting empty directory {self.root_directory}')
             self.root_directory.rmdir()  # remove the directory if it's empty
 
     @staticmethod
@@ -279,18 +284,18 @@ class AbstractBaseWriter(ABC):
         import re
 
         # Replace bad characters with underscores
-        sanitized = re.sub(r'[<>:"\\|?*]', "_", filename)
+        sanitized = re.sub(r'[<>:"\\|?*]', '_', filename)
 
         # Optionally trim leading/trailing spaces or periods
-        sanitized = sanitized.strip(" .")
+        sanitized = sanitized.strip(' .')
 
         return sanitized
 
-    def put(self, *args, **kwargs) -> NoReturn:  # noqa
+    def put(self, *args, **kwargs) -> NoReturn:  # noqa # type: ignore
         """Accdidentally using put() instead of save() will raise a fatal error."""
         msg = (
-            "Method put() is deprecated and will be removed in future versions. "
-            "Please use AbstractBaseWriter.save() instead of the old BaseWriter.put()."
+            'Method put() is deprecated and will be removed in future versions. '
+            'Please use AbstractBaseWriter.save() instead of the old BaseWriter.put().'
         )
         logger.fatal(msg)
         import sys
@@ -308,14 +313,14 @@ class BaseWriter:
         if create_dirs and not os.path.exists(self.root_directory):
             os.makedirs(self.root_directory)
 
-    def put(self, *args, **kwargs) -> NoReturn:
+    def put(self, *args, **kwargs):
         raise NotImplementedError
 
     def save(self, *args, **kwargs) -> Path:
         """not meant to be used with old BaseWriter, use AbstractBaseWriter.save() instead"""
         msg = (
-            "Method save() is not implemented for this writer. "
-            "Please use AbstractBaseWriter.save() instead of the old BaseWriter.save()."
+            'Method save() is not implemented for this writer. '
+            'Please use AbstractBaseWriter.save() instead of the old BaseWriter.save().'
         )
         logger.fatal(msg)
         import sys
@@ -324,9 +329,9 @@ class BaseWriter:
 
     def _get_path_from_subject_id(self, subject_id, **kwargs):
         now = datetime.now(timezone.utc)
-        date = now.strftime("%Y-%m-%d")
-        time = now.strftime("%H%M%S")
-        date_time = date + "_" + time
+        date = now.strftime('%Y-%m-%d')
+        time = now.strftime('%H%M%S')
+        date_time = date + '_' + time
         out_filename = self.filename_format.format(
             subject_id=subject_id, date=date, time=time, date_time=date_time, **kwargs
         )
@@ -343,7 +348,7 @@ class BaseSubjectWriter(BaseWriter):
     def __init__(
         self,
         root_directory,
-        filename_format="{subject_id}.nii.gz",
+        filename_format='{subject_id}.nii.gz',
         create_dirs=True,
         compress=True,
     ) -> None:
@@ -354,11 +359,9 @@ class BaseSubjectWriter(BaseWriter):
         self.compress = compress
         if os.path.exists(self.root_directory):
             # delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
-            if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+            if os.path.basename(os.path.dirname(self.root_directory)) == '{subject_id}':
                 shutil.rmtree(os.path.dirname(self.root_directory))
-            elif "{label_or_image}{train_or_test}" in os.path.basename(
-                self.root_directory
-            ):
+            elif '{label_or_image}{train_or_test}' in os.path.basename(self.root_directory):
                 shutil.rmtree(self.root_directory)
 
     def put(
@@ -367,39 +370,35 @@ class BaseSubjectWriter(BaseWriter):
         image,
         is_mask=False,
         nnunet_info=None,
-        label_or_image: str = "images",
-        mask_label: str = "",
-        train_or_test: str = "Tr",
+        label_or_image: str = 'images',
+        mask_label: str = '',
+        train_or_test: str = 'Tr',
         **kwargs,
     ) -> None:
         if is_mask:
             # remove illegal characters for Windows/Unix
             badboys = r'<>:"/\|?*'
             for char in badboys:
-                mask_label = mask_label.replace(char, "")
+                mask_label = mask_label.replace(char, '')
 
             # filename_format eh
             self.filename_format = (
-                mask_label + ".nii.gz"
+                mask_label + '.nii.gz'
             )  # save the mask labels as their rtstruct names
 
         if nnunet_info:
-            if label_or_image == "labels":
-                filename = f"{subject_id}.nii.gz"  # naming convention for labels
+            if label_or_image == 'labels':
+                filename = f'{subject_id}.nii.gz'  # naming convention for labels
             else:
                 filename = self.filename_format.format(
                     subject_id=subject_id,
-                    modality_index=nnunet_info["modalities"][
-                        nnunet_info["current_modality"]
-                    ],
+                    modality_index=nnunet_info['modalities'][nnunet_info['current_modality']],
                 )  # naming convention for images
             out_path = self._get_path_from_subject_id(
                 filename, label_or_image=label_or_image, train_or_test=train_or_test
             )
         else:
-            out_path = self._get_path_from_subject_id(
-                self.filename_format, subject_id=subject_id
-            )
+            out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, filename, **kwargs):

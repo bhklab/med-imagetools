@@ -2,8 +2,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, Tuple
 
-from imgtools.dicom.sort.exceptions import InvalidPatternError  # type: ignore
-from imgtools.dicom.sort.parser import PatternParser  # type: ignore
+from imgtools.dicom.sort.exceptions import InvalidPatternError
+from imgtools.dicom.sort.parser import PatternParser
 from imgtools.logging import logger
 
 
@@ -55,7 +55,7 @@ class PatternResolver:
 
     filename_format: str = field(init=True)
 
-    DEFAULT_PATTERN: ClassVar[re.Pattern] = re.compile(r'%(\w+)|\{(\w+)\}')
+    DEFAULT_PATTERN: ClassVar[re.Pattern] = re.compile(r"%(\w+)|\{(\w+)\}")
 
     def __init__(self, filename_format: str) -> None:
         self.filename_format = filename_format
@@ -64,13 +64,17 @@ class PatternResolver:
             self.pattern_parser = PatternParser(
                 self.filename_format, pattern_parser=self.DEFAULT_PATTERN
             )
-            self.formatted_pattern, self.keys = self.parse()  # Validate the pattern by parsing it
+            self.formatted_pattern, self.keys = (
+                self.parse()
+            )  # Validate the pattern by parsing it
         except InvalidPatternError as e:
-            msg = f'Invalid filename format: {e}'
+            msg = f"Invalid filename format: {e}"
             raise PatternResolverError(msg) from e
         else:
-            logger.debug('All keys are valid.', keys=self.keys)
-            logger.debug('Formatted Pattern valid.', formatted_pattern=self.formatted_pattern)
+            logger.debug("All keys are valid.", keys=self.keys)
+            logger.debug(
+                "Formatted Pattern valid.", formatted_pattern=self.formatted_pattern
+            )
 
     def parse(self) -> Tuple[str, list[str]]:
         """
@@ -108,15 +112,15 @@ class PatternResolver:
             If a required key is missing from the context dictionary.
         """
         if len(none_keys := [k for k, v in context.items() if v is None]) > 0:
-            msg = 'None is not a valid value for a placeholder in the pattern.'
-            msg += f' None keys: {none_keys}'
+            msg = "None is not a valid value for a placeholder in the pattern."
+            msg += f" None keys: {none_keys}"
             raise PatternResolverError(msg)
 
         try:
             return self.formatted_pattern % context
         except KeyError as e:
             missing_keys = set(context.keys()) - set(self.keys)
-            msg = f'Missing value for placeholder(s): {missing_keys}'
-            msg += '\nPlease provide a value for this key in the `context` argument.'
-            msg += f' i.e `{self.__class__.__name__}.save(..., {e.args[0]}=value)`.'
+            msg = f"Missing value for placeholder(s): {missing_keys}"
+            msg += "\nPlease provide a value for this key in the `context` argument."
+            msg += f" i.e `{self.__class__.__name__}.save(..., {e.args[0]}=value)`."
             raise PatternResolverError(msg) from e

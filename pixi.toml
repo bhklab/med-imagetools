@@ -103,6 +103,7 @@ ruff = ">=0.4.8"
 mypy = ">=1.13.0,<2"
 types-pytz = ">=2024.2.0.20241003,<2025"
 types-tqdm = ">=4.66.0.20240417,<5"
+pandas-stubs = ">=2.2.3.241126,<3"
 
 [feature.quality.pypi-dependencies]
 pydoctest = ">=0.2.1, <0.3"
