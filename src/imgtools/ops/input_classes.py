@@ -47,7 +47,7 @@ class CrawlGraphInput(BaseInput):
         DataGraph object containing the dataset graph.
     """
 
-    dir_path: str
+    dir_path: pathlib.Path
     n_jobs: int
     update_crawl: bool
     imgtools_dir: str
