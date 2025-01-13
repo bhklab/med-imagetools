@@ -1,32 +1,35 @@
-from argparse import ArgumentParser
+import json
 import os
 import pathlib
-import glob
-import json
+from argparse import ArgumentParser
+
 import pandas as pd
+from joblib import Parallel, delayed
 from pydicom import dcmread
 from tqdm import tqdm
-from joblib import Parallel, delayed
+
 from imgtools.logging import logger
 
 
 # fmt: off
-def crawl_one(folder):
+def crawl_one(folder: pathlib.Path) -> dict:
     folder_path = pathlib.Path(folder)
     database = {}
-    for path, _, _ in os.walk(folder):
+    for path in folder_path.iterdir():
         # find dicoms
-        dicoms = glob.glob(pathlib.Path(path, "**", "*.dcm").as_posix(), recursive=True)
-        # print('\n', folder, dicoms)
-        # instance (slice) information
+        dicoms = [f for f in path.rglob("*.dcm")]
+        logger.info(f"Found {len(dicoms)} dicoms in {folder}")
+
         for dcm in dicoms:
             try:
                 dcm_path = pathlib.Path(dcm)
-                # parent    = dcm_path.parent#.as_posix()
+
                 fname = dcm_path.name
+
                 rel_path = dcm_path.relative_to(
                     folder_path.parent.parent
                 )  # rel_path of dicom from folder
+
                 rel_posix = (
                     rel_path.parent.as_posix()
                 )  # folder name + until parent folder of dicom
@@ -220,16 +223,17 @@ def crawl(
     n_jobs: int = -1,
     csv_path: pathlib.Path | None = None,
     json_path: pathlib.Path | None = None,
+    imgtools_dir: str = ".imgtools",
 ) -> dict:
-
     database_list = []
-    folders = glob.glob(pathlib.Path(top, "*").as_posix())
+    # folders = glob.glob(pathlib.Path(top, "*").as_posix())
+    folders = [f for f in pathlib.Path(top).iterdir() if f.is_dir()]
     logger.info(f"Crawling {len(folders)} folders in {top}")
+
     database_list = Parallel(n_jobs=n_jobs)(
-        delayed(crawl_one)(pathlib.Path(top, folder).as_posix())
+        delayed(crawl_one)(folder.as_posix())
         for folder in tqdm(folders, desc="Crawling folders", leave=False)
     )
-
     logger.info("Converting list to dictionary")
     # convert list to dictionary
     database_dict = {}
@@ -239,13 +243,13 @@ def crawl(
 
     # configure json path
     if json_path is None:
-        json_path = top.parent / ".imgtools" / f"imgtools_{top.name}.json"
+        json_path = top.parent / imgtools_dir / f"imgtools_{top.name}.json"
 
     json_path.parent.mkdir(parents=True, exist_ok=True)
 
     # configure csv path
     if csv_path is None:
-        csv_path = top.parent / ".imgtools" / f"imgtools_{top.name}.csv"
+        csv_path = top.parent / imgtools_dir / f"imgtools_{top.name}.csv"
 
     csv_path.parent.mkdir(parents=True, exist_ok=True)
 
