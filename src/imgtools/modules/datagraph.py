@@ -1,6 +1,6 @@
 from functools import reduce
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 
 import numpy as np
 import pandas as pd
@@ -339,20 +339,33 @@ class DataGraph:
 
             # For cases such as the CT-RTSTRUCT and CT-RTDOSE, there exists multiple pathways due to which just searching on the edgetype gives wrong results
             if edge_type == 0:
-                # Search for subgraphs with edges 0 or (1 and 2)
-                regex_term = '(?:(?:(?=.*0)|(?=.*5)(?=.*6))|(?:(?=.*1)(?=.*2)))'
+                # Search for subgraphs with edges (0 or (5 and 6)) or (1 and 2)
+                edge_condition = lambda row: (
+                    ('0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])) or
+                    ('1' in row['edge_type'] and '2' in row['edge_type'])
+                )
                 mod = [i for i in self.queried_modalities if i in ['CT', 'MR']][
                     0
                 ]  # making folder_mod CT/MR agnostic <-- still needs testing
-                final_df = self.graph_query(regex_term, [0, 1, 2], f'folder_{mod}')
+                final_df = self.graph_query(edge_condition, [0, 1, 2], f'folder_{mod}')
             elif edge_type == 1:
-                # Search for subgraphs with edges 1 or (0 and 2)
-                regex_term = '(?:(?=.*1)|(?:(?:(?=.*0)|(?=.*5)(?=.*6))(?=.*2)))'
-                final_df = self.graph_query(regex_term, [0, 1, 2], 'RTSTRUCT')
+                # Search for subgraphs with edges 1 or ((0 or (5 and 6)) and 2)
+                edge_condition = lambda row: (
+                    '1' in row['edge_type'] or (
+                        ('0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])) and 
+                        '2' in row['edge_type']
+                    )
+                )
+                final_df = self.graph_query(edge_condition, [0, 1, 2], 'RTSTRUCT')
             elif edge_type == 2:
-                # Search for subgraphs with edges 2 or (1 and 0)
-                regex_term = '(?:(?=.*2)|(?:(?:(?=.*0)|(?=.*5)(?=.*6))(?=.*1)))'
-                final_df = self.graph_query(regex_term, [0, 1, 2], 'RTDOSE')
+                # Search for subgraphs with edges 2 or ((0 or (5 and 6)) and 1)
+                edge_condition = lambda row: (
+                    '2' in row['edge_type'] or (
+                        ('0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])) and 
+                        '1' in row['edge_type']
+                    )
+                )
+                final_df = self.graph_query(edge_condition, [0, 1, 2], 'RTDOSE')
             elif edge_type == 7:  # SEG->CT/MR
                 # keep final_df as is
                 final_df = self.df_edges.loc[self.df_edges.edge_type == edge_type].copy()
@@ -413,8 +426,11 @@ class DataGraph:
                 & ('RTDOSE' in query_string)
                 & ('PT' not in query_string)
             ):
-                # Fetch the required data. Checks whether each study has edge 2 and (1 or 0)
-                regex_term = '(?:(?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)'
+                # Fetch the required data. Checks whether each study has edge 2 and (1 or (0 or (5 and 6)))
+                edge_condition = lambda row: (
+                    '2' in row['edge_type'] and
+                    ('1' in row['edge_type'] or '0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])) 
+                )
                 edge_list = [0, 1, 2, 5, 6]
             # CT/MR,RTSTRUCT,RTDOSE,PT
             elif (
@@ -423,8 +439,13 @@ class DataGraph:
                 & ('RTDOSE' in query_string)
                 & ('PT' in query_string)
             ):
-                # Fetch the required data. Checks whether each study has edge 2,3,4 and (1 or 0)
-                regex_term = '(?:(?=.*1)|(?=.*0)|(?=.*5)(?=.*6))(?=.*2)(?=.*3)(?=.*4)'  # fix
+                # Fetch the required data. Checks whether each study has edge (1 or (0 or (5 and 6))) and 2,3,4
+                edge_condition = lambda row: (
+                    ('1' in row['edge_type'] or '0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])) and
+                    '2' in row['edge_type'] and
+                    '3' in row['edge_type'] and
+                    '4' in row['edge_type']
+                )
                 edge_list = [0, 1, 2, 3, 4]
             # CT/MR,RTSTRUCT,PT
             elif (
@@ -434,7 +455,7 @@ class DataGraph:
                 & ('RTDOSE' not in query_string)
             ):
                 # Fetch the required data. Checks whether each study has edge 2,3,4
-                regex_term = '(?=.*2)(?=.*3)(?=.*4)'
+                edge_condition = lambda row: '2' in row['edge_type'] and '3' in row['edge_type'] and '4' in row['edge_type']
                 edge_list = [2, 3, 4]
             # CT/MR,RTDOSE,PT
             elif (
@@ -443,14 +464,18 @@ class DataGraph:
                 & ('PT' in query_string)
                 & ('RTDOSE' in query_string)
             ):
-                # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Remove RTSTRUCT later
-                regex_term = '(?=.*4)(?:(?=.*1)|(?:(?=.*2)(?:(?=.*0)|(?=.*5)(?=.*6))))'
+                # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and (0 or (5 and 6)))). Remove RTSTRUCT later
+                edge_condition = lambda row: (
+                    '4' in row['edge_type'] and (
+                        '1' in row['edge_type'] or ('2' in row['edge_type'] and ('0' in row['edge_type'] or ('5' in row['edge_type'] and '6' in row['edge_type'])))
+                    )
+                )
                 edge_list = [0, 1, 2, 4, 5, 6]
                 bads.append('RTSTRUCT')
             else:
                 raise ValueError('Please enter the correct query')
 
-            final_df = self.graph_query(regex_term, edge_list, bads)
+            final_df = self.graph_query(edge_condition, edge_list, bads)
         else:
             raise ValueError('Please enter the correct query')
 
@@ -480,7 +505,7 @@ class DataGraph:
 
     def graph_query(
         self,
-        regex_term: str,
+        edge_condition: Callable,
         edge_list: List[int],
         change_df: List[str],
         return_components: bool = False,
@@ -514,11 +539,7 @@ class DataGraph:
         if self.df_new is None:
             self._form_agg()  # Form aggregates
 
-        # Fetch the required data. Checks whether each study has edge 4 and (1 or (2 and 0)). Can remove later
-        relevant_study_id = self.df_new.loc[
-            self.df_new.edge_type.str.contains(f'(?:{regex_term})', regex=True),
-            'study_x',
-        ].unique()
+        relevant_study_id = self.df_new.loc[self.df_new.apply(edge_condition, axis=1), 'study_x'].unique()
 
         # Based on the correct study ids, fetches the relevant edges
         df_processed = self.df_edges.loc[
