@@ -121,7 +121,7 @@ _type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
 _type-check.inputs = ["config/mypy.ini", "src"]
 _type-check.description = "Run mypy type check."
 
-qc.depends_on = ["_ruff-format", "_ruff-check", "_type-check"]
+qc.depends-on = ["_ruff-format", "_ruff-check", "_type-check"]
 qc.description = "Quality check: ruff & mypy"
 
 #################################### RELEASE & BUILD ###############################################
