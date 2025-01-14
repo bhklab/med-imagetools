@@ -15,11 +15,10 @@ def curr_path():
 
 @pytest.fixture(scope="session")
 def dataset_path(curr_path):
-    quebec_path = pathlib.Path(
-        pathlib.Path(curr_path, "data", "Head-Neck-PET-CT").as_posix()
-    )
 
-    if not quebec_path.exists():
+    quebec_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT")
+
+    if not (quebec_path.exists() and len(list(quebec_path.glob("*"))) == 2):
         quebec_path.mkdir(parents=True, exist_ok=True)
 
         # Download QC dataset
@@ -48,3 +47,27 @@ def dataset_path(curr_path):
     # json_path =  pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
 
     yield quebec_path, output_path, crawl_path, edge_path
+
+
+@pytest.fixture(scope="session")
+def modalities_path(curr_path):
+
+    qc_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT", "HN-CHUS-052")
+    assert qc_path.exists(), "Dataset not found"
+
+    path = {}
+    path["CT"] = pathlib.Path(
+        qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362"
+    ).as_posix()
+    path["RTSTRUCT"] = pathlib.Path(
+        qc_path,
+        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418",
+    ).as_posix()
+    path["RTDOSE"] = pathlib.Path(
+        qc_path,
+        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376",
+    ).as_posix()
+    path["PT"] = pathlib.Path(
+        qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600"
+    ).as_posix()
+    return path

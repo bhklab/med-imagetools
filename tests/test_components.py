@@ -50,7 +50,7 @@ class TestComponents:
             n_jobs=n_jobs,
             spacing=(5, 5, 5),
             overwrite=True,
-            # update=True,
+            update=True,
         )
         # Run for different modalities
         comp_path = pathlib.Path(output_path_mod, "dataset.csv").as_posix()

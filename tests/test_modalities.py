@@ -13,32 +13,6 @@ from imgtools.io import read_dicom_auto
 from imgtools.ops import StructureSetToSegmentation
 
 
-@pytest.fixture
-def modalities_path(dataset_path):  # dataset_path is a fixture defined in conftest.py
-
-    quebec_path, output_path, crawl_path, edge_path = dataset_path
-
-    qc_path = pathlib.Path(quebec_path) / "HN-CHUS-052"
-    assert qc_path.exists(), "Dataset not found"
-
-    path = {}
-    path["CT"] = pathlib.Path(
-        qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362"
-    ).as_posix()
-    path["RTSTRUCT"] = pathlib.Path(
-        qc_path,
-        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418",
-    ).as_posix()
-    path["RTDOSE"] = pathlib.Path(
-        qc_path,
-        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376",
-    ).as_posix()
-    path["PT"] = pathlib.Path(
-        qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600"
-    ).as_posix()
-    return path
-
-
 @pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
 def test_modalities(modalities, modalities_path):
     path = modalities_path
