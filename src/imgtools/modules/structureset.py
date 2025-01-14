@@ -53,13 +53,15 @@ def _get_rtstruct_reference_series(
     rtstruct: FileDataset,
 ) -> str:
     """Given an RTSTRUCT file, return the Referenced SeriesInstanceUID."""
-    return str(
-        rtstruct.ReferencedFrameOfReferenceSequence[0]
-        .RTReferencedStudySequence[0]
-        .RTReferencedSeriesSequence[0]
-        .SeriesInstanceUID
-    )
-
+    try:
+        return str(
+            rtstruct.ReferencedFrameOfReferenceSequence[0]
+            .RTReferencedStudySequence[0]
+            .RTReferencedSeriesSequence[0]
+            .SeriesInstanceUID
+        )
+    except (AttributeError, IndexError) as e:
+        raise ValueError("Referenced SeriesInstanceUID not found in RTSTRUCT") from e
 
 class StructureSet:
     """Class for handling DICOM RTSTRUCT contour data.
