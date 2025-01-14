@@ -22,9 +22,9 @@ from imgtools.ops.ops import (
 )
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def output_path(curr_path):  # curr_path is a fixture defined in conftest.py
-    out_path = pathlib.Path(curr_path, "temp_outputs")
+    out_path = pathlib.Path(curr_path, 'temp_outputs')
     out_path.mkdir(parents=True, exist_ok=True)
     return out_path
 
@@ -42,8 +42,8 @@ blank.SetSpacing(spacing)
 
 
 class TestOutput:
-    @pytest.mark.parametrize("op", [NumpyOutput, HDF5Output])  # , "CT,RTDOSE,PT"])
-    def test_output(self, op, output_path):
+    @pytest.mark.parametrize('op', [NumpyOutput, HDF5Output])  # , "CT,RTDOSE,PT"])
+    def test_output(self, op, output_path) -> None:
         # get class name
         class_name = op.__name__
 
@@ -55,13 +55,13 @@ class TestOutput:
         ).as_posix()
 
         # check output
-        if class_name == "HDF5Output":
-            f = h5py.File(saved_path, "r")
-            img = f["image"]
-            assert tuple(img.attrs["origin"]) == origin
-            assert tuple(img.attrs["direction"]) == direction
-            assert tuple(img.attrs["spacing"]) == spacing
-        elif class_name == "NumpyOutput":
+        if class_name == 'HDF5Output':
+            f = h5py.File(saved_path, 'r')
+            img = f['image']
+            assert tuple(img.attrs['origin']) == origin
+            assert tuple(img.attrs['direction']) == direction
+            assert tuple(img.attrs['spacing']) == spacing
+        elif class_name == 'NumpyOutput':
             img = np.load(saved_path)
 
         # class-agnostic
@@ -70,16 +70,16 @@ class TestOutput:
 
 class TestTransform:
     @pytest.mark.parametrize(
-        "op,params",
+        'op,params',
         [
-            (Resample, {"spacing": 3.7}),
-            (Resize, {"size": 10}),
-            (Zoom, {"scale_factor": 0.1}),
-            (Crop, {"crop_centre": (20, 20, 20), "size": 10}),
-            (CentreCrop, {"size": 10}),
+            (Resample, {'spacing': 3.7}),
+            (Resize, {'size': 10}),
+            (Zoom, {'scale_factor': 0.1}),
+            (Crop, {'crop_centre': (20, 20, 20), 'size': 10}),
+            (CentreCrop, {'size': 10}),
         ],
     )
-    def test_transform(self, op, params):
+    def test_transform(self, op, params) -> None:
         transform = op(**params)
         new_img = transform(blank)
 
@@ -100,15 +100,15 @@ class TestTransform:
 
 class TestIntensity:
     @pytest.mark.parametrize(
-        "op,params",
+        'op,params',
         [
-            (ClipIntensity, {"lower": 0, "upper": 500}),
-            (WindowIntensity, {"window": 500, "level": 250}),
+            (ClipIntensity, {'lower': 0, 'upper': 500}),
+            (WindowIntensity, {'window': 500, 'level': 250}),
             (StandardScale, {}),
-            (MinMaxScale, {"minimum": 0, "maximum": 1000}),
+            (MinMaxScale, {'minimum': 0, 'maximum': 1000}),
         ],
     )
-    def test_intesity(self, op, params):
+    def test_intesity(self, op, params) -> None:
         img_cube = copy.deepcopy(blank)
         img_cube[5:15, 5:15, 5:15] = 1000
 
@@ -122,4 +122,3 @@ class TestIntensity:
         elif isinstance(intensify, StandardScale):
             assert np.allclose(stats.mean, 0.0)
             assert np.allclose(stats.standard_deviation, 1.0, rtol=1e-1)
-            print(stats.minimum, stats.maximum)

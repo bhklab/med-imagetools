@@ -4,57 +4,53 @@ This file does not get tested because it doesnt start with test_ and so, is not 
 Leaving here for future reference.
 """
 
-import pathlib
 import os
+import pathlib
 import re
-import pandas as pd
-import torchio as tio
-import pytest
-import torch
-import urllib.request as request
+from typing import List
+from urllib import request
 from zipfile import ZipFile
 
-from typing import List
+import pandas as pd
+import pytest
+import torch
+import torchio as tio
+
 from imgtools.io import Dataset
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def dataset_path():
     curr_path = pathlib.Path(__file__).parent.parent.resolve()
-    quebec_path = pathlib.Path(
-        pathlib.Path(curr_path, "data", "Head-Neck-PET-CT").as_posix()
-    )
+    quebec_path = pathlib.Path(pathlib.Path(curr_path, 'data', 'Head-Neck-PET-CT').as_posix())
 
     if not os.path.exists(quebec_path):
         pathlib.Path(quebec_path).mkdir(parents=True, exist_ok=True)
         # Download QC dataset
-        print("Downloading the test dataset...")
-        quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
-        quebec_zip_path = pathlib.Path(quebec_path, "Head-Neck-PET-CT.zip").as_posix()
+        quebec_data_url = (
+            'https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true'
+        )
+        quebec_zip_path = pathlib.Path(quebec_path, 'Head-Neck-PET-CT.zip').as_posix()
         request.urlretrieve(quebec_data_url, quebec_zip_path)
-        with ZipFile(quebec_zip_path, "r") as zipfile:
+        with ZipFile(quebec_zip_path, 'r') as zipfile:
             zipfile.extractall(quebec_path)
         os.remove(quebec_zip_path)
     else:
-        print("Data already downloaded...")
-    output_path = pathlib.Path(curr_path, "tests", "temp").as_posix()
+        pass
+    output_path = pathlib.Path(curr_path, 'tests', 'temp').as_posix()
     quebec_path = quebec_path.as_posix()
 
     # Dataset name
     dataset_name = os.path.basename(quebec_path)
-    imgtools_path = pathlib.Path(os.path.dirname(quebec_path), ".imgtools")
+    imgtools_path = pathlib.Path(os.path.dirname(quebec_path), '.imgtools')
 
     # Defining paths for autopipeline and dataset component
-    crawl_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.csv").as_posix()
-    json_path = pathlib.Path(imgtools_path, f"imgtools_{dataset_name}.json").as_posix()  # noqa: F841
-    edge_path = pathlib.Path(
-        imgtools_path, f"imgtools_{dataset_name}_edges.csv"
-    ).as_posix()
+    crawl_path = pathlib.Path(imgtools_path, f'imgtools_{dataset_name}.csv').as_posix()
+    json_path = pathlib.Path(imgtools_path, f'imgtools_{dataset_name}.json').as_posix()  # noqa: F841
+    edge_path = pathlib.Path(imgtools_path, f'imgtools_{dataset_name}_edges.csv').as_posix()
     assert (
-        os.path.exists(crawl_path)
-        & os.path.exists(edge_path)
-        & os.path.exists(json_path)
-    ), "There was no crawler output"
+        os.path.exists(crawl_path) & os.path.exists(edge_path) & os.path.exists(json_path)
+    ), 'There was no crawler output'
 
     yield quebec_path, output_path, crawl_path, edge_path
 
@@ -73,7 +69,7 @@ class select_roi_names(tio.LabelTransform):
         # list of roi_names
         for image in self.get_images(subject):
             # For only applying to labelmaps
-            metadata = subject["metadata_RTSTRUCT_CT"]
+            metadata = subject['metadata_RTSTRUCT_CT']
             patterns = self.roi_names
             mask = torch.empty_like(image.data)[: len(patterns)]
             for j, pat in enumerate(patterns):
@@ -88,7 +84,7 @@ class select_roi_names(tio.LabelTransform):
             image.set_data(mask)
         return subject
 
-    def is_invertible(self):
+    def is_invertible(self) -> bool:
         return False
 
 
@@ -98,14 +94,14 @@ def collate_fn(data):
     data: is a tio.subject with multiple columns
           Need to return required data
     """
-    mod_names = [items for items in data[0].keys() if items.split("_")[0] == "mod"]
+    mod_names = [items for items in data[0] if items.split('_')[0] == 'mod']
     temp_stack = {}
     for names in mod_names:
         temp_stack[names] = torch.stack(tuple(items[names].data for items in data))
     return temp_stack
 
 
-@pytest.mark.parametrize("modalities", ["CT", "CT,RTSTRUCT", "CT,RTSTRUCT,RTDOSE"])
+@pytest.mark.parametrize('modalities', ['CT', 'CT,RTSTRUCT', 'CT,RTSTRUCT,RTDOSE'])
 class TestDataset:
     """
     For testing the dataset components of the med-imagetools package
@@ -118,24 +114,18 @@ class TestDataset:
     """
 
     @pytest.fixture(autouse=True)
-    def _get_path(self, dataset_path):
-        self.input_path, self.output_path, self.crawl_path, self.edge_path = (
-            dataset_path
-        )
-        print(dataset_path)
+    def _get_path(self, dataset_path) -> None:
+        self.input_path, self.output_path, self.crawl_path, self.edge_path = dataset_path
 
-    def test_dataset(self, modalities):
+    def test_dataset(self, modalities) -> None:
         """
         Testing the Dataset class
         """
         output_path_mod = pathlib.Path(
-            self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))
+            self.output_path, str('temp_folder_' + ('_').join(modalities.split(',')))
         ).as_posix()
-        comp_path = (
-            pathlib.Path(output_path_mod).resolve().joinpath("dataset.csv").as_posix()
-        )
-        comp_table = pd.read_csv(comp_path, index_col=0)
-        print(comp_path, comp_table)
+        comp_path = pathlib.Path(output_path_mod).resolve().joinpath('dataset.csv').as_posix()
+        pd.read_csv(comp_path, index_col=0)
 
         # Loading from nrrd files
         subjects_nrrd = Dataset.load_image(output_path_mod, ignore_multi=True)
@@ -157,7 +147,7 @@ class TestDataset:
             [
                 tio.Resample(4),
                 tio.CropOrPad((96, 96, 40)),
-                select_roi_names(["larynx"]),
+                select_roi_names(['larynx']),
                 tio.OneHot(),
             ]
         )
@@ -176,10 +166,8 @@ class TestDataset:
         data = next(iter(test_loader))
         A = [
             item[1].shape == (2, 1, 96, 96, 40)
-            if "RTSTRUCT" not in item[0]
+            if 'RTSTRUCT' not in item[0]
             else item[1].shape == (2, 2, 96, 96, 40)
             for item in data.items()
         ]
-        assert all(
-            A
-        ), "There is some problem in the transformation/the formation of subject object"
+        assert all(A), 'There is some problem in the transformation/the formation of subject object'
