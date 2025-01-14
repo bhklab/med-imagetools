@@ -521,7 +521,7 @@ class DataGraph:
 
         Parameters
         ----------
-        regex_term: str
+        edge_condition: Callable
             To search the string in edge_type column of self.df_new which is aggregate of all the edges in a single study
 
         edge_list: List[int]
