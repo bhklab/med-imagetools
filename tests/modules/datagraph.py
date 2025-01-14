@@ -12,4 +12,7 @@ from imgtools.modules.datagraph import (
 
 
 @pytest.fixture
-def 
+@pytest.fixture
+def datagraph_fixture():
+    # Implement the fixture or remove if not needed
+    pass
