@@ -18,7 +18,7 @@ def crawl_one(folder: pathlib.Path) -> dict:
     for path in folder_path.iterdir():
         # find dicoms
         dicoms = [f for f in path.rglob("*.dcm")]
-        logger.info(f"Found {len(dicoms)} dicoms in {folder}")
+        logger.info(f"Found {len(dicoms)} dicoms in {path}")
 
         for dcm in dicoms:
             try:
