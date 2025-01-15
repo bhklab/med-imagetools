@@ -2,6 +2,7 @@ import json
 import os
 import pathlib
 from argparse import ArgumentParser
+from collections import defaultdict
 
 import pandas as pd
 from joblib import Parallel, delayed
@@ -12,174 +13,147 @@ from imgtools.logging import logger
 
 
 # fmt: off
-def crawl_one(folder: pathlib.Path) -> dict:
-    folder_path = pathlib.Path(folder)
-    database = {}
+def crawl_one(folder_path: pathlib.Path) -> dict:
+    folder_path = pathlib.Path(folder_path)
+    assert folder_path.is_dir(), f"{folder_path} is not a directory"
+
+    logger.info(f"Crawling One for {folder_path}")
+
+    # patient -> study -> series -> subseries
+    database = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
     for path in folder_path.iterdir():
         # find dicoms
         dicoms = [f for f in path.rglob("*.dcm")]
         logger.info(f"Found {len(dicoms)} dicoms in {path}")
 
         for dcm in dicoms:
-            try:
-                dcm_path = pathlib.Path(dcm)
+            dcm_path = pathlib.Path(dcm)
 
-                fname = dcm_path.name
+            dicom_filename = dcm_path.name
 
-                rel_path = dcm_path.relative_to(
-                    folder_path.parent.parent
-                )  # rel_path of dicom from folder
+            # this aims to be relative to where the ".imgtools" folder is
+            dicom_relative_path = dcm_path.relative_to(
+                folder_path.parent.parent
+            ) 
 
-                rel_posix = (
-                    rel_path.parent.as_posix()
-                )  # folder name + until parent folder of dicom
+            # folder name + until parent folder of dicom
+            relative_directory_path = (
+                dicom_relative_path.parent.as_posix()
+            )
 
-                meta = dcmread(dcm, force=True, stop_before_pixels=True)
-                patient = str(meta.PatientID)
-                study = str(meta.StudyInstanceUID)
-                series = str(meta.SeriesInstanceUID)
-                instance = str(meta.SOPInstanceUID)
+            meta = dcmread(dcm, force=True, stop_before_pixels=True)
+            patient = str(meta.PatientID)
+            study = str(meta.StudyInstanceUID)
+            series = str(meta.SeriesInstanceUID)
+            sop_instance_uid = str(meta.SOPInstanceUID)
 
-                (
-                    reference_ct,
-                    reference_rs,
-                    reference_pl,
-                ) = "", "", ""
-                tr, te, tesla, scan_seq, elem = "", "", "", "", ""
-                try:
-                    orientation = str(meta.ImageOrientationPatient)  # (0020, 0037)
-                except:
-                    orientation = ""
+            study_description = str(getattr(meta, "StudyDescription", ""))
+            series_description = str(getattr(meta, "SeriesDescription", ""))
+            subseries = str(getattr(meta, "AcquisitionNumber", "default"))
 
-                try:
-                    orientation_type = str(
-                        meta.AnatomicalOrientationType
-                    )  # (0010, 2210)
-                except:
-                    orientation_type = ""
+            orientation = str(getattr(meta, "ImageOrientationPatient", "")) # (0020, 0037)
+            orientation_type = str(getattr(meta, "AnatomicalOrientationType", "")) # (0010, 2210)
+            
+            # MRI Tags
+            tr = float(getattr(meta, "RepetitionTime", 0)) if hasattr(meta, "RepetitionTime") else ""
+            te = float(getattr(meta, "EchoTime", 0)) if hasattr(meta, "EchoTime") else ""
+            tesla = float(getattr(meta, "MagneticFieldStrength", 0)) if hasattr(meta, "MagneticFieldStrength") else ""
+            scan_seq = str(getattr(meta, "ScanningSequence", ""))
+            elem = str(getattr(meta, "ImagedNucleus", ""))
 
-                try:  # RTSTRUCT
+            # Reference CT, RS, PL
+            (
+                reference_ct,
+                reference_rs,
+                reference_pl,
+            ) = "", "", ""
+            try:  # RTSTRUCT
+                reference_ct = str(
+                    meta.ReferencedFrameOfReferenceSequence[0]
+                    .RTReferencedStudySequence[0]
+                    .RTReferencedSeriesSequence[0]
+                    .SeriesInstanceUID
+                )
+            except:
+                try:  # SEGMENTATION
                     reference_ct = str(
-                        meta.ReferencedFrameOfReferenceSequence[0]
-                        .RTReferencedStudySequence[0]
-                        .RTReferencedSeriesSequence[0]
-                        .SeriesInstanceUID
+                        meta.ReferencedSeriesSequence[0].SeriesInstanceUID
                     )
                 except:
-                    try:  # SEGMENTATION
-                        reference_ct = str(
-                            meta.ReferencedSeriesSequence[0].SeriesInstanceUID
-                        )
-                    except:
-                        try:  # RTDOSE
-                            reference_rs = str(
-                                meta.ReferencedStructureSetSequence[
-                                    0
-                                ].ReferencedSOPInstanceUID
-                            )
-                        except:
-                            pass
-                        try:
-                            reference_ct = str(
-                                meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
-                            )
-                        except:
-                            pass
-                        try:
-                            reference_pl = str(
-                                meta.ReferencedRTPlanSequence[
-                                    0
-                                ].ReferencedSOPInstanceUID
-                            )
-                        except:
-                            pass
-
-                # MRI Tags
-                try:
-                    tr = float(meta.RepetitionTime)
-                except:
-                    pass
-                try:
-                    te = float(meta.EchoTime)
-                except:
-                    pass
-                try:
-                    scan_seq = str(meta.ScanningSequence)
-                except:
-                    pass
-                try:
-                    tesla = float(meta.MagneticFieldStrength)
-                except:
-                    pass
-                try:
-                    elem = str(meta.ImagedNucleus)
-                except:
-                    pass
-
-                # Frame of Reference UIDs
-                try:
-                    reference_frame = str(meta.FrameOfReferenceUID)
-                except:
-                    try:
-                        reference_frame = str(
-                            meta.ReferencedFrameOfReferenceSequence[
+                    try:  # RTDOSE
+                        reference_rs = str(
+                            meta.ReferencedStructureSetSequence[
                                 0
-                            ].FrameOfReferenceUID
+                            ].ReferencedSOPInstanceUID
                         )
                     except:
-                        reference_frame = ""
+                        pass
+                    try:
+                        reference_ct = str(
+                            meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
+                        )
+                    except:
+                        pass
+                    try:
+                        reference_pl = str(
+                            meta.ReferencedRTPlanSequence[
+                                0
+                            ].ReferencedSOPInstanceUID
+                        )
+                    except:
+                        pass
 
+            # Frame of Reference UIDs
+            try:
+                reference_frame = str(meta.FrameOfReferenceUID)
+            except AttributeError:
                 try:
-                    study_description = str(meta.StudyDescription)
-                except:
-                    study_description = ""
+                    reference_frame = str(
+                        meta.ReferencedFrameOfReferenceSequence[
+                            0
+                        ].FrameOfReferenceUID
+                    )
+                except AttributeError:
+                    reference_frame = ""
 
-                try:
-                    series_description = str(meta.SeriesDescription)
-                except:
-                    series_description = ""
+            if meta.Modality == "RTSTRUCT": # should we also do this for SEG? 
+                dicom_folder_or_file = os.path.join(relative_directory_path, dicom_filename)
+            else:
+                dicom_folder_or_file = relative_directory_path 
 
-                try:
-                    subseries = str(meta.AcquisitionNumber)
-                except:
-                    subseries = "default"
+            # TODO: just realized that for a given series+subseries, the data should be the same
+            # EXCEPT for the SOPInstanceUID. 
+            # This means that we can check for the series+subseries wayyy before extracting the 
+            # rest of the tags, and if it exists, we can just append the SOPInstanceUID to the
+            # instances list.
 
-                if patient not in database:
-                    database[patient] = {}
-                if study not in database[patient]:
-                    database[patient][study] = {"description": study_description}
-                if series not in database[patient][study]:
-                    rel_crawl_path = rel_posix
-                    if meta.Modality == "RTSTRUCT":
-                        rel_crawl_path = os.path.join(rel_crawl_path, fname)
+            # defaultdict will handle missing keys for us so we dont have to do the
+            # whole `if key not in dict: dict[key] = {}` dance
+            # by automatically creating the key if it doesn't exist
+            database[patient][study]["description"] = study_description
+            database[patient][study][series]["description"] = series_description
 
-                    database[patient][study][series] = {
-                        "description": series_description
-                    }
-                if subseries not in database[patient][study][series]:
-                    database[patient][study][series][subseries] = {'instances': {},
-                                                                   'instance_uid': instance,
-                                                                   'modality': meta.Modality,
-                                                                   'reference_ct': reference_ct,
-                                                                   'reference_rs': reference_rs,
-                                                                   'reference_pl': reference_pl,
-                                                                   'reference_frame': reference_frame,
-                                                                   'folder': rel_crawl_path,
-                                                                   'orientation': orientation,
-                                                                   'orientation_type': orientation_type,
-                                                                   'repetition_time':tr,
-                                                                   'echo_time':te,
-                                                                   'scan_sequence': scan_seq,
-                                                                   'mag_field_strength': tesla,
-                                                                   'imaged_nucleus': elem,
-                                                                   'fname': rel_path.as_posix()  # temporary until we switch to json-based loading
-                                                                   }
-                database[patient][study][series][subseries]["instances"][instance] = (
-                    rel_path.as_posix()
-                )
-            except Exception as e:
-                print(folder, e)
-                pass
+            database[patient][study][series][subseries] = {
+                'instance_uid': sop_instance_uid,
+                'modality': meta.Modality,
+                'reference_ct': reference_ct,
+                'reference_rs': reference_rs,
+                'reference_pl': reference_pl,
+                'reference_frame': reference_frame,
+                'folder': dicom_folder_or_file,
+                'orientation': orientation,
+                'orientation_type': orientation_type,
+                'repetition_time':tr,
+                'echo_time':te,
+                'scan_sequence': scan_seq,
+                'mag_field_strength': tesla,
+                'imaged_nucleus': elem,
+                'fname': dicom_relative_path.as_posix(),  # temporary until we switch to json-based loading
+                'instances': defaultdict(str),
+            }
+            database[patient][study][series][subseries]["instances"][sop_instance_uid] = (
+                dicom_relative_path.as_posix()
+            )
 
     return database
 
@@ -195,24 +169,38 @@ def to_df(database_dict):
     for pat in database_dict:
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
-                if series != "description":  # skip description key in dict
-                    for subseries in database_dict[pat][study][series]:
-                        if subseries != 'description':  # skip description key in dict
-                            
-                            values = [pat, study, database_dict[pat][study]['description'], # noqa
-                                      series, database_dict[pat][study][series]['description'], 
-                                      subseries, database_dict[pat][study][series][subseries]['modality'], 
-                                      len(database_dict[pat][study][series][subseries]['instances']), database_dict[pat][study][series][subseries]['instance_uid'], 
-                                      database_dict[pat][study][series][subseries]['reference_ct'], database_dict[pat][study][series][subseries]['reference_rs'], 
-                                      database_dict[pat][study][series][subseries]['reference_pl'], database_dict[pat][study][series][subseries]['reference_frame'], database_dict[pat][study][series][subseries]['folder'],
-                                      database_dict[pat][study][series][subseries]['orientation'], database_dict[pat][study][series][subseries]['orientation_type'],
-                                      database_dict[pat][study][series][subseries]['repetition_time'], database_dict[pat][study][series][subseries]['echo_time'],
-                                      database_dict[pat][study][series][subseries]['scan_sequence'], database_dict[pat][study][series][subseries]['mag_field_strength'], database_dict[pat][study][series][subseries]['imaged_nucleus'],
-                                      database_dict[pat][study][series][subseries]['fname']
-                                      ]
+                if series == "description":  # skip description key in dict
+                    continue
+                for subseries in database_dict[pat][study][series]:
+                    if subseries == 'description':  # skip description key in dict
+                        continue
+                    values = [
+                        pat, 
+                        study, 
+                        database_dict[pat][study]['description'], # noqa
+                        series, 
+                        database_dict[pat][study][series]['description'], 
+                        subseries, 
+                        database_dict[pat][study][series][subseries]['modality'], 
+                        len(database_dict[pat][study][series][subseries]['instances']), 
+                        database_dict[pat][study][series][subseries]['instance_uid'], 
+                        database_dict[pat][study][series][subseries]['reference_ct'],
+                        database_dict[pat][study][series][subseries]['reference_rs'], 
+                        database_dict[pat][study][series][subseries]['reference_pl'], 
+                        database_dict[pat][study][series][subseries]['reference_frame'], 
+                        database_dict[pat][study][series][subseries]['folder'],
+                        database_dict[pat][study][series][subseries]['orientation'], 
+                        database_dict[pat][study][series][subseries]['orientation_type'],
+                        database_dict[pat][study][series][subseries]['repetition_time'], 
+                        database_dict[pat][study][series][subseries]['echo_time'],
+                        database_dict[pat][study][series][subseries]['scan_sequence'], 
+                        database_dict[pat][study][series][subseries]['mag_field_strength'], 
+                        database_dict[pat][study][series][subseries]['imaged_nucleus'],
+                        database_dict[pat][study][series][subseries]['fname']
+                    ]
 
-                            df_add = pd.DataFrame([values], columns=columns)
-                            df = pd.concat([df, df_add], ignore_index=True)
+                    df_add = pd.DataFrame([values], columns=columns)
+                    df = pd.concat([df, df_add], ignore_index=True)
     return df
 
 # fmt: on
@@ -228,7 +216,7 @@ def crawl(
     database_list = []
     # folders = glob.glob(pathlib.Path(top, "*").as_posix())
     folders = [f for f in pathlib.Path(top).iterdir() if f.is_dir()]
-    logger.info(f"Crawling {len(folders)} folders in {top}")
+    logger.info(f"Will crawl {len(folders)} folders in {top}")
 
     database_list = Parallel(n_jobs=n_jobs)(
         delayed(crawl_one)(folder.as_posix())
@@ -239,6 +227,15 @@ def crawl(
     database_dict = {}
     for db in database_list:
         for key in db:
+            if key in database_dict:
+                msg = (
+                    f"Patient {key} already exists in database. "
+                    "This is probably due to one or more dicom files"
+                    " belonging to the same patient being present in multiple folders "
+                    f"within {top}."
+                )
+                logger.warning(msg)
+
             database_dict[key] = db[key]
 
     # configure json path
