@@ -12,7 +12,7 @@ from imgtools.io.loaders import (
 )
 from imgtools.logging import logger
 from imgtools.modules.datagraph import DataGraph
-from imgtools.utils import crawl
+from imgtools import crawl
 
 import time
 from .base_classes import BaseInput

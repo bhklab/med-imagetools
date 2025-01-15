@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 import numpy as np
 import SimpleITK as sitk
 
+from imgtools import crawl
 from imgtools.io.loaders import (
     BaseLoader,
     ImageCSVLoader,
@@ -23,8 +24,8 @@ from imgtools.io.writers import (
     SegNrrdWriter,
 )
 from imgtools.logging import logger
+from imgtools.modules import Segmentation, StructureSet, map_over_labels
 from imgtools.modules.datagraph import DataGraph
-from imgtools.modules import Segmentation, map_over_labels, StructureSet
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
@@ -42,7 +43,6 @@ from imgtools.ops.functional import (
 )
 from imgtools.utils import (
     array_to_image,
-    crawl,
     image_to_array,
     physical_points_to_idxs,
 )

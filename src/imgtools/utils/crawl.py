@@ -158,26 +158,31 @@ def crawl_one(folder_path_posix: str) -> dict:
             database[PatientID][StudyInstanceUID]["description"] = StudyDescription
             database[PatientID][StudyInstanceUID][SeriesInstanceUID]["description"] = SeriesDescription
 
-            database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries] = {
-                'SOPInstanceUID': sop_instance_uid,
-                'Modality': meta.Modality,
-                'reference_ct': reference_ct,
-                'reference_rs': reference_rs,
-                'reference_pl': reference_pl,
-                'reference_frame': reference_frame,
-                'folder': dicom_folder_or_file,
-                'ImageOrientationPatient': ImageOrientationPatient,
-                'AnatomicalOrientationType': AnatomicalOrientationType,
-                'RepetitionTime': RepetitionTime,
-                'EchoTime': EchoTime,
-                'ScanningSequence': ScanningSequence,
-                'MagneticFieldStrength': MagneticFieldStrength,
-                'ImagedNucleus': ImagedNucleus,
-                'fname': dicom_relative_path.as_posix(),  # temporary until we switch to json-based loading
-                'instances': defaultdict(str),
-            }
+            if subseries not in database[PatientID][StudyInstanceUID][SeriesInstanceUID]:
+                database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries] = {
+                    'SOPInstanceUID': sop_instance_uid,
+                    'Modality': meta.Modality,
+                    'ImageOrientationPatient': ImageOrientationPatient,
+                    'AnatomicalOrientationType': AnatomicalOrientationType,
+                    'RepetitionTime': RepetitionTime,
+                    'EchoTime': EchoTime,
+                    'ScanningSequence': ScanningSequence,
+                    'MagneticFieldStrength': MagneticFieldStrength,
+                    'ImagedNucleus': ImagedNucleus,
+                    'folder': dicom_folder_or_file,
+                    'fname': dicom_relative_path.as_posix(),  # temporary until we switch to json-based loading
+                    'instances': defaultdict(str),
+                    'number_of_instances': 1,
+                    'reference_ct': reference_ct,
+                    'reference_rs': reference_rs,
+                    'reference_pl': reference_pl,
+                    'reference_frame': reference_frame,
+                }
             database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries]["instances"][sop_instance_uid] = (
                 dicom_relative_path.as_posix()
+            )
+            database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries]["number_of_instances"] = len(
+                database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries]["instances"]
             )
 
     return database
@@ -199,13 +204,19 @@ def to_df(database_dict):
 
                     data = {
                         'patient_ID': patient_id,
+                        ############################################
+                        # Study
                         'study': study_uid,
                         'study_description': study_dict['description'],
+                        ############################################
+                        # Series
                         'series': series_key,
                         'series_description': series_dict['description'],
+                        ############################################
+                        # Subseries
                         'subseries': subseries_key,
                         'modality': subseries_dict['Modality'],
-                        'instances': len(subseries_dict['instances']),
+                        'instances': subseries_dict['number_of_instances'],
                         'instance_uid': subseries_dict['SOPInstanceUID'],
                         'reference_ct': subseries_dict['reference_ct'],
                         'reference_rs': subseries_dict['reference_rs'],
