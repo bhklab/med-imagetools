@@ -69,7 +69,7 @@ class DICOMSorter(SorterBase):
             # TODO: keep this logic, but make the suggestion more user-friendly/readable
             similar = similar_tags(key)
             suggestion = (
-                f"\n\tDid you mean: [bold green]{', '.join(similar)}[/bold green]?"
+                f'\n\tDid you mean: [bold green]{", ".join(similar)}[/bold green]?'
                 if similar
                 else ' And [bold red]no similar keys[/bold red] found.'
             )

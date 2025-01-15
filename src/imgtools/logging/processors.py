@@ -107,7 +107,7 @@ class CallPrettifier:
         }
 
         event_dict['call'] = (
-            f"{call['module']}.{call['func_name']}:{call['lineno']}" if self.concise else call
+            f'{call["module"]}.{call["func_name"]}:{call["lineno"]}' if self.concise else call
         )
         return event_dict
 

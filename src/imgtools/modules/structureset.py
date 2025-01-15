@@ -195,9 +195,9 @@ class StructureSet:
             msg += f' Received: {type(rtstruct_path)}'
             raise ValueError(msg)
 
-        assert (
-            dcm.Modality == 'RTSTRUCT'
-        ), f'The dicom provided is not an RTSTRUCT file {dcm.Modality=}'
+        assert dcm.Modality == 'RTSTRUCT', (
+            f'The dicom provided is not an RTSTRUCT file {dcm.Modality=}'
+        )
 
         # Extract ROI names and points
         roi_names: List[str] = [roi.ROIName for roi in dcm.StructureSetROISequence]
