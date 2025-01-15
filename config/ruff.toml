@@ -7,6 +7,9 @@ include = [
   "src/imgtools/logging/**/*.py",
   "src/imgtools/modules/*.py",
   "src/imgtools/dicom/**/*.py",
+  "src/imgtools/__init__.py",
+  "src/imgtools/utils/imageutils.py",
+  "src/imgtools/types.py",
   # "src/imgtools/utils/crawl.py",
 ]
 

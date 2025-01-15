@@ -1,59 +1,16 @@
-import SimpleITK as sitk
-import numpy as np
+from __future__ import annotations
 
 from typing import NamedTuple, Sequence, Union
 
-# ImageGeometry = namedtuple("ImageGeometry", "origin, direction, spacing")
+import numpy as np
+import SimpleITK as sitk
+
 
 class ImageGeometry(NamedTuple):
-    size:      Sequence[int]
-    origin:    Sequence[float]
+    size: Sequence[int]
+    origin: Sequence[float]
     direction: Sequence[float]
-    spacing:   Sequence[float]
-
-
-def physical_point_to_index(point, reference_geometry, continuous=False):
-    if isinstance(reference_geometry, ImageGeometry):
-        ref_image = sitk.Image(reference_geometry.size[::-1], 0)
-        ref_image.SetOrigin(reference_geometry.origin[::-1])
-        direction = reference_geometry.direction
-        direction_rev = direction[:-3] + direction[3:6] + direction[:3]
-        ref_image.SetDirection(direction_rev)
-        ref_image.SetSpacing(reference_geometry.spacing[::-1])
-    elif isinstance(reference_geometry, Image):
-        ref_image = reference_geometry._image
-    elif isinstance(reference_geometry, sitk.Image):
-        ref_image = reference_geometry
-    else:
-        raise ValueError(f"Reference geometry must be of type `ImageGeometry`, `imgtools.Image` or `sitk.Image`, got {type(reference_geometry)}")
-
-    if continuous:
-        return ref_image.TransformPhysicalPointToContinuousIndex(point[::-1])[::-1]
-    else:
-        return ref_image.TransformPhysicalPointToIndex(point[::-1])[::-1]
-
-
-def index_to_physical_point(index, reference_geometry):
-    if isinstance(reference_geometry, ImageGeometry):
-        ref_image = sitk.Image(reference_geometry.size[::-1], 0)
-        ref_image.SetOrigin(reference_geometry.origin[::-1])
-        direction = reference_geometry.direction
-        direction_rev = direction[:-3] + direction[3:6] + direction[:3]
-        ref_image.SetDirection(direction_rev)
-        ref_image.SetSpacing(reference_geometry.spacing[::-1])
-    elif isinstance(reference_geometry, Image):
-        ref_image = reference_geometry._image
-    elif isinstance(reference_geometry, sitk.Image):
-        ref_image = reference_geometry
-    else:
-        raise ValueError(f"Reference geometry must be of type ImageGeometry, imgtools.Image or sitk.Image, got {type(reference_geometry)}")
-
-    continuous = any([isinstance(i, float) for i in index])
-
-    if continuous:
-        return ref_image.TransformContinuousIndexToPhysicalPoint(index[::-1])[::-1]
-    else:
-        return ref_image.TransformIndexToPhysicalPoint(index[::-1])[::-1]
+    spacing: Sequence[float]
 
 
 # Goals for this module:
@@ -69,19 +26,25 @@ def index_to_physical_point(index, reference_geometry):
 # - better support for masks (e.g. what happens when we pass a one-hot encoded mask?)
 # - (optional) specify indexing order when creating new Image (sitk or numpy)
 
+# Type alias for Image or Array
+ImageOrArray = Union[sitk.Image, np.ndarray]
+
 
 class Image:
-    def __init__(self,
-                 image:     Union[sitk.Image, np.ndarray] = None,
-                 geometry:  ImageGeometry   = None,
-                 origin:    Sequence[float] = None,
-                 direction: Sequence[float] = None,
-                 spacing:   Sequence[float] = None):
-
+    def __init__(
+        self,
+        image: ImageOrArray,
+        geometry: ImageGeometry | None = None,
+        origin: Sequence[float] | None = None,
+        direction: Sequence[float] | None = None,
+        spacing: Sequence[float] | None = None,
+    ):
         if isinstance(image, sitk.Image):
             self._image = image
         elif isinstance(image, np.ndarray):
-            if geometry is None and any((origin is None, direction is None, spacing is None)):
+            if geometry is None and any(
+                (origin is None, direction is None, spacing is None)
+            ):
                 raise ValueError(
                     "If image is a Numpy array, either geometry must be specified."
                 )
@@ -119,10 +82,12 @@ class Image:
 
     @property
     def geometry(self):
-        return ImageGeometry(size=self.size,
-                             origin=self.origin,
-                             direction=self.direction,
-                             spacing=self.spacing)
+        return ImageGeometry(
+            size=self.size,
+            origin=self.origin,
+            direction=self.direction,
+            spacing=self.spacing,
+        )
 
     @property
     def ndim(self):
@@ -149,9 +114,9 @@ class Image:
 
     def __getitem__(self, idx):
         if isinstance(idx, (int, slice)):
-            idx = (idx, )
+            idx = (idx,)
         if len(idx) < self.ndim:
-            idx += (slice(None), ) * (self.ndim - len(idx))
+            idx += (slice(None),) * (self.ndim - len(idx))
 
         idx = idx[::-1]  # SimpleITK uses (x, y, z) ordering internally
 
@@ -164,9 +129,9 @@ class Image:
 
     def __setitem__(self, idx, value):
         if isinstance(idx, (int, slice)):
-            idx = (idx, )
+            idx = (idx,)
         if len(idx) < self.ndim:
-            idx += (slice(None), ) * (self.ndim - len(idx))
+            idx += (slice(None),) * (self.ndim - len(idx))
 
         idx = idx[::-1]  # SimpleITK uses (x, y, z) ordering internally
 
@@ -215,7 +180,7 @@ class Image:
 
     def __pow__(self, other):
         other_val = getattr(other, "_image", other)
-        return Image(self._image ** other_val)
+        return Image(self._image**other_val)
 
     def __iadd__(self, other):
         other_val = getattr(other, "_image", other)
@@ -241,7 +206,15 @@ class Image:
         pass
 
     def __repr__(self):
-        return f"Image(image={self._image}, origin={self.origin}, spacing={self.spacing}, direction={self.direction})"
+        return (
+            f"Image(image={self._image}, origin={self.origin}, "
+            f"spacing={self.spacing}, direction={self.direction})"
+        )
 
     def __str__(self):
-        return f"origin = {self.origin}\nspacing = {self.spacing}\ndirection = {self.direction}\nvalues = \n{self.to_numpy(view=True)}"
+        return (
+            f"origin = {self.origin}\n"
+            f"spacing = {self.spacing}\n"
+            f"direction = {self.direction}\n"
+            f"values = \n{self.to_numpy(view=True)}"
+        )
