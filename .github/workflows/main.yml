@@ -3,7 +3,7 @@ name: CI-CD
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "jjjermiah/devel/main"]
   pull_request:
     branches: ["*"]
 
