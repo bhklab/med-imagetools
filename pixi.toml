@@ -15,18 +15,12 @@ pip = ">=24.3.1,<25"
 med-imagetools = { path = ".", editable = true }
 
 [environments]
-dev = [
-  "test",
-  "quality",
-  "build",
-  "dev",
-  "docs",
-]
-docs =  ["docs"]
+dev = ["test", "quality", "build", "dev", "docs"]
+docs = ["docs"]
 test = ["test", "quality"]
-py310 =  {features = ["py310", "test"], no-default-feature = true}
-py311 =  {features = ["py311", "test"], no-default-feature = true}
-py312 =  {features = ["py312", "test"], no-default-feature = true}
+py310 = { features = ["py310", "test"], no-default-feature = true }
+py311 = { features = ["py311", "test"], no-default-feature = true }
+py312 = { features = ["py312", "test"], no-default-feature = true }
 
 ############################################## DEV ###############################################
 [feature.dev.dependencies]
@@ -104,24 +98,25 @@ ruff = ">=0.4.8"
 mypy = ">=1.13.0,<2"
 types-pytz = ">=2024.2.0.20241003,<2025"
 types-tqdm = ">=4.66.0.20240417,<5"
+pandas-stubs = ">=2.2.3.241126,<3"
 
 [feature.quality.pypi-dependencies]
 pydoctest = ">=0.2.1, <0.3"
 
 [feature.quality.tasks]
-_ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
-_ruff-check.inputs = ["config/ruff.toml", "src"]
-_ruff-check.description = "Run ruff check"
+ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
+ruff-check.inputs = ["config/ruff.toml", "src"]
+ruff-check.description = "Run ruff check"
 
-_ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
-_ruff-format.inputs = ["config/ruff.toml", "src"]
-_ruff-format.description = "Run ruff format, run check first"
+ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
+ruff-format.inputs = ["config/ruff.toml", "src"]
+ruff-format.description = "Run ruff format, run check first"
 
-_type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
-_type-check.inputs = ["config/mypy.ini", "src"]
-_type-check.description = "Run mypy type check."
+type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
+type-check.inputs = ["config/mypy.ini", "src"]
+type-check.description = "Run mypy type check."
 
-qc.depends-on = ["_ruff-format", "_ruff-check", "_type-check"]
+qc.depends-on = ["ruff-format", "ruff-check", "type-check"]
 qc.description = "Quality check: ruff & mypy"
 
 #################################### RELEASE & BUILD ###############################################
@@ -135,7 +130,6 @@ hatch = ">=1.13"
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
 
 
-
 build = { cmd = [
   "hatch",
   "build",
@@ -146,4 +140,3 @@ build = { cmd = [
 ], outputs = [
   "dist/*",
 ], description = "🛠️ Builds the packages" }
-

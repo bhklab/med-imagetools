@@ -21,9 +21,9 @@ requires-python = ">=3.10,<4"
 dependencies = [
   "h5py>=3.11.0,<4",
   "joblib>=1.4.2,<2",
-  "numpy>=2.0.0,<3",
+  "numpy<3",
   "matplotlib>=3.8.4,<4",
-  "pandas>=2.2.2,<3",
+  "pandas<3",
   "pydicom>=2.4.4",
   "pynrrd>=1.0.0,<2",
   "scikit-image>=0.23.2,<1",
@@ -35,7 +35,7 @@ dependencies = [
   "attrs>=23.2.0",
   "structlog>=24.0,<25",
   "click>=8.1,<9",
-  "rich>=13.9.4", 
+  "rich>=13.9.4",
   "sqlitedict>=2.0",
   "sqlalchemy>=2.0.0",
 ]
