@@ -13,8 +13,8 @@ from imgtools.logging.processors import (
     PathPrettifier,
 )
 
-VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
-DEFAULT_LOG_LEVEL = 'WARNING'
+VALID_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
+DEFAULT_LOG_LEVEL = "WARNING"
 
 
 class LoggingManager:
@@ -58,9 +58,9 @@ class LoggingManager:
     Examples
     --------
     Initialize with default settings:
-        >>> manager = LoggingManager(name='mypackage')
+        >>> manager = LoggingManager(name="mypackage")
         >>> logger = manager.get_logger()
-        >>> logger.info('Info message')
+        >>> logger.info("Info message")
     """
 
     def __init__(
@@ -75,7 +75,7 @@ class LoggingManager:
 
     @property
     def env_level(self) -> str:
-        return os.environ.get(f'{self.name}_LOG_LEVEL'.upper(), DEFAULT_LOG_LEVEL).upper()
+        return os.environ.get(f"{self.name}_LOG_LEVEL".upper(), DEFAULT_LOG_LEVEL).upper()
 
     @property
     def base_logging_config(self) -> Dict:
@@ -88,12 +88,12 @@ class LoggingManager:
             Base logging configuration.
         """
         return {
-            'version': 1,
-            'disable_existing_loggers': False,
-            'formatters': {
-                'console': {
-                    '()': structlog.stdlib.ProcessorFormatter,
-                    'processors': [
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "console": {
+                    "()": structlog.stdlib.ProcessorFormatter,
+                    "processors": [
                         CallPrettifier(concise=True),
                         structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                         structlog.dev.ConsoleRenderer(
@@ -102,20 +102,20 @@ class LoggingManager:
                             ),
                         ),
                     ],
-                    'foreign_pre_chain': self.pre_chain,
+                    "foreign_pre_chain": self.pre_chain,
                 },
             },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'console',
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "formatter": "console",
                 },
             },
-            'loggers': {
+            "loggers": {
                 self.name: {
-                    'handlers': ['console'],
-                    'level': self.level,
-                    'propagate': False,
+                    "handlers": ["console"],
+                    "level": self.level,
+                    "propagate": False,
                 },
             },
         }
@@ -187,7 +187,7 @@ class LoggingManager:
         """
         level_upper = level.upper()
         if level_upper not in VALID_LOG_LEVELS:
-            msg = f'Invalid logging level: {level}'
+            msg = f"Invalid logging level: {level}"
             raise ValueError(msg)
 
         # Store the old level for logging the change
@@ -199,6 +199,6 @@ class LoggingManager:
 
         # Log the level change
         if old_level != self.level:
-            logger.info('Log level changed', old_level=old_level, new_level=self.level)
+            logger.info("Log level changed", old_level=old_level, new_level=self.level)
 
         return logger

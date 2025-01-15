@@ -29,11 +29,11 @@ def repr_mixin(cls) -> type:  # type: ignore  # noqa: ANN001
         attrs = {
             key: (len(value) if isinstance(value, list) else value)
             for key, value in vars(self).items()
-            if not key.startswith('_') and isinstance(value, (str, int, float, list))
+            if not key.startswith("_") and isinstance(value, (str, int, float, list))
         }
         class_name = self.__class__.__name__
-        fields = ',\n  '.join(f'{key}={value}' for key, value in attrs.items())
-        return f'<{class_name}(\n  {fields}\n)>'
+        fields = ",\n  ".join(f"{key}={value}" for key, value in attrs.items())
+        return f"<{class_name}(\n  {fields}\n)>"
 
     cls.__repr__ = __repr_method__
     return cls
@@ -50,9 +50,9 @@ def repr_mixin(cls) -> type:  # type: ignore  # noqa: ANN001
 @dataclass
 class Patient:
     __table__ = Table(
-        'patients',
+        "patients",
         mapper_registry.metadata,
-        Column('PatientID', String, primary_key=True, index=True),  # PRIMARY KEY
+        Column("PatientID", String, primary_key=True, index=True),  # PRIMARY KEY
     )
 
     # Metadata from DICOM
@@ -62,8 +62,8 @@ class Patient:
     studies: List[Study] = field(default_factory=list)
 
     __mapper_args__ = {  # type: ignore
-        'properties': {
-            'studies': relationship('Study', back_populates='patient'),
+        "properties": {
+            "studies": relationship("Study", back_populates="patient"),
         }
     }
 
@@ -83,7 +83,7 @@ class Patient:
                         A Patient instance.
         """
         return cls(
-            PatientID=metadata['PatientID'],
+            PatientID=metadata["PatientID"],
         )
 
     @property
@@ -145,7 +145,7 @@ class Patient:
         List[Series]
                         The RTSTRUCT series.
         """
-        return [series for series in self.series if series.Modality == 'RTSTRUCT']
+        return [series for series in self.series if series.Modality == "RTSTRUCT"]
 
 
 ####################################################################################################
@@ -159,10 +159,10 @@ class Patient:
 @dataclass
 class Study:
     __table__ = Table(
-        'studies',
+        "studies",
         mapper_registry.metadata,
-        Column('StudyInstanceUID', String, primary_key=True, index=True),  # PRIMARY KEY
-        Column('PatientID', String, ForeignKey('patients.PatientID'), nullable=False),
+        Column("StudyInstanceUID", String, primary_key=True, index=True),  # PRIMARY KEY
+        Column("PatientID", String, ForeignKey("patients.PatientID"), nullable=False),
     )
 
     # Metadata from DICOM
@@ -174,9 +174,9 @@ class Study:
     series: List[Series] = field(default_factory=list)
 
     __mapper_args__ = {  # type: ignore
-        'properties': {
-            'patient': relationship('Patient', back_populates='studies'),
-            'series': relationship('Series', back_populates='study'),
+        "properties": {
+            "patient": relationship("Patient", back_populates="studies"),
+            "series": relationship("Series", back_populates="study"),
         }
     }
 
@@ -196,8 +196,8 @@ class Study:
                         A Study instance.
         """
         return cls(
-            StudyInstanceUID=metadata['StudyInstanceUID'],
-            PatientID=metadata['PatientID'],
+            StudyInstanceUID=metadata["StudyInstanceUID"],
+            PatientID=metadata["PatientID"],
         )
 
     @property
@@ -249,13 +249,13 @@ class Study:
 @dataclass
 class Series:
     __table__ = Table(
-        'series',
+        "series",
         mapper_registry.metadata,
-        Column('SeriesInstanceUID', String, primary_key=True, index=True),  # PRIMARY KEY
-        Column('StudyInstanceUID', String, ForeignKey('studies.StudyInstanceUID'), nullable=False),
-        Column('Modality', String, nullable=False),
-        Column('_RTSTRUCT', JSON, nullable=True),
-        Column('_MR', JSON, nullable=True),
+        Column("SeriesInstanceUID", String, primary_key=True, index=True),  # PRIMARY KEY
+        Column("StudyInstanceUID", String, ForeignKey("studies.StudyInstanceUID"), nullable=False),
+        Column("Modality", String, nullable=False),
+        Column("_RTSTRUCT", JSON, nullable=True),
+        Column("_MR", JSON, nullable=True),
     )
 
     # Metadata from DICOM
@@ -270,25 +270,25 @@ class Series:
     images: List[Image] = field(default_factory=list)
 
     __mapper_args__ = {  # type: ignore
-        'properties': {
-            'study': relationship('Study', back_populates='series'),
-            'images': relationship('Image', back_populates='series'),
+        "properties": {
+            "study": relationship("Study", back_populates="series"),
+            "images": relationship("Image", back_populates="series"),
         },
     }
 
     @classmethod
     def from_metadata(cls, metadata: Dict[str, str], file_path: Path) -> Series:
         base_cls = cls(
-            SeriesInstanceUID=metadata['SeriesInstanceUID'],
-            StudyInstanceUID=metadata['StudyInstanceUID'],
-            Modality=metadata['Modality'],
+            SeriesInstanceUID=metadata["SeriesInstanceUID"],
+            StudyInstanceUID=metadata["StudyInstanceUID"],
+            Modality=metadata["Modality"],
         )
 
-        match metadata['Modality']:
-            case 'RTSTRUCT':
+        match metadata["Modality"]:
+            case "RTSTRUCT":
                 try:
                     ds = dcmread(file_path, stop_before_pixels=True)
-                    logger.info(f'Reading RTSTRUCT file: {file_path}')
+                    logger.info(f"Reading RTSTRUCT file: {file_path}")
                     roi_names = [roi.ROIName for roi in ds.StructureSetROISequence]
                     rfrs = ds.ReferencedFrameOfReferenceSequence[0]
                     ref_series_seq = (
@@ -298,29 +298,29 @@ class Series:
                     )
                     frame_of_reference = rfrs.FrameOfReferenceUID
                     base_cls._RTSTRUCT = {
-                        'ROINames': ','.join(roi_names),
-                        'RTReferencedSeriesUID': ref_series_seq,
-                        'FrameOfReferenceUID': frame_of_reference,
+                        "ROINames": ",".join(roi_names),
+                        "RTReferencedSeriesUID": ref_series_seq,
+                        "FrameOfReferenceUID": frame_of_reference,
                     }
                 except Exception as e:
-                    logger.exception(f'Error reading RTSTRUCT file: {file_path}', error=str(e))
+                    logger.exception(f"Error reading RTSTRUCT file: {file_path}", error=str(e))
                     raise e
-            case 'MR':
+            case "MR":
                 try:
                     ds = dcmread(file_path, stop_before_pixels=True)
-                    logger.info(f'Reading MR file: {file_path}')
+                    logger.info(f"Reading MR file: {file_path}")
                     _mr = {
-                        'RepetitionTime': ds.RepetitionTime,
-                        'EchoTime': ds.EchoTime,
-                        'SliceThickness': ds.SliceThickness,
-                        'ScanningSequence': ds.ScanningSequence,
-                        'MagneticFieldStrength': ds.MagneticFieldStrength,
-                        'ImagedNucleus': ds.ImagedNucleus,
+                        "RepetitionTime": ds.RepetitionTime,
+                        "EchoTime": ds.EchoTime,
+                        "SliceThickness": ds.SliceThickness,
+                        "ScanningSequence": ds.ScanningSequence,
+                        "MagneticFieldStrength": ds.MagneticFieldStrength,
+                        "ImagedNucleus": ds.ImagedNucleus,
                     }
 
                     base_cls._MR = {k: str(v) for k, v in _mr.items()}
                 except Exception as e:
-                    logger.exception(f'Error reading MR file: {file_path}', error=str(e))
+                    logger.exception(f"Error reading MR file: {file_path}", error=str(e))
                     raise e
             case _:
                 pass
@@ -333,11 +333,11 @@ class Series:
 
     @property
     def RTReferencedSeriesUID(self) -> Optional[str]:  # noqa: N802
-        return self._RTSTRUCT.get('RTReferencedSeriesUID', None) if self._RTSTRUCT else None
+        return self._RTSTRUCT.get("RTReferencedSeriesUID", None) if self._RTSTRUCT else None
 
     @property
     def ROINames(self) -> Optional[str]:  # noqa: N802
-        return self._RTSTRUCT.get('ROINames', None) if self._RTSTRUCT else None
+        return self._RTSTRUCT.get("ROINames", None) if self._RTSTRUCT else None
 
 
 ####################################################################################################
@@ -351,11 +351,11 @@ class Series:
 @dataclass
 class Image:
     __table__ = Table(
-        'images',
+        "images",
         mapper_registry.metadata,
-        Column('FilePath', String, primary_key=True, index=True),  # PRIMARY KEY
-        Column('SOPInstanceUID', String, nullable=False),
-        Column('SeriesInstanceUID', String, ForeignKey('series.SeriesInstanceUID'), nullable=False),
+        Column("FilePath", String, primary_key=True, index=True),  # PRIMARY KEY
+        Column("SOPInstanceUID", String, nullable=False),
+        Column("SeriesInstanceUID", String, ForeignKey("series.SeriesInstanceUID"), nullable=False),
     )
 
     # Metadata from DICOM
@@ -367,8 +367,8 @@ class Image:
     series: Series = field(init=False)
 
     __mapper_args__ = {  # type: ignore
-        'properties': {
-            'series': relationship('Series', back_populates='images'),
+        "properties": {
+            "series": relationship("Series", back_populates="images"),
         }
     }
 
@@ -388,7 +388,7 @@ class Image:
                         A Image instance.
         """
         return cls(
-            SOPInstanceUID=metadata['SOPInstanceUID'],
-            SeriesInstanceUID=metadata['SeriesInstanceUID'],
+            SOPInstanceUID=metadata["SOPInstanceUID"],
+            SeriesInstanceUID=metadata["SeriesInstanceUID"],
             FilePath=file_path.as_posix(),
         )

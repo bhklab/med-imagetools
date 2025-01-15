@@ -68,7 +68,7 @@ def read_dicom_series(
         # extract the names of the dicom files that are in the path variable, which is a directory
         file_names = reader.GetGDCMSeriesFileNames(
             path,
-            seriesID=series_id if series_id else '',
+            seriesID=series_id if series_id else "",
             recursive=recursive,
         )
 
@@ -112,7 +112,7 @@ def read_dicom_rtdose(path: str) -> Dose:
 
 
 def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
-    return PET.from_dicom_pet(path, series, 'SUV')
+    return PET.from_dicom_pet(path, series, "SUV")
 
 
 def read_dicom_seg(path: str, meta: dict, series: Optional[str] = None) -> Segmentation:
@@ -125,8 +125,8 @@ auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
 
 def read_dicom_auto(path: str, series=None, file_names=None) -> auto_dicom_result:
     dcms = (
-        list(pathlib.Path(path).rglob('*.dcm'))
-        if not path.endswith('.dcm')
+        list(pathlib.Path(path).rglob("*.dcm"))
+        if not path.endswith(".dcm")
         else [pathlib.Path(path)]
     )
 
@@ -139,18 +139,18 @@ def read_dicom_auto(path: str, series=None, file_names=None) -> auto_dicom_resul
         modality = meta.Modality
 
         match modality:
-            case 'CT' | 'MR':
+            case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
-            case 'PT':
+            case "PT":
                 obj = read_dicom_pet(path, series)
-            case 'RTSTRUCT':
+            case "RTSTRUCT":
                 obj = read_dicom_rtstruct(dcm)
-            case 'RTDOSE':
+            case "RTDOSE":
                 obj = read_dicom_rtdose(dcm)
-            case 'SEG':
+            case "SEG":
                 obj = read_dicom_seg(path, meta, series)
             case _:
-                errmsg = f'Modality {modality} not supported in read_dicom_auto.'
+                errmsg = f"Modality {modality} not supported in read_dicom_auto."
                 raise NotImplementedError(errmsg)
 
         obj.metadata.update(get_modality_metadata(meta, modality))
@@ -227,20 +227,20 @@ class ImageTreeLoader(BaseLoader):
             if len(self.colnames) == 0:
                 self.colnames = self.paths.columns
         else:
-            msg = f'Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.'
+            msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
             raise ValueError(msg)
 
         if isinstance(json_path, str):
-            with open(json_path, 'r') as f:
+            with open(json_path, "r") as f:
                 self.tree = json.load(f)
         else:
-            msg = f'Expected a path to a json file, not {type(json_path)}.'
+            msg = f"Expected a path to a json file, not {type(json_path)}."
             raise ValueError(msg)
 
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple('Output', self.colnames)
+        self.output_tuple = namedtuple("Output", self.colnames)
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -257,14 +257,14 @@ class ImageTreeLoader(BaseLoader):
             }
 
         for i, (col, path) in enumerate(paths.items()):
-            files = self.tree[subject_id][study['study_' + ('_').join(col.split('_')[1:])]][
-                series['series_' + ('_').join(col.split('_')[1:])]
-            ][subseries['subseries_' + ('_').join(col.split('_')[1:])]]
-            self.readers[i](path, series['series_' + ('_').join(col.split('_')[1:])])
+            files = self.tree[subject_id][study["study_" + ("_").join(col.split("_")[1:])]][
+                series["series_" + ("_").join(col.split("_")[1:])]
+            ][subseries["subseries_" + ("_").join(col.split("_")[1:])]]
+            self.readers[i](path, series["series_" + ("_").join(col.split("_")[1:])])
         outputs = {
             col: self.readers[i](
                 path,
-                series['series_' + ('_').join(col.split('_')[1:])],
+                series["series_" + ("_").join(col.split("_")[1:])],
                 file_names=files,
             )
             for i, (col, path) in enumerate(paths.items())
@@ -313,13 +313,13 @@ class ImageCSVLoader(BaseLoader):
             if len(self.colnames) == 0:
                 self.colnames = self.paths.columns
         else:
-            msg = f'Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.'
+            msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
             raise ValueError(msg)
 
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple('Output', self.colnames)
+        self.output_tuple = namedtuple("Output", self.colnames)
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -333,7 +333,7 @@ class ImageCSVLoader(BaseLoader):
             }
 
         outputs = {
-            col: self.readers[i](path, series['series_' + ('_').join(col.split('_')[1:])])
+            col: self.readers[i](path, series["series_" + ("_").join(col.split("_")[1:])])
             for i, (col, path) in enumerate(paths.items())
         }
         return self.output_tuple(**outputs)
@@ -349,7 +349,7 @@ class ImageFileLoader(BaseLoader):
     def __init__(
         self,
         root_directory,
-        get_subject_id_from='filename',
+        get_subject_id_from="filename",
         subdir_path=None,
         exclude_paths=None,
         reader=None,
@@ -389,7 +389,7 @@ class ImageFileLoader(BaseLoader):
             except IndexError:
                 continue
             if os.path.isdir(full_path):
-                full_path = pathlib.Path(full_path, '').as_posix()
+                full_path = pathlib.Path(full_path, "").as_posix()
             subject_dir_name = os.path.basename(os.path.normpath(subject_dir_path))
             subject_id = self._extract_subject_id_from_path(full_path, subject_dir_name)
             paths[subject_id] = full_path
@@ -398,9 +398,9 @@ class ImageFileLoader(BaseLoader):
     def _extract_subject_id_from_path(self, full_path, subject_dir_name):
         filename, _ = os.path.splitext(os.path.basename(full_path))
         if isinstance(self.get_subject_id_from, str):
-            if self.get_subject_id_from == 'filename':
+            if self.get_subject_id_from == "filename":
                 subject_id = filename
-            elif self.get_subject_id_from == 'subject_directory':
+            elif self.get_subject_id_from == "subject_directory":
                 subject_id = subject_dir_name
             else:
                 subject_id = re.search(self.get_subject_id_from, full_path)[0]

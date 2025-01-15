@@ -27,12 +27,12 @@ Examples
 and replace the placeholders with values from a dictionary:
 
 >>> key_values = {
-...     'Key1': 'John',
-...     'Key2': 'Doe',
+...     "Key1": "John",
+...     "Key2": "Doe",
 ... }
 
->>> pattern = '{Key1}-{Key2}'
->>> pattern_parser = re.compile(r'\{(\w+)\}')
+>>> pattern = "{Key1}-{Key2}"
+>>> pattern_parser = re.compile(r"\{(\w+)\}")
 >>> parser = PatternParser(
 ...     pattern,
 ...     pattern_parser,
@@ -57,12 +57,12 @@ Now you can use the formatted pattern to replace the placeholders:
 and replace the placeholders with values from a dictionary:
 
 >>> key_values = {
-...     'Key1': 'Alice',
-...     'Key2': 'Bob',
+...     "Key1": "Alice",
+...     "Key2": "Bob",
 ... }
 
->>> pattern = '%<Key1> and {Key2}'
->>> pattern_parser = re.compile(r'%<(\w+)>|\{(\w+)\}')
+>>> pattern = "%<Key1> and {Key2}"
+>>> pattern_parser = re.compile(r"%<(\w+)>|\{(\w+)\}")
 >>> parser = PatternParser(
 ...     pattern,
 ...     pattern_parser,
@@ -87,12 +87,12 @@ Now you can use the formatted pattern to replace the placeholders:
 and replace the placeholders with values from a dictionary:
 
 >>> key_values = {
-...     'Key1': 'folder1',
-...     'Key2': 'folder2',
+...     "Key1": "folder1",
+...     "Key2": "folder2",
 ... }
 
->>> pattern = '/path/to/{Key1}/and/{Key2}'
->>> pattern_parser = re.compile(r'\{(\w+)\}')
+>>> pattern = "/path/to/{Key1}/and/{Key2}"
+>>> pattern_parser = re.compile(r"\{(\w+)\}")
 >>> parser = PatternParser(
 ...     pattern,
 ...     pattern_parser,
@@ -147,11 +147,11 @@ class PatternParser:
     ... )
 
     >>> key_values = {
-    ...     'Key1': 'Value1',
-    ...     'Key2': 'Value2',
+    ...     "Key1": "Value1",
+    ...     "Key2": "Value2",
     ... }
-    >>> pattern = '{Key1}-{Key2}'
-    >>> pattern_parser = re.compile(r'\{(\w+)\}')
+    >>> pattern = "{Key1}-{Key2}"
+    >>> pattern_parser = re.compile(r"\{(\w+)\}")
     >>> parser = PatternParser(
     ...     pattern,
     ...     pattern_parser,
@@ -170,10 +170,10 @@ class PatternParser:
     """
 
     def __init__(self, pattern: str, pattern_parser: Pattern) -> None:
-        assert isinstance(pattern, str) and pattern, 'Pattern must be a non-empty string.'
+        assert isinstance(pattern, str) and pattern, "Pattern must be a non-empty string."
         self._pattern = pattern
         self._keys: List[str] = []
-        assert isinstance(pattern_parser, Pattern), 'Pattern parser must be a regex pattern.'
+        assert isinstance(pattern_parser, Pattern), "Pattern parser must be a regex pattern."
         self._parser: Pattern = pattern_parser
 
     def parse(self) -> Tuple[str, List[str]]:
@@ -203,7 +203,7 @@ class PatternParser:
         """Replace placeholders with formatted keys and store them."""
         key = match.group(1) or match.group(2)
         self._keys.append(key)
-        return f'%({key})s'
+        return f"%({key})s"
 
     @property
     def keys(self) -> List[str]:

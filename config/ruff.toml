@@ -126,7 +126,7 @@ relative-imports-order = "closest-to-furthest"
 
 [format]
 
-quote-style = "single"
+quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 71

@@ -25,21 +25,21 @@ def _extract_metadata(file_path: Path, tags: List[str]) -> Dict[str, str]:
     try:
         dicom = dcmread(file_path, specific_tags=tags, stop_before_pixels=True)
     except FileNotFoundError as fnfe:
-        errmsg = f'File not found: {file_path}'
+        errmsg = f"File not found: {file_path}"
         raise FileNotFoundError(errmsg) from fnfe
     except InvalidDicomError as ide:
-        errmsg = f'Invalid DICOM file: {file_path}'
+        errmsg = f"Invalid DICOM file: {file_path}"
         raise InvalidDicomError(errmsg) from ide
     except ValueError as ve:
-        errmsg = f'Value error reading DICOM file: {file_path}'
+        errmsg = f"Value error reading DICOM file: {file_path}"
         raise ValueError(errmsg) from ve
 
-    return {tag: str(dicom.get(tag, '')) for tag in tags}
+    return {tag: str(dicom.get(tag, "")) for tag in tags}
 
 
 class DICOMInsertMixin:
     def _insert_patient(self, session: Session, metadata: Dict[str, str]) -> Patient:
-        patient = session.query(Patient).filter_by(PatientID=metadata['PatientID']).first()
+        patient = session.query(Patient).filter_by(PatientID=metadata["PatientID"]).first()
         if not patient:
             patient = Patient.from_metadata(metadata)
             session.add(patient)
@@ -47,7 +47,7 @@ class DICOMInsertMixin:
 
     def _insert_study(self, session: Session, metadata: Dict[str, str]) -> Study:
         study = (
-            session.query(Study).filter_by(StudyInstanceUID=metadata['StudyInstanceUID']).first()
+            session.query(Study).filter_by(StudyInstanceUID=metadata["StudyInstanceUID"]).first()
         )
         if not study:
             study = Study.from_metadata(metadata)
@@ -56,7 +56,7 @@ class DICOMInsertMixin:
 
     def _insert_series(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Series:
         series = (
-            session.query(Series).filter_by(SeriesInstanceUID=metadata['SeriesInstanceUID']).first()
+            session.query(Series).filter_by(SeriesInstanceUID=metadata["SeriesInstanceUID"]).first()
         )
         if series:
             return series
@@ -65,7 +65,7 @@ class DICOMInsertMixin:
         return series
 
     def _insert_image(self, session: Session, metadata: Dict[str, str], file_path: Path) -> Image:
-        file = session.query(Image).filter_by(SOPInstanceUID=metadata['SOPInstanceUID']).first()
+        file = session.query(Image).filter_by(SOPInstanceUID=metadata["SOPInstanceUID"]).first()
         if not file:
             file = Image.from_metadata(metadata, file_path)
             session.add(file)
@@ -88,11 +88,11 @@ class DICOMIndexer(DICOMInsertMixin):
         """
         self.db_handler = db_handler
         self.mytags = [
-            'PatientID',
-            'StudyInstanceUID',
-            'SeriesInstanceUID',
-            'Modality',
-            'SOPInstanceUID',
+            "PatientID",
+            "StudyInstanceUID",
+            "SeriesInstanceUID",
+            "Modality",
+            "SOPInstanceUID",
         ]
 
     @property
@@ -119,11 +119,11 @@ class DICOMIndexer(DICOMInsertMixin):
         """
         existing_files = self.existing_files
         remaining_files = list(set(files) - set(existing_files))
-        logger.debug(f'{len(existing_files)} files already indexed.')
-        logger.debug(f'{len(remaining_files)}/{len(files)} files left to index.')
+        logger.debug(f"{len(existing_files)} files already indexed.")
+        logger.debug(f"{len(remaining_files)}/{len(files)} files left to index.")
 
         if not remaining_files:
-            logger.info('All files are already indexed.')
+            logger.info("All files are already indexed.")
             return
         start = time.time()
         try:
@@ -132,7 +132,7 @@ class DICOMIndexer(DICOMInsertMixin):
                 tqdm.tqdm(
                     total=len(remaining_files),
                     initial=len(existing_files),
-                    desc='Indexing DICOM files',
+                    desc="Indexing DICOM files",
                 ) as tqdm_files,
             ):
                 for file_path in remaining_files:
@@ -144,13 +144,13 @@ class DICOMIndexer(DICOMInsertMixin):
                     series.images.append(image)
                     tqdm_files.update(1)
         except Exception as e:
-            logger.exception(f'Error: {e}')
+            logger.exception(f"Error: {e}")
             raise e
         finally:
-            logger.info(f'Indexing complete in {time.time() - start:.2f} seconds.')
+            logger.info(f"Indexing complete in {time.time() - start:.2f} seconds.")
 
 
-T = TypeVar('T')  # Generic type for table models
+T = TypeVar("T")  # Generic type for table models
 
 
 class DICOMDatabaseInterface:

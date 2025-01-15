@@ -16,12 +16,12 @@ from imgtools.logging import logger
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def read_image(path: str, series_id: Optional[str] = None) -> sitk.Image:
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path, seriesID=series_id if series_id else '')
+    dicom_names = reader.GetGDCMSeriesFileNames(path, seriesID=series_id if series_id else "")
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -47,7 +47,7 @@ class PET(sitk.Image):
 
     @classmethod
     def from_dicom_pet(
-        cls, path: str, series_id: Optional[str] = None, pet_image_type: str = 'SUV'
+        cls, path: str, series_id: Optional[str] = None, pet_image_type: str = "SUV"
     ) -> PET:
         """Read the PET scan and returns the data frame and the image dosage in SITK format
 
@@ -66,13 +66,13 @@ class PET(sitk.Image):
         df: FileDataset = dcmread(path_one)
         calc: bool = False
         try:
-            if pet_image_type == 'SUV':
-                factor: float = df.to_json_dict()['70531000']['Value'][0]
+            if pet_image_type == "SUV":
+                factor: float = df.to_json_dict()["70531000"]["Value"][0]
             else:
-                factor: float = df.to_json_dict()['70531009']['Value'][0]
+                factor: float = df.to_json_dict()["70531009"]["Value"][0]
         except KeyError:
             logger.warning(
-                'Scale factor not available in DICOMs. Calculating based on metadata, may contain errors'
+                "Scale factor not available in DICOMs. Calculating based on metadata, may contain errors"
             )
             factor = cls.calc_factor(df, pet_image_type)
             calc = True
@@ -87,25 +87,25 @@ class PET(sitk.Image):
     def get_metadata(self) -> Dict[str, Union[str, float, bool]]:
         self.metadata = {}
         with contextlib.suppress(Exception):
-            self.metadata['weight'] = float(self.df.PatientWeight)
+            self.metadata["weight"] = float(self.df.PatientWeight)
         try:
-            self.metadata['scan_time'] = datetime.datetime.strptime(
-                self.df.AcquisitionTime, '%H%M%S.%f'
+            self.metadata["scan_time"] = datetime.datetime.strptime(
+                self.df.AcquisitionTime, "%H%M%S.%f"
             )
-            self.metadata['injection_time'] = datetime.datetime.strptime(
+            self.metadata["injection_time"] = datetime.datetime.strptime(
                 self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
-                '%H%M%S.%f',
+                "%H%M%S.%f",
             )
-            self.metadata['half_life'] = float(
+            self.metadata["half_life"] = float(
                 self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
             )
-            self.metadata['injected_dose'] = float(
+            self.metadata["injected_dose"] = float(
                 self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
             )
         except KeyError:
             pass
-        self.metadata['factor'] = self.factor
-        self.metadata['Values_Assumed'] = self.calc
+        self.metadata["factor"] = self.factor
+        self.metadata["Values_Assumed"] = self.calc
         return self.metadata
 
     def resample_pet(self, ct_scan: sitk.Image) -> sitk.Image:
@@ -114,7 +114,7 @@ class PET(sitk.Image):
 
     def show_overlay(self, ct_scan: sitk.Image, slice_number: int) -> plt.figure:
         resampled_pt: sitk.Image = self.resample_pet(ct_scan)
-        fig: plt.figure = plt.figure('Overlayed image', figsize=[15, 10])
+        fig: plt.figure = plt.figure("Overlayed image", figsize=[15, 10])
         pt_arr: np.ndarray = sitk.GetArrayFromImage(resampled_pt)
         plt.subplot(1, 3, 1)
         plt.imshow(pt_arr[slice_number, :, :])
@@ -131,15 +131,15 @@ class PET(sitk.Image):
         try:
             weight: float = float(df.PatientWeight) * 1000
         except KeyError:
-            logger.warning('Patient Weight Not Present. Taking 75Kg')
+            logger.warning("Patient Weight Not Present. Taking 75Kg")
             weight = 75000
         try:
             scan_time: datetime.datetime = datetime.datetime.strptime(
-                df.AcquisitionTime, '%H%M%S.%f'
+                df.AcquisitionTime, "%H%M%S.%f"
             )
             injection_time: datetime.datetime = datetime.datetime.strptime(
                 df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
-                '%H%M%S.%f',
+                "%H%M%S.%f",
             )
             half_life: float = float(
                 df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
@@ -152,12 +152,12 @@ class PET(sitk.Image):
 
             injected_dose_decay: float = a * injected_dose
         except Exception:
-            logger.warning('Not enough data available, taking average values')
+            logger.warning("Not enough data available, taking average values")
             a = np.exp(-np.log(2) * (1.75 * 3600) / 6588)
             injected_dose_decay = 420000000 * a
 
         suv: float = weight / injected_dose_decay
-        if pet_image_type == 'SUV':
+        if pet_image_type == "SUV":
             return suv
         else:
             return 1 / a

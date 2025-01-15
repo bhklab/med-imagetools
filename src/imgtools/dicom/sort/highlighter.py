@@ -26,12 +26,12 @@ class TagHighlighter(RegexHighlighter):
                             }
                     ),
             )
-    >>> console.print('%(PatientID)s/%(StudyID)s/{SomeValue}')
+    >>> console.print("%(PatientID)s/%(StudyID)s/{SomeValue}")
     """
 
-    base_style = 'example.'
+    base_style = "example."
     highlights = [
-        r'%\((?P<Tag>[a-zA-Z0-9_]+)\)s',
-        r'(?P<ForwardSlash>/)',
-        r'(?P<Braces>\{[a-zA-Z0-9_]+\})',
+        r"%\((?P<Tag>[a-zA-Z0-9_]+)\)s",
+        r"(?P<ForwardSlash>/)",
+        r"(?P<Braces>\{[a-zA-Z0-9_]+\})",
     ]

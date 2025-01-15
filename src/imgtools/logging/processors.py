@@ -32,7 +32,7 @@ class PathPrettifier:
                 EventDict: The modified event dictionary with relative paths.
         """
         if not isinstance(event_dict, dict):
-            msg = 'event_dict must be a dictionary'
+            msg = "event_dict must be a dictionary"
             raise TypeError(msg)
 
         for key, path in event_dict.items():
@@ -61,15 +61,15 @@ class JSONFormatter:
                 EventDict: The modified event dictionary with core fields and extra fields separated.
         """
         if not isinstance(event_dict, dict):
-            msg = 'event_dict must be a dictionary'
+            msg = "event_dict must be a dictionary"
             raise TypeError(msg)
 
-        core_fields = {'event', 'level', 'timestamp', 'call', 'exception'}
+        core_fields = {"event", "level", "timestamp", "call", "exception"}
         extra_fields = {key: value for key, value in event_dict.items() if key not in core_fields}
         for key in extra_fields:
             del event_dict[key]
 
-        event_dict['extra'] = extra_fields
+        event_dict["extra"] = extra_fields
         return event_dict
 
 
@@ -97,17 +97,17 @@ class CallPrettifier:
                 EventDict: The modified event dictionary with formatted call information.
         """
         if not isinstance(event_dict, dict):
-            msg = 'event_dict must be a dictionary'
+            msg = "event_dict must be a dictionary"
             raise TypeError(msg)
 
         call = {
-            'module': event_dict.pop('module', ''),
-            'func_name': event_dict.pop('func_name', ''),
-            'lineno': event_dict.pop('lineno', ''),
+            "module": event_dict.pop("module", ""),
+            "func_name": event_dict.pop("func_name", ""),
+            "lineno": event_dict.pop("lineno", ""),
         }
 
-        event_dict['call'] = (
-            f'{call["module"]}.{call["func_name"]}:{call["lineno"]}' if self.concise else call
+        event_dict["call"] = (
+            f"{call['module']}.{call['func_name']}:{call['lineno']}" if self.concise else call
         )
         return event_dict
 
@@ -120,9 +120,9 @@ class ESTTimeStamper:
             fmt (str): The format string for the timestamp. Defaults to "%Y-%m-%dT%H:%M:%S%z".
     """
 
-    def __init__(self, fmt: str = '%Y-%m-%dT%H:%M:%S%z') -> None:
+    def __init__(self, fmt: str = "%Y-%m-%dT%H:%M:%S%z") -> None:
         self.fmt = fmt
-        self.est = pytz.timezone('US/Eastern')
+        self.est = pytz.timezone("US/Eastern")
 
     def __call__(self, _: object, __: object, event_dict: EventDict) -> EventDict:
         """
@@ -137,9 +137,9 @@ class ESTTimeStamper:
                 EventDict: The modified event dictionary with the added timestamp.
         """
         if not isinstance(event_dict, dict):
-            msg = 'event_dict must be a dictionary'
+            msg = "event_dict must be a dictionary"
             raise TypeError(msg)
 
         now = datetime.datetime.now(self.est)
-        event_dict['timestamp'] = now.strftime(self.fmt)
+        event_dict["timestamp"] = now.strftime(self.fmt)
         return event_dict

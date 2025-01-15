@@ -94,7 +94,7 @@ def find_dicoms(
     Find DICOM files recursively without header validation:
 
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=False,
     ... )
@@ -103,7 +103,7 @@ def find_dicoms(
     Suppose that `scan3.dcm` is not a valid DICOM file. Find DICOM files with header validation:
 
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=True,
     ... )
@@ -111,7 +111,7 @@ def find_dicoms(
 
     Find DICOM files without recursion:
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=False,
     ...     check_header=False,
     ... )
@@ -119,28 +119,28 @@ def find_dicoms(
 
     Find DICOM files with a specific extension:
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=False,
-    ...     extension='dcm',
+    ...     extension="dcm",
     ... )
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
     Find DICOM files with a search input:
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=False,
     ...     search_input=[
-    ...         'scan1',
-    ...         'scan2',
+    ...         "scan1",
+    ...         "scan2",
     ...     ],
     ... )
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
     Find DICOM files with a limit:
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=False,
     ...     limit=1,
@@ -149,21 +149,21 @@ def find_dicoms(
 
     Find DICOM files with all options:
     >>> find_dicoms(
-    ...     Path('/data'),
+    ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=True,
-    ...     extension='dcm',
+    ...     extension="dcm",
     ...     limit=2,
-    ...     search_input=['scan'],
+    ...     search_input=["scan"],
     ... )
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
     """
-    pattern = f'*.{extension}' if extension else '*'
+    pattern = f"*.{extension}" if extension else "*"
 
     glob_method = directory.rglob if recursive else directory.glob
 
     logger.debug(
-        'Looking for DICOM files',
+        "Looking for DICOM files",
         directory=directory,
         recursive=recursive,
         search_pattern=pattern,
@@ -211,20 +211,20 @@ def lookup_tag(keyword: str, hex_format: bool = False) -> Optional[str]:
 
     Lookup a DICOM tag in decimal format:
 
-    >>> lookup_tag('PatientID')
+    >>> lookup_tag("PatientID")
     '1048608'
 
     Lookup a DICOM tag in hexadecimal format:
 
     >>> lookup_tag(
-    ...     'PatientID',
+    ...     "PatientID",
     ...     hex_format=True,
     ... )
     '0x100020'
     """
     if (tag := tag_for_keyword(keyword)) is None:
         return None
-    return f'0x{tag:X}' if hex_format else str(tag)
+    return f"0x{tag:X}" if hex_format else str(tag)
 
 
 @functools.lru_cache(maxsize=1024)
@@ -244,10 +244,10 @@ def tag_exists(keyword: str) -> bool:
     Examples
     --------
 
-    >>> tag_exists('PatientID')
+    >>> tag_exists("PatientID")
     True
 
-    >>> tag_exists('InvalidKeyword')
+    >>> tag_exists("InvalidKeyword")
     False
     """
     return dictionary_has_tag(keyword)
@@ -277,13 +277,13 @@ def similar_tags(keyword: str, n: int = 3, threshold: float = 0.6) -> List[str]:
     --------
     Find similar tags for a misspelled keyword:
 
-    >>> similar_tags('PatinetID')
+    >>> similar_tags("PatinetID")
     ['PatientID', 'PatientName', 'PatientBirthDate']
 
     Adjust the number of results and threshold:
 
     >>> similar_tags(
-    ...     'PatinetID',
+    ...     "PatinetID",
     ...     n=5,
     ...     threshold=0.7,
     ... )

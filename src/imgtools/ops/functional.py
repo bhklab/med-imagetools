@@ -7,16 +7,16 @@ import SimpleITK as sitk
 from imgtools.modules import Segmentation
 
 INTERPOLATORS = {
-    'linear': sitk.sitkLinear,
-    'nearest': sitk.sitkNearestNeighbor,
-    'bspline': sitk.sitkBSpline,
+    "linear": sitk.sitkLinear,
+    "nearest": sitk.sitkNearestNeighbor,
+    "bspline": sitk.sitkBSpline,
 }
 
 
 def resample(
     image: sitk.Image,
     spacing: Union[float, Sequence[float], np.ndarray],
-    interpolation: str = 'linear',
+    interpolation: str = "linear",
     anti_alias: bool = True,
     anti_alias_sigma: Optional[float] = None,
     transform: Optional[sitk.Transform] = None,
@@ -67,7 +67,7 @@ def resample(
     try:
         interpolator = INTERPOLATORS[interpolation]
     except KeyError as ke:
-        msg = f'interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolation}.'
+        msg = f"interpolator must be one of {list(INTERPOLATORS.keys())}, got {interpolation}."
         raise ValueError(msg) from ke
 
     original_spacing = np.array(image.GetSpacing())
@@ -111,7 +111,7 @@ def resample(
 def resize(
     image: sitk.Image,
     size: Union[int, Sequence[int], np.ndarray],
-    interpolation: str = 'linear',
+    interpolation: str = "linear",
     anti_alias: bool = True,
     anti_alias_sigma: Optional[float] = None,
 ) -> sitk.Image:
@@ -172,7 +172,7 @@ def resize(
 def zoom(
     image: sitk.Image,
     scale_factor: Union[float, Sequence[float]],
-    interpolation: str = 'linear',
+    interpolation: str = "linear",
     anti_alias: bool = True,
     anti_alias_sigma: Optional[float] = None,
 ) -> sitk.Image:
@@ -237,7 +237,7 @@ def rotate(
     image: sitk.Image,
     rotation_centre: Sequence[float],
     angles: Union[float, Sequence[float]],
-    interpolation: str = 'linear',
+    interpolation: str = "linear",
 ) -> sitk.Image:
     """Rotate an image around a given centre.
 
@@ -317,7 +317,7 @@ def crop(
     size = np.array([size for _ in image.GetSize()]) if isinstance(size, int) else np.asarray(size)
 
     if (crop_centre < 0).any() or (crop_centre > original_size).any():
-        msg = f'Crop centre outside image boundaries. Image size = {original_size}, crop centre = {crop_centre}'
+        msg = f"Crop centre outside image boundaries. Image size = {original_size}, crop centre = {crop_centre}"
         raise ValueError(msg)
 
     min_coords = np.clip(np.floor(crop_centre - size / 2).astype(np.int64), 0, original_size)
@@ -562,7 +562,7 @@ def image_statistics(image: sitk.Image, mask: Optional[sitk.Image] = None, label
     """
 
     ImageStatistics = namedtuple(
-        'ImageStatistics', ['minimum', 'maximum', 'sum', 'mean', 'variance', 'standard_deviation']
+        "ImageStatistics", ["minimum", "maximum", "sum", "mean", "variance", "standard_deviation"]
     )
 
     if mask is not None:

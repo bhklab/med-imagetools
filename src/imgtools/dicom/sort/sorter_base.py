@@ -50,7 +50,7 @@ from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
 from imgtools.dicom.sort.utils import read_tags
 from imgtools.logging import logger
 
-DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
+DEFAULT_PATTERN_PARSER: Pattern = re.compile(r"%([A-Za-z]+)|\{([A-Za-z]+)\}")
 
 
 def resolve_path(
@@ -89,7 +89,7 @@ def resolve_path(
     if check_existing and not resolved_path.exists():
         resolved_path = resolved_path.resolve()
     else:
-        errmsg = f'Path {resolved_path} already exists.'
+        errmsg = f"Path {resolved_path} already exists."
         logger.error(errmsg, source_path=path, resolved_path=resolved_path)
         raise FileExistsError(errmsg)
 
@@ -134,7 +134,7 @@ class SorterBase(ABC):
         pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
     ) -> None:
         if not source_directory.exists() or not source_directory.is_dir():
-            errmsg = f'Source directory {source_directory} does not exist or is not a directory.'
+            errmsg = f"Source directory {source_directory} does not exist or is not a directory."
             raise SorterBaseError(errmsg)
 
         self.source_directory = source_directory
@@ -149,11 +149,11 @@ class SorterBase(ABC):
                 directory=self.source_directory,
                 check_header=False,
                 recursive=True,
-                extension='dcm',
+                extension="dcm",
             )
-            self.logger.info(f'Found {len(self.dicom_files)} files')
+            self.logger.info(f"Found {len(self.dicom_files)} files")
         except Exception as e:
-            errmsg = 'Failed to find files in the source directory.'
+            errmsg = "Failed to find files in the source directory."
             raise SorterBaseError(errmsg) from e
 
         try:
@@ -161,7 +161,7 @@ class SorterBase(ABC):
             self._format, parsed_keys = self._parser.parse()
             self._keys = set(parsed_keys)
         except Exception as e:
-            errmsg = 'Failed to initialize SorterBase.'
+            errmsg = "Failed to initialize SorterBase."
             raise SorterBaseError(errmsg) from e
 
     def __post_init__(self) -> None:
@@ -173,9 +173,9 @@ class SorterBase(ABC):
             highlighter=TagHighlighter(),
             theme=Theme(
                 {
-                    'example.Tag': 'bold magenta',
-                    'example.ForwardSlash': 'bold green',
-                    'example.Braces': 'bold magenta',
+                    "example.Tag": "bold magenta",
+                    "example.ForwardSlash": "bold green",
+                    "example.Braces": "bold magenta",
                 }
             ),
         )
@@ -208,15 +208,15 @@ class SorterBase(ABC):
             return
         if not path:
             return
-        parts = path.split('/')
-        if parts[0] in ['', '.', '/']:
+        parts = path.split("/")
+        if parts[0] in ["", ".", "/"]:
             parts = parts[1:]
-        style = 'dim' if parts[0].startswith('__') else ''
+        style = "dim" if parts[0].startswith("__") else ""
 
         highlighted_label = Text(parts[0], style=style)
-        highlighted_label.highlight_regex(r'\{[a-zA-Z0-9_]+\}', 'bold magenta')
+        highlighted_label.highlight_regex(r"\{[a-zA-Z0-9_]+\}", "bold magenta")
         branch = tree.add(highlighted_label, style=style, guide_style=style)
-        self._generate_tree_structure('/'.join(parts[1:]), branch, depth + 1)
+        self._generate_tree_structure("/".join(parts[1:]), branch, depth + 1)
 
     def _setup_tree(self, base_dir: Path | None = None) -> Tree:
         """
@@ -232,7 +232,7 @@ class SorterBase(ABC):
         Tree
             The initialized tree object.
         """
-        tree = Tree(f':file_folder: {base_dir}/', guide_style='bold bright_blue')
+        tree = Tree(f":file_folder: {base_dir}/", guide_style="bold bright_blue")
         return tree
 
     @property
@@ -244,10 +244,10 @@ class SorterBase(ABC):
 
         Examples
         --------
-        >>> target_pattern = '%key1/%key2/%key3'
-        >>> pattern_preview = '{key1}/{key2}/{key3}'
+        >>> target_pattern = "%key1/%key2/%key3"
+        >>> pattern_preview = "{key1}/{key2}/{key3}"
         """
-        replacements = {key: f'{{{key}}}' for key in self.keys}
+        replacements = {key: f"{{{key}}}" for key in self.keys}
         return self.format % replacements
 
     @property
@@ -280,18 +280,18 @@ class SorterBase(ABC):
             self._generate_tree_structure(self.pattern_preview, tree)
             self._console.print(tree)
         except Exception as e:
-            errmsg = 'Failed to generate tree visualization.'
+            errmsg = "Failed to generate tree visualization."
             raise SorterBaseError(errmsg) from e
 
     @contextlib.contextmanager
     def _progress_bar(self) -> Iterator[progress.Progress]:
         """Context manager for creating a progress bar."""
         with progress.Progress(
-            '[progress.description]{task.description}',
+            "[progress.description]{task.description}",
             progress.BarColumn(),
-            '[progress.percentage]{task.percentage:>3.0f}%',
+            "[progress.percentage]{task.percentage:>3.0f}%",
             progress.MofNCompleteColumn(),
-            'Time elapsed:',
+            "Time elapsed:",
             progress.TimeElapsedColumn(),
             console=self._console,
             transient=True,

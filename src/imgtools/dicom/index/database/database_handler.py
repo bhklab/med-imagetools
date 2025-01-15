@@ -26,11 +26,11 @@ class DatabaseHandler:
                 Whether to delete the existing database file if it exists.
         """
         if force_delete and db_path.exists():
-            logger.debug('Deleting existing database file.', db_path=db_path)
+            logger.debug("Deleting existing database file.", db_path=db_path)
             db_path.unlink()  # Delete the existing database file
 
-        logger.debug('Creating database engine.', db_path=db_path)
-        self.engine = create_engine(f'sqlite:///{db_path}', future=True)
+        logger.debug("Creating database engine.", db_path=db_path)
+        self.engine = create_engine(f"sqlite:///{db_path}", future=True)
         mapper_registry.metadata.create_all(self.engine)  # Create tables
         self.Session = sessionmaker(bind=self.engine)
 

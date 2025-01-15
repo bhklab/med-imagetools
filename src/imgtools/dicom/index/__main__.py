@@ -7,15 +7,15 @@ from imgtools.dicom import find_dicoms
 from imgtools.dicom.index import DatabaseHandler, DICOMDatabaseInterface, DICOMIndexer
 from imgtools.logging import logger
 
-DEFAULT_DB_DIR = Path('.imgtools')
-DEFAULT_DB_NAME = 'imgtools.db'
+DEFAULT_DB_DIR = Path(".imgtools")
+DEFAULT_DB_NAME = "imgtools.db"
 
 
 @click.command()
 @set_log_verbosity()
 @click.option(
-    '--directory',
-    '-d',
+    "--directory",
+    "-d",
     type=click.Path(
         exists=True,
         file_okay=False,
@@ -24,22 +24,22 @@ DEFAULT_DB_NAME = 'imgtools.db'
         resolve_path=True,
         path_type=Path,
     ),
-    help='Directory to search for DICOM files',
+    help="Directory to search for DICOM files",
     required=True,
 )
 @click.option(
-    '--update-db',
-    '-u',
+    "--update-db",
+    "-u",
     is_flag=True,
-    help='Force update the database',
+    help="Force update the database",
     default=False,
 )
 @click.option(
-    '--limit',
-    '-l',
+    "--limit",
+    "-l",
     type=int,
     default=0,
-    help='Number of files to index, 0 for all',
+    help="Number of files to index, 0 for all",
 )
 def index(
     directory: Path, update_db: bool = False, verbose: int = 0, quiet: bool = False, limit: int = 0
@@ -49,9 +49,9 @@ def index(
     For now, creates a database in the current directory at .imgtools/imgtools.db.
 
     """
-    extension = 'dcm'
+    extension = "dcm"
     check_header = False
-    logger.info('Searching for DICOM files.', args=locals())
+    logger.info("Searching for DICOM files.", args=locals())
 
     dicom_files = find_dicoms(
         directory=directory,
@@ -60,7 +60,7 @@ def index(
         extension=extension,
     )
     if not dicom_files:
-        warningmsg = f'No DICOM files found in {directory}.'
+        warningmsg = f"No DICOM files found in {directory}."
         logger.warning(
             warningmsg,
             directory=directory,
@@ -70,7 +70,7 @@ def index(
         )
         return
 
-    logger.info('DICOM find successful.', count=len(dicom_files))
+    logger.info("DICOM find successful.", count=len(dicom_files))
 
     db_path = DEFAULT_DB_DIR / DEFAULT_DB_NAME
 
@@ -83,16 +83,16 @@ def index(
     if limit:
         dicom_files = dicom_files[:limit]
 
-    logger.debug('Building index.', count=len(dicom_files), limit=limit)
+    logger.debug("Building index.", count=len(dicom_files), limit=limit)
     # Build index
     indexer.build_index_from_files(dicom_files)
 
     _ = DICOMDatabaseInterface(db_handler=db_handler)
 
-    logger.info('Indexing complete.')
+    logger.info("Indexing complete.")
 
-    click.echo(f'Indexed {len(dicom_files)} files to {db_path}')
+    click.echo(f"Indexed {len(dicom_files)} files to {db_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     index()
