@@ -13,8 +13,8 @@ from imgtools.logging import logger
 
 
 # fmt: off
-def crawl_one(folder_path: pathlib.Path) -> dict:
-    folder_path = pathlib.Path(folder_path)
+def crawl_one(folder_path_posix: str) -> dict:
+    folder_path = pathlib.Path(folder_path_posix)
     assert folder_path.is_dir(), f"{folder_path} is not a directory"
 
     logger.info(f"Crawling One for {folder_path}")
