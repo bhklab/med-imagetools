@@ -144,9 +144,9 @@ class StructureSet:
         >>> structure_set = StructureSet.from_dicom_rtstruct(
         ...     'path/to/rtstruct.dcm'
         ... )
-        >>> structure_set.search_roi('GTV.*')
+        >>> structure_set.has_roi('GTV.*')
         True
-        >>> structure_set.search_roi('ctv.*')
+        >>> structure_set.has_roi('ctv.*')
         True
         """
         _flags = re.IGNORECASE if ignore_case else 0
