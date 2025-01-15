@@ -51,24 +51,41 @@ def crawl_one(folder_path_posix: str) -> dict:
             )
 
             meta = dcmread(dcm, force=True, stop_before_pixels=True)
-            patient = str(meta.PatientID)
-            study = str(meta.StudyInstanceUID)
-            series = str(meta.SeriesInstanceUID)
+
+            ############################################################
+            # Extract metadata
+            PatientID = str(meta.PatientID)
+            StudyInstanceUID = str(meta.StudyInstanceUID)
+            SeriesInstanceUID = str(meta.SeriesInstanceUID)
             sop_instance_uid = str(meta.SOPInstanceUID)
 
-            study_description = str(getattr(meta, "StudyDescription", ""))
-            series_description = str(getattr(meta, "SeriesDescription", ""))
+            StudyDescription = str(getattr(meta, "StudyDescription", ""))
+            SeriesDescription = str(getattr(meta, "SeriesDescription", ""))
             subseries = str(getattr(meta, "AcquisitionNumber", "default"))
 
-            orientation = str(getattr(meta, "ImageOrientationPatient", "")) # (0020, 0037)
-            orientation_type = str(getattr(meta, "AnatomicalOrientationType", "")) # (0010, 2210)
+            ImageOrientationPatient = str(getattr(meta, "ImageOrientationPatient", "")) # (0020, 0037)
+            AnatomicalOrientationType = str(getattr(meta, "AnatomicalOrientationType", "")) # (0010, 2210)
             
             # MRI Tags
-            tr = float(getattr(meta, "RepetitionTime", 0)) if hasattr(meta, "RepetitionTime") else ""
-            te = float(getattr(meta, "EchoTime", 0)) if hasattr(meta, "EchoTime") else ""
-            tesla = float(getattr(meta, "MagneticFieldStrength", 0)) if hasattr(meta, "MagneticFieldStrength") else ""
-            scan_seq = str(getattr(meta, "ScanningSequence", ""))
-            elem = str(getattr(meta, "ImagedNucleus", ""))
+            RepetitionTime = (
+                float(getattr(meta, "RepetitionTime", 0)) 
+                if hasattr(meta, "RepetitionTime") 
+                else ""
+            )
+
+            EchoTime = (
+                float(getattr(meta, "EchoTime", 0)) 
+                if hasattr(meta, "EchoTime")
+                else ""
+            )
+
+            MagneticFieldStrength = (
+                float(getattr(meta, "MagneticFieldStrength", 0)) 
+                if hasattr(meta, "MagneticFieldStrength") 
+                else ""
+            )
+            ScanningSequence = str(getattr(meta, "ScanningSequence", ""))
+            ImagedNucleus = str(getattr(meta, "ImagedNucleus", ""))
 
             # Reference CT, RS, PL
             (
@@ -125,7 +142,7 @@ def crawl_one(folder_path_posix: str) -> dict:
                     reference_frame = ""
 
             if meta.Modality == "RTSTRUCT": # should we also do this for SEG? 
-                dicom_folder_or_file = os.path.join(relative_directory_path, dicom_filename)
+                dicom_folder_or_file = os.path.join(relative_directory_path, dicom_filename) # noqa
             else:
                 dicom_folder_or_file = relative_directory_path 
 
@@ -138,28 +155,28 @@ def crawl_one(folder_path_posix: str) -> dict:
             # defaultdict will handle missing keys for us so we dont have to do the
             # whole `if key not in dict: dict[key] = {}` dance
             # by automatically creating the key if it doesn't exist
-            database[patient][study]["description"] = study_description
-            database[patient][study][series]["description"] = series_description
+            database[PatientID][StudyInstanceUID]["description"] = StudyDescription
+            database[PatientID][StudyInstanceUID][SeriesInstanceUID]["description"] = SeriesDescription
 
-            database[patient][study][series][subseries] = {
-                'instance_uid': sop_instance_uid,
-                'modality': meta.Modality,
+            database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries] = {
+                'SOPInstanceUID': sop_instance_uid,
+                'Modality': meta.Modality,
                 'reference_ct': reference_ct,
                 'reference_rs': reference_rs,
                 'reference_pl': reference_pl,
                 'reference_frame': reference_frame,
                 'folder': dicom_folder_or_file,
-                'orientation': orientation,
-                'orientation_type': orientation_type,
-                'repetition_time':tr,
-                'echo_time':te,
-                'scan_sequence': scan_seq,
-                'mag_field_strength': tesla,
-                'imaged_nucleus': elem,
+                'ImageOrientationPatient': ImageOrientationPatient,
+                'AnatomicalOrientationType': AnatomicalOrientationType,
+                'RepetitionTime': RepetitionTime,
+                'EchoTime': EchoTime,
+                'ScanningSequence': ScanningSequence,
+                'MagneticFieldStrength': MagneticFieldStrength,
+                'ImagedNucleus': ImagedNucleus,
                 'fname': dicom_relative_path.as_posix(),  # temporary until we switch to json-based loading
                 'instances': defaultdict(str),
             }
-            database[patient][study][series][subseries]["instances"][sop_instance_uid] = (
+            database[PatientID][StudyInstanceUID][SeriesInstanceUID][subseries]["instances"][sop_instance_uid] = (
                 dicom_relative_path.as_posix()
             )
 
@@ -187,21 +204,21 @@ def to_df(database_dict):
                         'series': series_key,
                         'series_description': series_dict['description'],
                         'subseries': subseries_key,
-                        'modality': subseries_dict['modality'],
+                        'modality': subseries_dict['Modality'],
                         'instances': len(subseries_dict['instances']),
-                        'instance_uid': subseries_dict['instance_uid'],
+                        'instance_uid': subseries_dict['SOPInstanceUID'],
                         'reference_ct': subseries_dict['reference_ct'],
                         'reference_rs': subseries_dict['reference_rs'],
                         'reference_pl': subseries_dict['reference_pl'],
                         'reference_frame': subseries_dict['reference_frame'],
                         'folder': subseries_dict['folder'],
-                        'orientation': subseries_dict['orientation'],
-                        'orientation_type': subseries_dict['orientation_type'],
-                        'MR_repetition_time': subseries_dict['repetition_time'],
-                        'MR_echo_time': subseries_dict['echo_time'],
-                        'MR_scan_sequence': subseries_dict['scan_sequence'],
-                        'MR_magnetic_field_strength': subseries_dict['mag_field_strength'],
-                        'MR_imaged_nucleus': subseries_dict['imaged_nucleus'],
+                        'orientation': subseries_dict['ImageOrientationPatient'],
+                        'orientation_type': subseries_dict['AnatomicalOrientationType'],
+                        'MR_repetition_time': subseries_dict['RepetitionTime'],
+                        'MR_echo_time': subseries_dict['EchoTime'],
+                        'MR_scan_sequence': subseries_dict['ScanningSequence'],
+                        'MR_magnetic_field_strength': subseries_dict['MagneticFieldStrength'],
+                        'MR_imaged_nucleus': subseries_dict['ImagedNucleus'],
                         'file_path': subseries_dict['fname']
                     }
                     dataframe_list.append(data)
