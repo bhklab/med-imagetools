@@ -160,12 +160,6 @@ def crawl_one(folder_path: pathlib.Path) -> dict:
 
 def to_df(database_dict):
     df = pd.DataFrame()
-    columns = ['patient_ID', 'study', 'study_description',  # noqa
-                                       'series', 'series_description', 'subseries', 'modality', 
-                                       'instances', 'instance_uid', 
-                                       'reference_ct', 'reference_rs', 'reference_pl', 'reference_frame', 'folder',
-                                       'orientation', 'orientation_type', 'MR_repetition_time', 'MR_echo_time', 
-                                       'MR_scan_sequence', 'MR_magnetic_field_strength', 'MR_imaged_nucleus', 'file_path']
     for pat in database_dict:
         for study in database_dict[pat]:
             for series in database_dict[pat][study]:
@@ -174,33 +168,31 @@ def to_df(database_dict):
                 for subseries in database_dict[pat][study][series]:
                     if subseries == 'description':  # skip description key in dict
                         continue
-                    values = [
-                        pat, 
-                        study, 
-                        database_dict[pat][study]['description'], # noqa
-                        series, 
-                        database_dict[pat][study][series]['description'], 
-                        subseries, 
-                        database_dict[pat][study][series][subseries]['modality'], 
-                        len(database_dict[pat][study][series][subseries]['instances']), 
-                        database_dict[pat][study][series][subseries]['instance_uid'], 
-                        database_dict[pat][study][series][subseries]['reference_ct'],
-                        database_dict[pat][study][series][subseries]['reference_rs'], 
-                        database_dict[pat][study][series][subseries]['reference_pl'], 
-                        database_dict[pat][study][series][subseries]['reference_frame'], 
-                        database_dict[pat][study][series][subseries]['folder'],
-                        database_dict[pat][study][series][subseries]['orientation'], 
-                        database_dict[pat][study][series][subseries]['orientation_type'],
-                        database_dict[pat][study][series][subseries]['repetition_time'], 
-                        database_dict[pat][study][series][subseries]['echo_time'],
-                        database_dict[pat][study][series][subseries]['scan_sequence'], 
-                        database_dict[pat][study][series][subseries]['mag_field_strength'], 
-                        database_dict[pat][study][series][subseries]['imaged_nucleus'],
-                        database_dict[pat][study][series][subseries]['fname']
-                    ]
-
-                    df_add = pd.DataFrame([values], columns=columns)
-                    df = pd.concat([df, df_add], ignore_index=True)
+                    data = {
+                        'patient_ID': pat,
+                        'study': study,
+                        'study_description': database_dict[pat][study]['description'],
+                        'series': series,
+                        'series_description': database_dict[pat][study][series]['description'],
+                        'subseries': subseries,
+                        'modality': database_dict[pat][study][series][subseries]['modality'],
+                        'instances': len(database_dict[pat][study][series][subseries]['instances']),
+                        'instance_uid': database_dict[pat][study][series][subseries]['instance_uid'],
+                        'reference_ct': database_dict[pat][study][series][subseries]['reference_ct'],
+                        'reference_rs': database_dict[pat][study][series][subseries]['reference_rs'],
+                        'reference_pl': database_dict[pat][study][series][subseries]['reference_pl'],
+                        'reference_frame': database_dict[pat][study][series][subseries]['reference_frame'],
+                        'folder': database_dict[pat][study][series][subseries]['folder'],
+                        'orientation': database_dict[pat][study][series][subseries]['orientation'],
+                        'orientation_type': database_dict[pat][study][series][subseries]['orientation_type'],
+                        'MR_repetition_time': database_dict[pat][study][series][subseries]['repetition_time'],
+                        'MR_echo_time': database_dict[pat][study][series][subseries]['echo_time'],
+                        'MR_scan_sequence': database_dict[pat][study][series][subseries]['scan_sequence'],
+                        'MR_magnetic_field_strength': database_dict[pat][study][series][subseries]['mag_field_strength'],
+                        'MR_imaged_nucleus': database_dict[pat][study][series][subseries]['imaged_nucleus'],
+                        'file_path': database_dict[pat][study][series][subseries]['fname']
+                    }
+                    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
     return df
 
 # fmt: on
