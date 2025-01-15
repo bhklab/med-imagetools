@@ -9,7 +9,8 @@ include = [
   "src/imgtools/dicom/**/*.py",
   "src/imgtools/__init__.py",
   "src/imgtools/utils/imageutils.py",
-  "src/imgtools/types.py",
+  "src/imgtools/io/loaders.py",
+  # "src/imgtools/types.py",
   # "src/imgtools/utils/crawl.py",
 ]
 
@@ -17,11 +18,8 @@ extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
-  "src/imgtools/io/**/*.py",
-  "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
-  "src/imgtools/image.py",
 ]
 
 extend-include = ["src/imgtools/ops/functional.py"]
