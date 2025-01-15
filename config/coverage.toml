@@ -2,6 +2,7 @@
 omit = [
   "src/imgtools/logging/**/*.py",
   "src/imgtools/cli/**/*.py",
+  "src/imgtools/dicom/index/**/*.py",
 ]
 
 [tool.coverage.report]
