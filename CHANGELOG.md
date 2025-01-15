@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.12.0 (2025-01-15)
+
+### Features
+
+- Improve structureset and crawl modules, Refactor tests and improve dataset handling
+  ([#165](https://github.com/bhklab/med-imagetools/pull/165),
+  [`5333a80`](https://github.com/bhklab/med-imagetools/commit/5333a80c6b2242c12d384846a3649a94a9eea60f))
+
+
 ## v1.11.2 (2025-01-15)
 
 ### Bug Fixes
