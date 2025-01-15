@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.11.2 (2025-01-15)
+
+### Bug Fixes
+
+- Replaced capturing regex terms with non capturing in datagraph
+  ([#162](https://github.com/bhklab/med-imagetools/pull/162),
+  [`3237b21`](https://github.com/bhklab/med-imagetools/commit/3237b21957adc5bc3efffe42d589bdeb4f27bc57))
+
+
 ## v1.11.1 (2025-01-11)
 
 ### Bug Fixes
@@ -27,11 +36,6 @@ Additionally, added the `output_size` argument to the `resample` call in the `re
 
 
 ## v1.11.0 (2025-01-02)
-
-### Chores
-
-- **sem-ver**: 1.11.0
-  ([`cb71fa1`](https://github.com/bhklab/med-imagetools/commit/cb71fa15f0578b77b4ddde0749e95849f5af9102))
 
 ### Features
 
@@ -70,18 +74,8 @@ Co-authored-by: Joshua Siraj <joshua.siraj@ryerson.ca>
 - Update .gitignore to exclude SQLite and database files
   ([`95a2179`](https://github.com/bhklab/med-imagetools/commit/95a217913798b2f1f4aa2555f1f8fddc65b5b44d))
 
-### Chores
-
-- **sem-ver**: 1.10.1
-  ([`07a41fe`](https://github.com/bhklab/med-imagetools/commit/07a41fe073f9ce6a88aaa032caf69a7fb6086314))
-
 
 ## v1.10.0 (2024-12-03)
-
-### Chores
-
-- **sem-ver**: 1.10.0
-  ([`0efa004`](https://github.com/bhklab/med-imagetools/commit/0efa0048b135e06d8ebe99db45d00781f0786b86))
 
 ### Features
 
@@ -113,11 +107,6 @@ Co-authored-by: Joshua Siraj <joshua.siraj@ryerson.ca>
 
 - Update GitHub Actions workflow for concurrency and permissions;
   ([`45cddb4`](https://github.com/bhklab/med-imagetools/commit/45cddb4fd65be0df14a7f9d2a28261c5cc36159b))
-
-### Chores
-
-- **sem-ver**: 1.9.4
-  ([`6d283aa`](https://github.com/bhklab/med-imagetools/commit/6d283aa8167574ed6848a7b5c5558b63c5ee6568))
 
 
 ## v1.9.3 (2024-11-29)
@@ -152,11 +141,6 @@ Introduce an environment variable for debug logging and set the default log leve
 
 - **Documentation** - Updated docstrings and comments for clarity on new logging setup and features.
 
-### Chores
-
-- **sem-ver**: 1.9.3
-  ([`d9d1fd0`](https://github.com/bhklab/med-imagetools/commit/d9d1fd0f7d9817ca2c0d4e9d1d5132673b2478c3))
-
 
 ## v1.9.2 (2024-11-22)
 
@@ -169,9 +153,6 @@ Introduce an environment variable for debug logging and set the default log leve
 
 - **deps**: Update med-imagetools to version 1.9.1 and update sha256 checksum
   ([`ab77c58`](https://github.com/bhklab/med-imagetools/commit/ab77c5887e5bb8ae1fa477d2780b94dcdf3297a6))
-
-- **sem-ver**: 1.9.2
-  ([`22d8fb7`](https://github.com/bhklab/med-imagetools/commit/22d8fb77f1d2c47d26967b1578e9be41d829dbb1))
 
 ### Refactoring
 
@@ -186,11 +167,6 @@ Introduce an environment variable for debug logging and set the default log leve
 - Downstream bug where datagraph.py was missing from wheel due to data* being ignored in .gitignore
   ([`2dbb245`](https://github.com/bhklab/med-imagetools/commit/2dbb2455e1edcbf663effd8d40b6bff88dc92082))
 
-### Chores
-
-- **sem-ver**: 1.9.1
-  ([`711934c`](https://github.com/bhklab/med-imagetools/commit/711934cc211bd53347ad5c46cb873dae441f1796))
-
 ### Documentation
 
 - Fix broken images
@@ -198,11 +174,6 @@ Introduce an environment variable for debug logging and set the default log leve
 
 
 ## v1.9.0 (2024-11-22)
-
-### Chores
-
-- **sem-ver**: 1.9.0
-  ([`b597892`](https://github.com/bhklab/med-imagetools/commit/b597892041fb5dc096d43a757b3482bb20ba5293))
 
 ### Features
 
@@ -230,11 +201,6 @@ Introduce an environment variable for debug logging and set the default log leve
 - Update README with new CLI point and reorganize, and formatting
   ([`96c6ab6`](https://github.com/bhklab/med-imagetools/commit/96c6ab60488f97ee3830c7d4be8f96f1ebad0cac))
 
-### Chores
-
-- **sem-ver**: 1.8.2
-  ([`359cc09`](https://github.com/bhklab/med-imagetools/commit/359cc09a910b00e617157a0474d5b16f44b3253a))
-
 
 ## v1.8.1 (2024-11-21)
 
@@ -243,18 +209,8 @@ Introduce an environment variable for debug logging and set the default log leve
 - Common prefix for tree
   ([`a940969`](https://github.com/bhklab/med-imagetools/commit/a94096910b3b95629e96e809ec21a705505fe841))
 
-### Chores
-
-- **sem-ver**: 1.8.1
-  ([`3e1c40d`](https://github.com/bhklab/med-imagetools/commit/3e1c40d1441e305dc55c3256e0563c3317765299))
-
 
 ## v1.8.0 (2024-11-21)
-
-### Chores
-
-- **sem-ver**: 1.8.0
-  ([`f5d97d0`](https://github.com/bhklab/med-imagetools/commit/f5d97d01f45d58d5478e49429be4754f62b3e80c))
 
 ### Features
 
@@ -263,11 +219,6 @@ Introduce an environment variable for debug logging and set the default log leve
 
 
 ## v1.7.0 (2024-11-19)
-
-### Chores
-
-- **sem-ver**: 1.7.0
-  ([`d579680`](https://github.com/bhklab/med-imagetools/commit/d579680f37b4f37f299fbe0e69d7dd653ae52000))
 
 ### Features
 
@@ -343,11 +294,6 @@ Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.git
 
 ## v1.6.0 (2024-11-15)
 
-### Chores
-
-- **sem-ver**: 1.6.0
-  ([`1549be9`](https://github.com/bhklab/med-imagetools/commit/1549be986f235ec346d7c8cb37d5a582c61d20a7))
-
 ### Features
 
 - Transfer project management to Pixi ([#133](https://github.com/bhklab/med-imagetools/pull/133),
@@ -404,11 +350,6 @@ Co-authored-by: semantic-release <semantic-release>
 
 * fix(pyproject): update attrs version constraint to allow all 23.x versions and above
 
-### Chores
-
-- **sem-ver**: 1.5.8
-  ([`84aa480`](https://github.com/bhklab/med-imagetools/commit/84aa48014308784eef4314750da708682cea2968))
-
 
 ## v1.5.7 (2024-10-23)
 
@@ -417,11 +358,6 @@ Co-authored-by: semantic-release <semantic-release>
 - Ci-cd - add id in release for pypi step
   ([`7abd175`](https://github.com/bhklab/med-imagetools/commit/7abd175d58894b5ea84448735c4933de4aa156bd))
 
-### Chores
-
-- **sem-ver**: 1.5.7
-  ([`c9a10bb`](https://github.com/bhklab/med-imagetools/commit/c9a10bbbfe7cc0e026c6a1719c07361bb7f3187f))
-
 
 ## v1.5.6 (2024-10-23)
 
@@ -429,11 +365,6 @@ Co-authored-by: semantic-release <semantic-release>
 
 - Update ci to release to pypi
   ([`a92a41f`](https://github.com/bhklab/med-imagetools/commit/a92a41f56ab6d86c68d7657104f8c559b1958ffc))
-
-### Chores
-
-- **sem-ver**: 1.5.6
-  ([`22881f1`](https://github.com/bhklab/med-imagetools/commit/22881f19cabf0b9a096fe3d1822cd0ed26dcb507))
 
 
 ## v1.5.5 (2024-10-23)
@@ -472,9 +403,6 @@ Co-authored-by: semantic-release <semantic-release>
 * chore: enhance StructureSetToSegmentation docstring to support None as a roi_names option for
   loading all ROIs
 
-- **sem-ver**: 1.5.5
-  ([`9921fba`](https://github.com/bhklab/med-imagetools/commit/9921fba8c74d5bfb6d914ce7af069df3976acde0))
-
 
 ## v1.5.4 (2024-06-12)
 
@@ -482,11 +410,6 @@ Co-authored-by: semantic-release <semantic-release>
 
 - License updated to MIT ([#119](https://github.com/bhklab/med-imagetools/pull/119),
   [`6e755dd`](https://github.com/bhklab/med-imagetools/commit/6e755ddc70738da5c7afbced6e061d4e039fbd5f))
-
-### Chores
-
-- **sem-ver**: 1.5.4
-  ([`464462c`](https://github.com/bhklab/med-imagetools/commit/464462cb1718d96652382f115b2f20ae4d8cbee8))
 
 
 ## v1.5.3 (2024-06-10)
@@ -496,11 +419,6 @@ Co-authored-by: semantic-release <semantic-release>
 - Clarified license in README.md ([#118](https://github.com/bhklab/med-imagetools/pull/118),
   [`a4899ca`](https://github.com/bhklab/med-imagetools/commit/a4899ca15924dc9fa19f2e1f3964b7bd6c2e2d35))
 
-### Chores
-
-- **sem-ver**: 1.5.3
-  ([`7effcaf`](https://github.com/bhklab/med-imagetools/commit/7effcaffbe054995bb3111d3799bc8b7d9246300))
-
 
 ## v1.5.2 (2024-05-29)
 
@@ -508,11 +426,6 @@ Co-authored-by: semantic-release <semantic-release>
 
 - Upload latest version to pypi
   ([`1debad3`](https://github.com/bhklab/med-imagetools/commit/1debad3836732faf1a2e3f992a9f1d76943b076e))
-
-### Chores
-
-- **sem-ver**: 1.5.2
-  ([`69a651f`](https://github.com/bhklab/med-imagetools/commit/69a651f464b418c92f951be33bb865a04f0c604d))
 
 
 ## v1.5.1 (2024-05-29)
@@ -522,18 +435,8 @@ Co-authored-by: semantic-release <semantic-release>
 - Format toml
   ([`269f55d`](https://github.com/bhklab/med-imagetools/commit/269f55db58322dc31a5c44ee5a5e2eb830ed3e4f))
 
-### Chores
-
-- **sem-ver**: 1.5.1
-  ([`7890f36`](https://github.com/bhklab/med-imagetools/commit/7890f3638e76b449f3948ae3c8c4a9532bde10ae))
-
 
 ## v1.5.0 (2024-05-29)
-
-### Chores
-
-- **sem-ver**: 1.5.0
-  ([`69626ef`](https://github.com/bhklab/med-imagetools/commit/69626ef244aa26a8c7d5235548651cf4230e2b9a))
 
 ### Features
 
