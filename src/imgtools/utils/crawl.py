@@ -167,7 +167,7 @@ def crawl_one(folder_path_posix: str) -> dict:
 
 
 def to_df(database_dict):
-    df = pd.DataFrame()
+    dataframe_list = []
 
     for patient_id, patient_dict in database_dict.items():
 
@@ -204,12 +204,11 @@ def to_df(database_dict):
                         'MR_imaged_nucleus': subseries_dict['imaged_nucleus'],
                         'file_path': subseries_dict['fname']
                     }
-                    df = pd.concat([df, pd.DataFrame([data])], ignore_index=True)
+                    dataframe_list.append(data)
+    df = pd.DataFrame(dataframe_list)
     return df
 
 # fmt: on
-
-
 def crawl(
     top: pathlib.Path,
     n_jobs: int = -1,
