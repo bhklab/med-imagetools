@@ -3,6 +3,7 @@ import os
 import pathlib
 from argparse import ArgumentParser
 from collections import defaultdict
+from contextlib import suppress
 
 import pandas as pd
 from joblib import Parallel, delayed
@@ -75,6 +76,10 @@ def crawl_one(folder_path_posix: str) -> dict:
                 reference_rs,
                 reference_pl,
             ) = "", "", ""
+
+            # TODO: this is a mess, can we extract metadata based on modality instead 
+            # of trying to catch exceptions?
+
             try:  # RTSTRUCT
                 reference_ct = str(
                     meta.ReferencedFrameOfReferenceSequence[0]
@@ -82,35 +87,30 @@ def crawl_one(folder_path_posix: str) -> dict:
                     .RTReferencedSeriesSequence[0]
                     .SeriesInstanceUID
                 )
-            except:
+            except Exception:
                 try:  # SEGMENTATION
                     reference_ct = str(
                         meta.ReferencedSeriesSequence[0].SeriesInstanceUID
                     )
-                except:
-                    try:  # RTDOSE
+                except Exception:
+                    with suppress(Exception):
                         reference_rs = str(
                             meta.ReferencedStructureSetSequence[
                                 0
                             ].ReferencedSOPInstanceUID
                         )
-                    except:
-                        pass
-                    try:
+                    with suppress(Exception):
                         reference_ct = str(
                             meta.ReferencedImageSequence[0].ReferencedSOPInstanceUID
                         )
-                    except:
-                        pass
-                    try:
+                    with suppress(Exception):
                         reference_pl = str(
                             meta.ReferencedRTPlanSequence[
                                 0
                             ].ReferencedSOPInstanceUID
                         )
-                    except:
-                        pass
 
+            # TODO: extract to helper function
             # Frame of Reference UIDs
             try:
                 reference_frame = str(meta.FrameOfReferenceUID)
