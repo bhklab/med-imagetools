@@ -121,9 +121,7 @@ def physical_points_to_idxs(
     # - Wraps the result into a numpy array for further processing.
     # `np.vectorize` creates a vectorized function that can process arrays of points in one call.
     # The `signature="(3)->(3)"` ensures the transformation operates on 3D points, returning 3D results.
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
+    vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature='(3)->(3)')
 
     # Step 2: Apply the vectorized transformation to all slices of points.
     # For each 2D array `slc` in the `points` list:
@@ -159,7 +157,5 @@ def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
         if continuous
         else image.TransformIndexToPhysicalPoint
     )
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
+    vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature='(3)->(3)')
     return vectorized_transform(idxs)

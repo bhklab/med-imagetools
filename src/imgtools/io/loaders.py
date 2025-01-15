@@ -1,13 +1,13 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 
 import glob
 import json
 import os
 import pathlib
 import re
+from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import Optional
+from typing import Optional, Union
 
 import pandas as pd
 import SimpleITK as sitk
@@ -35,9 +35,9 @@ def read_image(path: str) -> sitk.Image:
 
 def read_dicom_series(
     path: str,
-    series_id: Optional[str] = None,
+    series_id: list[str] | None = None,
     recursive: bool = False,
-    file_names: list = None,
+    file_names: list[str] | None = None,
 ) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 
@@ -62,14 +62,15 @@ def read_dicom_series(
     Returns
     -------
     The loaded image.
-
     """
     reader = sitk.ImageSeriesReader()
     if file_names is None:
-        file_names = reader.GetGDCMSeriesFileNames(
-            path, seriesID=series_id if series_id else "", recursive=recursive
-        )
         # extract the names of the dicom files that are in the path variable, which is a directory
+        file_names = reader.GetGDCMSeriesFileNames(
+            path,
+            seriesID=series_id if series_id else '',
+            recursive=recursive,
+        )
 
     reader.SetFileNames(file_names)
 
@@ -86,17 +87,23 @@ def read_dicom_series(
 
 def read_dicom_scan(
     path: str,
-    series_id: Optional[str] = None,
+    series_id: list[str] | None = None,
     recursive: bool = False,
-    file_names: Optional[list] = None,
+    file_names: list[str] | None = None,
 ) -> Scan:
     image = read_dicom_series(
-        path, series_id=series_id, recursive=recursive, file_names=file_names
+        path,
+        series_id=series_id,
+        recursive=recursive,
+        file_names=file_names,
     )
     return Scan(image, {})
 
 
-def read_dicom_rtstruct(path: str, suppress_warnings: bool = False) -> StructureSet:
+def read_dicom_rtstruct(
+    path: str,
+    suppress_warnings: bool = False,
+) -> StructureSet:
     return StructureSet.from_dicom_rtstruct(path, suppress_warnings=suppress_warnings)
 
 
@@ -105,7 +112,7 @@ def read_dicom_rtdose(path: str) -> Dose:
 
 
 def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
-    return PET.from_dicom_pet(path, series, "SUV")
+    return PET.from_dicom_pet(path, series, 'SUV')
 
 
 def read_dicom_seg(path: str, meta: dict, series: Optional[str] = None) -> Segmentation:
@@ -113,48 +120,49 @@ def read_dicom_seg(path: str, meta: dict, series: Optional[str] = None) -> Segme
     return Segmentation.from_dicom_seg(seg_img, meta)
 
 
-def read_dicom_auto(path, series=None, file_names=None):
-    if path is None:
-        return None
-    if path.endswith(".dcm"):
-        dcms = [path]
-    else:
-        dcms = glob.glob(pathlib.Path(path, "*.dcm").as_posix())
+auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
+
+
+def read_dicom_auto(path: str, series=None, file_names=None) -> auto_dicom_result:
+    dcms = (
+        list(pathlib.Path(path).rglob('*.dcm'))
+        if not path.endswith('.dcm')
+        else [pathlib.Path(path)]
+    )
 
     for dcm in dcms:
-        meta = dcmread(dcm)
+        meta = dcmread(dcm, stop_before_pixels=True)
         if meta.SeriesInstanceUID != series and series is not None:
             continue
 
         modality = meta.Modality
-        if modality in ["CT", "MR"]:
-            obj = read_dicom_scan(path, series, file_names=file_names)
-        elif modality == "PT":
-            obj = read_dicom_pet(path, series)
-        elif modality == "RTSTRUCT":
-            obj = read_dicom_rtstruct(dcm)
-        elif modality == "RTDOSE":
-            obj = read_dicom_rtdose(dcm)
-        elif modality == "SEG":
-            obj = read_dicom_seg(path, meta, series)
-        else:
-            if len(dcms) == 1:
-                print(modality, "at", dcms[0], "is NOT implemented yet.")
-                raise NotImplementedError
-            else:
-                print("There were no dicoms in this path.")
-                return None
+
+        match modality:
+            case 'CT' | 'MR':
+                obj = read_dicom_scan(path, series, file_names=file_names)
+            case 'PT':
+                obj = read_dicom_pet(path, series)
+            case 'RTSTRUCT':
+                obj = read_dicom_rtstruct(dcm)
+            case 'RTDOSE':
+                obj = read_dicom_rtdose(dcm)
+            case 'SEG':
+                obj = read_dicom_seg(path, meta, series)
+            case _:
+                errmsg = f'Modality {modality} not supported in read_dicom_auto.'
+                raise NotImplementedError(errmsg)
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
 
 
+# ruff: noqa
 class BaseLoader(ABC):
     @abstractmethod
     def __getitem__(self, subject_id):
         pass
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.keys())
 
     @abstractmethod
@@ -179,14 +187,22 @@ class ImageTreeLoader(BaseLoader):
         self,
         json_path,
         csv_path_or_dataframe,
-        col_names=[],
-        study_names=[],
-        series_names=[],
-        subseries_names=[],
+        col_names=None,
+        study_names=None,
+        series_names=None,
+        subseries_names=None,
         id_column=None,
         expand_paths=False,
         readers=None,
-    ):
+    ) -> None:
+        if subseries_names is None:
+            subseries_names = []
+        if series_names is None:
+            series_names = []
+        if study_names is None:
+            study_names = []
+        if col_names is None:
+            col_names = []
         if readers is None:
             readers = [
                 read_image
@@ -210,20 +226,20 @@ class ImageTreeLoader(BaseLoader):
             if len(self.colnames) == 0:
                 self.colnames = self.paths.columns
         else:
-            raise ValueError(
-                f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
-            )
+            msg = f'Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.'
+            raise ValueError(msg)
 
         if isinstance(json_path, str):
-            with open(json_path, "r") as f:
+            with open(json_path, 'r') as f:
                 self.tree = json.load(f)
         else:
-            raise ValueError(f"Expected a path to a json file, not {type(json_path)}.")
+            msg = f'Expected a path to a json file, not {type(json_path)}.'
+            raise ValueError(msg)
 
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple("Output", self.colnames)
+        self.output_tuple = namedtuple('Output', self.colnames)
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -236,21 +252,18 @@ class ImageTreeLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {
-                col: glob.glob(path)[0] if pd.notna(path) else None
-                for col, path in paths.items()
+                col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()
             }
 
         for i, (col, path) in enumerate(paths.items()):
-            files = self.tree[subject_id][
-                study["study_" + ("_").join(col.split("_")[1:])]
-            ][series["series_" + ("_").join(col.split("_")[1:])]][
-                subseries["subseries_" + ("_").join(col.split("_")[1:])]
-            ]
-            self.readers[i](path, series["series_" + ("_").join(col.split("_")[1:])])
+            files = self.tree[subject_id][study['study_' + ('_').join(col.split('_')[1:])]][
+                series['series_' + ('_').join(col.split('_')[1:])]
+            ][subseries['subseries_' + ('_').join(col.split('_')[1:])]]
+            self.readers[i](path, series['series_' + ('_').join(col.split('_')[1:])])
         outputs = {
             col: self.readers[i](
                 path,
-                series["series_" + ("_").join(col.split("_")[1:])],
+                series['series_' + ('_').join(col.split('_')[1:])],
                 file_names=files,
             )
             for i, (col, path) in enumerate(paths.items())
@@ -268,12 +281,16 @@ class ImageCSVLoader(BaseLoader):
     def __init__(
         self,
         csv_path_or_dataframe,
-        colnames=[],
-        seriesnames=[],
+        colnames=None,
+        seriesnames=None,
         id_column=None,
         expand_paths=False,
         readers=None,
-    ):
+    ) -> None:
+        if seriesnames is None:
+            seriesnames = []
+        if colnames is None:
+            colnames = []
         if readers is None:
             readers = [
                 read_image
@@ -295,14 +312,13 @@ class ImageCSVLoader(BaseLoader):
             if len(self.colnames) == 0:
                 self.colnames = self.paths.columns
         else:
-            raise ValueError(
-                f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
-            )
+            msg = f'Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}.'
+            raise ValueError(msg)
 
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple("Output", self.colnames)
+        self.output_tuple = namedtuple('Output', self.colnames)
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -312,14 +328,11 @@ class ImageCSVLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {
-                col: glob.glob(path)[0] if pd.notna(path) else None
-                for col, path in paths.items()
+                col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()
             }
 
         outputs = {
-            col: self.readers[i](
-                path, series["series_" + ("_").join(col.split("_")[1:])]
-            )
+            col: self.readers[i](path, series['series_' + ('_').join(col.split('_')[1:])])
             for i, (col, path) in enumerate(paths.items())
         }
         return self.output_tuple(**outputs)
@@ -335,11 +348,11 @@ class ImageFileLoader(BaseLoader):
     def __init__(
         self,
         root_directory,
-        get_subject_id_from="filename",
+        get_subject_id_from='filename',
         subdir_path=None,
         exclude_paths=None,
         reader=None,
-    ):
+    ) -> None:
         if exclude_paths is None:
             exclude_paths = []
         if reader is None:
@@ -375,7 +388,7 @@ class ImageFileLoader(BaseLoader):
             except IndexError:
                 continue
             if os.path.isdir(full_path):
-                full_path = pathlib.Path(full_path, "").as_posix()
+                full_path = pathlib.Path(full_path, '').as_posix()
             subject_dir_name = os.path.basename(os.path.normpath(subject_dir_path))
             subject_id = self._extract_subject_id_from_path(full_path, subject_dir_name)
             paths[subject_id] = full_path
@@ -384,9 +397,9 @@ class ImageFileLoader(BaseLoader):
     def _extract_subject_id_from_path(self, full_path, subject_dir_name):
         filename, _ = os.path.splitext(os.path.basename(full_path))
         if isinstance(self.get_subject_id_from, str):
-            if self.get_subject_id_from == "filename":
+            if self.get_subject_id_from == 'filename':
                 subject_id = filename
-            elif self.get_subject_id_from == "subject_directory":
+            elif self.get_subject_id_from == 'subject_directory':
                 subject_id = subject_dir_name
             else:
                 subject_id = re.search(self.get_subject_id_from, full_path)[0]
