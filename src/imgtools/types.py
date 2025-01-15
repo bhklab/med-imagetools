@@ -173,7 +173,7 @@ class Image:
 
     def __floordiv__(self, other: Union[Image, Image]) -> Image:
         other_val = getattr(other, '_image', other)
-        return Image(self._image / other_val)
+        return Image(self._image // other_val)
 
     def __pow__(self, other: Union[Image, Image]) -> Image:
         other_val = getattr(other, '_image', other)
