@@ -57,6 +57,10 @@ class PatternResolver:
 
     DEFAULT_PATTERN: ClassVar[re.Pattern] = re.compile(r"%(\w+)|\{(\w+)\}")
 
+    pattern_parser: PatternParser = field(init=False)
+    formatted_pattern: str = field(init=False)
+    keys: list[str] = field(init=False)
+
     def __init__(self, filename_format: str) -> None:
         self.filename_format = filename_format
 
@@ -90,8 +94,11 @@ class PatternResolver:
         InvalidPatternError
             If the pattern contains no valid placeholders or is invalid.
         """
-        formatted_pattern, keys = self.pattern_parser.parse()
-        return formatted_pattern, keys
+        if hasattr(self, "formatted_pattern") and hasattr(self, "keys"):
+            return self.formatted_pattern, self.keys
+
+        self.formatted_pattern, self.keys = self.pattern_parser.parse()
+        return self.formatted_pattern, self.keys
 
     def resolve(self, context: Dict[str, Any]) -> str:
         """Resolve the pattern using the provided context dictionary.
@@ -111,6 +118,8 @@ class PatternResolver:
         PatternResolverError
             If a required key is missing from the context dictionary.
         """
+
+        # simultaneously check for None values and validate the pattern
         if len(none_keys := [k for k, v in context.items() if v is None]) > 0:
             msg = "None is not a valid value for a placeholder in the pattern."
             msg += f" None keys: {none_keys}"
@@ -119,6 +128,7 @@ class PatternResolver:
         try:
             return self.formatted_pattern % context
         except KeyError as e:
+            # key error will be raised if formatted_pattern contains a key not in context
             missing_keys = set(context.keys()) - set(self.keys)
             msg = f"Missing value for placeholder(s): {missing_keys}"
             msg += "\nPlease provide a value for this key in the `context` argument."
