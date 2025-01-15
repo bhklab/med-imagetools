@@ -21,7 +21,15 @@ def crawl_one(folder_path: pathlib.Path) -> dict:
 
     # patient -> study -> series -> subseries
     database = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
-    for path in folder_path.iterdir():
+
+    # TODO: I dont think we even need to iterate through subdirs, we can just glob 
+    # for dicoms in the folder_path itself
+
+    # find all subdirectories
+    subdirs = [f for f in folder_path.rglob("*") if f.is_dir()]
+    logger.info(f"Found {len(subdirs)} subdirectories in {folder_path}")
+
+    for path in subdirs:
         # find dicoms
         dicoms = [f for f in path.rglob("*.dcm")]
         logger.info(f"Found {len(dicoms)} dicoms in {path}")
@@ -205,17 +213,22 @@ def crawl(
     json_path: pathlib.Path | None = None,
     imgtools_dir: str = ".imgtools",
 ) -> dict:
-    database_list = []
-    # folders = glob.glob(pathlib.Path(top, "*").as_posix())
     folders = [f for f in pathlib.Path(top).iterdir() if f.is_dir()]
     logger.info(f"Will crawl {len(folders)} folders in {top}")
 
-    database_list = Parallel(n_jobs=n_jobs)(
+    ############################################################
+    # Crawl folders
+    ############################################################
+    # TODO: look into using multiprocessing pool instead of joblib
+    # so the tqdm progress bar works properly
+
+    database_list: list = Parallel(n_jobs=n_jobs)(
         delayed(crawl_one)(folder.as_posix())
         for folder in tqdm(folders, desc="Crawling folders", leave=False)
     )
+    logger.info("Finished crawling folders", database_list=len(database_list))
+
     logger.info("Converting list to dictionary")
-    # convert list to dictionary
     database_dict = {}
     for db in database_list:
         for key in db:
@@ -224,12 +237,15 @@ def crawl(
                     f"Patient {key} already exists in database. "
                     "This is probably due to one or more dicom files"
                     " belonging to the same patient being present in multiple folders "
-                    f"within {top}."
+                    f"within {top}. Continuing with the last instance found."
                 )
                 logger.warning(msg)
 
             database_dict[key] = db[key]
 
+    ############################################################
+    # Save as json and dataframe
+    ############################################################
     # configure json path
     if json_path is None:
         json_path = top.parent / imgtools_dir / f"imgtools_{top.name}.json"
