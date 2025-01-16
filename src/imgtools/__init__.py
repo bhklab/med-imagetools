@@ -1,4 +1,4 @@
-__version__ = "1.12.0"
+__version__ = "1.13.0"
 
 from .dicom import find_dicoms, lookup_tag, similar_tags, tag_exists
 from .logging import logger
