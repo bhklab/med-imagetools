@@ -9,7 +9,7 @@ include = [
   "src/imgtools/dicom/**/*.py",
   "src/imgtools/__init__.py",
   "src/imgtools/utils/imageutils.py",
-  "src/imgtools/io/loaders.py",
+  "src/imgtools/io/**/*.py",
   # "src/imgtools/types.py",
   # "src/imgtools/utils/crawl.py",
 ]
