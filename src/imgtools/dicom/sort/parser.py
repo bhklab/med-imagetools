@@ -112,7 +112,7 @@ Now you can use the formatted pattern to replace the placeholders:
 >>> print(resolved_string)
 '/path/to/folder1/and/folder2'
 
-"""
+"""  # noqa: A005
 
 from typing import List, Match, Pattern, Tuple
 

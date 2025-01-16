@@ -5,12 +5,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
 from pathlib import Path
-from types import TracebackType
-from typing import Any, Dict, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, Dict, NoReturn, Optional
 
 from imgtools.exceptions import DirectoryNotFoundError
 from imgtools.logging import logger
 from imgtools.pattern_parser import PatternResolver
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 
 class ExistingFileMode(Enum):
@@ -35,9 +37,7 @@ class AbstractBaseWriter(ABC):
 
     # Any subclass has to be initialized with a root directory and a filename format
     # Gets converted to a Path object in __post_init__
-    root_directory: Path = field(
-        metadata={"help": "Root directory where files will be saved."}
-    )
+    root_directory: Path = field(metadata={"help": "Root directory where files will be saved."})
 
     # The filename format string with placeholders for context variables
     # e.g. "{subject_id}_{date}/{disease}.txt"
@@ -54,9 +54,7 @@ class AbstractBaseWriter(ABC):
     # optionally, you can set create_dirs to False if you want to handle the directory creation yourself
     create_dirs: bool = field(
         default=True,
-        metadata={
-            "help": "If True, creates necessary directories if they don't exist."
-        },
+        metadata={"help": "If True, creates necessary directories if they don't exist."},
     )
 
     # class-level pattern resolver instance shared across all instances
@@ -70,9 +68,7 @@ class AbstractBaseWriter(ABC):
 
     sanitize_filenames: bool = field(
         default=True,
-        metadata={
-            "help": "If True, replaces illegal characters from filenames with underscores."
-        },
+        metadata={"help": "If True, replaces illegal characters from filenames with underscores."},
     )
 
     # Internal context storage for pre-checking
@@ -108,7 +104,7 @@ class AbstractBaseWriter(ABC):
         """
         pass
 
-    def set_context(self, **kwargs: Any) -> None:
+    def set_context(self, **kwargs: Any) -> None:  # noqa: ANN401
         """Set the context for the writer."""
         self.context.update(kwargs)
 
@@ -133,7 +129,7 @@ class AbstractBaseWriter(ABC):
             out_path.parent.mkdir(parents=True, exist_ok=True)
         return out_path
 
-    def resolve_and_validate_path(self, **kwargs: Any) -> Optional[Path]:
+    def resolve_and_validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
         """Pre-resolve the output path and validate based on the existing file mode.
 
         Also stores the context for later use.
@@ -164,14 +160,15 @@ class AbstractBaseWriter(ABC):
                     logger.debug(f"File {out_path} exists. Skipping.")
                     return None
                 case ExistingFileMode.FAIL:
-                    raise FileExistsError(f"File {out_path} already exists.")
+                    msg = f"File {out_path} already exists."
+                    raise FileExistsError(msg)
                 case ExistingFileMode.RAISE_WARNING:
                     logger.warning(f"File {out_path} exists. Proceeding anyway.")
                 case ExistingFileMode.OVERWRITE:
                     logger.debug(f"File {out_path} exists. Overwriting.")
         return out_path
 
-    def validate_path(self, **kwargs: Any) -> Optional[Path]:
+    def validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
         """Pre-checking file existence and setting up the writer context.
 
         Main idea here is to allow users to save computation if they choose to skip existing files.
