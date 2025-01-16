@@ -90,16 +90,16 @@ from imgtools.dicom.sort.utils import read_tags
 from imgtools.dicom.sort.dicomsorter import DICOMSorter
 
 __all__ = [
-    'TagHighlighter',
-    'DICOMSortError',
-    'InvalidDICOMKeyError',
-    'InvalidPatternError',
-    'SorterBaseError',
-    'PatternParser',
-    'SorterBase',
-    'read_tags',
-    'FileAction',
-    'handle_file',
-    'resolve_path',
-    'DICOMSorter',
+    "TagHighlighter",
+    "DICOMSortError",
+    "InvalidDICOMKeyError",
+    "InvalidPatternError",
+    "SorterBaseError",
+    "PatternParser",
+    "SorterBase",
+    "read_tags",
+    "FileAction",
+    "handle_file",
+    "resolve_path",
+    "DICOMSorter",
 ]

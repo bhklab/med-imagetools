@@ -3,12 +3,12 @@ name: CI-CD
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "jjjermiah/devel/main"]
   pull_request:
     branches: ["*"]
 
 jobs:
-  ################################################################################################
+  ###############################################################################################
   # Unit-Tests: Run unit tests using pytest
   ################################################################################################
   Unit-Tests:
@@ -73,15 +73,15 @@ jobs:
   ################################################################################################
   Publish-Docs:
     needs: Build-Docs
-    if: github.ref == 'refs/heads/main' 
-    
+    if: github.ref == 'refs/heads/main'
+
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
 
     permissions:
       # Need to give the action permission to write to the repository to deploy the docs
       contents: write
-      
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -93,7 +93,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Configure Git Credentials
         run: |
           git config user.name github-actions[bot]
@@ -114,7 +114,6 @@ jobs:
       - name: Publish docs using mike
         run: |
           pixi run -e ${{ matrix.env }} mike deploy --push dev devel
-
 
   ################################################################################################
   # Codecov: Run codecov to check coverage
@@ -140,7 +139,6 @@ jobs:
           fail_ci_if_error: true
           verbose: true
           name: codecov-umbrella
-
 
   cd:
     concurrency: release
@@ -217,7 +215,6 @@ jobs:
           verbose: true
           user: ${{ secrets.pypi_token }}
           password: ${{ secrets.pypi_api }}
-
 #   does-the-pip-squeak:
 #     needs: pip-squeak
 #     runs-on: ${{ matrix.os }}

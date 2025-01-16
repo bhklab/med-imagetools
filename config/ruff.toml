@@ -7,6 +7,10 @@ include = [
   "src/imgtools/logging/**/*.py",
   "src/imgtools/modules/*.py",
   "src/imgtools/dicom/**/*.py",
+  "src/imgtools/__init__.py",
+  "src/imgtools/utils/imageutils.py",
+  "src/imgtools/io/loaders.py",
+  # "src/imgtools/types.py",
   # "src/imgtools/utils/crawl.py",
 ]
 
@@ -14,11 +18,8 @@ extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
-  "src/imgtools/io/**/*.py",
-  "src/imgtools/transforms/**/*.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
-  "src/imgtools/image.py",
 ]
 
 extend-include = ["src/imgtools/ops/functional.py"]
@@ -125,7 +126,7 @@ relative-imports-order = "closest-to-furthest"
 
 [format]
 
-quote-style = "single"
+quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 71

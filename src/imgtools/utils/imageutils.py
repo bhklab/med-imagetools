@@ -52,16 +52,16 @@ def image_to_array(image: sitk.Image) -> ImageArrayMetadata:
     Parameters
     ----------
     image : sitk.Image
-            The SimpleITK image to convert.
+        The SimpleITK image to convert.
 
     Returns
     -------
     ImageArrayMetadata
-            A tuple containing:
-            - The image as a numpy array.
-            - The origin of the image (tuple of floats).
-            - The direction cosines of the image (tuple of floats).
-            - The pixel spacing of the image (tuple of floats).
+        A tuple containing:
+        - The image as a numpy array.
+        - The origin of the image (tuple of floats).
+        - The direction cosines of the image (tuple of floats).
+        - The pixel spacing of the image (tuple of floats).
     """
     origin: Array3D = image.GetOrigin()
     direction: Array3D = image.GetDirection()
@@ -71,13 +71,17 @@ def image_to_array(image: sitk.Image) -> ImageArrayMetadata:
 
 
 def physical_points_to_idxs(
-    image: sitk.Image, points: List[np.ndarray], continuous: bool = False
+    image: sitk.Image,
+    points: List[np.ndarray],
+    continuous: bool = False,
 ) -> List[np.ndarray]:
-    """Convert physical points to image indices based on the reference image's geometry.
+    """Convert physical points to image indices based on the reference image's
+    geometry.
 
-    This function uses the geometry of a SimpleITK image (origin, spacing, direction) to convert
-    real-world physical coordinates into indices in the image grid. It optionally supports continuous
-    indices for sub-pixel precision.
+    This function uses the geometry of a SimpleITK image (origin, spacing,
+    direction) to convert real-world physical coordinates into indices in the
+    image grid. It optionally supports continuous indices for sub-pixel
+    precision.
 
     Parameters
     ----------
@@ -86,20 +90,23 @@ def physical_points_to_idxs(
     points : List[np.ndarray]
         List of 3D physical points to transform.
     continuous : bool, optional
-        If True, returns continuous indices; otherwise, returns integer indices. Default is False.
+        If True, returns continuous indices; otherwise, returns integer indices.
+        Default is False.
 
     Returns
     -------
     List[np.ndarray]
-        A list of transformed points in image index space, reversed to match library conventions.
+        A list of transformed points in image index space, reversed to match
+        library conventions.
 
     Notes
     -----
     The following steps occur within the function:
-    1. A `numpy.vectorize` function is defined to apply the transformation method (physical to index)
-       to each 3D point in the input array.
-    2. The transformation is applied to each set of points in the list, reversing the coordinate
-       order to match the library's indexing convention.
+    1. A `numpy.vectorize` function is defined to apply the transformation
+       method (physical to index) to each 3D point in the input array.
+    2. The transformation is applied to each set of points in the list,
+       reversing the coordinate order to match the library's indexing
+       convention.
     """
     # Select the appropriate transformation function based on the `continuous` parameter.
     transform = (
@@ -114,9 +121,7 @@ def physical_points_to_idxs(
     # - Wraps the result into a numpy array for further processing.
     # `np.vectorize` creates a vectorized function that can process arrays of points in one call.
     # The `signature="(3)->(3)"` ensures the transformation operates on 3D points, returning 3D results.
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
+    vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature="(3)->(3)")
 
     # Step 2: Apply the vectorized transformation to all slices of points.
     # For each 2D array `slc` in the `points` list:
@@ -131,19 +136,20 @@ def physical_points_to_idxs(
 
 def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
     """
-    Converts image indices to physical points based on the reference image's geometry.
+    Converts image indices to physical points based on the reference image's
+    geometry.
 
     Parameters
     ----------
     image : sitk.Image
-            The reference SimpleITK image.
+        The reference SimpleITK image.
     idxs : np.ndarray
-            Array of 3D indices (continuous or discrete).
+        Array of 3D indices (continuous or discrete).
 
     Returns
     -------
     np.ndarray
-            Physical coordinates corresponding to the given indices.
+        Physical coordinates corresponding to the given indices.
     """
     continuous = np.issubdtype(idxs.dtype, np.floating)
     transform = (
@@ -151,7 +157,5 @@ def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
         if continuous
         else image.TransformIndexToPhysicalPoint
     )
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
+    vectorized_transform = np.vectorize(lambda x: np.array(transform(x)), signature="(3)->(3)")
     return vectorized_transform(idxs)

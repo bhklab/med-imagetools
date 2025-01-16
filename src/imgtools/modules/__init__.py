@@ -7,13 +7,13 @@ from .sparsemask import SparseMask
 from .structureset import StructureSet
 
 __all__ = [
-    'Segmentation',
-    'map_over_labels',
-    'accepts_segmentations',
-    'StructureSet',
-    'PET',
-    'Dose',
-    'DataGraph',
-    'SparseMask',
-    'Scan',
+    "Segmentation",
+    "map_over_labels",
+    "accepts_segmentations",
+    "StructureSet",
+    "PET",
+    "Dose",
+    "DataGraph",
+    "SparseMask",
+    "Scan",
 ]

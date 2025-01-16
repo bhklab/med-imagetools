@@ -37,13 +37,13 @@ Examples
 >>> seg = Segmentation(
 ...     image,
 ...     roi_indices={
-...         'GTV': 1,
-...         'PTV': 2,
+...         "GTV": 1,
+...         "PTV": 2,
 ...     },
 ... )
 
 # Extracting an individual label
->>> gtv_mask = seg.get_label(name='GTV')
+>>> gtv_mask = seg.get_label(name="GTV")
 
 # Generating a sparse mask
 >>> sparse_mask = seg.generate_sparse_mask(verbose=True)
@@ -104,8 +104,8 @@ def accepts_segmentations(f: Callable) -> Callable:
     >>> segmentation = Segmentation(
     ...     image,
     ...     roi_indices={
-    ...         'ROI1': 1,
-    ...         'ROI2': 2,
+    ...         "ROI1": 1,
+    ...         "ROI2": 2,
     ...     },
     ... )
     >>> result = some_processing_function(segmentation)
@@ -181,8 +181,8 @@ def map_over_labels(
     >>> segmentation = Segmentation(
     ...     image,
     ...     roi_indices={
-    ...         'ROI1': 1,
-    ...         'ROI2': 2,
+    ...         "ROI1": 1,
+    ...         "ROI2": 2,
     ...     },
     ... )
     >>> result = map_over_labels(
@@ -250,7 +250,7 @@ class Segmentation(sitk.Image):
         self.frame_groups = frame_groups
 
         if not roi_indices:
-            self.roi_indices = {f'label_{i}': i for i in range(1, self.num_labels + 1)}
+            self.roi_indices = {f"label_{i}": i for i in range(1, self.num_labels + 1)}
         else:
             self.roi_indices = roi_indices
             if 0 in self.roi_indices.values():
@@ -259,7 +259,7 @@ class Segmentation(sitk.Image):
         if len(self.roi_indices) != self.num_labels:
             for i in range(1, self.num_labels + 1):
                 if i not in self.roi_indices.values():
-                    self.roi_indices[f'label_{i}'] = i
+                    self.roi_indices[f"label_{i}"] = i
 
         self.existing_roi_indices = existing_roi_indices
 
@@ -292,7 +292,7 @@ class Segmentation(sitk.Image):
             If both label and name are None.
         """
         if label is None and name is None:
-            raise ValueError('Must pass either label or name.')
+            raise ValueError("Must pass either label or name.")
 
         if label is None:
             # Retrieve the label index from the name
@@ -341,7 +341,7 @@ class Segmentation(sitk.Image):
         return res
 
     def __repr__(self) -> str:
-        return f'<Segmentation with ROIs: {self.roi_indices!r}>'
+        return f"<Segmentation with ROIs: {self.roi_indices!r}>"
 
     def generate_sparse_mask(self, verbose: bool = False) -> SparseMask:
         """
@@ -385,7 +385,7 @@ class Segmentation(sitk.Image):
         sparsemask = SparseMask(sparsemask_arr, self.roi_indices)
 
         if verbose and len(voxels_with_overlap) != 0:
-            msg = f'{len(voxels_with_overlap)} voxels have overlapping contours.'
+            msg = f"{len(voxels_with_overlap)} voxels have overlapping contours."
             logger.warning(msg)
         return sparsemask
 
@@ -429,7 +429,7 @@ class Segmentation(sitk.Image):
             if label not in raw_roi_names:
                 raw_roi_names[label] = num
             else:
-                raw_roi_names[f'{label}_{label_counters[label]}'] = num
+                raw_roi_names[f"{label}_{label_counters[label]}"] = num
                 label_counters[label] += 1
 
         frame_groups = meta.PerFrameFunctionalGroupsSequence

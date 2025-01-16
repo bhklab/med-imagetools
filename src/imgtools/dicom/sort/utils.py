@@ -15,12 +15,12 @@ read_tags(file: Path, tags: list[str], truncate: bool = True, sanitize: bool = T
 Examples
 --------
 Sanitize a filename:
-    >>> sanitize_file_name('test<>file:/name.dcm')
+    >>> sanitize_file_name("test<>file:/name.dcm")
     'test_file_name.dcm'
 
 Truncate a UID:
     >>> truncate_uid(
-    ...     '1.2.840.10008.1.2.1',
+    ...     "1.2.840.10008.1.2.1",
     ...     last_digits=5,
     ... )
     '.1.2.1'
@@ -30,11 +30,11 @@ Read tags from a DICOM file:
     ...     Path,
     ... )
     >>> tags = [
-    ...     'PatientID',
-    ...     'StudyInstanceUID',
+    ...     "PatientID",
+    ...     "StudyInstanceUID",
     ... ]
     >>> read_tags(
-    ...     Path('sample.dcm'),
+    ...     Path("sample.dcm"),
     ...     tags,
     ... )
     {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
@@ -67,18 +67,18 @@ def sanitize_file_name(filename: str) -> str:
 
     Examples
     --------
-    >>> sanitize_file_name('test<>file:/name.dcm')
+    >>> sanitize_file_name("test<>file:/name.dcm")
     'test_file_name.dcm'
-    >>> sanitize_file_name('my file name.dcm')
+    >>> sanitize_file_name("my file name.dcm")
     'my_file_name.dcm'
     """
     assert filename is not None
     assert isinstance(filename, str)
 
     disallowed_characters_pattern = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
-    sanitized_name = disallowed_characters_pattern.sub('_', filename)
-    sanitized_name = sanitized_name.replace(' ', '_')
-    sanitized_name = re.sub(r'(_{2,})', '_', sanitized_name)
+    sanitized_name = disallowed_characters_pattern.sub("_", filename)
+    sanitized_name = sanitized_name.replace(" ", "_")
+    sanitized_name = re.sub(r"(_{2,})", "_", sanitized_name)
     return sanitized_name
 
 
@@ -103,12 +103,12 @@ def truncate_uid(uid: str, last_digits: int = 5) -> str:
     Examples
     --------
     >>> truncate_uid(
-    ...     '1.2.840.10008.1.2.1',
+    ...     "1.2.840.10008.1.2.1",
     ...     last_digits=5,
     ... )
     '.1.2.1'
     >>> truncate_uid(
-    ...     '12345',
+    ...     "12345",
     ...     last_digits=10,
     ... )
     '12345'
@@ -127,7 +127,7 @@ def read_tags(
     tags: List[str],
     truncate: bool = True,
     sanitize: bool = True,
-    default: Optional[str] = '',
+    default: Optional[str] = "",
 ) -> Dict[str, str]:
     """
     Read the specified tags from a DICOM file.
@@ -172,20 +172,20 @@ def read_tags(
     ...     Path,
     ... )
     >>> read_tags(
-    ...     Path('sample.dcm'),
+    ...     Path("sample.dcm"),
     ...     [
-    ...         'PatientID',
-    ...         'StudyInstanceUID',
+    ...         "PatientID",
+    ...         "StudyInstanceUID",
     ...     ],
     ... )
     {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
 
     Read tags without truncating UIDs:
     >>> read_tags(
-    ...     Path('sample.dcm'),
+    ...     Path("sample.dcm"),
     ...     [
-    ...         'PatientID',
-    ...         'StudyInstanceUID',
+    ...         "PatientID",
+    ...         "StudyInstanceUID",
     ...     ],
     ...     truncate=False,
     ... )
@@ -193,8 +193,8 @@ def read_tags(
 
     Handle missing tags:
     >>> read_tags(
-    ...     Path('sample.dcm'),
-    ...     ['NonexistentTag'],
+    ...     Path("sample.dcm"),
+    ...     ["NonexistentTag"],
     ... )
     [warn] No value for tag: NonexistentTag in file: sample.dcm
     {'NonexistentTag': 'UNKNOWN'}
@@ -205,13 +205,13 @@ def read_tags(
     try:
         dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True)
     except FileNotFoundError as fnfe:
-        errmsg = f'File not found: {file}'
+        errmsg = f"File not found: {file}"
         raise FileNotFoundError(errmsg) from fnfe
     except InvalidDicomError as ide:
-        errmsg = f'Invalid DICOM file: {file}'
+        errmsg = f"Invalid DICOM file: {file}"
         raise InvalidDicomError(errmsg) from ide
     except ValueError as ve:
-        errmsg = f'Value error reading DICOM file: {file}'
+        errmsg = f"Value error reading DICOM file: {file}"
         raise ValueError(errmsg) from ve
 
     result = {}
@@ -220,7 +220,7 @@ def read_tags(
     for tag in tags:
         value = str(dicom.get(tag, default=default))
 
-        if truncate and tag.endswith('UID'):
+        if truncate and tag.endswith("UID"):
             value = truncate_uid(value)
 
         if sanitize:

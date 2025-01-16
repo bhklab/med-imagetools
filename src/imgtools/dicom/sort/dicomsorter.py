@@ -17,7 +17,7 @@ from imgtools.dicom.sort import (
     resolve_path,
 )
 
-DEFAULT_PATTERN_PARSER: Pattern = re.compile(r'%([A-Za-z]+)|\{([A-Za-z]+)\}')
+DEFAULT_PATTERN_PARSER: Pattern = re.compile(r"%([A-Za-z]+)|\{([A-Za-z]+)\}")
 
 
 class DICOMSorter(SorterBase):
@@ -54,7 +54,7 @@ class DICOMSorter(SorterBase):
             target_pattern=target_pattern,
             pattern_parser=pattern_parser,
         )
-        self.logger.debug('All DICOM Keys are Valid in target pattern', keys=self.keys)
+        self.logger.debug("All DICOM Keys are Valid in target pattern", keys=self.keys)
 
     def validate_keys(self) -> None:
         """Validate the DICOM keys in the target pattern.
@@ -69,14 +69,14 @@ class DICOMSorter(SorterBase):
             # TODO: keep this logic, but make the suggestion more user-friendly/readable
             similar = similar_tags(key)
             suggestion = (
-                f'\n\tDid you mean: [bold green]{", ".join(similar)}[/bold green]?'
+                f"\n\tDid you mean: [bold green]{', '.join(similar)}[/bold green]?"
                 if similar
-                else ' And [bold red]no similar keys[/bold red] found.'
+                else " And [bold red]no similar keys[/bold red] found."
             )
-            _error = f'Invalid DICOM key: [bold red]{key}[/bold red].{suggestion}'
-            self._console.print(f'{_error}')
-        self._console.print(f'Parsed Path: `{self.pattern_preview}`')
-        errmsg = 'Invalid DICOM Keys found.'
+            _error = f"Invalid DICOM key: [bold red]{key}[/bold red].{suggestion}"
+            self._console.print(f"{_error}")
+        self._console.print(f"Parsed Path: `{self.pattern_preview}`")
+        errmsg = "Invalid DICOM Keys found."
         raise InvalidDICOMKeyError(errmsg)
 
     @property
@@ -131,7 +131,7 @@ class DICOMSorter(SorterBase):
         if not isinstance(action, FileAction):
             action = FileAction.validate(action)
 
-        self.logger.debug(f'Mapping {len(self.dicom_files)} files to new paths')
+        self.logger.debug(f"Mapping {len(self.dicom_files)} files to new paths")
 
         # Create a progress bar that can be used to track everything
         with self._progress_bar() as progress_bar:
@@ -141,13 +141,13 @@ class DICOMSorter(SorterBase):
             file_map: Dict[Path, Path] = self._resolve_new_paths(
                 progress_bar=progress_bar, num_workers=num_workers
             )
-        self.logger.info('Finished resolving paths')
+        self.logger.info("Finished resolving paths")
 
         ################################################################################
         # Check if any of the resolved paths are duplicates
         ################################################################################
         file_map = self._check_duplicates(file_map)
-        self.logger.info('Finished checking for duplicates')
+        self.logger.info("Finished checking for duplicates")
 
         ################################################################################
         # Handle files
@@ -157,7 +157,7 @@ class DICOMSorter(SorterBase):
             return
 
         with self._progress_bar() as progress_bar:
-            task_files = progress_bar.add_task('Handling files', total=len(file_map))
+            task_files = progress_bar.add_task("Handling files", total=len(file_map))
             new_paths: List[Path | None] = []
             with ProcessPoolExecutor(max_workers=num_workers) as executor:
                 future_to_file = {
@@ -173,7 +173,7 @@ class DICOMSorter(SorterBase):
                         progress_bar.update(task_files, advance=1)
                     except Exception as e:
                         self.logger.exception(
-                            'Failed to handle file',
+                            "Failed to handle file",
                             exc_info=e,
                             file=future_to_file[future],
                         )
@@ -210,12 +210,12 @@ class DICOMSorter(SorterBase):
         duplicates = False
         for resolved_path, source_paths in duplicate_paths.items():
             if len(source_paths) > 1:
-                msg = f'Duplicate paths found for {resolved_path}: {source_paths}'
+                msg = f"Duplicate paths found for {resolved_path}: {source_paths}"
                 self.logger.warning(msg)
                 duplicates = True
 
         if duplicates:
-            msg = 'Duplicate paths found. Please check the log file for more information.'
+            msg = "Duplicate paths found. Please check the log file for more information."
             raise ValueError(msg)
 
         return file_map
@@ -237,7 +237,7 @@ class DICOMSorter(SorterBase):
         Dict[Path, Path]
                 A mapping of source paths to resolved paths.
         """
-        task = progress_bar.add_task('Resolving paths', total=len(self.dicom_files))
+        task = progress_bar.add_task("Resolving paths", total=len(self.dicom_files))
 
         # Use ProcessPoolExecutor for parallel processing
         results: Dict[Path, Path] = {}
@@ -256,14 +256,14 @@ class DICOMSorter(SorterBase):
     def _dry_run(self, file_map: Dict[Path, Path]) -> None:
         """Perform a dry run without making any changes."""
         self._console.print(
-            '[bold green]:double_exclamation_mark: Dry run mode enabled. No files will be moved or copied. :double_exclamation_mark: [/bold green]'
+            "[bold green]:double_exclamation_mark: Dry run mode enabled. No files will be moved or copied. :double_exclamation_mark: [/bold green]"
         )
 
         new_paths = sorted(list(file_map.values()))
         ppa = Path(self.pattern_preview).absolute()
         common_prefix: Path = self._common_prefix([ppa, *new_paths])
-        common_prefix_styled = f'[bold yellow]{common_prefix}[/bold yellow]'
-        self._console.print(f'\nCommon Prefix: :file_folder:{common_prefix_styled}\n\n')
+        common_prefix_styled = f"[bold yellow]{common_prefix}[/bold yellow]"
+        self._console.print(f"\nCommon Prefix: :file_folder:{common_prefix_styled}\n\n")
 
         tree = self._setup_tree(Path(common_prefix_styled))
 
@@ -274,7 +274,7 @@ class DICOMSorter(SorterBase):
         )
         self._build_tree(new_paths, tree, common_prefix)
         self._console.print(
-            '[bold]Preview of the [magenta]parsed pattern[/magenta] and sample paths as directories:[/bold]\n'
+            "[bold]Preview of the [magenta]parsed pattern[/magenta] and sample paths as directories:[/bold]\n"
         )
         self._console.print(tree)
 
@@ -338,9 +338,9 @@ class DICOMSorter(SorterBase):
                     break
                 # Check if the parent has 3+ children already
                 # If no "..." placeholder exists, add it and replace the 3rd child
-                if not any(child.label == '...' for child in parent_node.children):
+                if not any(child.label == "..." for child in parent_node.children):
                     third_child = parent_node.children.pop(2)  # Remove the 3rd child
-                    parent_node.add('...')  # Add the "..." placeholder
+                    parent_node.add("...")  # Add the "..." placeholder
                     parent_node.add(third_child)  # Add the 3rd child back
 
                 # Replace the last child after the "..." placeholder
@@ -354,8 +354,8 @@ class DICOMSorter(SorterBase):
                 node.label = Text.assemble(
                     node.label,  # type: ignore
                     Text(
-                        f' ({len(depth_counts[depth])} unique)',
-                        style='bold green',
+                        f" ({len(depth_counts[depth])} unique)",
+                        style="bold green",
                     ),
                 )
             for child in node.children:
