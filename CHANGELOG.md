@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v1.13.0 (2025-01-16)
+
+### Features
+
+- Refactor utility modules, add patternresolver, formt
+  ([#170](https://github.com/bhklab/med-imagetools/pull/170),
+  [`dcc5aad`](https://github.com/bhklab/med-imagetools/commit/dcc5aadc9c053e581877b7561828a97c0de122ec))
+
+Introduce image utilities and a new PatternResolver class, along with updated dependencies and
+  configuration adjustments. This enhances the project's capabilities for handling image processing
+  and pattern resolution.
+
+## Release Notes
+
+- **New Features** - Added `PatternResolver` for parsing and resolving filename patterns. - Enhanced
+  `ImageGeometry` with a spacing attribute. - Introduced a new method to extract ROI names from
+  DICOM files.
+
+- **Improvements** - Updated dependency specifications for numpy, pandas, and rich. - Improved code
+  formatting across multiple files. - Expanded linting coverage for additional Python files. -
+  Enhanced error handling and flexibility in ROI extraction from DICOM files.
+
+- **Documentation** - Improved docstrings and code comments for better readability.
+
+- **Chores** - Updated CI/CD workflow to support additional branches. - Reformatted configuration
+  files for consistency. - Removed unused import from the `io` module. - Deleted the `common.py`
+  file, removing obsolete functionality.
+
+
 ## v1.12.0 (2025-01-15)
 
 ### Features
