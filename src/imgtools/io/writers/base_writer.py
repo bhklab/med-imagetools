@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -57,8 +58,6 @@ class AbstractBaseWriter(ABC):
         metadata={"help": "If True, creates necessary directories if they don't exist."},
     )
 
-    # class-level pattern resolver instance shared across all instances
-
     existing_file_mode: ExistingFileMode = field(
         default=ExistingFileMode.FAIL,
         metadata={
@@ -75,6 +74,7 @@ class AbstractBaseWriter(ABC):
     context: Dict[str, Any] = field(default_factory=dict, init=False)
 
     # PatternResolver to handle filename formatting
+    # class-level pattern resolver instance shared across all instances
     pattern_resolver: PatternResolver = field(init=False)
 
     def __post_init__(self) -> None:
@@ -129,7 +129,7 @@ class AbstractBaseWriter(ABC):
             out_path.parent.mkdir(parents=True, exist_ok=True)
         return out_path
 
-    def resolve_and_validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
+    def _resolve_and_validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
         """Pre-resolve the output path and validate based on the existing file mode.
 
         Also stores the context for later use.
@@ -165,7 +165,8 @@ class AbstractBaseWriter(ABC):
                 case ExistingFileMode.RAISE_WARNING:
                     logger.warning(f"File {out_path} exists. Proceeding anyway.")
                 case ExistingFileMode.OVERWRITE:
-                    logger.debug(f"File {out_path} exists. Overwriting.")
+                    logger.debug(f"File {out_path} exists. Deleting and overwriting.")
+                    out_path.unlink()
         return out_path
 
     def validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
@@ -204,7 +205,7 @@ class AbstractBaseWriter(ABC):
         logger.debug("validate_path")
         try:
             logger.debug("try")
-            resolved_path = self.resolve_and_validate_path(**kwargs)
+            resolved_path = self._resolve_and_validate_path(**kwargs)
         except FileExistsError as e:
             logger.exception(f"Error in {self.__class__.__name__} during pre-check.")
             raise e
@@ -270,7 +271,6 @@ class AbstractBaseWriter(ABC):
         str
             A sanitized filename safe for most file systems.
         """
-        import re
 
         # Replace bad characters with underscores
         sanitized = re.sub(r'[<>:"\\|?*]', "_", filename)
