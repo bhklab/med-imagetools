@@ -1091,12 +1091,12 @@
 
 <p><span class="doc-section-title">Examples:</span></p>
     <p>Lookup a DICOM tag in decimal format:</p>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">lookup_tag</span><span class="p">(</span><span class="s1">&#39;PatientID&#39;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">lookup_tag</span><span class="p">(</span><span class="s2">&quot;PatientID&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">&#39;1048608&#39;</span>
 </code></pre></div>
     <p>Lookup a DICOM tag in hexadecimal format:</p>
     <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">lookup_tag</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s1">&#39;PatientID&#39;</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s2">&quot;PatientID&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">hex_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span><span class="p">)</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="go">&#39;0x100020&#39;</span>
@@ -1161,20 +1161,20 @@
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>
 <a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">    Lookup a DICOM tag in decimal format:</span>
 <a id="__codelineno-0-213" name="__codelineno-0-213"></a>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    &gt;&gt;&gt; lookup_tag(&#39;PatientID&#39;)</span>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    &gt;&gt;&gt; lookup_tag(&quot;PatientID&quot;)</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="sd">    &#39;1048608&#39;</span>
 <a id="__codelineno-0-216" name="__codelineno-0-216"></a>
 <a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    Lookup a DICOM tag in hexadecimal format:</span>
 <a id="__codelineno-0-218" name="__codelineno-0-218"></a>
 <a id="__codelineno-0-219" name="__codelineno-0-219"></a><span class="sd">    &gt;&gt;&gt; lookup_tag(</span>
-<a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">    ...     &#39;PatientID&#39;,</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a><span class="sd">    ...     &quot;PatientID&quot;,</span>
 <a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">    ...     hex_format=True,</span>
 <a id="__codelineno-0-222" name="__codelineno-0-222"></a><span class="sd">    ... )</span>
 <a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">    &#39;0x100020&#39;</span>
 <a id="__codelineno-0-224" name="__codelineno-0-224"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">tag</span> <span class="o">:=</span> <span class="n">tag_for_keyword</span><span class="p">(</span><span class="n">keyword</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-226" name="__codelineno-0-226"></a>        <span class="k">return</span> <span class="kc">None</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;0x</span><span class="si">{</span><span class="n">tag</span><span class="si">:</span><span class="s1">X</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="n">hex_format</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;0x</span><span class="si">{</span><span class="n">tag</span><span class="si">:</span><span class="s2">X</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">hex_format</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1257,10 +1257,10 @@
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">tag_exists</span><span class="p">(</span><span class="s1">&#39;PatientID&#39;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">tag_exists</span><span class="p">(</span><span class="s2">&quot;PatientID&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">True</span>
 </code></pre></div>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">tag_exists</span><span class="p">(</span><span class="s1">&#39;InvalidKeyword&#39;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">tag_exists</span><span class="p">(</span><span class="s2">&quot;InvalidKeyword&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">False</span>
 </code></pre></div>
 
@@ -1306,10 +1306,10 @@
 <a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    Examples</span>
 <a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    --------</span>
 <a id="__codelineno-0-246" name="__codelineno-0-246"></a>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&#39;PatientID&#39;)</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;PatientID&quot;)</span>
 <a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    True</span>
 <a id="__codelineno-0-249" name="__codelineno-0-249"></a>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&#39;InvalidKeyword&#39;)</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;InvalidKeyword&quot;)</span>
 <a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">    False</span>
 <a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="k">return</span> <span class="n">dictionary_has_tag</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
@@ -1433,12 +1433,12 @@
 
 <p><span class="doc-section-title">Examples:</span></p>
     <p>Find similar tags for a misspelled keyword:</p>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">similar_tags</span><span class="p">(</span><span class="s1">&#39;PatinetID&#39;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">similar_tags</span><span class="p">(</span><span class="s2">&quot;PatinetID&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">[&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
 </code></pre></div>
     <p>Adjust the number of results and threshold:</p>
     <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">similar_tags</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s1">&#39;PatinetID&#39;</span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s2">&quot;PatinetID&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span><span class="p">)</span>
@@ -1507,13 +1507,13 @@
 <a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    --------</span>
 <a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    Find similar tags for a misspelled keyword:</span>
 <a id="__codelineno-0-279" name="__codelineno-0-279"></a>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    &gt;&gt;&gt; similar_tags(&#39;PatinetID&#39;)</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    &gt;&gt;&gt; similar_tags(&quot;PatinetID&quot;)</span>
 <a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
 <a id="__codelineno-0-282" name="__codelineno-0-282"></a>
 <a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    Adjust the number of results and threshold:</span>
 <a id="__codelineno-0-284" name="__codelineno-0-284"></a>
 <a id="__codelineno-0-285" name="__codelineno-0-285"></a><span class="sd">    &gt;&gt;&gt; similar_tags(</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    ...     &#39;PatinetID&#39;,</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    ...     &quot;PatinetID&quot;,</span>
 <a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    ...     n=5,</span>
 <a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    ...     threshold=0.7,</span>
 <a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    ... )</span>
