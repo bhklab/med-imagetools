@@ -1,3 +1,4 @@
+from .base_writer import AbstractBaseWriter, ExistingFileMode
 from .old_writers import (
     BaseSubjectWriter,
     BaseWriter,
@@ -9,6 +10,8 @@ from .old_writers import (
 )
 
 __all__ = [
+    "AbstractBaseWriter",
+    "ExistingFileMode",
     "BaseWriter",
     "BaseSubjectWriter",
     "ImageFileWriter",
