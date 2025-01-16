@@ -1,3 +1,33 @@
+"""
+TODO Summary:
+1. Optimize file search:
+   - Avoid iterating through subdirectories by using `glob` directly for DICOM files in the target directory.
+
+2. Refactor metadata extraction:
+   - Extract metadata based on modality to reduce reliance on exception handling.
+
+3. Modularize functionality:
+   - Extract repetitive metadata extraction logic (e.g., Frame of Reference UIDs) into helper functions.
+
+4. Optimize series and subseries processing:
+   - Pre-check for existing series+subseries data before extracting redundant metadata.
+   - Directly append SOPInstanceUID to an existing series+subseries.
+
+5. Enhance multiprocessing:
+   - Consider using a multiprocessing pool for improved compatibility with the `tqdm` progress bar.
+
+6. Improve output structure:
+   - Transition to JSON-based loading instead of using the temporary `fname` field.
+
+7. Handle duplicate patient entries:
+   - Investigate and properly handle cases where DICOM files for the same patient exist across multiple folders.
+
+8. Improve error handling:
+   - Add robust error handling for any potential issues during metadata extraction or file parsing.
+
+9. Expand testing:
+   - Ensure the logic accommodates edge cases, including missing metadata, empty folders, or unsupported modalities.
+"""
 import json
 import os
 import pathlib
