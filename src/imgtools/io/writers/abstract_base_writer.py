@@ -86,10 +86,14 @@ class AbstractBaseWriter(ABC):
     # class-level pattern resolver instance shared across all instances
     pattern_resolver: PatternResolver = field(init=False)
 
-    index_filename: Optional[Path] = field(
+    index_filename: Optional[str] = field(
         default="index.csv",
         metadata={
-            "help": "Name of the index file to track saved files, saved in the root directory."
+            "help": (
+                "Name of the index file to track saved files. If an absolute path "
+                "is provided, it will be used as is. Otherwise, it will be saved "
+                "in the root directory."
+            )
         },
     )
 
@@ -122,7 +126,9 @@ class AbstractBaseWriter(ABC):
 
     @property
     def index_file(self) -> Path:
-        """Get the path to the lock file for the index CSV."""
+        """Get the path to the index CSV file."""
+        if (index_path := Path(self.index_filename)).is_absolute():
+            return index_path
         return self.root_directory / self.index_filename
 
     def _get_index_lock(self) -> Path:
@@ -446,6 +452,10 @@ if __name__ == "__main__":
     from random import randint
     from typing import Any, Dict
 
+    # Configuration for the test
+    num_processes = 4
+    files_per_process = 100
+
     def write_files_in_process(
         process_id: int, writer_config: Dict[str, Any], file_count: int
     ):
@@ -455,7 +465,7 @@ if __name__ == "__main__":
         content = f"This is a file written by process {process_id}."
         with writer:
             for i in range(file_count):
-                time.sleep(randint(1, 5) / 10)
+                time.sleep(randint(1, 5) / 100)
                 context = {
                     "name": f"file_{process_id}_{i:04}",
                     "extra_info": f"process_{process_id}",
@@ -493,10 +503,6 @@ if __name__ == "__main__":
         "existing_file_mode": ExistingFileMode.OVERWRITE,
     }
 
-    # Configuration for the test
-    num_processes = 4
-    files_per_process = 100
-
     print("Running with multiprocessing...")
     start_time = time.time()
     run_multiprocessing(writer_config, num_processes, files_per_process)
@@ -516,9 +522,14 @@ if __name__ == "__main__":
         if time_difference > 0
         else f"\nSingle process was faster by {-time_difference:.2f} seconds"
     )
+    # Calculate and print the percentage improvement
+    improvement_percentage = (time_difference / single_process_duration) * 100
+    print(f"Multiprocessing improved the performance by {improvement_percentage:.2f}%")
 
     # Output:
-    # Time taken with multiprocessing: 31.89 seconds
-    # Time taken without multiprocessing: 125.24 seconds
+    # 4 procs and 100 files per proc
+    # Time taken with multiprocessing: 3.51 seconds
+    # Time taken without multiprocessing: 13.16 seconds
 
-    # Multiprocessing was faster by 93.36 seconds
+    # Multiprocessing was faster by 9.65 seconds
+    # Multiprocessing improved the performance by 73.31%
