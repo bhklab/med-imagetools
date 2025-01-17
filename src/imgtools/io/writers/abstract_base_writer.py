@@ -64,7 +64,7 @@ class AbstractBaseWriter(ABC):
             "help": "If True, creates necessary directories if they don't exist."
         },
     )
-    
+
     existing_file_mode: ExistingFileMode = field(
         default=ExistingFileMode.FAIL,
         metadata={
@@ -152,7 +152,7 @@ class AbstractBaseWriter(ABC):
         """Set the context for the writer."""
         self.context.update(kwargs)
 
-    def _generate_path(self, **kwargs: Any) -> Path:  # noqa
+    def _generate_path(self, **kwargs: Any) -> Path:  # noqa: ANN401
         """Helper for resolving paths with the given context."""
         save_context = {**self._generate_datetime_strings(), **self.context, **kwargs}
         self.set_context(**save_context)
@@ -162,7 +162,7 @@ class AbstractBaseWriter(ABC):
         out_path = self.root_directory / filename
         return out_path
 
-    def resolve_path(self, **kwargs: Any) -> Path:  # noqa
+    def resolve_path(self, **kwargs: Any) -> Path:  # noqa: ANN401
         """Generate a file path based on the filename format, subject ID, and additional parameters."""
         return self._resolve_and_validate_path(**kwargs)
 
@@ -170,9 +170,12 @@ class AbstractBaseWriter(ABC):
         """Pre-checking file existence and setting up the writer context.
 
         Main idea here is to allow users to save computation if they choose to skip existing files.
-        i.e
-        >>> if not writer.preview_path(subject="math", name="context_test"):
+        i.e if file exists and mode is SKIP, we return None, so the user can skip the computation.
+        >>> if writer.preview_path(subject="math", name="context_test") is None:
         >>>     continue
+
+        if the mode is FAIL, we raise an error if the file exists, so user doesnt have to
+        perform expensive computation only to fail when saving.
 
         The keyword arguments passed are also saved in the instance, so running .save() will use
         the same context, optionally can update the context with new values passed to .save().
