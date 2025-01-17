@@ -12,10 +12,9 @@ import SimpleITK as sitk
 from imgtools.io import read_dicom_auto
 from imgtools.ops import StructureSetToSegmentation
 
-
-@pytest.fixture(scope="module")
-def modalities_path(curr_path, dataset_path):
-    qc_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT", "HN-CHUS-052")
+@pytest.fixture
+def modalities_path(dataset_path):
+    qc_path = pathlib.Path(dataset_path[0]) / "HN-CHUS-052"
     assert qc_path.exists(), "Dataset not found"
 
     path = {}
@@ -40,7 +39,8 @@ def modalities_path(curr_path, dataset_path):
     return path
 
 
-@pytest.mark.xdist_group("modalities")
+
+
 @pytest.mark.parametrize("imaging_modality", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
 def test_modalities(
     imaging_modality, modalities_path

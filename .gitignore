@@ -229,3 +229,4 @@ data/**
 
 test_data
 
+*.lock
