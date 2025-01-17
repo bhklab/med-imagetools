@@ -23,7 +23,7 @@ def modalities_path(dataset_path):
     ).as_posix()
     path["RTSTRUCT"] = pathlib.Path(
         qc_path,
-        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418",
+        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418/1-1.dcm",
     ).as_posix()
     path["RTDOSE"] = pathlib.Path(
         qc_path,
