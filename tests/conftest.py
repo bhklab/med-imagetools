@@ -21,7 +21,7 @@ def prepare_dataset():
     quebec_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT").absolute()
 
     # when running xdist, use lockfile to prevent all processors from trying to download the dataset
-    lock_path = pathlib.Path(curr_path, ".dataset.lock")
+    lock_path = quebec_path / ".dataset.lock"
 
     with FileLock(lock_path):
         logger.info(

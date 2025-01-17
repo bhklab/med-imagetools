@@ -49,6 +49,7 @@ pytest-cov = "*"
 pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 sqlalchemy-stubs = ">=0.4,<0.5"
+filelock = ">=3.16.1,<4"
 
 [feature.test.pypi-dependencies]
 med-imagetools = { path = ".", editable = true }
