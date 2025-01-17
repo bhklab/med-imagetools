@@ -113,7 +113,7 @@ def test_pre_check_context(tmp_path):
         filename_format="{subject}_{name}.txt",
         existing_file_mode=ExistingFileMode.FAIL,
     )
-    if path := writer.validate_path(subject="math", name="context_test"):
+    if path := writer.preview_path(subject="math", name="context_test"):
         file_path = writer.save("Content")
         assert file_path.exists()
         assert file_path == path
@@ -122,13 +122,13 @@ def test_pre_check_context(tmp_path):
     # assert writer.context == {}
 
     with pytest.raises(FileExistsError):
-        if writer.validate_path(subject="math", name="context_test"):
+        if writer.preview_path(subject="math", name="context_test"):
             pass
 
     with pytest.raises(FileExistsError):
-        another_path = writer.validate_path(subject="math", name="context_test")  # noqa
+        another_path = writer.preview_path(subject="math", name="context_test")  # noqa
 
-    successfulpath = writer.validate_path(subject="math", name="context_test2")
+    successfulpath = writer.preview_path(subject="math", name="context_test2")
     assert not successfulpath.exists()
 
     skip_writer = SimpleWriter(
@@ -137,7 +137,7 @@ def test_pre_check_context(tmp_path):
         existing_file_mode=ExistingFileMode.SKIP,
     )
 
-    assert skip_writer.validate_path(subject="math", name="context_test") is None
+    assert skip_writer.preview_path(subject="math", name="context_test") is None
 
     overwrite_writer = SimpleWriter(
         root_directory=tmp_path,
@@ -146,5 +146,5 @@ def test_pre_check_context(tmp_path):
     )
 
     assert (
-        overwrite_writer.validate_path(subject="math", name="context_test") is not None
+        overwrite_writer.preview_path(subject="math", name="context_test") is not None
     )
