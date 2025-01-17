@@ -37,7 +37,10 @@ class ExistingFileMode(Enum):
 
 @dataclass
 class AbstractBaseWriter(ABC):
-    """Abstract base class for managing file writing with customizable paths and filenames."""
+    """Abstract base class for managing file writing with customizable paths and filenames.
+    
+    This class provides a template for writing files with a flexible directory structure.
+    """
 
     # Any subclass has to be initialized with a root directory and a filename format
     # Gets converted to a Path object in __post_init__
