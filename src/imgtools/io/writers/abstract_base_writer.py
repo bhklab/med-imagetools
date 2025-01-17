@@ -445,6 +445,8 @@ class ExampleWriter(AbstractBaseWriter):
         return output_path
 
 
+# ruff: noqa
+
 if __name__ == "__main__":
     import multiprocessing
     import time
