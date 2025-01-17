@@ -10,6 +10,7 @@ from imgtools.autopipeline import AutoPipeline
 from imgtools.logging import logger
 
 
+
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
 @pytest.mark.xdist_group("serial")
 @pytest.mark.parametrize(
@@ -58,23 +59,23 @@ class TestComponents:
         pipeline.run()
 
         # Check if the crawl and edges exist
-        assert os.path.exists(self.crawl_path) & os.path.exists(self.edge_path), (
-            "There was no crawler output"
-        )
+        assert os.path.exists(self.crawl_path) & os.path.exists(
+            self.edge_path
+        ), "There was no crawler output"
 
         # for the test example, there are 6 files and 4 connections
         crawl_data = pd.read_csv(self.crawl_path, index_col=0)
         edge_data = pd.read_csv(self.edge_path)
         # this assert will fail....
-        assert (len(crawl_data) == 12) & (len(edge_data) == 10), (
-            "There was an error in crawling or while making the edge table"
-        )
+        assert (len(crawl_data) == 12) & (
+            len(edge_data) == 10
+        ), "There was an error in crawling or while making the edge table"
 
         # Check if the dataset.csv is having the correct number of components and has all the fields
         comp_table = pd.read_csv(comp_path, index_col=0)
-        assert len(comp_table) == 2, (
-            "There was some error in making components, check datagraph.parser"
-        )
+        assert (
+            len(comp_table) == 2
+        ), "There was some error in making components, check datagraph.parser"
 
         # Check the nrrd files
         subject_id_list = list(comp_table.index)
