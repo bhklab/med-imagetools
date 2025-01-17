@@ -35,7 +35,7 @@ def modalities_path(curr_path, dataset_path):
     ).as_posix()
     return path
 
-
+@pytest.mark.xdist_group("serial")
 @pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
 def test_modalities(
     modalities, modalities_path

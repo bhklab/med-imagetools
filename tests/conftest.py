@@ -13,7 +13,7 @@ def curr_path():
     return pathlib.Path(__file__).parent.parent.resolve().as_posix()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='package')
 def dataset_path(curr_path):
     quebec_path = pathlib.Path(curr_path, "data", "Head-Neck-PET-CT")
 
@@ -27,7 +27,7 @@ def dataset_path(curr_path):
         request.urlretrieve(quebec_data_url, quebec_zip_path)
         with ZipFile(quebec_zip_path, "r") as zipfile:
             zipfile.extractall(quebec_path)
-        os.remove(quebec_zip_path)
+        # os.remove(quebec_zip_path)
     else:
         logger.info("Data already downloaded...")
 
