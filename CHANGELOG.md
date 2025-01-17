@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v1.14.0 (2025-01-17)
+
+### Features
+
+- Add dockerfile and update lockfile ([#177](https://github.com/bhklab/med-imagetools/pull/177),
+  [`6cf5515`](https://github.com/bhklab/med-imagetools/commit/6cf551529ebb7bfb432d868f4859c0631ec413a8))
+
+
 ## v1.13.0 (2025-01-16)
 
 ### Features

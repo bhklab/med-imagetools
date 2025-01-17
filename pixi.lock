@@ -4252,7 +4252,11 @@ packages:
   depends:
   - __osx >=11.0
   constrains:
+<<<<<<< HEAD
   - openmp 19.1.7|19.1.7.*
+=======
+  - openmp 19.1.6|19.1.6.*
+>>>>>>> origin/main
   license: Apache-2.0 WITH LLVM-exception
   license_family: APACHE
   purls: []
@@ -4490,7 +4494,11 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 1.13.0
+<<<<<<< HEAD
   sha256: 05555727265af3e089f84e9c403c153b84c4f9c420bd51c279f16dba6817a11a
+=======
+  sha256: 42c94c083b70f7dd6f9bf59bbcafcc221e6e50f842b7f6f1701b236081c54d8b
+>>>>>>> origin/main
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
