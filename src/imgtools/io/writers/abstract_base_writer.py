@@ -38,7 +38,9 @@ class AbstractBaseWriter(ABC):
 
     # Any subclass has to be initialized with a root directory and a filename format
     # Gets converted to a Path object in __post_init__
-    root_directory: Path = field(metadata={"help": "Root directory where files will be saved."})
+    root_directory: Path = field(
+        metadata={"help": "Root directory where files will be saved."}
+    )
 
     # The filename format string with placeholders for context variables
     # e.g. "{subject_id}_{date}/{disease}.txt"
@@ -55,7 +57,9 @@ class AbstractBaseWriter(ABC):
     # optionally, you can set create_dirs to False if you want to handle the directory creation yourself
     create_dirs: bool = field(
         default=True,
-        metadata={"help": "If True, creates necessary directories if they don't exist."},
+        metadata={
+            "help": "If True, creates necessary directories if they don't exist."
+        },
     )
 
     existing_file_mode: ExistingFileMode = field(
@@ -67,7 +71,9 @@ class AbstractBaseWriter(ABC):
 
     sanitize_filenames: bool = field(
         default=True,
-        metadata={"help": "If True, replaces illegal characters from filenames with underscores."},
+        metadata={
+            "help": "If True, replaces illegal characters from filenames with underscores."
+        },
     )
 
     # Internal context storage for pre-checking
@@ -108,15 +114,6 @@ class AbstractBaseWriter(ABC):
         """Set the context for the writer."""
         self.context.update(kwargs)
 
-    def _generate_datetime_strings(self) -> dict[str, str]:
-        """Free to use date-time context values."""
-        now = datetime.now(timezone.utc)
-        return {
-            "date": now.strftime("%Y-%m-%d"),
-            "time": now.strftime("%H%M%S"),
-            "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
-        }
-
     def resolve_path(self, **kwargs: Any) -> Path:  # noqa
         """Generate a file path based on the filename format, subject ID, and additional parameters."""
         save_context = {**self._generate_datetime_strings(), **self.context}
@@ -125,9 +122,52 @@ class AbstractBaseWriter(ABC):
         if self.sanitize_filenames:
             filename = self._sanitize_filename(filename)
         out_path = self.root_directory / filename
-        if self.create_dirs:
-            out_path.parent.mkdir(parents=True, exist_ok=True)
+
         return out_path
+
+    def preview_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
+        """Pre-checking file existence and setting up the writer context.
+
+        Main idea here is to allow users to save computation if they choose to skip existing files.
+        i.e
+        >>> if not writer.preview_path(subject="math", name="context_test"):
+        >>>     continue
+
+        The keyword arguments passed are also saved in the instance, so running .save() will use
+        the same context, optionally can update the context with new values passed to .save().
+
+        >>> if path := writer.preview_path(subject="math", name="context_test"):
+                # do some expensive computation to generate the data you wish to save
+                writer.save(data) # automatically uses the context set in preview_path
+
+        Parameters
+        ----------
+        **kwargs : Any
+            Parameters for resolving the filename and validating existence.
+
+        Returns
+        ------
+        Path | None
+            if the file exists and the mode is SKIP, returns None.
+            if the file exists and the mode is FAIL, raises a FileExistsError.
+            if the file exists and the mode is RAISE_WARNING, logs a warning and returns the path.
+            if the file exists and the mode is OVERWRITE, logs a debug message and returns the path.
+
+        Raises
+        ------
+        FileExistsError
+            If the file exists and the mode is FAIL.
+        """
+        logger.debug("previewing_path", **kwargs)
+        try:
+            logger.debug("try")
+            resolved_path = self._resolve_and_validate_path(**kwargs)
+        except FileExistsError as e:
+            logger.exception(
+                f"Error in {self.__class__.__name__} during pre-validation."
+            )
+            raise e
+        return resolved_path
 
     def _resolve_and_validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
         """Pre-resolve the output path and validate based on the existing file mode.
@@ -168,48 +208,6 @@ class AbstractBaseWriter(ABC):
                     logger.debug(f"File {out_path} exists. Deleting and overwriting.")
                     out_path.unlink()
         return out_path
-
-    def validate_path(self, **kwargs: Any) -> Optional[Path]:  # noqa: ANN401
-        """Pre-checking file existence and setting up the writer context.
-
-        Main idea here is to allow users to save computation if they choose to skip existing files.
-        i.e
-        >>> if not writer.validate_path(subject="math", name="context_test"):
-        >>>     continue
-
-        The keyword arguments passed are also saved in the instance, so running .save() will use
-        the same context, optionally can update the context with new values passed to .save().
-
-        >>> if path := writer.validate_path(subject="math", name="context_test"):
-                # do some expensive computation to generate the data you wish to save
-                writer.save(data) # automatically uses the context set in validate_path
-
-        Parameters
-        ----------
-        **kwargs : Any
-            Parameters for resolving the filename and validating existence.
-
-        Returns
-        ------
-        Path | None
-            if the file exists and the mode is SKIP, returns None.
-            if the file exists and the mode is FAIL, raises a FileExistsError.
-            if the file exists and the mode is RAISE_WARNING, logs a warning and returns the path.
-            if the file exists and the mode is OVERWRITE, logs a debug message and returns the path.
-
-        Raises
-        ------
-        FileExistsError
-            If the file exists and the mode is FAIL.
-        """
-        logger.debug("validate_path")
-        try:
-            logger.debug("try")
-            resolved_path = self._resolve_and_validate_path(**kwargs)
-        except FileExistsError as e:
-            logger.exception(f"Error in {self.__class__.__name__} during pre-check.")
-            raise e
-        return resolved_path
 
     # Context Manager Implementation
     def __enter__(self) -> AbstractBaseWriter:
@@ -290,3 +288,12 @@ class AbstractBaseWriter(ABC):
         import sys
 
         sys.exit(1)
+
+    def _generate_datetime_strings(self) -> dict[str, str]:
+        """Free to use date-time context values."""
+        now = datetime.now(timezone.utc)
+        return {
+            "date": now.strftime("%Y-%m-%d"),
+            "time": now.strftime("%H%M%S"),
+            "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
+        }

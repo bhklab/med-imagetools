@@ -1,4 +1,4 @@
-from .base_writer import AbstractBaseWriter, ExistingFileMode
+from .abstract_base_writer import AbstractBaseWriter, ExistingFileMode
 from .old_writers import (
     BaseSubjectWriter,
     BaseWriter,
