@@ -33,37 +33,44 @@ def modalities_path(curr_path, dataset_path):
     path["PT"] = pathlib.Path(
         qc_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600"
     ).as_posix()
+
+    for key, val in path.items():
+        assert pathlib.Path(val).exists(), f"{key} not found at {val}"
+
     return path
 
-@pytest.mark.xdist_group("serial")
-@pytest.mark.parametrize("modalities", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
+
+@pytest.mark.xdist_group("modalities")
+@pytest.mark.parametrize("imaging_modality", ["CT", "RTSTRUCT", "RTDOSE", "PT"])
 def test_modalities(
-    modalities, modalities_path
+    imaging_modality, modalities_path
 ) -> None:  # modalities_path is a fixture defined in conftest.py
     path = modalities_path
     img = read_dicom_auto(path["CT"]).image
-    if modalities != "RTSTRUCT":
+    if imaging_modality != "RTSTRUCT":
         # Checks for dimensions
         dcm = pydicom.dcmread(
-            pathlib.Path(path[modalities], os.listdir(path[modalities])[0]).as_posix()
+            pathlib.Path(
+                path[imaging_modality], os.listdir(path[imaging_modality])[0]
+            ).as_posix()
         ).pixel_array
-        instances = len(os.listdir(path[modalities]))
-        dicom = read_dicom_auto(path[modalities])
-        if modalities == "CT":
+        instances = len(os.listdir(path[imaging_modality]))
+        dicom = read_dicom_auto(path[imaging_modality])
+        if imaging_modality == "CT":
             dicom = dicom.image
         if instances > 1:  # For comparing CT and PT modalities
             assert dcm.shape == (dicom.GetHeight(), dicom.GetWidth())
             assert instances == dicom.GetDepth()
         else:  # For comparing RTDOSE modalties
             assert dcm.shape == (dicom.GetDepth(), dicom.GetHeight(), dicom.GetWidth())
-        if modalities == "PT":
+        if imaging_modality == "PT":
             dicom = dicom.resample_pet(img)
             assert dicom.GetSize() == img.GetSize()
-        if modalities == "RTDOSE":
+        if imaging_modality == "RTDOSE":
             dicom = dicom.resample_dose(img)
             assert dicom.GetSize() == img.GetSize()
     else:
-        struc = read_dicom_auto(path[modalities])
+        struc = read_dicom_auto(path[imaging_modality])
         make_binary_mask = StructureSetToSegmentation(
             roi_names=["GTV.?", "LARYNX"], continuous=False
         )
