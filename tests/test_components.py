@@ -108,3 +108,4 @@ class TestComponents:
                 shapes.append(temp_dicom.shape)
             A = [item == shapes[0] for item in shapes]
             assert all(A)
+        edge_path.unlink()
