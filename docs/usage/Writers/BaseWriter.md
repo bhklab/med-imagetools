@@ -17,9 +17,13 @@ this is where you start!
 - Provides reusable methods for context management and logging.  
 - Cannot be used directly – meant to be extended with your custom logic.  
 
-### When Should You Use It?
+### When Should you extend `AbstractBaseWriter` for your custom writer?
 
-Use `AbstractBaseWriter` if you need:
+If you write many files with dynamic paths and filenames, or need
+to manage file existence scenarios, you might consider extending `AbstractBaseWriter`
+(or even one of its subclasses) to simplify your implementation.
+
+`AbstractBaseWriter` is useful when you need:
 
 - Dynamic paths and filenames based on placeholders like `{subject_id}`.  
 - Control over what happens when files already exist (overwrite, skip, etc.).  

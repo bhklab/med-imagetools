@@ -438,7 +438,7 @@ class ExampleWriter(AbstractBaseWriter):
             f.write(content)
 
         # Log the save operation
-        logger.info(f"File saved: {output_path}")
+        logger.debug(f"File saved: {output_path}")
 
         self.dump_to_csv(
             output_path,
