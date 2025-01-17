@@ -61,9 +61,7 @@ class BaseSubjectWriter(BaseWriter):
             # delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
             if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
                 shutil.rmtree(os.path.dirname(self.root_directory))
-            elif "{label_or_image}{train_or_test}" in os.path.basename(
-                self.root_directory
-            ):
+            elif "{label_or_image}{train_or_test}" in os.path.basename(self.root_directory):
                 shutil.rmtree(self.root_directory)
 
     def put(
@@ -94,17 +92,13 @@ class BaseSubjectWriter(BaseWriter):
             else:
                 filename = self.filename_format.format(
                     subject_id=subject_id,
-                    modality_index=nnunet_info["modalities"][
-                        nnunet_info["current_modality"]
-                    ],
+                    modality_index=nnunet_info["modalities"][nnunet_info["current_modality"]],
                 )  # naming convention for images
             out_path = self._get_path_from_subject_id(
                 filename, label_or_image=label_or_image, train_or_test=train_or_test
             )
         else:
-            out_path = self._get_path_from_subject_id(
-                self.filename_format, subject_id=subject_id
-            )
+            out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, filename, **kwargs):
@@ -194,9 +188,7 @@ class SegNrrdWriter(BaseWriter):
                 bbox = props["bbox"]
                 bbox_segment = [bbox[0], bbox[3], bbox[1], bbox[4], bbox[2], bbox[5]]
             except IndexError:  # mask is empty
-                assert (
-                    arr[n].sum() == 0
-                ), "Mask not empty but 'skimage.measure.regionprops' failed."
+                assert arr[n].sum() == 0, "Mask not empty but 'skimage.measure.regionprops' failed."
                 bbox_segment = [0, 0, 0, 0, 0, 0]
 
             segment_info[f"Segment{n}_Color"] = list(np.random.random(3))
@@ -228,9 +220,7 @@ class SegNrrdWriter(BaseWriter):
 
 
 class NumpyWriter(BaseWriter):
-    def __init__(
-        self, root_directory, filename_format="{subject_id}.npy", create_dirs=True
-    ):
+    def __init__(self, root_directory, filename_format="{subject_id}.npy", create_dirs=True):
         super().__init__(root_directory, filename_format, create_dirs)
         self.root_directory = root_directory
         self.filename_format = filename_format
@@ -238,9 +228,7 @@ class NumpyWriter(BaseWriter):
     def put(self, subject_id, image, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         if isinstance(image, sitk.Image):
-            array, *_ = image_to_array(
-                image
-            )  # TODO (Michal) optionally save the image geometry
+            array, *_ = image_to_array(image)  # TODO (Michal) optionally save the image geometry
         np.save(out_path, array)
 
 
@@ -291,9 +279,7 @@ class MetadataWriter(BaseWriter):
             )
 
         if self.file_format == "csv" and self.remove_existing:
-            out_path = pathlib.Path(
-                self.root_directory, self.filename_format
-            ).as_posix()
+            out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
             if os.path.exists(out_path):
                 os.remove(out_path)  # remove existing CSV instead of appending
 
