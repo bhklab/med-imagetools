@@ -10,7 +10,6 @@ from imgtools.autopipeline import AutoPipeline
 from imgtools.logging import logger
 
 
-
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
 @pytest.mark.xdist_group("serial")
 @pytest.mark.parametrize(
@@ -31,19 +30,19 @@ class TestComponents:
     def _get_path(
         self, dataset_path
     ) -> None:  # dataset_path is a fixture defined in conftest.py
-        self.input_path, self.output_path, self.crawl_path, self.edge_path = (
-            dataset_path
-        )
+        self.input_path, _, _, _ = dataset_path
+        self.input_path = pathlib.Path(self.input_path)
         logger.info(dataset_path)
 
-    def test_pipeline(self, modalities) -> None:
+    def test_pipeline(self, modalities, tmp_path) -> None:
         """
         Testing the Autopipeline for processing the DICOMS and saving it as nrrds
         """
         n_jobs = 2
         output_path_mod = pathlib.Path(
-            self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))
+            tmp_path, str("temp_folder_" + ("_").join(modalities.split(",")))
         ).as_posix()
+        output_path_mod = pathlib.Path(output_path_mod).as_posix()
         # Initialize pipeline for the current setting
         pipeline = AutoPipeline(
             self.input_path,
@@ -52,20 +51,27 @@ class TestComponents:
             n_jobs=n_jobs,
             spacing=(5, 5, 5),
             overwrite=True,
-            update=True,
+            update=False,
         )
         # Run for different modalities
         comp_path = pathlib.Path(output_path_mod, "dataset.csv").as_posix()
         pipeline.run()
+        dataset_name = self.input_path.name
+        crawl_path = (
+            self.input_path.parent / ".imgtools" / f"imgtools_{dataset_name}.csv"
+        )
+        edge_path = (
+            self.input_path.parent / ".imgtools" / f"imgtools_{dataset_name}_edges.csv"
+        )
 
         # Check if the crawl and edges exist
-        assert os.path.exists(self.crawl_path) & os.path.exists(
-            self.edge_path
+        assert os.path.exists(crawl_path) & os.path.exists(
+            edge_path
         ), "There was no crawler output"
 
         # for the test example, there are 6 files and 4 connections
-        crawl_data = pd.read_csv(self.crawl_path, index_col=0)
-        edge_data = pd.read_csv(self.edge_path)
+        crawl_data = pd.read_csv(crawl_path, index_col=0)
+        edge_data = pd.read_csv(edge_path)
         # this assert will fail....
         assert (len(crawl_data) == 12) & (
             len(edge_data) == 10
