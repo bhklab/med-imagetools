@@ -292,7 +292,9 @@ class AbstractBaseWriter(ABC):
         logger.debug(f"Exiting context manager for {self.__class__.__name__}")
         if self.index_file.exists():
             logger.debug(f"Removing lock file {self._get_index_lock()}")
-            self._get_index_lock().unlink()
+            lock_file = self._get_index_lock()
+            if lock_file.exists():
+                lock_file.unlink()
 
         # if the root directory is empty, aka we created it but didn't write anything, delete it
         if (
