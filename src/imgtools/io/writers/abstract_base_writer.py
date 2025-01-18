@@ -38,7 +38,7 @@ class ExistingFileMode(Enum):
 @dataclass
 class AbstractBaseWriter(ABC):
     """Abstract base class for managing file writing with customizable paths and filenames.
-    
+
     This class provides a template for writing files with a flexible directory structure.
     """
 
