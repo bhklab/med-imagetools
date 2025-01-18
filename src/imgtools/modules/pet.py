@@ -21,7 +21,9 @@ T = TypeVar("T")
 
 def read_image(path: str, series_id: Optional[str] = None) -> sitk.Image:
     reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path, seriesID=series_id if series_id else "")
+    dicom_names = reader.GetGDCMSeriesFileNames(
+        path, seriesID=series_id if series_id else ""
+    )
     reader.SetFileNames(dicom_names)
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
@@ -44,6 +46,23 @@ class PET(sitk.Image):
         self.factor: float = factor
         self.calc: bool = calc
         self.metadata: Dict[str, Union[str, float, bool]] = metadata if metadata else {}
+
+    @classmethod
+    def from_dicom(cls, dcm_path: str | pathlib.Path) -> PET:
+        """Factory method to create PET object from DICOM file
+
+        2025-01-18 Jermiah:
+            Needs a lot of work and validation
+            aiming to create a standard interface for reading DICOM files
+        """
+        dcm_path = pathlib.Path(dcm_path)
+        if dcm_path.is_dir():
+            raise NotImplementedError("Directory input not supported yet")
+        elif dcm_path.is_file():
+            if dcm_path.suffix == ".dcm":
+                return cls.from_dicom_pet(dcm_path.as_posix())
+            else:
+                raise NotImplementedError("Only DICOM files are supported")
 
     @classmethod
     def from_dicom_pet(
@@ -93,7 +112,9 @@ class PET(sitk.Image):
                 self.df.AcquisitionTime, "%H%M%S.%f"
             )
             self.metadata["injection_time"] = datetime.datetime.strptime(
-                self.df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
+                self.df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadiopharmaceuticalStartTime,
                 "%H%M%S.%f",
             )
             self.metadata["half_life"] = float(
@@ -138,7 +159,9 @@ class PET(sitk.Image):
                 df.AcquisitionTime, "%H%M%S.%f"
             )
             injection_time: datetime.datetime = datetime.datetime.strptime(
-                df.RadiopharmaceuticalInformationSequence[0].RadiopharmaceuticalStartTime,
+                df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadiopharmaceuticalStartTime,
                 "%H%M%S.%f",
             )
             half_life: float = float(
@@ -148,7 +171,9 @@ class PET(sitk.Image):
                 df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
             )
 
-            a: float = np.exp(-np.log(2) * ((scan_time - injection_time).seconds / half_life))
+            a: float = np.exp(
+                -np.log(2) * ((scan_time - injection_time).seconds / half_life)
+            )
 
             injected_dose_decay: float = a * injected_dose
         except Exception:

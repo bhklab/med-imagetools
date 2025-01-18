@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict, Optional, TypeVar, Union
 
 import numpy as np
@@ -33,6 +34,23 @@ class Dose(sitk.Image):
             self.metadata = metadata
         else:
             self.metadata = {}
+
+    @classmethod
+    def from_dicom(cls, dcm_path: str | Path) -> Dose:
+        """Factory method to create Dose object from DICOM file
+
+        2025-01-18 Jermiah:
+            Needs a lot of work and validation
+            aiming to create a standard interface for reading DICOM files
+        """
+        dcm_path = Path(dcm_path)
+        if dcm_path.is_dir():
+            raise NotImplementedError("Directory input not supported yet")
+        elif dcm_path.is_file():
+            if dcm_path.suffix == ".dcm":
+                return cls.from_dicom_rtdose(dcm_path.as_posix())
+            else:
+                raise NotImplementedError("Only DICOM files are supported")
 
     @classmethod
     def from_dicom_rtdose(cls, path: str) -> Dose:
@@ -120,7 +138,9 @@ class Dose(sitk.Image):
 
                 # ROI ID
                 roi_reference = (
-                    self.df.DVHSequence[i].DVHReferencedROISequence[0].ReferencedROINumber
+                    self.df.DVHSequence[i]
+                    .DVHReferencedROISequence[0]
+                    .ReferencedROINumber
                 )
 
                 # Make dictionary for each ROI ID
@@ -143,7 +163,9 @@ class Dose(sitk.Image):
                 self.dvh[roi_reference]["min_dose"] = min_dose
                 self.dvh[roi_reference]["total_vol"] = tot_vol
         except AttributeError:
-            logger.warning("No DVH information present in the DICOM. Returning empty dictionary")
+            logger.warning(
+                "No DVH information present in the DICOM. Returning empty dictionary"
+            )
             self.dvh = {}
 
         return self.dvh
