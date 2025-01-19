@@ -154,40 +154,6 @@ class StructureSet:
         self.roi_points: Dict[str, List[np.ndarray]] = roi_points
         self.metadata: Dict[str, T] = metadata or {}
 
-    @property
-    def roi_names(self) -> List[str]:
-        """List of all ROI (Region of Interest) names."""
-        return list(self.roi_points.keys())
-
-    def has_roi(self, pattern: str, ignore_case: bool = False) -> bool:
-        """Search for an ROI name based on a regular expression pattern.
-
-        Parameters
-        ----------
-        pattern : str
-            The regular expression pattern to search for.
-        flags : int, optional
-            Flags to modify the regular expression matching behavior. Default is re.IGNORECASE.
-
-        Returns
-        -------
-        bool
-            True if the pattern matches any ROI name, False otherwise.
-
-        Examples
-        --------
-        Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
-        >>> structure_set = StructureSet.from_dicom_rtstruct(
-        ...     "path/to/rtstruct.dcm"
-        ... )
-        >>> structure_set.has_roi("GTV.*")
-        True
-        >>> structure_set.has_roi("ctv.*")
-        True
-        """
-        _flags = re.IGNORECASE if ignore_case else 0
-        return any(re.fullmatch(pattern, name, flags=_flags) for name in self.roi_names)
-
     @classmethod
     def from_dicom_rtstruct(
         cls,
@@ -219,7 +185,7 @@ class StructureSet:
         ...     "path/to/rtstruct.dcm", roi_name_pattern="^GTV|PTV"
         ... )
         """
-        dcm = cls.import_rtstruct_data(rtstruct_path)
+        dcm = cls._load_rtstruct_data(rtstruct_path)
 
         # Extract ROI names and points
         roi_names = roi_names_from_dicom(dcm)
@@ -257,6 +223,40 @@ class StructureSet:
     from_dicom.__doc__ = (
         "Alias for 'from_dicom_rtstruct' method.\n\n" + from_dicom_rtstruct.__doc__
     )
+
+    @property
+    def roi_names(self) -> List[str]:
+        """List of all ROI (Region of Interest) names."""
+        return list(self.roi_points.keys())
+
+    def has_roi(self, pattern: str, ignore_case: bool = False) -> bool:
+        """Search for an ROI name in self.roi_names based on a regular expression pattern.
+
+        Parameters
+        ----------
+        pattern : str
+            The regular expression pattern to search for.
+        flags : int, optional
+            Flags to modify the regular expression matching behavior. Default is re.IGNORECASE.
+
+        Returns
+        -------
+        bool
+            True if the pattern matches any ROI name, False otherwise.
+
+        Examples
+        --------
+        Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
+        >>> structure_set = StructureSet.from_dicom_rtstruct(
+        ...     "path/to/rtstruct.dcm"
+        ... )
+        >>> structure_set.has_roi("GTV.*")
+        True
+        >>> structure_set.has_roi("ctv.*")
+        True
+        """
+        _flags = re.IGNORECASE if ignore_case else 0
+        return any(re.fullmatch(pattern, name, flags=_flags) for name in self.roi_names)
 
     @staticmethod
     def _extract_metadata(rtstruct: FileDataset) -> Dict[str, Union[str, int, float]]:
@@ -638,7 +638,7 @@ class StructureSet:
         )
 
     @classmethod
-    def import_rtstruct_data(
+    def _load_rtstruct_data(
         cls,
         rtstruct_path: str | Path | bytes,
     ) -> FileDataset:
