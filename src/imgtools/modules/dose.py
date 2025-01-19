@@ -36,23 +36,6 @@ class Dose(sitk.Image):
             self.metadata = {}
 
     @classmethod
-    def from_dicom(cls, dcm_path: str | Path) -> Dose:
-        """Factory method to create Dose object from DICOM file
-
-        2025-01-18 Jermiah:
-            Needs a lot of work and validation
-            aiming to create a standard interface for reading DICOM files
-        """
-        dcm_path = Path(dcm_path)
-        if dcm_path.is_dir():
-            raise NotImplementedError("Directory input not supported yet")
-        elif dcm_path.is_file():
-            if dcm_path.suffix == ".dcm":
-                return cls.from_dicom_rtdose(dcm_path.as_posix())
-            else:
-                raise NotImplementedError("Only DICOM files are supported")
-
-    @classmethod
     def from_dicom_rtdose(cls, path: str) -> Dose:
         """
         Reads the data and returns the data frame and the image dosage in SITK format
@@ -74,6 +57,11 @@ class Dose(sitk.Image):
         metadata = {}
 
         return cls(img_dose, df, metadata)
+
+    from_dicom = from_dicom_rtdose
+    from_dicom.__doc__ = (
+        "Alias for 'from_dicom_rtdose' method.\n\n" + from_dicom_rtdose.__doc__
+    )
 
     def resample_dose(self, ct_scan: sitk.Image) -> sitk.Image:
         """

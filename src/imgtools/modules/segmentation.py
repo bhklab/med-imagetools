@@ -263,6 +263,29 @@ class Segmentation(sitk.Image):
 
         self.existing_roi_indices = existing_roi_indices
 
+    @classmethod
+    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:
+        # get duplicates
+        label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
+        raw_roi_names = {}  # {i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
+        for _n, i in enumerate(meta.SegmentSequence):
+            label = i.SegmentLabel
+            num = i.SegmentNumber
+
+            if label not in raw_roi_names:
+                raw_roi_names[label] = num
+            else:
+                raw_roi_names[f"{label}_{label_counters[label]}"] = num
+                label_counters[label] += 1
+
+        frame_groups = meta.PerFrameFunctionalGroupsSequence
+        return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)
+
+    from_dicom = from_dicom_seg
+    from_dicom.__doc__ = (
+        "Alias for 'from_dicom_seg' method.\n\n" + from_dicom_seg.__doc__
+    )
+
     def get_label(
         self,
         label: Optional[int] = None,
@@ -302,7 +325,9 @@ class Segmentation(sitk.Image):
             # Background is stored implicitly and needs to be computed
             label_arr = sitk.GetArrayViewFromImage(self)
             # Create a binary image where background is 1 and other regions are 0
-            label_img = sitk.GetImageFromArray((label_arr.sum(-1) == 0).astype(np.uint8))
+            label_img = sitk.GetImageFromArray(
+                (label_arr.sum(-1) == 0).astype(np.uint8)
+            )
         else:
             # Retrieve the label image for the given label index
             label_img = sitk.VectorIndexSelectionCast(self, label - 1)
@@ -369,7 +394,9 @@ class Segmentation(sitk.Image):
         if len(mask_arr.shape) == 4:
             for i in range(mask_arr.shape[0]):
                 slc = mask_arr[i, :, :, :]
-                slc *= list(self.roi_indices.values())[
+                slc *= list(
+                    self.roi_indices.values()
+                )[
                     i
                 ]  # everything is 0 or 1, so this is fine to convert filled voxels to label indices
                 if verbose:
@@ -416,21 +443,3 @@ class Segmentation(sitk.Image):
                         overlaps.add((i, j, k))
                     res[i, j, k] = max(arr_1[i, j, k], arr_2[i, j, k])
         return res, overlaps
-
-    @classmethod
-    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:  # noqa
-        # get duplicates
-        label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
-        raw_roi_names = {}  # {i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
-        for _n, i in enumerate(meta.SegmentSequence):
-            label = i.SegmentLabel
-            num = i.SegmentNumber
-
-            if label not in raw_roi_names:
-                raw_roi_names[label] = num
-            else:
-                raw_roi_names[f"{label}_{label_counters[label]}"] = num
-                label_counters[label] += 1
-
-        frame_groups = meta.PerFrameFunctionalGroupsSequence
-        return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)

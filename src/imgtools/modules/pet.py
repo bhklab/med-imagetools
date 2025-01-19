@@ -48,23 +48,6 @@ class PET(sitk.Image):
         self.metadata: Dict[str, Union[str, float, bool]] = metadata if metadata else {}
 
     @classmethod
-    def from_dicom(cls, dcm_path: str | pathlib.Path) -> PET:
-        """Factory method to create PET object from DICOM file
-
-        2025-01-18 Jermiah:
-            Needs a lot of work and validation
-            aiming to create a standard interface for reading DICOM files
-        """
-        dcm_path = pathlib.Path(dcm_path)
-        if dcm_path.is_dir():
-            raise NotImplementedError("Directory input not supported yet")
-        elif dcm_path.is_file():
-            if dcm_path.suffix == ".dcm":
-                return cls.from_dicom_pet(dcm_path.as_posix())
-            else:
-                raise NotImplementedError("Only DICOM files are supported")
-
-    @classmethod
     def from_dicom_pet(
         cls, path: str, series_id: Optional[str] = None, pet_image_type: str = "SUV"
     ) -> PET:
@@ -102,6 +85,11 @@ class PET(sitk.Image):
 
         metadata: Dict[str, Union[str, float, bool]] = {}
         return cls(img_pet, df, factor, calc, metadata)
+
+    from_dicom = from_dicom_pet
+    from_dicom.__doc__ = (
+        "Alias for 'from_dicom_pet' method.\n\n" + from_dicom_pet.__doc__
+    )
 
     def get_metadata(self) -> Dict[str, Union[str, float, bool]]:
         self.metadata = {}
