@@ -661,15 +661,13 @@ class StructureSet:
                 metadata_str_parts.append(f"\t{k}: {v[-5:]} (truncated)")
             else:
                 metadata_str_parts.append(f"\t{k}: {v}")
-
+        metadata_str = "\n\t".join(metadata_str_parts)
         repr_string = (
             "\n<StructureSet\n"
             f"\tROIs: {sorted_rois}\n"
-            f"\tMetadata:\n\t{'\n\t'.join(metadata_str_parts)}\n>"
+            f"\tMetadata:\n\t{metadata_str}\n>"
         )
-        return (
-            repr_string
-        )
+        return repr_string
 
     @classmethod
     def _load_rtstruct_data(
