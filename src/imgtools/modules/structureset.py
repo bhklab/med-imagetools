@@ -123,7 +123,7 @@ class StructureSet:
         Create a StructureSet instance from a DICOM RTSTRUCT file.
 
     from_dicom(rtstruct_path: str | Path | bytes, suppress_warnings: bool = False) -> StructureSet
-        Alias for 'from_dicom_rtstruct' method.
+        Create a StructureSet instance from a DICOM RTSTRUCT file.
 
     to_segmentation(
         reference_image: sitk.Image,
@@ -155,13 +155,15 @@ class StructureSet:
         self.metadata: Dict[str, T] = metadata or {}
 
     @classmethod
-    def from_dicom_rtstruct(
+    def from_dicom(
         cls,
         rtstruct_path: str | Path | bytes,
         suppress_warnings: bool = False,
         roi_name_pattern: str | None = None,
     ) -> StructureSet:
         """Create a StructureSet instance from a DICOM RTSTRUCT file.
+
+        Alias for the 'from_dicom_rtstruct' method (>=v1.16.0).
 
         Parameters
         ----------
@@ -181,10 +183,24 @@ class StructureSet:
 
         Examples
         --------
-        >>> structure_set = StructureSet.from_dicom_rtstruct(
+        >>> structure_set = StructureSet.from_dicom(
         ...     "path/to/rtstruct.dcm", roi_name_pattern="^GTV|PTV"
         ... )
         """
+
+        return cls.from_dicom_rtstruct(
+            rtstruct_path, suppress_warnings, roi_name_pattern
+        )
+
+    @classmethod
+    def from_dicom_rtstruct(
+        cls,
+        rtstruct_path: str | Path | bytes,
+        suppress_warnings: bool = False,
+        roi_name_pattern: str | None = None,
+    ) -> StructureSet:
+        """Create a StructureSet instance from a DICOM RTSTRUCT file."""
+
         dcm = cls._load_rtstruct_data(rtstruct_path)
 
         # Extract ROI names and points
@@ -219,11 +235,6 @@ class StructureSet:
         # Return the StructureSet instance
         return cls(roi_points, metadata)
 
-    from_dicom = from_dicom_rtstruct
-    from_dicom.__doc__ = (
-        "Alias for 'from_dicom_rtstruct' method.\n\n" + from_dicom_rtstruct.__doc__
-    )
-
     @property
     def roi_names(self) -> List[str]:
         """List of all ROI (Region of Interest) names."""
@@ -247,7 +258,7 @@ class StructureSet:
         Examples
         --------
         Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
-        >>> structure_set = StructureSet.from_dicom_rtstruct(
+        >>> structure_set = StructureSet.from_dicom(
         ...     "path/to/rtstruct.dcm"
         ... )
         >>> structure_set.has_roi("GTV.*")

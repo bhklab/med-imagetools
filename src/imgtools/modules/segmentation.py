@@ -28,7 +28,7 @@ Notes
   of multi-label segmentation masks.
 - The `generate_sparse_mask` method resolves overlapping contours by taking the
   maximum label value for each voxel, ensuring a consistent sparse representation.
-- Integration with DICOM SEG metadata is supported through the `from_dicom_seg`
+- Integration with DICOM SEG metadata is supported through the `from_dicom`
   class method, which creates `Segmentation` objects from DICOM SEG files.
 
 Examples
@@ -263,8 +263,10 @@ class Segmentation(sitk.Image):
 
         self.existing_roi_indices = existing_roi_indices
 
+    # jjjermiah: this is literally NOT "from_dicom" lmao... 
+    # TODO: rename this to something more appropriate and add a proper from_dicom method
     @classmethod
-    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:
+    def from_dicom(cls, mask: sitk.Image, meta: Any) -> Segmentation:
         # get duplicates
         label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
         raw_roi_names = {}  # {i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
@@ -281,10 +283,10 @@ class Segmentation(sitk.Image):
         frame_groups = meta.PerFrameFunctionalGroupsSequence
         return cls(mask, raw_roi_names=raw_roi_names, frame_groups=frame_groups)
 
-    from_dicom = from_dicom_seg
-    from_dicom.__doc__ = (
-        "Alias for 'from_dicom_seg' method.\n\n" + from_dicom_seg.__doc__
-    )
+    @classmethod
+    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:
+        """Alias for `from_dicom`."""
+        return cls.from_dicom(mask=mask, meta=meta)
 
     def get_label(
         self,

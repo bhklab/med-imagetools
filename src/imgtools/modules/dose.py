@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, Optional, TypeVar, Union
 
 import numpy as np
@@ -10,17 +9,9 @@ from pydicom import Dataset, dcmread
 
 from imgtools.logging import logger
 
+from .utils import read_image
+
 T = TypeVar("T")
-
-
-def read_image(path: str) -> sitk.Image:  # noqa
-    reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(path)
-    reader.SetFileNames(dicom_names)
-    reader.MetaDataDictionaryArrayUpdateOn()
-    reader.LoadPrivateTagsOn()
-
-    return reader.Execute()
 
 
 class Dose(sitk.Image):
@@ -36,7 +27,7 @@ class Dose(sitk.Image):
             self.metadata = {}
 
     @classmethod
-    def from_dicom_rtdose(cls, path: str) -> Dose:
+    def from_dicom(cls, path: str) -> Dose:
         """
         Reads the data and returns the data frame and the image dosage in SITK format
         """
@@ -57,11 +48,6 @@ class Dose(sitk.Image):
         metadata = {}
 
         return cls(img_dose, df, metadata)
-
-    from_dicom = from_dicom_rtdose
-    from_dicom.__doc__ = (
-        "Alias for 'from_dicom_rtdose' method.\n\n" + from_dicom_rtdose.__doc__
-    )
 
     def resample_dose(self, ct_scan: sitk.Image) -> sitk.Image:
         """

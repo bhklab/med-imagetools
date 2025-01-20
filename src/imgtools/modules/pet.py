@@ -13,22 +13,12 @@ from pydicom import dcmread
 
 from imgtools.logging import logger
 
+from .utils import read_image
+
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 T = TypeVar("T")
-
-
-def read_image(path: str, series_id: Optional[str] = None) -> sitk.Image:
-    reader = sitk.ImageSeriesReader()
-    dicom_names = reader.GetGDCMSeriesFileNames(
-        path, seriesID=series_id if series_id else ""
-    )
-    reader.SetFileNames(dicom_names)
-    reader.MetaDataDictionaryArrayUpdateOn()
-    reader.LoadPrivateTagsOn()
-
-    return reader.Execute()
 
 
 class PET(sitk.Image):
@@ -48,7 +38,7 @@ class PET(sitk.Image):
         self.metadata: Dict[str, Union[str, float, bool]] = metadata if metadata else {}
 
     @classmethod
-    def from_dicom_pet(
+    def from_dicom(
         cls, path: str, series_id: Optional[str] = None, pet_image_type: str = "SUV"
     ) -> PET:
         """Read the PET scan and returns the data frame and the image dosage in SITK format
@@ -85,11 +75,6 @@ class PET(sitk.Image):
 
         metadata: Dict[str, Union[str, float, bool]] = {}
         return cls(img_pet, df, factor, calc, metadata)
-
-    from_dicom = from_dicom_pet
-    from_dicom.__doc__ = (
-        "Alias for 'from_dicom_pet' method.\n\n" + from_dicom_pet.__doc__
-    )
 
     def get_metadata(self) -> Dict[str, Union[str, float, bool]]:
         self.metadata = {}
