@@ -4,7 +4,7 @@ import contextlib
 import datetime
 import os
 import pathlib
-from enum import StrEnum
+from enum import Enum
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import numpy as np
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 
-class PETImageType(StrEnum):
+class PETImageType(str, Enum):  # alternative to StrEnum for python 3.10 compatibility
     """
     Enumeration for PET image types used in DICOM processing.
 
