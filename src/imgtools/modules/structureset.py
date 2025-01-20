@@ -326,6 +326,16 @@ class StructureSet:
         --------
         >>> rtstruct = dcmread("path/to/rtstruct.dcm", force=True)
         >>> StructureSet._get_roi_points(rtstruct, 0)
+
+        Notes
+        -----
+        The structure of the contour data in the DICOM RTSTRUCT file is as follows:
+        > ROIContourSequence (3006, 0039)
+        >> ReferencedROINumber (3006, 0084)
+        >> ContourSequence (3006, 0040)
+        >>> ContourData (3006, 0050)
+        >>> ContourGeometricType (3006, 0042)
+        >>> NumberOfContourPoints (3006, 0046)
         """
         # Check for ROIContourSequence
         if not hasattr(rtstruct, "ROIContourSequence"):

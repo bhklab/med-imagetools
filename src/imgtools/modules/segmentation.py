@@ -94,13 +94,16 @@ def accepts_segmentations(f: Callable) -> Callable:
 
     Examples
     --------
+
+    Define a function that processes an image and is decorated with `@accepts_segmentations`:
     >>> @accepts_segmentations
     ... def some_processing_function(
     ...     img,
     ...     *args,
     ...     **kwargs,
-    ... ):
-    ...     return img  # Perform some operation on the image
+    ... ) -> sitk.Image:
+            # Perform some operation on the image
+    ...     return img  
     >>> segmentation = Segmentation(
     ...     image,
     ...     roi_indices={
@@ -114,6 +117,8 @@ def accepts_segmentations(f: Callable) -> Callable:
     ...     Segmentation,
     ... )
     True
+    >>> print(result.roi_indices)
+    {"ROI1": 1, "ROI2": 2}
     """
 
     @wraps(f)
