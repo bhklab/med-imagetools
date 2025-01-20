@@ -1,16 +1,113 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, NamedTuple, Sequence, Union
+from dataclasses import dataclass, field
+from typing import Any, Generic, Iterator, NamedTuple, Sequence, TypeVar, Union
 
 import numpy as np
 import SimpleITK as sitk
 
+IntOrFloat = TypeVar("T", int, float)
+
 
 class ImageGeometry(NamedTuple):
-    size: Sequence[int]
-    origin: Sequence[float]
+    """
+    Represent the geometry of a 3D image, including its size, origin, direction,
+    and spacing.
+    """
+
+    size: Size3D
+    origin: Coordinate
     direction: Sequence[float]
-    spacing: Sequence[float]
+    spacing: Spacing3D
+
+
+@dataclass
+class Vector3D(Generic[IntOrFloat]):
+    """Base class for a 3D vector representation."""
+
+    x: IntOrFloat
+    y: IntOrFloat
+    z: IntOrFloat
+
+    def __post_init__(self):
+        for dim, name in zip(self.as_tuple, ["x", "y", "z"]):
+            self._validate_dimension(dim, name)
+
+    @property
+    def as_tuple(self) -> tuple[IntOrFloat, IntOrFloat, IntOrFloat]:
+        return self.x, self.y, self.z
+
+    def _validate_dimension(self, dim: IntOrFloat, name: str) -> None:
+        """Validation method to be overridden by subclasses."""
+        pass
+
+    def __add__(self, other: Vector3D[IntOrFloat]) -> Vector3D[IntOrFloat]:
+        return self.__class__(x=self.x + other.x, y=self.y + other.y, z=self.z + other.z)
+
+    def __sub__(self, other: Vector3D[IntOrFloat]) -> Vector3D[IntOrFloat]:
+        return self.__class__(x=self.x - other.x, y=self.y - other.y, z=self.z - other.z)
+
+
+@dataclass
+class Spacing3D(Vector3D[float]):
+    """Represent the spacing of a 3D object with float constraints."""
+
+    def _validate_dimension(self, dim: float, name: str) -> None:
+        match dim:
+            case float():
+                pass
+            case _:
+                raise TypeError(
+                    f"{name} must be a number (float or int), got {dim} ({self.as_tuple=})"
+                )
+        if dim <= 0:
+            raise ValueError(f"{name} must be positive, got {dim}")
+
+    def __repr__(self) -> str:
+        """Round the spacing values to 3 decimal places."""
+        return f"Spacing3D(x={self.x:.3f}, y={self.y:.3f}, z={self.z:.3f})"
+
+
+@dataclass
+class Point3D(Vector3D[int]):
+    """Represent a point in 3D space with integer constraints."""
+
+    def _validate_dimension(self, dim: int, name: str) -> None:
+        match dim:
+            case int():
+                pass
+            case float() if dim.is_integer():
+                pass
+            case _:
+                raise TypeError(f"{name} must be a whole number, got {dim} ({self.as_tuple=})")
+
+        # Ensure the value is stored as an integer
+        setattr(self, name, int(dim))
+
+
+@dataclass
+class Size3D(Point3D):
+    """Represent the size of a 3D object with positive integer constraints."""
+
+    def _validate_dimension(self, dim: int, name: str) -> None:
+        super()._validate_dimension(dim, name)
+        if dim < 0:
+            raise ValueError(f"{name} must be positive or 0, got {dim}")
+
+    @property
+    def volume(self) -> int:
+        return self.x * self.y * self.z
+
+    @classmethod
+    def from_tuple(cls, size: tuple[int, int, int]) -> Size3D:
+        return cls(*size)
+
+
+@dataclass
+class Coordinate(Point3D):
+    """Represent a coordinate in 3D space."""
+
+    pass
 
 
 # Goals for this module:
@@ -43,7 +140,7 @@ class Image:
             self._image = image
         elif isinstance(image, np.ndarray):
             if geometry is None and any((origin is None, direction is None, spacing is None)):
-                raise ValueError('If image is a Numpy array, either geometry must be specified.')
+                raise ValueError("If image is a Numpy array, either geometry must be specified.")
 
             if geometry is not None:
                 _, origin, direction, spacing = geometry
@@ -54,7 +151,7 @@ class Image:
             self._image.SetDirection(direction[:-3] + direction[3:6] + direction[:3])
             self._image.SetSpacing(spacing[::-1])
         else:
-            msg = f'image must be either numpy.ndarray or SimpleITK.Image, not {type(image)}.'
+            msg = f"image must be either numpy.ndarray or SimpleITK.Image, not {type(image)}."
             raise TypeError(msg)
 
     @property
@@ -156,47 +253,47 @@ class Image:
         return Image(~self._image)
 
     def __add__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image + other_val)
 
     def __sub__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image - other_val)
 
     def __mul__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image * other_val)
 
     def __div__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image / other_val)
 
     def __floordiv__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image // other_val)
 
     def __pow__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         return Image(self._image**other_val)
 
     def __iadd__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         self._image += other_val
 
     def __isub__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         self._image -= other_val
 
     def __imul__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         self._image *= other_val
 
     def __idiv__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         self._image /= other_val
 
     def __ifloordiv__(self, other: Union[Image, Image]) -> Image:
-        other_val = getattr(other, '_image', other)
+        other_val = getattr(other, "_image", other)
         self._image //= other_val
 
     def __iter__(self) -> Iterator:
@@ -204,14 +301,14 @@ class Image:
 
     def __repr__(self) -> str:
         return (
-            f'Image(image={self._image}, origin={self.origin}, '
-            f'spacing={self.spacing}, direction={self.direction})'
+            f"Image(image={self._image}, origin={self.origin}, "
+            f"spacing={self.spacing}, direction={self.direction})"
         )
 
     def __str__(self) -> str:
         return (
-            f'origin = {self.origin}\n'
-            f'spacing = {self.spacing}\n'
-            f'direction = {self.direction}\n'
-            f'values = \n{self.to_numpy(view=True)}'
+            f"origin = {self.origin}\n"
+            f"spacing = {self.spacing}\n"
+            f"direction = {self.direction}\n"
+            f"values = \n{self.to_numpy(view=True)}"
         )
