@@ -32,7 +32,7 @@ import re
 from io import BytesIO
 from itertools import groupby
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict, Union
 
 import numpy as np
 import SimpleITK as sitk
@@ -45,8 +45,6 @@ from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
-
-T = TypeVar("T")
 
 
 def roi_names_from_dicom(
@@ -94,6 +92,27 @@ def rtstruct_reference_seriesuid(
         raise ValueError("Referenced SeriesInstanceUID not found in RTSTRUCT") from e
 
 
+class RTSTRUCTMetadata(TypedDict):
+    PatientID: str
+    StudyInstanceUID: str
+    SeriesInstanceUID: str
+    Modality: str
+    ReferencedSeriesInstanceUID: str
+    OriginalNumberOfROIs: int
+
+
+def extract_metadata(rtstruct: FileDataset) -> RTSTRUCTMetadata:
+    """Extract metadata from the RTSTRUCT file."""
+    return {
+        "PatientID": rtstruct.PatientID,
+        "StudyInstanceUID": rtstruct.StudyInstanceUID,
+        "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
+        "Modality": rtstruct.Modality,
+        "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(rtstruct),
+        "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
+    }
+
+
 class StructureSet:
     """Class for handling DICOM RTSTRUCT contour data.
 
@@ -106,7 +125,7 @@ class StructureSet:
     roi_points : Dict[str, List[np.ndarray]]
         A dictionary mapping ROI (Region of Interest) names to a list of 2D arrays.
         Each array contains the 3D physical coordinates of the contour points for a slice.
-    metadata : Dict[str, T]
+    metadata : RTSTRUCTMetadata
         A dictionary containing additional metadata from the DICOM RTSTRUCT file.
 
     Properties
@@ -144,15 +163,15 @@ class StructureSet:
     """
 
     roi_points: Dict[str, List[np.ndarray]]
-    metadata: Dict[str, T]
+    metadata: RTSTRUCTMetadata
 
     def __init__(
         self,
         roi_points: Dict[str, List[np.ndarray]],
-        metadata: Optional[Dict[str, T]] = None,
+        metadata: Optional[RTSTRUCTMetadata] = None,
     ) -> None:
         self.roi_points: Dict[str, List[np.ndarray]] = roi_points
-        self.metadata: Dict[str, T] = metadata or {}
+        self.metadata: RTSTRUCTMetadata = metadata or {}
 
     @classmethod
     def from_dicom(
@@ -226,7 +245,7 @@ class StructureSet:
         roi_points = dict(sorted(roi_points.items()))
 
         # Initialize metadata (can be extended later to extract more useful fields)
-        metadata = cls._extract_metadata(dcm)
+        metadata = extract_metadata(dcm)
 
         # Some of the ROIs wont have been extracted.
         # We can add a metadata field to indicate the number of ROIs that were extracted
@@ -639,13 +658,17 @@ class StructureSet:
         # Truncate the UID values for better readability
         for k, v in self.metadata.items():
             if k.endswith("UID"):
-                metadata_str_parts.append(f"{k}: {v[-5:]} (truncated)")
+                metadata_str_parts.append(f"\t{k}: {v[-5:]} (truncated)")
             else:
-                metadata_str_parts.append(f"{k}: {v}")
-        metadata_str = "\n\t".join(metadata_str_parts)
+                metadata_str_parts.append(f"\t{k}: {v}")
 
+        repr_string = (
+            "\n<StructureSet\n"
+            f"\tROIs: {sorted_rois}\n"
+            f"\tMetadata:\n\t{'\n\t'.join(metadata_str_parts)}\n>"
+        )
         return (
-            f"\n<StructureSet with ROIs: {sorted_rois!r}>\nMetadata:\n\t{metadata_str}"
+            repr_string
         )
 
     @classmethod
@@ -653,17 +676,17 @@ class StructureSet:
         cls,
         rtstruct_path: str | Path | bytes,
     ) -> FileDataset:
-        if isinstance(rtstruct_path, str) | isinstance(rtstruct_path, Path):
-            dcm = dcmread(rtstruct_path, force=True)
-        elif isinstance(rtstruct_path, bytes):
-            rt_bytes = BytesIO(rtstruct_path)
-            dcm = dcmread(rt_bytes, force=True)
-        else:
-            msg = (
-                "Invalid type for 'rtstruct_path'. Must be str, Path, or bytes object."
-            )
-            msg += f" Received: {type(rtstruct_path)}"
-            raise ValueError(msg)
+        """Load the DICOM RTSTRUCT file and return the FileDataset object."""
+        match rtstruct_path:
+            case str() | Path():
+                dcm = dcmread(rtstruct_path, force=True)
+            case bytes():
+                rt_bytes = BytesIO(rtstruct_path)
+                dcm = dcmread(rt_bytes, force=True)
+            case _:
+                msg = "Invalid type for 'rtstruct_path'. Must be str, Path, or bytes object."
+                msg += f" Received: {type(rtstruct_path)}"
+                raise ValueError(msg)
 
         assert (
             dcm.Modality == "RTSTRUCT"
