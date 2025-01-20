@@ -28,6 +28,12 @@ ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
 
+[feature.dev.pypi-dependencies]
+# itkwidgets = {version = "==1.0a54", extras = ["notebook", "lab"]}
+itkwidgets = {git = "https://github.com/InsightSoftwareConsortium/itkwidgets.git", branch = "main", extras = ["all"]}
+zarr = "==2.18.2"
+crc32c = ">=2.7.1, <3"
+
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
 
