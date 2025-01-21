@@ -3,7 +3,7 @@ name: CI-CD
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["main", "jjjermiah/devel/main"]
+    branches: ["main"]
   pull_request:
     branches: ["*"]
 
@@ -14,6 +14,7 @@ jobs:
   Unit-Tests:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15 # Consider increasing timeout
+    continue-on-error: true # dont fail the whole matrix if one fails
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-14] # , windows-latest removed for now
@@ -41,6 +42,21 @@ jobs:
         with:
           name: coverage-report
           path: coverage-report
+
+      - name: JUnit Test Summary
+        id: pytest-summary
+        uses: test-summary/action@v2
+        with: 
+          paths: .cache/test-results/**/*.xml
+          output: test-summary-${{ matrix.os }}-${{ matrix.env }}.md
+        if: always()
+
+      - name: Upload JUnit Test Summary
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-summary-${{ matrix.os }}-${{ matrix.env }}
+          path: test-summary-${{ matrix.os }}-${{ matrix.env }}.md
+        if: always()
 
   ################################################################################################
   # Build-Docs: Build documentation using mkdocs
