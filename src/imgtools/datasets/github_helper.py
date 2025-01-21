@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import shutil
 import tarfile
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 
 import requests
 from github import Github
+from rich import print
 
 
 @dataclass
@@ -69,6 +69,7 @@ class GitHubRelease:
     assets: List[GitHubReleaseAsset]
 
 
+@dataclass
 class GitHubReleaseManager:
     """
     Class to fetch and interact with datasets from the latest GitHub release.
@@ -81,14 +82,20 @@ class GitHubReleaseManager:
         Optional GitHub token for authenticated requests (higher rate limits).
     """
 
+    repo_name: str
+    github: Github
+    repo: Github.Repository
+    latest_release: GitHubRelease | None = None
+
     def __init__(self, repo_name: str, token: str | None = None):
         self.repo_name = repo_name
         self.github = Github(token) if token else Github()
+        self.repo = self.github.get_repo(repo_name)
 
     def get_latest_release(self) -> GitHubRelease:
         """Fetches the latest release details from the repository."""
-        repo = self.github.get_repo(self.repo_name)
-        release = repo.get_latest_release()
+
+        release = self.repo.get_latest_release()
 
         assets = [
             GitHubReleaseAsset(
@@ -101,7 +108,7 @@ class GitHubReleaseManager:
             for asset in release.get_assets()
         ]
 
-        return GitHubRelease(
+        self.latest_release = GitHubRelease(
             tag_name=release.tag_name,
             name=release.title,
             body=release.body or "",
@@ -110,6 +117,7 @@ class GitHubReleaseManager:
             published_at=release.published_at.isoformat(),
             assets=assets,
         )
+        return self.latest_release
 
     def download_asset(self, asset: GitHubReleaseAsset, dest: Path) -> Path:
         """
@@ -143,12 +151,13 @@ class GitHubReleaseManager:
         return filepath
 
 
+@dataclass
 class MedImageTestData(GitHubReleaseManager):
     """
     Manager for downloading and extracting med-image test data from GitHub releases.
     """
 
-    downloaded_paths: List[Path]
+    downloaded_paths: List[Path] = field(default_factory=list, init=False)
 
     def __init__(self):
         super().__init__("bhklab/med-image_test-data")
@@ -189,5 +198,12 @@ class MedImageTestData(GitHubReleaseManager):
 # Usage example
 if __name__ == "__main__":
     manager = MedImageTestData()
+
+    print(manager)
+
+    manager.get_latest_release()
+
+    print(manager)
+
     download_dir = Path("./data/med-image_test-data")
     manager.download_release_data(download_dir).extract(download_dir)
