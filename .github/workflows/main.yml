@@ -45,7 +45,7 @@ jobs:
 
       - name: JUnit Test Summary
         id: pytest-summary
-        uses: test-summary/action@v4
+        uses: test-summary/action@v2
         with: 
           paths: .cache/test-results/**/*.xml
           output: test-summary-${{ matrix.os }}-${{ matrix.env }}.md
