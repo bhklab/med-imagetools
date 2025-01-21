@@ -48,15 +48,7 @@ jobs:
         uses: test-summary/action@v2
         with: 
           paths: .cache/test-results/**/*.xml
-          output: test-summary-${{ matrix.os }}-${{ matrix.env }}.md
           show: all
-        if: always()
-
-      - name: Upload JUnit Test Summary
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-summary-${{ matrix.os }}-${{ matrix.env }}
-          path: test-summary-${{ matrix.os }}-${{ matrix.env }}.md
         if: always()
 
   ################################################################################################
