@@ -19,6 +19,7 @@ requires-python = ">=3.10,<4"
 
 # Standard dependencies
 dependencies = [
+  "pygithub>=2.5.0",
   "h5py>=3.11.0,<4",
   "joblib>=1.4.2,<2",
   "numpy<3",
