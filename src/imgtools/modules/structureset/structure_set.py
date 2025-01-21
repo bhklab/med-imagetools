@@ -29,88 +29,27 @@ error handling and logging to handle malformed or incomplete DICOM files.
 from __future__ import annotations
 
 import re
-from io import BytesIO
 from itertools import groupby
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 import SimpleITK as sitk
-from pydicom import dcmread
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
+from imgtools.modules.structureset import (
+    RTSTRUCTMetadata,
+    extract_roi_names,
+    extract_rtstruct_metadata,
+    load_rtstruct_data,
+    rtstruct_reference_seriesuid,
+)
 from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
-
-
-def roi_names_from_dicom(
-    rtstruct_or_path: Union[str, Path, FileDataset],
-) -> list[str]:
-    """Extract ROI names from DICOM file or loaded RTSTRUCT."""
-    try:
-        if isinstance(rtstruct_or_path, (str, Path)):
-            rtstruct = dcmread(
-                rtstruct_or_path,
-                force=True,
-                stop_before_pixels=True,
-                specific_tags=["StructureSetROISequence"],
-            )
-        else:
-            rtstruct = rtstruct_or_path
-        return [roi.ROIName for roi in rtstruct.StructureSetROISequence]
-    except (AttributeError, IndexError) as e:
-        msg = "Error extracting ROI names from DICOM file."
-        raise ValueError(msg) from e
-
-
-def rtstruct_reference_seriesuid(
-    rtstruct_or_path: Union[str, Path, FileDataset],
-) -> str:
-    """Given an RTSTRUCT file or loaded RTSTRUCT, return the Referenced SeriesInstanceUID."""
-    try:
-        if isinstance(rtstruct_or_path, (str, Path)):
-            rtstruct = dcmread(
-                rtstruct_or_path,
-                force=True,
-                stop_before_pixels=True,
-                specific_tags=["ReferencedFrameOfReferenceSequence"],
-            )
-        else:
-            rtstruct = rtstruct_or_path
-
-        return str(
-            rtstruct.ReferencedFrameOfReferenceSequence[0]
-            .RTReferencedStudySequence[0]
-            .RTReferencedSeriesSequence[0]
-            .SeriesInstanceUID
-        )
-    except (AttributeError, IndexError) as e:
-        raise ValueError("Referenced SeriesInstanceUID not found in RTSTRUCT") from e
-
-
-class RTSTRUCTMetadata(TypedDict):
-    PatientID: str
-    StudyInstanceUID: str
-    SeriesInstanceUID: str
-    Modality: str
-    ReferencedSeriesInstanceUID: str
-    OriginalNumberOfROIs: int
-
-
-def extract_metadata(rtstruct: FileDataset) -> RTSTRUCTMetadata:
-    """Extract metadata from the RTSTRUCT file."""
-    return {
-        "PatientID": rtstruct.PatientID,
-        "StudyInstanceUID": rtstruct.StudyInstanceUID,
-        "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
-        "Modality": rtstruct.Modality,
-        "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(rtstruct),
-        "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
-    }
 
 
 class StructureSet:
@@ -207,9 +146,7 @@ class StructureSet:
         ... )
         """
 
-        return cls.from_dicom_rtstruct(
-            rtstruct_path, suppress_warnings, roi_name_pattern
-        )
+        return cls.from_dicom_rtstruct(rtstruct_path, suppress_warnings, roi_name_pattern)
 
     @classmethod
     def from_dicom_rtstruct(
@@ -220,10 +157,13 @@ class StructureSet:
     ) -> StructureSet:
         """Create a StructureSet instance from a DICOM RTSTRUCT file."""
 
-        dcm = cls._load_rtstruct_data(rtstruct_path)
+        dcm = load_rtstruct_data(rtstruct_path)
 
         # Extract ROI names and points
-        roi_names = roi_names_from_dicom(dcm)
+        metadata: RTSTRUCTMetadata = extract_rtstruct_metadata(dcm)
+
+        roi_names = metadata["OriginalROINames"]
+        logger.debug("Extracted ROI names", roi_names=roi_names, num_rois=len(roi_names))
 
         # Initialize dictionary to store ROI points
         roi_points: Dict[str, List[np.ndarray]] = {}
@@ -245,10 +185,13 @@ class StructureSet:
         roi_points = dict(sorted(roi_points.items()))
 
         # Initialize metadata (can be extended later to extract more useful fields)
-        metadata = extract_metadata(dcm)
 
         # Some of the ROIs wont have been extracted.
         # We can add a metadata field to indicate the number of ROIs that were extracted
+        metadata["ExtractedROINames"] = list(roi_points.keys())
+        # i like the idea of missingroinames, but would be even more useful if we can store the 
+        # reason why they were missing. e.g. "Could not get points for ROI `GTV`."
+        # metadata["MissingROINames"] = list(set(roi_names) - set(roi_points.keys()))
         metadata["ExtractedNumberOfROIs"] = len(roi_points)
 
         # Return the StructureSet instance
@@ -289,18 +232,6 @@ class StructureSet:
         return any(re.fullmatch(pattern, name, flags=_flags) for name in self.roi_names)
 
     @staticmethod
-    def _extract_metadata(rtstruct: FileDataset) -> Dict[str, Union[str, int, float]]:
-        """Extract metadata from the RTSTRUCT file."""
-        return {
-            "PatientID": rtstruct.PatientID,
-            "StudyInstanceUID": rtstruct.StudyInstanceUID,
-            "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
-            "Modality": rtstruct.Modality,
-            "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(rtstruct),
-            "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
-        }
-
-    @staticmethod
     def _get_roi_points(rtstruct: FileDataset, roi_index: int) -> List[np.ndarray]:
         """Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
 
@@ -339,9 +270,7 @@ class StructureSet:
         """
         # Check for ROIContourSequence
         if not hasattr(rtstruct, "ROIContourSequence"):
-            raise AttributeError(
-                "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
-            )
+            raise AttributeError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
 
         # Check if ROI index exists in the sequence
         if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
@@ -364,9 +293,7 @@ class StructureSet:
         contour_points = []
         for i, slc in enumerate(contour_sequence):
             if not hasattr(slc, "ContourData"):
-                msg = (
-                    f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
-                )
+                msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
                 raise AttributeError(msg)
             contour_points.append(np.array(slc.ContourData).reshape(-1, 3))
 
@@ -598,9 +525,7 @@ class StructureSet:
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
-                    matching_names = list(
-                        self._assign_labels([pattern], roi_select_first).keys()
-                    )
+                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
                     if matching_names:
                         # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
                         labels[name] = matching_names
@@ -613,9 +538,7 @@ class StructureSet:
                             self._assign_labels([pattern_one], roi_select_first).keys()
                         )
                         if matching_names:
-                            extracted_labels.extend(
-                                matching_names
-                            )  # {"GTV": ["GTV1", "GTV2"]}
+                            extracted_labels.extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
                     labels[name] = extracted_labels
         if isinstance(roi_names, str):
             roi_names = [roi_names]
@@ -637,9 +560,7 @@ class StructureSet:
         if not roi_names:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {
-                "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
-            }
+            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
         elif isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
@@ -673,31 +594,23 @@ class StructureSet:
                 metadata_str_parts.append(f"\t{k}: {v}")
         metadata_str = "\n\t".join(metadata_str_parts)
         repr_string = (
-            "\n<StructureSet\n"
-            f"\tROIs: {sorted_rois}\n"
-            f"\tMetadata:\n\t{metadata_str}\n>"
+            "\n<StructureSet\n" f"\tROIs: {sorted_rois}\n" f"\tMetadata:\n\t{metadata_str}\n>"
         )
         return repr_string
 
-    @classmethod
-    def _load_rtstruct_data(
-        cls,
-        rtstruct_path: str | Path | bytes,
-    ) -> FileDataset:
-        """Load the DICOM RTSTRUCT file and return the FileDataset object."""
-        match rtstruct_path:
-            case str() | Path():
-                dcm = dcmread(rtstruct_path, force=True)
-            case bytes():
-                rt_bytes = BytesIO(rtstruct_path)
-                dcm = dcmread(rt_bytes, force=True)
-            case _:
-                msg = "Invalid type for 'rtstruct_path'. Must be str, Path, or bytes object."
-                msg += f" Received: {type(rtstruct_path)}"
-                raise ValueError(msg)
 
-        assert (
-            dcm.Modality == "RTSTRUCT"
-        ), f"The dicom provided is not an RTSTRUCT file {dcm.Modality=}"
+if __name__ == "__main__":
+    from pathlib import Path
 
-        return dcm
+    data = Path("/home/bioinf/bhklab/radiomics/repos/med-imagetools/data")
+
+    ct_dir = (
+        data
+        / "Head-Neck-PET-CT/HN-CHUS-052/08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362,"
+    )
+    rt_path = (
+        data
+        / "Head-Neck-PET-CT/HN-CHUS-052/08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418/1-1.dcm"
+    )
+
+    rt = StructureSet.from_dicom(rt_path, suppress_warnings=True)

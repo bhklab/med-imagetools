@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from imgtools.modules.structureset import (
+from imgtools.modules.structureset.structure_set import (
     StructureSet,
 )  # Replace `your_module` with the actual module name
 
