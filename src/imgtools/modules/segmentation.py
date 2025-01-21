@@ -363,7 +363,7 @@ class Segmentation(sitk.Image):
     def __getitem__(self, idx) -> Segmentation | any:  # noqa
         res = super().__getitem__(idx)
         match res:
-            case sitk.Image:
+            case sitk.Image():
                 res = Segmentation(
                     res, roi_indices=self.roi_indices, raw_roi_names=self.raw_roi_names
                 )
