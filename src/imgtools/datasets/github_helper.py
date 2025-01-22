@@ -10,7 +10,14 @@ from typing import List, Optional
 import aiohttp
 from rich import print
 from rich.console import Console
-from rich.progress import Progress
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TaskProgressColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
 
 # create a single console for all progress bars, so they don't clutter the output
 console = Console()
@@ -153,6 +160,46 @@ class GitHubReleaseManager:
         return self.latest_release
 
 
+async def download_dataset(
+    download_link: str, file_path: Path, progress: Progress, timeout_seconds: int = 3600
+) -> Path:
+    """
+    Download a single dataset.
+
+    Parameters
+    ----------
+    download_link : str
+        The URL to download the dataset from.
+    file_path : Path
+        The path where the downloaded file will be saved.
+    progress : Progress
+        The progress bar to use for the download.
+    timeout_seconds : int, optional
+        The timeout for the download in seconds, by default 3600.
+
+    Returns
+    -------
+    Path
+        The path to the downloaded file.
+    """
+    timeout = aiohttp.ClientTimeout(total=timeout_seconds)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        try:
+            async with session.get(download_link) as response:
+                total = int(response.headers.get("content-length", 0))
+                task = progress.add_task(f"[cyan]Downloading {file_path.name}...", total=total)
+                with file_path.open("wb") as f:
+                    async for chunk in response.content.iter_chunked(8192):
+                        f.write(chunk)
+                        progress.update(task, advance=len(chunk))
+        except asyncio.TimeoutError:
+            console.print(
+                f"[bold red]Timeout while downloading {file_path.name}. Please try again later.[/]"
+            )
+            raise
+    return file_path
+
+
 @dataclass
 class MedImageTestData(GitHubReleaseManager):
     """
@@ -166,7 +213,6 @@ class MedImageTestData(GitHubReleaseManager):
         super().__init__("bhklab/med-image_test-data")
         self.downloaded_paths = []
         self.get_latest_release()
-        self.progress = Progress()
 
     @property
     def datasets(self) -> List[GitHubReleaseAsset]:
@@ -177,7 +223,11 @@ class MedImageTestData(GitHubReleaseManager):
         return [asset.name for asset in self.datasets]
 
     async def _download_asset(
-        self, session: aiohttp.ClientSession, asset: GitHubReleaseAsset, dest: Path
+        self,
+        session: aiohttp.ClientSession,
+        asset: GitHubReleaseAsset,
+        dest: Path,
+        progress: Progress,
     ) -> Path:
         """
         Helper method to download a single asset asynchronously with a progress bar.
@@ -190,6 +240,8 @@ class MedImageTestData(GitHubReleaseManager):
             The asset to download.
         dest : Path
             Destination directory where the file will be saved.
+        progress : Progress
+            The progress bar to use for the download.
 
         Returns
         -------
@@ -203,20 +255,10 @@ class MedImageTestData(GitHubReleaseManager):
             print(f"File {asset.name} already exists. Skipping download.")
             return filepath
 
-        with self.progress:
-            task_id = self.progress.add_task(f"Downloading {asset.name}", total=asset.size)
-
-            async with session.get(asset.url) as response:
-                response.raise_for_status()
-                with open(filepath, "wb") as file:
-                    while chunk := await response.content.read(8192):
-                        file.write(chunk)
-                        self.progress.update(task_id, advance=len(chunk))
-
-        return filepath
+        return await download_dataset(asset.url, filepath, progress)
 
     async def _download(
-        self, dest: Path, assets: Optional[List[GitHubReleaseAsset]] = None
+        self, dest: Path, assets: List[GitHubReleaseAsset], progress: Progress
     ) -> List[Path]:
         """
         Download specified assets or all assets if none are specified.
@@ -227,6 +269,8 @@ class MedImageTestData(GitHubReleaseManager):
             Destination directory where the files will be saved.
         assets : List[GitHubReleaseAsset], optional
             List of assets to download. If None, all assets will be downloaded.
+        progress : Progress
+            The progress bar to use for the download.
 
         Returns
         -------
@@ -237,7 +281,7 @@ class MedImageTestData(GitHubReleaseManager):
             assets = self.latest_release.assets
 
         async with aiohttp.ClientSession() as session:
-            tasks = [self._download_asset(session, asset, dest) for asset in assets]
+            tasks = [self._download_asset(session, asset, dest, progress) for asset in assets]
             self.downloaded_paths = await asyncio.gather(*tasks)
         return self.downloaded_paths
 
@@ -255,12 +299,22 @@ class MedImageTestData(GitHubReleaseManager):
         List[Path]
             List of paths to the downloaded files.
         """
-        return asyncio.run(
-            self._download(
-                dest,
-                assets=self.latest_release.assets,
+        with Progress(
+            TextColumn("[bold blue]{task.description}", justify="right"),
+            BarColumn(),
+            TaskProgressColumn(),
+            DownloadColumn(),
+            TextColumn("{task.completed}/{task.total} MB", justify="right"),
+            TimeRemainingColumn(),
+            console=console,
+        ) as progress:
+            return asyncio.run(
+                self._download(
+                    dest,
+                    assets=self.latest_release.assets,
+                    progress=progress,
+                )
             )
-        )
 
     def download(self, dest: Path, assets: Optional[List[GitHubReleaseAsset]] = None) -> List[Path]:
         """
@@ -280,7 +334,16 @@ class MedImageTestData(GitHubReleaseManager):
         """
         print(f"Downloading assets to {dest}...")
         print(f"Assets: {', '.join(asset.name for asset in assets)}")
-        return asyncio.run(self._download(dest, assets))
+        with Progress(
+            TextColumn("[bold blue]{task.description}", justify="right"),
+            BarColumn(),
+            TaskProgressColumn(),
+            DownloadColumn(),
+            TextColumn("{task.completed}/{task.total} MB", justify="right"),
+            TimeRemainingColumn(),
+            console=console,
+        ) as progress:
+            return asyncio.run(self._download(dest, assets, progress))
 
     def extract(self, dest: Path) -> List[Path]:
         """Extract downloaded archives to the specified directory."""
