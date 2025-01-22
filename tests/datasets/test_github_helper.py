@@ -24,7 +24,12 @@ def test_get_latest_release(med_image_test_data):
 def test_extract(med_image_test_data, tmp_path):
     download_dir = tmp_path / "downloads"
     extract_dir = tmp_path / "extracted"
-    med_image_test_data.download_release_data(download_dir)
+
+    release = med_image_test_data.get_latest_release()
+
+    chosen_assets = release.assets[:2]
+
+    med_image_test_data.download(download_dir, assets=chosen_assets)
 
     assert len(med_image_test_data.downloaded_paths) > 0
     for path in med_image_test_data.downloaded_paths:
