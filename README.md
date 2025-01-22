@@ -1,3 +1,5 @@
+<div align="center">
+
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
 <!--intro-start-->
 
@@ -14,6 +16,8 @@
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
+
+</div>
 
 ## Med-ImageTools core features
 
