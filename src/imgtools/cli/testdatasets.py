@@ -1,19 +1,20 @@
-try:
-    from github import Github  # type: ignore # noqa
-except ImportError as e:
-    raise ImportError(
-        "PyGithub is required for the test data feature of med-imagetools. "
-        "Install it using 'pip install med-imagetools[test]'."
-    ) from e
-
-
 import pathlib
 from typing import List
 
 import click
 
-from imgtools.datasets import MedImageTestData
-from imgtools.logging import logger
+
+def is_testdata_available() -> bool:
+    try:
+        from github import Github  # type: ignore # noqa
+
+        return True
+    except ImportError:
+        return False
+
+
+if is_testdata_available():
+    from imgtools.datasets import MedImageTestData
 
 
 @click.command()
