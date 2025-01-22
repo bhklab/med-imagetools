@@ -54,17 +54,19 @@ classifiers = [
 # Optional dependencies (extras)
 [project.optional-dependencies]
 torch = ["torch", "torchio"]
+debug = ["pyvis"]
 test = [
   "pygithub>=2.5.0",
   "aiohttp>=3.8.1",
 ]
 all = [
   "pygithub>=2.5.0",
+  "aiohttp>=3.8.1",
   # add these back later
   # "torch",
   # "torchio",
+  # "pyvis",
 ]
-# debug = ["pyvis"]
 
 # Entry points for CLI commands
 [project.scripts]
