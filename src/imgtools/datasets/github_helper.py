@@ -382,18 +382,3 @@ if __name__ == "__main__":
 
     dest_dir = Path("data")
     downloaded_files = manager.download(dest_dir, assets=chosen_assets)
-
-    # release = manager.get_latest_release()
-
-    # print(manager)
-
-    # print(manager.datasets)
-
-    # print(manager.dataset_names)
-
-    # dest_dir = Path("data")
-    # chosen_assets = manager.datasets[:2]
-
-    # downloaded_files = manager.download(dest_dir, assets=chosen_assets)
-
-    # print(downloaded_files)
