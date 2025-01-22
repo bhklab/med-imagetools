@@ -7,8 +7,15 @@ from pathlib import Path
 from typing import List
 
 import requests
-from github import Github
 from rich import print
+
+try:
+    from github import Github  # type: ignore # noqa
+except ImportError as e:
+    raise ImportError(
+        "PyGithub is required for the test data feature of med-imagetools. "
+        "Install it using 'pip install med-imagetools[test]'."
+    ) from e
 
 
 @dataclass
