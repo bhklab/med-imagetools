@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 import tarfile
 import zipfile
 from dataclasses import dataclass, field
@@ -110,6 +111,7 @@ class GitHubReleaseManager:
 
     def __init__(self, repo_name: str, token: str | None = None):
         self.repo_name = repo_name
+        token = token or os.environ.get("GITHUB_TOKEN")
         self.github = Github(token) if token else Github()
         self.repo = self.github.get_repo(repo_name)
 
@@ -146,8 +148,7 @@ class GitHubReleaseManager:
         return GitHubRelease(
             tag_name=release.tag_name,
             name=release.title,
-            # body=release.body or "",
-            body="",  # for now... we can add this later
+            body=release.body or "",
             html_url=release.html_url,
             created_at=release.created_at.isoformat(),
             published_at=release.published_at.isoformat(),
