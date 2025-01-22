@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import tarfile
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
+import aiohttp
 import requests
 from rich import print
 
@@ -99,10 +101,24 @@ class GitHubReleaseManager:
         self.github = Github(token) if token else Github()
         self.repo = self.github.get_repo(repo_name)
 
-    def get_latest_release(self) -> GitHubRelease:
-        """Fetches the latest release details from the repository."""
+    def get_release(self, tag: Optional[str] = "latest") -> GitHubRelease:
+        """
+        Fetches the details of a specific release or the latest release if no tag is provided.
 
-        release = self.repo.get_latest_release()
+        Parameters
+        ----------
+        tag : str, optional
+            The tag of the release to fetch. If 'latest', fetches the latest release.
+
+        Returns
+        -------
+        GitHubRelease
+            The details of the requested release.
+        """
+        if tag == "latest":
+            release = self.repo.get_latest_release()
+        else:
+            release = self.repo.get_release(tag)
 
         assets = [
             GitHubReleaseAsset(
@@ -115,7 +131,7 @@ class GitHubReleaseManager:
             for asset in release.get_assets()
         ]
 
-        self.latest_release = GitHubRelease(
+        return GitHubRelease(
             tag_name=release.tag_name,
             name=release.title,
             body=release.body or "",
@@ -124,38 +140,11 @@ class GitHubReleaseManager:
             published_at=release.published_at.isoformat(),
             assets=assets,
         )
+
+    def get_latest_release(self) -> GitHubRelease:
+        """Fetches the latest release details from the repository."""
+        self.latest_release = self.get_release("latest")
         return self.latest_release
-
-    def download_asset(self, asset: GitHubReleaseAsset, dest: Path) -> Path:
-        """
-        Downloads a release asset to a specified directory.
-
-        Parameters
-        ----------
-        asset : GitHubReleaseAsset
-            The asset to download.
-        dest : Path
-            Destination directory where the file will be saved.
-
-        Returns
-        -------
-        Path
-            Path to the downloaded file.
-        """
-        response = requests.get(asset.url, stream=True)
-        response.raise_for_status()
-        dest.mkdir(parents=True, exist_ok=True)
-        filepath = dest / asset.name
-
-        if filepath.exists():
-            print(f"File {asset.name} already exists. Skipping download.")
-            return filepath
-
-        with open(filepath, "wb") as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-
-        return filepath
 
 
 @dataclass
@@ -169,15 +158,117 @@ class MedImageTestData(GitHubReleaseManager):
     def __init__(self):
         super().__init__("bhklab/med-image_test-data")
         self.downloaded_paths = []
+        self.get_latest_release()
 
-    def download_release_data(self, dest: Path) -> MedImageTestData:
-        """Download all assets of the latest release to the specified directory."""
-        latest_release = self.get_latest_release()
-        for asset in latest_release.assets:
-            print(f"Downloading {asset.name}...")
-            downloaded_path = self.download_asset(asset, dest)
-            self.downloaded_paths.append(downloaded_path)
-        return self
+    @property
+    def datasets(self) -> List[GitHubReleaseAsset]:
+        return self.latest_release.assets
+
+    @property
+    def dataset_names(self) -> List[str]:
+        return [asset.name for asset in self.datasets]
+
+    async def _download_asset(
+        self, session: aiohttp.ClientSession, asset: GitHubReleaseAsset, dest: Path
+    ) -> Path:
+        """
+        Helper method to download a single asset asynchronously.
+
+        Parameters
+        ----------
+        session : aiohttp.ClientSession
+            The aiohttp session to use for the request.
+        asset : GitHubReleaseAsset
+            The asset to download.
+        dest : Path
+            Destination directory where the file will be saved.
+
+        Returns
+        -------
+        Path
+            Path to the downloaded file.
+        """
+        dest.mkdir(parents=True, exist_ok=True)
+        filepath = dest / asset.name
+
+        if filepath.exists():
+            print(f"File {asset.name} already exists. Skipping download.")
+            return filepath
+
+        async with session.get(asset.url) as response:
+            response.raise_for_status()
+            with open(filepath, "wb") as file:
+                while chunk := await response.content.read(8192):
+                    file.write(chunk)
+
+        return filepath
+
+    async def _download(
+        self, dest: Path, assets: Optional[List[GitHubReleaseAsset]] = None
+    ) -> List[Path]:
+        """
+        Download specified assets or all assets if none are specified.
+
+        Parameters
+        ----------
+        dest : Path
+            Destination directory where the files will be saved.
+        assets : List[GitHubReleaseAsset], optional
+            List of assets to download. If None, all assets will be downloaded.
+
+        Returns
+        -------
+        List[Path]
+            List of paths to the downloaded files.
+        """
+        if assets is None:
+            assets = self.latest_release.assets
+
+        async with aiohttp.ClientSession() as session:
+            tasks = [self._download_asset(session, asset, dest) for asset in assets]
+            self.downloaded_paths = await asyncio.gather(*tasks)
+        return self.downloaded_paths
+
+    def download_all(self, dest: Path) -> List[Path]:
+        """
+        Download all assets of the latest release synchronously.
+
+        Parameters
+        ----------
+        dest : Path
+            Destination directory where the files will be saved.
+
+        Returns
+        -------
+        List[Path]
+            List of paths to the downloaded files.
+        """
+        return asyncio.run(
+            self._download(
+                dest,
+                assets=self.latest_release.assets,
+            )
+        )
+
+    def download(self, dest: Path, assets: Optional[List[GitHubReleaseAsset]] = None) -> List[Path]:
+        """
+        Download specified assets synchronously.
+
+        Parameters
+        ----------
+        dest : Path
+            Destination directory where the files will be saved.
+        assets : List[GitHubReleaseAsset], optional
+            List of assets to download. If None, all assets will be downloaded.
+
+        Returns
+        -------
+        List[Path]
+            List of paths to the downloaded files.
+        """
+        print(f"Downloading assets to {dest}...")
+        print(f"Assets: {', '.join(asset.name for asset in assets)}")
+        return asyncio.run(self._download(dest, assets))
 
     def extract(self, dest: Path) -> List[Path]:
         """Extract downloaded archives to the specified directory."""
@@ -208,9 +299,26 @@ if __name__ == "__main__":
 
     print(manager)
 
-    manager.get_latest_release()
+    old_release_tag = "v0.11"
+    old_release = manager.get_release(old_release_tag)
+    print(old_release)
 
-    print(manager)
+    chosen_assets = old_release.assets[:2]
 
-    download_dir = Path("./data/med-image_test-data")
-    manager.download_release_data(download_dir).extract(download_dir)
+    dest_dir = Path("data")
+    downloaded_files = manager.download(dest_dir, assets=chosen_assets)
+
+    # release = manager.get_latest_release()
+
+    # print(manager)
+
+    # print(manager.datasets)
+
+    # print(manager.dataset_names)
+
+    # dest_dir = Path("data")
+    # chosen_assets = manager.datasets[:2]
+
+    # downloaded_files = manager.download(dest_dir, assets=chosen_assets)
+
+    # print(downloaded_files)
