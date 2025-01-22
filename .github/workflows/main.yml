@@ -32,6 +32,8 @@ jobs:
           locked: false # wont be the same because of the tag
 
       - name: Run pytest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pixi run -e ${{ matrix.env }} test -s -vv
 
