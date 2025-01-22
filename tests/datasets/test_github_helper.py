@@ -26,6 +26,8 @@ def test_extract(med_image_test_data, tmp_path):
     extract_dir = tmp_path / "extracted"
 
     release = med_image_test_data.get_latest_release()
+    # assert release is at least 'v0.13'
+    assert release.tag_name >= "v0.13"
 
     # chosen_assets = release.assets[:2]
     strings_of_interest = [
