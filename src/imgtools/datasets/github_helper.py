@@ -8,8 +8,13 @@ from pathlib import Path
 from typing import List, Optional
 
 import aiohttp
-import requests
 from rich import print
+from rich.console import Console
+from rich.progress import Progress
+
+# create a single console for all progress bars, so they don't clutter the output
+console = Console()
+
 
 try:
     from github import Github  # type: ignore # noqa
@@ -134,7 +139,8 @@ class GitHubReleaseManager:
         return GitHubRelease(
             tag_name=release.tag_name,
             name=release.title,
-            body=release.body or "",
+            # body=release.body or "",
+            body="",  # for now... we can add this later
             html_url=release.html_url,
             created_at=release.created_at.isoformat(),
             published_at=release.published_at.isoformat(),
@@ -154,11 +160,13 @@ class MedImageTestData(GitHubReleaseManager):
     """
 
     downloaded_paths: List[Path] = field(default_factory=list, init=False)
+    progress: Progress = field(default_factory=Progress, init=False)
 
     def __init__(self):
         super().__init__("bhklab/med-image_test-data")
         self.downloaded_paths = []
         self.get_latest_release()
+        self.progress = Progress()
 
     @property
     def datasets(self) -> List[GitHubReleaseAsset]:
@@ -172,7 +180,7 @@ class MedImageTestData(GitHubReleaseManager):
         self, session: aiohttp.ClientSession, asset: GitHubReleaseAsset, dest: Path
     ) -> Path:
         """
-        Helper method to download a single asset asynchronously.
+        Helper method to download a single asset asynchronously with a progress bar.
 
         Parameters
         ----------
@@ -195,11 +203,15 @@ class MedImageTestData(GitHubReleaseManager):
             print(f"File {asset.name} already exists. Skipping download.")
             return filepath
 
-        async with session.get(asset.url) as response:
-            response.raise_for_status()
-            with open(filepath, "wb") as file:
-                while chunk := await response.content.read(8192):
-                    file.write(chunk)
+        with self.progress:
+            task_id = self.progress.add_task(f"Downloading {asset.name}", total=asset.size)
+
+            async with session.get(asset.url) as response:
+                response.raise_for_status()
+                with open(filepath, "wb") as file:
+                    while chunk := await response.content.read(8192):
+                        file.write(chunk)
+                        self.progress.update(task_id, advance=len(chunk))
 
         return filepath
 
