@@ -110,21 +110,16 @@ class GitHubReleaseManager:
     latest_release: GitHubRelease | None = None
 
     # github parameters
-    seconds_between_requests = 15
-    timeout = 60
+    timeout = 300
 
     def __init__(self, repo_name: str, token: str | None = None):
         self.repo_name = repo_name
         token = token or os.environ.get("GITHUB_TOKEN")
         if token:
             print("Using token")
-            self.github = Github(
-                token, seconds_between_requests=self.seconds_between_requests, timeout=self.timeout
-            )
+            self.github = Github(token, timeout=self.timeout)
         else:
-            self.github = Github(
-                seconds_between_requests=self.seconds_between_requests, timeout=self.timeout
-            )
+            self.github = Github(timeout=self.timeout)
 
         self.repo = self.github.get_repo(repo_name)
 
