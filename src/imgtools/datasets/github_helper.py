@@ -184,7 +184,7 @@ class MedImageTestData(GitHubReleaseManager):
             print(f"Extracting {path.name}...")
             if tarfile.is_tarfile(path):
                 with tarfile.open(path, "r:*") as archive:
-                    archive.extractall(dest)
+                    archive.extractall(dest, filter="data")
                     extracted_paths.extend([dest / member.name for member in archive.getmembers()])
             elif zipfile.is_zipfile(path):
                 with zipfile.ZipFile(path, "r") as archive:
