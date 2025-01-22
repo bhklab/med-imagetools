@@ -27,7 +27,17 @@ def test_extract(med_image_test_data, tmp_path):
 
     release = med_image_test_data.get_latest_release()
 
-    chosen_assets = release.assets[:2]
+    # chosen_assets = release.assets[:2]
+    strings_of_interest = [
+        "NSCLC-Radiomics",
+        "NSCLC_Radiogenomics",
+        "Vestibular-Schwannoma-SEG",
+    ]
+    chosen_assets = [
+        asset
+        for asset in release.assets
+        if any(string in asset.name for string in strings_of_interest)
+    ]
 
     med_image_test_data.download(download_dir, assets=chosen_assets)
 
