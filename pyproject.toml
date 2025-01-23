@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "1.15.0"
+version = "1.16.0"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -55,6 +55,18 @@ classifiers = [
 [project.optional-dependencies]
 torch = ["torch", "torchio"]
 debug = ["pyvis"]
+test = [
+  "pygithub>=2.5.0",
+  "aiohttp>=3.8.1",
+]
+all = [
+  "pygithub>=2.5.0",
+  "aiohttp>=3.8.1",
+  # add these back later
+  # "torch",
+  # "torchio",
+  # "pyvis",
+]
 
 # Entry points for CLI commands
 [project.scripts]

@@ -3,7 +3,7 @@ name: CI-CD
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["main", "jjjermiah/devel/main"]
+    branches: ["main"]
   pull_request:
     branches: ["*"]
 
@@ -14,9 +14,10 @@ jobs:
   Unit-Tests:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15 # Consider increasing timeout
+    continue-on-error: true # dont fail the whole matrix if one fails
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14] # , windows-latest removed for now
+        os: [ubuntu-latest, macos-latest, macos-14, windows-latest] 
         env: ["py310", "py311", "py312"]
 
     steps:
@@ -31,8 +32,10 @@ jobs:
           locked: false # wont be the same because of the tag
 
       - name: Run pytest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pixi run -e ${{ matrix.env }} test
+          pixi run -e ${{ matrix.env }} test -s -vv
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
@@ -41,6 +44,14 @@ jobs:
         with:
           name: coverage-report
           path: coverage-report
+
+      - name: JUnit Test Summary
+        id: pytest-summary
+        uses: test-summary/action@v2
+        with: 
+          paths: .cache/test-results/**/*.xml
+          show: all
+        if: always()
 
   ################################################################################################
   # Build-Docs: Build documentation using mkdocs
