@@ -1,4 +1,4 @@
-from dataclasses import dataclass, fields
+from dataclasses import dataclass, field, fields
 from typing import Iterator, List, Sequence
 
 import numpy as np
@@ -34,6 +34,17 @@ class RTSTRUCTMetadata:
     def __getitem__(self, key: str) -> str:
         return getattr(self, key)
 
+    def __rich_repr__(self) -> Iterator[tuple[str, str | Sequence[str]]]:
+        # for each key-value pair, 'yield key, value'
+        for attr_field in fields(self):
+            if attr_field.name.endswith("ROINames"):
+                if attr_field.name == "OriginalROINames":
+                    continue  # skip OriginalROINames for brevity
+                sorted_names = sorted(getattr(self, attr_field.name))
+                yield attr_field.name, sorted_names
+            else:
+                yield attr_field.name, getattr(self, attr_field.name)
+
 
 class ContourSlice:
     """Represents the contour points for a single slice."""
@@ -53,12 +64,12 @@ class ContourSlice:
         return f"ContourSlice<points.shape={self.points.shape}>"
 
 
+@dataclass
 class ROI:
     """Represents a region of interest (ROI), containing slices of contours."""
 
-    def __init__(self, name: str) -> None:
-        self.name: str = name
-        self.slices: List[ContourSlice] = []
+    name: str
+    slices: List[ContourSlice] = field(default_factory=list)
 
     def add_slice(self, points: np.ndarray) -> None:
         """Add a new slice to the ROI."""

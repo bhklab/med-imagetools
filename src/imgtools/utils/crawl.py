@@ -3,6 +3,7 @@ import os
 import pathlib
 from argparse import ArgumentParser
 
+import click
 import pandas as pd
 from joblib import Parallel, delayed
 from pydicom import dcmread
@@ -218,6 +219,30 @@ def to_df(database_dict):
 # fmt: on
 
 
+@click.command()
+@click.argument(
+    "top",
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        dir_okay=True,
+        path_type=pathlib.Path,
+        resolve_path=True,
+    ),
+)
+@click.option("-n", "--n_jobs", default=-1, help="Number of parallel processes for multiprocessing.")
+@click.option(
+    "--csv_path",
+    type=click.Path(
+        exists=False,
+        path_type=pathlib.Path,
+    ),
+    help="Path to save the csv file.",
+)
+@click.help_option(
+    "-h",
+    "--help",
+)
 def crawl(
     top: pathlib.Path,
     n_jobs: int = -1,
@@ -267,17 +292,16 @@ def crawl(
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser("Dataset DICOM Crawler")
-    parser.add_argument(
-        "directory", type=str, help="Top-level directory of the dataset."
-    )
-    parser.add_argument(
-        "--n_jobs",
-        type=int,
-        default=os.cpu_count() - 2,
-        help="Number of parallel processes for multiprocessing.",
-    )
+    crawl()
+    # parser = ArgumentParser("Dataset DICOM Crawler")
+    # parser.add_argument("directory", type=str, help="Top-level directory of the dataset.")
+    # parser.add_argument(
+    #     "--n_jobs",
+    #     type=int,
+    #     default=os.cpu_count() - 2,
+    #     help="Number of parallel processes for multiprocessing.",
+    # )
 
-    args = parser.parse_args()
-    db = crawl(args.directory, n_jobs=args.n_jobs)
-    print("# patients:", len(db))
+    # args = parser.parse_args()
+    # db = crawl(args.directory, n_jobs=args.n_jobs)
+    # print("# patients:", len(db))
