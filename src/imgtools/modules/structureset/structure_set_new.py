@@ -8,12 +8,9 @@ import numpy as np
 from imgtools.logging import logger
 from imgtools.modules.structureset import (
     ROI,
-    ContourSlice,
     RTSTRUCTMetadata,
-    extract_roi_names,
     extract_rtstruct_metadata,
-    load_rtstruct_data,
-    rtstruct_reference_seriesuid,
+    load_rtstruct_dcm,
 )
 
 if TYPE_CHECKING:
@@ -36,13 +33,13 @@ class StructureSetData:
     """Represents the entire structure set, containing multiple ROIs."""
 
     rois: dict[str, ROI]
-    metadata: RTSTRUCTMetadata
+    metadata: RTSTRUCTMetadata | None
 
     def __init__(
         self, rois: dict[str, ROI] | None = None, metadata: RTSTRUCTMetadata | None = None
     ) -> None:
         self.rois = rois or {}
-        self.metadata = metadata or {}
+        self.metadata = metadata
 
     def add_roi(self, name: str, slice_points: List[np.ndarray]) -> None:
         """Add a new ROI to the structure set or append slices to an existing ROI."""
@@ -92,21 +89,26 @@ class StructureSetData:
         """Retrieve an ROI by name or access the metadata"""
         if name in self.rois:
             return self.rois[name]
-        elif name in self.metadata:
-            return self.metadata[name]
+        elif self.metadata:
+            if name in self.metadata:
+                return getattr(self.metadata, name)
+            else:
+                msg = f"{name} not found in ROI names OR metadata."
+                msg += f" Available ROIs: {self.roi_names}"
+                msg += f" Available metadata: {self.metadata.keys()}"
+                raise MissingROIError(msg)
         else:
-            msg = f"{name} not found in ROI names OR metadata."
-            msg += f" Available ROIs: {self.roi_names}"
-            msg += f" Available metadata: {list(self.metadata.keys())}"
-            raise MissingROIError(msg)
+            errmsg = f"ROI `{name}` not found in the structure set."
+            raise MissingROIError(errmsg)
 
     def __repr__(self) -> str:
         # roi_info = "\n\t".join(f"{name} ({len(roi)} slices)" for name, roi in self.rois.items())
         roi_info = f"ROIs: {len(self.rois)}"
         base_str = f"StructureSetData:\n\t{roi_info}\n"
         # newline for each key-value pair
-        metadata_str = "\n\t".join(f"{key}: {value}" for key, value in self.metadata.items())
-        base_str += f"Metadata:\n\t{metadata_str}"
+        if self.metadata:
+            metadata_str = "\n\t".join(f"{key}: {value}" for key, value in self.metadata.items())
+            base_str += f"Metadata:\n\t{metadata_str}"
         return base_str
 
     def __len__(self) -> int:
@@ -138,7 +140,7 @@ class StructureSetData:
             The structure set data extracted from the RTSTRUCT.
         """
         structure_set = cls()
-        dicom_rt = load_rtstruct_data(dicom)
+        dicom_rt = load_rtstruct_dcm(dicom)
         structure_set.metadata = extract_rtstruct_metadata(dicom_rt)
 
         # Extract ROI contour points for each ROI

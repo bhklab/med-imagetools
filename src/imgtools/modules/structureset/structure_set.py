@@ -43,7 +43,7 @@ from imgtools.modules.structureset import (
     RTSTRUCTMetadata,
     extract_roi_names,
     extract_rtstruct_metadata,
-    load_rtstruct_data,
+    load_rtstruct_dcm,
     rtstruct_reference_seriesuid,
 )
 from imgtools.utils import physical_points_to_idxs
@@ -157,7 +157,7 @@ class StructureSet:
     ) -> StructureSet:
         """Create a StructureSet instance from a DICOM RTSTRUCT file."""
 
-        dcm = load_rtstruct_data(rtstruct_path)
+        dcm = load_rtstruct_dcm(rtstruct_path)
 
         # Extract ROI names and points
         metadata: RTSTRUCTMetadata = extract_rtstruct_metadata(dcm)
@@ -188,11 +188,11 @@ class StructureSet:
 
         # Some of the ROIs wont have been extracted.
         # We can add a metadata field to indicate the number of ROIs that were extracted
-        metadata["ExtractedROINames"] = list(roi_points.keys())
-        # i like the idea of missingroinames, but would be even more useful if we can store the 
+        metadata.ExtractedROINames = list(roi_points.keys())
+        # i like the idea of missingroinames, but would be even more useful if we can store the
         # reason why they were missing. e.g. "Could not get points for ROI `GTV`."
         # metadata["MissingROINames"] = list(set(roi_names) - set(roi_points.keys()))
-        metadata["ExtractedNumberOfROIs"] = len(roi_points)
+        metadata.ExtractedNumberOfROIs = len(roi_points)
 
         # Return the StructureSet instance
         return cls(roi_points, metadata)

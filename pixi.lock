@@ -8428,8 +8428,8 @@ packages:
   timestamp: 1733255681319
 - pypi: .
   name: med-imagetools
-  version: 1.15.0
-  sha256: a3cd45e219ddc55879d6698777b3e907946a9e4308803df95c4fac3cd711b12a
+  version: 1.16.0
+  sha256: 874faebae02a2913f8be90ef6cf00bdce876d922a92582a0e9bd2882c72e7413
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2

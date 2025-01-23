@@ -1,10 +1,12 @@
-from typing import List, Sequence, TypedDict
+from dataclasses import dataclass, fields
+from typing import Iterator, List, Sequence
 
 import numpy as np
 
 
-class RTSTRUCTMetadata(TypedDict):
-    """TypedDict for RTSTRUCT metadata.
+@dataclass
+class RTSTRUCTMetadata:
+    """Dataclass for RTSTRUCT metadata.
 
     New keys can be added as needed.
     """
@@ -16,6 +18,21 @@ class RTSTRUCTMetadata(TypedDict):
     ReferencedSeriesInstanceUID: str
     OriginalROINames: Sequence[str]
     OriginalNumberOfROIs: int
+    ExtractedROINames: Sequence[str] = ()
+    ExtractedNumberOfROIs: int = 0
+
+    # or 'key in RTSTRUCTMetadata' to check if a key exists
+    def __contains__(self, key: str) -> bool:
+        return hasattr(self, key)
+
+    def keys(self) -> List[str]:
+        return [field.name for field in fields(self)]
+
+    def items(self) -> List[tuple[str, str]]:
+        return [(field.name, getattr(self, field.name)) for field in fields(self)]
+
+    def __getitem__(self, key: str) -> str:
+        return getattr(self, key)
 
 
 class ContourSlice:
@@ -53,5 +70,5 @@ class ROI:
     def __len__(self) -> int:
         return len(self.slices)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         return iter(self.slices)
