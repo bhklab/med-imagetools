@@ -43,7 +43,7 @@ class RTSTRUCTMetadata:
                 if attr_field.name == "OriginalROINames":
                     continue  # skip OriginalROINames for brevity
                 sorted_names = sorted(getattr(self, attr_field.name))
-                yield attr_field.name, ', '.join(sorted_names)
+                yield attr_field.name, ", ".join(sorted_names)
             else:
                 yield attr_field.name, getattr(self, attr_field.name)
 
@@ -77,7 +77,7 @@ class ROI:
     slices: List[ContourSlice]
 
     def __repr__(self) -> str:
-        return f"ROI<name={self.name}, num_slices={len(self.slices)}>"
+        return f"ROI<name={self.name}, roi_num={self.referenced_roi_number}, num_slices={len(self.slices)}>"
 
     def __len__(self) -> int:
         return len(self.slices)
