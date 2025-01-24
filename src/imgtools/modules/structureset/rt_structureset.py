@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, List
 
@@ -10,6 +11,7 @@ from imgtools.exceptions import MissingROIError, ROIContourError
 from imgtools.logging import logger
 from imgtools.modules.structureset import (
     ROI,
+    ContourSlice,
     DicomInput,
     RTSTRUCTMetadata,
     extract_rtstruct_metadata,
@@ -20,19 +22,12 @@ if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 
+@dataclass
 class RTStructureSet:
     """Represents the entire structure set, containing multiple ROIs."""
 
-    rois: dict[str, ROI]
-    metadata: RTSTRUCTMetadata | None
-
-    def __init__(
-        self,
-        rois: dict[str, ROI] | None = None,
-        metadata: RTSTRUCTMetadata | None = None,
-    ) -> None:
-        self.rois = rois or {}
-        self.metadata = metadata
+    rois: dict[str, ROI] = field(repr=False)
+    metadata: RTSTRUCTMetadata
 
     @classmethod
     def from_dicom(
@@ -60,40 +55,39 @@ class RTStructureSet:
         RTStructureSet
             The structure set data extracted from the RTSTRUCT.
         """
-        structure_set = cls()
+        logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
         dicom_rt = load_rtstruct_dcm(dicom)
-        structure_set.metadata = extract_rtstruct_metadata(dicom_rt)
+        metadata = extract_rtstruct_metadata(dicom_rt)
 
         case_ignore = re.IGNORECASE if ignore_case else 0
 
-        # Extract ROI contour points for each ROI
-        for roi_index, roi_name in enumerate(structure_set.metadata["OriginalROINames"]):
+        # Create a dictionary to store the ROI objects
+        roi_dict: dict[str, ROI] = {}
+
+        # Extract ROI contour points for each ROI and
+        for roi_index, roi_name in enumerate(metadata["OriginalROINames"]):
             if roi_name_pattern and not re.match(roi_name_pattern, roi_name, flags=case_ignore):
                 continue
             try:
-                roi_points = cls._get_roi_points(dicom_rt, roi_index=roi_index)
+                extracted_roi = cls._get_roi_points(
+                    dicom_rt, roi_index=roi_index, roi_name=roi_name
+                )
             except ROIContourError as ae:
                 if not suppress_warnings:
                     logger.warning(
                         f"Could not get points for ROI `{roi_name}`.",
-                        rtstruct_series=structure_set["SeriesInstanceUID"],
+                        rtstruct_series=metadata["SeriesInstanceUID"],
                         error=ae,
                     )
             else:
-                structure_set.add_roi(roi_name, roi_points)
+                roi_dict[roi_name] = extracted_roi
 
-        structure_set.metadata.ExtractedNumberOfROIs = len(structure_set.rois)
-        structure_set.metadata.ExtractedROINames = structure_set.roi_names
+        metadata.ExtractedNumberOfROIs = len(roi_dict)
+        metadata.ExtractedROINames = list(roi_dict.keys())
+        # Create a new RTStructureSet object
+        structure_set = cls(rois=roi_dict, metadata=metadata)
+
         return structure_set
-
-    def add_roi(self, name: str, slice_points: List[np.ndarray]) -> None:
-        """Add a new ROI to the structure set or append slices to an existing ROI."""
-        if name not in self.rois:
-            self.rois[name] = ROI(name)
-
-        # Add each slice to the ROI, will be converted to ContourSlice objects
-        for points in slice_points:
-            self.rois[name].add_slice(points)
 
     @property
     def roi_names(self) -> List[str]:
@@ -150,15 +144,9 @@ class RTStructureSet:
             errmsg = f"Key `{name}` not found in structure set's ROI names or metadata."
             raise MissingROIError(errmsg)
 
-    def __repr__(self) -> str:
-        # roi_info = "\n\t".join(f"{name} ({len(roi)} slices)" for name, roi in self.rois.items())
-        roi_info = f"ROIs: {len(self.rois)}"
-        base_str = f"RTStructureSet:\n\t{roi_info}\n"
-        # newline for each key-value pair
-        if self.metadata:
-            metadata_str = "\n\t".join(f"{key}: {value}" for key, value in self.metadata.items())
-            base_str += f"Metadata:\n\t{metadata_str}"
-        return base_str
+    def __rich_repr__(self) -> Iterator:
+        yield "rois", len(self.rois)
+        yield "Metadata", self.metadata
 
     def __len__(self) -> int:
         return len(self.rois)
@@ -168,7 +156,7 @@ class RTStructureSet:
         return iter(self.rois.items())
 
     @staticmethod
-    def _get_roi_points(rtstruct: FileDataset, roi_index: int) -> List[np.ndarray]:
+    def _get_roi_points(rtstruct: FileDataset, roi_index: int, roi_name: str) -> ROI:
         """Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
 
         Parameters
@@ -177,6 +165,8 @@ class RTStructureSet:
             The loaded DICOM RTSTRUCT file.
         roi_index : int
             The index of the ROI in the ROIContourSequence.
+        roi_name : str
+            The name of the ROI to extract points for.
 
         Returns
         -------
@@ -229,13 +219,17 @@ class RTStructureSet:
         contour_points = []
         for i, slc in enumerate(contour_sequence):
             if not hasattr(slc, "ContourData"):
-                _contour_type = roi_contour.get("ContourGeometricType", "unknown")
-                msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'."
-                msg += f"ContourGeometricType: {_contour_type}."
+                msg = (
+                    f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'. "
+                    f"ContourGeometricType: {roi_contour.get("ContourGeometricType", "unknown")}."
+                    f"NumberOfContourPoints: {roi_contour.get('NumberOfContourPoints', 'unknown')}"
+                )
                 raise ROIContourError(msg)
-            contour_points.append(np.array(slc.ContourData).reshape(-1, 3))
+            roi_points = np.array(slc.ContourData).reshape(-1, 3)
+            contour_slice = ContourSlice(roi_points)
+            contour_points.append(contour_slice)
 
-        return contour_points
+        return ROI(roi_name, roi_index, contour_points)
 
 
 if __name__ == "__main__":
@@ -243,6 +237,7 @@ if __name__ == "__main__":
 
     import pandas as pd
     from rich import print
+    import time
 
     index = Path(".imgtools/imgtools_data.csv")
     df = pd.read_csv(index, index_col=0)
@@ -258,18 +253,22 @@ if __name__ == "__main__":
         patient_id = row["patient_ID"]
         file_path = row["file_path"]
 
+        start = time.time()
         rtstruct = RTStructureSet.from_dicom(
             file_path,
             suppress_warnings=True,
         )
+        print(f"Time taken: {time.time() - start:.2f} seconds")
+        print(rtstruct)
+
+        print("_" * 80)
         print(rtstruct["PatientID"])
         print(rtstruct["SeriesInstanceUID"])
-        # print(rtstruct)
         print(rtstruct["gtv.*"])
         print(rtstruct["ctv.*"])
 
         # anything that has 'ptv' in the name
-        print(rtstruct[".*ptv.*"])
+        print(rtstruct["ptv.*"])
         break
 
     # # Profile the main function

@@ -1,4 +1,6 @@
-from dataclasses import dataclass, field, fields
+from __future__ import annotations
+
+from dataclasses import dataclass, fields
 from typing import Iterator, List, Sequence
 
 import numpy as np
@@ -26,10 +28,10 @@ class RTSTRUCTMetadata:
         return hasattr(self, key)
 
     def keys(self) -> List[str]:
-        return [field.name for field in fields(self)]
+        return [attr_field.name for attr_field in fields(self)]
 
     def items(self) -> List[tuple[str, str]]:
-        return [(field.name, getattr(self, field.name)) for field in fields(self)]
+        return [(attr_field.name, getattr(self, attr_field.name)) for attr_field in fields(self)]
 
     def __getitem__(self, key: str) -> str:
         return getattr(self, key)
@@ -41,27 +43,29 @@ class RTSTRUCTMetadata:
                 if attr_field.name == "OriginalROINames":
                     continue  # skip OriginalROINames for brevity
                 sorted_names = sorted(getattr(self, attr_field.name))
-                yield attr_field.name, sorted_names
+                yield attr_field.name, ', '.join(sorted_names)
             else:
                 yield attr_field.name, getattr(self, attr_field.name)
 
 
-class ContourSlice:
-    """Represents the contour points for a single slice."""
+class ContourSlice(np.ndarray):
+    """Represents the contour points for a single slice.
+    Simply a NumPy array with shape (n_points, 3) where the last dimension
+    represents the x, y, and z coordinates of each point.
+    """
 
-    def __init__(self, points: np.ndarray) -> None:
-        assert isinstance(points, np.ndarray)
-        if points.ndim != 2 or points.shape[1] != 3:
-            msg = f"Contour points must be a 2D array with shape (n_points, 3), got {points.shape}"
-            raise ValueError(msg)
-        self.points: np.ndarray = points
+    def __new__(cls, input_array: np.ndarray) -> ContourSlice:
+        obj = np.asarray(input_array).view(cls)
+        return obj
 
-    def __array__(self) -> np.ndarray:
-        """Allow the object to be used as a NumPy array."""
-        return self.points
+    def __array_finalize__(self, obj: np.ndarray | None) -> None:
+        if obj is None:
+            return
+        assert self.ndim == 2
+        assert self.shape[1] == 3
 
     def __repr__(self) -> str:
-        return f"ContourSlice<points.shape={self.points.shape}>"
+        return f"ContourSlice<points.shape={self.shape}>"
 
 
 @dataclass
@@ -69,11 +73,8 @@ class ROI:
     """Represents a region of interest (ROI), containing slices of contours."""
 
     name: str
-    slices: List[ContourSlice] = field(default_factory=list)
-
-    def add_slice(self, points: np.ndarray) -> None:
-        """Add a new slice to the ROI."""
-        self.slices.append(ContourSlice(points))
+    referenced_roi_number: int
+    slices: List[ContourSlice]
 
     def __repr__(self) -> str:
         return f"ROI<name={self.name}, num_slices={len(self.slices)}>"
