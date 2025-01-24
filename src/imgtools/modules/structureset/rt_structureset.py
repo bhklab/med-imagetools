@@ -59,7 +59,7 @@ class RTStructureSet:
         dicom_rt = load_rtstruct_dcm(dicom)
         metadata = extract_rtstruct_metadata(dicom_rt)
 
-        case_ignore = re.IGNORECASE if ignore_case else 0
+        case_ignore = re.IGNORECASE if ignore_case else 0  # for pattern matching
 
         # Create a dictionary to store the ROI objects
         roi_dict: dict[str, ROI] = {}
@@ -233,11 +233,11 @@ class RTStructureSet:
 
 
 if __name__ == "__main__":
+    import time
     from pathlib import Path
 
     import pandas as pd
     from rich import print
-    import time
 
     index = Path(".imgtools/imgtools_data.csv")
     df = pd.read_csv(index, index_col=0)
