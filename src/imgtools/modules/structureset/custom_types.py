@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, fields
+from dataclasses import asdict, dataclass, fields
 from typing import Iterator, List, Sequence
 
 import numpy as np
@@ -20,8 +20,6 @@ class RTSTRUCTMetadata:
     ReferencedSeriesInstanceUID: str
     OriginalROINames: Sequence[str]
     OriginalNumberOfROIs: int
-    ExtractedROINames: Sequence[str] = ()
-    ExtractedNumberOfROIs: int = 0
 
     # or 'key in RTSTRUCTMetadata' to check if a key exists
     def __contains__(self, key: str) -> bool:
@@ -33,17 +31,19 @@ class RTSTRUCTMetadata:
     def items(self) -> List[tuple[str, str]]:
         return [(attr_field.name, getattr(self, attr_field.name)) for attr_field in fields(self)]
 
+    def to_dict(self) -> dict:
+        return asdict(self)
+
     def __getitem__(self, key: str) -> str:
         return getattr(self, key)
 
     def __rich_repr__(self) -> Iterator[tuple[str, str | Sequence[str]]]:
         # for each key-value pair, 'yield key, value'
         for attr_field in fields(self):
-            if attr_field.name.endswith("ROINames"):
-                if attr_field.name == "OriginalROINames":
-                    continue  # skip OriginalROINames for brevity
-                sorted_names = sorted(getattr(self, attr_field.name))
-                yield attr_field.name, ", ".join(sorted_names)
+            if attr_field.name == "OriginalROINames":
+                continue  # skip OriginalROINames for brevity
+            elif attr_field.name.endswith("UID"):
+                yield attr_field.name, f"...{getattr(self, attr_field.name)[-5:]}"
             else:
                 yield attr_field.name, getattr(self, attr_field.name)
 
@@ -74,13 +74,38 @@ class ROI:
 
     name: str
     referenced_roi_number: int
+    num_points: int
     slices: List[ContourSlice]
 
+    def __str__(self) -> str:
+        return (
+            f"{self.name} (ROI#={self.referenced_roi_number}) "
+            f"{self.NumSlices} slices & {self.NumberOfContourPoints} points"
+        )
+
     def __repr__(self) -> str:
-        return f"ROI<name={self.name}, roi_num={self.referenced_roi_number}, num_slices={len(self.slices)}>"
+        return (
+            f"ROI<name={self.name}, ReferencedROINumber={self.referenced_roi_number}, "
+            f"num_slices={self.NumSlices}, num_points={self.NumberOfContourPoints}>"
+        )
 
     def __len__(self) -> int:
         return len(self.slices)
 
     def __iter__(self) -> Iterator:
         return iter(self.slices)
+
+    @property
+    def ReferencedROINumber(self) -> int:
+        return self.referenced_roi_number
+
+    @property
+    def NumSlices(self) -> int:
+        return len(self.slices)
+
+    @property
+    def NumberOfContourPoints(self) -> int:
+        return self.num_points
+
+    def to_dict(self) -> dict:
+        return asdict(self)
