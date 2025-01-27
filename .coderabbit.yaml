@@ -58,6 +58,14 @@ reviews:
         - Check for grammar and spelling errors using markdownlint and languagetool.
         - Highlight any missing critical information (e.g., contributions guide, license).
 
+    - path: "config/mypy.ini"
+      instructions: >-
+        Review the MyPy configuration file to ensure type checking is up to date
+        - there are many ignored modules, as we are refactoring the codebase
+        to improve type hints.
+        - if any PR is modifying a module which is ignored in the mypy.ini file,
+        make a comment in the PR to let the author know to update the mypy.ini file.
+
   abort_on_close: true
   auto_review:
     enabled: true
