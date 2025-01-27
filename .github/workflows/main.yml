@@ -12,6 +12,9 @@ jobs:
   # Unit-Tests: Run unit tests using pytest
   ################################################################################################
   Unit-Tests:
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: true
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15 # Consider increasing timeout
     continue-on-error: true # dont fail the whole matrix if one fails
