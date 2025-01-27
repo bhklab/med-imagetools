@@ -1483,43 +1483,47 @@
 <span class="normal"><a href="#__codelineno-0-290">290</a></span>
 <span class="normal"><a href="#__codelineno-0-291">291</a></span>
 <span class="normal"><a href="#__codelineno-0-292">292</a></span>
-<span class="normal"><a href="#__codelineno-0-293">293</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="k">def</span><span class="w"> </span><span class="nf">similar_tags</span><span class="p">(</span><span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find similar DICOM tags for a given keyword.</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a>
-<a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="sd">    Useful for User Interface to suggest similar tags based on a misspelled keyword.</span>
+<span class="normal"><a href="#__codelineno-0-293">293</a></span>
+<span class="normal"><a href="#__codelineno-0-294">294</a></span>
+<span class="normal"><a href="#__codelineno-0-295">295</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-257" name="__codelineno-0-257"></a><span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a><span class="k">def</span><span class="w"> </span><span class="nf">similar_tags</span><span class="p">(</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find similar DICOM tags for a given keyword.</span>
 <a id="__codelineno-0-262" name="__codelineno-0-262"></a>
-<a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-264" name="__codelineno-0-264"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    keyword : str</span>
-<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">                    The keyword to search for similar tags.</span>
-<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">    n : int, optional</span>
-<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">                    Maximum number of similar tags to return (default is 3).</span>
-<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">    threshold : float, optional</span>
-<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">                    Minimum similarity ratio (default is 0.6).</span>
-<a id="__codelineno-0-271" name="__codelineno-0-271"></a>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    List[str]</span>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">                    A list of up to `n` similar DICOM tags.</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    Examples</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    --------</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    Find similar tags for a misspelled keyword:</span>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    &gt;&gt;&gt; similar_tags(&quot;PatinetID&quot;)</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    Adjust the number of results and threshold:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a><span class="sd">    Useful for User Interface to suggest similar tags based on a misspelled keyword.</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a><span class="sd">    keyword : str</span>
+<a id="__codelineno-0-268" name="__codelineno-0-268"></a><span class="sd">                    The keyword to search for similar tags.</span>
+<a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="sd">    n : int, optional</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="sd">                    Maximum number of similar tags to return (default is 3).</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    threshold : float, optional</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="sd">                    Minimum similarity ratio (default is 0.6).</span>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    List[str]</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">                    A list of up to `n` similar DICOM tags.</span>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    Examples</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    --------</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    Find similar tags for a misspelled keyword:</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">    &gt;&gt;&gt; similar_tags(&quot;PatinetID&quot;)</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
 <a id="__codelineno-0-285" name="__codelineno-0-285"></a>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    &gt;&gt;&gt; similar_tags(</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a><span class="sd">    ...     &quot;PatinetID&quot;,</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    ...     n=5,</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    ...     threshold=0.7,</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    ... )</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;]</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-293" name="__codelineno-0-293"></a>    <span class="k">return</span> <span class="n">difflib</span><span class="o">.</span><span class="n">get_close_matches</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">ALL_DICOM_TAGS</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a><span class="sd">    Adjust the number of results and threshold:</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a><span class="sd">    &gt;&gt;&gt; similar_tags(</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a><span class="sd">    ...     &quot;PatinetID&quot;,</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a><span class="sd">    ...     n=5,</span>
+<a id="__codelineno-0-291" name="__codelineno-0-291"></a><span class="sd">    ...     threshold=0.7,</span>
+<a id="__codelineno-0-292" name="__codelineno-0-292"></a><span class="sd">    ... )</span>
+<a id="__codelineno-0-293" name="__codelineno-0-293"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;]</span>
+<a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="k">return</span> <span class="n">difflib</span><span class="o">.</span><span class="n">get_close_matches</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">ALL_DICOM_TAGS</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
