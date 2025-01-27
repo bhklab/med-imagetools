@@ -13,8 +13,7 @@ jobs:
   ################################################################################################
   Unit-Tests:
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref_name }}
-      cancel-in-progress: true
+      group: ${{ github.ref }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15 # Consider increasing timeout
     continue-on-error: true # dont fail the whole matrix if one fails
