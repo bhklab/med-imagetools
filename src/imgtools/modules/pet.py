@@ -20,7 +20,8 @@ if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 
-class PETImageType(str, Enum):  # alternative to StrEnum for python 3.10 compatibility
+# alternative to StrEnum for python 3.10 compatibility
+class PETImageType(str, Enum):
     """
     Enumeration for PET image types used in DICOM processing.
 
@@ -40,7 +41,7 @@ class PETImageType(str, Enum):  # alternative to StrEnum for python 3.10 compati
 
     Examples
     --------
-    >>> image_type = PETImageType.SUV # SUV image type
+    >>> image_type = PETImageType.SUV  # SUV image type
     >>> print(image_type)
     'SUV'
     >>> isinstance(image_type, str)
@@ -68,7 +69,9 @@ class PET(sitk.Image):
         self.df: FileDataset = df
         self.factor: float = factor
         self.values_assumed: bool = values_assumed
-        self.metadata: Dict[str, Union[str, float, bool]] = metadata if metadata else {}
+        self.metadata: Dict[str, Union[str, float, bool]] = (
+            metadata if metadata else {}
+        )
         self.image_type = PETImageType(image_type)
 
     @classmethod
@@ -138,10 +141,14 @@ class PET(sitk.Image):
                 "%H%M%S.%f",
             )
             self.metadata["half_life"] = float(
-                self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
+                self.df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideHalfLife
             )
             self.metadata["injected_dose"] = float(
-                self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
+                self.df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideTotalDose
             )
         except KeyError:
             pass
@@ -153,7 +160,9 @@ class PET(sitk.Image):
         resampled_pt: sitk.Image = sitk.Resample(self.img_pet, ct_scan)
         return resampled_pt
 
-    def show_overlay(self, ct_scan: sitk.Image, slice_number: int) -> plt.figure:
+    def show_overlay(
+        self, ct_scan: sitk.Image, slice_number: int
+    ) -> plt.figure:
         resampled_pt: sitk.Image = self.resample_pet(ct_scan)
         fig: plt.figure = plt.figure("Overlayed image", figsize=[15, 10])
         pt_arr: np.ndarray = sitk.GetArrayFromImage(resampled_pt)
@@ -185,10 +194,14 @@ class PET(sitk.Image):
                 "%H%M%S.%f",
             )
             half_life: float = float(
-                df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
+                df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideHalfLife
             )
             injected_dose: float = float(
-                df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
+                df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideTotalDose
             )
 
             a: float = np.exp(
