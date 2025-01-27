@@ -53,7 +53,7 @@ jobs:
         uses: test-summary/action@v2
         with: 
           paths: .cache/test-results/**/*.xml
-          show: failed
+          show: "fail,skip"
         if: always()
 
   ################################################################################################
