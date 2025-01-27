@@ -25,8 +25,10 @@ reviews:
   poem: false  # Remove whimsical features to keep the workflow focused.
   labeling_instructions: []
   path_filters:
-    - "!tests/**"
+    - "tests/**"
     - "src/**"
+    - "README.md"
+    - "config/**"
   path_instructions:
     - path: "src/**/*.py"
       instructions: >-
