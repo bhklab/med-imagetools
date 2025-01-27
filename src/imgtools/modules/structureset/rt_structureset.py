@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, List
+from typing import TYPE_CHECKING, Iterator, List, TypeAlias
 
 import numpy as np
 
@@ -21,18 +21,38 @@ from imgtools.modules.structureset import (
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
+# Define type aliases
+SelectionPattern: TypeAlias = str | list[str]
+"""Alias for a string or a list of strings used to represent selection patterns."""
+
+ROINamePatterns: TypeAlias = SelectionPattern | dict[str, SelectionPattern] | None
+"""Alias for ROI names, which can be:
+- A single string pattern.
+- A list of string patterns.
+- A dictionary mapping strings to patterns or lists of patterns.
+- None, to represent the absence of any selection.
+"""
+
+
+class ROIExtractionErrorMsg(str):
+    pass
+
 
 @dataclass
 class RTStructureSet:
     """Represents the entire structure set, containing multiple ROIs."""
 
-    rois: dict[str, ROI | str] = field(repr=False)
+    roi_map: dict[str, ROI | ROIExtractionErrorMsg] = field(repr=False)
 
     # these are the EXTRACTED ROI names, not the original ones in the RTSTRUCT
     # since some will fail to extract
     # missing_rois = set(self.rois.keys()) - set(self.roi_names)
     roi_names: List[str]
     metadata: RTSTRUCTMetadata
+
+    @property
+    def rois(self) -> dict[str, ROI]:
+        return {roi_name: roi for roi_name, roi in self.roi_map if isinstance(roi, ROI)}
 
     @classmethod
     def from_dicom(
@@ -49,7 +69,7 @@ class RTStructureSet:
         dicom : str | Path | bytes | FileDataset
             The RTSTRUCT DICOM object.
         suppress_warnings : bool, optional
-            Whether to suppress warnings when extracting ROI points. 
+            Whether to suppress warnings when extracting ROI points.
             Default is False.
         roi_name_pattern : str, optional
             A regular expression pattern to match ROI names. Default is None.
@@ -87,13 +107,13 @@ class RTStructureSet:
                         error=ae,
                     )
                 error_string = f"Error extracting ROI '{roi_name}': {ae}"
-                roi_dict[roi_name] = error_string
+                roi_dict[roi_name] = ROIExtractionErrorMsg(error_string)
             else:
                 roi_dict[roi_name] = extracted_roi
                 extracted_rois.append(roi_name)
 
         # Create a new RTStructureSet object
-        structure_set = cls(rois=roi_dict, roi_names=extracted_rois, metadata=metadata)
+        structure_set = cls(roi_map=roi_dict, roi_names=extracted_rois, metadata=metadata)
 
         return structure_set
 
@@ -148,11 +168,11 @@ class RTStructureSet:
         --------
         imgtools.modules.structureset.custom_types.ROI
         """
-        if name in self.rois:
-            return [self.rois[name]]
+        if name in self.roi_map:
+            return [self.roi_map[name]]
         # Check if name is a pattern and match against ROI names
         elif matched_rois := self.match_roi(name, ignore_case=True):
-            return [self.rois[roi] for roi in matched_rois]
+            return [self.roi_map[roi] for roi in matched_rois]
         elif self.metadata:
             if name in self.metadata:
                 return getattr(self.metadata, name)
@@ -165,6 +185,10 @@ class RTStructureSet:
             errmsg = f"Key `{name}` not found in structure set's ROI names or metadata."
             raise MissingROIError(errmsg)
 
+    def _ipython_key_completions_(self) -> list[str]:
+        """IPython/Jupyter tab completion when indexing rtstruct[...]"""
+        return list(self.metadata.keys()) + self.roi_names
+
     def __rich_repr__(self) -> Iterator:
         yield "rois", len(self)  # len(self.roi_names)
         yield "roi_names", ", ".join(self.roi_names)  # self.roi_names
@@ -175,9 +199,11 @@ class RTStructureSet:
 
     def __iter__(self) -> Iterator[tuple[str, ROI]]:
         # iterate through self.rois.items if key is in self.roi_names
-        for name, roi in self.rois.items():
-            if name in self.roi_names:
-                yield name, roi
+        for name in self.roi_names:
+            yield name, self.roi_map[name]
+
+    def items(self) -> List[tuple[str, ROI]]:
+        return list(iter(self))
 
     @staticmethod
     def _get_roi_points(rtstruct: FileDataset, roi_index: int, roi_name: str) -> ROI:
@@ -275,7 +301,7 @@ class RTStructureSet:
 
         roi_info = {}
 
-        for name, roi in self.rois.items():
+        for name, roi in self.roi_map.items():
             if exclude_errors and not isinstance(roi, ROI):
                 continue
             roi_info[name] = str(roi)
@@ -286,6 +312,31 @@ class RTStructureSet:
             "Metadata": self.metadata.to_dict(),
         }
 
+    def _handle_roi_names(self, roi_names: ROINamePatterns = None) -> None:
+        """Handle the ROI names extracted from the RTSTRUCT file."""
+        match roi_names:
+            case None | []:
+                return None
+            case str() as single_pattern_str:  # roi_names is a single string
+                pass
+            case [*roi_patterns]:  # when roi_names is a non-empty list
+                pass
+            case dict() as roi_map:  # roi_names is a dictionary
+                for name, pattern in roi_map.items():
+                    match pattern:
+                        case str() as pattern_str:
+                            # Handle when a dictionary value is a string
+                            pass
+                        case []:
+                            # Handle when a dictionary value is an empty list
+                            pass
+                        case [*patterns]:
+                            # Handle when a dictionary value is a non-empty list
+                            pass
+            case _:
+                # Handle unexpected cases or raise an error if needed
+                pass
+
 
 if __name__ == "__main__":
     import time
@@ -294,10 +345,12 @@ if __name__ == "__main__":
     import pandas as pd
     from rich import print
 
-    index = Path(".imgtools/imgtools_data.csv")
-    df = pd.read_csv(index, index_col=0)
+    from imgtools.modules.structureset.structure_set import StructureSet
 
-    df = df[df["modality"] == "RTSTRUCT"]
+    index = Path(".imgtools/imgtools_data.csv")
+    full_index = pd.read_csv(index, index_col=0)
+
+    df = full_index[full_index["modality"] == "RTSTRUCT"]
 
     # store the metadata for each rtstruct in a dictionary
     rt_metadata = {}
@@ -315,6 +368,8 @@ if __name__ == "__main__":
         rt_metadata[file_path] = rtstruct.summary_dict(exclude_errors=False)
 
         print(rtstruct)
+
+        # rtstruct_old = StructureSet.from_dicom(rtstruct_path=file_path)
         break
         # print("_" * 80)
         # print(rtstruct["PatientID"])

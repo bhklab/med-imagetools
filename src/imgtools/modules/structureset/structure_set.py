@@ -557,15 +557,17 @@ class StructureSet:
         mask = np.zeros(size, dtype=np.uint8)
 
         seg_roi_indices = {}
-        if not roi_names:
-            for name, label in labels.items():
-                self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
-        elif isinstance(roi_names, dict):
+        # THIS GOT MESSED UP AFTER https://github.com/bhklab/med-imagetools/commit/0dff0f403d802d517614105b50f1c4008945e32d#diff-11d6f8dc4c916bd1f83966fac407f0231fb8ce4e73b80815c4de7f957103947b
+        if isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
                     self.get_mask(reference_image, mask, label, i, continuous)
                 seg_roi_indices[name] = i
+        # if not roi_names:
+        else:
+            for name, label in labels.items():
+                self.get_mask(reference_image, mask, name, label, continuous)
+            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
 
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)

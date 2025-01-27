@@ -13,13 +13,19 @@ from .custom_types import RTSTRUCTMetadata
 DicomInput: TypeAlias = FileDataset | str | Path | bytes
 
 
-def load_rtstruct_dcm(rtstruct_input: DicomInput, stop_before_pixels: bool = True) -> FileDataset:
+def load_rtstruct_dcm(
+    rtstruct_input: DicomInput,
+    force: bool = True,
+    stop_before_pixels: bool = True,
+) -> FileDataset:
     """Load an RTSTRUCT DICOM file or bytes data and return the FileDataset object.
 
     Parameters
     ----------
     rtstruct_input : str | Path | bytes
         Path to the RTSTRUCT file or its content as bytes.
+    force: bool (default = True)
+        ignore dicoms that are missing their *File Meta Information* header.
     stop_before_pixels : bool
         If True, stop reading the DICOM file before the pixel data, by default True
 
@@ -30,17 +36,19 @@ def load_rtstruct_dcm(rtstruct_input: DicomInput, stop_before_pixels: bool = Tru
 
     Raises
     ------
-    ValueError
+    InvalidDicomError
         If the input type is unsupported or the file is not an RTSTRUCT.
+    NotRTSTRUCTError
+        if the Modality field in the dicom is not `RTSTRUCT`
     """
     match rtstruct_input:
         case FileDataset():
             dicom = rtstruct_input
         case str() | Path():
-            dicom = dcmread(rtstruct_input, force=True, stop_before_pixels=stop_before_pixels)
+            dicom = dcmread(rtstruct_input, force=force, stop_before_pixels=stop_before_pixels)
         case bytes():
             dicom = dcmread(
-                BytesIO(rtstruct_input), force=True, stop_before_pixels=stop_before_pixels
+                BytesIO(rtstruct_input), force=force, stop_before_pixels=stop_before_pixels
             )
         case _:
             raise InvalidDicomError(
