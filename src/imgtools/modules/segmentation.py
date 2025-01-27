@@ -281,7 +281,7 @@ class Segmentation(sitk.Image):
     # jjjermiah: this is literally NOT "from_dicom" lmao...
     # TODO: rename this to something more appropriate and add a proper from_dicom method
     @classmethod
-    def from_dicom(cls, mask: sitk.Image, meta: Any) -> Segmentation:
+    def from_dicom(cls, mask: sitk.Image, meta: Any) -> Segmentation:  # noqa
         # get duplicates
         label_counters = {i.SegmentLabel: 1 for i in meta.SegmentSequence}
         raw_roi_names = {}  # {i.SegmentLabel: i.SegmentNumber for n, i in meta.SegmentSequence}
@@ -301,7 +301,7 @@ class Segmentation(sitk.Image):
         )
 
     @classmethod
-    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:
+    def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:  # noqa
         """Alias for `from_dicom`."""
         return cls.from_dicom(mask=mask, meta=meta)
 

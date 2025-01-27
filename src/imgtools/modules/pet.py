@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import contextlib
-import datetime
+import datetimeawww
 import os
 import pathlib
 from enum import Enum
@@ -98,17 +98,17 @@ class PET(sitk.Image):
         path_one: str = pathlib.Path(path, os.listdir(path)[0]).as_posix()
         df: FileDataset = dcmread(path_one)
         values_assumed: bool = False
-        pet_image_type: PETImageType = PETImageType(pet_image_type)
+        pet_type: PETImageType = PETImageType(pet_image_type)
         try:
-            if pet_image_type == PETImageType.SUV:
+            if pet_type == PETImageType.SUV:
                 factor: float = df.to_json_dict()["70531000"]["Value"][0]
             else:
-                factor: float = df.to_json_dict()["70531009"]["Value"][0]
+                factor = df.to_json_dict()["70531009"]["Value"][0]
         except KeyError:
             logger.warning(
                 "Scale factor not available in DICOMs. Calculating based on metadata, may contain errors"
             )
-            factor = cls.calc_factor(df, pet_image_type)
+            factor = cls.calc_factor(df, pet_type)
             values_assumed = True
 
         # SimpleITK reads some pixel values as negative but with correct value
@@ -121,7 +121,7 @@ class PET(sitk.Image):
             factor=factor,
             values_assumed=values_assumed,
             metadata=metadata,
-            image_type=pet_image_type,
+            image_type=pet_type,
         )
 
     def get_metadata(self) -> Dict[str, Union[str, float, bool]]:

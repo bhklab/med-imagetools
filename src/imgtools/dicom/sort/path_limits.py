@@ -82,9 +82,10 @@ def os_max_filename_length() -> int:
 
 
 # Example usage
+
 if __name__ == "__main__":
     try:
-        print(
+        print(  # noqa: T201
             f"The maximum file path length on this system is: {os_max_path_length()} characters"
         )  # noqa: T201
     except ValueError as e:
