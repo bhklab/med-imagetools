@@ -7,13 +7,15 @@ on:
   pull_request:
     branches: ["*"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ###############################################################################################
   # Unit-Tests: Run unit tests using pytest
   ################################################################################################
   Unit-Tests:
-    concurrency:
-      group: ${{ github.ref }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15 # Consider increasing timeout
     continue-on-error: true # dont fail the whole matrix if one fails
