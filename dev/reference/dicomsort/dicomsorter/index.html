@@ -1061,7 +1061,7 @@
 
 
 <h2 id="imgtools.dicom.sort" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">imgtools.dicom.sort</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-module"></code>            <span class="doc doc-object-name doc-module-name">sort</span>
 
 
 </h2>
@@ -1157,14 +1157,14 @@ process. The basename of each file remains unchanged.</p>
 
 
 <h2 id="imgtools.dicom.sort.DICOMSorter" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">imgtools.dicom.sort.DICOMSorter</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">DICOMSorter</span>
 
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">DICOMSorter</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">source_directory</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">source_directory</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">target_pattern</span><span class="p">:</span> <span class="n">str</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">pattern_parser</span><span class="p">:</span> <span class="n"><span title="typing.Pattern">Pattern</span></span> <span class="o">=</span> <span class="n"><span title="imgtools.dicom.sort.dicomsorter.DEFAULT_PATTERN_PARSER">DEFAULT_PATTERN_PARSER</span></span><span class="p">,</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">pattern_parser</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Pattern">Pattern</span></span> <span class="o">=</span> <span class="n">imgtools</span><span class="o">.</span><span class="n"><span title="imgtools.dicom">dicom</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="imgtools.dicom.sort" href="#imgtools.dicom.sort">sort</a></span><span class="o">.</span><span class="n"><span title="imgtools.dicom.sort.dicomsorter">dicomsorter</span></span><span class="o">.</span><span class="n"><span title="imgtools.dicom.sort.dicomsorter.DEFAULT_PATTERN_PARSER">DEFAULT_PATTERN_PARSER</span></span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span>
 </code></pre></div>
 
@@ -1190,7 +1190,7 @@ filename of each source file is preserved during this process.</p>
           <tr class="doc-section-item">
             <td><code><span title="imgtools.dicom.sort.DICOMSorter.source_directory">source_directory</span></code></td>
             <td>
-                  <code><span title="pathlib.Path">Path</span></code>
+                  <code>pathlib.<span title="pathlib.Path">Path</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1234,7 +1234,7 @@ filename of each source file is preserved during this process.</p>
           <tr class="doc-section-item">
             <td><code><a class="autorefs autorefs-internal" title="imgtools.dicom.sort.DICOMSorter.keys" href="#imgtools.dicom.sort.DICOMSorter.keys">keys</a></code></td>
             <td>
-                  <code><span title="typing.Set">Set</span>[str]</code>
+                  <code>typing.<span title="typing.Set">Set</span>[str]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1245,7 +1245,7 @@ filename of each source file is preserved during this process.</p>
           <tr class="doc-section-item">
             <td><code><a class="autorefs autorefs-internal" title="imgtools.dicom.sort.DICOMSorter.invalid_keys" href="#imgtools.dicom.sort.DICOMSorter.invalid_keys">invalid_keys</a></code></td>
             <td>
-                  <code><span title="typing.Set">Set</span>[str]</code>
+                  <code>typing.<span title="typing.Set">Set</span>[str]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1377,7 +1377,7 @@ filename of each source file is preserved during this process.</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">invalid_keys</span><span class="p">:</span> <span class="n"><span title="typing.Set">Set</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">invalid_keys</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Set">Set</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1398,7 +1398,7 @@ in the pattern and return the set of keys that are invalid.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.Set">Set</span>[str]</code>
+                  <code>typing.<span title="typing.Set">Set</span>[str]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1425,7 +1425,7 @@ in the pattern and return the set of keys that are invalid.</p>
   </span>
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">keys</span><span class="p">:</span> <span class="n"><span title="typing.Set">Set</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">keys</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Set">Set</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1477,11 +1477,13 @@ highlighted using Rich Console.</p>
 
 </h3>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">execute</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(action)">action</a></span><span class="p">:</span> <span class="n"><span title="imgtools.dicom.sort.FileAction">FileAction</span></span> <span class="o">|</span> <span class="n">str</span> <span class="o">=</span> <span class="n"><span title="imgtools.dicom.sort.FileAction.MOVE">MOVE</span></span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(overwrite)">overwrite</a></span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(dry_run)">dry_run</a></span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(num_workers)">num_workers</a></span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(action)">action</a></span><span class="p">:</span> <span class="p">(</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        <span class="n">imgtools</span><span class="o">.</span><span class="n"><span title="imgtools.dicom">dicom</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="imgtools.dicom.sort" href="#imgtools.dicom.sort">sort</a></span><span class="o">.</span><span class="n"><span title="imgtools.dicom.sort.FileAction">FileAction</span></span> <span class="o">|</span> <span class="n">str</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="p">)</span> <span class="o">=</span> <span class="n">imgtools</span><span class="o">.</span><span class="n"><span title="imgtools.dicom">dicom</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="imgtools.dicom.sort" href="#imgtools.dicom.sort">sort</a></span><span class="o">.</span><span class="n"><span title="imgtools.dicom.sort.FileAction">FileAction</span></span><span class="o">.</span><span class="n"><span title="imgtools.dicom.sort.FileAction.MOVE">MOVE</span></span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(overwrite)">overwrite</a></span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(dry_run)">dry_run</a></span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.sort.DICOMSorter.execute(num_workers)">num_workers</a></span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1513,7 +1515,7 @@ where storage efficiency is crucial.</p>
 <h4 id="imgtools.dicom.sort.DICOMSorter.execute(action)" class="doc doc-heading doc-heading-parameter">                  <code>action</code>
 </h4>            </td>
             <td>
-                  <code><span title="imgtools.dicom.sort.FileAction">FileAction</span></code>
+                  <code>imgtools.<span title="imgtools.dicom">dicom</span>.<a class="autorefs autorefs-internal" title="imgtools.dicom.sort" href="#imgtools.dicom.sort">sort</a>.<span title="imgtools.dicom.sort.FileAction">FileAction</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1778,7 +1780,7 @@ where storage efficiency is crucial.</p>
 
 
 </h3>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">print_tree</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">print_tree</span><span class="p">(</span><span class="n">base_dir</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

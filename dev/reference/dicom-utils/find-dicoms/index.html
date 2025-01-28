@@ -921,18 +921,18 @@
 
 
 <h2 id="imgtools.dicom.utils.find_dicoms" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">imgtools.dicom.utils.find_dicoms</span>
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">find_dicoms</span>
 
 
 </h2>
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">find_dicoms</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(directory)">directory</a></span><span class="p">:</span> <span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(directory)">directory</a></span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(recursive)">recursive</a></span><span class="p">:</span> <span class="n">bool</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(check_header)">check_header</a></span><span class="p">:</span> <span class="n">bool</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(extension)">extension</a></span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(limit)">limit</a></span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">search_input</span><span class="p">:</span> <span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n"><span title="typing.List">List</span></span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing.List">List</span></span><span class="p">[</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">]</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(extension)">extension</a></span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n"><a class="autorefs autorefs-internal" href="#imgtools.dicom.utils.find_dicoms(limit)">limit</a></span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">search_input</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.Optional">Optional</span></span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.List">List</span></span><span class="p">[</span><span class="n">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n"><span title="typing.List">List</span></span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -959,7 +959,7 @@ recursive search and optional header validation to confirm file validity.</p>
 <h3 id="imgtools.dicom.utils.find_dicoms(directory)" class="doc doc-heading doc-heading-parameter">                  <code>directory</code>
 </h3>            </td>
             <td>
-                  <code><span title="pathlib.Path">Path</span></code>
+                  <code>pathlib.<span title="pathlib.Path">Path</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -1052,7 +1052,7 @@ regardless of extension.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="typing.List">List</span>[<span title="pathlib.Path">Path</span>]</code>
+                  <code>typing.<span title="typing.List">List</span>[pathlib.<span title="pathlib.Path">Path</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
