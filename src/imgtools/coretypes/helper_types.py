@@ -42,7 +42,7 @@ Examples:
 >>> point = Point3D(x=10, y=20, z=30)
 >>> size = Size3D(x=50, y=60, z=70)
 >>> coord = Coordinate(x=5, y=5, z=5)
->>> direction = Direction(i=1.0, j=0.0, k=0.0)
+>>> direction =
 """
 
 from __future__ import annotations
@@ -54,18 +54,16 @@ from dataclasses import dataclass
 from typing import Tuple, Iterable, TypeAlias
 import numpy as np
 
-Matrix2D: TypeAlias = Tuple[Tuple[float, float], Tuple[float, float]]
 Matrix3D: TypeAlias = Tuple[
     Tuple[float, float, float],
     Tuple[float, float, float],
     Tuple[float, float, float],
 ]
-Matrix2DFlat: TypeAlias = Tuple[float, float, float, float]
 Matrix3DFlat: TypeAlias = Tuple[
     float, float, float, float, float, float, float, float, float
 ]
 
-FlattenedMatrix = Matrix2DFlat | Matrix3DFlat
+FlattenedMatrix = Matrix3DFlat
 
 
 @dataclass(frozen=True)
@@ -73,22 +71,22 @@ class Direction:
     """
     Represent a directional matrix for image orientation.
 
-    Supports 2D (2x2) and 3D (3x3) directional matrices in row-major format.
+    Supports 3D (3x3) directional matrices in row-major format.
 
     Attributes
     ----------
     matrix : Tuple[float, ...]
         A flattened 1D array representing the matrix,
-        with length 4 (2x2) or 9 (3x3).
+        with length 9 (3x3).
     """
 
-    matrix: Matrix2DFlat | Matrix3DFlat
+    matrix: Matrix3DFlat
 
     def __post_init__(self) -> None:
         length = len(self.matrix)
-        if length not in (4, 9):
+        if length != 9:
             msg = (
-                "Direction must be a 2x2 (4 values) or 3x3 (9 values) matrix."
+                "Direction must be a 3x3 (9 values) matrix."
                 f" Got {length} values."
             )
             raise ValueError(msg)
@@ -104,35 +102,35 @@ class Direction:
     @classmethod
     def from_matrix(
         cls,
-        matrix: Matrix2D | Matrix3D,
+        matrix: Matrix3D,
     ) -> Direction:
         """
-        Create a Direction object from a full 2D (2x2) or 3D (3x3) matrix.
+        Create a Direction object from a full 3D (3x3) matrix.
 
         Parameters
         ----------
-        matrix : Matrix2D | Matrix3D
-            A nested tuple representing the 2D or 3D matrix.
+        matrix : Matrix3D
+            A nested tuple representing the 3D matrix.
 
         Returns
         -------
         Direction
             A Direction instance.
         """
-        size = len(matrix)
-        if size not in (2, 3):
-            raise ValueError("Matrix must be 2x2 or 3x3.")
+        if (size := len(matrix)) != 3:
+            msg = f"Matrix must be 3x3. Got {size=}."
+            raise ValueError(msg)
         for row in matrix:
             if len(row) != size:
-                raise ValueError("Matrix must be square (2x2 or 3x3).")
+                raise ValueError("Matrix must be square (3x3).")
         flattened: FlattenedMatrix = tuple(
             value for row in matrix for value in row
         )  # type: ignore
         return cls(matrix=flattened)
 
     def to_matrix(self) -> list[list[float]]:
-        """Convert the flattened row-major array back to a 2D or 3D matrix."""
-        dim = int(len(self.matrix) ** 0.5)
+        """Convert the flattened row-major array back to a 3D matrix."""
+        dim = 3
         return [list(self.matrix[i * dim : (i + 1) * dim]) for i in range(dim)]
 
     def normalize(self) -> Direction:
@@ -150,12 +148,16 @@ class Direction:
         yield from self.matrix
 
     def __repr__(self) -> str:
-        dim = int(len(self.matrix) ** 0.5)
+        dim = 3
         rows = self.to_matrix()
+        formatted_rows = [
+            "  [" + ", ".join(f"{value:>7.3f}" for value in row) + "]"
+            for row in rows
+        ]
         return (
-            f"Direction(\n"
-            + "\n".join([f"  {row}" for row in rows])
-            + f"\n  {dim}x{dim} matrix, row-major\n)"
+            f"Direction(  {dim}x{dim} matrix\n"
+            + "\n".join(formatted_rows)
+            + f"\n)"
         )
 
 
@@ -188,7 +190,13 @@ if __name__ == "__main__":
         )
     )
 
-    print(f"{example_sitk_image.GetDirection()=}")
     print(f"{direction_3d=}")
     example_sitk_image.SetDirection(direction_3d)
-    print(f"{example_sitk_image.GetDirection()=}")
+
+    # make another direction from a flattened
+    direction_3d_flat = Direction(
+        matrix=(0.707, 0.707, 0.0, -0.707, 0.707, 0.0, 0.0, 0.0, 1.0)
+    )
+    print(f"{direction_3d_flat=}")
+
+    print(f"{example_sitk_image=}")
