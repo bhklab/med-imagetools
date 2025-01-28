@@ -6,15 +6,15 @@ import pickle
 import shutil
 from datetime import datetime, timezone
 
-import h5py
-import nrrd
+import h5py # type: ignore
+import nrrd # type: ignore
 import numpy as np
 import SimpleITK as sitk
 from skimage.measure import regionprops
 
 from imgtools.utils import image_to_array
 
-
+# ruff: noqa
 class BaseWriter:
     def __init__(self, root_directory, filename_format, create_dirs=True):
         self.root_directory = root_directory
