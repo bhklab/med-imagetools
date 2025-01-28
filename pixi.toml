@@ -61,7 +61,6 @@ pytest-cov = "*"
 pytest-mock = ">=3.14.0,<4"
 sqlalchemy-stubs = ">=0.4,<0.5"
 
-
 [feature.test.tasks.test]
 cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
 inputs = ["src", "tests", "config/pytest.ini", "config/coverage.toml"]

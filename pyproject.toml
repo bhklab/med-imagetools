@@ -81,9 +81,14 @@ requires = ["hatchling"]
 directory = "dist"
 
 [tool.hatch.build.targets.wheel]
+# Automatically discovers packages in `src/`
 packages = ["src/imgtools"]
-include = ["pyproject.toml", "README.md", "src/**"]
-
+include = [
+    "pyproject.toml",
+    "README.md",
+    "src/imgtools/py.typed",
+    "src/**"
+]
 
 [tool.semantic_release]
 version_variables = ["src/imgtools/__init__.py:__version__"]
