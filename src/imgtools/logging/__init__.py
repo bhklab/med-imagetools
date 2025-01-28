@@ -38,6 +38,7 @@ def get_logger(name: str, level: str = "INFO") -> structlog.stdlib.BoundLogger:
         )
     return logging_manager.configure_logging(level=level)
 
+logging_manager = LoggingManager("imgtools")
 
 logger = get_logger("imgtools", DEFAULT_OR_ENV)
 

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Dict, List
 
+import rich
 import structlog
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
 from structlog.typing import Processor
@@ -96,20 +97,23 @@ class LoggingManager:
                 "console": {
                     "()": structlog.stdlib.ProcessorFormatter,
                     "processors": [
-                        CallPrettifier(concise=True),
                         structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                         structlog.dev.ConsoleRenderer(
                             exception_formatter=structlog.dev.RichTracebackFormatter(
-                                width=-1, show_locals=False
+                                width=-1,
+                                show_locals=False,
                             ),
+                            colors=False,
                         ),
                     ],
-                    "foreign_pre_chain": self.pre_chain,
+                    "foreign_pre_chain": LoggingManager.pre_chain(
+                        self.base_dir
+                    ),
                 },
             },
             "handlers": {
                 "console": {
-                    "class": "logging.StreamHandler",
+                    "class": "rich.logging.RichHandler",
                     "formatter": "console",
                 },
             },
@@ -122,11 +126,12 @@ class LoggingManager:
             },
         }
 
-    @property
-    def pre_chain(self) -> List[Processor]:
+    @classmethod
+    def pre_chain(cls, base_dir: Path | None = None) -> List[Processor]:
+        _base_dir = base_dir or Path.cwd()
         return [
-            structlog.stdlib.add_log_level,
-            ESTTimeStamper(),
+            # structlog.stdlib.add_log_level,
+            # ESTTimeStamper(),
             structlog.stdlib.add_logger_name,
             structlog.stdlib.PositionalArgumentsFormatter(),
             CallsiteParameterAdder(
@@ -136,8 +141,9 @@ class LoggingManager:
                     CallsiteParameter.LINENO,
                 ]
             ),
-            PathPrettifier(base_dir=self.base_dir),
+            PathPrettifier(base_dir=_base_dir),
             structlog.stdlib.ExtraAdder(),
+            CallPrettifier(concise=True),
             structlog.processors.StackInfoRenderer(),
         ]
 
@@ -149,7 +155,7 @@ class LoggingManager:
         logging.config.dictConfig(self.base_logging_config)
         structlog.configure(
             processors=[
-                *self.pre_chain,
+                *LoggingManager.pre_chain(self.base_dir),
                 structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
             ],
             logger_factory=structlog.stdlib.LoggerFactory(),
