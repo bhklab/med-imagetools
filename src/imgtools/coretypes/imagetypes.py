@@ -27,7 +27,20 @@ class ImageGeometry(NamedTuple):
 
 
 # Type alias for Image or Array
-ImageOrArray = Union[sitk.Image, np.ndarray]
+ImageOrArray = sitk.Image | np.ndarray
+
+
+class MedImage:
+    def __init__(
+        self,
+        image: ImageOrArray,
+        origin: Sequence[float] | None = None,
+        direction: Sequence[float] | None = None,
+        spacing: Sequence[float] | None = None,
+    ) -> None:
+        pass
+
+    
 
 
 # class Image:

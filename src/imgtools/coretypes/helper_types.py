@@ -51,7 +51,8 @@ import numpy as np
 import SimpleITK as sitk
 from dataclasses import dataclass
 
-from typing import Tuple, Iterable, TypeAlias
+from typing import NamedTuple, Sequence
+from typing import Tuple, Iterator, TypeAlias
 import numpy as np
 
 Matrix3D: TypeAlias = Tuple[
@@ -67,6 +68,131 @@ FlattenedMatrix = Matrix3DFlat
 
 
 @dataclass(frozen=True)
+class ImageGeometry:
+    """Represents the geometry of a 3D image."""
+
+    size: Size3D
+    origin: Point3D
+    direction: Direction
+    spacing: Spacing
+
+
+@dataclass(frozen=True)
+class Vector3D:
+    """
+    Represent a vector in 3D space.
+
+    Attributes
+    ----------
+    x : float
+        X-component of the vector.
+    y : float
+        Y-component of the vector.
+    z : float
+        Z-component of the vector.
+
+    Methods
+    -------
+    __add__(other):
+        Add another Vector3D to this vector.
+    __sub__(other):
+        Subtract another Vector3D from this vector.
+    __iter__():
+        Iterate over the components (x, y, z).
+    """
+
+    x: float
+    y: float
+    z: float
+
+    def __iter__(self) -> Iterator[float]:
+        """Allow iteration over the components."""
+        return iter((self.x, self.y, self.z))
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Vector3D."""
+        return f"Vector3D(x={self.x:.3f}, y={self.y:.3f}, z={self.z:.3f})"
+
+
+@dataclass(frozen=True)
+class Spacing(Vector3D):
+    """
+    Represent the spacing in 3D space.
+    Inherits from Vector3D.
+    """
+
+    # No exta attributes or methods needed (yet),
+    # inherits everything from Vector3D
+
+
+@dataclass(frozen=True)
+class Point3D(Vector3D):
+    """
+    Represent a point in 3D space.
+    Inherits from Vector3D.
+
+    Can add and subtract other Point3D or Size3D objects.
+    """
+
+    def __add__(self, other: Point3D | Size3D) -> Point3D:
+        """Add another Vector3D to this vector."""
+        match other:
+            case Point3D(x, y, z):
+                return Point3D(self.x + x, self.y + y, self.z + z)
+            case Size3D(width, height, depth):
+                return Point3D(self.x + width, self.y + height, self.z + depth)
+
+    def __sub__(self, other: Point3D | Size3D) -> Point3D:
+        """Subtract another Vector3D from this vector."""
+        match other:
+            case Point3D(x, y, z):
+                return Point3D(self.x - x, self.y - y, self.z - z)
+            case Size3D(width, height, depth):
+                return Point3D(self.x - width, self.y - height, self.z - depth)
+
+
+@dataclass(frozen=True)
+class Size3D:
+    """
+    Represent the size (width, height, depth) of a 3D object.
+
+    Attributes
+    ----------
+    width : float
+        The width of the 3D object.
+    height : float
+        The height of the 3D object.
+    depth : float
+        The depth of the 3D object.
+
+    Methods
+    -------
+    volume:
+        Calculate the volume of the 3D object.
+    """
+
+    width: float
+    height: float
+    depth: float
+
+    @property
+    def volume(self) -> float:
+        """Calculate the volume of the 3D object."""
+        return self.width * self.height * self.depth
+
+    def __iter__(self) -> Iterator[float]:
+        """Allow iteration over the dimensions."""
+        return iter((self.width, self.height, self.depth))
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Size3D."""
+        return (
+            f"Size3D(w={self.width:.3f},"
+            " h={self.height:.3f}, d={self.depth:.3f})"
+        )
+
+
+@dataclass(frozen=True, eq=True)
 class Direction:
     """
     Represent a directional matrix for image orientation.
@@ -90,14 +216,6 @@ class Direction:
                 f" Got {length} values."
             )
             raise ValueError(msg)
-
-    def is_normalized(self, tol: float = 1e-6) -> bool:
-        """Check if the row vectors of the matrix are normalized."""
-        matrix = self.to_matrix()
-        for row in matrix:
-            if not np.isclose(np.linalg.norm(row), 1.0, atol=tol):
-                return False
-        return True
 
     @classmethod
     def from_matrix(
@@ -143,7 +261,15 @@ class Direction:
             tuple(tuple(row) for row in normalized_matrix)  # type: ignore
         )
 
-    def __iter__(self) -> Iterable:
+    def is_normalized(self, tol: float = 1e-6) -> bool:
+        """Check if the row vectors of the matrix are normalized."""
+        matrix = self.to_matrix()
+        for row in matrix:
+            if not np.isclose(np.linalg.norm(row), 1.0, atol=tol):
+                return False
+        return True
+
+    def __iter__(self) -> Iterator:
         """Allow the Direction instance to be passed directly as a 1D array."""
         yield from self.matrix
 
@@ -166,16 +292,29 @@ if __name__ == "__main__":
     from pathlib import Path
     from rich import print
 
-    from imgtools.io import read_dicom_series
+    # Create instances of each class
+    point = Point3D(10.0, 20.0, 30.0)
+    size = Size3D(50.0, 60.0, 70.0)
+    direction = Direction.from_matrix(
+        (
+            (0.707, 0.707, 0.0),
+            (-0.707, 0.707, 0.0),
+            (0.0, 0.0, 1.0),
+        )
+    )
 
-    # p = "/home/bioinf/bhklab/radiomics/repos/med-image_test-data/procdata/NSCLC-Radiomics/LUNG1-002/1.3.6.1.4.1.32722.99.99.232988001551799080335895423941323261228"
+    # Testing Point3D and Size3D operations
+    new_point = point + size
 
-    # # ct_path = Path(p)
-    # ct_path = p
+    # Printing out the details
+    print(f"Point: {point}")
+    print(f"Size: {size}")
+    print(f"New point after adding size: {new_point}")
+    print(f"Direction: {direction}")
 
-    # ct_series = read_dicom_series(ct_path)
-
-    # print(f'{ct_series["direction"]=}')
+    # Unpacking the values
+    print("Unpacked Point:", tuple(point))  # (10.0, 20.0, 30.0)
+    print("Unpacked Size:", tuple(size))  # (50.0, 60.0, 70.0)
 
     example_image = np.random.rand(10, 10, 10)
     example_sitk_image = sitk.GetImageFromArray(example_image)
@@ -198,5 +337,6 @@ if __name__ == "__main__":
         matrix=(0.707, 0.707, 0.0, -0.707, 0.707, 0.0, 0.0, 0.0, 1.0)
     )
     print(f"{direction_3d_flat=}")
+    print(f"{(direction_3d_flat==direction_3d)=}")
 
     print(f"{example_sitk_image=}")
