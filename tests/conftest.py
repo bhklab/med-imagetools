@@ -27,10 +27,16 @@ def download_all_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
     logger.info("Downloading the test dataset...")
     manager = MedImageTestData()
     latest_release: GitHubRelease = manager.get_latest_release()
-    zip_dir = data_dir
-    zip_dir.mkdir(parents=True, exist_ok=True)
-    _ = manager.download(zip_dir, assets=latest_release.assets)
-    extracted_paths = manager.extract(data_dir)
+    selected_tests = list(
+        filter(
+            lambda asset: not any(
+                asset.name.startswith(nope)
+                for nope in ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
+            ),
+            latest_release.assets,
+        )
+    )
+    extracted_paths = manager.download(data_dir, assets=selected_tests)
     dataset_path_mapping = {
         unzip_path.name: unzip_path for unzip_path in extracted_paths
     }

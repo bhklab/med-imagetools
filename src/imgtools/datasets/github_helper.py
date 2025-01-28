@@ -339,15 +339,17 @@ class MedImageTestData:
                 self._download(dest, assets, progress, force)
             )
 
-        extracted_paths = self.extract(dest, force=force, cores=cores)
+        extracted_paths = self.extract(force=force, cores=cores)
 
         for tar_file in tar_files:
             if tar_file.exists():
                 tar_file.unlink()
+            if tar_file in self.downloaded_paths:
+                self.downloaded_paths.remove(tar_file)
         return extracted_paths
 
     def extract(
-        self, dest: Path, force: bool = False, cores: Optional[int] = None
+        self, force: bool = False, cores: Optional[int] = None
     ) -> List[Path]:
         """Extract downloaded archives to the specified directory in parallel.
 
@@ -396,9 +398,9 @@ class MedImageTestData:
                     archive.extractall(extract_path.parent, filter="data")
                     extracted_paths.append(extract_path)
             elif zipfile.is_zipfile(path):
-                raise NotImplementedError(
-                    "ZIP extraction not implemented yet."
-                )
+                with zipfile.ZipFile(path, "r") as archive:
+                    archive.extractall(extract_path.parent)
+                    extracted_paths.append(extract_path)
             else:
                 console.print(f"Unsupported archive format: {path.name}")
             return extracted_paths
