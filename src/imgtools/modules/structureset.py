@@ -704,11 +704,7 @@ class StructureSet:
             else:
                 metadata_str_parts.append(f"\t{k}: {v}")
         metadata_str = "\n\t".join(metadata_str_parts)
-        repr_string = (
-            "\n<StructureSet\n"
-            f"\tROIs: {sorted_rois}\n"
-            f"\tMetadata:\n\t{metadata_str}\n>"
-        )
+        repr_string = f"\n<StructureSet\n\tROIs: {sorted_rois}\n\tMetadata:\n\t{metadata_str}\n>"
         return repr_string
 
     @classmethod

@@ -63,9 +63,12 @@ sqlalchemy-stubs = ">=0.4,<0.5"
 
 
 [feature.test.tasks.test]
-cmd = "pytest -c config/pytest.ini --rootdir ."
+cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
 inputs = ["src", "tests", "config/pytest.ini", "config/coverage.toml"]
 description = "Run pytest (make sure to run in root directory)"
+
+[feature.test.tasks.test_ci]
+cmd = "pytest -c config/pytest.ini --rootdir ."
 
 [feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
@@ -73,6 +76,8 @@ inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
+[feature.test.tasks.clean_tests]
+cmd = "rm -rf .pytest_cache data tests/temp temp_outputs"
 ############################################## DOCS ###############################################
 [feature.docs.dependencies]
 mkdocs = "*"
