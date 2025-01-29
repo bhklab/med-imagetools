@@ -11,7 +11,6 @@ from imgtools.logging import logger
 
 
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
-@pytest.mark.xdist_group("serial")
 @pytest.mark.parametrize(
     "modalities", ["CT", "CT,RTSTRUCT", "CT,RTSTRUCT,RTDOSE"]
 )  # , "CT,RTDOSE,PT"])
@@ -39,7 +38,7 @@ class TestComponents:
         """
         Testing the Autopipeline for processing the DICOMS and saving it as nrrds
         """
-        n_jobs = 2
+        n_jobs = 1
         output_path_mod = pathlib.Path(
             self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))
         ).as_posix()
