@@ -88,26 +88,40 @@ def download_old_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
     this is mainly the quebec dataset
     """
 
-    # Download QC dataset
-    logger.info("Downloading the test dataset...")
-    quebec_data_path = data_dir / "Head-Neck-PET-CT"
+    lock_path = data_dir / "download_old_test_data"
 
-    if not quebec_data_path.exists():
-        quebec_data_url ="https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true" 
-        quebec_zip_path = quebec_data_path.with_suffix(".zip")
+    with FileLock(str(lock_path) + ".lock"):
+        if lock_path.with_suffix(".json").exists():
+            # Load existing dataset mapping if already downloaded
+            logger.info("Loading pre-downloaded old test dataset metadata...")
+            loaded_json = json.loads(lock_path.with_suffix(".json").read_text())
+            dataset_path_mapping = {k: Path(v) for k, v in loaded_json.items()}
+            return dataset_path_mapping
 
-        quebec_data_path.mkdir(parents=True, exist_ok=True)
-        request.urlretrieve(quebec_data_url, quebec_zip_path)
-        with ZipFile(quebec_zip_path, "r") as zipfile:
-            zipfile.extractall(quebec_data_path)
-        quebec_zip_path.unlink()
+        # Download QC dataset
+        logger.info("Downloading the old test dataset...")
+        quebec_data_path = data_dir / "Head-Neck-PET-CT"
 
-    assert quebec_data_path.exists(), f"Quebec data not found at {quebec_data_path}"
-    dataset_path_mapping = {
-        "Head-Neck-PET-CT": quebec_data_path,
-    }
+        if not quebec_data_path.exists():
+            quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
+            quebec_zip_path = quebec_data_path.with_suffix(".zip")
 
-    return dataset_path_mapping
+            quebec_data_path.mkdir(parents=True, exist_ok=True)
+            request.urlretrieve(quebec_data_url, quebec_zip_path)
+            with ZipFile(quebec_zip_path, "r") as zipfile:
+                zipfile.extractall(quebec_data_path)
+            quebec_zip_path.unlink()
+
+        assert quebec_data_path.exists(), f"Quebec data not found at {quebec_data_path}"
+        dataset_path_mapping = {
+            "Head-Neck-PET-CT": quebec_data_path,
+        }
+
+        # Save dataset mapping to avoid re-downloading in future runs
+        lock_path.with_suffix(".json").write_text(
+            json.dumps({k: str(v) for k, v in dataset_path_mapping.items()})
+        )
+        return dataset_path_mapping
 
 
 @pytest.fixture(scope="session")
