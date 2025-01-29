@@ -137,7 +137,8 @@ async def download_dataset(
                         progress.update(task, advance=len(chunk))
         except asyncio.TimeoutError:
             console.print(
-                f"[bold red]Timeout while downloading {file_path.name}. Please try again later.[/]"
+                f"[bold red]Timeout while downloading "
+                f"{file_path.name}. Please try again later.[/]"
             )
             raise
     return file_path
@@ -387,7 +388,8 @@ class MedImageTestData:
                     shutil.rmtree(extract_path)
                 else:
                     console.print(
-                        f"Directory {extract_path} already exists. Skipping extraction."
+                        f"Directory {extract_path} already"
+                        " exists. Skipping extraction."
                     )
                     extracted_paths.append(extract_path)
                     return extracted_paths
@@ -417,7 +419,7 @@ class MedImageTestData:
 
 
 # Usage example
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     manager = MedImageTestData()
 
     print(manager)
