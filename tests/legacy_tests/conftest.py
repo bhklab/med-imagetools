@@ -51,8 +51,8 @@ def legacy_test_data(quebec_paths, request, tmp_path):
 
     # remake the other paths
 
-    crawl_path = result / ".imgtools" / f"imgtools_{fixture_name}.csv"
-    edge_path = result / ".imgtools" / f"imgtools_{fixture_name}_edges.csv"
+    crawl_path = result.parent / ".imgtools" / f"imgtools_{fixture_name}.csv"
+    edge_path = result.parent / ".imgtools" / f"imgtools_{fixture_name}_edges.csv"
     output_path = result / "temp"
 
     output_path.mkdir(parents=True, exist_ok=True)
