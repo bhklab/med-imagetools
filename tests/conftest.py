@@ -15,12 +15,15 @@ from imgtools.datasets.github_helper import (
 )
 from imgtools.logging import logger  # type: ignore
 
-from .conf_helpers import ensure_data_dir_exists  # type: ignore
+# from .conf_helpers import ensure_data_dir_exists  # type: ignore
 
 
 @pytest.fixture(scope="session")
 def data_dir() -> pathlib.Path:
-    return ensure_data_dir_exists()
+    data_dir = Path(__file__).parent.parent / "data"
+    if not data_dir.exists():
+        data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
 
 
 @pytest.fixture(scope="session")
