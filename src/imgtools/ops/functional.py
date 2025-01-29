@@ -550,7 +550,7 @@ def window_intensity(
     Returns
     -------
     sitk.Image
-        The windowed intensity image.
+        The windowed intensity image
     """
     lower = level - window / 2
     upper = level + window / 2
