@@ -17,8 +17,10 @@ from rich.progress import (
     BarColumn,
     DownloadColumn,
     Progress,
+    SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
+    TimeElapsedColumn,
     TimeRemainingColumn,
 )
 
@@ -333,6 +335,7 @@ class MedImageTestData:
             TaskProgressColumn(),
             DownloadColumn(),
             TimeRemainingColumn(),
+            TimeElapsedColumn(),
             console=console,
         ) as progress:
             _ = asyncio.run(self._download(dest, assets, progress, force))
@@ -340,7 +343,7 @@ class MedImageTestData:
         extracted_paths = self.extract(force=force, cores=cores)
         for tar_file in self.downloaded_paths:
             if tar_file.exists():
-                logger.info("Removing downloaded file: {tar_file}")
+                logger.info(f"Removing downloaded file: {tar_file}")
                 tar_file.unlink()
             else:
                 logger.debug(f"File {tar_file} does not exist.")
@@ -354,8 +357,6 @@ class MedImageTestData:
 
         Parameters
         ----------
-        dest : Path
-            Destination directory where the files will be extracted.
         force : bool, optional
             Whether to force extraction by removing existing directories, by default False.
         cores : int, optional
@@ -368,7 +369,7 @@ class MedImageTestData:
         """
         if not self.downloaded_paths:
             raise ValueError(
-                "No archives have been downloaded yet. Call `download_release_data` first."
+                "No archives have been downloaded yet. Call `download` first."
             )
 
         if cores is None:
@@ -391,7 +392,7 @@ class MedImageTestData:
                     extracted_paths.append(extract_path)
                     return extracted_paths
 
-            logger.info(f"Extracting {path.name}...")
+            console.log(f"Extracting {path.name}...")
             if tarfile.is_tarfile(path):
                 with tarfile.open(path, "r:*") as archive:
                     archive.extractall(extract_path.parent, filter="data")
@@ -423,7 +424,7 @@ if __name__ == "__main__":
 
     old_release = manager.get_latest_release()
 
-    chosen_assets = old_release.assets
+    chosen_assets = old_release.assets[8:]
 
     dest_dir = Path("data")
     downloaded_files = manager.download(dest_dir, assets=chosen_assets)
