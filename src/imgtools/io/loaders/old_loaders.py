@@ -103,27 +103,36 @@ def read_dicom_scan(
 def read_dicom_rtstruct(
     path: str,
     suppress_warnings: bool = False,
+    roi_name_pattern: str | None = None,
 ) -> StructureSet:
-    return StructureSet.from_dicom_rtstruct(path, suppress_warnings=suppress_warnings)
+    return StructureSet.from_dicom(
+        path,
+        suppress_warnings=suppress_warnings,
+        roi_name_pattern=roi_name_pattern,
+    )
 
 
 def read_dicom_rtdose(path: str) -> Dose:
-    return Dose.from_dicom_rtdose(path)
+    return Dose.from_dicom(path=path)
 
 
 def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
-    return PET.from_dicom_pet(path, series, "SUV")
+    return PET.from_dicom(path=path, series_id=series, pet_image_type="SUV")
 
 
-def read_dicom_seg(path: str, meta: dict, series: Optional[str] = None) -> Segmentation:
+def read_dicom_seg(
+    path: str, meta: dict, series: Optional[str] = None
+) -> Segmentation:
     seg_img = read_dicom_series(path, series)
-    return Segmentation.from_dicom_seg(seg_img, meta)
+    return Segmentation.from_dicom(seg_img, meta)
 
 
 auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
 
 
-def read_dicom_auto(path: str, series=None, file_names=None) -> auto_dicom_result:
+def read_dicom_auto(
+    path: str, series=None, file_names=None
+) -> auto_dicom_result:
     dcms = (
         list(pathlib.Path(path).rglob("*.dcm"))
         if not path.endswith(".dcm")
@@ -150,7 +159,9 @@ def read_dicom_auto(path: str, series=None, file_names=None) -> auto_dicom_resul
             case "SEG":
                 obj = read_dicom_seg(path, meta, series)
             case _:
-                errmsg = f"Modality {modality} not supported in read_dicom_auto."
+                errmsg = (
+                    f"Modality {modality} not supported in read_dicom_auto."
+                )
                 raise NotImplementedError(errmsg)
 
         obj.metadata.update(get_modality_metadata(meta, modality))
@@ -219,7 +230,9 @@ class ImageTreeLoader(BaseLoader):
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in self.colnames:
                 self.colnames.append(id_column)
-            self.paths = pd.read_csv(csv_path_or_dataframe, index_col=id_column)
+            self.paths = pd.read_csv(
+                csv_path_or_dataframe, index_col=id_column
+            )
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
             self.paths = csv_path_or_dataframe
             if id_column:
@@ -253,14 +266,19 @@ class ImageTreeLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {
-                col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()
+                col: glob.glob(path)[0] if pd.notna(path) else None
+                for col, path in paths.items()
             }
 
         for i, (col, path) in enumerate(paths.items()):
-            files = self.tree[subject_id][study["study_" + ("_").join(col.split("_")[1:])]][
-                series["series_" + ("_").join(col.split("_")[1:])]
-            ][subseries["subseries_" + ("_").join(col.split("_")[1:])]]
-            self.readers[i](path, series["series_" + ("_").join(col.split("_")[1:])])
+            files = self.tree[subject_id][
+                study["study_" + ("_").join(col.split("_")[1:])]
+            ][series["series_" + ("_").join(col.split("_")[1:])]][
+                subseries["subseries_" + ("_").join(col.split("_")[1:])]
+            ]
+            self.readers[i](
+                path, series["series_" + ("_").join(col.split("_")[1:])]
+            )
         outputs = {
             col: self.readers[i](
                 path,
@@ -305,7 +323,9 @@ class ImageCSVLoader(BaseLoader):
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in colnames:
                 colnames.append(id_column)
-            self.paths = pd.read_csv(csv_path_or_dataframe, index_col=id_column)
+            self.paths = pd.read_csv(
+                csv_path_or_dataframe, index_col=id_column
+            )
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
             self.paths = csv_path_or_dataframe
             if id_column:
@@ -329,11 +349,14 @@ class ImageCSVLoader(BaseLoader):
         if self.expand_paths:
             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
             paths = {
-                col: glob.glob(path)[0] if pd.notna(path) else None for col, path in paths.items()
+                col: glob.glob(path)[0] if pd.notna(path) else None
+                for col, path in paths.items()
             }
 
         outputs = {
-            col: self.readers[i](path, series["series_" + ("_").join(col.split("_")[1:])])
+            col: self.readers[i](
+                path, series["series_" + ("_").join(col.split("_")[1:])]
+            )
             for i, (col, path) in enumerate(paths.items())
         }
         return self.output_tuple(**outputs)
@@ -365,7 +388,9 @@ class ImageFileLoader(BaseLoader):
         self.exclude_paths = []
         for path in exclude_paths:
             if not path.startswith(self.root_directory):
-                full_paths = glob.glob(pathlib.Path(root_directory, path).as_posix())
+                full_paths = glob.glob(
+                    pathlib.Path(root_directory, path).as_posix()
+                )
                 self.exclude_paths.extend(full_paths)
             else:
                 full_path = path
@@ -381,7 +406,9 @@ class ImageFileLoader(BaseLoader):
                 continue
             subject_dir_path = f.path
             if self.subdir_path:
-                full_path = pathlib.Path(subject_dir_path, self.subdir_path).as_posix()
+                full_path = pathlib.Path(
+                    subject_dir_path, self.subdir_path
+                ).as_posix()
             else:
                 full_path = subject_dir_path
             try:
@@ -390,8 +417,12 @@ class ImageFileLoader(BaseLoader):
                 continue
             if os.path.isdir(full_path):
                 full_path = pathlib.Path(full_path, "").as_posix()
-            subject_dir_name = os.path.basename(os.path.normpath(subject_dir_path))
-            subject_id = self._extract_subject_id_from_path(full_path, subject_dir_name)
+            subject_dir_name = os.path.basename(
+                os.path.normpath(subject_dir_path)
+            )
+            subject_id = self._extract_subject_id_from_path(
+                full_path, subject_dir_name
+            )
             paths[subject_id] = full_path
         return paths
 
@@ -405,7 +436,9 @@ class ImageFileLoader(BaseLoader):
             else:
                 subject_id = re.search(self.get_subject_id_from, full_path)[0]
         else:
-            return self.get_subject_id_from(full_path, filename, subject_dir_name)
+            return self.get_subject_id_from(
+                full_path, filename, subject_dir_name
+            )
         return subject_id
 
     def __getitem__(self, subject_id):
