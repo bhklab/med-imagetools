@@ -27,7 +27,7 @@ def data_dir() -> pathlib.Path:
 
 
 @pytest.fixture(scope="session")
-def download_all_test_data(data_dir: pathlib.Path, worker_id) -> dict[str, Path]:
+def download_all_test_data(data_dir: pathlib.Path, worker_id: str | None) -> dict[str, Path]:  
 
     # idk how this works like in the pytest-xdist docs
     # leaving in case we need to use it later
