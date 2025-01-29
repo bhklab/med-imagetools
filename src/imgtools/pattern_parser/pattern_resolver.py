@@ -17,7 +17,9 @@ class PatternResolverError(Exception):
 class MissingPlaceholderValueError(PatternResolverError):
     """Raised when a required placeholder value is missing in the context."""
 
-    def __init__(self, missing_keys: set[str], class_name: str, key: str) -> None:
+    def __init__(
+        self, missing_keys: set[str], class_name: str, key: str
+    ) -> None:
         self.missing_keys = missing_keys
         self.class_name = class_name
         self.key = key
@@ -25,8 +27,12 @@ class MissingPlaceholderValueError(PatternResolverError):
 
     def _build_message(self) -> str:
         msg = f"Missing value for placeholder(s): {self.missing_keys}."
-        msg += "\nPlease provide a value for this key in the `context` argument."
-        msg += f"\nFor example: `{self.class_name}.save(..., {self.key}=value)`."
+        msg += (
+            "\nPlease provide a value for this key in the `context` argument."
+        )
+        msg += (
+            f"\nFor example: `{self.class_name}.save(..., {self.key}=value)`."
+        )
         return msg
 
 
@@ -36,7 +42,9 @@ class PatternResolver:
 
     By default, this class uses the following pattern parser:
 
-    >>> DEFAULT_PATTERN: re.Pattern = re.compile(r'%(\w+)|\{(\w+)\}')
+    >>> DEFAULT_PATTERN: re.Pattern = re.compile(
+    ...     r"%(\w+)|\{(\w+)\}"
+    ... )
 
     This will match placeholders of the form `{key}` or `%(key)s`.
 
@@ -56,9 +64,9 @@ class PatternResolver:
     So you could resolve the pattern like this:
 
     >>> data_dict = {
-    ...     'subject_id': 'JohnDoe',
-    ...     'date': 'January-01-2025',
-    ...     'disease': 'cancer',
+    ...     "subject_id": "JohnDoe",
+    ...     "date": "January-01-2025",
+    ...     "disease": "cancer",
     ... }
 
     >>> pattern_resolver.formatted_pattern % data_dict
@@ -82,15 +90,20 @@ class PatternResolver:
 
         try:
             self.pattern_parser = PatternParser(
-                self.filename_format, pattern_parser=self.DEFAULT_PATTERN
+                self.filename_format, pattern_matcher=self.DEFAULT_PATTERN
             )
-            self.formatted_pattern, self.keys = self.parse()  # Validate the pattern by parsing it
+            self.formatted_pattern, self.keys = (
+                self.parse()
+            )  # Validate the pattern by parsing it
         except InvalidPatternError as e:
             msg = f"Invalid filename format: {e}"
             raise PatternResolverError(msg) from e
         else:
             logger.debug("All keys are valid.", keys=self.keys)
-            logger.debug("Formatted Pattern valid.", formatted_pattern=self.formatted_pattern)
+            logger.debug(
+                "Formatted Pattern valid.",
+                formatted_pattern=self.formatted_pattern,
+            )
 
     def parse(self) -> Tuple[str, list[str]]:
         """
