@@ -26,22 +26,17 @@ def test_get_latest_release_and_extract(med_image_test_data: MedImageTestData, t
     assert isinstance(latest_release.tag_name, str)
     assert isinstance(latest_release.name, str)
 
-    # Test extract
-    download_dir: Path = tmp_path / "downloads"
- 
-    assert latest_release.tag_name >= "v0.13"
-
-    strings_of_interest: List[str] = [
+def test_downloaded_data_is_sound(download_all_test_data: dict[str, Path])-> None:
+    assert len(download_all_test_data) > 5 
+    datasets_of_interest = [
         "NSCLC-Radiomics",
         "NSCLC_Radiogenomics",
         "Vestibular-Schwannoma-SEG",
     ]
-    chosen_assets: List[GitHubReleaseAsset] = [
-        asset
-        for asset in latest_release.assets
-        if any(string in asset.name for string in strings_of_interest)
-    ]
 
-    med_image_test_data.download(download_dir, assets=chosen_assets)
-
-    assert len(med_image_test_data.downloaded_paths) > 0
+    assert all(
+        dataset in download_all_test_data.keys() for dataset in datasets_of_interest
+    )
+    assert all(
+        download_all_test_data[dataset].exists() for dataset in datasets_of_interest
+    )

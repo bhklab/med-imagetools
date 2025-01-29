@@ -28,12 +28,12 @@ class TestComponents:
 
     @pytest.fixture(autouse=True)
     def _get_path(
-        self, dataset_path
+        self, quebec_paths
     ) -> None:  # dataset_path is a fixture defined in conftest.py
         self.input_path, self.output_path, self.crawl_path, self.edge_path = (
-            dataset_path
+            quebec_paths
         )
-        logger.info(dataset_path)
+        logger.info(quebec_paths)
 
     def test_pipeline(self, modalities) -> None:
         """
