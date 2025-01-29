@@ -34,6 +34,8 @@ jupyterlab = "*"
 trimesh = ">=4.6.0,<5"
 numpy-stl = "*"
 ipympl = ">=0.9.6,<0.10"
+ipywidgets = ">=8.1.5,<9"
+plotly = ">=5.24.1,<6"
 
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
