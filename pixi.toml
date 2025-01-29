@@ -25,11 +25,15 @@ py312 = { features = ["py312", "test"], no-default-feature = true }
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"]}
+numpy-stl = "*"
 
 [feature.dev.dependencies]
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+trimesh = ">=4.6.0,<5"
+numpy-stl = "*"
+ipympl = ">=0.9.6,<0.10"
 
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
