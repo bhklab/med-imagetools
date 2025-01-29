@@ -57,7 +57,7 @@ med-imagetools = { path = ".", editable = true, extras = ["test"]}
 [feature.test.dependencies]
 pytest = "*"
 pytest-cov = "*"
-# pytest-xdist = "*" re-introduce later. 
+pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 sqlalchemy-stubs = ">=0.4,<0.5"
 

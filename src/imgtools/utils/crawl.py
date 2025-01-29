@@ -216,8 +216,6 @@ def to_df(database_dict):
     return df
 
 # fmt: on
-
-
 def crawl(
     top: pathlib.Path,
     n_jobs: int = -1,

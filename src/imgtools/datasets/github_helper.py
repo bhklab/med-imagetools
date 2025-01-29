@@ -346,8 +346,6 @@ class MedImageTestData:
             if tar_file.exists():
                 logger.info(f"Removing downloaded file: {tar_file}")
                 tar_file.unlink()
-            else:
-                logger.debug(f"File {tar_file} does not exist.")
 
         return extracted_paths
 
