@@ -335,17 +335,16 @@ class MedImageTestData:
             TimeRemainingColumn(),
             console=console,
         ) as progress:
-            tar_files = asyncio.run(
-                self._download(dest, assets, progress, force)
-            )
+            _ = asyncio.run(self._download(dest, assets, progress, force))
 
         extracted_paths = self.extract(force=force, cores=cores)
-
-        for tar_file in tar_files:
+        for tar_file in self.downloaded_paths:
             if tar_file.exists():
+                logger.info("Removing downloaded file: {tar_file}")
                 tar_file.unlink()
-            if tar_file in self.downloaded_paths:
-                self.downloaded_paths.remove(tar_file)
+            else:
+                logger.debug(f"File {tar_file} does not exist.")
+
         return extracted_paths
 
     def extract(

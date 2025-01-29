@@ -27,11 +27,12 @@ def download_all_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
     logger.info("Downloading the test dataset...")
     manager = MedImageTestData()
     latest_release: GitHubRelease = manager.get_latest_release()
+    # banned = ["4D-Lungs", "CC-Tumor-Heterogeneisty.tar"]
+    banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
     selected_tests = list(
         filter(
             lambda asset: not any(
-                asset.name.startswith(nope)
-                for nope in ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
+                asset.name.startswith(nope) for nope in banned
             ),
             latest_release.assets,
         )
@@ -43,6 +44,9 @@ def download_all_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
     return dataset_path_mapping
 
 
+####################################################################################################
+# these ones are all OLD
+# hopefully we can replace them with the new ones
 @pytest.fixture(scope="session")
 def curr_path() -> str:
     return pathlib.Path(__file__).parent.parent.resolve().as_posix()
