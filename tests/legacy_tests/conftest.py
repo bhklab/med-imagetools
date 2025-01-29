@@ -59,4 +59,4 @@ def legacy_test_data(quebec_paths, request, tmp_path):
     crawl_path.parent.mkdir(parents=True, exist_ok=True)
     edge_path.parent.mkdir(parents=True, exist_ok=True)
 
-    return input_path, output_path.as_posix(), crawl_path.as_posix(), edge_path.as_posix()
+    return result.as_posix(), output_path.as_posix(), crawl_path.as_posix(), edge_path.as_posix()
