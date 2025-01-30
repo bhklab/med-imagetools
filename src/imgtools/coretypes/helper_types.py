@@ -29,11 +29,6 @@ spatial transformations, bounding box calculations, and metadata representation.
 4. **Spacing3D**
    - Represents the spacing in 3D space.
    - Inherits from `Vector3D`.
-
-5. **Direction**
-   - Represents a directional matrix for image orientation.
-   - Includes methods for normalization and conversion between flattened and
-     matrix forms.
 """
 
 from __future__ import annotations
@@ -77,13 +72,13 @@ class Vector3D:
     y: float
     z: float
 
-    def __init__(self, *args: float) -> None:
+    def __init__(self, *args: float | int) -> None:
         """Initialize a Vector3D with x, y, z components."""
         match args:
             case [x, y, z]:
-                self.x, self.y, self.z = x, y, z
+                self.x, self.y, self.z = float(x), float(y), float(z)
             case [tuple_points] if isinstance(tuple_points, tuple):
-                self.x, self.y, self.z = tuple_points
+                self.x, self.y, self.z = map(float, tuple_points)
             case _:
                 errmsg = (
                     f"{self.__class__.__name__} expects 3 values for x, y, z."
@@ -131,7 +126,7 @@ class Coordinate3D(Vector3D):
     Can add and subtract other Point3D or Size3D objects.
     """
 
-    def __add__(self, other: Coordinate3D | Size3D) -> Coordinate3D:
+    def __add__(self, other: Coordinate3D | Size3D | tuple) -> Coordinate3D:
         """Add another Vector3D to this vector."""
         match other:
             case Coordinate3D(x, y, z):
@@ -151,7 +146,7 @@ class Coordinate3D(Vector3D):
                 )
                 raise TypeError(errmsg)
 
-    def __sub__(self, other: Coordinate3D | Size3D) -> Coordinate3D:
+    def __sub__(self, other: Coordinate3D | Size3D | tuple) -> Coordinate3D:
         """Subtract another Vector3D from this vector."""
         match other:
             case Coordinate3D(x, y, z):
@@ -207,6 +202,7 @@ class Size3D:
                     f"{self.__class__.__name__} expects 3 values for width, height, depth."
                     f" Got {len(args)} values for {args}."
                 )
+                raise ValueError(errmsg)
 
     @property
     def volume(self) -> float:
@@ -225,7 +221,7 @@ class Size3D:
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     # ruff : noqa
     from pathlib import Path
     from rich import print
