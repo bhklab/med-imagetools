@@ -1,7 +1,7 @@
 <div align="center">
 
 # Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python
-<!--intro-start-->
+
 
 [![CI/CD Status](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml/badge.svg)](https://github.com/bhklab/med-imagetools/actions/workflows/main.yml)
 ![GitHub repo size](https://img.shields.io/github/repo-size/bhklab/med-imagetools)
@@ -18,7 +18,7 @@
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
 
 </div>
-
+<!--intro-start-->
 ## Med-ImageTools core features
 
 * AutoPipeline CLI

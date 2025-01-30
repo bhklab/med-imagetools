@@ -58,15 +58,17 @@ med-imagetools = { path = ".", editable = true, extras = ["test"]}
 [feature.test.dependencies]
 pytest = "*"
 pytest-cov = "*"
-# pytest-xdist = "*" re-introduce later. 
+pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 sqlalchemy-stubs = ">=0.4,<0.5"
-
+filelock = ">=3.17.0,<4"
 
 [feature.test.tasks.test]
-cmd = "pytest -c config/pytest.ini --rootdir ."
-inputs = ["src", "tests", "config/pytest.ini", "config/coverage.toml"]
+cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
 description = "Run pytest (make sure to run in root directory)"
+
+[feature.test.tasks.test_ci]
+cmd = "pytest -c config/pytest.ini --rootdir ."
 
 [feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
@@ -74,6 +76,8 @@ inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
+[feature.test.tasks.clean_tests]
+cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
 ############################################## DOCS ###############################################
 [feature.docs.dependencies]
 mkdocs = "*"
@@ -122,7 +126,7 @@ ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
 ruff-format.inputs = ["config/ruff.toml", "src"]
 ruff-format.description = "Run ruff format, run check first"
 
-type-check.cmd = ["mypy", "--config-file", "config/mypy.ini"]
+type-check.cmd = ["mypy", "--config-file", "config/mypy.ini", "src"]
 type-check.inputs = ["config/mypy.ini", "src"]
 type-check.description = "Run mypy type check."
 

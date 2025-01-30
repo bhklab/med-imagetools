@@ -35,6 +35,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 import SimpleITK as sitk
+from pydicom import dcmread
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
@@ -50,6 +51,74 @@ from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
+
+
+def roi_names_from_dicom(
+    rtstruct_or_path: Union[str, Path, FileDataset],
+) -> list[str]:
+    """Extract ROI names from DICOM file or loaded RTSTRUCT."""
+    try:
+        if isinstance(rtstruct_or_path, (str, Path)):
+            rtstruct = dcmread(
+                rtstruct_or_path,
+                force=True,
+                stop_before_pixels=True,
+                specific_tags=["StructureSetROISequence"],
+            )
+        else:
+            rtstruct = rtstruct_or_path
+        return [roi.ROIName for roi in rtstruct.StructureSetROISequence]
+    except (AttributeError, IndexError) as e:
+        msg = "Error extracting ROI names from DICOM file."
+        raise ValueError(msg) from e
+
+
+def rtstruct_reference_seriesuid(
+    rtstruct_or_path: Union[str, Path, FileDataset],
+) -> str:
+    """Given an RTSTRUCT file or loaded RTSTRUCT, return the Referenced SeriesInstanceUID."""
+    try:
+        if isinstance(rtstruct_or_path, (str, Path)):
+            rtstruct = dcmread(
+                rtstruct_or_path,
+                force=True,
+                stop_before_pixels=True,
+                specific_tags=["ReferencedFrameOfReferenceSequence"],
+            )
+        else:
+            rtstruct = rtstruct_or_path
+
+        return str(
+            rtstruct.ReferencedFrameOfReferenceSequence[0]
+            .RTReferencedStudySequence[0]
+            .RTReferencedSeriesSequence[0]
+            .SeriesInstanceUID
+        )
+    except (AttributeError, IndexError) as e:
+        raise ValueError(
+            "Referenced SeriesInstanceUID not found in RTSTRUCT"
+        ) from e
+
+
+class RTSTRUCTMetadata(TypedDict):
+    PatientID: str
+    StudyInstanceUID: str
+    SeriesInstanceUID: str
+    Modality: str
+    ReferencedSeriesInstanceUID: str
+    OriginalNumberOfROIs: int
+
+
+def extract_metadata(rtstruct: FileDataset) -> RTSTRUCTMetadata:
+    """Extract metadata from the RTSTRUCT file."""
+    return {
+        "PatientID": rtstruct.PatientID,
+        "StudyInstanceUID": rtstruct.StudyInstanceUID,
+        "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
+        "Modality": rtstruct.Modality,
+        "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(rtstruct),
+        "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
+    }
 
 
 class StructureSet:
@@ -96,9 +165,13 @@ class StructureSet:
 
     Examples
     --------
-    >>> roi_points = {"GTV": [np.array([[0, 0, 0], [1, 1, 1]])]}
+    >>> roi_points = {
+    ...     "GTV": [np.array([[0, 0, 0], [1, 1, 1]])]
+    ... }
     >>> metadata = {"PatientName": "John Doe"}
-    >>> structure_set = StructureSet(roi_points, metadata)
+    >>> structure_set = StructureSet(
+    ...     roi_points, metadata
+    ... )
     """
 
     roi_points: Dict[str, List[np.ndarray]]
@@ -142,11 +215,14 @@ class StructureSet:
         Examples
         --------
         >>> structure_set = StructureSet.from_dicom(
-        ...     "path/to/rtstruct.dcm", roi_name_pattern="^GTV|PTV"
+        ...     "path/to/rtstruct.dcm",
+        ...     roi_name_pattern="^GTV|PTV",
         ... )
         """
 
-        return cls.from_dicom_rtstruct(rtstruct_path, suppress_warnings, roi_name_pattern)
+        return cls.from_dicom_rtstruct(
+            rtstruct_path, suppress_warnings, roi_name_pattern
+        )
 
     @classmethod
     def from_dicom_rtstruct(
@@ -163,7 +239,9 @@ class StructureSet:
         metadata: RTSTRUCTMetadata = extract_rtstruct_metadata(dcm)
 
         roi_names = metadata["OriginalROINames"]
-        logger.debug("Extracted ROI names", roi_names=roi_names, num_rois=len(roi_names))
+        logger.debug(
+            "Extracted ROI names", roi_names=roi_names, num_rois=len(roi_names)
+        )
 
         # Initialize dictionary to store ROI points
         roi_points: Dict[str, List[np.ndarray]] = {}
@@ -229,10 +307,31 @@ class StructureSet:
         True
         """
         _flags = re.IGNORECASE if ignore_case else 0
-        return any(re.fullmatch(pattern, name, flags=_flags) for name in self.roi_names)
+        return any(
+            re.fullmatch(pattern, name, flags=_flags)
+            for name in self.roi_names
+        )
 
     @staticmethod
-    def _get_roi_points(rtstruct: FileDataset, roi_index: int) -> List[np.ndarray]:
+    def _extract_metadata(
+        rtstruct: FileDataset,
+    ) -> Dict[str, Union[str, int, float]]:
+        """Extract metadata from the RTSTRUCT file."""
+        return {
+            "PatientID": rtstruct.PatientID,
+            "StudyInstanceUID": rtstruct.StudyInstanceUID,
+            "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
+            "Modality": rtstruct.Modality,
+            "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(
+                rtstruct
+            ),
+            "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
+        }
+
+    @staticmethod
+    def _get_roi_points(
+        rtstruct: FileDataset, roi_index: int
+    ) -> List[np.ndarray]:
         """Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
 
         Parameters
@@ -255,7 +354,9 @@ class StructureSet:
 
         Examples
         --------
-        >>> rtstruct = dcmread("path/to/rtstruct.dcm", force=True)
+        >>> rtstruct = dcmread(
+        ...     "path/to/rtstruct.dcm", force=True
+        ... )
         >>> StructureSet._get_roi_points(rtstruct, 0)
 
         Notes
@@ -270,7 +371,9 @@ class StructureSet:
         """
         # Check for ROIContourSequence
         if not hasattr(rtstruct, "ROIContourSequence"):
-            raise AttributeError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
+            raise AttributeError(
+                "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
+            )
 
         # Check if ROI index exists in the sequence
         if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
@@ -348,13 +451,17 @@ class StructureSet:
 
         Case 2: Select only the first match for each pattern
         Subsequent matches are ignored.
-        >>> self._assign_labels(["GTV", "CTV.*"], roi_select_first=True)
+        >>> self._assign_labels(
+        ...     ["GTV", "CTV.*"], roi_select_first=True
+        ... )
         {'GTV': 0, 'CTV_0': 1}
 
         Case 3: Separate labels for each match
         Even if a pattern matches multiple ROIs, each ROI gets a separate label.
         note how now the CTV ROIs are assigned different labels: 1 and 2
-        >>> self._assign_labels(["GTV", "CTV.*"], roi_separate=True)
+        >>> self._assign_labels(
+        ...     ["GTV", "CTV.*"], roi_separate=True
+        ... )
         {'GTV': 0, 'CTV_0': 1, 'CTV_1': 2}
 
         # Case 4: Grouped patterns
@@ -403,7 +510,9 @@ class StructureSet:
                     if roi_select_first and matched:
                         break
                     for i, roi_name in enumerate(self.roi_names):
-                        if re.fullmatch(subpattern, roi_name, flags=re.IGNORECASE):
+                        if re.fullmatch(
+                            subpattern, roi_name, flags=re.IGNORECASE
+                        ):
                             matched = True
                             if roi_separate:
                                 labels[f"{roi_name}_{i}"] = cur_label
@@ -442,7 +551,9 @@ class StructureSet:
                 ):  # assert len(z) == 1, f"This contour ({name}) spreads across more than 1 slice."
                     slice_mask = polygon2mask(size[1:], slice_points)
                     mask[z[0], :, :, idx] += slice_mask
-            except Exception as e:  # rounding errors for points on the boundary
+            except (
+                Exception
+            ) as e:  # rounding errors for points on the boundary
                 if z == mask.shape[0]:
                     z -= 1
                 elif z == -1:  # ?
@@ -464,7 +575,10 @@ class StructureSet:
     def to_segmentation(  # noqa
         self,
         reference_image: sitk.Image,
-        roi_names: str | List[str] | Dict[str, Union[str, List[str]]] | None = None,
+        roi_names: str
+        | List[str]
+        | Dict[str, Union[str, List[str]]]
+        | None = None,
         continuous: bool = True,
         existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
@@ -525,7 +639,9 @@ class StructureSet:
         elif isinstance(roi_names, dict):
             for name, pattern in roi_names.items():
                 if isinstance(pattern, str):
-                    matching_names = list(self._assign_labels([pattern], roi_select_first).keys())
+                    matching_names = list(
+                        self._assign_labels([pattern], roi_select_first).keys()
+                    )
                     if matching_names:
                         # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
                         labels[name] = matching_names
@@ -535,10 +651,14 @@ class StructureSet:
                     extracted_labels = []
                     for pattern_one in pattern:
                         matching_names = list(
-                            self._assign_labels([pattern_one], roi_select_first).keys()
+                            self._assign_labels(
+                                [pattern_one], roi_select_first
+                            ).keys()
                         )
                         if matching_names:
-                            extracted_labels.extend(matching_names)  # {"GTV": ["GTV1", "GTV2"]}
+                            extracted_labels.extend(
+                                matching_names
+                            )  # {"GTV": ["GTV1", "GTV2"]}
                     labels[name] = extracted_labels
         if isinstance(roi_names, str):
             roi_names = [roi_names]
@@ -548,7 +668,9 @@ class StructureSet:
         labels = {k: v for (k, v) in labels.items() if v != []}
         if not labels:
             if not ignore_missing_regex:
-                msg = f"No ROIs matching {roi_names} found in {self.roi_names}."
+                msg = (
+                    f"No ROIs matching {roi_names} found in {self.roi_names}."
+                )
                 raise ValueError(msg)
             else:
                 return None
@@ -557,8 +679,14 @@ class StructureSet:
         mask = np.zeros(size, dtype=np.uint8)
 
         seg_roi_indices = {}
-        # THIS GOT MESSED UP AFTER https://github.com/bhklab/med-imagetools/commit/0dff0f403d802d517614105b50f1c4008945e32d#diff-11d6f8dc4c916bd1f83966fac407f0231fb8ce4e73b80815c4de7f957103947b
-        if isinstance(roi_names, dict):
+        if not roi_names:
+            for name, label in labels.items():
+                self.get_mask(reference_image, mask, name, label, continuous)
+            seg_roi_indices = {
+                "_".join(k): v
+                for v, k in groupby(labels, key=lambda x: labels[x])
+            }
+        elif isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
                     self.get_mask(reference_image, mask, label, i, continuous)
@@ -567,7 +695,10 @@ class StructureSet:
         else:
             for name, label in labels.items():
                 self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {"_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])}
+            seg_roi_indices = {
+                "_".join(k): v
+                for v, k in groupby(labels, key=lambda x: labels[x])
+            }
 
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
@@ -595,24 +726,5 @@ class StructureSet:
             else:
                 metadata_str_parts.append(f"\t{k}: {v}")
         metadata_str = "\n\t".join(metadata_str_parts)
-        repr_string = (
-            "\n<StructureSet\n" f"\tROIs: {sorted_rois}\n" f"\tMetadata:\n\t{metadata_str}\n>"
-        )
+        repr_string = f"\n<StructureSet\n\tROIs: {sorted_rois}\n\tMetadata:\n\t{metadata_str}\n>"
         return repr_string
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    data = Path("/home/bioinf/bhklab/radiomics/repos/med-imagetools/data")
-
-    ct_dir = (
-        data
-        / "Head-Neck-PET-CT/HN-CHUS-052/08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362,"
-    )
-    rt_path = (
-        data
-        / "Head-Neck-PET-CT/HN-CHUS-052/08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418/1-1.dcm"
-    )
-
-    rt = StructureSet.from_dicom(rt_path, suppress_warnings=True)

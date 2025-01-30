@@ -51,7 +51,7 @@ def dicom_test_file():
 
     # Create a temporary file
     temp_file = Path(tempfile.NamedTemporaryFile(suffix='.dcm', delete=False).name)
-    ds.save_as(temp_file, write_like_original=False)
+    ds.save_as(temp_file, enforce_file_format=True)
 
     yield temp_file
 

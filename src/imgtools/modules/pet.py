@@ -20,7 +20,8 @@ if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 
-class PETImageType(str, Enum):  # alternative to StrEnum for python 3.10 compatibility
+# alternative to StrEnum for python 3.10 compatibility
+class PETImageType(str, Enum):
     """
     Enumeration for PET image types used in DICOM processing.
 
@@ -40,7 +41,7 @@ class PETImageType(str, Enum):  # alternative to StrEnum for python 3.10 compati
 
     Examples
     --------
-    >>> image_type = PETImageType.SUV # SUV image type
+    >>> image_type = PETImageType.SUV  # SUV image type
     >>> print(image_type)
     'SUV'
     >>> isinstance(image_type, str)
@@ -68,7 +69,9 @@ class PET(sitk.Image):
         self.df: FileDataset = df
         self.factor: float = factor
         self.values_assumed: bool = values_assumed
-        self.metadata: Dict[str, Union[str, float, bool]] = metadata if metadata else {}
+        self.metadata: Dict[str, Union[str, float, bool]] = (
+            metadata if metadata else {}
+        )
         self.image_type = PETImageType(image_type)
 
     @classmethod
@@ -95,17 +98,17 @@ class PET(sitk.Image):
         path_one: str = pathlib.Path(path, os.listdir(path)[0]).as_posix()
         df: FileDataset = dcmread(path_one)
         values_assumed: bool = False
-        pet_image_type: PETImageType = PETImageType(pet_image_type)
+        pet_type: PETImageType = PETImageType(pet_image_type)
         try:
-            if pet_image_type == PETImageType.SUV:
+            if pet_type == PETImageType.SUV:
                 factor: float = df.to_json_dict()["70531000"]["Value"][0]
             else:
-                factor: float = df.to_json_dict()["70531009"]["Value"][0]
+                factor = df.to_json_dict()["70531009"]["Value"][0]
         except KeyError:
             logger.warning(
                 "Scale factor not available in DICOMs. Calculating based on metadata, may contain errors"
             )
-            factor = cls.calc_factor(df, pet_image_type)
+            factor = cls.calc_factor(df, pet_type)
             values_assumed = True
 
         # SimpleITK reads some pixel values as negative but with correct value
@@ -118,7 +121,7 @@ class PET(sitk.Image):
             factor=factor,
             values_assumed=values_assumed,
             metadata=metadata,
-            image_type=pet_image_type,
+            image_type=pet_type,
         )
 
     def get_metadata(self) -> Dict[str, Union[str, float, bool]]:
@@ -138,10 +141,14 @@ class PET(sitk.Image):
                 "%H%M%S.%f",
             )
             self.metadata["half_life"] = float(
-                self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
+                self.df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideHalfLife
             )
             self.metadata["injected_dose"] = float(
-                self.df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
+                self.df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideTotalDose
             )
         except KeyError:
             pass
@@ -153,7 +160,9 @@ class PET(sitk.Image):
         resampled_pt: sitk.Image = sitk.Resample(self.img_pet, ct_scan)
         return resampled_pt
 
-    def show_overlay(self, ct_scan: sitk.Image, slice_number: int) -> plt.figure:
+    def show_overlay(
+        self, ct_scan: sitk.Image, slice_number: int
+    ) -> plt.figure:
         resampled_pt: sitk.Image = self.resample_pet(ct_scan)
         fig: plt.figure = plt.figure("Overlayed image", figsize=[15, 10])
         pt_arr: np.ndarray = sitk.GetArrayFromImage(resampled_pt)
@@ -185,10 +194,14 @@ class PET(sitk.Image):
                 "%H%M%S.%f",
             )
             half_life: float = float(
-                df.RadiopharmaceuticalInformationSequence[0].RadionuclideHalfLife
+                df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideHalfLife
             )
             injected_dose: float = float(
-                df.RadiopharmaceuticalInformationSequence[0].RadionuclideTotalDose
+                df.RadiopharmaceuticalInformationSequence[
+                    0
+                ].RadionuclideTotalDose
             )
 
             a: float = np.exp(

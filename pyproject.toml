@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "1.16.0"
+version = "1.17.0"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -81,9 +81,14 @@ requires = ["hatchling"]
 directory = "dist"
 
 [tool.hatch.build.targets.wheel]
+# Automatically discovers packages in `src/`
 packages = ["src/imgtools"]
-include = ["pyproject.toml", "README.md", "src/**"]
-
+include = [
+    "pyproject.toml",
+    "README.md",
+    "src/imgtools/py.typed",
+    "src/**"
+]
 
 [tool.semantic_release]
 version_variables = ["src/imgtools/__init__.py:__version__"]
@@ -101,3 +106,7 @@ match = "(main|master)"
 match = ".*dev.*"
 prerelease = true
 prerelease_token = "rc"
+
+[tool.ruff]
+# Extend the `pyproject.toml` file in the parent directory...
+extend = "config/ruff.toml"
