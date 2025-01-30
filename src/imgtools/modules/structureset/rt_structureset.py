@@ -60,7 +60,7 @@ class RTStructureSet:
     def rois(self) -> dict[str, ROI]:
         return {
             roi_name: roi
-            for roi_name, roi in self.roi_map
+            for roi_name, roi in self.roi_map.items()
             if isinstance(roi, ROI)
         }
 
