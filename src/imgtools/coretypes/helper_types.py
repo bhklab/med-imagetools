@@ -33,12 +33,9 @@ spatial transformations, bounding box calculations, and metadata representation.
 
 from __future__ import annotations
 
-import numpy as np
-import SimpleITK as sitk
 from dataclasses import dataclass
 
-from typing import NamedTuple, Sequence
-from typing import Tuple, Iterator, TypeAlias
+from typing import Iterator
 import numpy as np
 
 
@@ -162,7 +159,7 @@ class Coordinate3D(Vector3D):
             case _:
                 errmsg = (
                     f"Unsupported type for subtraction: {type(other)}."
-                    " Expected Point3D or Size3D."
+                    " Expected Coordinate3D or Size3D."
                 )
                 raise TypeError(errmsg)
 
@@ -194,9 +191,13 @@ class Size3D:
     def __init__(self, *args: float) -> None:
         match args:
             case [width, height, depth]:
-                self.width, self.height, self.depth = width, height, depth
+                self.width, self.height, self.depth = (
+                    float(width),
+                    float(height),
+                    float(depth),
+                )
             case [tuple_points] if isinstance(tuple_points, tuple):
-                self.width, self.height, self.depth = tuple_points
+                self.width, self.height, self.depth = map(float, tuple_points)
             case _:
                 errmsg = (
                     f"{self.__class__.__name__} expects 3 values for width, height, depth."
@@ -232,7 +233,8 @@ if __name__ == "__main__":  # pragma: no cover
 
     vector1 = Vector3D(1.0, 2.0, 3.0)
 
-    vector2 = Vector3D((1, 2, 3))  # as tuple input
+    # as tuple input
+    vector2 = Vector3D((1, 2, 3))  # type: ignore
     assert all((attr1 == attr2) for attr1, attr2 in zip(vector1, vector2))
 
     # iterate over the objects' attributes
@@ -250,13 +252,13 @@ if __name__ == "__main__":  # pragma: no cover
     ########################################
 
     point = Coordinate3D(10.0, 20.0, 30.0)
-    point2 = Coordinate3D((15.0, 25.0, 35.0))
+    point2 = Coordinate3D((15.0, 25.0, 35.0))  # type: ignore
 
     print(point)
     print(point2)
 
     size_tuple = (50.0, 60.0, 70.0)
-    size = Size3D(size_tuple)
+    size = Size3D(size_tuple)  # type: ignore
     point_plus_size = point + size_tuple
 
     print(f"Adding {point=} and {size_tuple=} = {point_plus_size}")
