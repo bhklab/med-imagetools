@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from typing import Tuple
 
 
 def _win32_longpath(path):
@@ -32,11 +33,12 @@ def _win32_longpath(path):
         return path
 
 
-
 @pytest.fixture(scope="function")
-def legacy_test_data(quebec_paths, request, tmp_path):
-    # quebec_path = download_old_test_data["Head-Neck-PET-CT"]
-
+def legacy_test_data(
+    quebec_paths: Tuple[str, str, str, str],
+    request: pytest.FixtureRequest,
+    tmp_path: Path
+) -> Tuple[str, str, str, str]:
     input_path, output_path, crawl_path, edge_path = quebec_paths
 
     assert Path(input_path).exists(), "Dataset not found"
