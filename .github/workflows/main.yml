@@ -12,11 +12,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ################################################################################################
+  # Set up data for unit tests
+  ################################################################################################
+  # idea is to download all the data that each pytest test will need, and use 
+  # github actions to cache it. This will speed up the tests and reduce the
+  # amount of data that needs to be downloaded each time.
+
+  # This job will download the data and cache it in the actions cache
+  Prepare-Test-Data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Consider increasing timeout
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: "py312"
+          pixi-version: v0.40.0
+          cache: true
+
+      - name: Download test data
+        run: |
+          pixi run -e py310 imgtools -vvv testdata data
+
+      - name: Upload dataset as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-test_data
+          path: data/
+          retention-days: 1
   ###############################################################################################
   # Unit-Tests: Run unit tests using pytest
-  ################################################################################################
+  ###############################################################################################
   Unit-Tests:
     runs-on: ${{ matrix.os }}
+    needs: Prepare-Test-Data
     timeout-minutes: 15 # Consider increasing timeout
     continue-on-error: true # dont fail the whole matrix if one fails
     strategy:
@@ -26,6 +58,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pytest-test_data
+          path: data/
 
       - name: Install Pixi
         uses: prefix-dev/setup-pixi@v0.8.1

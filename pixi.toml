@@ -69,6 +69,10 @@ description = "Run pytest (make sure to run in root directory)"
 [feature.test.tasks.test_ci]
 cmd = "pytest -c config/pytest.ini --rootdir ."
 
+[feature.test.tasks.download_data]
+cmd = "pixi run pytest -s -vv -k test_downloaded_data_is_sound"
+description = "Download data using one of the pytest tests"
+
 [feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
 inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]

@@ -17,11 +17,11 @@ from rich.progress import (
     BarColumn,
     DownloadColumn,
     Progress,
-    SpinnerColumn,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
+    TransferSpeedColumn,
 )
 
 from imgtools.logging import logger
@@ -129,7 +129,7 @@ async def download_dataset(
             async with session.get(download_link) as response:
                 total = int(response.headers.get("content-length", 0))
                 task = progress.add_task(
-                    f"[cyan]Downloading {file_path.name}...", total=total
+                    f"[cyan]{file_path.name}...", total=total
                 )
                 with file_path.open("wb") as f:
                     async for chunk in response.content.iter_chunked(8192):
@@ -170,11 +170,12 @@ class MedImageTestData:
     timeout = 300
 
     def __post_init__(self) -> None:
-        token = os.environ.get("GITHUB_TOKEN")
+        token = os.environ.get("GITHUB_TOKEN", os.environ.get("GH_TOKEN"))
         if token:
-            console.print("Using token")
+            console.log("Using GH token")
             self.github = Github(token, timeout=self.timeout)
         else:
+            console.log("No GH token found")
             self.github = Github(timeout=self.timeout)
 
         self.repo = self.github.get_repo(self.repo_name)
@@ -309,6 +310,7 @@ class MedImageTestData:
         self,
         dest: Path,
         assets: Optional[List[GitHubReleaseAsset]] = None,
+        exclude: Optional[List[str]] = None,
         force: bool = False,
         cores: Optional[int] = None,
     ) -> List[Path]:
@@ -319,6 +321,9 @@ class MedImageTestData:
         ----------
         dest : Path
             Destination directory where the files will be saved.
+        exclude: List[str], optional
+            List of assets to exclude from download.
+            Can be patterns or exact names.
         assets : List[GitHubReleaseAsset], optional
             List of assets to download. If None, all assets will be downloaded
 
@@ -329,6 +334,23 @@ class MedImageTestData:
         """
         if assets is None:
             assets = self.latest_release.assets
+
+        if exclude:
+            import re
+
+            console.log(f"Excluding assets on patterns: {', '.join(exclude)}")
+            # try matching OR finding exact names
+            exclude = [re.compile(f".*{name}.*") for name in exclude]
+            exclude_assets = [
+                asset
+                for asset in assets
+                if any(pattern.match(asset.name) for pattern in exclude)
+            ]
+            console.log(
+                f"Excluding assets: {', '.join(asset.name for asset in exclude_assets)}"
+            )
+            assets = [asset for asset in assets if asset not in exclude_assets]
+
         console.print(f"Downloading assets to {dest.absolute()}...")
         with Progress(
             TextColumn("[bold blue]{task.description}", justify="right"),
@@ -337,6 +359,7 @@ class MedImageTestData:
             DownloadColumn(),
             TimeRemainingColumn(),
             TimeElapsedColumn(),
+            transient=True,
             console=console,
         ) as progress:
             _ = asyncio.run(self._download(dest, assets, progress, force))
@@ -344,9 +367,8 @@ class MedImageTestData:
         extracted_paths = self.extract(force=force, cores=cores)
         for tar_file in self.downloaded_paths:
             if tar_file.exists():
-                logger.info(f"Removing downloaded file: {tar_file}")
+                console.log(f"Removing downloaded file: {tar_file}")
                 tar_file.unlink()
-
         return extracted_paths
 
     def extract(
