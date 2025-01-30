@@ -42,7 +42,6 @@ from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
 from imgtools.modules.structureset import (
     RTSTRUCTMetadata,
-    extract_roi_names,
     extract_rtstruct_metadata,
     load_rtstruct_dcm,
     rtstruct_reference_seriesuid,
@@ -51,74 +50,6 @@ from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
-
-
-def roi_names_from_dicom(
-    rtstruct_or_path: Union[str, Path, FileDataset],
-) -> list[str]:
-    """Extract ROI names from DICOM file or loaded RTSTRUCT."""
-    try:
-        if isinstance(rtstruct_or_path, (str, Path)):
-            rtstruct = dcmread(
-                rtstruct_or_path,
-                force=True,
-                stop_before_pixels=True,
-                specific_tags=["StructureSetROISequence"],
-            )
-        else:
-            rtstruct = rtstruct_or_path
-        return [roi.ROIName for roi in rtstruct.StructureSetROISequence]
-    except (AttributeError, IndexError) as e:
-        msg = "Error extracting ROI names from DICOM file."
-        raise ValueError(msg) from e
-
-
-def rtstruct_reference_seriesuid(
-    rtstruct_or_path: Union[str, Path, FileDataset],
-) -> str:
-    """Given an RTSTRUCT file or loaded RTSTRUCT, return the Referenced SeriesInstanceUID."""
-    try:
-        if isinstance(rtstruct_or_path, (str, Path)):
-            rtstruct = dcmread(
-                rtstruct_or_path,
-                force=True,
-                stop_before_pixels=True,
-                specific_tags=["ReferencedFrameOfReferenceSequence"],
-            )
-        else:
-            rtstruct = rtstruct_or_path
-
-        return str(
-            rtstruct.ReferencedFrameOfReferenceSequence[0]
-            .RTReferencedStudySequence[0]
-            .RTReferencedSeriesSequence[0]
-            .SeriesInstanceUID
-        )
-    except (AttributeError, IndexError) as e:
-        raise ValueError(
-            "Referenced SeriesInstanceUID not found in RTSTRUCT"
-        ) from e
-
-
-class RTSTRUCTMetadata(TypedDict):
-    PatientID: str
-    StudyInstanceUID: str
-    SeriesInstanceUID: str
-    Modality: str
-    ReferencedSeriesInstanceUID: str
-    OriginalNumberOfROIs: int
-
-
-def extract_metadata(rtstruct: FileDataset) -> RTSTRUCTMetadata:
-    """Extract metadata from the RTSTRUCT file."""
-    return {
-        "PatientID": rtstruct.PatientID,
-        "StudyInstanceUID": rtstruct.StudyInstanceUID,
-        "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
-        "Modality": rtstruct.Modality,
-        "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(rtstruct),
-        "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
-    }
 
 
 class StructureSet:
@@ -264,13 +195,13 @@ class StructureSet:
 
         # Initialize metadata (can be extended later to extract more useful fields)
 
-        # Some of the ROIs wont have been extracted.
-        # We can add a metadata field to indicate the number of ROIs that were extracted
-        metadata.ExtractedROINames = list(roi_points.keys())
-        # i like the idea of missingroinames, but would be even more useful if we can store the
-        # reason why they were missing. e.g. "Could not get points for ROI `GTV`."
-        # metadata["MissingROINames"] = list(set(roi_names) - set(roi_points.keys()))
-        metadata.ExtractedNumberOfROIs = len(roi_points)
+        # # Some of the ROIs wont have been extracted.
+        # # We can add a metadata field to indicate the number of ROIs that were extracted
+        # metadata.ExtractedROINames = list(roi_points.keys())
+        # # i like the idea of missingroinames, but would be even more useful if we can store the
+        # # reason why they were missing. e.g. "Could not get points for ROI `GTV`."
+        # # metadata["MissingROINames"] = list(set(roi_names) - set(roi_points.keys()))
+        # metadata.ExtractedNumberOfROIs = len(roi_points)
 
         # Return the StructureSet instance
         return cls(roi_points, metadata)
