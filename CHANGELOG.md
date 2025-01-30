@@ -1,6 +1,63 @@
 # CHANGELOG
 
 
+## v1.17.0 (2025-01-29)
+
+### Documentation
+
+- Fix readme formatting
+  ([`5c76c77`](https://github.com/bhklab/med-imagetools/commit/5c76c77c042b043026cc0abc7508f366416a4365))
+
+### Features
+
+- **tests**: Add test dataset downloading and extraction helpers
+  ([#201](https://github.com/bhklab/med-imagetools/pull/201),
+  [`95bfca6`](https://github.com/bhklab/med-imagetools/commit/95bfca6977dbd2d7e70f02d3758e6d5dc4d69767))
+
+## Release Notes
+
+- **New Features** - Enhanced dataset downloading functionality with progress tracking and timeout
+  management 	- Improved dataset extraction with parallel processing support
+
+- **Improvements** 	- Refined GitHub release management 	- Updated test data handling and fixtures
+  	- Improved logging and error handling for dataset operations
+
+- **Changes** 	- Renamed `GitHubReleaseManager` to `MedImageTestData` 	- Updated variable names for
+  better clarity in various modules 	- Adjusted DICOM file saving parameters
+
+- **Testing** 	- Added new test cases for dataset integrity and download processes 	- Enhanced type
+  annotations and test fixtures
+
+### Refactoring
+
+- Improve code formatting and structure across multiple files
+  ([#198](https://github.com/bhklab/med-imagetools/pull/198),
+  [`230235f`](https://github.com/bhklab/med-imagetools/commit/230235fa538f986693504260f27e33d11e528165))
+
+- **Style** 	- Reformatted code across multiple files to improve readability. 	- Updated method
+  signatures to use multi-line formatting. 	- Adjusted import statements and docstring examples. 	-
+  Enhanced clarity in error messages and logging statements.
+
+- **Chores** 	- Updated Ruff linting configuration. 	- Adjusted line length limits in configuration
+  files. 	- Expanded files considered for linting. - Enhanced type clarity and readability in GitHub
+  dataset management classes. - Modified mypy configuration to change file analysis scope and added
+  new sections for specific modules.
+
+- Some changes that will propagate to all branches
+  ([#199](https://github.com/bhklab/med-imagetools/pull/199),
+  [`df23476`](https://github.com/bhklab/med-imagetools/commit/df23476cbfc3919b6cb701f2980d29069f149d84))
+
+- **Configuration Updates** - Updated coverage configuration to exclude specific files from
+  reporting - Adjusted pytest cache directory and coverage settings - Removed mypy unreachable code
+  warnings
+
+- **Error Handling** - Enhanced pattern resolution with a new `MissingPlaceholderValueError` -
+  Improved error messaging for missing placeholder values
+
+- **Code Quality** - Added type ignore annotations for specific library imports - Minor formatting
+  improvements in string representations
+
+
 ## v1.16.0 (2025-01-22)
 
 ### Chores

@@ -57,14 +57,13 @@ med-imagetools = { path = ".", editable = true, extras = ["test"]}
 [feature.test.dependencies]
 pytest = "*"
 pytest-cov = "*"
-# pytest-xdist = "*" re-introduce later. 
+pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 sqlalchemy-stubs = ">=0.4,<0.5"
-
+filelock = ">=3.17.0,<4"
 
 [feature.test.tasks.test]
 cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
-inputs = ["src", "tests", "config/pytest.ini", "config/coverage.toml"]
 description = "Run pytest (make sure to run in root directory)"
 
 [feature.test.tasks.test_ci]
@@ -77,7 +76,7 @@ depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
 [feature.test.tasks.clean_tests]
-cmd = "rm -rf .pytest_cache data tests/temp temp_outputs"
+cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
 ############################################## DOCS ###############################################
 [feature.docs.dependencies]
 mkdocs = "*"

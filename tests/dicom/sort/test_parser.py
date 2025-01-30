@@ -4,7 +4,7 @@ import warnings
 import pytest
 
 from imgtools.dicom.sort.exceptions import InvalidPatternError
-from imgtools.dicom.sort.parser import PatternParser
+from imgtools.pattern_parser.parser import PatternParser
 
 # Disable warnings for the purpose of this test
 warnings.filterwarnings('ignore', category=pytest.PytestWarning)

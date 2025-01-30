@@ -22,13 +22,6 @@ from imgtools.ops.ops import (
 )
 
 
-@pytest.fixture(scope='session')
-def output_path(curr_path):  # curr_path is a fixture defined in conftest.py
-    out_path = pathlib.Path(curr_path, 'temp_outputs')
-    out_path.mkdir(parents=True, exist_ok=True)
-    return out_path
-
-
 img_shape = (100, 100, 100)
 direction = (1, 0, 0, 0, 1, 0, 0, 0, 1)
 origin = (37, 37, 37)
@@ -43,7 +36,10 @@ blank.SetSpacing(spacing)
 
 class TestOutput:
     @pytest.mark.parametrize('op', [NumpyOutput, HDF5Output])  # , "CT,RTDOSE,PT"])
-    def test_output(self, op, output_path) -> None:
+    def test_output(self, op, tmp_path) -> None:
+
+        output_path = tmp_path / 'temp_outputs'
+        output_path.mkdir()
         # get class name
         class_name = op.__name__
 
