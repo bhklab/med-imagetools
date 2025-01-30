@@ -95,7 +95,7 @@ class Vector3D:
         """Allow iteration over the components."""
         return iter((self.x, self.y, self.z))
 
-    def __getitem__(self, idx: int) -> float:
+    def __getitem__(self, idx: int | str) -> float:
         """Access components via index."""
         # return (self.x, self.y, self.z)[index]
         match idx:
