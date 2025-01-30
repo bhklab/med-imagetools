@@ -11,7 +11,6 @@ from imgtools.logging import logger
 
 
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])
-@pytest.mark.xdist_group("serial")
 @pytest.mark.parametrize(
     "modalities", ["CT", "CT,RTSTRUCT", "CT,RTSTRUCT,RTDOSE"]
 )  # , "CT,RTDOSE,PT"])
@@ -28,18 +27,18 @@ class TestComponents:
 
     @pytest.fixture(autouse=True)
     def _get_path(
-        self, quebec_paths
+        self, legacy_test_data
     ) -> None:  # dataset_path is a fixture defined in conftest.py
         self.input_path, self.output_path, self.crawl_path, self.edge_path = (
-            quebec_paths
+            legacy_test_data
         )
-        logger.info(quebec_paths)
+        logger.info(legacy_test_data)
 
     def test_pipeline(self, modalities) -> None:
         """
         Testing the Autopipeline for processing the DICOMS and saving it as nrrds
         """
-        n_jobs = 2
+        n_jobs = 1
         output_path_mod = pathlib.Path(
             self.output_path, str("temp_folder_" + ("_").join(modalities.split(",")))
         ).as_posix()

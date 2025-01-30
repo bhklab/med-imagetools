@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, Tuple
 
 from imgtools.dicom.sort.exceptions import InvalidPatternError
-from imgtools.dicom.sort.parser import PatternParser
 from imgtools.logging import logger
+from imgtools.pattern_parser.parser import PatternParser
 
 
 # Define custom exceptions

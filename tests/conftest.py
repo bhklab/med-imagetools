@@ -4,8 +4,10 @@ from pathlib import Path
 from typing import Generator, Tuple
 from urllib import request
 from zipfile import ZipFile
-
+import json
 import pytest
+from filelock import FileLock
+
 
 from imgtools.datasets.github_helper import (
     GitHubRelease,
@@ -13,36 +15,74 @@ from imgtools.datasets.github_helper import (
 )
 from imgtools.logging import logger  # type: ignore
 
-from .conf_helpers import ensure_data_dir_exists  # type: ignore
+# from .conf_helpers import ensure_data_dir_exists  # type: ignore
 
 
 @pytest.fixture(scope="session")
 def data_dir() -> pathlib.Path:
-    return ensure_data_dir_exists()
+    data_dir = Path(__file__).parent.parent / "data"
+    if not data_dir.exists():
+        data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
 
 
 @pytest.fixture(scope="session")
-def download_all_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
-    # Download QC dataset
-    logger.info("Downloading the test dataset...")
-    manager = MedImageTestData()
-    latest_release: GitHubRelease = manager.get_latest_release()
-    # banned = ["4D-Lungs", "CC-Tumor-Heterogeneisty.tar"]
-    banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
-    selected_tests = list(
-        filter(
-            lambda asset: not any(
-                asset.name.startswith(nope) for nope in banned
-            ),
-            latest_release.assets,
-        )
-    )
-    extracted_paths = manager.download(data_dir, assets=selected_tests)
-    dataset_path_mapping = {
-        unzip_path.name: unzip_path for unzip_path in extracted_paths
-    }
-    return dataset_path_mapping
+def download_all_test_data(data_dir: pathlib.Path, worker_id: str | None) -> dict[str, Path]:  
 
+    # idk how this works like in the pytest-xdist docs
+    # leaving in case we need to use it later
+    # if worker_id == "master":
+    #     # following the pytest-xdist docs, we only want to download the data once
+
+    #     manager = MedImageTestData()
+    #     latest_release: GitHubRelease = manager.get_latest_release()
+    #     # banned = ["4D-Lungs", "CC-Tumor-Heterogeneisty.tar"]
+    #     banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
+    #     selected_tests = list(
+    #         filter(
+    #             lambda asset: not any(
+    #                 asset.name.startswith(nope) for nope in banned
+    #             ),
+    #             latest_release.assets,
+    #         )
+    #     )
+    #     extracted_paths = manager.download(data_dir, assets=selected_tests)
+    #     dataset_path_mapping = {
+    #         unzip_path.name: unzip_path for unzip_path in extracted_paths
+    #     }
+    #     return dataset_path_mapping
+
+    lock_path = data_dir / "download_all_test_data"
+
+    with FileLock(str(lock_path) + ".lock"):
+        if lock_path.with_suffix(".json").exists():
+            # Load existing dataset mapping if already downloaded
+            logger.info("Loading pre-downloaded test dataset metadata...")
+            loaded_json =  json.loads(lock_path.with_suffix(".json").read_text())
+            dataset_path_mapping = {k: Path(v) for k, v in loaded_json.items()}
+            return dataset_path_mapping
+        # Download QC dataset
+        logger.info("Downloading the test dataset...")
+        manager = MedImageTestData()
+        latest_release: GitHubRelease = manager.get_latest_release()
+        banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
+        selected_tests = list(
+            filter(
+                lambda asset: not any(
+                    asset.name.startswith(nope) for nope in banned
+                ),
+                latest_release.assets,
+            )
+        )
+        extracted_paths = manager.download(data_dir, assets=selected_tests)
+        dataset_path_mapping = {
+            unzip_path.name: unzip_path for unzip_path in extracted_paths
+        }
+        # Save dataset mapping to avoid re-downloading in future runs
+        lock_path.with_suffix(".json").write_text(
+            json.dumps({k: str(v) for k, v in dataset_path_mapping.items()})
+        )
+        return dataset_path_mapping
 
 @pytest.fixture(scope="session")
 def download_old_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
@@ -51,26 +91,40 @@ def download_old_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
     this is mainly the quebec dataset
     """
 
-    # Download QC dataset
-    logger.info("Downloading the test dataset...")
-    quebec_data_path = data_dir / "Head-Neck-PET-CT"
+    lock_path = data_dir / "download_old_test_data"
 
-    if not quebec_data_path.exists():
-        quebec_data_url ="https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true" 
-        quebec_zip_path = quebec_data_path.with_suffix(".zip")
+    with FileLock(str(lock_path) + ".lock"):
+        if lock_path.with_suffix(".json").exists():
+            # Load existing dataset mapping if already downloaded
+            logger.info("Loading pre-downloaded old test dataset metadata...")
+            loaded_json = json.loads(lock_path.with_suffix(".json").read_text())
+            dataset_path_mapping = {k: Path(v) for k, v in loaded_json.items()}
+            return dataset_path_mapping
 
-        quebec_data_path.mkdir(parents=True, exist_ok=True)
-        request.urlretrieve(quebec_data_url, quebec_zip_path)
-        with ZipFile(quebec_zip_path, "r") as zipfile:
-            zipfile.extractall(quebec_data_path)
-        quebec_zip_path.unlink()
+        # Download QC dataset
+        logger.info("Downloading the old test dataset...")
+        quebec_data_path = data_dir / "Head-Neck-PET-CT"
 
-    assert quebec_data_path.exists(), f"Quebec data not found at {quebec_data_path}"
-    dataset_path_mapping = {
-        "Head-Neck-PET-CT": quebec_data_path,
-    }
+        if not quebec_data_path.exists():
+            quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
+            quebec_zip_path = quebec_data_path.with_suffix(".zip")
 
-    return dataset_path_mapping
+            quebec_data_path.mkdir(parents=True, exist_ok=True)
+            request.urlretrieve(quebec_data_url, quebec_zip_path)
+            with ZipFile(quebec_zip_path, "r") as zipfile:
+                zipfile.extractall(quebec_data_path)
+            quebec_zip_path.unlink()
+
+        assert quebec_data_path.exists(), f"Quebec data not found at {quebec_data_path}"
+        dataset_path_mapping = {
+            "Head-Neck-PET-CT": quebec_data_path,
+        }
+
+        # Save dataset mapping to avoid re-downloading in future runs
+        lock_path.with_suffix(".json").write_text(
+            json.dumps({k: str(v) for k, v in dataset_path_mapping.items()})
+        )
+        return dataset_path_mapping
 
 
 @pytest.fixture(scope="session")
