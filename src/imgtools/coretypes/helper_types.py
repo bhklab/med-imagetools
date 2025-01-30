@@ -149,6 +149,7 @@ class Coordinate3D(Vector3D):
                     f"Unsupported type for addition: {type(other)}."
                     " Expected Coordinate3D or Size3D."
                 )
+                raise TypeError(errmsg)
 
     def __sub__(self, other: Coordinate3D | Size3D) -> Coordinate3D:
         """Subtract another Vector3D from this vector."""
