@@ -126,7 +126,11 @@ class RTStructureSet:
             else:
                 roi_dict[roi_name] = extracted_roi
                 extracted_rois.append(roi_name)
-
+        logger.debug(
+            "Finished extracting ROI points.",
+            extracted_rois=extracted_rois,
+            failed_rois=list(roi_errors.keys()),
+        )
         # Create a new RTStructureSet object
         structure_set = cls(
             roi_map=roi_dict,
@@ -220,6 +224,11 @@ class RTStructureSet:
     def __rich_repr__(self) -> Iterator:
         yield "rois", len(self)  # len(self.roi_names)
         yield "roi_names", ", ".join(self.roi_names)  # self.roi_names
+        if self.roi_map_errors:
+            yield (
+                "failed_roi_extractions",
+                ", ".join(self.roi_map_errors.keys()),
+            )
         yield "Metadata", self.metadata
 
     def __len__(self) -> int:
@@ -300,13 +309,6 @@ class RTStructureSet:
 
         roi_contour = rtstruct.ROIContourSequence[roi_index]
 
-        if int(roi_contour.ReferencedROINumber) != roi_index + 1:
-            msg = (
-                f"ReferencedROINumber {roi_contour.ReferencedROINumber} does not match "
-                f"the expected index {roi_index + 1}."
-            )
-            raise ROIContourError(msg)
-
         # Check for ContourSequence in the specified ROI
         if not hasattr(roi_contour, "ContourSequence"):
             msg = (
@@ -377,12 +379,26 @@ class RTStructureSet:
                 pass
 
 
+##############################################
+# Benchmarking functions
+
+
+def load_new_rtstruct(file_path: Path) -> RTStructureSet:
+    rtstruct = RTStructureSet.from_dicom(file_path)
+    return rtstruct
+
+
+def load_old_rtstruct(file_path: Path) -> StructureSet:
+    rtstruct = StructureSet.from_dicom(rtstruct_path=file_path)
+    return rtstruct
+
+
 if __name__ == "__main__":
     import time
     from pathlib import Path
 
     import pandas as pd
-    from rich import print
+    from rich import print  # noqa
 
     from imgtools.modules.structureset.structure_set import StructureSet
 
@@ -391,50 +407,64 @@ if __name__ == "__main__":
 
     df = full_index[full_index["modality"] == "RTSTRUCT"]
 
+    collections = set(df["folder"].apply(lambda x: x.split("/")[1]).tolist())
+    print(
+        f"There are a total of {len(df)} RTSTRUCT files in the index for {collections} collections."
+    )
+
     # store the metadata for each rtstruct in a dictionary
-    rt_metadata = {}
 
-    for idx, row in df.iterrows():
-        file_path = row["file_path"]
+    paths = df["file_path"].tolist()
+    logger.setLevel("WARNING")  # type: ignore
+    start_new = time.time()
+    for _i in range(10):
+        for path in paths:
+            _ = load_new_rtstruct(path)
 
-        start = time.time()
-        rtstruct = RTStructureSet.from_dicom(
-            file_path,
-            suppress_warnings=True,
-        )
-        print(f"Time taken: {time.time() - start:.2f} seconds")
+    end_new = time.time()
 
-        rt_metadata[file_path] = rtstruct.summary_dict(exclude_errors=False)
+    start_old = time.time()
+    for _i in range(10):
+        for path in paths:
+            __ = load_old_rtstruct(path)
+    end_old = time.time()
 
-        print(rtstruct)
+    ##############################
+    # use rich table print to display the results
 
-        # rtstruct_old = StructureSet.from_dicom(rtstruct_path=file_path)
-        break
-        # print("_" * 80)
-        # print(rtstruct["PatientID"])
-        # print(rtstruct["SeriesInstanceUID"])
-        # print(rtstruct["gtv.*"])
-        # print(rtstruct["ctv.*"])
+    from rich import table as rich_table
 
-        # # anything that has 'ptv' in the name
-        # print(rtstruct["ptv.*"])
-        # break
+    rtable = rich_table.Table()
+    rtable.add_column("Method", justify="right")
+    rtable.add_column("Time", justify="right")
+    rtable.add_row("New", f"{end_new - start_new:.2f} seconds")
+    rtable.add_row("Old", f"{end_old - start_old:.2f} seconds")
 
-    # # Profile the main function
-    # # with cProfile.Profile() as pr:
-    # main()
+    print(rtable)
+    # for idx, row in df.iterrows():
+    #     file_path = row["file_path"]
 
-    # # # Save profiling stats
-    # # with open("profile_results.prof", "w") as f:
-    # #     stats = pstats.Stats(pr, stream=f)
-    # #     stats.sort_stats(pstats.SortKey.TIME)
-    # #     stats.print_stats()
+    #     start = time.time()
+    #     rtstruct = RTStructureSet.from_dicom(
+    #         file_path,
+    #         suppress_warnings=True,
+    #     )
+    #     print(f"Time taken: {time.time() - start:.2f} seconds")
 
-    # # vizualize the profiling stats with snakeviz
-    import json
+    #     start = time.time()
+    #     rtstruct_old = StructureSet.from_dicom(rtstruct_path=file_path)
+    #     print(f"Time taken: {time.time() - start:.2f} seconds")
 
-    rt_metadata_json_path = index.parent / "rt_metadata.json"
-    with rt_metadata_json_path.open("w") as f:
-        json.dump(rt_metadata, f, indent=4, sort_keys=True)
-    # print(rt_metadata)
-    # # !pip install snakeviz
+    #     rt_metadata[file_path] = rtstruct.summary_dict(exclude_errors=False)
+
+    #     print(rtstruct)
+
+    #     break
+    # rt_metadata = {}
+
+    # # # vizualize the profiling stats with snakeviz
+    # import json
+
+    # rt_metadata_json_path = index.parent / "rt_metadata.json"
+    # with rt_metadata_json_path.open("w") as f:
+    #     json.dump(rt_metadata, f, indent=4, sort_keys=True)

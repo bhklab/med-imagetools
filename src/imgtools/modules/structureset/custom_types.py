@@ -44,7 +44,7 @@ class RTSTRUCTMetadata:
             elif attr_field.name.endswith("UID"):
                 yield (
                     attr_field.name,
-                    f"...{getattr(self, attr_field.name)[-5:]}",
+                    f"...{getattr(self, attr_field.name)[-10:]}",
                 )
             else:
                 yield attr_field.name, getattr(self, attr_field.name)
