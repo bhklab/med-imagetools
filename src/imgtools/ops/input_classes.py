@@ -3,8 +3,12 @@ Input classes refactored to use the BaseInput abstract base class.
 """
 
 import pathlib
+import time
 from typing import Any, List, Optional
+
 import pandas as pd
+
+from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     ImageCSVLoader,
     ImageFileLoader,
@@ -12,9 +16,7 @@ from imgtools.io.loaders import (
 )
 from imgtools.logging import logger
 from imgtools.modules.datagraph import DataGraph
-from imgtools.crawler import crawl
 
-import time
 from .base_classes import BaseInput
 
 
@@ -59,7 +61,7 @@ class CrawlGraphInput(BaseInput):
         n_jobs: int = -1,
         update_crawl: bool = False,
         imgtools_dir: str = ".imgtools",
-    ):
+    ) -> None:
         self.dir_path = pathlib.Path(dir_path)
         self.dataset_name = self.dir_path.name
         self.n_jobs = n_jobs
@@ -67,8 +69,12 @@ class CrawlGraphInput(BaseInput):
         self.imgtools_dir = imgtools_dir
 
         self.csv_path = self._create_path(f"imgtools_{self.dataset_name}.csv")
-        self.json_path = self._create_path(f"imgtools_{self.dataset_name}.json")
-        self.edge_path = self._create_path(f"imgtools_{self.dataset_name}_edges.csv")
+        self.json_path = self._create_path(
+            f"imgtools_{self.dataset_name}.json"
+        )
+        self.edge_path = self._create_path(
+            f"imgtools_{self.dataset_name}_edges.csv"
+        )
 
         start = time.time()
         self.db = self._crawl()
@@ -122,7 +128,9 @@ class CrawlGraphInput(BaseInput):
             A pandas DataFrame containing the parsed graph.
         """
         assert self.graph is not None, "Graph not initialized."
-        modalities = modalities if isinstance(modalities, str) else ",".join(modalities)
+        modalities = (
+            modalities if isinstance(modalities, str) else ",".join(modalities)
+        )
         logger.info("Querying graph", modality=modalities)
         self.df_combined = self.graph.parser(modalities)
         return self.df_combined
@@ -138,7 +146,7 @@ class CrawlGraphInput(BaseInput):
             update=self.update_crawl,
         )
 
-    def __call__(self, key: Any) -> Any:
+    def __call__(self, key: object) -> object:
         """Retrieve input data."""
         return self._loader.get(key)
 
@@ -176,7 +184,7 @@ class ImageCSVInput(BaseInput):
         id_column: Optional[str] = None,
         expand_paths: bool = True,
         readers: Optional[List] = None,
-    ):
+    ) -> None:
         self.csv_path_or_dataframe = csv_path_or_dataframe
         self.colnames = colnames
         self.id_column = id_column
@@ -190,7 +198,7 @@ class ImageCSVInput(BaseInput):
             readers=self.readers,
         )
 
-    def __call__(self, key: Any) -> Any:
+    def __call__(self, key: Any) -> Any:  # noqa: ANN401
         """Retrieve input data."""
         return self._loader.get(key)
 
@@ -223,8 +231,8 @@ class ImageFileInput(BaseInput):
         get_subject_id_from: str = "filename",
         subdir_path: Optional[str] = None,
         exclude_paths: Optional[List[str]] = None,
-        reader: Optional[Any] = None,
-    ):
+        reader: Optional[Any] = None,  # noqa: ANN401
+    ) -> None:
         self.root_directory = root_directory
         self.get_subject_id_from = get_subject_id_from
         self.subdir_path = subdir_path
@@ -238,14 +246,17 @@ class ImageFileInput(BaseInput):
             reader=self.reader,
         )
 
-    def __call__(self, key: Any) -> Any:
+    def __call__(self, key: Any) -> Any:  # noqa: ANN401
         """Retrieve input data."""
         return self._loader.get(key)
 
 
-if __name__ == "__main__":
+# ruff: noqa
+if __name__ == "__main__":  # pragma: no cover
     # Demonstrating usage with mock data
-    example_csv_input = ImageCSVInput("path/to/csv", colnames=["image", "label"])
+    example_csv_input = ImageCSVInput(
+        "path/to/csv", colnames=["image", "label"]
+    )
     print("ExampleCSVInput repr:", repr(example_csv_input))
 
     example_file_input = ImageFileInput("path/to/directory")

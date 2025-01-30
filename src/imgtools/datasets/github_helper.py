@@ -21,14 +21,10 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
-    TransferSpeedColumn,
 )
-
-from imgtools.logging import logger
 
 # create a single console for all progress bars, so they don't clutter the output
 console = Console()
-
 
 try:
     from github import Github  # type: ignore # noqa
