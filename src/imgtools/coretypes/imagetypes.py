@@ -1,29 +1,24 @@
 from __future__ import annotations
 
-from typing import Any, Iterator, NamedTuple, Sequence, Union
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Sequence
 
 import numpy as np
 import SimpleITK as sitk
 
-# Goals for this module:
-# - One Image Class to Rule Them All (no more juggling numpy & sitk)
-# - consistent indexing (z, y, x) (maybe fancy indexing?)
-# - can be created either from array or sitk.Image
-# - implements all basic operators of sitk.Image
-# - easy conversion to array or sitk
-# - method to apply arbitrary sitk filter
-# - nicer repr
-
-# TODO:
-# - better support for masks (e.g. what happens when we pass a one-hot encoded mask?)
-# - (optional) specify indexing order when creating new Image (sitk or numpy)
+if TYPE_CHECKING:
+    from .direction import Direction
+    from .helper_types import Coordinate3D, Size3D, Spacing3D
 
 
-class ImageGeometry(NamedTuple):
-    size: Sequence[int]
-    origin: Sequence[float]
-    direction: Sequence[float]
-    spacing: Sequence[float]
+@dataclass(frozen=True)
+class ImageGeometry:
+    """Represents the geometry of a 3D image."""
+
+    size: Size3D
+    origin: Coordinate3D
+    direction: Direction
+    spacing: Spacing3D
 
 
 # Type alias for Image or Array
@@ -40,7 +35,22 @@ class MedImage:
     ) -> None:
         pass
 
-    
+
+# The following goals and code was written by
+# the original author of the codebase, considering it as a possible implementation
+
+# Goals for this module:
+# - One Image Class to Rule Them All (no more juggling numpy & sitk)
+# - consistent indexing (z, y, x) (maybe fancy indexing?)
+# - can be created either from array or sitk.Image
+# - implements all basic operators of sitk.Image
+# - easy conversion to array or sitk
+# - method to apply arbitrary sitk filter
+# - nicer repr
+
+# TODO:
+# - better support for masks (e.g. what happens when we pass a one-hot encoded mask?)
+# - (optional) specify indexing order when creating new Image (sitk or numpy)
 
 
 # class Image:
