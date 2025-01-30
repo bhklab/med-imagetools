@@ -1,3 +1,7 @@
+"""
+OLD BBOX CODE TO GET INSPIRATION FROM
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
