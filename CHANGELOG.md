@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v1.17.1 (2025-01-30)
+
+### Bug Fixes
+
+- Mis-handling of string as roi_name for to_segmentation
+  ([#206](https://github.com/bhklab/med-imagetools/pull/206),
+  [`358be55`](https://github.com/bhklab/med-imagetools/commit/358be55e6f65cb86eb8d7ba083e5d7debef6ab4a))
+
+Remove unnecessary conversion of `roi_names` from string to list and fix handling when a string is
+  passed to the `to_segmentation` function.
+
+fixes #205
+
+- **Improvements** 	- Enhanced input handling for ROI names in the segmentation process. - Improved
+  flexibility by allowing both string and list input types for ROI names. - **New Features** - Added
+  new test cases to validate the functionality of converting ROI points to segmentation images. -
+  **Bug Fixes** 	- Updated test data structures for consistency and accuracy.
+
+
 ## v1.17.0 (2025-01-29)
 
 ### Documentation
