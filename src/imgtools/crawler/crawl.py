@@ -1,10 +1,33 @@
+"""
+TODO Summary:
+1. Optimize file search:
+   - Avoid iterating through subdirectories by using `glob` directly for DICOM files in the target directory.
+2. Refactor metadata extraction:
+   - Extract metadata based on modality to reduce reliance on exception handling.
+3. Modularize functionality:
+   - Extract repetitive metadata extraction logic (e.g., Frame of Reference UIDs) into helper functions.
+4. Optimize series and subseries processing:
+   - Pre-check for existing series+subseries data before extracting redundant metadata.
+   - Directly append SOPInstanceUID to an existing series+subseries.
+5. Enhance multiprocessing:
+   - Consider using a multiprocessing pool for improved compatibility with the `tqdm` progress bar.
+6. Improve output structure:
+   - Transition to JSON-based loading instead of using the temporary `fname` field.
+7. Handle duplicate patient entries:
+   - Investigate and properly handle cases where DICOM files for the same patient exist across multiple folders.
+8. Improve error handling:
+   - Add robust error handling for any potential issues during metadata extraction or file parsing.
+9. Expand testing:
+   - Ensure the logic accommodates edge cases, including missing metadata, empty folders, or unsupported modalities.
+"""
+
 import json
 import os
 import pathlib
 from argparse import ArgumentParser
 
 import pandas as pd
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
 from tqdm import tqdm
 
@@ -14,7 +37,7 @@ from imgtools.logging import logger
 # fmt: off
 def crawl_one(folder: pathlib.Path) -> dict:
     folder_path = pathlib.Path(folder)
-    database = {}
+    database: dict[str, dict] = {}
     for path in folder_path.iterdir():
         # find dicoms
         dicoms = [f for f in path.rglob("*.dcm")]
@@ -96,11 +119,11 @@ def crawl_one(folder: pathlib.Path) -> dict:
 
                 # MRI Tags
                 try:
-                    tr = float(meta.RepetitionTime)
+                    tr = str(float(meta.RepetitionTime))
                 except:
                     pass
                 try:
-                    te = float(meta.EchoTime)
+                    te = str(float(meta.EchoTime))
                 except:
                     pass
                 try:
@@ -108,7 +131,7 @@ def crawl_one(folder: pathlib.Path) -> dict:
                 except:
                     pass
                 try:
-                    tesla = float(meta.MagneticFieldStrength)
+                    tesla = str(float(meta.MagneticFieldStrength))
                 except:
                     pass
                 try:
@@ -264,6 +287,10 @@ def crawl(
     return database_dict
 
 
+# os.cpu_count() - 2,
+cpu_count = os.cpu_count()
+DEFAULT_CPU_COUNT = cpu_count - 2 if cpu_count and cpu_count > 2 else 1
+
 # ruff: noqa
 if __name__ == "__main__":  # pragma: no cover
     parser = ArgumentParser("Dataset DICOM Crawler")
@@ -273,7 +300,7 @@ if __name__ == "__main__":  # pragma: no cover
     parser.add_argument(
         "--n_jobs",
         type=int,
-        default=os.cpu_count() - 2,
+        default=DEFAULT_CPU_COUNT,
         help="Number of parallel processes for multiprocessing.",
     )
 
