@@ -213,6 +213,7 @@ def test_rtstruct_to_segmentation(roi_points, metadata) -> None:
 
     assert "GTV" in raw_roi_names
     assert "PTV" in raw_roi_names
+    assert list(seg_images.roi_indices.keys()) == ["GTV", "PTV"]
 
     seg_images2 = structure_set.to_segmentation(
         reference_image=ref_image, roi_names="GTV"
@@ -224,3 +225,7 @@ def test_rtstruct_to_segmentation(roi_points, metadata) -> None:
     assert "PTV" not in seg_images2.raw_roi_names
 
     assert seg_images2.get_label(name="GTV") is not None
+
+    assert list(seg_images2.roi_indices.keys()) == ["GTV"]
+
+    assert repr(seg_images2) == "<Segmentation with ROIs: {'GTV': 1}>"
