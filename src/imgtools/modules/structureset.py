@@ -649,8 +649,6 @@ class StructureSet:
                                 matching_names
                             )  # {"GTV": ["GTV1", "GTV2"]}
                     labels[name] = extracted_labels
-        if isinstance(roi_names, str):
-            roi_names = [roi_names]
 
         logger.debug(f"Found {len(labels)} labels", labels=labels)
 
