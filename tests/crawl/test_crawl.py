@@ -2,7 +2,7 @@ from pathlib import Path
 import pytest
 from rich import print as rprint
 import pandas as pd
-from imgtools.utils import crawl
+from imgtools.crawler import crawl
 
 """
 This stuff will be hard coded unfortunately, and will be tedious to adjust if
