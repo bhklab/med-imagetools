@@ -106,15 +106,14 @@ class StructureSet:
     """
 
     roi_points: Dict[str, List[np.ndarray]]
-    metadata: RTSTRUCTMetadata
 
     def __init__(
         self,
         roi_points: Dict[str, List[np.ndarray]],
-        metadata: Optional[RTSTRUCTMetadata] = None,
+        metadata: Optional[dict] = None,
     ) -> None:
         self.roi_points: Dict[str, List[np.ndarray]] = roi_points
-        self.metadata: RTSTRUCTMetadata = metadata or {}
+        self.metadata = metadata or {}
 
     @classmethod
     def from_dicom(
@@ -167,7 +166,7 @@ class StructureSet:
         dcm = load_rtstruct_dcm(rtstruct_path)
 
         # Extract ROI names and points
-        metadata: RTSTRUCTMetadata = extract_rtstruct_metadata(dcm)
+        metadata: dict = extract_rtstruct_metadata(dcm).to_dict()
 
         roi_names = metadata["OriginalROINames"]
         logger.debug(

@@ -25,7 +25,9 @@ if TYPE_CHECKING:
 SelectionPattern: TypeAlias = str | list[str]
 """Alias for a string or a list of strings used to represent selection patterns."""
 
-ROINamePatterns: TypeAlias = SelectionPattern | dict[str, SelectionPattern] | None
+ROINamePatterns: TypeAlias = (
+    SelectionPattern | dict[str, SelectionPattern] | None
+)
 """Alias for ROI names, which can be:
 - A single string pattern.
 - A list of string patterns.
@@ -42,17 +44,25 @@ class ROIExtractionErrorMsg(str):
 class RTStructureSet:
     """Represents the entire structure set, containing multiple ROIs."""
 
-    roi_map: dict[str, ROI | ROIExtractionErrorMsg] = field(repr=False)
-
     # these are the EXTRACTED ROI names, not the original ones in the RTSTRUCT
     # since some will fail to extract
     # missing_rois = set(self.rois.keys()) - set(self.roi_names)
     roi_names: List[str]
     metadata: RTSTRUCTMetadata
 
+    roi_map: dict[str, ROI] = field(repr=False)
+
+    roi_map_errors: dict[str, ROIExtractionErrorMsg] = field(
+        repr=False, default_factory=dict
+    )
+
     @property
     def rois(self) -> dict[str, ROI]:
-        return {roi_name: roi for roi_name, roi in self.roi_map if isinstance(roi, ROI)}
+        return {
+            roi_name: roi
+            for roi_name, roi in self.roi_map
+            if isinstance(roi, ROI)
+        }
 
     @classmethod
     def from_dicom(
@@ -85,15 +95,20 @@ class RTStructureSet:
         dicom_rt = load_rtstruct_dcm(dicom)
         metadata = extract_rtstruct_metadata(dicom_rt)
 
-        case_ignore = re.IGNORECASE if ignore_case else 0  # for pattern matching
+        case_ignore = (
+            re.IGNORECASE if ignore_case else 0
+        )  # for pattern matching
 
         # Create a dictionary to store the ROI objects
         roi_dict: dict[str, ROI] = {}
+        roi_errors: dict[str, ROIExtractionErrorMsg] = {}
         extracted_rois = []  # only track successfully extracted ROIs
 
         # Extract ROI contour points for each ROI and
         for roi_index, roi_name in enumerate(metadata["OriginalROINames"]):
-            if roi_name_pattern and not re.match(roi_name_pattern, roi_name, flags=case_ignore):
+            if roi_name_pattern and not re.match(
+                roi_name_pattern, roi_name, flags=case_ignore
+            ):
                 continue
             try:
                 extracted_roi = cls._get_roi_points(
@@ -107,17 +122,24 @@ class RTStructureSet:
                         error=ae,
                     )
                 error_string = f"Error extracting ROI '{roi_name}': {ae}"
-                roi_dict[roi_name] = ROIExtractionErrorMsg(error_string)
+                roi_errors[roi_name] = ROIExtractionErrorMsg(error_string)
             else:
                 roi_dict[roi_name] = extracted_roi
                 extracted_rois.append(roi_name)
 
         # Create a new RTStructureSet object
-        structure_set = cls(roi_map=roi_dict, roi_names=extracted_rois, metadata=metadata)
+        structure_set = cls(
+            roi_map=roi_dict,
+            roi_names=extracted_rois,
+            roi_map_errors=roi_errors,
+            metadata=metadata,
+        )
 
         return structure_set
 
-    def match_roi(self, pattern: str, ignore_case: bool = True) -> List[str] | None:
+    def match_roi(
+        self, pattern: str, ignore_case: bool = True
+    ) -> List[str] | None:
         """Search for ROI names in self.roi_names based on a regular expression pattern.
 
         Parameters
@@ -140,11 +162,17 @@ class RTStructureSet:
         ... )
         >>> structure_set.match_roi("GTV.*")
         ['GTV1', 'GTV2']
-        >>> structure_set.match_roi("ctv.*", ignore_case=True)
+        >>> structure_set.match_roi(
+        ...     "ctv.*", ignore_case=True
+        ... )
         ['CTV_0', 'CTV_1']
         """
         _flags = re.IGNORECASE if ignore_case else 0
-        matches = [name for name in self.roi_names if re.fullmatch(pattern, name, flags=_flags)]
+        matches = [
+            name
+            for name in self.roi_names
+            if re.fullmatch(pattern, name, flags=_flags)
+        ]
         return matches if matches else None
 
     def __getitem__(self, name: str) -> list[ROI] | str:
@@ -206,7 +234,9 @@ class RTStructureSet:
         return list(iter(self))
 
     @staticmethod
-    def _get_roi_points(rtstruct: FileDataset, roi_index: int, roi_name: str) -> ROI:
+    def _get_roi_points(
+        rtstruct: FileDataset, roi_index: int, roi_name: str
+    ) -> ROI:
         """Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
 
         The passed in roi_index is what is used to index the ROIContourSequence,
@@ -239,7 +269,9 @@ class RTStructureSet:
 
         Examples
         --------
-        >>> rtstruct = dcmread("path/to/rtstruct.dcm", force=True)
+        >>> rtstruct = dcmread(
+        ...     "path/to/rtstruct.dcm", force=True
+        ... )
         >>> StructureSet._get_roi_points(rtstruct, 0, "GTV")
         """
         # Notes
@@ -254,7 +286,9 @@ class RTStructureSet:
 
         # Check for ROIContourSequence
         if not hasattr(rtstruct, "ROIContourSequence"):
-            raise ROIContourError("The DICOM RTSTRUCT file is missing 'ROIContourSequence'.")
+            raise ROIContourError(
+                "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
+            )
 
         # Check if ROI index exists in the sequence
         if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
@@ -276,7 +310,7 @@ class RTStructureSet:
         # Check for ContourSequence in the specified ROI
         if not hasattr(roi_contour, "ContourSequence"):
             msg = (
-                f"ROI at index {roi_index}, (ReferencedROINumber={roi_index+1}) "
+                f"ROI at index {roi_index}, (ReferencedROINumber={roi_index + 1}) "
                 "is missing 'ContourSequence';"
             )
             raise ROIContourError(msg)
@@ -294,7 +328,12 @@ class RTStructureSet:
             contour_points.append(contour_slice)
             num_points = slc.get("NumberOfContourPoints", 0)
 
-        return ROI(roi_name, roi_contour.ReferencedROINumber, num_points, contour_points)
+        return ROI(
+            roi_name,
+            roi_contour.ReferencedROINumber,
+            num_points,
+            contour_points,
+        )
 
     def summary_dict(self, exclude_errors: bool = False) -> dict:
         """Return a dictionary of summary information for the RTStructureSet."""

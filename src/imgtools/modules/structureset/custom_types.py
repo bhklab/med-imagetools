@@ -21,15 +21,14 @@ class RTSTRUCTMetadata:
     OriginalROINames: Sequence[str]
     OriginalNumberOfROIs: int
 
-    # or 'key in RTSTRUCTMetadata' to check if a key exists
-    def __contains__(self, key: str) -> bool:
-        return hasattr(self, key)
-
     def keys(self) -> List[str]:
         return [attr_field.name for attr_field in fields(self)]
 
     def items(self) -> List[tuple[str, str]]:
-        return [(attr_field.name, getattr(self, attr_field.name)) for attr_field in fields(self)]
+        return [
+            (attr_field.name, getattr(self, attr_field.name))
+            for attr_field in fields(self)
+        ]
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -43,9 +42,21 @@ class RTSTRUCTMetadata:
             if attr_field.name == "OriginalROINames":
                 continue  # skip OriginalROINames for brevity
             elif attr_field.name.endswith("UID"):
-                yield attr_field.name, f"...{getattr(self, attr_field.name)[-5:]}"
+                yield (
+                    attr_field.name,
+                    f"...{getattr(self, attr_field.name)[-5:]}",
+                )
             else:
                 yield attr_field.name, getattr(self, attr_field.name)
+
+    # or 'key in RTSTRUCTMetadata' to check if a key exists
+    def __contains__(self, key: str) -> bool:
+        return hasattr(self, key)
+
+    # implement dict-like 'update' method
+    def update(self, **kwargs: str) -> None:
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class ContourSlice(np.ndarray):
@@ -96,15 +107,15 @@ class ROI:
         return iter(self.slices)
 
     @property
-    def ReferencedROINumber(self) -> int:
+    def ReferencedROINumber(self) -> int:  # noqa N802
         return self.referenced_roi_number
 
     @property
-    def NumSlices(self) -> int:
+    def NumSlices(self) -> int:  # noqa N802
         return len(self.slices)
 
     @property
-    def NumberOfContourPoints(self) -> int:
+    def NumberOfContourPoints(self) -> int:  # noqa N802
         return self.num_points
 
     def to_dict(self) -> dict:
