@@ -1,6 +1,37 @@
 # CHANGELOG
 
 
+## v1.18.0 (2025-01-31)
+
+### Documentation
+
+- Fix subheading README.md
+  ([`18c41b9`](https://github.com/bhklab/med-imagetools/commit/18c41b9387c58629047d2d825980b42886c312cd))
+
+### Features
+
+- Add helper types for 3D spatial operations
+  ([#203](https://github.com/bhklab/med-imagetools/pull/203),
+  [`ee344d1`](https://github.com/bhklab/med-imagetools/commit/ee344d1b580685dacd18fb577224bd4ffd73b4ca))
+
+- **Documentation** - Added a class inheritance diagram and explanation to the `coretypes` README. -
+  Introduced detailed documentation for 3D spatial and image-related types.
+
+- **New Features** 	- Added new classes for 3D geometric operations: 		- `Point3D` 		- `Size3D` 		-
+  `Coordinate3D` 		- `Centroid` 		- `BoundingBox` 		- `Direction` 		- `ImageGeometry` 		- `MedImage`
+  	- Introduced the `RegionBox` class for handling 3D bounding boxes.
+
+- **Bug Fixes** - Implemented error handling for bounding box operations to ensure valid dimensions.
+
+- **Refactor** 	- Removed existing `Image` class from `types.py`. - Restructured image and geometric
+  type handling across multiple modules.
+
+- **Tests** - Introduced a comprehensive test suite for `Vector3D`, `Size3D`, `Coordinate3D`, and
+  `Spacing3D` classes.
+
+- **Chores** - Updated linting configuration to include new paths and exclude deprecated files.
+
+
 ## v1.17.1 (2025-01-30)
 
 ### Bug Fixes
