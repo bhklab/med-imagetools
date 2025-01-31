@@ -103,8 +103,7 @@ class RegionBox:
         ----------
         mask : sitk.Image
             The input mask image.
-        min_dim_size : int
-            Minimum size of bounding box along each dimension. Default is 4.
+        label : int, optional
 
         Returns
         -------
