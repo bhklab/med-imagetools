@@ -46,11 +46,11 @@ class Vector3D:
 
     Attributes
     ----------
-    x : float | int
+    x :int
         X-component of the vector.
-    y : float | int
+    y : int
         Y-component of the vector.
-    z : float | int
+    z : int
         Z-component of the vector.
 
     Methods
@@ -65,11 +65,11 @@ class Vector3D:
         Access components via index.
     """
 
-    x: float | int
-    y: float | int
-    z: float | int
+    x: int
+    y: int
+    z: int
 
-    def __init__(self, *args: float | int) -> None:
+    def __init__(self, *args: int) -> None:
         """Initialize a Vector3D with x, y, z components."""
         match args:
             case [x, y, z]:
@@ -83,14 +83,14 @@ class Vector3D:
                 )
                 raise ValueError(errmsg)
 
-    def __iter__(self) -> Iterator[float | int]:
+    def __iter__(self) -> Iterator[int]:
         """Allow iteration over the components."""
         return iter((self.x, self.y, self.z))
 
-    def __getitem__(self, idx: int | str) -> float | int:
+    def __getitem__(self, idx: int | str) -> int:
         """Access components via index."""
         match idx:
-            case int() as index:
+            case int() as idx:
                 return (self.x, self.y, self.z)[idx]
             case str() if idx in vars(self):
                 return getattr(self, idx)
@@ -101,17 +101,7 @@ class Vector3D:
     def __repr__(self) -> str:
         """Return a string representation of the Vector3D."""
         cls = self.__class__.__name__
-        return f"{cls}(x={self.x:.1f}, y={self.y:.1f}, z={self.z:.1f})"
-
-
-class Spacing3D(Vector3D):
-    """
-    Represent the spacing in 3D space.
-    Inherits from Vector3D.
-    """
-
-    # No exta attributes or methods needed (yet),
-    # inherits everything from Vector3D
+        return f"{cls}(x={self.x}, y={self.y}, z={self.z})"
 
 
 class Coordinate3D(Vector3D):
@@ -163,6 +153,39 @@ class Coordinate3D(Vector3D):
                 raise TypeError(errmsg)
 
 
+class Spacing3D:
+    """
+    Represent the spacing in 3D space.
+    Inherits from Vector3D.
+    """
+
+    x: float
+    y: float
+    z: float
+
+    def __init__(self, *args: float) -> None:
+        """Initialize a Spacing3D with x, y, z components."""
+        match args:
+            case [x, y, z]:
+                self.x, self.y, self.z = x, y, z
+            case [tuple_points] if isinstance(tuple_points, tuple):
+                self.x, self.y, self.z = tuple_points
+            case _:
+                errmsg = (
+                    f"{self.__class__.__name__} expects 3 values for x, y, z."
+                    f" Got {len(args)} values for {args}."
+                )
+                raise ValueError(errmsg)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Spacing3D."""
+        return f"Spacing3D(x={self.x}, y={self.y}, z={self.z})"
+
+    def __iter__(self) -> Iterator[float]:
+        """Allow iteration over the components."""
+        return iter((self.x, self.y, self.z))
+
+
 @dataclass
 class Size3D:
     """
@@ -211,10 +234,7 @@ class Size3D:
 
     def __repr__(self) -> str:
         """Return a string representation of the Size3D."""
-        return (
-            f"Size3D(w={self.width:.1f},"
-            f" h={self.height:.1f}, d={self.depth:.1f})"
-        )
+        return f"Size3D(w={self.width}, h={self.height}, d={self.depth})"
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -225,8 +245,10 @@ if __name__ == "__main__":  # pragma: no cover
     ########################################
     # Vector3D
     ########################################
+    myint = 10
+    print(myint)
 
-    vector1 = Vector3D(1.0, 2.0, 3.0)
+    vector1 = Vector3D(1, 2, 3)
 
     # as tuple input
     vector2 = Vector3D(*(1, 2, 3))
@@ -246,17 +268,33 @@ if __name__ == "__main__":  # pragma: no cover
     # Coordinate3D
     ########################################
 
-    point = Coordinate3D(10.0, 20.0, 30.0)
-    point2 = Coordinate3D((15.0, 25.0, 35.0))
-    point2 = Coordinate3D(*(15.0, 25.0, 35.0))
+    point = Coordinate3D(10, 20, 30)
+    point2 = Coordinate3D((15, 25, 35)) # mypy will complain about this, but it will work
+    point2 = Coordinate3D(*(15, 25, 35)) # unpack the tuple to avoid mypy error
 
     print(point)
     print(point2)
 
     size_tuple = (50, 60, 70)
-    size = Size3D(size_tuple)
-    size = Size3D(*size_tuple)
+    size = Size3D(size_tuple) # mypy will complain about this, but it will work
+    size = Size3D(*size_tuple) # unpack the tuple
     point_plus_size = point + size_tuple
 
     print(f"Adding {point=} and {size_tuple=} = {point_plus_size}")
     print(f"Adding {point=} and {size=} = {point + size}")
+
+
+    # make a sitk image
+    import SimpleITK as sitk
+
+    # create a 3D image
+    image = sitk.Image(100, 100, 100, sitk.sitkInt16)
+
+    image_size = Size3D(*image.GetSize())
+    print(f"Image size: {image_size}")
+
+    # get the spacing
+    image_spacing = Spacing3D(*image.GetSpacing())
+    print(f"Image spacing: {image_spacing}")
+
+    
