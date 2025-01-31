@@ -27,6 +27,7 @@ py312 = { features = ["py312", "test"], no-default-feature = true }
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+ipympl = ">=0.9.6,<0.10"
 
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
