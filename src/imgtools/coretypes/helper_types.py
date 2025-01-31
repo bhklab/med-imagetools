@@ -46,11 +46,11 @@ class Vector3D:
 
     Attributes
     ----------
-    x : float
+    x : float | int
         X-component of the vector.
-    y : float
+    y : float | int
         Y-component of the vector.
-    z : float
+    z : float | int
         Z-component of the vector.
 
     Methods
@@ -65,17 +65,17 @@ class Vector3D:
         Access components via index.
     """
 
-    x: float
-    y: float
-    z: float
+    x: float | int
+    y: float | int
+    z: float | int
 
     def __init__(self, *args: float | int) -> None:
         """Initialize a Vector3D with x, y, z components."""
         match args:
             case [x, y, z]:
-                self.x, self.y, self.z = float(x), float(y), float(z)
+                self.x, self.y, self.z = x, y, z
             case [tuple_points] if isinstance(tuple_points, tuple):
-                self.x, self.y, self.z = map(float, tuple_points)
+                self.x, self.y, self.z = tuple_points
             case _:
                 errmsg = (
                     f"{self.__class__.__name__} expects 3 values for x, y, z."
@@ -83,13 +83,12 @@ class Vector3D:
                 )
                 raise ValueError(errmsg)
 
-    def __iter__(self) -> Iterator[float]:
+    def __iter__(self) -> Iterator[float | int]:
         """Allow iteration over the components."""
         return iter((self.x, self.y, self.z))
 
-    def __getitem__(self, idx: int | str) -> float:
+    def __getitem__(self, idx: int | str) -> float | int:
         """Access components via index."""
-        # return (self.x, self.y, self.z)[index]
         match idx:
             case int() as index:
                 return (self.x, self.y, self.z)[idx]
@@ -171,11 +170,11 @@ class Size3D:
 
     Attributes
     ----------
-    width : float
+    width : int
         The width of the 3D object.
-    height : float
+    height : int
         The height of the 3D object.
-    depth : float
+    depth : int
         The depth of the 3D object.
 
     Methods
@@ -184,20 +183,16 @@ class Size3D:
         Calculate the volume of the 3D object.
     """
 
-    width: float
-    height: float
-    depth: float
+    width: int
+    height: int
+    depth: int
 
-    def __init__(self, *args: float) -> None:
+    def __init__(self, *args: int) -> None:
         match args:
-            case [width, height, depth]:
-                self.width, self.height, self.depth = (
-                    float(width),
-                    float(height),
-                    float(depth),
-                )
+            case [int() as width, int() as height, int() as depth]:
+                self.width, self.height, self.depth = width, height, depth
             case [tuple_points] if isinstance(tuple_points, tuple):
-                self.width, self.height, self.depth = map(float, tuple_points)
+                self.width, self.height, self.depth = map(int, tuple_points)
             case _:
                 errmsg = (
                     f"{self.__class__.__name__} expects 3 values for width, height, depth."
@@ -206,11 +201,11 @@ class Size3D:
                 raise ValueError(errmsg)
 
     @property
-    def volume(self) -> float:
+    def volume(self) -> int:
         """Calculate the volume of the 3D object."""
         return self.width * self.height * self.depth
 
-    def __iter__(self) -> Iterator[float]:
+    def __iter__(self) -> Iterator[int]:
         """Allow iteration over the dimensions."""
         return iter((self.width, self.height, self.depth))
 
@@ -234,7 +229,7 @@ if __name__ == "__main__":  # pragma: no cover
     vector1 = Vector3D(1.0, 2.0, 3.0)
 
     # as tuple input
-    vector2 = Vector3D((1, 2, 3))  # type: ignore
+    vector2 = Vector3D(*(1, 2, 3))
     assert all((attr1 == attr2) for attr1, attr2 in zip(vector1, vector2))
 
     # iterate over the objects' attributes
@@ -252,13 +247,15 @@ if __name__ == "__main__":  # pragma: no cover
     ########################################
 
     point = Coordinate3D(10.0, 20.0, 30.0)
-    point2 = Coordinate3D((15.0, 25.0, 35.0))  # type: ignore
+    point2 = Coordinate3D((15.0, 25.0, 35.0))
+    point2 = Coordinate3D(*(15.0, 25.0, 35.0))
 
     print(point)
     print(point2)
 
-    size_tuple = (50.0, 60.0, 70.0)
-    size = Size3D(size_tuple)  # type: ignore
+    size_tuple = (50, 60, 70)
+    size = Size3D(size_tuple)
+    size = Size3D(*size_tuple)
     point_plus_size = point + size_tuple
 
     print(f"Adding {point=} and {size_tuple=} = {point_plus_size}")
