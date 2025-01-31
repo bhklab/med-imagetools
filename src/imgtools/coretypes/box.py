@@ -20,34 +20,28 @@ class BoundingBoxOutsideImageError(Exception):
 
 def calculate_image_boundaries(image: sitk.Image) -> RegionBox:
     """
-     Calculate the physical coordinate boundaries of a SimpleITK image.
+    Calculate the physical coordinate boundaries of a SimpleITK image.
 
-     Parameters
-     ----------
-     image : sitk.Image
-             The input SimpleITK image.
+    Parameters
+    ----------
+    image: sitk.Image
+        The input SimpleITK image.
 
-     Returns
-     -------
+    Returns
+    -------
     RegionBox
 
-     Examples
-     --------
-     >>> calculate_image_boundaries(image)
-
+    Examples
+    --------
+    >>> calculate_image_boundaries(image)
     """
 
-    size = image.GetSize()
-    origin = image.GetOrigin()
-
-    return RegionBox.from_tuple(
-        coordmin=(int(origin[0]), int(origin[1]), int(origin[2])),
-        coordmax=(
-            int(origin[0] + size[0]),
-            int(origin[1] + size[1]),
-            int(origin[2] + size[2]),
-        ),
+    min_coord = Coordinate3D(
+        *image.TransformPhysicalPointToIndex(image.GetOrigin())
     )
+    size = Size3D(*image.GetSize())
+
+    return RegionBox(min_coord, min_coord + size)
 
 
 @dataclass
@@ -353,6 +347,9 @@ if __name__ == "__main__":
     ct_image = sitk.ReadImage(
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/CT_82918_original.nii.gz"
     )
+
+    print(f"{calculate_image_boundaries(ct_image)=}")
+
     rt_image = sitk.ReadImage(
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/RTSTRUCT_11267_GTV.nii.gz"
     )
