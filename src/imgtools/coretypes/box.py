@@ -81,8 +81,8 @@ class RegionBox:
 
         Returns
         -------
-        BoundingBox
-            The bounding box coordinates as a BoundingBox object.
+        RegionBox
+            The bounding box coordinates as a RegionBox object.
         """
         mask_uint = sitk.Cast(mask, sitk.sitkUInt8)
         stats = sitk.LabelShapeStatisticsImageFilter()
@@ -96,7 +96,7 @@ class RegionBox:
         )
 
     @classmethod
-    def from_mask(cls, mask: sitk.Image, label: int = 1) -> RegionBox:
+    def from_mask_bbox(cls, mask: sitk.Image, label: int = 1) -> RegionBox:
         """Creates a RegionBox from the bounding box of a mask image.
 
         Parameters
@@ -108,8 +108,8 @@ class RegionBox:
 
         Returns
         -------
-        BoundingBox
-            The bounding box coordinates as a BoundingBox object.
+        RegionBox
+            The bounding box coordinates as a RegionBox object.
         """
 
         mask_uint = sitk.Cast(mask, sitk.sitkUInt8)
@@ -354,7 +354,7 @@ if __name__ == "__main__":
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/RTSTRUCT_11267_GTV.nii.gz"
     )
 
-    print(f"{RegionBox.from_mask(rt_image)=}")
+    print(f"{RegionBox.from_mask_bbox(rt_image)=}")
 
     print(f"{RegionBox.from_mask_centroid(rt_image)=}")
 
@@ -368,7 +368,7 @@ if __name__ == "__main__":
     centroid_region = RegionBox.from_mask_centroid(rt_image).expand_to_cube(
         100
     )
-    bbox_region = RegionBox.from_mask(rt_image).expand_to_cube(100)
+    bbox_region = RegionBox.from_mask_bbox(rt_image).expand_to_cube(100)
 
     cropped_centroid_image = centroid_region.crop_image(ct_image)
     cropped_bbox_image = bbox_region.crop_image(ct_image)
