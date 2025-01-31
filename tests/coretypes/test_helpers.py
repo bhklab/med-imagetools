@@ -2,7 +2,7 @@ from typing import Tuple, Union
 
 import pytest
 
-from imgtools.coretypes.helper_types import (
+from imgtools import (
     Coordinate3D,
     Size3D,
     Spacing3D,
@@ -16,40 +16,35 @@ class TestVector3D:
     @pytest.mark.parametrize(
         "args, expected",
         [
-            # Float values
-            ((1.2, 2.3, 3.4), (1.2, 2.3, 3.4)),
             # Integer values
-            ((1, 2, 3), (1.0, 2.0, 3.0)),
-            # Mixed int/float
-            ((1, 2.5, 3), (1.0, 2.5, 3.0)),
+            ((1, 2, 3), (1, 2, 3)),
             # Tuple input
-            (((4, 5, 6),), (4.0, 5.0, 6.0)),
+            (((4, 5, 6),), (4, 5, 6)),
         ],
     )
     def test_initialization(
         self,
-        args: Tuple[Union[int, float], ...],
-        expected: Tuple[float, float, float],
+        args: Tuple[int, ...],
+        expected: Tuple[int, int, int],
     ) -> None:
         """Test Vector3D initialization with different input types."""
         v = Vector3D(*args)
         assert (v.x, v.y, v.z) == expected
         assert (
-            isinstance(v.x, float)
-            and isinstance(v.y, float)
-            and isinstance(v.z, float)
+            isinstance(v.x, int)
+            and isinstance(v.y, int)
+            and isinstance(v.z, int)
         )
 
     @pytest.mark.parametrize(
         "invalid_args",
         [
-            (1.0, 2.0),  # Too few values
-            (1.0, 2.0, 3.0, 4.0),  # Too many values
-            (("invalid", 2, 3),),  # Non-numeric values
+            (1, 2),  # Too few values
+            (1, 2, 3, 4),  # Too many values
         ],
     )
     def test_invalid_initialization(
-        self, invalid_args: Tuple[Union[int, float, str], ...]
+        self, invalid_args: Tuple[Union[int, str], ...]
     ) -> None:
         """Ensure Vector3D raises errors for invalid inputs."""
         with pytest.raises(ValueError):
@@ -57,13 +52,13 @@ class TestVector3D:
 
     def test_indexing(self) -> None:
         """Test indexing access via int and str."""
-        v = Vector3D(1.0, 2.0, 3.0)
-        assert v[0] == 1.0
-        assert v[1] == 2.0
-        assert v[2] == 3.0
-        assert v["x"] == 1.0
-        assert v["y"] == 2.0
-        assert v["z"] == 3.0
+        v = Vector3D(1, 2, 3)
+        assert v[0] == 1
+        assert v[1] == 2
+        assert v[2] == 3
+        assert v["x"] == 1
+        assert v["y"] == 2
+        assert v["z"] == 3
         with pytest.raises(IndexError):
             _ = v[3]
         with pytest.raises(IndexError):
@@ -71,16 +66,16 @@ class TestVector3D:
 
     def test_iteration(self) -> None:
         """Ensure Vector3D is iterable."""
-        v = Vector3D(1.0, 2.0, 3.0)
-        assert list(v) == [1.0, 2.0, 3.0]
+        v = Vector3D(1, 2, 3)
+        assert list(v) == [1, 2, 3]
 
         for i, val in enumerate(v, start=1):
-            assert val == float(i)
+            assert val == i
 
     def test_repr(self) -> None:
         """Ensure Vector3D has a readable representation."""
-        v = Vector3D(1.0, 2.0, 3.0)
-        assert repr(v) == "Vector3D(x=1.0, y=2.0, z=3.0)"
+        v = Vector3D(1, 2, 3)
+        assert repr(v) == "Vector3D(x=1, y=2, z=3)"
 
 
 class TestSize3D:
@@ -89,20 +84,16 @@ class TestSize3D:
     @pytest.mark.parametrize(
         "args, expected",
         [
-            # Float values
-            ((1.2, 2.3, 3.4), (1.2, 2.3, 3.4)),
             # Integer values
-            ((1, 2, 3), (1.0, 2.0, 3.0)),
-            # Mixed int/float
-            ((1, 2.5, 3), (1.0, 2.5, 3.0)),
+            ((1, 2, 3), (1, 2, 3)),
             # Tuple input
-            (((4, 5, 6),), (4.0, 5.0, 6.0)),
+            (((4, 5, 6),), (4, 5, 6)),
         ],
     )
     def test_initialization(
         self,
-        args: Tuple[Union[int, float], ...],
-        expected: Tuple[float, float, float],
+        args: Tuple[int, ...],
+        expected: Tuple[int, int, int],
     ) -> None:
         """Test Size3D initialization with different input types."""
         s = Size3D(*args)
@@ -111,22 +102,22 @@ class TestSize3D:
     def test_invalid_initialization(self) -> None:
         """Ensure Size3D raises errors for invalid inputs."""
         with pytest.raises(ValueError):
-            Size3D(1.0, 2.0)
+            Size3D(1, 2)
 
     def test_volume(self) -> None:
         """Ensure Size3D correctly calculates volume."""
         s = Size3D(3, 4, 5)
-        assert s.volume == 60.0
+        assert s.volume == 60
 
     def test_iteration(self) -> None:
         """Ensure Size3D is iterable."""
-        s = Size3D(1.0, 2.0, 3.0)
-        assert list(s) == [1.0, 2.0, 3.0]
+        s = Size3D(1, 2, 3)
+        assert list(s) == [1, 2, 3]
 
     def test_repr(self) -> None:
         """Ensure Size3D has a readable representation."""
-        s = Size3D(1.0, 2.0, 3.0)
-        assert repr(s) == "Size3D(w=1.0, h=2.0, d=3.0)"
+        s = Size3D(1, 2, 3)
+        assert repr(s) == "Size3D(w=1, h=2, d=3)"
 
 
 class TestCoordinate3D:
@@ -135,20 +126,16 @@ class TestCoordinate3D:
     @pytest.mark.parametrize(
         "args, expected",
         [
-            # Float values
-            ((1.2, 2.3, 3.4), (1.2, 2.3, 3.4)),
             # Integer values
-            ((1, 2, 3), (1.0, 2.0, 3.0)),
-            # Mixed int/float
-            ((1, 2.5, 3), (1.0, 2.5, 3.0)),
+            ((1, 2, 3), (1, 2, 3)),
             # Tuple input
-            (((4, 5, 6),), (4.0, 5.0, 6.0)),
+            (((4, 5, 6),), (4, 5, 6)),
         ],
     )
     def test_initialization(
         self,
-        args: Tuple[Union[int, float], ...],
-        expected: Tuple[float, float, float],
+        args: Tuple[int, ...],
+        expected: Tuple[int, int, int],
     ) -> None:
         """Test Coordinate3D initialization."""
         c = Coordinate3D(*args)
@@ -160,9 +147,9 @@ class TestCoordinate3D:
         s = Size3D(1, 2, 3)
         assert (c + s) == Coordinate3D(11, 22, 33)
 
-        c2 = Coordinate3D(10.5, 20.5, 30.5)
+        c2 = Coordinate3D(10, 20, 30)
         new = c + c2
-        assert new == Coordinate3D(20.5, 40.5, 60.5)
+        assert new == Coordinate3D(20, 40, 60)
 
         # we also let users add tuples, just for the sake of it
         tuple_c = (10, 20, 30)
@@ -175,9 +162,9 @@ class TestCoordinate3D:
         s = Size3D(1, 2, 3)
         assert (c - s) == Coordinate3D(9, 18, 27)
 
-        c2 = Coordinate3D(10.5, 20.5, 30.5)
+        c2 = Coordinate3D(10, 20, 30)
         new = c - c2
-        assert new == Coordinate3D(-0.5, -0.5, -0.5)
+        assert new == Coordinate3D(0, 0, 0)
 
         # we also let users subtract tuples, just for the sake of it
         tuple_c = (10, 20, 30)
@@ -194,8 +181,8 @@ class TestCoordinate3D:
 
     def test_iteration(self) -> None:
         """Ensure Coordinate3D is iterable."""
-        c = Coordinate3D(1.0, 2.0, 3.0)
-        assert list(c) == [1.0, 2.0, 3.0]
+        c = Coordinate3D(1, 2, 3)
+        assert list(c) == [1, 2, 3]
 
 
 class TestSpacing3D:
@@ -204,18 +191,16 @@ class TestSpacing3D:
     @pytest.mark.parametrize(
         "args, expected",
         [
-            # Float values
-            ((1.2, 2.3, 3.4), (1.2, 2.3, 3.4)),
             # Integer values
-            ((1, 2, 3), (1.0, 2.0, 3.0)),
-            # Mixed int/float
-            ((1, 2.5, 3), (1.0, 2.5, 3.0)),
+            ((1, 2, 3), (1, 2, 3)),
+            # Tuple input
+            (((4, 5, 6),), (4, 5, 6)),
         ],
     )
     def test_initialization(
         self,
-        args: Tuple[Union[int, float], ...],
-        expected: Tuple[float, float, float],
+        args: Tuple[int, ...],
+        expected: Tuple[int, int, int],
     ) -> None:
         """Test Spacing3D initialization."""
         sp = Spacing3D(*args)
