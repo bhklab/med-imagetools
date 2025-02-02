@@ -12,23 +12,6 @@ spatial transformations, bounding box calculations, and metadata representation.
 - **Reusability:** Types should be generic enough to apply to various spatial
   operations across domains, especially medical imaging.
 
-## Types:
-1. **Vector3D**
-   - Represents a vector in 3D space with x, y, z components.
-   - Includes methods for basic vector arithmetic (addition, subtraction).
-
-2. **Size3D**
-   - Represents the dimensions of a 3D object (width, height, depth).
-   - Includes methods to calculate volume.
-
-3. **Coordinate3D**
-   - Represents a specific coordinate in 3D space.
-   - Inherits from `Vector3D` and includes methods for addition and subtraction
-     with other `Coordinate3D` or `Size3D` objects.
-
-4. **Spacing3D**
-   - Represents the spacing in 3D space.
-   - Inherits from `Vector3D`.
 """
 
 from __future__ import annotations
@@ -42,9 +25,12 @@ import numpy as np
 
 @dataclass
 @total_ordering
-class Vector3D:
+class Coordinate3D:
     """
-    Represent a vector in 3D space.
+    Represent a point in 3D space.
+
+    Can add and subtract other Point3D or Size3D objects.
+
 
     Attributes
     ----------
@@ -58,9 +44,9 @@ class Vector3D:
     Methods
     -------
     __add__(other):
-        Add another Vector3D to this vector.
+        Add another Coordinate3D to this vector.
     __sub__(other):
-        Subtract another Vector3D from this vector.
+        Subtract another Coordinate3D from this vector.
     __iter__():
         Iterate over the components (x, y, z).
     __getitem__(index):
@@ -72,7 +58,7 @@ class Vector3D:
     z: int
 
     def __init__(self, *args: int) -> None:
-        """Initialize a Vector3D with x, y, z components."""
+        """Initialize a Coordinate3D with x, y, z components."""
         match args:
             case [x, y, z]:
                 self.x, self.y, self.z = x, y, z
@@ -101,36 +87,27 @@ class Vector3D:
                 raise IndexError(errmsg)
 
     def __repr__(self) -> str:
-        """Return a string representation of the Vector3D."""
+        """Return a string representation of the Coordinate3D."""
         cls = self.__class__.__name__
         return f"{cls}(x={self.x}, y={self.y}, z={self.z})"
 
     def __eq__(self, other: object) -> bool:
-        """Check if two Vector3D objects are equal."""
-        if not isinstance(other, Vector3D):
+        """Check if two Coordinate3D objects are equal."""
+        if not isinstance(other, Coordinate3D):
             errmsg = (
                 f"Cannot compare {self.__class__.__name__} with {type(other)}."
             )
             raise TypeError(errmsg)
         return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
-    def __lt__(self, other: Vector3D) -> bool:
-        """Check if this Vector3D is less than another."""
-        if not isinstance(other, Vector3D):
+    def __lt__(self, other: Coordinate3D) -> bool:
+        """Check if this Coordinate3D is less than another."""
+        if not isinstance(other, Coordinate3D):
             return NotImplemented
         return (self.x, self.y, self.z) < (other.x, other.y, other.z)
 
-
-class Coordinate3D(Vector3D):
-    """
-    Represent a point in 3D space.
-    Inherits from Vector3D.
-
-    Can add and subtract other Point3D or Size3D objects.
-    """
-
     def __add__(self, other: Coordinate3D | Size3D | tuple) -> Coordinate3D:
-        """Add another Vector3D to this vector."""
+        """Add another Coordinate3D to this vector."""
         match other:
             case Coordinate3D(x, y, z):
                 return Coordinate3D(self.x + x, self.y + y, self.z + z)
@@ -150,7 +127,7 @@ class Coordinate3D(Vector3D):
                 raise TypeError(errmsg)
 
     def __sub__(self, other: Coordinate3D | Size3D | tuple) -> Coordinate3D:
-        """Subtract another Vector3D from this vector."""
+        """Subtract another Coordinate3D from this vector."""
         match other:
             case Coordinate3D(x, y, z):
                 return Coordinate3D(self.x - x, self.y - y, self.z - z)
@@ -171,10 +148,7 @@ class Coordinate3D(Vector3D):
 
 
 class Spacing3D:
-    """
-    Represent the spacing in 3D space.
-    Inherits from Vector3D.
-    """
+    """Represent the spacing in 3D space."""
 
     x: float
     y: float
@@ -265,13 +239,13 @@ if __name__ == "__main__":  # pragma: no cover
     myint = 10
     print(myint)
 
-    vector1 = Vector3D(1, 2, 3)
+    vector1 = Coordinate3D(1, 2, 3)
 
     # as tuple input
-    vector1_same = Vector3D(*(1, 2, 3))
+    vector1_same = Coordinate3D(*(1, 2, 3))
     assert all((attr1 == attr2) for attr1, attr2 in zip(vector1, vector1_same))
 
-    vector2 = Vector3D(*(1, 2, 4))
+    vector2 = Coordinate3D(*(1, 2, 4))
 
     print(f"{(vector1 == vector2)=}")
     print(f"{(vector1 < vector2)=}")

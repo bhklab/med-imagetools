@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 
 import SimpleITK as sitk
 
+from imgtools.logging import logger
+
 from .helper_types import Coordinate3D, Size3D
 
 
@@ -12,8 +14,7 @@ class BoundingBoxOutsideImageError(Exception):
     """Exception raised when the bounding box is outside the image."""
 
     def __init__(self, message: str) -> None:
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 def calculate_image_boundaries(image: sitk.Image) -> RegionBox:
@@ -60,6 +61,18 @@ class RegionBox:
     min: Coordinate3D
     max: Coordinate3D
     size: Size3D = field(init=False)
+
+    def __post_init__(self) -> None:
+        if self.min > self.max:
+            msg = "The minimum coordinate must be less than the maximum coordinate."
+            msg += f" Got: min={self.min}, max={self.max}"
+            raise ValueError(msg)
+
+        self.size = Size3D(
+            self.max.x - self.min.x,
+            self.max.y - self.min.y,
+            self.max.z - self.min.z,
+        )
 
     @classmethod
     def from_tuple(
@@ -121,22 +134,6 @@ class RegionBox:
         return RegionBox(
             Coordinate3D(xstart, ystart, zstart),
             Coordinate3D(xstart + xsize, ystart + ysize, zstart + zsize),
-        )
-
-    def __post_init__(self) -> None:
-        if (
-            self.min.x > self.max.x
-            or self.min.y > self.max.y
-            or self.min.z > self.max.z
-        ):
-            msg = "The minimum coordinate must be less than the maximum coordinate."
-            msg += f" Got: min={self.min}, max={self.max}"
-            raise ValueError(msg)
-
-        self.size = Size3D(
-            self.max.x - self.min.x,
-            self.max.y - self.min.y,
-            self.max.z - self.min.z,
         )
 
     def __repr__(self) -> str:
@@ -289,6 +286,28 @@ class RegionBox:
         else:
             return cropped_image
 
+    def crop_image_and_mask(
+        self, image: sitk.Image, mask: sitk.Image
+    ) -> tuple[sitk.Image, sitk.Image]:
+        """Crop an image and mask to the coordinates defined by the box.
+
+        Parameters
+        ----------
+        image : sitk.Image
+            The image to crop.
+        mask : sitk.Image
+            The mask to crop.
+
+        Returns
+        -------
+        tuple[sitk.Image, sitk.Image]
+            The cropped image and mask.
+        """
+        cropped_image = self.crop_image(image)
+        cropped_mask = self.crop_image(mask)
+
+        return cropped_image, cropped_mask
+
 
 if __name__ == "__main__":
     from rich import print  # noqa
@@ -327,6 +346,7 @@ if __name__ == "__main__":
 
     print(f"{non_uniform_box.expand_to_cube().minimum_dimension_size(50)=}")
 
+    print("*" * 20)
     try:
         box_outsided_image = RegionBox(
             Coordinate3D(0, 0, 0), Coordinate3D(200, 200, 200)
@@ -336,9 +356,9 @@ if __name__ == "__main__":
 
         print(f"{cropped_image.GetSize()=}")
     except BoundingBoxOutsideImageError as e:
-        print("ERROR")
-        print(e)
+        logger.exception(e)
 
+    print("*" * 20)
     ########################################
     # from masks
     ########################################
@@ -347,7 +367,7 @@ if __name__ == "__main__":
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/CT_82918_original.nii.gz"
     )
 
-    print(f"{calculate_image_boundaries(ct_image)=}")
+    # print(f"{calculate_image_boundaries(ct_image)=}")
 
     rt_image = sitk.ReadImage(
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/RTSTRUCT_11267_GTV.nii.gz"
