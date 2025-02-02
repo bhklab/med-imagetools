@@ -244,11 +244,11 @@ class RegionBox:
         min_coord = self.min - (extra_x, extra_y, extra_z)
         max_coord = self.max + (extra_x, extra_y, extra_z)
 
-        self._adjust_negatived_coordinates(min_coord, max_coord)
+        self._adjust_negative_coordinates(min_coord, max_coord)
 
         return RegionBox(min=min_coord, max=max_coord)
 
-    def _adjust_negatived_coordinates(
+    def _adjust_negative_coordinates(
         self, min_coord: Coordinate3D, max_coord: Coordinate3D
     ) -> None:
         """Adjust the coordinates to ensure that the min values are not negative."""
