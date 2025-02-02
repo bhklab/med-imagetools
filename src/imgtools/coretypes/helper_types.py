@@ -287,7 +287,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     point = Coordinate3D(10, 20, 30)
     point2 = Coordinate3D(
-        (15, 25, 35)
+        (15, 25, 35)  # type: ignore
     )  # mypy will complain about this, but it will work
     point2 = Coordinate3D(
         *(15, 25, 35)
@@ -298,7 +298,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     size_tuple = (50, 60, 70)
     size = Size3D(
-        size_tuple
+        size_tuple  # type: ignore
     )  # mypy will complain about this, but it will work
     size = Size3D(*size_tuple)  # unpack the tuple
     point_plus_size = point + size_tuple
