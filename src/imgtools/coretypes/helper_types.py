@@ -34,19 +34,21 @@ spatial transformations, bounding box calculations, and metadata representation.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import total_ordering
 
 from typing import Iterator
 import numpy as np
 
 
 @dataclass
+@total_ordering
 class Vector3D:
     """
     Represent a vector in 3D space.
 
     Attributes
     ----------
-    x :int
+    x : int
         X-component of the vector.
     y : int
         Y-component of the vector.
@@ -102,6 +104,21 @@ class Vector3D:
         """Return a string representation of the Vector3D."""
         cls = self.__class__.__name__
         return f"{cls}(x={self.x}, y={self.y}, z={self.z})"
+
+    def __eq__(self, other: object) -> bool:
+        """Check if two Vector3D objects are equal."""
+        if not isinstance(other, Vector3D):
+            errmsg = (
+                f"Cannot compare {self.__class__.__name__} with {type(other)}."
+            )
+            raise TypeError(errmsg)
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
+
+    def __lt__(self, other: Vector3D) -> bool:
+        """Check if this Vector3D is less than another."""
+        if not isinstance(other, Vector3D):
+            return NotImplemented
+        return (self.x, self.y, self.z) < (other.x, other.y, other.z)
 
 
 class Coordinate3D(Vector3D):
@@ -251,38 +268,43 @@ if __name__ == "__main__":  # pragma: no cover
     vector1 = Vector3D(1, 2, 3)
 
     # as tuple input
-    vector2 = Vector3D(*(1, 2, 3))
-    assert all((attr1 == attr2) for attr1, attr2 in zip(vector1, vector2))
+    vector1_same = Vector3D(*(1, 2, 3))
+    assert all((attr1 == attr2) for attr1, attr2 in zip(vector1, vector1_same))
 
-    # iterate over the objects' attributes
-    for attr in vector1:
-        print(attr)
+    vector2 = Vector3D(*(1, 2, 4))
 
-    print(vector1)
+    print(f"{(vector1 == vector2)=}")
+    print(f"{(vector1 < vector2)=}")
+    print(f"{(vector1 > vector2)=}")
 
     # access object attributes via [ ]
-    print(f"{vector1[0]}")
-    print(f"{vector1['y']}")
+    print(f"{vector1[0]=}")
+    print(f"{vector1['y']=}")
 
     ########################################
     # Coordinate3D
     ########################################
 
     point = Coordinate3D(10, 20, 30)
-    point2 = Coordinate3D((15, 25, 35)) # mypy will complain about this, but it will work
-    point2 = Coordinate3D(*(15, 25, 35)) # unpack the tuple to avoid mypy error
+    point2 = Coordinate3D(
+        (15, 25, 35)
+    )  # mypy will complain about this, but it will work
+    point2 = Coordinate3D(
+        *(15, 25, 35)
+    )  # unpack the tuple to avoid mypy error
 
     print(point)
     print(point2)
 
     size_tuple = (50, 60, 70)
-    size = Size3D(size_tuple) # mypy will complain about this, but it will work
-    size = Size3D(*size_tuple) # unpack the tuple
+    size = Size3D(
+        size_tuple
+    )  # mypy will complain about this, but it will work
+    size = Size3D(*size_tuple)  # unpack the tuple
     point_plus_size = point + size_tuple
 
     print(f"Adding {point=} and {size_tuple=} = {point_plus_size}")
     print(f"Adding {point=} and {size=} = {point + size}")
-
 
     # make a sitk image
     import SimpleITK as sitk
@@ -296,5 +318,3 @@ if __name__ == "__main__":  # pragma: no cover
     # get the spacing
     image_spacing = Spacing3D(*image.GetSpacing())
     print(f"Image spacing: {image_spacing}")
-
-    
