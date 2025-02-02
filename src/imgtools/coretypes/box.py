@@ -4,8 +4,6 @@ from dataclasses import dataclass, field
 
 import SimpleITK as sitk
 
-from imgtools.logging import logger
-
 from .helper_types import Coordinate3D, Size3D
 
 

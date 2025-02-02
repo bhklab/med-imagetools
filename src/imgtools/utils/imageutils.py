@@ -2,7 +2,6 @@ from typing import List, Tuple
 
 import numpy as np
 import SimpleITK as sitk
-from itertools import product
 
 # Define type aliases for better readability
 Array3D = Tuple[float, float, float]
