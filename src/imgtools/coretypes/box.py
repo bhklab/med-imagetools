@@ -78,6 +78,8 @@ class RegionBox:
         ----------
         mask : sitk.Image
             The input mask image.
+        label : int, optional
+            label in the mask image to calculate the centroid.
 
         Returns
         -------
