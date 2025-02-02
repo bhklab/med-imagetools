@@ -336,11 +336,13 @@ class MedImageTestData:
 
             console.log(f"Excluding assets on patterns: {', '.join(exclude)}")
             # try matching OR finding exact names
-            exclude = [re.compile(f".*{name}.*") for name in exclude]
+            exclude_patterns = [re.compile(f".*{name}.*") for name in exclude]
             exclude_assets = [
                 asset
                 for asset in assets
-                if any(pattern.match(asset.name) for pattern in exclude)
+                if any(
+                    pattern.match(asset.name) for pattern in exclude_patterns
+                )
             ]
             console.log(
                 f"Excluding assets: {', '.join(asset.name for asset in exclude_assets)}"
