@@ -106,11 +106,15 @@ class Coordinate3D:
             return NotImplemented
         return (self.x, self.y, self.z) < (other.x, other.y, other.z)
 
-    def __add__(self, other: int | Coordinate3D | Size3D | tuple) -> Coordinate3D:
+    def __add__(
+        self, other: int | Coordinate3D | Size3D | tuple
+    ) -> Coordinate3D:
         """Add another Coordinate3D to this vector."""
         match other:
             case int() as value:
-                return Coordinate3D(self.x + value, self.y + value, self.z + value)
+                return Coordinate3D(
+                    self.x + value, self.y + value, self.z + value
+                )
             case Coordinate3D(x, y, z):
                 return Coordinate3D(self.x + x, self.y + y, self.z + z)
             case Size3D(width, height, depth):
@@ -128,11 +132,15 @@ class Coordinate3D:
                 )
                 raise TypeError(errmsg)
 
-    def __sub__(self, other: int | Coordinate3D | Size3D | tuple) -> Coordinate3D:
+    def __sub__(
+        self, other: int | Coordinate3D | Size3D | tuple
+    ) -> Coordinate3D:
         """Subtract another Coordinate3D from this vector."""
         match other:
             case int() as value:
-                return Coordinate3D(self.x - value, self.y - value, self.z - value)
+                return Coordinate3D(
+                    self.x - value, self.y - value, self.z - value
+                )
             case Coordinate3D(x, y, z):
                 return Coordinate3D(self.x - x, self.y - y, self.z - z)
             case Size3D(width, height, depth):
@@ -213,7 +221,7 @@ class Size3D:
                 self.width, self.height, self.depth = map(int, tuple_points)
             case _:
                 errmsg = (
-                    f"{self.__class__.__name__} expects 3 values for width, height, depth."
+                    f"{self.__class__.__name__} expects 3 integer values for width, height, depth."
                     f" Got {len(args)} values for {args}."
                 )
                 raise ValueError(errmsg)
