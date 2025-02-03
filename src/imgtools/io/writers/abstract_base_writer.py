@@ -191,8 +191,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         """
         Abstract method for writing data. Must be implemented by subclasses.
 
-        Can use resolve_path() or resolve_and_validate_path() to get the output
-        path.
+        Can use resolve_path() to get the output path and write the data to it.
 
         For efficiency, use self.context to access the context variables,
         updating them with the kwargs passed from the save method.

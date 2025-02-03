@@ -128,61 +128,61 @@ class NumPyWriter(
         )
         return out_path
 
-    @staticmethod
-    def load(filepath: Path) -> sitk.Image | dict[str, sitk.Image]:
-        """Load data from a `.npz` file and reconstruct SimpleITK images if metadata is present.
+    # @staticmethod
+    # def load(filepath: Path) -> sitk.Image | dict[str, sitk.Image]:
+    #     """Load data from a `.npz` file and reconstruct SimpleITK images if metadata is present.
 
-        Parameters
-        ----------
-        filepath : Path
-            Path to the `.npz` file.
+    #     Parameters
+    #     ----------
+    #     filepath : Path
+    #         Path to the `.npz` file.
 
-        Returns
-        -------
-        sitk.Image | dict[str, sitk.Image]
-            Reconstructed SimpleITK image(s) with metadata.
+    #     Returns
+    #     -------
+    #     sitk.Image | dict[str, sitk.Image]
+    #         Reconstructed SimpleITK image(s) with metadata.
 
-        Raises
-        ------
-        NumpyWriterError
-            If the file is invalid or missing required metadata.
-        """
-        try:
-            with np.load(filepath, allow_pickle=True) as data:
-                arrays = {}
-                for key in data.files:
-                    if key == "image_array":
-                        # Single image case
-                        image = sitk.GetImageFromArray(data["image_array"])
-                        metadata_keys = [
-                            "spacing",
-                            "origin",
-                            "direction",
-                        ]
-                        if all(k in data for k in metadata_keys):
-                            image.SetSpacing(data["spacing"])
-                            image.SetOrigin(data["origin"])
-                            image.SetDirection(data["direction"])
-                        return image
-                    elif key.endswith("_array"):
-                        # Multi-image case
-                        array_key = key.replace("_array", "")
-                        arrays[array_key] = data[key]
-                    elif "_" not in key:
-                        continue
-                # If it's a multi-image case, reassemble all images with their metadata
-                images = {}
-                for key, array in arrays.items():
-                    image = sitk.GetImageFromArray(array)
-                    for meta_key in ["spacing", "origin", "direction"]:
-                        if f"{key}_{meta_key}" in data:
-                            setattr(
-                                image,
-                                f"Set{meta_key.capitalize()}",
-                                data[f"{key}_{meta_key}"],
-                            )
-                    images[key] = image
-                return images
-        except Exception as e:
-            msg = f"Failed to load data from {filepath}: {e}"
-            raise NumpyWriterError(msg) from e
+    #     Raises
+    #     ------
+    #     NumpyWriterError
+    #         If the file is invalid or missing required metadata.
+    #     """
+    #     try:
+    #         with np.load(filepath, allow_pickle=True) as data:
+    #             arrays = {}
+    #             for key in data.files:
+    #                 if key == "image_array":
+    #                     # Single image case
+    #                     image = sitk.GetImageFromArray(data["image_array"])
+    #                     metadata_keys = [
+    #                         "spacing",
+    #                         "origin",
+    #                         "direction",
+    #                     ]
+    #                     if all(k in data for k in metadata_keys):
+    #                         image.SetSpacing(data["spacing"])
+    #                         image.SetOrigin(data["origin"])
+    #                         image.SetDirection(data["direction"])
+    #                     return image
+    #                 elif key.endswith("_array"):
+    #                     # Multi-image case
+    #                     array_key = key.replace("_array", "")
+    #                     arrays[array_key] = data[key]
+    #                 elif "_" not in key:
+    #                     continue
+    #             # If it's a multi-image case, reassemble all images with their metadata
+    #             images = {}
+    #             for key, array in arrays.items():
+    #                 image = sitk.GetImageFromArray(array)
+    #                 for meta_key in ["spacing", "origin", "direction"]:
+    #                     if f"{key}_{meta_key}" in data:
+    #                         setattr(
+    #                             image,
+    #                             f"Set{meta_key.capitalize()}",
+    #                             data[f"{key}_{meta_key}"],
+    #                         )
+    #                 images[key] = image
+    #             return images
+    #     except Exception as e:
+    #         msg = f"Failed to load data from {filepath}: {e}"
+    #         raise NumpyWriterError(msg) from e

@@ -110,11 +110,10 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
                 msg = "Input must be a SimpleITK Image or a numpy array"
                 raise NiftiWriterValidationError(msg)
 
+        out_path = self.resolve_path(**kwargs)
         if (
-            (
-                out_path := self.resolve_path(**kwargs)
-            ).exists()  # check if it exists
-            # This will only be true if SKIP OR WARNING
+            out_path.exists()  # check if it exists
+            # This will only be true if SKIP,
             # OVERWRITE would have deleted the file
             and self.existing_file_mode == ExistingFileMode.SKIP
         ):
