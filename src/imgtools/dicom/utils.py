@@ -198,14 +198,14 @@ def lookup_tag(keyword: str, hex_format: bool = False) -> Optional[str]:
     Parameters
     ----------
     keyword : str
-                    The DICOM keyword to look up.
+        The DICOM keyword to look up.
     hex_format : bool, optional
-                    If True, return the tag in hexadecimal format (default is False).
+        If True, return the tag in hexadecimal format (default is False).
 
     Returns
     -------
     str or None
-                    The DICOM tag as a string, or None if the keyword is invalid.
+        The DICOM tag as a string, or None if the keyword is invalid.
 
     Examples
     --------
@@ -235,12 +235,12 @@ def tag_exists(keyword: str) -> bool:
     Parameters
     ----------
     keyword : str
-                    The DICOM keyword to check.
+        The DICOM keyword to check.
 
     Returns
     -------
     bool
-                    True if the tag exists, False otherwise.
+        True if the tag exists, False otherwise.
 
     Examples
     --------
@@ -265,16 +265,16 @@ def similar_tags(
     Parameters
     ----------
     keyword : str
-                    The keyword to search for similar tags.
+        The keyword to search for similar tags.
     n : int, optional
-                    Maximum number of similar tags to return (default is 3).
+        Maximum number of similar tags to return (default is 3).
     threshold : float, optional
-                    Minimum similarity ratio (default is 0.6).
+        Minimum similarity ratio (default is 0.6).
 
     Returns
     -------
     List[str]
-                    A list of up to `n` similar DICOM tags.
+        A list of up to `n` similar DICOM tags.
 
     Examples
     --------
