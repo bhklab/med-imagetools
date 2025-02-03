@@ -30,18 +30,15 @@ from __future__ import annotations
 
 import re
 from itertools import groupby
-from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 import SimpleITK as sitk
-from pydicom import dcmread
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
 from imgtools.modules.segmentation import Segmentation
 from imgtools.modules.structureset import (
-    RTSTRUCTMetadata,
     extract_rtstruct_metadata,
     load_rtstruct_dcm,
     rtstruct_reference_seriesuid,
@@ -49,6 +46,8 @@ from imgtools.modules.structureset import (
 from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pydicom.dataset import FileDataset
 
 
