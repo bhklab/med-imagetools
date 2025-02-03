@@ -1,5 +1,5 @@
+from pathlib import Path
 from typing import Dict, List
-from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -173,3 +173,12 @@ def test_init(
     # Test default metadata
     structure_set_no_metadata = StructureSet(roi_points)
     assert structure_set_no_metadata.metadata == {}
+
+
+def test_from_dicom(modalities_path: Dict[str, str]) -> None:
+    """Test StructureSet.from_dicom method."""
+
+    rt_path = next(Path(modalities_path["RTSTRUCT"]).rglob("*.dcm"))
+    structure_set = StructureSet.from_dicom(rt_path)
+    assert isinstance(structure_set, StructureSet)
+    assert structure_set.metadata["Modality"] == "RTSTRUCT"
