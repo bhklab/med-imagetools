@@ -43,7 +43,9 @@ def calculate_image_boundaries(
         max=Coordinate3D(x=512, y=512, z=135)
         size=Size3D(w=512, h=512, d=135)
     )
-    >>> calculate_image_boundaries(image, use_world_coordinates=True)
+    >>> calculate_image_boundaries(
+    ...     image, use_world_coordinates=True
+    ... )
     RegionBox(
         min=Coordinate3D(x=-249.51171875, y=-492.51171875, z=-717.5),
         max=Coordinate3D(x=262.48828125, y=19.48828125, z=-582.5)
@@ -204,7 +206,7 @@ class RegionBox:
         max_size = max(self.size)
 
         if not desired_size:
-            return self.minimum_dimension_size(max_size)
+            return self.expand_to_min_size(max_size)
 
         if desired_size < max_size:
             msg = (
@@ -213,9 +215,9 @@ class RegionBox:
             )
             raise ValueError(msg)
 
-        return self.minimum_dimension_size(desired_size)
+        return self.expand_to_min_size(desired_size)
 
-    def minimum_dimension_size(self, size: int = 5) -> RegionBox:
+    def expand_to_min_size(self, size: int = 5) -> RegionBox:
         """Ensure that the bounding box has a minimum size along each dimension.
 
         Parameters
@@ -352,9 +354,9 @@ if __name__ == "__main__":
 
     print(f"{non_uniform_box.pad(5)=}")
 
-    print(f"{ non_uniform_box.minimum_dimension_size(30)=}")
+    print(f"{ non_uniform_box.expand_to_min_size(30)=}")
 
-    print(f"{non_uniform_box.expand_to_cube().minimum_dimension_size(50)=}")
+    print(f"{non_uniform_box.expand_to_cube().expand_to_min_size(50)=}")
 
     print("*" * 20)
     try:
@@ -392,7 +394,7 @@ if __name__ == "__main__":
     print(f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50)=}")
 
     print(
-        f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50).minimum_dimension_size(30)=}"
+        f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50).expand_to_min_size(30)=}"
     )
 
     ## assign
