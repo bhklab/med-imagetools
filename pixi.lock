@@ -278,11 +278,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backoff-2.2.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports-1.0-pyhd8ed1ab_5.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.tarfile-1.2.0-pyhd8ed1ab_1.conda
-<<<<<<< HEAD
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.1-pyha770c72_0.conda
-=======
-      - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.0-pyha770c72_0.conda
->>>>>>> origin/main
       - conda: https://conda.anaconda.org/conda-forge/linux-64/black-24.10.0-py312h7900ff3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.2.0-pyh29332c3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.2.0-h82add2a_4.conda
@@ -571,11 +567,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backoff-2.2.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports-1.0-pyhd8ed1ab_5.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.tarfile-1.2.0-pyhd8ed1ab_1.conda
-<<<<<<< HEAD
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.1-pyha770c72_0.conda
-=======
-      - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.0-pyha770c72_0.conda
->>>>>>> origin/main
       - conda: https://conda.anaconda.org/conda-forge/osx-64/black-24.10.0-py312hb401068_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.2.0-pyh29332c3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.2.0-h82add2a_4.conda
@@ -851,11 +843,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backoff-2.2.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports-1.0-pyhd8ed1ab_5.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.tarfile-1.2.0-pyhd8ed1ab_1.conda
-<<<<<<< HEAD
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.1-pyha770c72_0.conda
-=======
-      - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.0-pyha770c72_0.conda
->>>>>>> origin/main
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/black-24.10.0-py312h81bd7bf_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.2.0-pyh29332c3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.2.0-h82add2a_4.conda
@@ -1129,11 +1117,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/backoff-2.2.1-pyhd8ed1ab_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports-1.0-pyhd8ed1ab_5.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/backports.tarfile-1.2.0-pyhd8ed1ab_1.conda
-<<<<<<< HEAD
       - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.1-pyha770c72_0.conda
-=======
-      - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.0-pyha770c72_0.conda
->>>>>>> origin/main
       - conda: https://conda.anaconda.org/conda-forge/win-64/black-24.10.0-py312h2e8e312_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-6.2.0-pyh29332c3_4.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/bleach-with-css-6.2.0-h82add2a_4.conda
@@ -4113,15 +4097,9 @@ packages:
   - pkg:pypi/backports-tarfile?source=hash-mapping
   size: 32786
   timestamp: 1733325872620
-<<<<<<< HEAD
 - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.1-pyha770c72_0.conda
   sha256: f27f8399c2587143128d101729c0d09ee0610f24d47c5f9798d47abd4be4ae2c
   md5: 27919cdfaf859d161bc4a5552246b964
-=======
-- conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.13.0-pyha770c72_0.conda
-  sha256: 089dcb5c91dab1423856147f604b389c55b3edede63e2367066d6ba27c6adef8
-  md5: ad3754a495d170cb598f93f05c651adf
->>>>>>> origin/main
   depends:
   - python >=3.9
   - soupsieve >=1.2
@@ -4129,15 +4107,9 @@ packages:
   license: MIT
   license_family: MIT
   purls:
-<<<<<<< HEAD
   - pkg:pypi/beautifulsoup4?source=compressed-mapping
   size: 145124
   timestamp: 1738599697363
-=======
-  - pkg:pypi/beautifulsoup4?source=hash-mapping
-  size: 144791
-  timestamp: 1738536565021
->>>>>>> origin/main
 - conda: https://conda.anaconda.org/conda-forge/linux-64/black-24.10.0-py312h7900ff3_0.conda
   sha256: 2b4344d18328b3e8fd9b5356f4ee15556779766db8cb21ecf2ff818809773df6
   md5: 2daba153b913b1b901cf61440ad5e019
@@ -8656,11 +8628,7 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 1.18.0
-<<<<<<< HEAD
   sha256: 7e7cebd8ba06568e19c41f54d301849c4b2b658ba51ae9f0941f04d64db8403d
-=======
-  sha256: 25c1bea38ec80b6ee777414b68193eb9b6cf93dba04862a1b1e88be990156f16
->>>>>>> origin/main
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
@@ -8685,10 +8653,7 @@ packages:
   - torch ; extra == 'torch'
   - torchio ; extra == 'torch'
   - pyvis ; extra == 'debug'
-<<<<<<< HEAD
   - h5py>=3.0.0 ; extra == 'hdf5'
-=======
->>>>>>> origin/main
   - pygithub>=2.5.0 ; extra == 'test'
   - aiohttp>=3.8.1 ; extra == 'test'
   - pygithub>=2.5.0 ; extra == 'all'
