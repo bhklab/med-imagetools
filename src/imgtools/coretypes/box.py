@@ -368,7 +368,7 @@ if __name__ == "__main__":
 
         print(f"{cropped_image.GetSize()=}")
     except BoundingBoxOutsideImageError as e:
-        logger.exception(e)
+        logger.exception(e)  # type: ignore
 
     print("*" * 20)
     ########################################
