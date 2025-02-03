@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 import pytest
 
@@ -6,76 +6,7 @@ from imgtools import (
     Coordinate3D,
     Size3D,
     Spacing3D,
-    Vector3D,
 )
-
-
-class TestVector3D:
-    """Test suite for Vector3D class."""
-
-    @pytest.mark.parametrize(
-        "args, expected",
-        [
-            # Integer values
-            ((1, 2, 3), (1, 2, 3)),
-            # Tuple input
-            (((4, 5, 6),), (4, 5, 6)),
-        ],
-    )
-    def test_initialization(
-        self,
-        args: Tuple[int, ...],
-        expected: Tuple[int, int, int],
-    ) -> None:
-        """Test Vector3D initialization with different input types."""
-        v = Vector3D(*args)
-        assert (v.x, v.y, v.z) == expected
-        assert (
-            isinstance(v.x, int)
-            and isinstance(v.y, int)
-            and isinstance(v.z, int)
-        )
-
-    @pytest.mark.parametrize(
-        "invalid_args",
-        [
-            (1, 2),  # Too few values
-            (1, 2, 3, 4),  # Too many values
-        ],
-    )
-    def test_invalid_initialization(
-        self, invalid_args: Tuple[Union[int, str], ...]
-    ) -> None:
-        """Ensure Vector3D raises errors for invalid inputs."""
-        with pytest.raises(ValueError):
-            Vector3D(*invalid_args)  # type: ignore
-
-    def test_indexing(self) -> None:
-        """Test indexing access via int and str."""
-        v = Vector3D(1, 2, 3)
-        assert v[0] == 1
-        assert v[1] == 2
-        assert v[2] == 3
-        assert v["x"] == 1
-        assert v["y"] == 2
-        assert v["z"] == 3
-        with pytest.raises(IndexError):
-            _ = v[3]
-        with pytest.raises(IndexError):
-            _ = v["invalid"]
-
-    def test_iteration(self) -> None:
-        """Ensure Vector3D is iterable."""
-        v = Vector3D(1, 2, 3)
-        assert list(v) == [1, 2, 3]
-
-        for i, val in enumerate(v, start=1):
-            assert val == i
-
-    def test_repr(self) -> None:
-        """Ensure Vector3D has a readable representation."""
-        v = Vector3D(1, 2, 3)
-        assert repr(v) == "Vector3D(x=1, y=2, z=3)"
 
 
 class TestSize3D:
@@ -184,6 +115,40 @@ class TestCoordinate3D:
         c = Coordinate3D(1, 2, 3)
         assert list(c) == [1, 2, 3]
 
+    def test_indexing(self) -> None:
+        """Test indexing access via int and str."""
+        c = Coordinate3D(1, 2, 3)
+        assert c[0] == 1
+        assert c[1] == 2
+        assert c[2] == 3
+        assert c["x"] == 1
+        assert c["y"] == 2
+        assert c["z"] == 3
+        with pytest.raises(IndexError):
+            _ = c[3]
+        with pytest.raises(IndexError):
+            _ = c["invalid"]
+
+    def test_equality(self) -> None:
+        """Test equality comparison for Coordinate3D."""
+        c1 = Coordinate3D(1, 2, 3)
+        c2 = Coordinate3D(1, 2, 3)
+        c3 = Coordinate3D(4, 5, 6)
+        assert c1 == c2
+        assert c1 != c3
+
+    def test_comparison(self) -> None:
+        """Test comparison operations for Coordinate3D."""
+        c1 = Coordinate3D(1, 2, 3)
+        c2 = Coordinate3D(4, 5, 6)
+        assert c1 < c2
+        assert c2 > c1
+
+    def test_repr(self) -> None:
+        """Ensure Coordinate3D has a readable representation."""
+        c = Coordinate3D(1, 2, 3)
+        assert repr(c) == "Coordinate3D(x=1, y=2, z=3)"
+
 
 class TestSpacing3D:
     """Test suite for Spacing3D class."""
@@ -191,17 +156,27 @@ class TestSpacing3D:
     @pytest.mark.parametrize(
         "args, expected",
         [
-            # Integer values
-            ((1, 2, 3), (1, 2, 3)),
+            # Float values
+            ((1.0, 2.0, 3.0), (1.0, 2.0, 3.0)),
             # Tuple input
-            (((4, 5, 6),), (4, 5, 6)),
+            (((4.0, 5.0, 6.0),), (4.0, 5.0, 6.0)),
         ],
     )
     def test_initialization(
         self,
-        args: Tuple[int, ...],
-        expected: Tuple[int, int, int],
+        args: Tuple[float, ...],
+        expected: Tuple[float, float, float],
     ) -> None:
         """Test Spacing3D initialization."""
         sp = Spacing3D(*args)
         assert (sp.x, sp.y, sp.z) == expected
+
+    def test_iteration(self) -> None:
+        """Ensure Spacing3D is iterable."""
+        sp = Spacing3D(1.0, 2.0, 3.0)
+        assert list(sp) == [1.0, 2.0, 3.0]
+
+    def test_repr(self) -> None:
+        """Ensure Spacing3D has a readable representation."""
+        sp = Spacing3D(1.0, 2.0, 3.0)
+        assert repr(sp) == "Spacing3D(x=1.0, y=2.0, z=3.0)"
