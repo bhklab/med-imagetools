@@ -532,7 +532,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         """
         now = datetime.now(timezone.utc)
         return {
-            "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
+            "date_time": now.strftime("%Y-%m-%d_%H:%M:%SUTC"),
         }
 
     def __del__(self) -> None:
