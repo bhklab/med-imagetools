@@ -1,8 +1,8 @@
 # PatternParser
 
 <!-- Only show the module level docstring  -->
-::: imgtools.dicom.sort.parser
+::: imgtools.pattern_parser.parser
     options:
       members: false
 
-::: imgtools.dicom.sort.parser.PatternParser
+::: imgtools.pattern_parser.parser.PatternParser

@@ -1,6 +1,227 @@
 # CHANGELOG
 
 
+## v1.18.0 (2025-01-31)
+
+### Documentation
+
+- Fix subheading README.md
+  ([`18c41b9`](https://github.com/bhklab/med-imagetools/commit/18c41b9387c58629047d2d825980b42886c312cd))
+
+### Features
+
+- Add helper types for 3D spatial operations
+  ([#203](https://github.com/bhklab/med-imagetools/pull/203),
+  [`ee344d1`](https://github.com/bhklab/med-imagetools/commit/ee344d1b580685dacd18fb577224bd4ffd73b4ca))
+
+- **Documentation** - Added a class inheritance diagram and explanation to the `coretypes` README. -
+  Introduced detailed documentation for 3D spatial and image-related types.
+
+- **New Features** 	- Added new classes for 3D geometric operations: 		- `Point3D` 		- `Size3D` 		-
+  `Coordinate3D` 		- `Centroid` 		- `BoundingBox` 		- `Direction` 		- `ImageGeometry` 		- `MedImage`
+  	- Introduced the `RegionBox` class for handling 3D bounding boxes.
+
+- **Bug Fixes** - Implemented error handling for bounding box operations to ensure valid dimensions.
+
+- **Refactor** 	- Removed existing `Image` class from `types.py`. - Restructured image and geometric
+  type handling across multiple modules.
+
+- **Tests** - Introduced a comprehensive test suite for `Vector3D`, `Size3D`, `Coordinate3D`, and
+  `Spacing3D` classes.
+
+- **Chores** - Updated linting configuration to include new paths and exclude deprecated files.
+
+
+## v1.17.1 (2025-01-30)
+
+### Bug Fixes
+
+- Mis-handling of string as roi_name for to_segmentation
+  ([#206](https://github.com/bhklab/med-imagetools/pull/206),
+  [`358be55`](https://github.com/bhklab/med-imagetools/commit/358be55e6f65cb86eb8d7ba083e5d7debef6ab4a))
+
+Remove unnecessary conversion of `roi_names` from string to list and fix handling when a string is
+  passed to the `to_segmentation` function.
+
+fixes #205
+
+- **Improvements** 	- Enhanced input handling for ROI names in the segmentation process. - Improved
+  flexibility by allowing both string and list input types for ROI names. - **New Features** - Added
+  new test cases to validate the functionality of converting ROI points to segmentation images. -
+  **Bug Fixes** 	- Updated test data structures for consistency and accuracy.
+
+
+## v1.17.0 (2025-01-29)
+
+### Documentation
+
+- Fix readme formatting
+  ([`5c76c77`](https://github.com/bhklab/med-imagetools/commit/5c76c77c042b043026cc0abc7508f366416a4365))
+
+### Features
+
+- **tests**: Add test dataset downloading and extraction helpers
+  ([#201](https://github.com/bhklab/med-imagetools/pull/201),
+  [`95bfca6`](https://github.com/bhklab/med-imagetools/commit/95bfca6977dbd2d7e70f02d3758e6d5dc4d69767))
+
+## Release Notes
+
+- **New Features** - Enhanced dataset downloading functionality with progress tracking and timeout
+  management 	- Improved dataset extraction with parallel processing support
+
+- **Improvements** 	- Refined GitHub release management 	- Updated test data handling and fixtures
+  	- Improved logging and error handling for dataset operations
+
+- **Changes** 	- Renamed `GitHubReleaseManager` to `MedImageTestData` 	- Updated variable names for
+  better clarity in various modules 	- Adjusted DICOM file saving parameters
+
+- **Testing** 	- Added new test cases for dataset integrity and download processes 	- Enhanced type
+  annotations and test fixtures
+
+### Refactoring
+
+- Improve code formatting and structure across multiple files
+  ([#198](https://github.com/bhklab/med-imagetools/pull/198),
+  [`230235f`](https://github.com/bhklab/med-imagetools/commit/230235fa538f986693504260f27e33d11e528165))
+
+- **Style** 	- Reformatted code across multiple files to improve readability. 	- Updated method
+  signatures to use multi-line formatting. 	- Adjusted import statements and docstring examples. 	-
+  Enhanced clarity in error messages and logging statements.
+
+- **Chores** 	- Updated Ruff linting configuration. 	- Adjusted line length limits in configuration
+  files. 	- Expanded files considered for linting. - Enhanced type clarity and readability in GitHub
+  dataset management classes. - Modified mypy configuration to change file analysis scope and added
+  new sections for specific modules.
+
+- Some changes that will propagate to all branches
+  ([#199](https://github.com/bhklab/med-imagetools/pull/199),
+  [`df23476`](https://github.com/bhklab/med-imagetools/commit/df23476cbfc3919b6cb701f2980d29069f149d84))
+
+- **Configuration Updates** - Updated coverage configuration to exclude specific files from
+  reporting - Adjusted pytest cache directory and coverage settings - Removed mypy unreachable code
+  warnings
+
+- **Error Handling** - Enhanced pattern resolution with a new `MissingPlaceholderValueError` -
+  Improved error messaging for missing placeholder values
+
+- **Code Quality** - Added type ignore annotations for specific library imports - Minor formatting
+  improvements in string representations
+
+
+## v1.16.0 (2025-01-22)
+
+### Chores
+
+- Update .gitattributes for merge strategies and diff management
+  ([#184](https://github.com/bhklab/med-imagetools/pull/184),
+  [`8fef781`](https://github.com/bhklab/med-imagetools/commit/8fef781fcc9b3b58f13b76ef4696da8cf61b1a04))
+
+### Continuous Integration
+
+- Update CI workflow and add JUnit test reporting
+  ([#192](https://github.com/bhklab/med-imagetools/pull/192),
+  [`8ccc0c0`](https://github.com/bhklab/med-imagetools/commit/8ccc0c0e2ac1c755e7f203c24c4d878b4dd3a49e))
+
+- **CI/CD** - Simplified GitHub Actions workflow to focus on main branch - Added JUnit test result
+  summary reporting - Enhanced test job error handling
+
+- **Development Tools** - Updated pytest configuration for improved test reporting and caching -
+  Refined linting configuration - Added new development task to clean cache and coverage files
+
+### Features
+
+- Add Test Data classes to download from github releases
+  ([#194](https://github.com/bhklab/med-imagetools/pull/194),
+  [`3385682`](https://github.com/bhklab/med-imagetools/commit/3385682c23ae6b574ff1858e4b014b7de79cbd85))
+
+``` ❯ pixi run -e default imgtools --help Usage: imgtools [OPTIONS] COMMAND [ARGS]...
+
+A collection of tools for working with medical imaging data.
+
+Options: -q, --quiet Suppress all logging except errors, overrides verbosity options. -v, --verbose
+  Increase verbosity of logging, overrides environment variable. (0-3: ERROR, WARNING, INFO, DEBUG).
+  --version Show the version and exit. -h, --help Show this message and exit.
+
+Commands: dicomsort Sorts DICOM files into directories based on their tags. find-dicoms A tool to
+  find DICOM files. ```
+
+versus using `med-imagetools[test]` ``` ❯ pixi run -e dev imgtools --help Usage: imgtools [OPTIONS]
+  COMMAND [ARGS]...
+
+Commands: dicomsort Sorts DICOM files into directories based on their tags. find-dicoms A tool to
+  find DICOM files. testdata Download test data from the latest GitHub release.
+
+```
+
+- **New Features** 	- Added GitHub release management functionality for medical imaging test data.
+  	- Introduced new classes for handling GitHub releases and assets. 	- Implemented methods for
+  downloading and extracting test datasets. 	- Enhanced command-line interface with a new command
+  for downloading test datasets based on availability. 	- Expanded platform support in project
+  configuration.
+
+- **Documentation** 	- Updated README with improved layout and badge presentation. 	- Enhanced
+  project configuration in `pyproject.toml` and `pixi.toml`.
+
+- **Tests** 	- Added comprehensive test suite for GitHub release data management. 	- Created
+  fixtures and test methods to validate release retrieval and extraction. 	- Enhanced test coverage
+  with additional scenarios for error handling.
+
+### Refactoring
+
+- Enhance modules classes; StructureSet, PET, Dose, with factory methods
+  ([#185](https://github.com/bhklab/med-imagetools/pull/185),
+  [`093eab0`](https://github.com/bhklab/med-imagetools/commit/093eab03f441049f9bec4b457e4e24185218f7d7))
+
+## Walkthrough
+
+This pull request introduces significant refactoring across multiple modules in the image tools
+  library, focusing on DICOM reading and processing functions. The changes centralize image reading
+  functionality into a new `read_image` utility function in the `utils.py` module, rename several
+  method signatures to use a more generic `from_dicom` approach, and improve the handling of DICOM
+  metadata across different image types like Dose, PET, and StructureSet. The modifications aim to
+  standardize the DICOM reading process and enhance code modularity.
+
+## Changes
+
+| File | Changes | |------|---------| | `src/imgtools/io/loaders/old_loaders.py` | - Updated
+  `read_dicom_rtstruct` with optional `roi_name_pattern` parameter<br>- Modified method calls for
+  `StructureSet`, `Dose`, and `PET` object creation | | `src/imgtools/modules/dose.py` | - Removed
+  local `read_image` function<br>- Renamed `from_dicom_rtdose` to `from_dicom`<br>- Imported
+  `read_image` from `.utils` | | `src/imgtools/modules/pet.py` | - Removed local `read_image`
+  function<br>- Renamed `from_dicom_pet` to `from_dicom`<br>- Imported `read_image` from `.utils` |
+  | `src/imgtools/modules/segmentation.py` | - Added new `from_dicom` class method<br>- Added
+  `from_dicom_seg` alias method | | `src/imgtools/modules/structureset.py` | - Added `from_dicom`
+  method as alias for `from_dicom_rtstruct`<br>- Reintroduced `roi_names` and `has_roi` methods<br>-
+  Renamed `_extract_metadata` to utilize new `RTSTRUCTMetadata` type | |
+  `src/imgtools/modules/utils.py` | - Added new `read_image` utility function for DICOM series
+  reading |
+
+- Refactor find-dicom logic + docstring formatting, closes #149
+  ([#186](https://github.com/bhklab/med-imagetools/pull/186),
+  [`da363d6`](https://github.com/bhklab/med-imagetools/commit/da363d62d559d00d4714a25014b6d874de506456))
+
+- **Documentation** 	- Improved docstring formatting for better readability in DICOM-related utility
+  functions 	- Enhanced parameter descriptions in documentation
+
+- **Chores** 	- Reformatted code for improved readability 	- Slight modifications to code structure
+  without changing core functionality
+
+- Remove unused imports for future re-introduction
+  ([#188](https://github.com/bhklab/med-imagetools/pull/188),
+  [`cf5cbd0`](https://github.com/bhklab/med-imagetools/commit/cf5cbd02581d30168e261aff37d45a1a2b12d720))
+
+
+## v1.15.0 (2025-01-17)
+
+### Features
+
+- Refactor io module, introduce new abstract base writer
+  ([#181](https://github.com/bhklab/med-imagetools/pull/181),
+  [`e04008d`](https://github.com/bhklab/med-imagetools/commit/e04008d2f2a2040f3a1092debca0c69caa180f85))
+
+Co-authored-by: coderabbitai[bot] <136622811+coderabbitai[bot]@users.noreply.github.com>
+
+
 ## v1.14.0 (2025-01-17)
 
 ### Features

@@ -32,10 +32,10 @@ and replace the placeholders with values from a dictionary:
 ... }
 
 >>> pattern = "{Key1}-{Key2}"
->>> pattern_parser = re.compile(r"\{(\w+)\}")
+>>> pattern_matcher = re.compile(r"\{(\w+)\}")
 >>> parser = PatternParser(
 ...     pattern,
-...     pattern_parser,
+...     pattern_matcher,
 ... )
 >>> (
 ...     formatted_pattern,
@@ -62,10 +62,12 @@ and replace the placeholders with values from a dictionary:
 ... }
 
 >>> pattern = "%<Key1> and {Key2}"
->>> pattern_parser = re.compile(r"%<(\w+)>|\{(\w+)\}")
+>>> pattern_matcher = re.compile(
+...     r"%<(\w+)>|\{(\w+)\}"
+... )
 >>> parser = PatternParser(
 ...     pattern,
-...     pattern_parser,
+...     pattern_matcher,
 ... )
 >>> (
 ...     formatted_pattern,
@@ -92,10 +94,10 @@ and replace the placeholders with values from a dictionary:
 ... }
 
 >>> pattern = "/path/to/{Key1}/and/{Key2}"
->>> pattern_parser = re.compile(r"\{(\w+)\}")
+>>> pattern_matcher = re.compile(r"\{(\w+)\}")
 >>> parser = PatternParser(
 ...     pattern,
-...     pattern_parser,
+...     pattern_matcher,
 ... )
 >>> (
 ...     formatted_pattern,
@@ -131,7 +133,7 @@ class PatternParser:
     ----------
     pattern : str
         The pattern string to parse.
-    pattern_parser : Pattern, optional
+    pattern_matcher : Pattern, optional
         Custom regex pattern for parsing
 
     Attributes
@@ -151,10 +153,10 @@ class PatternParser:
     ...     "Key2": "Value2",
     ... }
     >>> pattern = "{Key1}-{Key2}"
-    >>> pattern_parser = re.compile(r"\{(\w+)\}")
+    >>> pattern_matcher = re.compile(r"\{(\w+)\}")
     >>> parser = PatternParser(
     ...     pattern,
-    ...     pattern_parser,
+    ...     pattern_matcher,
     ... )
     >>> (
     ...     formatted_pattern,
@@ -169,12 +171,16 @@ class PatternParser:
     'Value1-Value2'
     """
 
-    def __init__(self, pattern: str, pattern_parser: Pattern) -> None:
-        assert isinstance(pattern, str) and pattern, "Pattern must be a non-empty string."
+    def __init__(self, pattern: str, pattern_matcher: Pattern) -> None:
+        assert isinstance(pattern, str) and pattern, (
+            "Pattern must be a non-empty string."
+        )
         self._pattern = pattern
         self._keys: List[str] = []
-        assert isinstance(pattern_parser, Pattern), "Pattern parser must be a regex pattern."
-        self._parser: Pattern = pattern_parser
+        assert isinstance(pattern_matcher, Pattern), (
+            "Pattern parser must be a regex pattern."
+        )
+        self._parser: Pattern = pattern_matcher
 
     def parse(self) -> Tuple[str, List[str]]:
         """
@@ -196,7 +202,9 @@ class PatternParser:
             errmsg = f"Pattern must contain placeholders matching '{self._parser.pattern}'."
             raise InvalidPatternError(errmsg)
 
-        formatted_pattern = self._parser.sub(self._replace_key, sanitized_pattern)
+        formatted_pattern = self._parser.sub(
+            self._replace_key, sanitized_pattern
+        )
         return formatted_pattern, self._keys
 
     def _replace_key(self, match: Match) -> str:
