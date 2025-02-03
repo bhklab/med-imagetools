@@ -45,9 +45,9 @@ class RTSTRUCTMetadata:
     """
 
     PatientID: str
+    Modality: str
     StudyInstanceUID: str
     SeriesInstanceUID: str
-    Modality: str
     ReferencedStudyInstanceUID: str
     ReferencedSeriesInstanceUID: str
     OriginalROIMeta: List[ROIMetadata]
@@ -75,9 +75,7 @@ class RTSTRUCTMetadata:
     def __rich_repr__(self) -> Iterator[tuple[str, str | Sequence[str]]]:
         # for each key-value pair, 'yield key, value'
         for attr_field in fields(self):
-            if attr_field.name == "OriginalROINames":
-                continue  # skip OriginalROINames for brevity
-            elif attr_field.name.endswith("UID"):
+            if attr_field.name.endswith("UID"):
                 yield (
                     attr_field.name,
                     f"...{getattr(self, attr_field.name)[-10:]}",

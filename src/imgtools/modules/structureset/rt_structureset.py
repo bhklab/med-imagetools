@@ -107,7 +107,7 @@ class RTStructureSet:
         extracted_rois = []  # only track successfully extracted ROIs
 
         # Extract ROI contour points for each ROI and
-        for roi_index, roi_name in enumerate(metadata["OriginalROINames"]):
+        for roi_index, roi_name in enumerate(metadata.OriginalROINames):
             if roi_name_pattern and not re.match(
                 roi_name_pattern, roi_name, flags=case_ignore
             ):
@@ -433,30 +433,35 @@ if __name__ == "__main__":
     paths = df["file_path"].tolist()
     logger.setLevel("WARNING")  # type: ignore
     start_new = time.time()
-    for _i in range(10):
-        for path in paths:
-            _ = load_new_rtstruct(path)
 
-    end_new = time.time()
+    rt = load_new_rtstruct(paths[20])
+    print(rt)
 
-    start_old = time.time()
-    for _i in range(10):
-        for path in paths:
-            __ = load_old_rtstruct(path)
-    end_old = time.time()
+    # benchiter = 1
+    # for _i in range(benchiter):
+    #     for path in paths:
+    #         _ = load_new_rtstruct(path)
 
-    ##############################
-    # use rich table print to display the results
+    # end_new = time.time()
 
-    from rich import table as rich_table
+    # start_old = time.time()
+    # for _i in range(benchiter):
+    #     for path in paths:
+    #         __ = load_old_rtstruct(path)
+    # end_old = time.time()
 
-    rtable = rich_table.Table()
-    rtable.add_column("Method", justify="right")
-    rtable.add_column("Time", justify="right")
-    rtable.add_row("New", f"{end_new - start_new:.2f} seconds")
-    rtable.add_row("Old", f"{end_old - start_old:.2f} seconds")
+    # ##############################
+    # # use rich table print to display the results
 
-    print(rtable)
+    # from rich import table as rich_table
+
+    # rtable = rich_table.Table()
+    # rtable.add_column("Method", justify="right")
+    # rtable.add_column("Time", justify="right")
+    # rtable.add_row("New", f"{end_new - start_new:.2f} seconds")
+    # rtable.add_row("Old", f"{end_old - start_old:.2f} seconds")
+
+    # print(rtable)
     # for idx, row in df.iterrows():
     #     file_path = row["file_path"]
 
