@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 import numpy as np
 import SimpleITK as sitk
 
+from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     BaseLoader,
     ImageCSVLoader,
@@ -42,7 +43,6 @@ from imgtools.ops.functional import (
 )
 from imgtools.utils import (
     array_to_image,
-    crawl,
     image_to_array,
     physical_points_to_idxs,
 )

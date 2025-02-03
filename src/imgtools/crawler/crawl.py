@@ -216,8 +216,6 @@ def to_df(database_dict):
     return df
 
 # fmt: on
-
-
 def crawl(
     top: pathlib.Path,
     n_jobs: int = -1,
@@ -266,7 +264,8 @@ def crawl(
     return database_dict
 
 
-if __name__ == "__main__":
+# ruff: noqa
+if __name__ == "__main__":  # pragma: no cover
     parser = ArgumentParser("Dataset DICOM Crawler")
     parser.add_argument(
         "directory", type=str, help="Top-level directory of the dataset."
