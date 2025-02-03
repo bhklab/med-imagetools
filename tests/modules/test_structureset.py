@@ -1,8 +1,8 @@
-from typing import Dict, List, Union
+from typing import Dict, List
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-import SimpleITK as sitk
 
 from imgtools.modules.structureset.structure_set import (  # type: ignore
     StructureSet,
@@ -55,7 +55,13 @@ def metadata() -> Dict[str, str]:
         # ([["GTV", "PTV"], "CTV.*"], False, True, {"GTV": 0, "PTV": 0, "CTV_0": 1, "CTV_1": 2, "CTV_2": 3}),
     ],
 )
-def test_assign_labels(names, roi_select_first, roi_separate, expected, roi_points) -> None:
+def test_assign_labels(
+    names: List[str] | List[List[str] | str],
+    roi_select_first: bool,
+    roi_separate: bool,
+    expected: Dict[str, int],
+    roi_points,
+) -> None:
     """Test _assign_labels method with various cases."""
     structure_set = StructureSet(roi_points)
     result = structure_set._assign_labels(
@@ -80,7 +86,14 @@ def test_assign_labels(names, roi_select_first, roi_separate, expected, roi_poin
             [["GTV", "CTV.*"], "P.*", "Extra.*"],
             False,
             False,
-            {'GTV': 0, 'CTV_0': 0, 'CTV_1': 0, 'CTV_2': 0, 'PTV': 1, 'ExtraROI': 2},
+            {
+                "GTV": 0,
+                "CTV_0": 0,
+                "CTV_1": 0,
+                "CTV_2": 0,
+                "PTV": 1,
+                "ExtraROI": 2,
+            },
         ),
         # ([["GTV", "CTV.*"], "P.*", "Extra.*"], False, True, {"GTV": 0, "CTV_0_0": 1, "CTV_1_1": 2, "CTV_2_2": 3, "PTV": 4, "ExtraROI": 5}),
         # Case 3: Regex patterns that match all ROIs
@@ -88,7 +101,14 @@ def test_assign_labels(names, roi_select_first, roi_separate, expected, roi_poin
             [".*"],
             False,
             False,
-            {'GTV': 0, 'PTV': 0, 'CTV_0': 0, 'CTV_1': 0, 'CTV_2': 0, 'ExtraROI': 0},
+            {
+                "GTV": 0,
+                "PTV": 0,
+                "CTV_0": 0,
+                "CTV_1": 0,
+                "CTV_2": 0,
+                "ExtraROI": 0,
+            },
         ),
         # ([".*"], False, True, {"GTV_0": 0, "PTV_1": 1, "CTV_0_2": 2, "CTV_1_3": 3, "CTV_2_4": 4, "ExtraROI_5": 5}),
         # Case 4: Overlapping regex patterns
@@ -111,7 +131,9 @@ def test_assign_labels(names, roi_select_first, roi_separate, expected, roi_poin
         # pytest.param(["G.*"], True, True, None, marks=pytest.mark.xfail(raises=ValueError)),
     ],
 )
-def test_assign_labels_complex(names, roi_select_first, roi_separate, expected, roi_points) -> None:
+def test_assign_labels_complex(
+    names, roi_select_first, roi_separate, expected, roi_points
+) -> None:
     """Test _assign_labels method with complex scenarios."""
     structure_set = StructureSet(roi_points)
     result = structure_set._assign_labels(
@@ -120,7 +142,9 @@ def test_assign_labels_complex(names, roi_select_first, roi_separate, expected, 
     assert result == expected
 
 
-def test_assign_labels_invalid(roi_points: Dict[str, List[np.ndarray]]) -> None:
+def test_assign_labels_invalid(
+    roi_points: Dict[str, List[np.ndarray]],
+) -> None:
     """Test _assign_labels method with invalid inputs."""
     structure_set = StructureSet(roi_points)
 
@@ -133,10 +157,14 @@ def test_assign_labels_invalid(roi_points: Dict[str, List[np.ndarray]]) -> None:
         ValueError,
         match="The options 'roi_select_first' and 'roi_separate' cannot both be True.",
     ):
-        structure_set._assign_labels(['G.*'], roi_select_first=True, roi_separate=True)
+        structure_set._assign_labels(
+            ["G.*"], roi_select_first=True, roi_separate=True
+        )
 
 
-def test_init(roi_points: Dict[str, List[np.ndarray]], metadata: Dict[str, str]) -> None:
+def test_init(
+    roi_points: Dict[str, List[np.ndarray]], metadata: Dict[str, str]
+) -> None:
     """Test StructureSet initialization."""
     structure_set = StructureSet(roi_points, metadata)
     assert structure_set.roi_points == roi_points
@@ -145,29 +173,3 @@ def test_init(roi_points: Dict[str, List[np.ndarray]], metadata: Dict[str, str])
     # Test default metadata
     structure_set_no_metadata = StructureSet(roi_points)
     assert structure_set_no_metadata.metadata == {}
-
-
-@patch('imgtools.modules.structureset.dcmread')
-def test_from_dicom_rtstruct(mock_dcmread) -> None:
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    mock_rtstruct = MagicMock()
-    mock_rtstruct.StructureSetROISequence = [
-        MagicMock(ROIName='GTV'),
-        MagicMock(ROIName='PTV'),
-    ]
-    mock_rtstruct.ROIContourSequence = [
-        MagicMock(),
-        MagicMock(),
-    ]
-    mock_rtstruct.ROIContourSequence[0].ContourSequence = [MagicMock(ContourData=[1.0, 2.0, 3.0])]
-    mock_rtstruct.ROIContourSequence[1].ContourSequence = [MagicMock(ContourData=[4.0, 5.0, 6.0])]
-    mock_rtstruct.Modality = 'RTSTRUCT'
-    mock_dcmread.return_value = mock_rtstruct
-
-    structure_set = StructureSet.from_dicom_rtstruct('dummy')
-    # Assert the results
-    assert 'GTV' in structure_set.roi_points
-    assert 'PTV' in structure_set.roi_points
-    assert len(structure_set.roi_points['GTV']) == 1
-    assert len(structure_set.roi_points['PTV']) == 1

@@ -5,7 +5,11 @@ from typing import TypeAlias
 from pydicom import dcmread
 from pydicom.dataset import FileDataset
 
-from imgtools.exceptions import InvalidDicomError, NotRTSTRUCTError, RTSTRUCTAttributeError
+from imgtools.exceptions import (
+    InvalidDicomError,
+    NotRTSTRUCTError,
+    RTSTRUCTAttributeError,
+)
 
 from .custom_types import RTSTRUCTMetadata
 
@@ -45,21 +49,27 @@ def load_rtstruct_dcm(
         case FileDataset():
             dicom = rtstruct_input
         case str() | Path():
-            dicom = dcmread(rtstruct_input, force=force, stop_before_pixels=stop_before_pixels)
+            dicom = dcmread(
+                rtstruct_input,
+                force=force,
+                stop_before_pixels=stop_before_pixels,
+            )
         case bytes():
             dicom = dcmread(
-                BytesIO(rtstruct_input), force=force, stop_before_pixels=stop_before_pixels
+                BytesIO(rtstruct_input),
+                force=force,
+                stop_before_pixels=stop_before_pixels,
             )
         case _:
-            raise InvalidDicomError(
+            msg = (
                 f"Invalid input type for 'rtstruct_input': {type(rtstruct_input)}. "
                 "Must be a str, Path, or bytes object."
             )
+            raise InvalidDicomError(msg)
 
     if dicom.Modality != "RTSTRUCT":
-        raise NotRTSTRUCTError(
-            f"The provided DICOM is not an RTSTRUCT file. Found Modality: {dicom.Modality}"
-        )
+        msg = f"The provided DICOM is not an RTSTRUCT file. Found Modality: {dicom.Modality}"
+        raise NotRTSTRUCTError(msg)
 
     return dicom
 
@@ -106,7 +116,7 @@ def extract_rtstruct_metadata(rtstruct: DicomInput) -> RTSTRUCTMetadata:
     )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import timeit
 
     # Load an RTSTRUCT file and extract metadata
@@ -122,7 +132,9 @@ if __name__ == "__main__":
     REPEAT = 5
     NUMBER = 10
 
-    print(f"Benchmark times for {REPEAT} repeats of {NUMBER} iterations:")
+    print(f"Benchmark times for {REPEAT} repeats of {NUMBER} iterations:")  # noqa
 
     times = timeit.repeat(benchmark, repeat=REPEAT, number=NUMBER)
-    print(f"Average time per {NUMBER} iterations: {sum(times) / len(times):.6f} seconds")
+    print(  # noqa
+        f"Average time per {NUMBER} iterations: {sum(times) / len(times):.6f} seconds"
+    )

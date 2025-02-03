@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Iterator, List, TypeAlias
 
 import numpy as np
+from pydicom.dataset import FileDataset
 
 from imgtools.exceptions import MissingROIError, ROIContourError
 from imgtools.logging import logger
@@ -22,18 +23,19 @@ if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 # Define type aliases
-SelectionPattern: TypeAlias = str | list[str]
 """Alias for a string or a list of strings used to represent selection patterns."""
+SelectionPattern: TypeAlias = str | list[str]
 
-ROINamePatterns: TypeAlias = (
-    SelectionPattern | dict[str, SelectionPattern] | None
-)
 """Alias for ROI names, which can be:
-- A single string pattern.
-- A list of string patterns.
+- SelectionPattern:
+    - A single string pattern.
+    - A list of string patterns.
 - A dictionary mapping strings to patterns or lists of patterns.
 - None, to represent the absence of any selection.
 """
+ROINamePatterns: TypeAlias = (
+    SelectionPattern | dict[str, SelectionPattern] | None
+)
 
 
 class ROIExtractionErrorMsg(str):
@@ -92,8 +94,8 @@ class RTStructureSet:
             The structure set data extracted from the RTSTRUCT.
         """
         logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
-        dicom_rt = load_rtstruct_dcm(dicom)
-        metadata = extract_rtstruct_metadata(dicom_rt)
+        dicom_rt: FileDataset = load_rtstruct_dcm(dicom)
+        metadata: RTSTRUCTMetadata = extract_rtstruct_metadata(dicom_rt)
 
         case_ignore = (
             re.IGNORECASE if ignore_case else 0
@@ -175,7 +177,7 @@ class RTStructureSet:
         matches = [
             name
             for name in self.roi_names
-            if re.fullmatch(pattern, name, flags=_flags)
+            if re.fullmatch(pattern=pattern, string=name, flags=_flags)
         ]
         return matches if matches else None
 
@@ -331,13 +333,13 @@ class RTStructureSet:
             num_points = slc.get("NumberOfContourPoints", 0)
 
         return ROI(
-            roi_name,
-            roi_contour.ReferencedROINumber,
-            num_points,
-            contour_points,
+            name=roi_name,
+            referenced_roi_number=roi_contour.ReferencedROINumber,
+            num_points=num_points,
+            slices=contour_points,
         )
 
-    def summary_dict(self, exclude_errors: bool = False) -> dict:
+    def summary(self, exclude_errors: bool = False) -> dict:
         """Return a dictionary of summary information for the RTStructureSet."""
 
         roi_info = {}
@@ -455,7 +457,7 @@ if __name__ == "__main__":
     #     rtstruct_old = StructureSet.from_dicom(rtstruct_path=file_path)
     #     print(f"Time taken: {time.time() - start:.2f} seconds")
 
-    #     rt_metadata[file_path] = rtstruct.summary_dict(exclude_errors=False)
+    #     rt_metadata[file_path] = rtstruct.summary(exclude_errors=False)
 
     #     print(rtstruct)
 
