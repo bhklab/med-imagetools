@@ -559,6 +559,9 @@ class StructureSet:
         a single name or are lists of strings).
         """
         labels: dict[str, list] = {}
+        if isinstance(roi_names, str):
+            roi_names = [roi_names]
+
         if not roi_names:
             labels = self._assign_labels(
                 list(self.roi_names), roi_select_first, roi_separate
@@ -589,8 +592,6 @@ class StructureSet:
                                 matching_names
                             )  # {"GTV": ["GTV1", "GTV2"]}
                     labels[name] = extracted_labels
-        if isinstance(roi_names, str):
-            roi_names = [roi_names]
 
         logger.debug(f"Found {len(labels)} labels", labels=labels)
 
@@ -620,14 +621,10 @@ class StructureSet:
                 for label in label_list:
                     self.get_mask(reference_image, mask, label, i, continuous)
                 seg_roi_indices[name] = i
-        # if not roi_names:
-        else:
-            for name, label in labels.items():
-                self.get_mask(reference_image, mask, name, label, continuous)
-            seg_roi_indices = {
-                "_".join(k): v
-                for v, k in groupby(labels, key=lambda x: labels[x])
-            }
+        elif isinstance(roi_names, list):
+            for i, name in enumerate(labels):
+                self.get_mask(reference_image, mask, name, i, continuous)
+                seg_roi_indices[name] = i
 
         mask[mask > 1] = 1
         mask = sitk.GetImageFromArray(mask, isVector=True)
