@@ -1,20 +1,26 @@
 """3DSliceImages: Efficiently generate and store 2D slices from a 3D SimpleITK image."""
 
 # %%
-"""3DSliceImages: Efficiently generate and store 2D slices from a 3D SimpleITK image."""
+from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
-from pathlib import Path
+from typing import TYPE_CHECKING, Iterator
 
-import matplotlib.pyplot as plt
+import ipywidgets as widgets  # type: ignore
 import numpy as np
 import SimpleITK as sitk
 from IPython.display import display
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
+from tqdm.notebook import tqdm
 
 from imgtools import Size3D
+from imgtools.logging import logger
 from imgtools.ops import Resize
 from imgtools.utils import image_to_array
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass
@@ -50,146 +56,267 @@ class ImageSlices:
     def __getitem__(self, index: int) -> Image.Image:
         return self.image_list[index]
 
+    def __len__(self) -> int:
+        return len(self.image_list)
+
+    def __iter__(self) -> Iterator[Image.Image]:
+        return iter(self.image_list)
+
 
 def _generate_slice(
-    index: int, array: np.ndarray, cmap: str, dpi: int
-) -> tuple[int, np.ndarray]:
-    """Generate a single 2D slice."""
-    # Create a new figure and axis with the specified DPI
-    fig, ax = plt.subplots()
+    index: int,
+    img_slice: np.ndarray,
+    mask_slice: np.ndarray | None,
+    alpha: float,
+    vmax: int,
+    vmin: int,
+    scale_factor: float = 2.0,
+) -> tuple[int, Image.Image]:
+    """Generate a single 2D slice, overlaying the mask in red if available,
+    with metadata text in the bottom right corner.
+    """
 
-    # Display the array as an image with the specified colormap
-    ax.imshow(array, cmap=cmap, origin="lower")
+    # Normalize the image to 0-255
+    img_slice = np.clip(
+        (img_slice - vmin) / (vmax - vmin) * 255, 0, 255
+    ).astype(np.uint8)
 
-    # Remove the axis for a cleaner image
-    # ax.axis("off")
+    # Convert image slice to PIL image (grayscale → RGB)
+    image = Image.fromarray(img_slice, mode="L").convert("RGB")
 
-    # Draw the canvas to update the figure
-    fig.canvas.draw()
+    if mask_slice is not None:
+        # mask should be all 1s and 0s
+        red_mask = np.zeros_like(mask_slice, dtype=np.uint8)
 
-    # Convert the canvas to a numpy array
-    image = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
+        # Set red channel to 255 where mask values are > 0
+        red_mask[mask_slice > 0] = 255
+        green_mask = np.zeros_like(mask_slice, dtype=np.uint8)
+        blue_mask = np.zeros_like(mask_slice, dtype=np.uint8)
 
-    # Reshape the array to match the canvas dimensions and remove the alpha channel
-    image = image.reshape(fig.canvas.get_width_height()[::-1] + (4,))
-    image = image[..., 1:]  # Remove the alpha channel
+        # Stack the channels to create an RGB image
+        mask_img_stack = np.stack([red_mask, green_mask, blue_mask], axis=-1)
 
-    # Close the figure to free up memory
-    plt.close(fig)
+        # Convert to PIL image
+        mask_img = Image.fromarray(mask_img_stack, mode="RGB")
 
-    return index, Image.fromarray(image, mode="RGB")
+        # Create an alpha transparency mask where mask values are > 0
+        mask_alpha = Image.fromarray(
+            (mask_slice > 0).astype(np.uint8) * int(255 * alpha), mode="L"
+        )
+
+        # Blend the red mask with the original image
+        image = Image.composite(mask_img, image, mask_alpha)
+
+    # Metadata text
+    metadata_dict = {
+        "Slice #": index,
+        "Shape": f"{image.width}x{image.height}",
+        "Min": img_slice.min(),
+        "Max": img_slice.max(),
+    }
+    metadata_str = "\n".join(
+        [f"{key}: {value}" for key, value in metadata_dict.items()]
+    )
+
+    # Draw the text on the image
+    draw = ImageDraw.Draw(image)
+
+    font_size = max(10, min(image.width, image.height) * 0.03)
+    font = ImageFont.load_default(font_size)
+
+    # Get text size
+    text_bbox = draw.textbbox((0, 0), metadata_str, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    # Calculate position in bottom right
+    padding = 10
+    position = (
+        image.width - text_width - padding,
+        image.height - text_height - padding,
+    )
+
+    # Add background for better visibility
+    bg_padding = 5
+    bg_position = (
+        position[0] - bg_padding,
+        position[1] - bg_padding,
+        position[0] + text_width + bg_padding,
+        position[1] + text_height + bg_padding,
+    )
+    draw.rectangle(
+        bg_position, fill=(0, 0, 0, 150)
+    )  # Semi-transparent background
+
+    # Draw text
+    draw.text(position, metadata_str, fill="white", font=font)
+
+    return index, image
 
 
 @dataclass
 class SliceImage3D:
-    """Generates 2D slices from a 3D SimpleITK image across all three dimensions."""
+    """Generates 2D slices from a 3D SimpleITK image and optionally overlays a mask."""
 
     image: sitk.Image
-    num_processors: int = field(default_factory=cpu_count)
+    mask: sitk.Image | None = None
+
     resizer_interpolation: str = field(
-        default="linear", metadata={"choices": ["linear", "nearest"]}
+        default="nearest",
+        metadata={"choices": ["linear", "nearest", "bspline"]},
     )
-    cmap: str = "gray"
-    dpi: int = 100
+    alpha: float = 0.4
 
     slices: ImageSlices = field(init=False)
-    origin: tuple[float, float, float] = field(init=False)
-    direction: tuple[float, float, float] = field(init=False)
-    spacing: tuple[float, float, float] = field(init=False)
-    cropped_size: Size3D = field(default_factory=lambda: Size3D(256, 256, 0))
+    cropped_size: Size3D = field(default_factory=lambda: Size3D(512, 512, 0))
+
+    image_array: np.ndarray = field(init=False)
+    mask_array: np.ndarray | None = field(init=False)
 
     def __post_init__(self) -> None:
-        # Convert image once instead of multiple times
-        match self.resizer_interpolation:
-            case "linear":
-                resizer = Resize(
-                    list(self.cropped_size), interpolation="linear"
-                )
-            case "nearest":
-                resizer = Resize(
-                    list(self.cropped_size), interpolation="nearest"
-                )
-        image = resizer(self.image)
-        self.image_array, self.origin, self.direction, self.spacing = (
-            image_to_array(image)
+        resizer = Resize(
+            size=list(self.cropped_size),
+            interpolation=self.resizer_interpolation,
+            anti_alias=True,
+            anti_alias_sigma=2.0,  # Higher value to better prevent artifacts
         )
+        logger.debug(f"Resizing image to {self.cropped_size}")
+        self.image = resizer(self.image)
+        self.image_array, *_image = image_to_array(self.image)
 
-    def generate_dim_slices(self, dim: int) -> None:
-        """Generate all slices efficiently using multiprocessing."""
-        # if dim == 0:
-        #     slices = [
-        #         self.image_array[i, :, :]
-        #         for i in range(self.image_array.shape[0])
-        #     ]
-        # elif dim == 1:
-        #     slices = [
-        #         self.image_array[:, i, :]
-        #         for i in range(self.image_array.shape[1])
-        #     ]
-        # else:
-        #     slices = [
-        #         self.image_array[:, :, i]
-        #         for i in range(self.image_array.shape[2])
-        #     ]
-        slices = [
+        # Resize mask if provided
+        if self.mask:
+            self.mask = resizer(self.mask)
+            self.mask_array, *_ = image_to_array(self.mask)
+        else:
+            self.mask_array = None
+
+    def image_slices(self, dim: int, every_n: int = 5) -> list[np.ndarray]:
+        return [
             np.take(self.image_array, i, axis=dim)
-            for i in range(self.image_array.shape[dim])
+            for i in range(0, self.image_array.shape[dim], every_n)
         ]
 
-        tasks = [(i, slc, self.cmap, self.dpi) for i, slc in enumerate(slices)]
+    def mask_slices(
+        self, dim: int, every_n: int = 5
+    ) -> list[np.ndarray] | None:
+        if self.mask_array is not None:
+            return [
+                np.take(self.mask_array, i, axis=dim)
+                for i in range(0, self.mask_array.shape[dim], every_n)
+            ]
+        return None
 
-        # display progress bar with tqdm_notebook
+    @property
+    def vmax(self) -> int:
+        return max(
+            self.image_array.max(),
+            self.mask_array.max() if self.mask_array is not None else 0,
+        )
+
+    @property
+    def vmin(self) -> int:
+        return min(
+            self.image_array.min(),
+            self.mask_array.min() if self.mask_array is not None else 0,
+        )
+
+    def generate_dim_slices(
+        self, dim: int, every_n: int = 5, new_size_factor: float = 1.0
+    ) -> SliceImage3D:
+        """Generate 2D slices along a given dimension, optionally overlaying the mask."""
+        slices = self.image_slices(dim, every_n)
+        mask_slices: list[np.ndarray] | None = self.mask_slices(dim, every_n)
+
+        if mask_slices is None:
+            mask_slices = [np.zeros_like(slices[0])] * len(slices)
+
+        tasks = [
+            (
+                i,
+                img,
+                mask,
+                self.alpha,
+                self.vmax,
+                self.vmin,
+                new_size_factor,
+            )
+            for i, (img, mask) in enumerate(
+                zip(slices, mask_slices, strict=False)
+            )
+        ]
+        start = time.time()
         results = [_generate_slice(*task) for task in tqdm(tasks)]
+        logger.info(f"Time taken: {time.time() - start:.2f}s")
 
-        # Store slices in a dictionary (key: (dimension, index))
-        images = {(dim, index): image for index, image in results}
-        self.slices = ImageSlices.from_dict(images)
+        # Store slices in a dictionary
+        images = [image for _, image in results]
+        self.slices = ImageSlices(images)
+
+        return self
 
     def __repr__(self) -> str:
         slices_by_dimension = {
-            dim: sum(1 for key in self.slices if key[0] == dim)
-            for dim in range(3)
+            dim: len(self.image_slices(dim)) for dim in range(3)
         }
         return (
             f"SliceImage3D(image_shape={self.image_array.shape}, "
-            f"origin={self.origin}, direction={self.direction}, "
-            f"spacing={self.spacing}, "
             f"slices_by_dimension={slices_by_dimension})"
+        )
+
+    def view(self) -> None:
+        def display_slice(index: int) -> None:
+            img = self.slices[index]
+            display(img)
+
+        max_slider = len(self.slices) - 1
+        widgets.interact(
+            display_slice,
+            index=widgets.IntSlider(min=0, max=max_slider, step=1, value=0),
         )
 
 
 # %%
-from rich import print, progress  # type: ignore # noqa
+if __name__ == "__main__":  # pragma: no cover
+    from rich import print, progress  # type: ignore # noqa
+    from imgtools.coretypes.box import RegionBox
+    from pathlib import Path
 
-# Load example images
-ct_image = sitk.ReadImage(
-    "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/CT_70181_original.nii.gz"
-)
-seg_image = sitk.ReadImage(
-    "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/RTSTRUCT_54305_GTV.nii.gz"
-)
+    # ct_path =    "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/CT_70181_original.nii.gz"
+    # seg_path =     "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/RTSTRUCT_54305_GTV.nii.gz"
+    image_dir = (
+        Path("/home/bioinf/bhklab/radiomics/repos/med-imagetools")
+        / "notebooks"
+    )
+    ct_path = image_dir / "merged_duck_with_star.nii.gz"
+    seg_path = image_dir / "star_mask.nii.gz"
 
-slices = SliceImage3D(ct_image, num_processors=4)
+    setting = 2
+    dim = 0
 
-# %%
-dim = 0
+    # Load example images
+    ct_image = sitk.ReadImage(ct_path)
+    seg_image = sitk.ReadImage(seg_path)
+    match setting:
+        case 1:
+            bbox = RegionBox.from_mask_bbox(seg_image).minimum_dimension_size(
+                25
+            )
+            cropped_image = bbox.crop_image(ct_image)
+            cropped_mask = bbox.crop_image(seg_image)
+        case 2:
+            cropped_image = ct_image
+            cropped_mask = seg_image
 
-slices.generate_dim_slices(dim)
+    new_size = 512 * 2
 
-print(slices)
+    slices = SliceImage3D(
+        cropped_image,
+        mask=cropped_mask,
+        cropped_size=Size3D(new_size, new_size, 0),
+    )
 
-# %%
-# get a slice
-img = slices.slices[1]
-
-display(img)
-
-
-print(slices.image_array[9, :, :].nbytes)
-
-# %%
-# display it
-plt.imshow(img)
-plt.show()
+    # %%
+    slices.generate_dim_slices(dim, every_n=1).view()
 
 # %%

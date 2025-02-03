@@ -59,6 +59,6 @@ class EnvironmentType(str, Enum):
 
 
 # Example usage
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     env = EnvironmentType.detect()
-    print(f"Detected environment: {env}")
+    print(f"Detected environment: {env}")  # noqa
