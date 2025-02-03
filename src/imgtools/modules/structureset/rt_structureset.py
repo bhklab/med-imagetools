@@ -323,6 +323,8 @@ class RTStructureSet:
 
         # Check for ContourData in each contour
         contour_points = []
+        total_num_points = 0
+        contourgeometric_types = set()
         for i, slc in enumerate(contour_sequence):
             if not hasattr(slc, "ContourData"):
                 msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'. "
@@ -330,12 +332,24 @@ class RTStructureSet:
             roi_points = np.array(slc.ContourData).reshape(-1, 3)
             contour_slice = ContourSlice(roi_points)
             contour_points.append(contour_slice)
-            num_points = slc.get("NumberOfContourPoints", 0)
+            total_num_points += slc.get("NumberOfContourPoints", 0)
+            contourgeometric_types.add(slc.get("ContourGeometricType", None))
+
+        if len(contourgeometric_types) > 1:
+            warnmsg = (
+                f"Multiple ContourGeometricTypes found for ROI '{roi_name}': "
+                f"{contourgeometric_types}."
+            )
+            logger.warning(warnmsg)
+            cgt = ",".join(contourgeometric_types)
+        else:
+            cgt = contourgeometric_types.pop()
 
         return ROI(
             name=roi_name,
-            referenced_roi_number=roi_contour.ReferencedROINumber,
-            num_points=num_points,
+            ReferencedROINumber=roi_contour.ReferencedROINumber,
+            contour_geometric_type=cgt,
+            num_points=total_num_points,
             slices=contour_points,
         )
 

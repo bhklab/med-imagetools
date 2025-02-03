@@ -41,7 +41,6 @@ from imgtools.modules.segmentation import Segmentation
 from imgtools.modules.structureset import (
     extract_rtstruct_metadata,
     load_rtstruct_dcm,
-    rtstruct_reference_seriesuid,
 )
 from imgtools.utils import physical_points_to_idxs
 
@@ -167,7 +166,7 @@ class StructureSet:
         # Extract ROI names and points
         metadata: dict = extract_rtstruct_metadata(dcm).to_dict()
 
-        roi_names = metadata["OriginalROINames"]
+        roi_names = [v["ROIName"] for v in metadata["OriginalROIMeta"]]
         logger.debug(
             "Extracted ROI names", roi_names=roi_names, num_rois=len(roi_names)
         )
@@ -240,22 +239,6 @@ class StructureSet:
             re.fullmatch(pattern, name, flags=_flags)
             for name in self.roi_names
         )
-
-    @staticmethod
-    def _extract_metadata(
-        rtstruct: FileDataset,
-    ) -> Dict[str, Union[str, int, float]]:
-        """Extract metadata from the RTSTRUCT file."""
-        return {
-            "PatientID": rtstruct.PatientID,
-            "StudyInstanceUID": rtstruct.StudyInstanceUID,
-            "SeriesInstanceUID": rtstruct.SeriesInstanceUID,
-            "Modality": rtstruct.Modality,
-            "ReferencedSeriesInstanceUID": rtstruct_reference_seriesuid(
-                rtstruct
-            ),
-            "OriginalNumberOfROIs": len(rtstruct.StructureSetROISequence),
-        }
 
     @staticmethod
     def _get_roi_points(

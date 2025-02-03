@@ -10,8 +10,10 @@ from imgtools.exceptions import (
     NotRTSTRUCTError,
     RTSTRUCTAttributeError,
 )
-
-from .custom_types import RTSTRUCTMetadata
+from imgtools.modules.structureset.custom_types import (
+    ROIMetadata,
+    RTSTRUCTMetadata,
+)
 
 # Define a type alias for DICOM input types
 DicomInput: TypeAlias = FileDataset | str | Path | bytes
@@ -75,57 +77,76 @@ def load_rtstruct_dcm(
 
 
 # Example usage of the decorator with refactored functions
-def extract_roi_names(rtstruct: DicomInput) -> list[str]:
+def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
     """Extract ROI names from a FileDataset."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
-        return [roi.ROIName for roi in dcm_rtstruct.StructureSetROISequence]
-    except (AttributeError, IndexError) as e:
-        errmsg = "Failed to extract ROI names from the RTSTRUCT file."
+        roi_sequence = dcm_rtstruct.StructureSetROISequence
+    except AttributeError as e:
+        errmsg = "Failed to extract ROISequence from the RTSTRUCT file."
         raise RTSTRUCTAttributeError(errmsg) from e
+    roi_metas = []
+    for roi in roi_sequence:
+        roi_meta = {}
+        roi_meta["ROINumber"] = getattr(roi, "ROINumber", "")
+        roi_meta["ROIName"] = getattr(roi, "ROIName", "")
+        roi_meta["ROIGenerationAlgorithm"] = getattr(
+            roi, "ROIGenerationAlgorithm", ""
+        )
+        roi_metas.append(roi_meta)
+    return roi_metas
 
 
-def rtstruct_reference_seriesuid(rtstruct: DicomInput) -> str:
-    """Return the Referenced SeriesInstanceUID from an RTSTRUCT."""
+def rtstruct_reference_seriesuid(rtstruct: DicomInput) -> tuple[str, str]:
+    """Return the Referenced SeriesInstanceUID and Referenced StudyInstanceUID from an RTSTRUCT."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
-        return str(
+        referenced_series_instance_uid = str(
             dcm_rtstruct.ReferencedFrameOfReferenceSequence[0]
             .RTReferencedStudySequence[0]
             .RTReferencedSeriesSequence[0]
             .SeriesInstanceUID
         )
+        referenced_study_instance_uid = str(
+            dcm_rtstruct.ReferencedFrameOfReferenceSequence[0]
+            .RTReferencedStudySequence[0]
+            .ReferencedSOPInstanceUID
+        )
+        return referenced_series_instance_uid, referenced_study_instance_uid
     except (AttributeError, IndexError) as e:
-        errmsg = "Failed to extract Referenced SeriesInstanceUID from the RTSTRUCT file."
+        errmsg = "Failed to extract Referenced SeriesInstanceUID or Referenced StudyInstanceUID from the RTSTRUCT file."
         raise RTSTRUCTAttributeError(errmsg) from e
 
 
 def extract_rtstruct_metadata(rtstruct: DicomInput) -> RTSTRUCTMetadata:
     """Extract metadata from the RTSTRUCT file."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
-    roi_names = extract_roi_names(dcm_rtstruct)
-
+    roi_metas: list[dict[str, str]] = extract_roi_meta(dcm_rtstruct)
+    rt_ref_series, rt_ref_study = rtstruct_reference_seriesuid(dcm_rtstruct)
     return RTSTRUCTMetadata(
         PatientID=dcm_rtstruct.PatientID,
         StudyInstanceUID=dcm_rtstruct.StudyInstanceUID,
         SeriesInstanceUID=dcm_rtstruct.SeriesInstanceUID,
         Modality=dcm_rtstruct.Modality,
-        ReferencedSeriesInstanceUID=rtstruct_reference_seriesuid(dcm_rtstruct),
-        OriginalROINames=roi_names,
-        OriginalNumberOfROIs=len(roi_names),
+        ReferencedStudyInstanceUID=rt_ref_study,
+        ReferencedSeriesInstanceUID=rt_ref_series,
+        OriginalROIMeta=[ROIMetadata(**roi_meta) for roi_meta in roi_metas],
+        OriginalNumberOfROIs=len(roi_metas),
     )
 
 
 if __name__ == "__main__":  # pragma: no cover
     import timeit
 
+    from rich import print  # noqa
     # Load an RTSTRUCT file and extract metadata
 
     # Benchmark the metadata extraction 100 times
+    rtstruct_path = Path(
+        "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/dicoms/RADCURE-0006/StudyUID-46105/RTSTRUCT_SeriesUID-32605/00000001.dcm"
+    )
+
     def benchmark() -> None:
-        rtstruct_path = Path(
-            "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/dicoms/RADCURE-0006/StudyUID-46105/RTSTRUCT_SeriesUID-32605/00000001.dcm"
-        )
         extract_rtstruct_metadata(rtstruct_path)
 
     # config
@@ -138,3 +159,7 @@ if __name__ == "__main__":  # pragma: no cover
     print(  # noqa
         f"Average time per {NUMBER} iterations: {sum(times) / len(times):.6f} seconds"
     )
+
+    result = extract_rtstruct_metadata(rtstruct_path)
+
+    print(result)  # noqa

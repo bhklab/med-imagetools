@@ -7,6 +7,37 @@ import numpy as np
 
 
 @dataclass
+class ROIMetadata:
+    """Dataclass for ROI metadata.
+
+    New keys can be added as needed.
+    """
+
+    ROIName: str
+    ROINumber: str
+    ROIGenerationAlgorithm: str
+
+    def keys(self) -> List[str]:
+        return [attr_field.name for attr_field in fields(self)]
+
+    def items(self) -> List[tuple[str, str | Sequence[str]]]:
+        return [
+            (attr_field.name, getattr(self, attr_field.name))
+            for attr_field in fields(self)
+        ]
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+    def __getitem__(self, key: str) -> str:
+        return getattr(self, key)
+
+    def __rich_repr__(self) -> Iterator[tuple[str, str]]:
+        for attr_field in fields(self):
+            yield attr_field.name, getattr(self, attr_field.name)
+
+
+@dataclass
 class RTSTRUCTMetadata:
     """Dataclass for RTSTRUCT metadata.
 
@@ -17,8 +48,9 @@ class RTSTRUCTMetadata:
     StudyInstanceUID: str
     SeriesInstanceUID: str
     Modality: str
+    ReferencedStudyInstanceUID: str
     ReferencedSeriesInstanceUID: str
-    OriginalROINames: Sequence[str]
+    OriginalROIMeta: List[ROIMetadata]
     OriginalNumberOfROIs: int
 
     def keys(self) -> List[str]:
@@ -35,6 +67,10 @@ class RTSTRUCTMetadata:
 
     def __getitem__(self, key: str) -> str:
         return getattr(self, key)
+
+    @property
+    def OriginalROINames(self) -> List[str]:  # noqa N802
+        return [roi.ROIName for roi in self.OriginalROIMeta]
 
     def __rich_repr__(self) -> Iterator[tuple[str, str | Sequence[str]]]:
         # for each key-value pair, 'yield key, value'
@@ -84,19 +120,20 @@ class ROI:
     """Represents a region of interest (ROI), containing slices of contours."""
 
     name: str
-    referenced_roi_number: int
+    ReferencedROINumber: int
+    contour_geometric_type: str
     num_points: int
     slices: List[ContourSlice]
 
     def __str__(self) -> str:
         return (
-            f"{self.name} (ROI#={self.referenced_roi_number}) "
+            f"{self.name} (ROI#={self.ReferencedROINumber}) "
             f"{self.NumSlices} slices & {self.NumberOfContourPoints} points"
         )
 
     def __repr__(self) -> str:
         return (
-            f"ROI<name={self.name}, ReferencedROINumber={self.referenced_roi_number}, "
+            f"ROI<name={self.name}, ReferencedROINumber={self.ReferencedROINumber}, "
             f"num_slices={self.NumSlices}, num_points={self.NumberOfContourPoints}>"
         )
 
@@ -107,16 +144,16 @@ class ROI:
         return iter(self.slices)
 
     @property
-    def ReferencedROINumber(self) -> int:  # noqa N802
-        return self.referenced_roi_number
-
-    @property
     def NumSlices(self) -> int:  # noqa N802
         return len(self.slices)
 
     @property
     def NumberOfContourPoints(self) -> int:  # noqa N802
         return self.num_points
+
+    @property
+    def ContourGeometricType(self) -> str:  # noqa N802
+        return self.contour_geometric_type
 
     def to_dict(self) -> dict:
         return asdict(self)

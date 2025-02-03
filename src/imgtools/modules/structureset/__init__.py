@@ -5,7 +5,7 @@ from .custom_types import (
 )
 from .helpers import (
     DicomInput,
-    extract_roi_names,
+    extract_roi_meta,
     extract_rtstruct_metadata,
     load_rtstruct_dcm,
     rtstruct_reference_seriesuid,
@@ -16,7 +16,7 @@ __all__ = [
     "ContourSlice",
     "RTSTRUCTMetadata",
     "DicomInput",
-    "extract_roi_names",
+    "extract_roi_meta",
     "extract_rtstruct_metadata",
     "load_rtstruct_dcm",
     "rtstruct_reference_seriesuid",
