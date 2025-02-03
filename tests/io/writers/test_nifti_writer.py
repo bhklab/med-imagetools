@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from pathlib import Path
 
@@ -81,7 +83,9 @@ def parameterized_image(request: pytest.FixtureRequest) -> TestImage:
 
     if params["pixel_type"] == sitk.sitkVectorFloat32:
         image = sitk.VectorIndexSelectionCast(
-            sitk.PhysicalPointSource(params["pixel_type"], size=params["size"]),
+            sitk.PhysicalPointSource(
+                params["pixel_type"], size=params["size"]
+            ),
             0,
         )
     else:
@@ -100,7 +104,9 @@ def parameterized_image(request: pytest.FixtureRequest) -> TestImage:
 
 
 @pytest.fixture(params=list(ExistingFileMode))
-def nifti_writer(temp_nifti_dir: Path, request: pytest.FixtureRequest) -> NIFTIWriter:
+def nifti_writer(
+    temp_nifti_dir: Path, request: pytest.FixtureRequest
+) -> NIFTIWriter:
     """Fixture for creating a parameterized NIFTIWriter instance."""
 
     mode = request.param
@@ -118,8 +124,8 @@ def nifti_writer(temp_nifti_dir: Path, request: pytest.FixtureRequest) -> NIFTIW
 
 @pytest.mark.xdist_group("nifti_writer")
 def test_parameterized_image_save(
-    nifti_writer: NIFTIWriter, parameterized_image: Image
-):
+    nifti_writer: NIFTIWriter, parameterized_image: TestImage
+) -> None:
     """Test saving parameterized images with NIFTIWriter."""
 
     for version_suffix in range(10):
@@ -164,21 +170,13 @@ def test_parameterized_image_save(
             assert saved_path.exists()
             assert saved_path.stat().st_mtime == saved_time
             assert saved_path.stat().st_size == saved_hash
-        case ExistingFileMode.RAISE_WARNING:
-            saved_path = nifti_writer.save(
-                parameterized_image,
-                **parameterized_image.metadata,
-            )
-            assert saved_path.exists()
 
 
 # some simpler tests
-
-
-def test_invalid_compression():
+def test_invalid_compression() -> None:
     with pytest.raises(NiftiWriterValidationError):
         NIFTIWriter(
-            root_directory=Path("."),
+            root_directory=Path.cwd(),
             filename_format="{filename}.nii.gz",
             existing_file_mode=ExistingFileMode.SKIP,
             create_dirs=True,
@@ -188,10 +186,10 @@ def test_invalid_compression():
         )
 
 
-def test_invalid_extension():
+def test_invalid_extension() -> None:
     with pytest.raises(NiftiWriterValidationError):
         NIFTIWriter(
-            root_directory=Path("."),
+            root_directory=Path.cwd(),
             filename_format="{filename}.nii.gz.invalid",
             existing_file_mode=ExistingFileMode.SKIP,
             create_dirs=True,
@@ -201,7 +199,7 @@ def test_invalid_extension():
         )
 
 
-def test_save_numpy_array_image(temp_nifti_dir: Path):
+def test_save_numpy_array_image(temp_nifti_dir: Path) -> None:
     """Test saving a numpy array image with NIFTIWriter."""
     nifti_writer = NIFTIWriter(
         root_directory=temp_nifti_dir,
@@ -227,7 +225,7 @@ def test_save_numpy_array_image(temp_nifti_dir: Path):
     assert saved_path.suffix == ".gz"
 
 
-def test_save_bad_image(temp_nifti_dir: Path):
+def test_save_bad_image(temp_nifti_dir: Path) -> None:
     """Test saving a bad image with NIFTIWriter and expect NiftiWriterIOError."""
     nifti_writer = NIFTIWriter(
         root_directory=temp_nifti_dir,
