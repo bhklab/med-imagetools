@@ -21,6 +21,13 @@ The `AbstractBaseWriter` is:
 - **Customizable**: Extend it to handle your file formats and workflows.  
 - **Safe and robust**: Features context management, filename sanitization, and optional CSV indexing.  
 
+!!! tip
+    the `AbstractBaseWriter` generates a 'date_time' key for use by all subclasses,
+    which can be included in the filename format or context.
+
+Example:
+filename_format="{date_time}_{subject_id}.txt"
+
 ### When Should you extend `AbstractBaseWriter` for your custom writer?
 
 If you write many files with dynamic paths and filenames, or need

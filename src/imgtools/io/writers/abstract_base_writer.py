@@ -70,6 +70,13 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
 
     This class provides a template for writing files with a flexible directory
     structure.
+
+    Automatically generates a 'date_time' key for use by all subclasses, which
+    can be included in the filename format or context.
+
+    Example:
+    --------
+    filename_format="{date_time}_{subject_id}.txt"
     """
 
     # Any subclass has to be initialized with a root directory and a filename format
@@ -525,8 +532,6 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         """
         now = datetime.now(timezone.utc)
         return {
-            "date": now.strftime("%Y-%m-%d"),
-            "time": now.strftime("%H%M%S"),
             "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
         }
 
