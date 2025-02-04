@@ -2,14 +2,27 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from itertools import chain
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, List, TypeAlias
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Iterator,
+    List,
+    Mapping,
+    Sequence,
+    TypeAlias,
+)
 
 import numpy as np
+import SimpleITK as sitk
 from pydicom.dataset import FileDataset
+from skimage.draw import polygon2mask
 
+from imgtools import physical_points_to_idxs
 from imgtools.exceptions import MissingROIError, ROIContourError
 from imgtools.logging import logger
+from imgtools.modules.segmentation import Segmentation
 from imgtools.modules.structureset import (
     ROI,
     ContourSlice,
@@ -24,7 +37,7 @@ if TYPE_CHECKING:
 
 # Define type aliases
 """Alias for a string or a list of strings used to represent selection patterns."""
-SelectionPattern: TypeAlias = str | list[str]
+SelectionPattern: TypeAlias = str | List[str] | List[List[str]]
 
 """Alias for ROI names, which can be:
 - SelectionPattern:
@@ -34,12 +47,35 @@ SelectionPattern: TypeAlias = str | list[str]
 - None, to represent the absence of any selection.
 """
 ROINamePatterns: TypeAlias = (
-    SelectionPattern | dict[str, SelectionPattern] | None
+    SelectionPattern | Mapping[str, SelectionPattern] | None
 )
 
 
 class ROIExtractionErrorMsg(str):
     pass
+
+
+class ContourPointsAcrossSlicesError(Exception):
+    """Exception raised when contour points span across multiple slices."""
+
+    def __init__(
+        self,
+        roi_name: str,
+        contour_num: int,
+        slice_points_shape: tuple,
+        z_values: list,
+    ) -> None:
+        self.roi_name = roi_name
+        self.contour_num = contour_num
+        self.slice_points_shape = slice_points_shape
+        self.z_values = z_values
+        super().__init__(self._generate_message())
+
+    def _generate_message(self) -> str:
+        return (
+            f"Contour points for ROI '{self.roi_name}' and contour {self.contour_num} "
+            f"(shape: {self.slice_points_shape}) span across multiple slices: {self.z_values}."
+        )
 
 
 @dataclass
@@ -181,14 +217,15 @@ class RTStructureSet:
         ]
         return matches if matches else None
 
-    def __getitem__(self, name: str) -> list[ROI] | str:
+    def __getitem__(self, name: str) -> ROI | list[ROI] | str:
         """Extend slice based access to the data in the RTStructureSet
 
         rtss = RTStructureSet.from_dicom(...)
 
         1. rtss['GTV']
             if key exists EXACTLY as 'GTV' in the self.rois dict, return the `ROI` instance
-            representing the contour points (returned as a LIST of only 1 element)
+            representing the contour points (sinlge ROI element)
+            (maybe we should be returning as a LIST of only 1 element?)
         2. rtss['gtv.*']
             when trying to index using a key that is a regex pattern,
             match the roi names to a pattern that starts with 'gtv' (case-insensitive),
@@ -203,7 +240,7 @@ class RTStructureSet:
         imgtools.modules.structureset.custom_types.ROI
         """
         if name in self.roi_map:
-            return [self.roi_map[name]]
+            return self.roi_map[name]
         # Check if name is a pattern and match against ROI names
         elif matched_rois := self.match_roi(name, ignore_case=True):
             return [self.roi_map[roi] for roi in matched_rois]
@@ -353,46 +390,255 @@ class RTStructureSet:
             slices=contour_points,
         )
 
-    def summary(self, exclude_errors: bool = False) -> dict:
-        """Return a dictionary of summary information for the RTStructureSet."""
+    def summary(self) -> dict:
+        """Return a comprehensive summary of the RTStructureSet."""
 
         roi_info = {}
-
         for name, roi in self.roi_map.items():
-            if exclude_errors and not isinstance(roi, ROI):
-                continue
-            roi_info[name] = str(roi)
+            roi_meta = [
+                metadict
+                for metadict in self.metadata.OriginalROIMeta
+                if metadict["ROIName"] == roi.name
+            ]
+            roi_info[name] = {
+                "ROINumber": roi.ReferencedROINumber,
+                "ROIGenerationAlgorithm": roi_meta[0][
+                    "ROIGenerationAlgorithm"
+                ],
+                "ContourGeometricType": roi.contour_geometric_type,
+                "NumPoints": roi.num_points,
+                "NumSlices": len(roi.slices),
+            }
+
+        roi_errors_info = {
+            name: str(error) for name, error in self.roi_map_errors.items()
+        }
+        # remove OriginalROIMeta from metadata
+        meta = self.metadata.to_dict()
+        meta.pop("OriginalROIMeta", None)
+        OriginalNumberOfROIs = meta.pop("OriginalNumberOfROIs", 0)  # noqa
 
         return {
+            "Metadata": meta,
+            "OriginalNumberOfROIs": OriginalNumberOfROIs,
             "SuccessfullyExtractedROIs": len(self.roi_names),
+            "FailedROIs": len(self.roi_map_errors),
             "ROIInfo": roi_info,
-            "Metadata": self.metadata.to_dict(),
+            "ROIErrors": roi_errors_info,
         }
 
-    def _handle_roi_names(self, roi_names: ROINamePatterns = None) -> None:
+    def _handle_roi_names(
+        self, roi_names: ROINamePatterns = None
+    ) -> List[str] | None | Mapping[str, List[str] | None]:
         """Handle the ROI names extracted from the RTSTRUCT file."""
+
+        def handle_str_list(
+            roi_patterns: SelectionPattern | List[SelectionPattern],
+        ) -> List[str] | None:
+            match roi_patterns:
+                case str() as pattern_str:
+                    return self.match_roi(pattern_str)
+                case [*roi_pattern_list] if all(
+                    isinstance(p, (str, list)) for p in roi_pattern_list
+                ):
+                    return list(
+                        chain.from_iterable(
+                            handle_str_list(p) or [] for p in roi_patterns
+                        )
+                    )
+                case _:
+                    logger.debug(f"Invalid pattern: {roi_patterns}")
+                    return None
+
         match roi_names:
             case None | []:
-                return None
-            case str() as single_pattern_str:  # roi_names is a single string
-                pass
-            case [*roi_patterns]:  # when roi_names is a non-empty list
-                pass
-            case dict() as roi_map:  # roi_names is a dictionary
+                # return all roi names
+                return self.roi_names
+            case str() as pattern:
+                return handle_str_list(pattern)
+            case [*roi_pattern_list]:
+                return list(
+                    chain.from_iterable(
+                        handle_str_list(p) for p in roi_pattern_list
+                    )
+                )
+            case dict() as roi_map:
+                # raise error if any value is None:
+                if None in roi_map.values():
+                    raise ValueError(
+                        "The 'roi_names' dictionary cannot have any value set to None."
+                    )
+                map_dict = {}
                 for name, pattern in roi_map.items():
-                    match pattern:
-                        case str() as pattern_str:
-                            # Handle when a dictionary value is a string
-                            pass
-                        case []:
-                            # Handle when a dictionary value is an empty list
-                            pass
-                        case [*patterns]:
-                            # Handle when a dictionary value is a non-empty list
-                            pass
-            case _:
-                # Handle unexpected cases or raise an error if needed
-                pass
+                    map_dict[str(name)] = handle_str_list(pattern)
+                return map_dict
+        return None
+
+    def _get_mask_ndarray(
+        self,
+        reference_image: sitk.Image,
+        ref_img_size: tuple[int, int, int],
+        roi_name: str,
+        roi_index: int,
+        mask_array: np.ndarray,
+        continuous: bool,
+    ) -> None:
+        try:
+            roi: ROI = self.roi_map[roi_name]
+        except KeyError as ke:
+            msg = f"ROI '{roi_name}' not found in the RTSTRUCT file."
+            raise MissingROIError(msg) from ke
+
+        logger.debug("Processing ROI.", roi_name=roi_name, roi_index=roi_index)
+
+        roi_slices_as_ndarrays: list[np.ndarray]
+        roi_slices_as_ndarrays = [np.asarray(slice_) for slice_ in roi.slices]
+
+        mask_points: list[np.ndarray]
+        mask_points = physical_points_to_idxs(
+            reference_image, roi_slices_as_ndarrays, continuous=continuous
+        )
+
+        for contour_num, contour in enumerate(mask_points, start=0):
+            # split the contour into z values and the points
+            uniq_z_vals = list(np.unique(contour[:, 0]))
+            slice_points = contour[:, 1:]
+
+            match uniq_z_vals:
+                # lets make sure that z is 1 unique value
+                case [z] if len(uniq_z_vals) == 1:
+                    z_idx = z
+                case [*z_values]:
+                    raise ContourPointsAcrossSlicesError(
+                        roi_name,
+                        contour_num,
+                        slice_points.shape,
+                        z_values,
+                    )
+                case _:
+                    errmsg = f"Something went wrong with the contour points {uniq_z_vals}."
+                    raise ValueError(errmsg)
+
+            logger.debug(
+                f"processing contour {contour_num} for ROI '{roi_name}'",
+                z_idx=z_idx,
+                slice_points=slice_points.shape,
+            )
+            filled_mask_array = polygon2mask(ref_img_size[1:], slice_points)
+
+            z_int = int(z_idx)
+
+            # make sure z_int is within the bounds of the mask array
+            assert 0 <= z_int < mask_array.shape[0]
+
+            assert (
+                0 <= roi_index < mask_array.shape[3]
+            )  # Ensure roi_index is within bounds
+
+            try:
+                mask_array[z_int, :, :, roi_index] += filled_mask_array
+            except IndexError as ie:
+                errmsg = f"Error adding mask for ROI '{roi_name}' and contour {contour_num}."
+                logger.exception(
+                    errmsg,
+                    mask_size=mask_array.shape,
+                    filled_mask_size=filled_mask_array.shape,
+                    z_idx=z_int,
+                    roi_index=roi_index,
+                )
+                raise IndexError(errmsg) from ie
+
+    def get_mask(
+        self,
+        reference_image: sitk.Image,
+        matched_roi_names: List[str] | Mapping[str, List[str]],
+        dtype: np.dtype | None = None,
+        continuous: bool = False,
+    ) -> Segmentation:
+        """Generate a binary mask of the specified ROIs.
+
+        Parameters
+        ----------
+        reference_image : sitk.Image
+            The reference image to create the mask from.
+        matched_roi_names : ROINamePatterns, optional
+            The ROI names to generate the mask for. Default is None.
+        dtype : np.dtype, optional
+            The data type of the mask image. Default will be np.uint8
+
+        Returns
+        -------
+        sitk.Image
+            The binary mask image.
+        """
+        if dtype is None:
+            dtype = np.dtype(np.uint8)
+        seg_roi_indices: dict[str, int] = {}
+        ref_img_size = reference_image.GetSize()[::-1]
+
+        mask_img_size = ref_img_size + (len(matched_roi_names),)
+
+        logger.debug(
+            "Creating mask array.",
+            masksize=mask_img_size,
+            refsize=ref_img_size,
+            roi_names=matched_roi_names,
+        )
+
+        mask_array = np.zeros(mask_img_size, dtype=dtype)
+
+        # i think this is supposed to represent the roi names that were successfully extracted
+        raw_roi_names: dict[str, List[str]] = {}
+        match matched_roi_names:
+            case [*roi_name_list]:
+                for idx, roi_name in enumerate(roi_name_list, start=0):
+                    self._get_mask_ndarray(
+                        reference_image,
+                        ref_img_size,
+                        roi_name,
+                        idx,
+                        mask_array,
+                        continuous=continuous,
+                    )
+                    seg_roi_indices[roi_name] = idx
+                    raw_roi_names[roi_name] = [roi_name]
+            case dict() as roi_map:
+                for idx, (roi_id, roi_name_list) in enumerate(
+                    roi_map.items(), start=0
+                ):
+                    raw_roi_names[roi_id] = roi_name_list
+                    for roi_name in roi_name_list:
+                        self._get_mask_ndarray(
+                            reference_image,
+                            ref_img_size,
+                            roi_name,
+                            idx,
+                            mask_array,
+                            continuous=continuous,
+                        )
+                        seg_roi_indices[roi_id] = idx
+
+        # create another array where all the values greater than 0 are set to 1
+        mask_array_ones = np.where(mask_array > 0, 1, 0)
+
+        mask_image = sitk.GetImageFromArray(mask_array_ones, isVector=True)
+        mask_image.CopyInformation(reference_image)
+
+        metadata_summary = self.summary()
+        metadata_summary["ROIErrors"] = {
+            name: str(error) for name, error in self.roi_map_errors.items()
+        }
+        metadata_summary["OriginalROINames"] = [
+            rm.ROIName for rm in self.metadata.OriginalROIMeta
+        ]
+
+        segmentation_object = Segmentation(
+            segmentation=mask_image,
+            roi_indices=seg_roi_indices,
+            raw_roi_names=raw_roi_names,  # type: ignore
+            metadata=metadata_summary,
+        )
+        return segmentation_object
 
 
 ##############################################
@@ -416,9 +662,11 @@ if __name__ == "__main__":
     import pandas as pd
     from rich import print  # noqa
 
+    from imgtools.io.loaders.old_loaders import read_dicom_series
     from imgtools.modules.structureset.structure_set import StructureSet
 
     index = Path(".imgtools/imgtools_data.csv")
+
     full_index = pd.read_csv(index, index_col=0)
 
     df = full_index[full_index["modality"] == "RTSTRUCT"]
@@ -430,12 +678,52 @@ if __name__ == "__main__":
 
     # store the metadata for each rtstruct in a dictionary
 
-    paths = df["file_path"].tolist()
-    logger.setLevel("WARNING")  # type: ignore
-    start_new = time.time()
+    # paths = df["file_path"].tolist()
+    # logger.setLevel("WARNING")  # type: ignore
+    # start_new = time.time()
 
-    rt = load_new_rtstruct(paths[20])
-    print(rt)
+    # rt = load_new_rtstruct(paths[20])
+    # print(rt)
+
+    # print(rt.summary())
+
+    ################################################################
+    #
+    edges = Path(".imgtools/imgtools_data_edges.csv")
+
+    edge_index = pd.read_csv(edges, index_col=0)
+
+    edge_df = edge_index[
+        (edge_index["modality_y"] == "RTSTRUCT")
+        & (edge_index["modality_x"] == "CT")
+    ]
+
+    rt_paths = edge_df["file_path_y"].tolist()
+    ct_paths = edge_df["folder_x"].tolist()
+
+    both_paths = list(zip(rt_paths, ct_paths, strict=True))
+
+    for rt_path, ct_path in both_paths:
+        old_rt = load_old_rtstruct(rt_path)
+        rt = load_new_rtstruct(rt_path)
+        ct_image = read_dicom_series(ct_path)
+        print(rt)
+
+        # rt_rois = ["Tumor_c90"]
+        rt_p: Dict[str, List[str]] = {
+            "Primary": ["Tumor_c90"],
+            "Extra": ["LN.*", "Carina.*", "Vertebra.*"],
+        }
+        rt_rois = rt._handle_roi_names(rt_p)
+
+        # make sure none of the values are None
+        if isinstance(rt_rois, dict):
+            assert all(rt_rois.values())
+            mask = rt.get_mask(ct_image, rt_rois)
+        elif isinstance(rt_rois, list):
+            mask = rt.get_mask(ct_image, rt_rois)
+        print(mask)
+        break
 
     # benchiter = 1
     # for _i in range(benchiter):
