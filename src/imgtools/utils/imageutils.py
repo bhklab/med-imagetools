@@ -23,7 +23,7 @@ def array_to_image(
         1.0,
     ),
     spacing: Array3D = (1.0, 1.0, 1.0),
-    reference_image: sitk.Image = None,
+    reference_image: sitk.Image | None = None,
 ) -> sitk.Image:
     """Convert a numpy array to a SimpleITK image with optional metadata.
 

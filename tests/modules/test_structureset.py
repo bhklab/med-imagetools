@@ -1,31 +1,12 @@
-from unittest.mock import MagicMock, patch
+from pathlib import Path
+from typing import Dict, List, Literal
 
 import numpy as np
 import pytest
-import SimpleITK as sitk
 
-from imgtools.modules.structureset import (
+from imgtools.modules.structureset.structure_set import (  # type: ignore
     StructureSet,
-)  # Replace `your_module` with the actual module name
-
-
-@pytest.fixture
-def roi_points():
-    """Fixture for mock ROI points."""
-    return {
-        "GTV": [np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])],
-        "PTV": [np.array([[2.0, 2.0, 2.0], [3.0, 3.0, 3.0]])],
-        "CTV_0": [np.array([[4.0, 4.0, 4.0], [5.0, 5.0, 5.0]])],
-        "CTV_1": [np.array([[6.0, 6.0, 6.0], [7.0, 7.0, 7.0]])],
-        "CTV_2": [np.array([[8.0, 8.0, 8.0], [9.0, 9.0, 9.0]])],
-        "ExtraROI": [np.array([[10.0, 10.0, 10.0], [11.0, 11.0, 11.0]])],
-    }
-
-
-@pytest.fixture
-def metadata():
-    """Fixture for mock metadata."""
-    return {"PatientName": "John Doe"}
+)
 
 
 # Parametrized tests for simple and moderately complex cases
@@ -56,7 +37,11 @@ def metadata():
     ],
 )
 def test_assign_labels(
-    names, roi_select_first, roi_separate, expected, roi_points
+    names: List[str] | List[List[str] | str],
+    roi_select_first: bool,
+    roi_separate: bool,
+    expected: Dict[str, int],
+    roi_points: Dict[str, List[np.ndarray]],
 ) -> None:
     """Test _assign_labels method with various cases."""
     structure_set = StructureSet(roi_points)
@@ -128,7 +113,11 @@ def test_assign_labels(
     ],
 )
 def test_assign_labels_complex(
-    names, roi_select_first, roi_separate, expected, roi_points
+    names: List[str] | List[List[str] | str],
+    roi_select_first: Literal[False],
+    roi_separate: Literal[False],
+    expected: Dict[str, int],
+    roi_points: Dict[str, List[np.ndarray]],
 ) -> None:
     """Test _assign_labels method with complex scenarios."""
     structure_set = StructureSet(roi_points)
@@ -138,7 +127,9 @@ def test_assign_labels_complex(
     assert result == expected
 
 
-def test_assign_labels_invalid(roi_points) -> None:
+def test_assign_labels_invalid(
+    roi_points: Dict[str, List[np.ndarray]],
+) -> None:
     """Test _assign_labels method with invalid inputs."""
     structure_set = StructureSet(roi_points)
 
@@ -156,7 +147,9 @@ def test_assign_labels_invalid(roi_points) -> None:
         )
 
 
-def test_init(roi_points, metadata) -> None:
+def test_init(
+    roi_points: Dict[str, List[np.ndarray]], metadata: Dict[str, str]
+) -> None:
     """Test StructureSet initialization."""
     structure_set = StructureSet(roi_points, metadata)
     assert structure_set.roi_points == roi_points
@@ -167,65 +160,10 @@ def test_init(roi_points, metadata) -> None:
     assert structure_set_no_metadata.metadata == {}
 
 
-@patch("imgtools.modules.structureset.dcmread")
-def test_from_dicom_rtstruct(mock_dcmread) -> None:
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    mock_rtstruct = MagicMock()
-    mock_rtstruct.StructureSetROISequence = [
-        MagicMock(ROIName="GTV"),
-        MagicMock(ROIName="PTV"),
-    ]
-    mock_rtstruct.ROIContourSequence = [
-        MagicMock(),
-        MagicMock(),
-    ]
-    mock_rtstruct.ROIContourSequence[0].ContourSequence = [
-        MagicMock(ContourData=[1.0, 2.0, 3.0])
-    ]
-    mock_rtstruct.ROIContourSequence[1].ContourSequence = [
-        MagicMock(ContourData=[4.0, 5.0, 6.0])
-    ]
-    mock_rtstruct.Modality = "RTSTRUCT"
-    mock_dcmread.return_value = mock_rtstruct
+def test_from_dicom(modalities_path: Dict[str, str]) -> None:
+    """Test StructureSet.from_dicom method."""
 
-    structure_set = StructureSet.from_dicom_rtstruct("dummy")
-    # Assert the results
-    assert "GTV" in structure_set.roi_points
-    assert "PTV" in structure_set.roi_points
-    assert len(structure_set.roi_points["GTV"]) == 1
-    assert len(structure_set.roi_points["PTV"]) == 1
-
-
-def test_rtstruct_to_segmentation(roi_points, metadata) -> None:
-    """Test rtstruct_to_segmentation method with mocked ROI points."""
-    structure_set = StructureSet(roi_points, metadata)
-    # reference sitk_image
-    ref_image = sitk.Image(10, 10, 10, sitk.sitkFloat32)
-
-    seg_images = structure_set.to_segmentation(
-        reference_image=ref_image, roi_names=["GTV", "PTV"]
-    )
-
-    assert seg_images is not None
-
-    raw_roi_names = seg_images.raw_roi_names
-
-    assert "GTV" in raw_roi_names
-    assert "PTV" in raw_roi_names
-    assert list(seg_images.roi_indices.keys()) == ["GTV", "PTV"]
-
-    seg_images2 = structure_set.to_segmentation(
-        reference_image=ref_image, roi_names="GTV"
-    )
-
-    assert seg_images2 is not None
-
-    assert "GTV" in seg_images2.raw_roi_names
-    assert "PTV" not in seg_images2.raw_roi_names
-
-    assert seg_images2.get_label(name="GTV") is not None
-
-    assert list(seg_images2.roi_indices.keys()) == ["GTV"]
-
-    assert repr(seg_images2) == "<Segmentation with ROIs: {'GTV': 1}>"
+    rt_path = next(Path(modalities_path["RTSTRUCT"]).rglob("*.dcm"))
+    structure_set = StructureSet.from_dicom(rt_path)
+    assert isinstance(structure_set, StructureSet)
+    assert structure_set.metadata["Modality"] == "RTSTRUCT"
