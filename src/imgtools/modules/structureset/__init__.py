@@ -3,12 +3,12 @@ from .custom_types import (
     ContourSlice,
     RTSTRUCTMetadata,
 )
-from .helpers import (
+from .utils import (
     DicomInput,
     extract_roi_meta,
     extract_rtstruct_metadata,
     load_rtstruct_dcm,
-    rtstruct_reference_seriesuid,
+    rtstruct_reference_uids,
 )
 
 __all__ = [
@@ -19,5 +19,5 @@ __all__ = [
     "extract_roi_meta",
     "extract_rtstruct_metadata",
     "load_rtstruct_dcm",
-    "rtstruct_reference_seriesuid",
+    "rtstruct_reference_uids",
 ]

@@ -28,7 +28,7 @@ def load_rtstruct_dcm(
 
     Parameters
     ----------
-    rtstruct_input : str | Path | bytes
+    rtstruct_input : pydicom.FileDataset | str | Path | bytes
         Path to the RTSTRUCT file or its content as bytes.
     force: bool (default = True)
         ignore dicoms that are missing their *File Meta Information* header.
@@ -76,7 +76,6 @@ def load_rtstruct_dcm(
     return dicom
 
 
-# Example usage of the decorator with refactored functions
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
     """Extract ROI names from a FileDataset."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
@@ -97,7 +96,19 @@ def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
     return roi_metas
 
 
-def rtstruct_reference_seriesuid(rtstruct: DicomInput) -> tuple[str, str]:
+def extract_roi_names(rtstruct: DicomInput) -> list[str]:
+    """Extract ROI names from a FileDataset."""
+    dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
+    try:
+        roi_sequence = dcm_rtstruct.StructureSetROISequence
+    except AttributeError as e:
+        errmsg = "Failed to extract ROISequence from the RTSTRUCT file."
+        raise RTSTRUCTAttributeError(errmsg) from e
+    roi_names = [roi.ROIName for roi in roi_sequence]
+    return roi_names
+
+
+def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
     """Return the Referenced SeriesInstanceUID and Referenced StudyInstanceUID from an RTSTRUCT."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
@@ -122,7 +133,7 @@ def extract_rtstruct_metadata(rtstruct: DicomInput) -> RTSTRUCTMetadata:
     """Extract metadata from the RTSTRUCT file."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     roi_metas: list[dict[str, str]] = extract_roi_meta(dcm_rtstruct)
-    rt_ref_series, rt_ref_study = rtstruct_reference_seriesuid(dcm_rtstruct)
+    rt_ref_series, rt_ref_study = rtstruct_reference_uids(dcm_rtstruct)
     return RTSTRUCTMetadata(
         PatientID=dcm_rtstruct.PatientID,
         StudyInstanceUID=dcm_rtstruct.StudyInstanceUID,
