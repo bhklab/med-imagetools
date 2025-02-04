@@ -594,7 +594,7 @@ class StructureSet:
         seg_roi_indices = {}
         if not roi_names:
             for name, label in labels.items():
-                self.get_mask(reference_image, mask, name, label, continuous)
+                self.get_mask(reference_image=reference_image, mask=mask, label=name, idx=label, continuous=continuous)
             seg_roi_indices = {
                 "_".join(k): v
                 for v, k in groupby(labels, key=lambda x: labels[x])
@@ -602,11 +602,11 @@ class StructureSet:
         elif isinstance(roi_names, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
-                    self.get_mask(reference_image, mask, label, i, continuous)
+                    self.get_mask(reference_image=reference_image, mask=mask, label=label, idx=i, continuous=continuous)
                 seg_roi_indices[name] = i
         elif isinstance(roi_names, list):
             for i, name in enumerate(labels):
-                self.get_mask(reference_image, mask, name, i, continuous)
+                self.get_mask(reference_image=reference_image, mask=mask, label=name, idx=i, continuous=continuous)
                 seg_roi_indices[name] = i
 
         mask[mask > 1] = 1
