@@ -166,21 +166,21 @@ class SliceImage3D:
         metadata={"choices": ["linear", "nearest", "bspline"]},
     )
     alpha: float = 0.4
-
-    slices: ImageSlices = field(init=False)
     cropped_size: Size3D = field(default_factory=lambda: Size3D(512, 512, 0))
 
+    slices: ImageSlices = field(init=False)
     image_array: np.ndarray = field(init=False)
     mask_array: np.ndarray | None = field(init=False)
 
     def __post_init__(self) -> None:
+        logger.info("Original image shape: " + str(self.image.GetSize()))
         resizer = Resize(
             size=list(self.cropped_size),
             interpolation=self.resizer_interpolation,
             anti_alias=True,
             anti_alias_sigma=2.0,  # Higher value to better prevent artifacts
         )
-        logger.debug(f"Resizing image to {self.cropped_size}")
+        logger.info(f"Resizing image to {self.cropped_size}")
         self.image = resizer(self.image)
         self.image_array, *_image = image_to_array(self.image)
 
@@ -190,6 +190,10 @@ class SliceImage3D:
             self.mask_array, *_ = image_to_array(self.mask)
         else:
             self.mask_array = None
+
+        logger.info(f"Image shape: {self.image_array.shape}")
+        if self.mask_array is not None:
+            logger.info(f"Mask shape: {self.mask_array.shape}")
 
     def image_slices(self, dim: int, every_n: int = 5) -> list[np.ndarray]:
         return [
@@ -230,7 +234,7 @@ class SliceImage3D:
 
         if mask_slices is None:
             mask_slices = [np.zeros_like(slices[0])] * len(slices)
-
+        logger.warning("Generating slices...")
         tasks = [
             (
                 i,
@@ -272,7 +276,9 @@ class SliceImage3D:
         max_slider = len(self.slices) - 1
         widgets.interact(
             display_slice,
-            index=widgets.IntSlider(min=0, max=max_slider, step=1, value=0),
+            index=widgets.IntSlider(
+                min=0, max=max_slider, step=1, value=max_slider // 2
+            ),
         )
 
 
@@ -281,6 +287,8 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print, progress  # type: ignore # noqa
     from imgtools.coretypes.box import RegionBox
     from pathlib import Path
+
+    logger.setLevel("DEBUG")  # type: ignore
 
     # ct_path =    "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/CT_70181_original.nii.gz"
     # seg_path =     "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-3_RADCURE-4106/RTSTRUCT_54305_GTV.nii.gz"
@@ -293,6 +301,7 @@ if __name__ == "__main__":  # pragma: no cover
 
     setting = 2
     dim = 0
+    every = 5
 
     # Load example images
     ct_image = sitk.ReadImage(ct_path)
@@ -308,15 +317,20 @@ if __name__ == "__main__":  # pragma: no cover
             cropped_image = ct_image
             cropped_mask = seg_image
 
-    new_size = 512 * 2
+    new_size = 512
+    if dim == 0:
+        sz = Size3D(new_size, new_size, 0)
+    elif dim == 1:
+        sz = Size3D(new_size, 0, new_size)
+
+    sz = Size3D(new_size, new_size, new_size)
 
     slices = SliceImage3D(
-        cropped_image,
+        image=cropped_image,
         mask=cropped_mask,
-        cropped_size=Size3D(new_size, new_size, 0),
+        cropped_size=sz,
     )
 
-    # %%
-    slices.generate_dim_slices(dim, every_n=1).view()
+    slices.generate_dim_slices(dim, every_n=every).view()
 
 # %%
