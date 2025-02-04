@@ -2,6 +2,10 @@ from typing import Dict
 
 import numpy as np
 
+"""
+This will be deprecated until we have a defined use-case.
+"""
+
 
 class SparseMask:
     def __init__(
