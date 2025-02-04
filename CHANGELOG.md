@@ -1,6 +1,38 @@
 # CHANGELOG
 
 
+## v1.19.0 (2025-02-04)
+
+### Documentation
+
+- Example usage for functional.py ([#190](https://github.com/bhklab/med-imagetools/pull/190),
+  [`c2befdc`](https://github.com/bhklab/med-imagetools/commit/c2befdcbdd49e8683243c3827c50032fcf4a2db6))
+
+- **Chores** - Adjusted internal error handling settings for improved type checking.
+
+- **Documentation** - Enhanced usage guides by adding examples to image processing functions to
+  assist with proper implementation.
+
+- **Refactor** - Streamlined parameter annotations and updated return formats across image
+  transformation operations for better clarity and consistency.
+
+### Features
+
+- Add custom exceptions and utility functions for RTSTRUCT DICOM handling
+  ([#211](https://github.com/bhklab/med-imagetools/pull/211),
+  [`0739747`](https://github.com/bhklab/med-imagetools/commit/0739747475b6a59d2c8b49b538abc67c9ade0368))
+
+Introduce custom exceptions and utility functions to improve error handling and data extraction for
+  RTSTRUCT DICOM files.
+
+- **New Features** - Introduced enhanced capabilities for processing RTSTRUCT DICOM files, including
+  streamlined load operations and extraction of region-of-interest metadata and identifiers. - Added
+  robust error handling that clearly notifies users of issues during file processing, improving
+  diagnostic feedback. - Expanded the publicly accessible tools to simplify interactions with
+  structure set data, enabling more efficient DICOM workflow management. - New exception classes for
+  better error categorization related to DICOM processing.
+
+
 ## v1.18.0 (2025-01-31)
 
 ### Documentation
