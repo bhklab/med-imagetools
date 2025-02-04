@@ -1,4 +1,7 @@
-from .examples import data_paths as example_data
+from .examples import (
+    data_images as example_data,
+    data_paths as example_data_paths,
+)
 from .github_helper import (
     GitHubRelease,
     GitHubReleaseAsset,
@@ -10,4 +13,5 @@ __all__ = [
     "GitHubReleaseAsset",
     "MedImageTestData",
     "example_data",
+    "example_data_paths",
 ]
