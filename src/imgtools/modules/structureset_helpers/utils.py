@@ -73,7 +73,7 @@ def load_rtstruct_dcm(
 
 
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
-    """Extract ROI names from a FileDataset."""
+    """Extract ROI metadata from an RTSTRUCT FileDataset."""
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
         roi_sequence = dcm_rtstruct.StructureSetROISequence
