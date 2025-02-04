@@ -20,29 +20,31 @@ def load_rtstruct_dcm(
     force: bool = True,
     stop_before_pixels: bool = True,
 ) -> FileDataset:
-    """Load an RTSTRUCT DICOM file or bytes data and return the FileDataset object.
+    """Load an RTSTRUCT DICOM file and return the parsed FileDataset object.
 
     Parameters
     ----------
-    rtstruct_input : pydicom.FileDataset | str | Path | bytes
-        Path to the RTSTRUCT file or its content as bytes.
-    force: bool (default = True)
-        ignore dicoms that are missing their *File Meta Information* header.
-    stop_before_pixels : bool
-        If True, stop reading the DICOM file before the pixel data, by default True
+    rtstruct_input : FileDataset | str | Path | bytes
+        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
+    force : bool, optional
+        Whether to allow reading DICOM files missing the *File Meta Information*
+        header, by default True.
+    stop_before_pixels : bool, optional
+        Whether to stop reading the DICOM file before loading pixel data, by default True.
 
     Returns
     -------
     FileDataset
-        Parsed RTSTRUCT DICOM object.
+        Parsed RTSTRUCT DICOM dataset.
 
     Raises
     ------
     InvalidDicomError
-        If the input type is unsupported or the file is not an RTSTRUCT.
+        If the input is of an unsupported type or cannot be read as a DICOM file.
     NotRTSTRUCTError
-        if the Modality field in the dicom is not `RTSTRUCT`
+        If the input file is not an RTSTRUCT (i.e., `Modality` field is not "RTSTRUCT").
     """
+
     match rtstruct_input:
         case FileDataset():
             dicom = rtstruct_input
@@ -73,7 +75,29 @@ def load_rtstruct_dcm(
 
 
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
-    """Extract ROI metadata from an RTSTRUCT FileDataset."""
+    """Extract ROI metadata from an RTSTRUCT DICOM file.
+
+    Iterate over the `StructureSetROISequence` in the RTSTRUCT file and extract:
+        - "ROINumber": Unique identifier for the ROI.
+        - "ROIName": Name of the ROI.
+        - "ROIGenerationAlgorithm": Algorithm used to generate the ROI.
+
+    Parameters
+    ----------
+    rtstruct : FileDataset | str | Path | bytes
+        Input RTSTRUCT DICOM dataset or file path.
+
+    Returns
+    -------
+    list of dict[str, str]
+        A list of dictionaries, each containing metadata for an ROI.
+
+    Raises
+    ------
+    RTSTRUCTAttributeError
+        If the RTSTRUCT file does not contain the required `StructureSetROISequence`.
+    """
+
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
         roi_sequence = dcm_rtstruct.StructureSetROISequence
@@ -93,7 +117,23 @@ def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
 
 
 def extract_roi_names(rtstruct: DicomInput) -> list[str]:
-    """Extract ROI names from a FileDataset."""
+    """Extract a list of ROI names from an RTSTRUCT DICOM file.
+
+    Parameters
+    ----------
+    rtstruct : FileDataset | str | Path | bytes
+        Input RTSTRUCT DICOM dataset or file path.
+
+    Returns
+    -------
+    list of str
+        A list of ROI names extracted from the RTSTRUCT file.
+
+    Raises
+    ------
+    RTSTRUCTAttributeError
+        If the RTSTRUCT file does not contain the required `StructureSetROISequence`.
+    """
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
         roi_sequence = dcm_rtstruct.StructureSetROISequence
@@ -105,7 +145,24 @@ def extract_roi_names(rtstruct: DicomInput) -> list[str]:
 
 
 def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
-    """Return the Referenced SeriesInstanceUID and Referenced StudyInstanceUID from an RTSTRUCT."""
+    """Retrieve the referenced SeriesInstanceUID and StudyInstanceUID from an RTSTRUCT.
+
+    Parameters
+    ----------
+    rtstruct : FileDataset | str | Path | bytes
+        Input RTSTRUCT DICOM dataset or file path.
+
+    Returns
+    -------
+    tuple[str, str]
+        - Referenced `SeriesInstanceUID` (str).
+        - Referenced `StudyInstanceUID` (str).
+
+    Raises
+    ------
+    RTSTRUCTAttributeError
+        If the RTSTRUCT file does not contain the required reference fields.
+    """
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
         referenced_series_instance_uid = str(
