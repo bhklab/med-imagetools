@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, fields
-from typing import Iterator, List, Sequence
+from typing import Any, Iterator, List, Sequence
 
 import numpy as np
 
@@ -97,6 +97,23 @@ class ContourSlice(np.ndarray):
     """Represents the contour points for a single slice.
     Simply a NumPy array with shape (n_points, 3) where the last dimension
     represents the x, y, and z coordinates of each point.
+
+    Examples
+    --------
+    So if the slice has points representing a square in the x-y plane, the
+    array would look like this:
+
+    ```python
+    >>> ContourSlice(
+            [
+                [0, 0, 0],
+                [1, 0, 0],
+                [1, 1, 0],
+                [0, 1, 0],
+                [0, 0, 0],
+            ]
+        )
+    ```
     """
 
     def __new__(cls, input_array: np.ndarray) -> ContourSlice:
@@ -109,6 +126,37 @@ class ContourSlice(np.ndarray):
         assert self.ndim == 2
         assert self.shape[1] == 3
 
+    def __array_wrap__(
+        self,
+        out_arr: np.ndarray,
+        context: tuple[np.ufunc, tuple[Any, ...], int] | None = None,  # noqa
+        subok: bool = True,
+    ) -> np.ndarray | ContourSlice:
+        """Ensure output retains ContourSlice type if shape is valid.
+
+        When performing operations on a ContourSlice, the output shape could be
+        altered. This method ensures that the output retains the ContourSlice type
+        if the shape is still valid.
+
+        Examples
+        --------
+        ```python
+        >>> contour = ContourSlice([[0, 0, 0], [1, 1, 1]])
+        >>> contour + 1
+        ContourSlice<points.shape=(2, 3)>
+        ```
+
+        ```python
+        >>> contour = ContourSlice([[0, 0, 0], [1, 1, 1]])
+        >>> contour.mean(axis=0)
+        array([0.5, 0.5, 0.5])
+        ```
+        """
+        if out_arr.ndim == 2 and out_arr.shape[1] == 3:
+            return out_arr.view(ContourSlice)  # Preserve type
+        # Return as NumPy array if shape changes # Return as a NumPy array if shape is altered
+        return out_arr
+
     def __repr__(self) -> str:
         return f"ContourSlice<points.shape={self.shape}>"
 
@@ -119,9 +167,9 @@ class ROI:
 
     name: str
     ReferencedROINumber: int
-    contour_geometric_type: str
     num_points: int
     slices: List[ContourSlice]
+    contour_geometric_type: str | None = None
 
     def __str__(self) -> str:
         return (
@@ -150,7 +198,7 @@ class ROI:
         return self.num_points
 
     @property
-    def ContourGeometricType(self) -> str:  # noqa N802
+    def ContourGeometricType(self) -> str | None:  # noqa N802
         return self.contour_geometric_type
 
     def to_dict(self) -> dict:

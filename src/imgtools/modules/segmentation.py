@@ -63,7 +63,16 @@ Examples
 from __future__ import annotations
 
 from functools import wraps
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import SimpleITK as sitk
@@ -72,6 +81,9 @@ from imgtools.logging import logger
 from imgtools.utils import array_to_image, image_to_array
 
 from .sparsemask import SparseMask
+
+if TYPE_CHECKING:
+    import rich.repr
 
 
 def accepts_segmentations(f: Callable) -> Callable:
@@ -344,7 +356,9 @@ class Segmentation(sitk.Image):
             # Background is stored implicitly and needs to be computed
             label_arr = sitk.GetArrayViewFromImage(self)
             # Create a binary image where background is 1 and other regions are 0
-            label_img = sitk.GetImageFromArray((label_arr.sum(-1) == 0).astype(np.uint8))
+            label_img = sitk.GetImageFromArray(
+                (label_arr.sum(-1) == 0).astype(np.uint8)
+            )
             # TODO:: copy over metadata!
         else:
             # Retrieve the label image for the given label index
@@ -385,8 +399,20 @@ class Segmentation(sitk.Image):
 
         return res
 
-    def __repr__(self) -> str:
-        return f"<Segmentation with ROIs: {self.roi_indices!r}>"
+    def __rich_repr__(self) -> rich.repr.Result:
+        yield "roi_indices", self.roi_indices
+        yield "raw_roi_names", self.raw_roi_names
+        yield "metadata", self.metadata, None
+
+    def __repr__(self) -> str:  # type: ignore
+        main_str = f"<Segmentation with ROIs: {self.roi_indices!r}>"
+        if self.metadata:
+            meta_str = "\n".join(
+                [f"{k}: {v}" for k, v in self.metadata.items()]
+            )
+            main_str += f" with metadata:\n {meta_str}"
+        return main_str
+        # return f"<Segmentation with ROIs: {self.roi_indices!r}>"
 
     def generate_sparse_mask(self, verbose: bool = False) -> SparseMask:
         """
