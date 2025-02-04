@@ -1,21 +1,6 @@
 # CHANGELOG
 
 
-## v1.20.0 (2025-02-06)
-
-### Features
-
-- Add examples module for image dataset tools
-  ([#212](https://github.com/bhklab/med-imagetools/pull/212),
-  [`a882574`](https://github.com/bhklab/med-imagetools/commit/a8825741006650fae3f36fd5bbe270768b87965a))
-
-- **New Features** - Introduced new functions for streamlined access to example dataset resources,
-  mapping key identifiers to their corresponding file paths and images. - Added a dynamic capability
-  to conditionally include functionalities based on the availability of test data. - **Bug Fixes**
-  	- Enhanced error handling for missing dataset files. - **Tests** - Added a new test function to
-  verify the integrity and presence of example dataset images.
-
-
 ## v1.19.0 (2025-02-04)
 
 ### Documentation
