@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Literal
 
 import numpy as np
 import pytest
@@ -7,25 +7,6 @@ import pytest
 from imgtools.modules.structureset.structure_set import (  # type: ignore
     StructureSet,
 )
-
-
-@pytest.fixture
-def roi_points() -> Dict[str, List[np.ndarray]]:
-    """Fixture for mock ROI points."""
-    return {
-        "GTV": [np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])],
-        "PTV": [np.array([[2.0, 2.0, 2.0], [3.0, 3.0, 3.0]])],
-        "CTV_0": [np.array([[4.0, 4.0, 4.0], [5.0, 5.0, 5.0]])],
-        "CTV_1": [np.array([[6.0, 6.0, 6.0], [7.0, 7.0, 7.0]])],
-        "CTV_2": [np.array([[8.0, 8.0, 8.0], [9.0, 9.0, 9.0]])],
-        "ExtraROI": [np.array([[10.0, 10.0, 10.0], [11.0, 11.0, 11.0]])],
-    }
-
-
-@pytest.fixture
-def metadata() -> Dict[str, str]:
-    """Fixture for mock metadata."""
-    return {"PatientName": "John Doe"}
 
 
 # Parametrized tests for simple and moderately complex cases
@@ -60,7 +41,7 @@ def test_assign_labels(
     roi_select_first: bool,
     roi_separate: bool,
     expected: Dict[str, int],
-    roi_points,
+    roi_points: Dict[str, List[np.ndarray]],
 ) -> None:
     """Test _assign_labels method with various cases."""
     structure_set = StructureSet(roi_points)
@@ -132,7 +113,11 @@ def test_assign_labels(
     ],
 )
 def test_assign_labels_complex(
-    names, roi_select_first, roi_separate, expected, roi_points
+    names: List[str] | List[List[str] | str],
+    roi_select_first: Literal[False],
+    roi_separate: Literal[False],
+    expected: Dict[str, int],
+    roi_points: Dict[str, List[np.ndarray]],
 ) -> None:
     """Test _assign_labels method with complex scenarios."""
     structure_set = StructureSet(roi_points)
