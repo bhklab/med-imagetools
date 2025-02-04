@@ -1,4 +1,4 @@
-__version__ = "1.18.0"
+__version__ = "1.19.0"
 
 from .coretypes import Coordinate3D, Size3D, Spacing3D, Vector3D
 from .dicom import find_dicoms, lookup_tag, similar_tags, tag_exists
