@@ -174,7 +174,6 @@ def read_tags(
         raise ValueError(errmsg) from ve
 
     result = {}
-    # is_rtstruct = dicom.get('Modality') == 'RTSTRUCT' if 'InstanceNumber' in tags else False
 
     for tag in tags:
         value = str(dicom.get(tag, default=default))

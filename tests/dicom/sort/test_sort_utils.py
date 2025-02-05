@@ -9,7 +9,6 @@ from pydicom.errors import InvalidDicomError
 from pydicom.uid import UID, ExplicitVRLittleEndian
 
 from imgtools.dicom.sort.utils import read_tags, truncate_uid
-from imgtools.utils.sanitize_file_name import sanitize_file_name
 
 
 @pytest.fixture(scope="module")
@@ -88,32 +87,22 @@ class TestReadTags:
             "ManufacturerModelName",
         ]
         result = read_tags(file=dicom_test_file, tags=tags, truncate=True)
-        assert result["PatientName"] == sanitize_file_name("Test^Firstname")
-        assert result["PatientID"] == sanitize_file_name("123456")
-        assert result["ContentDate"] == sanitize_file_name("20021114")
-        assert result["ContentTime"] == sanitize_file_name("111131")
-        assert result["SpecificCharacterSet"] == sanitize_file_name(
-            "ISO_IR 100"
-        )
-        assert result["StudyDate"] == sanitize_file_name("20021114")
-        assert result["SeriesDate"] == sanitize_file_name("20021114")
-        assert result["AcquisitionDate"] == sanitize_file_name("20021114")
-        assert result["StudyTime"] == sanitize_file_name("105444")
-        assert result["SeriesTime"] == sanitize_file_name("110039")
-        assert result["AcquisitionTime"] == sanitize_file_name("110234.982284")
-        assert result["Modality"] == sanitize_file_name("CT")
-        assert result["Manufacturer"] == sanitize_file_name(
-            "GE MEDICAL SYSTEMS"
-        )
-        assert result["StudyDescription"] == sanitize_file_name(
-            "CT ABD & PELVIS W/O &"
-        )
-        assert result["SeriesDescription"] == sanitize_file_name(
-            "2.5SOFT + 30%ASIR"
-        )
-        assert result["ManufacturerModelName"] == sanitize_file_name(
-            "LightSpeed VCT"
-        )
+        assert result["PatientName"] == str("Test^Firstname")
+        assert result["PatientID"] == str("123456")
+        assert result["ContentDate"] == str("20021114")
+        assert result["ContentTime"] == str("111131")
+        assert result["SpecificCharacterSet"] == str("ISO_IR 100")
+        assert result["StudyDate"] == str("20021114")
+        assert result["SeriesDate"] == str("20021114")
+        assert result["AcquisitionDate"] == str("20021114")
+        assert result["StudyTime"] == str("105444")
+        assert result["SeriesTime"] == str("110039")
+        assert result["AcquisitionTime"] == str("110234.982284")
+        assert result["Modality"] == str("CT")
+        assert result["Manufacturer"] == str("GE MEDICAL SYSTEMS")
+        assert result["StudyDescription"] == str("CT ABD & PELVIS W/O &")
+        assert result["SeriesDescription"] == str("2.5SOFT + 30%ASIR")
+        assert result["ManufacturerModelName"] == str("LightSpeed VCT")
 
     def test_read_tags_with_empty_tags(self, dicom_test_file: Path) -> None:
         tags: list[str] = []
