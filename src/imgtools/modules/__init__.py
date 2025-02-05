@@ -2,7 +2,7 @@ from .datagraph import DataGraph
 from .dose import Dose
 from .pet import PET
 from .scan import Scan
-from .segmentation.segmentation import Segmentation, accepts_segmentations, map_over_labels
+from .segmentation import Segmentation, accepts_segmentations, map_over_labels
 from .sparsemask import SparseMask
 from .structureset import StructureSet
 from .structureset_helpers import (
