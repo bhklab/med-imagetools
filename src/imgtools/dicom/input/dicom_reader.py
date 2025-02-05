@@ -43,6 +43,16 @@ def load_dicom(
 ) -> FileDataset:
     """Load a DICOM file and return the parsed FileDataset object.
 
+    This function supports various input types including file paths, byte streams,
+    and file-like objects. It uses the `pydicom.dcmread` function to read the DICOM file.
+
+    Notes
+    -----
+    - If `dicom_input` is already a `FileDataset`, it is returned as is.
+    - If `dicom_input` is a file path or file-like object, it is read using `pydicom.dcmread`.
+    - If `dicom_input` is a byte stream, it is wrapped in a `BytesIO` object and then read.
+    - An `InvalidDicomError` is raised if the input type is unsupported.
+
     Parameters
     ----------
     dicom_input : FileDataset | str | Path | bytes | BinaryIO
