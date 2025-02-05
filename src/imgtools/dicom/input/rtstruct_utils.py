@@ -10,7 +10,7 @@ from .dicom_reader import (
 )
 
 if TYPE_CHECKING:
-    from pydicom.dataset import FileDatasetww
+    from pydicom.dataset import FileDataset
 
 
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
