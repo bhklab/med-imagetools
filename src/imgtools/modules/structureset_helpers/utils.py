@@ -1,108 +1,15 @@
-from io import BytesIO
-from pathlib import Path
-from typing import TypeAlias
+from typing import TYPE_CHECKING
 
-from pydicom import dcmread
-from pydicom.dataset import FileDataset
-
+from imgtools.dicom import (
+    DicomInput,
+    load_rtstruct_dcm,
+)
 from imgtools.exceptions import (
-    InvalidDicomError,
-    NotRTSTRUCTError,
     RTSTRUCTAttributeError,
 )
 
-# Define a type alias for DICOM input types
-DicomInput: TypeAlias = FileDataset | str | Path | bytes
-
-
-def load_dicom(
-    dicom_input: DicomInput,
-    force: bool = True,
-    stop_before_pixels: bool = True,
-) -> FileDataset:
-    """Load a DICOM file and return the parsed FileDataset object.
-
-    Parameters
-    ----------
-    dicom_input : FileDataset | str | Path | bytes
-        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
-    force : bool, optional
-        Whether to allow reading DICOM files missing the *File Meta Information*
-        header, by default True.
-    stop_before_pixels : bool, optional
-        Whether to stop reading the DICOM file before loading pixel data, by default True.
-
-    Returns
-    -------
-    FileDataset
-        Parsed DICOM dataset.
-
-    Raises
-    ------
-    InvalidDicomError
-        If the input is of an unsupported type or cannot be read as a DICOM file.
-    """
-
-    match dicom_input:
-        case FileDataset():
-            return dicom_input
-        case str() | Path():
-            return dcmread(
-                dicom_input,
-                force=force,
-                stop_before_pixels=stop_before_pixels,
-            )
-        case bytes():
-            return dcmread(
-                BytesIO(dicom_input),
-                force=force,
-                stop_before_pixels=stop_before_pixels,
-            )
-        case _:
-            msg = (
-                f"Invalid input type for 'dicom_input': {type(dicom_input)}. "
-                "Must be a str, Path, or bytes object."
-            )
-            raise InvalidDicomError(msg)
-
-
-def load_rtstruct_dcm(
-    rtstruct_input: DicomInput,
-    force: bool = True,
-    stop_before_pixels: bool = True,
-) -> FileDataset:
-    """Load an RTSTRUCT DICOM file and return the parsed FileDataset object.
-
-    Parameters
-    ----------
-    rtstruct_input : FileDataset | str | Path | bytes
-        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
-    force : bool, optional
-        Whether to allow reading DICOM files missing the *File Meta Information*
-        header, by default True.
-    stop_before_pixels : bool, optional
-        Whether to stop reading the DICOM file before loading pixel data, by default True.
-
-    Returns
-    -------
-    FileDataset
-        Parsed RTSTRUCT DICOM dataset.
-
-    Raises
-    ------
-    InvalidDicomError
-        If the input is of an unsupported type or cannot be read as a DICOM file.
-    NotRTSTRUCTError
-        If the input file is not an RTSTRUCT (i.e., `Modality` field is not "RTSTRUCT").
-    """
-
-    dicom = load_dicom(rtstruct_input, force, stop_before_pixels)
-
-    if dicom.Modality != "RTSTRUCT":
-        msg = f"The provided DICOM is not an RTSTRUCT file. Found Modality: {dicom.Modality}"
-        raise NotRTSTRUCTError(msg)
-
-    return dicom
+if TYPE_CHECKING:
+    from pydicom.dataset import FileDataset
 
 
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
