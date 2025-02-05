@@ -15,6 +15,57 @@ from imgtools.exceptions import (
 DicomInput: TypeAlias = FileDataset | str | Path | bytes
 
 
+def load_dicom(
+    dicom_input: DicomInput,
+    force: bool = True,
+    stop_before_pixels: bool = True,
+) -> FileDataset:
+    """Load a DICOM file and return the parsed FileDataset object.
+
+    Parameters
+    ----------
+    dicom_input : FileDataset | str | Path | bytes
+        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
+    force : bool, optional
+        Whether to allow reading DICOM files missing the *File Meta Information*
+        header, by default True.
+    stop_before_pixels : bool, optional
+        Whether to stop reading the DICOM file before loading pixel data, by default True.
+
+    Returns
+    -------
+    FileDataset
+        Parsed DICOM dataset.
+
+    Raises
+    ------
+    InvalidDicomError
+        If the input is of an unsupported type or cannot be read as a DICOM file.
+    """
+
+    match dicom_input:
+        case FileDataset():
+            return dicom_input
+        case str() | Path():
+            return dcmread(
+                dicom_input,
+                force=force,
+                stop_before_pixels=stop_before_pixels,
+            )
+        case bytes():
+            return dcmread(
+                BytesIO(dicom_input),
+                force=force,
+                stop_before_pixels=stop_before_pixels,
+            )
+        case _:
+            msg = (
+                f"Invalid input type for 'dicom_input': {type(dicom_input)}. "
+                "Must be a str, Path, or bytes object."
+            )
+            raise InvalidDicomError(msg)
+
+
 def load_rtstruct_dcm(
     rtstruct_input: DicomInput,
     force: bool = True,
@@ -45,27 +96,7 @@ def load_rtstruct_dcm(
         If the input file is not an RTSTRUCT (i.e., `Modality` field is not "RTSTRUCT").
     """
 
-    match rtstruct_input:
-        case FileDataset():
-            dicom = rtstruct_input
-        case str() | Path():
-            dicom = dcmread(
-                rtstruct_input,
-                force=force,
-                stop_before_pixels=stop_before_pixels,
-            )
-        case bytes():
-            dicom = dcmread(
-                BytesIO(rtstruct_input),
-                force=force,
-                stop_before_pixels=stop_before_pixels,
-            )
-        case _:
-            msg = (
-                f"Invalid input type for 'rtstruct_input': {type(rtstruct_input)}. "
-                "Must be a str, Path, or bytes object."
-            )
-            raise InvalidDicomError(msg)
+    dicom = load_dicom(rtstruct_input, force, stop_before_pixels)
 
     if dicom.Modality != "RTSTRUCT":
         msg = f"The provided DICOM is not an RTSTRUCT file. Found Modality: {dicom.Modality}"
