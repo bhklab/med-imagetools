@@ -1,15 +1,16 @@
 from typing import TYPE_CHECKING
 
-from imgtools.dicom import (
-    DicomInput,
-    load_rtstruct_dcm,
-)
 from imgtools.exceptions import (
     RTSTRUCTAttributeError,
 )
 
+from .dicom_reader import (
+    DicomInput,
+    load_rtstruct_dcm,
+)
+
 if TYPE_CHECKING:
-    from pydicom.dataset import FileDataset
+    from pydicom.dataset import FileDatasetww
 
 
 def extract_roi_meta(rtstruct: DicomInput) -> list[dict[str, str]]:
