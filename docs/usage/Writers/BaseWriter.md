@@ -21,7 +21,7 @@ The `AbstractBaseWriter` is:
 - **Customizable**: Extend it to handle your file formats and workflows.  
 - **Safe and robust**: Features context management, filename sanitization, and optional CSV indexing.  
 
-### When Should you extend `AbstractBaseWriter` for your custom writer?
+### When should you extend `AbstractBaseWriter` for your custom writer?
 
 If you write many files with dynamic paths and filenames, or need
 to manage file existence scenarios, you might consider extending `AbstractBaseWriter`

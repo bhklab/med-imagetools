@@ -331,9 +331,12 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         Pre-checking file existence and setting up the writer context.
 
         Meant to be used by users to skip expensive computations if a file
+        already exists and you dont want to overwrite it.
         Only difference between this and resolve_path is that this method
-        returns `None` if the file exists and the mode is `SKIP`.
-        This is because, the `.save()` method should be able to return
+        does not return the path if the file exists and the mode is set to
+        `SKIP`.
+
+        This is because the `.save()` method should be able to return
         the path even if the file exists.
 
         **What It Does**:
@@ -345,18 +348,13 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         caches the context variables for future use, and `save()` can be called
         without passing in the context variables again.
 
-        **When to Use It**:
-
-        - Meant to be called by users to skip expensive computations if a file
-        already exists and you don’t want to overwrite it.
-
         Examples
         --------
 
         Main idea here is to allow users to save computation if they choose to
         skip existing files.
 
-        i.e if file exists and mode is **`SKIP`**, we return
+        i.e. if file exists and mode is **`SKIP`**, we return
         `None`, so the user can skip the computation.
         >>> if nifti_writer.preview_path(subject="math", name="test") is None:
         >>>     logger.info("File already exists. Skipping computation.")
@@ -367,9 +365,9 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
 
         **Useful Feature**
         ----------------------
-        the context is saved in the instance, so running
+        The context is saved in the instance, so running
         `.save()` after this will use the same context, and user can optionally
-        update the context with new values passed to .save().
+        update the context with new values passed to `.save()`.
 
         ```python
         >>> if path := writer.preview_path(subject="math", name="test"):
@@ -387,8 +385,8 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         Returns
         ------
         Path | None
-            if the file exists and the mode is SKIP, returns None. if the file
-            exists and the mode is FAIL, raises a FileExistsError. if the file
+            If the file exists and the mode is `SKIP`, returns `None`. if the file
+            exists and the mode is FAIL, raises a `FileExistsError`. If the file
             exists and the mode is OVERWRITE, logs a debug message and returns
             the path.
 
