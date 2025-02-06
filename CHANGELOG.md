@@ -1,6 +1,56 @@
 # CHANGELOG
 
 
+## v1.21.0 (2025-02-06)
+
+### Chores
+
+- Update lockfile
+  ([`3ff9ca1`](https://github.com/bhklab/med-imagetools/commit/3ff9ca1da86a3f2d481a6fd151dec42b90245836))
+
+### Features
+
+- Improve AbstractBaseWriter with indexing and add docs (#176)
+  ([#189](https://github.com/bhklab/med-imagetools/pull/189),
+  [`e147629`](https://github.com/bhklab/med-imagetools/commit/e147629c0f2f055d02609cde6f1f2f4be5e260c0))
+
+- **New Features** - Introduced a unified file writing framework that streamlines saving image and
+  array data across various formats (e.g., HDF5, NIFTI, NumPy). - Enhanced file handling with
+  improved validations for naming, compression levels, and managing existing files, ensuring smooth
+  data export and logging.
+
+- **Tests** - Added comprehensive testing to verify file saving operations, error handling, and file
+  indexing, ensuring robust performance across different usage scenarios. <!-- end of auto-generated
+  comment: release notes by coderabbit.ai -->
+
+### Refactoring
+
+- Remove Vector3D; update Coordinate3D and enhance RegionBox
+  ([#210](https://github.com/bhklab/med-imagetools/pull/210),
+  [`c16ae7c`](https://github.com/bhklab/med-imagetools/commit/c16ae7c04695e2b5f15d3d8a8fe54209b9024dd7))
+
+Remove the Vector3D class, integrating its functionality into Coordinate3D. Update documentation and
+  improve the calculate_image_boundaries function to support world coordinates. Rename variables for
+  clarity and consistency.
+
+- **New Features** - Introduced a cropping capability that allows simultaneous cropping of images
+  and their corresponding masks. - Added an optional parameter to select the coordinate system when
+  computing image boundaries. - Added new functions to retrieve example dataset paths and images.
+
+- **Enhancements** - Improved 3D coordinate operations to now support integer arithmetic as well as
+  equality and ordering comparisons. - Updated documentation and diagrams to provide a clearer,
+  simplified view of class relationships.
+
+- **Refactor** - Removed a legacy 3D vector type to streamline the available coordinate types.
+
+- **Bug Fixes** - Simplified exception handling and improved clarity in the
+  `BoundingBoxOutsideImageError` class.
+
+- **Tests** - Expanded test coverage for the new `Coordinate3D` class, including equality and
+  comparison operations, while removing tests for the deprecated `Vector3D`. - Added a new test for
+  validating example dataset images.
+
+
 ## v1.20.0 (2025-02-06)
 
 ### Features

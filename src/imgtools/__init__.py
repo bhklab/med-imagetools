@@ -1,4 +1,4 @@
-__version__ = "1.20.0"
+__version__ = "1.21.0"
 
 from .coretypes import Coordinate3D, Size3D, Spacing3D
 from .datasets import example_data, example_data_paths
