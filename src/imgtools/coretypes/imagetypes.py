@@ -8,7 +8,7 @@ import SimpleITK as sitk
 
 if TYPE_CHECKING:
     from .direction import Direction
-    from .helper_types import Coordinate3D, Size3D, Spacing3D
+    from .spatial_types import Coordinate3D, Size3D, Spacing3D
 
 
 @dataclass(frozen=True)
