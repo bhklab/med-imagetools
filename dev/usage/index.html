@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/cli/imgtools/">
+        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/usage/">
       
       
-        <link rel="prev" href="../nnUNet/">
+        <link rel="prev" href="..">
       
       
-        <link rel="next" href="../../reference/dicom-utils/find-dicoms/">
+        <link rel="next" href="Writers/BaseWriter/">
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.1">
     
     
       
-        <title>imgtools CLI - Med-ImageTools Documentation</title>
+        <title>Home - Med-ImageTools Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.a40c8224.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.a40c8224.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#imgtools-cli" class="md-skip">
+        <a href="#usage" class="md-skip">
           Skip to content
         </a>
       
@@ -92,7 +92,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Med-ImageTools Documentation" class="md-header__button md-logo" aria-label="Med-ImageTools Documentation" data-md-component="logo">
+    <a href=".." title="Med-ImageTools Documentation" class="md-header__button md-logo" aria-label="Med-ImageTools Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              imgtools CLI
+              Home
             
           </span>
         </div>
@@ -213,7 +213,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
     
@@ -228,11 +228,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../usage/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
     
@@ -248,13 +250,11 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../AutoPipeline/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../cli/AutoPipeline/" class="md-tabs__link">
           
   
     
@@ -280,7 +280,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../reference/dicom-utils/find-dicoms/" class="md-tabs__link">
+        <a href="../reference/dicom-utils/find-dicoms/" class="md-tabs__link">
           
   
     
@@ -324,7 +324,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Med-ImageTools Documentation" class="md-nav__button md-logo" aria-label="Med-ImageTools Documentation" data-md-component="logo">
+    <a href=".." title="Med-ImageTools Documentation" class="md-nav__button md-logo" aria-label="Med-ImageTools Documentation" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -342,7 +342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -360,6 +360,8 @@
       
   
   
+    
+  
   
   
     
@@ -374,21 +376,24 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="../../usage/" class="md-nav__link ">
+            <a href="./" class="md-nav__link md-nav__link--active">
               
   
   <span class="md-ellipsis">
@@ -400,13 +405,13 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+              <label class="md-nav__link md-nav__link--active" for="__nav_2" id="__nav_2_label" tabindex="">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -433,17 +438,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -469,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/Writers/BaseWriter/" class="md-nav__link">
+      <a href="Writers/BaseWriter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -491,7 +499,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../usage/Writers/ImplementingWriters/" class="md-nav__link">
+      <a href="Writers/ImplementingWriters/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -525,10 +533,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -541,22 +547,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -568,7 +571,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             CLI Reference
@@ -582,7 +585,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../AutoPipeline/" class="md-nav__link">
+      <a href="../cli/AutoPipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -604,7 +607,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../nnUNet/" class="md-nav__link">
+      <a href="../cli/nnUNet/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -623,19 +626,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../cli/imgtools/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -645,7 +639,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -759,7 +752,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/dicom-utils/find-dicoms/" class="md-nav__link">
+      <a href="../reference/dicom-utils/find-dicoms/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -781,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/dicom-utils/tag-helpers/" class="md-nav__link">
+      <a href="../reference/dicom-utils/tag-helpers/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -858,7 +851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/dicomsort/dicomsorter/" class="md-nav__link">
+      <a href="../reference/dicomsort/dicomsorter/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -880,7 +873,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/dicomsort/patternparser/" class="md-nav__link">
+      <a href="../reference/dicomsort/patternparser/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -944,147 +937,10 @@
 
 
 
-<h1 id="imgtools-cli"><code>imgtools</code> CLI</h1>
-<h1 id="imgtools">imgtools</h1>
-<p>A collection of tools for working with medical imaging data.</p>
-<p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>imgtools [OPTIONS] COMMAND [ARGS]...
-</code></pre></div>
-<p><strong>Options:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--quiet</code>, <code>-q</code></td>
-<td>boolean</td>
-<td>Suppress all logging except errors, overrides verbosity options.</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>--verbose</code>, <code>-v</code></td>
-<td>integer range (<code>0</code> and above)</td>
-<td>Increase verbosity of logging, overrides environment variable. (0-3: ERROR, WARNING, INFO, DEBUG).</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>--version</code></td>
-<td>boolean</td>
-<td>Show the version and exit.</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>-h</code>, <code>--help</code></td>
-<td>boolean</td>
-<td>Show this message and exit.</td>
-<td><code>False</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="imgtools-dicomsort">imgtools dicomsort</h2>
-<p>Sorts DICOM files into directories based on their tags.</p>
-<p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>imgtools dicomsort [OPTIONS] SOURCE_DIRECTORY TARGET_DIRECTORY
-</code></pre></div>
-<p><strong>Options:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--action</code>, <code>-a</code></td>
-<td>choice (<code>move</code> &#x7C; <code>copy</code> &#x7C; <code>symlink</code> &#x7C; <code>hardlink</code>)</td>
-<td>Action to perform on the files.</td>
-<td>_required</td>
-</tr>
-<tr>
-<td><code>-n</code>, <code>--dry-run</code></td>
-<td>boolean</td>
-<td>Do not move or copy files, just print what would be done. Always recommended to use this first to confirm the operation!</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>-j</code>, <code>--num-workers</code></td>
-<td>integer</td>
-<td>Number of worker processes to use for sorting.</td>
-<td><code>1</code></td>
-</tr>
-<tr>
-<td><code>-h</code>, <code>--help</code></td>
-<td>boolean</td>
-<td>Show this message and exit.</td>
-<td><code>False</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="imgtools-find-dicoms">imgtools find-dicoms</h2>
-<p>A tool to find DICOM files.</p>
-<p>PATH is the directory to search for DICOM files.</p>
-<p>SEARCH_INPUT is an optional list of regex patterns to filter the search results.</p>
-<p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>imgtools find-dicoms [OPTIONS] PATH [SEARCH_INPUT]...
-</code></pre></div>
-<p><strong>Options:</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>-e</code>, <code>--extension</code></td>
-<td>text</td>
-<td>File extension to look for.</td>
-<td><code>dcm</code></td>
-</tr>
-<tr>
-<td><code>-c</code>, <code>--count</code></td>
-<td>boolean</td>
-<td>Whether to just print the count of files found. This is useful for scripts.</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>-l</code>, <code>--limit</code></td>
-<td>integer</td>
-<td>The limit of results to return.</td>
-<td>None</td>
-</tr>
-<tr>
-<td><code>-ch</code>, <code>--check-header</code></td>
-<td>boolean</td>
-<td>Whether to check DICOM header for "DICM" signature.</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>-s</code>, <code>--sorted</code></td>
-<td>boolean</td>
-<td>Sort the results alphabetically.</td>
-<td><code>False</code></td>
-</tr>
-<tr>
-<td><code>-h</code>, <code>--help</code></td>
-<td>boolean</td>
-<td>Show this message and exit.</td>
-<td><code>False</code></td>
-</tr>
-</tbody>
-</table>
+<h1 id="usage">Usage</h1>
+<p>The following documentation is a work-in-progress.
+If you encounter any issues or discrepencies, please
+let us know by <a href="https://github.com/bhklab/med-imagetools/issues">opening an issue</a>.</p>
 
 
 
@@ -1142,7 +998,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../nnUNet/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Preparing Data for nnUNet">
+          <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1152,20 +1008,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Preparing Data for nnUNet
+                Home
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../reference/dicom-utils/find-dicoms/" class="md-footer__link md-footer__link--next" aria-label="Next: Find DICOMs">
+          <a href="Writers/BaseWriter/" class="md-footer__link md-footer__link--next" aria-label="Next: Abstract Base Writer">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Find DICOMs
+                Abstract Base Writer
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1199,10 +1055,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.5090c770.min.js"></script>
+      <script src="../assets/javascripts/bundle.5090c770.min.js"></script>
       
     
   </body>

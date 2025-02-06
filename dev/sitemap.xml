@@ -36,4 +36,16 @@
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicomsort/patternparser/</loc>
          <lastmod>2025-02-06</lastmod>
     </url>
+    <url>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/</loc>
+         <lastmod>2025-02-06</lastmod>
+    </url>
+    <url>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/Writers/BaseWriter/</loc>
+         <lastmod>2025-02-06</lastmod>
+    </url>
+    <url>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/Writers/ImplementingWriters/</loc>
+         <lastmod>2025-02-06</lastmod>
+    </url>
 </urlset>
