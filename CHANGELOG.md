@@ -1,6 +1,38 @@
 # CHANGELOG
 
 
+## v1.21.1 (2025-02-06)
+
+### Bug Fixes
+
+- Refactor DICOM utilities and enhance documentation
+  ([#216](https://github.com/bhklab/med-imagetools/pull/216),
+  [`1ed8de6`](https://github.com/bhklab/med-imagetools/commit/1ed8de6d0f373837a24b36653df30338d66cea0c))
+
+Remove unnecessary sanitization functionality, improve DICOM exception handling, and introduce new
+  utilities for loading and extracting ROI metadata. Update documentation to include references for
+  the new DICOM utilities.
+
+- **New Features** - Enhanced support for processing various DICOM file formats with improved
+  metadata extraction and robust error handling. - Introduced cross-platform support for determining
+  optimal file path and filename lengths, along with secure filename sanitization.
+
+- **Refactor** - Streamlined DICOM processing by removing legacy parameters and simplifying function
+  interfaces for consistent performance.
+
+- **Tests** - Updated the testing suite for improved type safety and reliability, ensuring smoother
+  interactions when handling DICOM files.
+
+### Documentation
+
+- Enhance RegionBox with flexible padding options and module updates
+  ([#215](https://github.com/bhklab/med-imagetools/pull/215),
+  [`5f38f49`](https://github.com/bhklab/med-imagetools/commit/5f38f4994c14dcabf79a3400000f560de1c798cc))
+
+Introduce the BoxPadMethod enum for padding flexibility in RegionBox. Update import paths and remove
+  deprecated modules to streamline the codebase.
+
+
 ## v1.21.0 (2025-02-06)
 
 ### Chores
