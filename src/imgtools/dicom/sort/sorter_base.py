@@ -59,7 +59,6 @@ def resolve_path(
     format_str: str,
     check_existing: bool = True,
     truncate: bool = True,
-    sanitize: bool = True,
 ) -> Tuple[Path, Path]:
     """
     Worker function to resolve a single path.
@@ -76,8 +75,6 @@ def resolve_path(
         If True, check if the resolved path already exists (default is True).
     truncate : bool, optional
         If True, truncate long values in the resolved path (default is True).
-    sanitize : bool, optional
-        If True, sanitize the resolved path (default is True).
 
     Returns
     -------
@@ -85,7 +82,7 @@ def resolve_path(
         The source path and resolved path.
     """
     tags: Dict[str, str] = read_tags(
-        path, list(keys), truncate=truncate, sanitize=sanitize
+        path, list(keys), truncate=truncate
     )
     resolved_path = Path(format_str % tags, path.name)
     if check_existing and not resolved_path.exists():
