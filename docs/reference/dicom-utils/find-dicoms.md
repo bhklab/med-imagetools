@@ -1,3 +1,6 @@
 # Find DICOMs
 
-::: imgtools.dicom.utils.find_dicoms
+::: imgtools.dicom.find_dicoms
+    options:
+        show_root_full_path: true
+        show_docstring_raises: true

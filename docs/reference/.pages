@@ -1,0 +1,4 @@
+nav:
+  - DICOM Utilities: dicom-utils
+  - DICOM Sorting: dicomsort
+  - ...
