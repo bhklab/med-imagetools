@@ -30,6 +30,9 @@ def calculate_image_boundaries(
         The input SimpleITK image.
     use_world_coordinates: bool, optional
         If True, the origin and size are calculated in world coordinates.
+        Meant to be used internally and for debugging purposes.
+        Use with caution as it may not work as the resulting RegionBox
+        may not work as expected.
 
     Returns
     -------
@@ -41,14 +44,6 @@ def calculate_image_boundaries(
     RegionBox(
         min=Coordinate3D(x=0, y=0, z=0),
         max=Coordinate3D(x=512, y=512, z=135)
-        size=Size3D(w=512, h=512, d=135)
-    )
-    >>> calculate_image_boundaries(
-    ...     image, use_world_coordinates=True
-    ... )
-    RegionBox(
-        min=Coordinate3D(x=-249.51171875, y=-492.51171875, z=-717.5),
-        max=Coordinate3D(x=262.48828125, y=19.48828125, z=-582.5)
         size=Size3D(w=512, h=512, d=135)
     )
     """
@@ -328,7 +323,7 @@ class RegionBox:
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
     basicbox = RegionBox(Coordinate3D(5, 5, 5), Coordinate3D(10, 10, 10))
