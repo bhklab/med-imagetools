@@ -179,8 +179,10 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
                 self.existing_file_mode = ExistingFileMode[
                     self.existing_file_mode.upper()
                 ]
+            case ExistingFileMode():
+                pass  # already a valid ExistingFileMode instance
             case _:
-                errmsg = (  # type: ignore
+                errmsg = (
                     f"Invalid existing_file_mode {self.existing_file_mode}. "
                     "Must be one of 'overwrite', 'skip', or 'fail'."
                 )

@@ -82,9 +82,7 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         Parameters
         ----------
         data : sitk.Image | np.ndarray
-            The SimpleITK image to save
-        PatientID : str
-            Required patient identifier
+            The SimpleITK image or numpy array to save
         **kwargs : object
             Additional formatting parameters for the output path
 
@@ -96,9 +94,9 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         Raises
         ------
         NiftiWriterIOError
-            If file exists and overwrite=False or if writing fails
+            If writing fails
         NiftiWriterValidationError
-            If image is invalid
+            If the input data is invalid
         """
         match data:
             case sitk.Image():
