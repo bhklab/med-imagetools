@@ -8663,8 +8663,8 @@ packages:
   timestamp: 1733255681319
 - pypi: .
   name: med-imagetools
-  version: 1.20.0
-  sha256: 1d0f3c85f36e91e2f84a1be20bc7724d2f0cbaa129e9d0081a65a0f95de3666c
+  version: 1.21.0
+  sha256: e0b7a1d97d1108d636274625a0f401ed176c631bf8b94327f138b0fb3844b162
   requires_dist:
   - h5py>=3.11.0,<4
   - joblib>=1.4.2,<2
@@ -10832,8 +10832,6 @@ packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/pandoc-3.6.2-ha770c72_0.conda
   sha256: ed347f989622c91dd86180011a93efe284eef5f3d98bec83468165e6b418917e
   md5: 4ded4ab71d9fd3764d796a23ca3e722b
-  arch: x86_64
-  platform: linux
   license: GPL-2.0-or-later
   license_family: GPL
   purls: []
@@ -10842,8 +10840,6 @@ packages:
 - conda: https://conda.anaconda.org/conda-forge/osx-64/pandoc-3.6.2-h694c41f_0.conda
   sha256: 1a7edd03b68fc379dc16051551d4604feea72b78287fb53945d0760348d61313
   md5: 8913fd78e01851d9f534f043022e1a4b
-  arch: x86_64
-  platform: osx
   license: GPL-2.0-or-later
   license_family: GPL
   purls: []
@@ -10852,8 +10848,6 @@ packages:
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pandoc-3.6.2-hce30654_0.conda
   sha256: 012fac5e6ddc6e5f2b8080471c25fc435dabc04e71ddbe2206d62ad22b950696
   md5: 0c282e8b2ec04ad9f74e3a5cc1c4cd2f
-  arch: arm64
-  platform: osx
   license: GPL-2.0-or-later
   license_family: GPL
   purls: []
@@ -10862,8 +10856,6 @@ packages:
 - conda: https://conda.anaconda.org/conda-forge/win-64/pandoc-3.6.2-h57928b3_0.conda
   sha256: b9b7480ba2339c2e9c48ec66bfce1a93b1fa398bad3404ecc8cbc088b5af2250
   md5: 05afb57dcba13f72295a1790b95a7996
-  arch: x86_64
-  platform: win
   license: GPL-2.0-or-later
   license_family: GPL
   purls: []
