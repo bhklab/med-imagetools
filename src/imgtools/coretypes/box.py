@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 
 import SimpleITK as sitk
 
 from imgtools.logging import logger
 
-from .helper_types import Coordinate3D, Size3D
+from .spatial_types import Coordinate3D, Size3D
 
 
 # Exception for when the bounding box is outside the image
@@ -59,6 +60,13 @@ def calculate_image_boundaries(
         size = Size3D(*image.GetSize())
 
     return RegionBox(min_coord, min_coord + size)
+
+
+class BoxPadMethod(str, Enum):
+    """Enum for padding methods."""
+
+    SYMMETRIC = "symmetric"
+    END = "end"
 
 
 @dataclass
@@ -154,24 +162,63 @@ class RegionBox:
             Coordinate3D(xstart + xsize, ystart + ysize, zstart + zsize),
         )
 
-    def pad(self, padding: int) -> RegionBox:
-        """Expand the bounding box by a specified padding value in all directions.
+    def pad(
+        self, padding: int, method: BoxPadMethod = BoxPadMethod.SYMMETRIC
+    ) -> RegionBox:
+        """Expand the bounding box by a specified padding value.
+
+        Can be applied symmetrically on both sides or only at the end of the box.
+        If the padded result has negative coordinates, they region is adjusted by
+        shifting the min coordinates to 0 and adding the difference to the max coordinates.
 
         Parameters
         ----------
         padding : int
             The padding value to expand the bounding box.
+        method : BoxPadMethod, optional
+            The padding method to use. Default is BoxPadMethod.SYMMETRIC.
+            Options are:
+            - BoxPadMethod.SYMMETRIC: Pad symmetrically on both sides.
+            - BoxPadMethod.END: Pad only at the end of the box (furthest from the origin).
 
         Returns
         -------
         RegionBox
             The expanded bounding box.
+
+        Examples
+        --------
+        >>> box = RegionBox(
+        ...     Coordinate3D(5, 5, 5),
+        ...     Coordinate3D(10, 10, 10),
+        ... )
+        >>> box.pad(5)
+        RegionBox(
+        ... min=Coordinate3D(x=0, y=0, z=0),
+        ... max=Coordinate3D(x=15, y=15, z=15)
+        ... size=(15, 15, 15)
+        )
+        >>> box.pad(5, method=BoxPadMethod.END)
+        RegionBox(
+        ... min=Coordinate3D(x=5, y=5, z=5),
+        ... max=Coordinate3D(x=15, y=15, z=15)
+        ... size=(10, 10, 10)
+        )
         """
         if padding == 0:
             return self
 
-        padded_min = self.min - padding
-        padded_max = self.max + padding
+        match method:
+            case BoxPadMethod.SYMMETRIC:
+                padded_min = self.min - padding
+                padded_max = self.max + padding
+            case BoxPadMethod.END:
+                padded_min = self.min
+                padded_max = self.max + padding
+            case _:
+                errmsg = f"Invalid padding method: {method}"
+                errmsg += f" Options are: {BoxPadMethod.__members__.keys()}"
+                raise ValueError(errmsg)
 
         self._adjust_negative_coordinates(padded_min, padded_max)
 
