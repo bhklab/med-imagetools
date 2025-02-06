@@ -89,10 +89,14 @@ def test_run_rtss_tests_and_display(rtss: RTStructureSet) -> None:
         [["GTV.*", "PTV.*"], "CTV.*"],
         # Dictionary-based mappings
         {},  # Empty dictionary case
-        {"GTV": ["GTV"], "Plan": ["PTV"]},
-        {"GTV": "CTV.*", "Plan": ["PTV", "GTV"]},
-        {"Primary": [["GTV", "PTV"], "CTV.*"], "GTV": "GTV.*"},  # GTV twice
+        {"GTV": ["GTV.*"], "Plan": ["PTV"]},
+        {"Plan": ["PTV"], "CTV": "CTV.*"},
         {"Primary": [["GTV", "PTV"], "CTV.*"], "Extra": "Extra.*"},
+        {
+            "Primary": [["GTV", "PTV"], "CTV.*"],
+            "Extra": "Extra.*",
+            "GTV": "GTV.*",
+        },  # GTV twice
     ]
 
     # Run tests and collect results
