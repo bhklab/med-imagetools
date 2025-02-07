@@ -1,11 +1,11 @@
 import pathlib
 import re
 import time
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
-
+from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union, Callable
+from typing import Generator
 import numpy as np
 import SimpleITK as sitk
-
+import pandas as pd
 from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     BaseLoader,
@@ -47,7 +47,7 @@ from imgtools.utils import (
     physical_points_to_idxs,
 )
 
-LoaderFunction = TypeVar("LoaderFunction")
+LoaderFunction = Callable[..., sitk.Image|StructureSet | Segmentation]
 ImageFilter = TypeVar("ImageFilter")
 Function = TypeVar("Function")
 
@@ -116,9 +116,25 @@ class ImageAutoInput(BaseInput):
 
     update: bool
         Whether to update crawled index
+    
+    readers: List[LoaderFunction]
+        The functions used to read images.
+        By default, will use `read_dicom_auto` for all modalities.
     """
 
     imgtools_dir: str = ".imgtools"
+    dir_path: pathlib.Path
+    dataset_name: str
+    csv_path: pathlib.Path
+    json_path: pathlib.Path
+    edge_path: pathlib.Path
+    graph: DataGraph
+    df_combined: pd.DataFrame
+    output_streams: List[str]
+    column_names: List[str]
+    series_names: List[str]
+    readers: List[LoaderFunction]
+
 
     def __init__(
         self,
@@ -127,21 +143,22 @@ class ImageAutoInput(BaseInput):
         n_jobs: int = -1,
         visualize: bool = False,
         update: bool = False,
+        readers: List[LoaderFunction] | None = None,
     ):
         self.modalities = modalities
 
         self.dir_path = pathlib.Path(dir_path)
-        self.parent = self.dir_path.parent
+        parent = self.dir_path.parent
         self.dataset_name = self.dir_path.name
 
         self.csv_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
+            parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
         )
         self.json_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.json"
+            parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.json"
         )
         self.edge_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
+            parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
         )
 
         start = time.time()
@@ -193,8 +210,12 @@ class ImageAutoInput(BaseInput):
         logger.info(
             f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities."
         )
-
-        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
+        if readers is None:
+            self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
+        else:
+            assert len(readers) == len(self.output_streams), \
+                "Number of readers should be equal to the number of modalities"
+            self.readers = readers
         logger.info(f"Total time taken: {time.time() - start:.2f} seconds")
         loader = ImageCSVLoader(
             self.df_combined,
@@ -210,6 +231,11 @@ class ImageAutoInput(BaseInput):
     def keys(self):
         return self._loader.keys()
 
+    def __iter__(self) -> Generator[Any, Any, None]:
+        cases = list(self.keys())
+        assert len(cases) > 0, "No cases found in the dataset."
+        for case in cases:
+            yield self.__call__(case)
 
 class ImageCSVInput(BaseInput):
     """ImageCSVInput class looks for a CSV file in a specified directory and loads images based on the information in the file.

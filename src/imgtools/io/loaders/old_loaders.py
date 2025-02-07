@@ -7,7 +7,7 @@ import pathlib
 import re
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import Optional, Union
+from typing import NamedTuple, Optional, Union
 
 import pandas as pd
 import SimpleITK as sitk
@@ -15,6 +15,7 @@ from pydicom import dcmread
 
 from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.utils.dicomutils import get_modality_metadata
+from imgtools.logging import logger
 
 
 def read_image(path: str) -> sitk.Image:
@@ -102,6 +103,7 @@ def read_dicom_scan(
 
 def read_dicom_rtstruct(
     path: str,
+    *args,
     suppress_warnings: bool = False,
     roi_name_pattern: str | None = None,
 ) -> StructureSet:
@@ -297,6 +299,12 @@ class ImageTreeLoader(BaseLoader):
 
 
 class ImageCSVLoader(BaseLoader):
+    paths: pd.DataFrame
+    expand_paths: bool
+    readers: list
+    colnames: list
+    seriesnames: list
+
     def __init__(
         self,
         csv_path_or_dataframe,
@@ -306,10 +314,6 @@ class ImageCSVLoader(BaseLoader):
         expand_paths=False,
         readers=None,
     ) -> None:
-        if seriesnames is None:
-            seriesnames = []
-        if colnames is None:
-            colnames = []
         if readers is None:
             readers = [
                 read_image
@@ -318,8 +322,8 @@ class ImageCSVLoader(BaseLoader):
         self.expand_paths = expand_paths
         self.readers = readers
 
-        self.colnames = colnames
-        self.seriesnames = seriesnames
+        self.colnames = colnames or []
+        self.seriesnames = seriesnames or []
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in colnames:
                 colnames.append(id_column)
@@ -327,11 +331,12 @@ class ImageCSVLoader(BaseLoader):
                 csv_path_or_dataframe, index_col=id_column
             )
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
+            # i dont think this branch actually works as expected
             self.paths = csv_path_or_dataframe
             if id_column:
                 self.paths = self.paths.set_index(id_column)
             if len(self.colnames) == 0:
-                self.colnames = self.paths.columns
+                self.colnames = self.paths.columns  # type: ignore
         else:
             msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
             raise ValueError(msg)
@@ -339,7 +344,22 @@ class ImageCSVLoader(BaseLoader):
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple("Output", self.colnames)
+        tuple_names: list[str]
+        if all([c.startswith("folder_")] for c in self.colnames):
+            tuple_names = [c.split("_")[1] for c in self.colnames]
+            logger.debug(f"Tuple names: {tuple_names}")
+        else:
+            tuple_names = self.colnames
+
+        self.output_tuple = NamedTuple(  # type: ignore
+            "Output", [(c, str) for c in tuple_names]
+        )
+
+        # add __getitem__ method to the output tuple
+        def getitem(self, key):
+            return getattr(self, key)
+
+        self.output_tuple.__getitem__ = getitem
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -353,8 +373,16 @@ class ImageCSVLoader(BaseLoader):
                 for col, path in paths.items()
             }
 
+        _namedtupledkeys = self.output_tuple._fields
+
+        # outputs = {
+        #     col: self.readers[i](
+        #         path, series["series_" + ("_").join(col.split("_")[1:])]
+        #     )
+        #     for i, (col, path) in enumerate(paths.items())
+        # }
         outputs = {
-            col: self.readers[i](
+            _namedtupledkeys[i]: self.readers[i](
                 path, series["series_" + ("_").join(col.split("_")[1:])]
             )
             for i, (col, path) in enumerate(paths.items())
