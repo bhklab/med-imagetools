@@ -1,7 +1,20 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.3 (2025-02-07)
+
+### Chores
+
+- Update lockfile
+  ([`9069f4f`](https://github.com/bhklab/med-imagetools/commit/9069f4fe3bcc2f2344d2e6148cb1b7dd614d09c0))
+
+
 ## v2.0.0-rc.2 (2025-02-07)
+
+### Bug Fixes
+
+- Push release candidates to pypi
+  ([`2120f9f`](https://github.com/bhklab/med-imagetools/commit/2120f9f3160f1230f782fd50d209ec69dda653a6))
 
 ### Chores
 
