@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.2 (2025-02-07)
+
+### Chores
+
+- Comment out PyPI publish step in CI workflow
+  ([`c42f5eb`](https://github.com/bhklab/med-imagetools/commit/c42f5eb848b254d2389fe58810f43cce389192b7))
+
+- Update pixi.lock file
+  ([`e2c2c5e`](https://github.com/bhklab/med-imagetools/commit/e2c2c5e75d1b30db2f4d4e5edb45cffcdff869ae))
+
+### Features
+
+- Allow CI-CD workflow to run on development branch
+  ([`d832db9`](https://github.com/bhklab/med-imagetools/commit/d832db9bf165daefab5c849b16c81493799f89b7))
+
+- Update docs and lockfile
+  ([`6e07540`](https://github.com/bhklab/med-imagetools/commit/6e075408fd1ef5e4da4ec84000c558d8fa117e59))
+
+
 ## v2.0.0-rc.1 (2025-02-07)
 
 ### Chores
