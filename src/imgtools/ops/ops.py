@@ -171,15 +171,18 @@ class ImageAutoInput(BaseInput):
         logger.info(
             f"Forming the graph based on the given modalities: {self.modalities}"
         )
-        self.df_combined = self.graph.parser(self.modalities)
+        if isinstance(self.modalities, list):
+            modalities = ",".join(self.modalities)
+        else:
+            modalities = self.modalities
+        
+        self.df_combined = self.graph.parser(modalities)
 
         self.output_streams = [
             ("_").join(cols.split("_")[1:])
             for cols in self.df_combined.columns
             if cols.split("_")[0] == "folder"
         ]
-
-        # not sure what this is really doing...
 
         self.column_names = [
             cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"
@@ -203,6 +206,9 @@ class ImageAutoInput(BaseInput):
         )
 
         super().__init__(loader)
+    
+    def keys(self):
+        return self._loader.keys()
 
 
 class ImageCSVInput(BaseInput):
