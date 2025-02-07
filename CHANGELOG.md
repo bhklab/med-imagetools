@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v1.22.0 (2025-02-07)
+
+### Features
+
+- Add optional import functionality and clean up dependencies
+  ([#217](https://github.com/bhklab/med-imagetools/pull/217),
+  [`9efc491`](https://github.com/bhklab/med-imagetools/commit/9efc491ef6e6ded596b7880eca810ce24c8a6647))
+
+Introduce optional import functionality for h5py and pynrrd, while removing unused dependencies and
+  refactoring the codebase for better maintainability.
+
+- Documentation • Updated installation instructions with new environment setup commands and
+  streamlined guidance.
+
+- Refactor • Removed legacy imaging processing and indexing functionalities to simplify the toolset.
+
+- New Features • Enhanced error handling for optional dependencies to offer clearer messaging when
+  modules are missing.
+
+
 ## v1.21.1 (2025-02-06)
 
 ### Bug Fixes
