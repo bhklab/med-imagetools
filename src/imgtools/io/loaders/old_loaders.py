@@ -11,9 +11,16 @@ from typing import NamedTuple, Optional, Union
 
 import pandas as pd
 import SimpleITK as sitk
-from pydicom import dcmread
+from pydicom import FileDataset, dcmread
 
-from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modules import (
+    PET,
+    Dose,
+    Scan,
+    Segmentation,
+    StructureSet,
+    PETImageType,
+)
 from imgtools.utils.dicomutils import get_modality_metadata
 from imgtools.logging import logger
 
@@ -36,9 +43,10 @@ def read_image(path: str) -> sitk.Image:
 
 def read_dicom_series(
     path: str,
-    series_id: list[str] | None = None,
+    series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
+    **kwargs,  # unused
 ) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 
@@ -88,9 +96,10 @@ def read_dicom_series(
 
 def read_dicom_scan(
     path: str,
-    series_id: list[str] | None = None,
+    series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
+    **kwargs,  # unused
 ) -> Scan:
     image = read_dicom_series(
         path,
@@ -103,10 +112,10 @@ def read_dicom_scan(
 
 def read_dicom_rtstruct(
     path: str,
-    *args,
-    suppress_warnings: bool = False,
-    roi_name_pattern: str | None = None,
+    **kwargs,
 ) -> StructureSet:
+    roi_name_pattern = kwargs.get("roi_name_pattern", None)
+    suppress_warnings = kwargs.get("suppress_warnings", False)
     return StructureSet.from_dicom(
         path,
         suppress_warnings=suppress_warnings,
@@ -114,16 +123,22 @@ def read_dicom_rtstruct(
     )
 
 
-def read_dicom_rtdose(path: str) -> Dose:
+def read_dicom_rtdose(path: str, **kwargs) -> Dose:
     return Dose.from_dicom(path=path)
 
 
-def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
-    return PET.from_dicom(path=path, series_id=series, pet_image_type="SUV")
+def read_dicom_pet(path: str, series: Optional[str] = None, **kwargs) -> PET:
+    _pet_image_type = kwargs.get("pet_image_type", "SUV")
+
+    return PET.from_dicom(
+        path=path,
+        series_id=series,
+        pet_image_type=PETImageType(_pet_image_type),
+    )
 
 
 def read_dicom_seg(
-    path: str, meta: dict, series: Optional[str] = None
+    path: str, meta: FileDataset, series: Optional[str] = None, **kwargs
 ) -> Segmentation:
     seg_img = read_dicom_series(path, series)
     return Segmentation.from_dicom(seg_img, meta)
@@ -133,13 +148,16 @@ auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
 
 
 def read_dicom_auto(
-    path: str, series=None, file_names=None
+    path: str, series=None, file_names=None, **kwargs
 ) -> auto_dicom_result:
     dcms = (
         list(pathlib.Path(path).rglob("*.dcm"))
         if not path.endswith(".dcm")
         else [pathlib.Path(path)]
     )
+    if len(dcms) == 0:
+        errmsg = f"No DICOM files found in {path}."
+        raise FileNotFoundError(errmsg)
 
     for dcm_path in dcms:
         dcm = dcm_path.as_posix()
@@ -148,18 +166,18 @@ def read_dicom_auto(
             continue
 
         modality = meta.Modality
-
+        obj: auto_dicom_result
         match modality:
             case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
             case "PT":
-                obj = read_dicom_pet(path, series)
+                obj = read_dicom_pet(path, series, **kwargs)
             case "RTSTRUCT":
-                obj = read_dicom_rtstruct(dcm)
+                obj = read_dicom_rtstruct(dcm, **kwargs)
             case "RTDOSE":
-                obj = read_dicom_rtdose(dcm)
+                obj = read_dicom_rtdose(dcm, **kwargs)
             case "SEG":
-                obj = read_dicom_seg(path, meta, series)
+                obj = read_dicom_seg(path, meta, series, **kwargs)
             case _:
                 errmsg = (
                     f"Modality {modality} not supported in read_dicom_auto."
@@ -168,6 +186,9 @@ def read_dicom_auto(
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
+
+    errmsg = f'Something went wrong reading DICOM files in "{path}".'
+    raise FileNotFoundError(errmsg)
 
 
 # ruff: noqa
