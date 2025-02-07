@@ -302,6 +302,21 @@ class RegionBox:
                 setattr(min_coord, axis, 0)
                 setattr(max_coord, axis, getattr(max_coord, axis) + diff)
 
+
+    def check_out_of_bounds_coordinates(self, image: sitk.Image) -> None:
+        """Adjust the coordinates to ensure that the max values are not greater than the image size."""
+        # if any of the max values are greater than the image size, set them to the image size,
+        # and subtract the difference from the min values
+        for idx, axis in enumerate(["x", "y", "z"]):
+            max_value = getattr(self.max, axis)
+            image_size = image.GetSize()[idx]
+            if max_value > image_size:
+                logger.debug(f"Adjusting box {axis} coordinates to be within the image size.")
+                diff = max_value - image_size
+                setattr(self.min, axis, getattr(self.min, axis) - diff)
+                setattr(self.max, axis, image_size)
+    
+
     def crop_image(self, image: sitk.Image) -> sitk.Image:
         """Crop an image to the coordinates defined by the box.
 
@@ -316,17 +331,12 @@ class RegionBox:
             The cropped image.
         """
         try:
+            self.check_out_of_bounds_coordinates(image)
             cropped_image = sitk.RegionOfInterest(image, self.size, self.min)
-        except RuntimeError as e:
-            msg = (
-                f"The box {self} is outside"
-                f" the image size {calculate_image_boundaries(image)} "
-            )
-            # this is probably due to the box being outside the image
-            # try to crop the image to the largest possible region
-            # we could handle this in the future, for now let it raise the error
-            # and make user try again with an adjusted box
-            raise BoundingBoxOutsideImageError(msg) from e
+        except Exception as e:
+            msg = f"Error cropping image to the box: {e}"
+            logger.exception(msg)
+            raise e
         else:
             return cropped_image
 
@@ -369,6 +379,9 @@ class RegionBox:
             f")"
         )
 
+    def copy(self) -> RegionBox:
+        """Create a copy of the RegionBox."""
+        return RegionBox(self.min, self.max)
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
