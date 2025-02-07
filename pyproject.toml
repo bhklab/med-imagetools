@@ -38,9 +38,6 @@ dependencies = [
   "fasteners==0.19",
   "pyyaml>=6.0.1,<7",
   "dill>=0.3.8,<1",
-  # index 
-  "sqlitedict>=2.0",
-  "sqlalchemy>=2.0.0",
 ]
 
 classifiers = [
