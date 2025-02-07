@@ -440,9 +440,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#recommended-create-new-conda-virtual-environment" class="md-nav__link">
+  <a href="#create-new-conda-virtual-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      (recommended) Create new conda virtual environment
+      Create new conda virtual environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-pixi-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a pixi environment
     </span>
   </a>
   
@@ -1328,9 +1337,18 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#recommended-create-new-conda-virtual-environment" class="md-nav__link">
+  <a href="#create-new-conda-virtual-environment" class="md-nav__link">
     <span class="md-ellipsis">
-      (recommended) Create new conda virtual environment
+      Create new conda virtual environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-pixi-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a pixi environment
     </span>
   </a>
   
@@ -1405,15 +1423,19 @@
 <h2 id="installing-med-imagetools">Installing med-imagetools</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="go">pip install med-imagetools</span>
 </code></pre></div>
-<h3 id="recommended-create-new-conda-virtual-environment">(recommended) Create new conda virtual environment</h3>
+<h3 id="create-new-conda-virtual-environment">Create new conda virtual environment</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="go">conda create -n mit</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">conda activate mit</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="go">pip install med-imagetools</span>
 </code></pre></div>
+<h3 id="create-a-pixi-environment">Create a <code>pixi</code> environment</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">pixi init mit</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="go">pixi add --pypi med-imagetools</span>
+</code></pre></div>
 <h3 id="optional-install-in-development-mode">(optional) Install in development mode</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="go">conda create -n mit</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="go">conda activate mit</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="go">pip install -e git+https://github.com/bhklab/med-imagetools.git</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="go">conda create -n mit</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">conda activate mit</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="go">pip install -e git+https://github.com/bhklab/med-imagetools.git</span>
 </code></pre></div>
 <p>This will install the package in editable mode, so that the installed package will update when the code is changed.</p>
 
