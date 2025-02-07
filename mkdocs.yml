@@ -73,7 +73,6 @@ plugins:
   - include-markdown                  # allows for including Markdown files into another Markdown file
   - mkdocs-jupyter:
       allow_errors: false
-      theme: dark
       include_source: true
   - mkdocstrings:
       handlers:
