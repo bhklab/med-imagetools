@@ -5,7 +5,7 @@ import SimpleITK as sitk
 T = TypeVar("T")
 
 
-class Scan:
+class Scan(sitk.Image):
     def __init__(self, image: sitk.Image, metadata: Dict[str, T]) -> None:
-        self.image = image
+        super().__init__(image)
         self.metadata = metadata

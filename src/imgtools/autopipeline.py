@@ -393,7 +393,10 @@ class AutoPipeline(Pipeline):
 
                 # Process image (CT/MR)
                 elif modality == "CT" or modality == 'MR':
-                    image = read_results[i].image
+                    try:
+                        image = read_results[i].image
+                    except AttributeError:
+                        image = read_results[i]
                     if len(image.GetSize()) == 4:
                         assert image.GetSize()[-1] == 1, f"There is more than one volume in this CT file for {subject_id}."
                         extractor = sitk.ExtractImageFilter()
