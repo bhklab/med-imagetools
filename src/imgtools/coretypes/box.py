@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -278,15 +279,22 @@ class RegionBox:
         Notes
         -----
         Validation is done to ensure that any min coordinates that are negative are set to 0,
-        and the difference is added to the maximum coordinates
+        and the difference is added to the maximum coordinates.
+
+        If an extra dimension is not an integer (e.g. 1.5), the bounding box is shifted 1 voxel towards the minimum in that dimension.
         """
-        extra_x = max(0, size - self.size.width) // 2
-        extra_y = max(0, size - self.size.height) // 2
-        extra_z = max(0, size - self.size.depth) // 2
+        # Calculate extra dimensions to add to the existing coordinates
+        extra_x = max(0, size - self.size.width) / 2
+        extra_y = max(0, size - self.size.height) / 2
+        extra_z = max(0, size - self.size.depth) / 2
 
-        min_coord = self.min - (extra_x, extra_y, extra_z)
-        max_coord = self.max + (extra_x, extra_y, extra_z)
+        # Round extra dimension values UP to the nearest integer before adding to existing minimum coordinates
+        min_coord = self.min - tuple([math.ceil(extra) for extra in(extra_x, extra_y, extra_z)])
 
+        # Round extra dimensions DOWN to the nearest integer before adding to existing maximum coordinates
+        max_coord = self.max + tuple([math.floor(extra) for extra in(extra_x, extra_y, extra_z)])
+
+        # Adjust negative coordinates to ensure that the min values are not negative
         self._adjust_negative_coordinates(min_coord, max_coord)
 
         return RegionBox(min=min_coord, max=max_coord)
