@@ -52,7 +52,7 @@ python = "3.12.*"
 
 ############################################## TEST ################################################
 [feature.test.pypi-dependencies]
-med-imagetools = { path = ".", editable = true, extras = ["test"]}
+med-imagetools = { path = ".", editable = true, extras = ["all"]}
 
 [feature.test.dependencies]
 pytest = "*"
