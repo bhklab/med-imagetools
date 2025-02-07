@@ -17,6 +17,13 @@ class Scan(sitk.Image):
         stats["direction"] = self.GetDirection()
         return stats
 
+    def __repr__(self) -> str:  # type: ignore
+        # convert metadata and img_stats to string
+        # with angulated brackets
+        metadata = "\n\t".join([f"{k}={v}" for k, v in self.metadata.items()])
+        img_stats = "\n\t".join([f"{k}={v}" for k, v in self._img_stats.items()])
+        return f"Scan<\n{metadata}, {img_stats}\n>"
+
     def __rich_repr__(self) -> Generator[tuple[str, str], Any, None]:
         for k, v in self.metadata.items():
             yield k, v
