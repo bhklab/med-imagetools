@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from functools import total_ordering
 
 from typing import Iterator
-import numpy as np
+import math
 
 
 @dataclass
@@ -157,6 +157,18 @@ class Coordinate3D:
                     " Expected int, Coordinate3D, or Size3D."
                 )
                 raise TypeError(errmsg)
+
+    def __floor__(self) -> Coordinate3D:
+        """Return the floor of each component."""
+        return Coordinate3D(
+            math.floor(self.x), math.floor(self.y), math.floor(self.z)
+        )
+
+    def __ceil__(self) -> Coordinate3D:
+        """Return the ceiling of each component."""
+        return Coordinate3D(
+            math.ceil(self.x), math.ceil(self.y), math.ceil(self.z)
+        )
 
 
 class Spacing3D:
