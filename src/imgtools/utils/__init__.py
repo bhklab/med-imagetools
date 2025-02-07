@@ -16,6 +16,7 @@ from .nnunet import (
     save_json,
     subfiles,
 )
+from .optional_import import OptionalImportError, optional_import
 
 __all__ = [
     "array_to_image",
@@ -33,4 +34,7 @@ __all__ = [
     "subfiles",
     "generate_dataset_json",
     "save_data",
+    # Optional import
+    "OptionalImportError",
+    "optional_import",
 ]
