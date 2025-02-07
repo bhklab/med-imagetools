@@ -1,5 +1,5 @@
 from collections import namedtuple
-from typing import Optional, Sequence, Tuple, Union, List
+from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 import SimpleITK as sitk
