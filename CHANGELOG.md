@@ -1,6 +1,15 @@
 # CHANGELOG
 
 
+## v1.23.1 (2025-02-07)
+
+### Bug Fixes
+
+- Handle odd extra dimension values in expand_to_min_size
+  ([#220](https://github.com/bhklab/med-imagetools/pull/220),
+  [`6eb58ea`](https://github.com/bhklab/med-imagetools/commit/6eb58eab110cabc7655372246870488f42c3daf8))
+
+
 ## v1.23.0 (2025-02-07)
 
 ### Features
