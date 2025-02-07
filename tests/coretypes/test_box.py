@@ -85,7 +85,11 @@ def test_regionbox_from_centroid_odd_cube():
 
 def test_bbox_cubed()->None:
     mask = example_data()['mask']
-    bbox = RegionBox.from_mask_bbox(mask, 1)
-    rprint(bbox)
-    bbox = RegionBox.from_mask_bbox(mask, 1).expand_to_cube()
-    rprint(bbox)
+    region = RegionBox(
+        Coordinate3D(12, 13, 14),
+        Coordinate3D(21, 23, 25)
+    )
+    rprint(region)
+    
+    expanded_region = region.expand_to_cube(13)
+    rprint(expanded_region)

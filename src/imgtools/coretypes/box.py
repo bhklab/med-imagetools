@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -108,7 +109,9 @@ class RegionBox:
         return cls(Coordinate3D(*coordmin), Coordinate3D(*coordmax))
 
     @classmethod
-    def from_mask_centroid(cls, mask: sitk.Image, label: int = 1, desired_size: int | None = None) -> RegionBox:
+    def from_mask_centroid(
+        cls, mask: sitk.Image, label: int = 1, desired_size: int | None = None
+    ) -> RegionBox:
         """Creates a RegionBox from the centroid of a mask image.
 
         Parameters
@@ -133,8 +136,7 @@ class RegionBox:
         centroid_idx = mask.TransformPhysicalPointToIndex(centroid)
 
         return RegionBox(
-            Coordinate3D(*centroid_idx), 
-            Coordinate3D(*centroid_idx)
+            Coordinate3D(*centroid_idx), Coordinate3D(*centroid_idx)
         ).expand_to_cube(desired_size)
 
     @classmethod
@@ -277,15 +279,17 @@ class RegionBox:
 
         Notes
         -----
+        If the size is odd, the extra padding is added to the min
+
         Validation is done to ensure that any min coordinates that are negative are set to 0,
         and the difference is added to the maximum coordinates
         """
-        extra_x = max(0, size - self.size.width) // 2
-        extra_y = max(0, size - self.size.height) // 2
-        extra_z = max(0, size - self.size.depth) // 2
+        extra_x: float = max(0, size - self.size.width) / 2
+        extra_y: float = max(0, size - self.size.height) / 2
+        extra_z: float = max(0, size - self.size.depth) / 2
 
-        min_coord = self.min - (extra_x, extra_y, extra_z)
-        max_coord = self.max + (extra_x, extra_y, extra_z)
+        min_coord = math.floor(self.min - (extra_x, extra_y, extra_z))
+        max_coord = math.floor(self.max + (extra_x, extra_y, extra_z))
 
         self._adjust_negative_coordinates(min_coord, max_coord)
 
