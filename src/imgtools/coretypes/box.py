@@ -109,7 +109,7 @@ class RegionBox:
         return cls(Coordinate3D(*coordmin), Coordinate3D(*coordmax))
 
     @classmethod
-    def from_mask_centroid(cls, mask: sitk.Image, label: int = 1) -> RegionBox:
+    def from_mask_centroid(cls, mask: sitk.Image, label: int = 1, desired_size: int | None = None) -> RegionBox:
         """Creates a RegionBox from the centroid of a mask image.
 
         Parameters
@@ -118,6 +118,8 @@ class RegionBox:
             The input mask image.
         label : int, optional
             label in the mask image to calculate the centroid.
+        desired_size : int | None, optional
+            The desired size of the box. If None, the minimum size default from `expand_to_min_size` is used.
 
         Returns
         -------
@@ -132,8 +134,9 @@ class RegionBox:
         centroid_idx = mask.TransformPhysicalPointToIndex(centroid)
 
         return RegionBox(
-            Coordinate3D(*centroid_idx), Coordinate3D(*centroid_idx)
-        )
+            Coordinate3D(*centroid_idx), 
+            Coordinate3D(*centroid_idx)
+        ).expand_to_cube(desired_size)
 
     @classmethod
     def from_mask_bbox(cls, mask: sitk.Image, label: int = 1) -> RegionBox:

@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v1.23.0 (2025-02-07)
+
+### Features
+
+- Add desired_size to centroid bounding box generation
+  ([#219](https://github.com/bhklab/med-imagetools/pull/219),
+  [`30a129f`](https://github.com/bhklab/med-imagetools/commit/30a129ff47f94328c870c98681215e7561a7546a))
+
+In old version, bounding box was a single voxel. Now is expanded to at least the minimum dimension
+  default.
+
+- **New Features** - Now, users can optionally specify a desired size when generating image bounding
+  boxes for enhanced control.
+
+- **Chores** - Updated the software version from 1.21.1 to 1.22.0.
+
+
 ## v1.22.0 (2025-02-07)
 
 ### Features
