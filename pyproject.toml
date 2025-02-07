@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "1.21.1"
+version = "2.0.0-rc.1"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -102,7 +102,7 @@ match = "(main|master)"
 
 [tool.semantic_release.branches.dev]
 # any branch that contains "dev" will be considered a dev branch
-match = ".*dev.*"
+match = "(development|dev)"
 prerelease = true
 prerelease_token = "rc"
 
