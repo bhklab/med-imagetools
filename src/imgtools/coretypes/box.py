@@ -390,6 +390,9 @@ class RegionBox:
             f")"
         )
 
+    def copy(self) -> RegionBox:
+        """Create a copy of the RegionBox."""
+        return RegionBox(self.min, self.max)
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
