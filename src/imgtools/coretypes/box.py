@@ -136,7 +136,8 @@ class RegionBox:
         centroid_idx = mask.TransformPhysicalPointToIndex(centroid)
 
         return RegionBox(
-            Coordinate3D(*centroid_idx), Coordinate3D(*centroid_idx)
+            Coordinate3D(*centroid_idx), 
+            Coordinate3D(*centroid_idx)
         ).expand_to_cube(desired_size)
 
     @classmethod
