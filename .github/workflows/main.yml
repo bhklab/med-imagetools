@@ -3,7 +3,7 @@ name: CI-CD
 # only run on pushes to main or pull requests
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "development"]
   pull_request:
     branches: ["*"]
 
@@ -154,7 +154,10 @@ jobs:
           verbose: true
           name: codecov-umbrella
 
-  cd:
+  ################################################################################################
+  # CD: Continuous Deployment
+  ################################################################################################
+  Continuous-Deployment:
     concurrency: release
     permissions:
       id-token: write
@@ -166,7 +169,7 @@ jobs:
 
     needs: Unit-Tests
 
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/devel'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
 
     # Set up operating system
     runs-on: ubuntu-latest
@@ -203,14 +206,14 @@ jobs:
           git_committer_name: "gh-actions-semver"
 
   pip-squeak:
-    needs: cd
-    if: needs.cd.outputs.released == 'true'
+    needs: Continuous-Deployment
+    if: needs.Continuous-Deployment.outputs.released == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the code with tag ${{ needs.cd.outputs.tag }}
+      - name: Checkout the code with tag ${{ needs.Continuous-Deployment.outputs.tag }}
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.cd.outputs.tag }}
+          ref: ${{ needs.Continuous-Deployment.outputs.tag }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
@@ -224,6 +227,8 @@ jobs:
         run: python3 -m build --sdist --wheel --outdir dist/
 
       - name: Publish to PyPI
+        # only push to pypi if on main
+        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true

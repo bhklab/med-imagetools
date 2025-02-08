@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 
 import SimpleITK as sitk
 
 from imgtools.logging import logger
 
-from .helper_types import Coordinate3D, Size3D
+from .spatial_types import Coordinate3D, Size3D
 
 
 # Exception for when the bounding box is outside the image
@@ -14,18 +15,25 @@ class BoundingBoxOutsideImageError(Exception):
     """Exception raised when the bounding box is outside the image."""
 
     def __init__(self, message: str) -> None:
-        self.message = message
-        super().__init__(self.message)
+        super().__init__(message)
 
 
-def calculate_image_boundaries(image: sitk.Image) -> RegionBox:
-    """
-    Calculate the physical coordinate boundaries of a SimpleITK image.
+def calculate_image_boundaries(
+    image: sitk.Image, use_world_coordinates: bool = False
+) -> RegionBox:
+    """Calculate boundary RegionBox of a SimpleITK image.
+
+    Calculates the origin and size of the image in either index or world coordinates.
 
     Parameters
     ----------
     image: sitk.Image
         The input SimpleITK image.
+    use_world_coordinates: bool, optional
+        If True, the origin and size are calculated in world coordinates.
+        Meant to be used internally and for debugging purposes.
+        Use with caution as it may not work as the resulting RegionBox
+        may not work as expected.
 
     Returns
     -------
@@ -34,14 +42,31 @@ def calculate_image_boundaries(image: sitk.Image) -> RegionBox:
     Examples
     --------
     >>> calculate_image_boundaries(image)
+    RegionBox(
+        min=Coordinate3D(x=0, y=0, z=0),
+        max=Coordinate3D(x=512, y=512, z=135)
+        size=Size3D(w=512, h=512, d=135)
+    )
     """
 
-    min_coord = Coordinate3D(
-        *image.TransformPhysicalPointToIndex(image.GetOrigin())
-    )
-    size = Size3D(*image.GetSize())
+    if use_world_coordinates:
+        min_coord = Coordinate3D(*image.GetOrigin())
+        size = Size3D(*image.GetSize())
+
+    else:
+        min_coord = Coordinate3D(
+            *image.TransformPhysicalPointToIndex(image.GetOrigin())
+        )
+        size = Size3D(*image.GetSize())
 
     return RegionBox(min_coord, min_coord + size)
+
+
+class BoxPadMethod(str, Enum):
+    """Enum for padding methods."""
+
+    SYMMETRIC = "symmetric"
+    END = "end"
 
 
 @dataclass
@@ -63,6 +88,18 @@ class RegionBox:
     max: Coordinate3D
     size: Size3D = field(init=False)
 
+    def __post_init__(self) -> None:
+        if self.min > self.max:
+            msg = "The minimum coordinate must be less than the maximum coordinate."
+            msg += f" Got: min={self.min}, max={self.max}"
+            raise ValueError(msg)
+
+        self.size = Size3D(
+            int(self.max.x - self.min.x),
+            int(self.max.y - self.min.y),
+            int(self.max.z - self.min.z),
+        )
+
     @classmethod
     def from_tuple(
         cls, coordmin: tuple[int, int, int], coordmax: tuple[int, int, int]
@@ -78,6 +115,8 @@ class RegionBox:
         ----------
         mask : sitk.Image
             The input mask image.
+        label : int, optional
+            label in the mask image to calculate the centroid.
 
         Returns
         -------
@@ -123,65 +162,66 @@ class RegionBox:
             Coordinate3D(xstart + xsize, ystart + ysize, zstart + zsize),
         )
 
-    def __post_init__(self) -> None:
-        if (
-            self.min.x > self.max.x
-            or self.min.y > self.max.y
-            or self.min.z > self.max.z
-        ):
-            msg = "The minimum coordinate must be less than the maximum coordinate."
-            msg += f" Got: min={self.min}, max={self.max}"
-            raise ValueError(msg)
+    def pad(
+        self, padding: int, method: BoxPadMethod = BoxPadMethod.SYMMETRIC
+    ) -> RegionBox:
+        """Expand the bounding box by a specified padding value.
 
-        self.size = Size3D(
-            self.max.x - self.min.x,
-            self.max.y - self.min.y,
-            self.max.z - self.min.z,
-        )
-
-    def __repr__(self) -> str:
-        """prints out like this:
-
-        RegionBox(
-            min=Coordinate3D(x=223, y=229, z=57),
-            max=Coordinate3D(x=303, y=299, z=87)
-            size=(80, 70, 30)
-        )
-        """
-        return (
-            f"{self.__class__.__name__}(\n"
-            f"\tmin={self.min},\n"
-            f"\tmax={self.max}\n"
-            f"\tsize={self.size}\n"
-            f")"
-        )
-
-    def pad(self, padding: int) -> RegionBox:
-        """Expand the bounding box by a specified padding value in all directions.
+        Can be applied symmetrically on both sides or only at the end of the box.
+        If the padded result has negative coordinates, they region is adjusted by
+        shifting the min coordinates to 0 and adding the difference to the max coordinates.
 
         Parameters
         ----------
         padding : int
             The padding value to expand the bounding box.
+        method : BoxPadMethod, optional
+            The padding method to use. Default is BoxPadMethod.SYMMETRIC.
+            Options are:
+            - BoxPadMethod.SYMMETRIC: Pad symmetrically on both sides.
+            - BoxPadMethod.END: Pad only at the end of the box (furthest from the origin).
 
         Returns
         -------
         RegionBox
             The expanded bounding box.
+
+        Examples
+        --------
+        >>> box = RegionBox(
+        ...     Coordinate3D(5, 5, 5),
+        ...     Coordinate3D(10, 10, 10),
+        ... )
+        >>> box.pad(5)
+        RegionBox(
+        ... min=Coordinate3D(x=0, y=0, z=0),
+        ... max=Coordinate3D(x=15, y=15, z=15)
+        ... size=(15, 15, 15)
+        )
+        >>> box.pad(5, method=BoxPadMethod.END)
+        RegionBox(
+        ... min=Coordinate3D(x=5, y=5, z=5),
+        ... max=Coordinate3D(x=15, y=15, z=15)
+        ... size=(10, 10, 10)
+        )
         """
         if padding == 0:
             return self
 
-        padded_min = Coordinate3D(
-            self.min.x - padding,
-            self.min.y - padding,
-            self.min.z - padding,
-        )
-        padded_max = Coordinate3D(
-            self.max.x + padding,
-            self.max.y + padding,
-            self.max.z + padding,
-        )
+        match method:
+            case BoxPadMethod.SYMMETRIC:
+                padded_min = self.min - padding
+                padded_max = self.max + padding
+            case BoxPadMethod.END:
+                padded_min = self.min
+                padded_max = self.max + padding
+            case _:
+                errmsg = f"Invalid padding method: {method}"
+                errmsg += f" Options are: {BoxPadMethod.__members__.keys()}"
+                raise ValueError(errmsg)
+
+        self._adjust_negative_coordinates(padded_min, padded_max)
+
         return RegionBox(min=padded_min, max=padded_max)
 
     def expand_to_cube(self, desired_size: int | None = None) -> RegionBox:
@@ -208,7 +248,7 @@ class RegionBox:
         max_size = max(self.size)
 
         if not desired_size:
-            return self.minimum_dimension_size(max_size)
+            return self.expand_to_min_size(max_size)
 
         if desired_size < max_size:
             msg = (
@@ -217,9 +257,9 @@ class RegionBox:
             )
             raise ValueError(msg)
 
-        return self.minimum_dimension_size(desired_size)
+        return self.expand_to_min_size(desired_size)
 
-    def minimum_dimension_size(self, size: int = 5) -> RegionBox:
+    def expand_to_min_size(self, size: int = 5) -> RegionBox:
         """Ensure that the bounding box has a minimum size along each dimension.
 
         Parameters
@@ -248,8 +288,9 @@ class RegionBox:
 
         return RegionBox(min=min_coord, max=max_coord)
 
+    @staticmethod
     def _adjust_negative_coordinates(
-        self, min_coord: Coordinate3D, max_coord: Coordinate3D
+        min_coord: Coordinate3D, max_coord: Coordinate3D
     ) -> None:
         """Adjust the coordinates to ensure that the min values are not negative."""
         # if any of the min values are negative, set them to 0,
@@ -289,8 +330,47 @@ class RegionBox:
         else:
             return cropped_image
 
+    def crop_image_and_mask(
+        self, image: sitk.Image, mask: sitk.Image
+    ) -> tuple[sitk.Image, sitk.Image]:
+        """Crop an image and mask to the coordinates defined by the box.
 
-if __name__ == "__main__":
+        Parameters
+        ----------
+        image : sitk.Image
+            The image to crop.
+        mask : sitk.Image
+            The mask to crop.
+
+        Returns
+        -------
+        tuple[sitk.Image, sitk.Image]
+            The cropped image and mask.
+        """
+        cropped_image = self.crop_image(image)
+        cropped_mask = self.crop_image(mask)
+
+        return cropped_image, cropped_mask
+
+    def __repr__(self) -> str:
+        """prints out like this:
+
+        RegionBox(
+            min=Coordinate3D(x=223, y=229, z=57),
+            max=Coordinate3D(x=303, y=299, z=87)
+            size=(80, 70, 30)
+        )
+        """
+        return (
+            f"{self.__class__.__name__}(\n"
+            f"\tmin={self.min},\n"
+            f"\tmax={self.max}\n"
+            f"\tsize={self.size}\n"
+            f")"
+        )
+
+
+if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
     basicbox = RegionBox(Coordinate3D(5, 5, 5), Coordinate3D(10, 10, 10))
@@ -314,31 +394,25 @@ if __name__ == "__main__":
 
     print(f"{non_uniform_box=}")
 
-    padded_box = non_uniform_box.pad(5)
+    print(f"{non_uniform_box.pad(5)=}")
 
-    print(f"{padded_box=}")
+    print(f"{ non_uniform_box.expand_to_min_size(30)=}")
 
-    cube_box = non_uniform_box.expand_to_cube()
+    print(f"{non_uniform_box.expand_to_cube().expand_to_min_size(50)=}")
 
-    print(f"{cube_box=}")
-
-    min_size_box = non_uniform_box.minimum_dimension_size(30)
-    print(f"{min_size_box=}")
-
-    print(f"{non_uniform_box.expand_to_cube().minimum_dimension_size(50)=}")
-
+    print("*" * 20)
     try:
         box_outsided_image = RegionBox(
-            Coordinate3D(0, 0, 0), Coordinate3D(200, 200, 200)
+            Coordinate3D(0, 0, 0), Coordinate3D(100, 100, 101)
         )
 
         cropped_image = box_outsided_image.crop_image(image)
 
         print(f"{cropped_image.GetSize()=}")
     except BoundingBoxOutsideImageError as e:
-        print("ERROR")
-        print(e)
+        logger.exception(e)  # type: ignore
 
+    print("*" * 20)
     ########################################
     # from masks
     ########################################
@@ -348,7 +422,9 @@ if __name__ == "__main__":
     )
 
     print(f"{calculate_image_boundaries(ct_image)=}")
-
+    print(f"{calculate_image_boundaries(ct_image, True)=}")
+    # print(f"{RegionBox.from_mask_bbox(ct_image)=}")
+    # sys.exit(0)
     rt_image = sitk.ReadImage(
         "/home/bioinf/bhklab/radiomics/readii-negative-controls/rawdata/HEAD-NECK-RADIOMICS-HN1/images/niftis/SubjectID-100_HN1339/RTSTRUCT_11267_GTV.nii.gz"
     )
@@ -360,7 +436,7 @@ if __name__ == "__main__":
     print(f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50)=}")
 
     print(
-        f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50).minimum_dimension_size(30)=}"
+        f"{RegionBox.from_mask_centroid(rt_image).expand_to_cube(50).expand_to_min_size(30)=}"
     )
 
     ## assign

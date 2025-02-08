@@ -6,8 +6,18 @@ class InvalidDicomError(Exception):
     pass
 
 
+####################################################################################################
+# Dicom spcific exceptions
+
+
 class NotRTSTRUCTError(InvalidDicomError):
-    """Exception raised for errors in the RTSTRUCT DICOM file."""
+    """Exception raised when loading a non-RTSTRUCT DICOM file."""
+
+    pass
+
+
+class NotSEGError(InvalidDicomError):
+    """Exception raised when loading a non-SEG DICOM file."""
 
     pass
 
@@ -16,6 +26,7 @@ class RTSTRUCTAttributeError(InvalidDicomError):
     """Exception raised for attribute errors in the RTSTRUCT DICOM file."""
 
     pass
+
 
 class MissingROIError(KeyError):
     """Custom exception for missing ROI in the structure set."""

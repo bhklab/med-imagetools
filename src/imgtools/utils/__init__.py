@@ -16,6 +16,7 @@ from .nnunet import (
     save_json,
     subfiles,
 )
+from .optional_import import OptionalImportError, optional_import
 
 __all__ = [
     # From args
@@ -38,4 +39,8 @@ __all__ = [
     "get_identifiers_from_splitted_files",
     "subfiles",
     "generate_dataset_json",
+    "save_data",
+    # Optional import
+    "OptionalImportError",
+    "optional_import",
 ]

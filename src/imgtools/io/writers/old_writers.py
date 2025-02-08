@@ -6,13 +6,15 @@ import pickle
 import shutil
 from datetime import datetime, timezone
 
-import h5py # type: ignore
-import nrrd # type: ignore
 import numpy as np
 import SimpleITK as sitk
 from skimage.measure import regionprops
 
-from imgtools.utils import image_to_array
+from imgtools.utils import image_to_array, optional_import, OptionalImportError
+
+h5py, _h5py_available = optional_import("h5py")
+nrrd, _nrrd_available = optional_import("pynrrd")
+
 
 # ruff: noqa
 class BaseWriter:
@@ -32,7 +34,11 @@ class BaseWriter:
         time = now.strftime("%H%M%S")
         date_time = date + "_" + time
         out_filename = self.filename_format.format(
-            subject_id=subject_id, date=date, time=time, date_time=date_time, **kwargs
+            subject_id=subject_id,
+            date=date,
+            time=time,
+            date_time=date_time,
+            **kwargs,
         )
         out_path = pathlib.Path(self.root_directory, out_filename).as_posix()
         out_dir = os.path.dirname(out_path)
@@ -59,9 +65,14 @@ class BaseSubjectWriter(BaseWriter):
         self.compress = compress
         if os.path.exists(self.root_directory):
             # delete the folder called {subject_id} that was made in the original BaseWriter / the one named {label_or_image}
-            if os.path.basename(os.path.dirname(self.root_directory)) == "{subject_id}":
+            if (
+                os.path.basename(os.path.dirname(self.root_directory))
+                == "{subject_id}"
+            ):
                 shutil.rmtree(os.path.dirname(self.root_directory))
-            elif "{label_or_image}{train_or_test}" in os.path.basename(self.root_directory):
+            elif "{label_or_image}{train_or_test}" in os.path.basename(
+                self.root_directory
+            ):
                 shutil.rmtree(self.root_directory)
 
     def put(
@@ -88,17 +99,25 @@ class BaseSubjectWriter(BaseWriter):
 
         if nnunet_info:
             if label_or_image == "labels":
-                filename = f"{subject_id}.nii.gz"  # naming convention for labels
+                filename = (
+                    f"{subject_id}.nii.gz"  # naming convention for labels
+                )
             else:
                 filename = self.filename_format.format(
                     subject_id=subject_id,
-                    modality_index=nnunet_info["modalities"][nnunet_info["current_modality"]],
+                    modality_index=nnunet_info["modalities"][
+                        nnunet_info["current_modality"]
+                    ],
                 )  # naming convention for images
             out_path = self._get_path_from_subject_id(
-                filename, label_or_image=label_or_image, train_or_test=train_or_test
+                filename,
+                label_or_image=label_or_image,
+                train_or_test=train_or_test,
             )
         else:
-            out_path = self._get_path_from_subject_id(self.filename_format, subject_id=subject_id)
+            out_path = self._get_path_from_subject_id(
+                self.filename_format, subject_id=subject_id
+            )
         sitk.WriteImage(image, out_path, self.compress)
 
     def _get_path_from_subject_id(self, filename, **kwargs):
@@ -143,6 +162,8 @@ class SegNrrdWriter(BaseWriter):
             self.compression_level = 9
         else:
             self.compression_level = 1
+        if not _nrrd_available:
+            raise OptionalImportError("pynrrd", "nrrd")
 
     def put(self, subject_id, mask, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
@@ -169,7 +190,9 @@ class SegNrrdWriter(BaseWriter):
             arr = np.transpose(sitk.GetArrayFromImage(mask), [-1, -2, -3, -4])
 
             # add extra dimension to metadata
-            space_directions.insert(0, [float("nan"), float("nan"), float("nan")])
+            space_directions.insert(
+                0, [float("nan"), float("nan"), float("nan")]
+            )
             kinds.insert(0, "vector")
             dims += 1
         else:
@@ -186,9 +209,18 @@ class SegNrrdWriter(BaseWriter):
                 else:
                     props = regionprops(arr)[0]
                 bbox = props["bbox"]
-                bbox_segment = [bbox[0], bbox[3], bbox[1], bbox[4], bbox[2], bbox[5]]
+                bbox_segment = [
+                    bbox[0],
+                    bbox[3],
+                    bbox[1],
+                    bbox[4],
+                    bbox[2],
+                    bbox[5],
+                ]
             except IndexError:  # mask is empty
-                assert arr[n].sum() == 0, "Mask not empty but 'skimage.measure.regionprops' failed."
+                assert arr[n].sum() == 0, (
+                    "Mask not empty but 'skimage.measure.regionprops' failed."
+                )
                 bbox_segment = [0, 0, 0, 0, 0, 0]
 
             segment_info[f"Segment{n}_Color"] = list(np.random.random(3))
@@ -220,7 +252,12 @@ class SegNrrdWriter(BaseWriter):
 
 
 class NumpyWriter(BaseWriter):
-    def __init__(self, root_directory, filename_format="{subject_id}.npy", create_dirs=True):
+    def __init__(
+        self,
+        root_directory,
+        filename_format="{subject_id}.npy",
+        create_dirs=True,
+    ):
         super().__init__(root_directory, filename_format, create_dirs)
         self.root_directory = root_directory
         self.filename_format = filename_format
@@ -228,7 +265,9 @@ class NumpyWriter(BaseWriter):
     def put(self, subject_id, image, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
         if isinstance(image, sitk.Image):
-            array, *_ = image_to_array(image)  # TODO (Michal) optionally save the image geometry
+            array, *_ = image_to_array(
+                image
+            )  # TODO (Michal) optionally save the image geometry
         np.save(out_path, array)
 
 
@@ -242,6 +281,8 @@ class HDF5Writer(BaseWriter):
     ):
         super().__init__(root_directory, filename_format, create_dirs)
         self.save_geometry = save_geometry
+        if not _h5py_available:
+            raise OptionalImportError("h5py", "hdf5")
 
     def put(self, subject_id, images, metadata=None, **kwargs):
         out_path = self._get_path_from_subject_id(subject_id, **kwargs)
@@ -279,7 +320,9 @@ class MetadataWriter(BaseWriter):
             )
 
         if self.file_format == "csv" and self.remove_existing:
-            out_path = pathlib.Path(self.root_directory, self.filename_format).as_posix()
+            out_path = pathlib.Path(
+                self.root_directory, self.filename_format
+            ).as_posix()
             if os.path.exists(out_path):
                 os.remove(out_path)  # remove existing CSV instead of appending
 

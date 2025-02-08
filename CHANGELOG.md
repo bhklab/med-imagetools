@@ -1,6 +1,179 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.2 (2025-02-07)
+
+### Chores
+
+- Comment out PyPI publish step in CI workflow
+  ([`c42f5eb`](https://github.com/bhklab/med-imagetools/commit/c42f5eb848b254d2389fe58810f43cce389192b7))
+
+- Update pixi.lock file
+  ([`e2c2c5e`](https://github.com/bhklab/med-imagetools/commit/e2c2c5e75d1b30db2f4d4e5edb45cffcdff869ae))
+
+### Features
+
+- Allow CI-CD workflow to run on development branch
+  ([`d832db9`](https://github.com/bhklab/med-imagetools/commit/d832db9bf165daefab5c849b16c81493799f89b7))
+
+- Update docs and lockfile
+  ([`6e07540`](https://github.com/bhklab/med-imagetools/commit/6e075408fd1ef5e4da4ec84000c558d8fa117e59))
+
+
+## v2.0.0-rc.1 (2025-02-07)
+
+### Chores
+
+- Update lockfile
+  ([`f3c4837`](https://github.com/bhklab/med-imagetools/commit/f3c4837e14ca692f68eba2f0d27c30cab2cf7a7c))
+
+### Features
+
+- Add optional import functionality and clean up dependencies
+  ([#217](https://github.com/bhklab/med-imagetools/pull/217),
+  [`9efc491`](https://github.com/bhklab/med-imagetools/commit/9efc491ef6e6ded596b7880eca810ce24c8a6647))
+
+Introduce optional import functionality for h5py and pynrrd, while removing unused dependencies and
+  refactoring the codebase for better maintainability.
+
+- Documentation • Updated installation instructions with new environment setup commands and
+  streamlined guidance.
+
+- Refactor • Removed legacy imaging processing and indexing functionalities to simplify the toolset.
+
+- New Features • Enhanced error handling for optional dependencies to offer clearer messaging when
+  modules are missing.
+
+
+## v1.21.1 (2025-02-06)
+
+### Bug Fixes
+
+- Refactor DICOM utilities and enhance documentation
+  ([#216](https://github.com/bhklab/med-imagetools/pull/216),
+  [`1ed8de6`](https://github.com/bhklab/med-imagetools/commit/1ed8de6d0f373837a24b36653df30338d66cea0c))
+
+Remove unnecessary sanitization functionality, improve DICOM exception handling, and introduce new
+  utilities for loading and extracting ROI metadata. Update documentation to include references for
+  the new DICOM utilities.
+
+- **New Features** - Enhanced support for processing various DICOM file formats with improved
+  metadata extraction and robust error handling. - Introduced cross-platform support for determining
+  optimal file path and filename lengths, along with secure filename sanitization.
+
+- **Refactor** - Streamlined DICOM processing by removing legacy parameters and simplifying function
+  interfaces for consistent performance.
+
+- **Tests** - Updated the testing suite for improved type safety and reliability, ensuring smoother
+  interactions when handling DICOM files.
+
+### Documentation
+
+- Enhance RegionBox with flexible padding options and module updates
+  ([#215](https://github.com/bhklab/med-imagetools/pull/215),
+  [`5f38f49`](https://github.com/bhklab/med-imagetools/commit/5f38f4994c14dcabf79a3400000f560de1c798cc))
+
+Introduce the BoxPadMethod enum for padding flexibility in RegionBox. Update import paths and remove
+  deprecated modules to streamline the codebase.
+
+
+## v1.21.0 (2025-02-06)
+
+### Chores
+
+- Update lockfile
+  ([`3ff9ca1`](https://github.com/bhklab/med-imagetools/commit/3ff9ca1da86a3f2d481a6fd151dec42b90245836))
+
+### Features
+
+- Improve AbstractBaseWriter with indexing and add docs (#176)
+  ([#189](https://github.com/bhklab/med-imagetools/pull/189),
+  [`e147629`](https://github.com/bhklab/med-imagetools/commit/e147629c0f2f055d02609cde6f1f2f4be5e260c0))
+
+- **New Features** - Introduced a unified file writing framework that streamlines saving image and
+  array data across various formats (e.g., HDF5, NIFTI, NumPy). - Enhanced file handling with
+  improved validations for naming, compression levels, and managing existing files, ensuring smooth
+  data export and logging.
+
+- **Tests** - Added comprehensive testing to verify file saving operations, error handling, and file
+  indexing, ensuring robust performance across different usage scenarios. <!-- end of auto-generated
+  comment: release notes by coderabbit.ai -->
+
+### Refactoring
+
+- Remove Vector3D; update Coordinate3D and enhance RegionBox
+  ([#210](https://github.com/bhklab/med-imagetools/pull/210),
+  [`c16ae7c`](https://github.com/bhklab/med-imagetools/commit/c16ae7c04695e2b5f15d3d8a8fe54209b9024dd7))
+
+Remove the Vector3D class, integrating its functionality into Coordinate3D. Update documentation and
+  improve the calculate_image_boundaries function to support world coordinates. Rename variables for
+  clarity and consistency.
+
+- **New Features** - Introduced a cropping capability that allows simultaneous cropping of images
+  and their corresponding masks. - Added an optional parameter to select the coordinate system when
+  computing image boundaries. - Added new functions to retrieve example dataset paths and images.
+
+- **Enhancements** - Improved 3D coordinate operations to now support integer arithmetic as well as
+  equality and ordering comparisons. - Updated documentation and diagrams to provide a clearer,
+  simplified view of class relationships.
+
+- **Refactor** - Removed a legacy 3D vector type to streamline the available coordinate types.
+
+- **Bug Fixes** - Simplified exception handling and improved clarity in the
+  `BoundingBoxOutsideImageError` class.
+
+- **Tests** - Expanded test coverage for the new `Coordinate3D` class, including equality and
+  comparison operations, while removing tests for the deprecated `Vector3D`. - Added a new test for
+  validating example dataset images.
+
+
+## v1.20.0 (2025-02-06)
+
+### Features
+
+- Add examples module for image dataset tools
+  ([#212](https://github.com/bhklab/med-imagetools/pull/212),
+  [`a882574`](https://github.com/bhklab/med-imagetools/commit/a8825741006650fae3f36fd5bbe270768b87965a))
+
+- **New Features** - Introduced new functions for streamlined access to example dataset resources,
+  mapping key identifiers to their corresponding file paths and images. - Added a dynamic capability
+  to conditionally include functionalities based on the availability of test data. - **Bug Fixes**
+  	- Enhanced error handling for missing dataset files. - **Tests** - Added a new test function to
+  verify the integrity and presence of example dataset images.
+
+
+## v1.19.0 (2025-02-04)
+
+### Documentation
+
+- Example usage for functional.py ([#190](https://github.com/bhklab/med-imagetools/pull/190),
+  [`c2befdc`](https://github.com/bhklab/med-imagetools/commit/c2befdcbdd49e8683243c3827c50032fcf4a2db6))
+
+- **Chores** - Adjusted internal error handling settings for improved type checking.
+
+- **Documentation** - Enhanced usage guides by adding examples to image processing functions to
+  assist with proper implementation.
+
+- **Refactor** - Streamlined parameter annotations and updated return formats across image
+  transformation operations for better clarity and consistency.
+
+### Features
+
+- Add custom exceptions and utility functions for RTSTRUCT DICOM handling
+  ([#211](https://github.com/bhklab/med-imagetools/pull/211),
+  [`0739747`](https://github.com/bhklab/med-imagetools/commit/0739747475b6a59d2c8b49b538abc67c9ade0368))
+
+Introduce custom exceptions and utility functions to improve error handling and data extraction for
+  RTSTRUCT DICOM files.
+
+- **New Features** - Introduced enhanced capabilities for processing RTSTRUCT DICOM files, including
+  streamlined load operations and extraction of region-of-interest metadata and identifiers. - Added
+  robust error handling that clearly notifies users of issues during file processing, improving
+  diagnostic feedback. - Expanded the publicly accessible tools to simplify interactions with
+  structure set data, enabling more efficient DICOM workflow management. - New exception classes for
+  better error categorization related to DICOM processing.
+
+
 ## v1.18.0 (2025-01-31)
 
 ### Documentation

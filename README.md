@@ -12,10 +12,12 @@
 ![DOI Status](https://zenodo.org/badge/243786996.svg)
 
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/med-imagetools)](https://pypi.org/project/med-imagetools/)
-[![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools)](https://pypi.org/project/med-imagetools/)
+[![GitHub Release](https://img.shields.io/github/v/release/bhklab/med-imagetools?include_prereleases&label=pre-release)](https://github.com/bhklab/med-imagetools/releases)
+[![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools?label=stable-pypi)](https://pypi.org/project/med-imagetools/)
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
+![Codecov](https://img.shields.io/codecov/c/github/bhklab/med-imagetools?labelColor=violet&color=white)
 
 </div>
 <!--intro-start-->
@@ -53,12 +55,19 @@ Fig.2 - Med-Imagetools AutoPipeline diagram
 pip install med-imagetools
 ```
 
-### (recommended) Create new conda virtual environment
+### Create new conda virtual environment
 
 ```console
 conda create -n mit
 conda activate mit
 pip install med-imagetools
+```
+
+### Create a `pixi` environment
+
+```console
+pixi init mit
+pixi add --pypi med-imagetools
 ```
 
 ### (optional) Install in development mode
@@ -84,10 +93,6 @@ This will install the package in editable mode, so that the installed package wi
 
 ![imgtools](https://github.com/bhklab/med-imagetools/blob/main/images/dicomsort_help.png?raw=true)
 
-## Latest Updates (v1.2.0) - Feb 5th, 2024
-
-* Documentation is now available at: [https://med-imagetools.readthedocs.io](https://med-imagetools.readthedocs.io)
-* Dependencies have been reduced for a lighter install. `torch` and `torchio` dependencies have been moved to an extra pip install flag. Use `pip install med-imagetools[torch]`.
 
 ## Getting Started
 
@@ -110,28 +115,6 @@ Med-Imagetools takes two step approch to turn messy medical raw dataset to ML re
       --continue_processing [flag]\
       --dry_run [flag]
     ```
-
-2. ***class Dataset***: This class converts processed nrrds to torchio subjects, which can be easily converted to torch dataset
-
-    ```console
-    from imgtools.io import Dataset
-    
-    subjects = Dataset.load_from_nrrd(output_directory, ignore_multi=True)
-    data_set = tio.SubjectsDataset(subjects)
-    data_loader = torch.utils.data.DataLoader(data_set, batch_size=4, shuffle=True, num_workers=4)
-    ```
-
-## Demo (Outdated as of v0.4)
-
-These google collab notebooks will introduce the main functionalities of med-imagetools. More information can be found [here](https://github.com/bhklab/med-imagetools/blob/master/examples/README.md)
-
-### Tutorial 1: Forming Dataset with med-imagetools Autopipeline
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_1_Forming_Dataset_with_Med_Imagetools.ipynb)
-
-### Tutorial 2: Machine Learning with med-imagetools and torchio
-
-[![Google Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/skim2257/tcia_samples/blob/main/notebooks/Tutorial_2_Machine_Learning_with_Med_Imagetools_and_torchio.ipynb)
 
 ## Contributors
 

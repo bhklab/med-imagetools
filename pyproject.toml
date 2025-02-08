@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "1.18.0"
+version = "2.0.0-rc.2"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -19,26 +19,25 @@ requires-python = ">=3.10,<4"
 
 # Standard dependencies
 dependencies = [
-  "h5py>=3.11.0,<4",
+  # logging, CLI, and progress bars
+  "structlog>=24.0,<25",
+  "click>=8.1,<9",
+  "tqdm>=4.66.4,<5",
+  "rich>=13.9.4",
   "joblib>=1.4.2,<2",
-  "numpy<3",
+  # data manipulation
   "matplotlib>=3.8.4,<4",
+  "numpy<3",
   "pandas<3",
+  # image processing
   "pydicom>=2.4.4",
-  "pynrrd>=1.0.0,<2",
   "scikit-image>=0.23.2,<1",
   "scikit-learn>=1.4.2,<2",
   "simpleitk>=2.3.1,<3",
-  "tqdm>=4.66.4,<5",
+  # lockfile
   "fasteners==0.19",
   "pyyaml>=6.0.1,<7",
   "dill>=0.3.8,<1",
-  "attrs>=23.2.0",
-  "structlog>=24.0,<25",
-  "click>=8.1,<9",
-  "rich>=13.9.4",
-  "sqlitedict>=2.0",
-  "sqlalchemy>=2.0.0",
 ]
 
 classifiers = [
@@ -53,8 +52,10 @@ classifiers = [
 
 # Optional dependencies (extras)
 [project.optional-dependencies]
-torch = ["torch", "torchio"]
+torch = ["torch", "torchio"] # dont think these are even used anymore
 debug = ["pyvis"]
+hdf5 = ["h5py>=3.11.0"]
+nrrd = ["pynrrd>=1.0.0"]
 test = [
   "pygithub>=2.5.0",
   "aiohttp>=3.8.1",
@@ -62,10 +63,8 @@ test = [
 all = [
   "pygithub>=2.5.0",
   "aiohttp>=3.8.1",
-  # add these back later
-  # "torch",
-  # "torchio",
-  # "pyvis",
+  "h5py>=3.11.0",
+  "pynrrd>=1.0.0",
 ]
 
 # Entry points for CLI commands
@@ -103,7 +102,7 @@ match = "(main|master)"
 
 [tool.semantic_release.branches.dev]
 # any branch that contains "dev" will be considered a dev branch
-match = ".*dev.*"
+match = "(development|dev)"
 prerelease = true
 prerelease_token = "rc"
 
