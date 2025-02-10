@@ -7,7 +7,6 @@ from enum import Enum
 from itertools import chain
 from typing import (
     TYPE_CHECKING,
-    Dict,
     Iterator,
     List,
     Mapping,
@@ -371,6 +370,7 @@ class RTStructureSet(DataclassMixin):
         def handle_str_list(
             roi_patterns: SelectionPattern | List[SelectionPattern],
         ) -> List[str] | None:
+            """Helper to handle string or list of strings."""
             match roi_patterns:
                 case str() as pattern_str:
                     return self.match_roi(pattern_str)
@@ -401,9 +401,8 @@ class RTStructureSet(DataclassMixin):
             case dict() as roi_map:
                 # raise error if any value is None:
                 if None in roi_map.values():
-                    raise ValueError(
-                        "The 'roi_names' dictionary cannot have any value set to None."
-                    )
+                    errmsg = "The 'roi_names' dictionary cannot have any value set to None."
+                    raise ValueError(errmsg)
                 map_dict = {}
                 for name, pattern in roi_map.items():
                     map_dict[str(name)] = handle_str_list(pattern)
@@ -414,7 +413,8 @@ class RTStructureSet(DataclassMixin):
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
     import pandas as pd
-    from tqdm import tqdm
+
+    # from tqdm import tqdm
     import time
     from imgtools.modules import StructureSet
 
