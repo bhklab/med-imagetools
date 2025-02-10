@@ -457,7 +457,10 @@ if __name__ == "__main__":  # pragma: no cover
         start = time.time()
 
         if setting == 1:
-            _ = [RTStructureSet.from_dicom(rtp) for rtp in subset_paths]
+            rts = [RTStructureSet.from_dicom(rtp) for rtp in subset_paths]
+            # for rt in rts:
+            #     for rn in rt.roi_names:
+            #         _ = rt._get_contour_data(rn)
         elif setting == 2:
             _ = [
                 StructureSet.from_dicom(rtp, suppress_warnings=True)
