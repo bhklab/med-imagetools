@@ -278,5 +278,5 @@ if __name__ == "__main__":  # pragma: no cover
     )
 
     args = parser.parse_args()
-    db = crawl(args.directory, n_jobs=args.n_jobs)
+    db = crawl(pathlib.Path(args.directory), n_jobs=args.n_jobs)
     print("# patients:", len(db))
