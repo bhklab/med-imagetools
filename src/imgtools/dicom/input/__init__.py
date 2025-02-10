@@ -1,4 +1,5 @@
 from .dicom_reader import (
+    DicomInput,
     load_dicom,
     load_rtstruct_dcm,
     load_seg_dcm,
@@ -15,6 +16,7 @@ __all__ = [
     "path_from_pathlike",
     "load_rtstruct_dcm",
     "load_seg_dcm",
+    "DicomInput",
     # rtstruct_utils
     "extract_roi_meta",
     "extract_roi_names",

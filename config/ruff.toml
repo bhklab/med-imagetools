@@ -114,6 +114,8 @@ ignore = [
   "D206",
   "N813",
   "EM101",
+  "ANN101",
+  "ANN102",
 ]
 
 [lint.mccabe]

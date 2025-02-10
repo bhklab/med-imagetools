@@ -1,5 +1,6 @@
 from .args import parser
 from .autopipeutils import save_data
+from .class_utils import DataclassMixin
 from .dicomutils import all_modalities_metadata, get_modality_metadata
 from .imageutils import (
     Array3D,
@@ -37,4 +38,6 @@ __all__ = [
     # Optional import
     "OptionalImportError",
     "optional_import",
+    # class utils
+    "DataclassMixin",
 ]

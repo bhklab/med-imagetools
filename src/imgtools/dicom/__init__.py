@@ -1,4 +1,5 @@
 from .input import (
+    DicomInput,
     extract_roi_meta,
     extract_roi_names,
     load_dicom,
@@ -20,4 +21,5 @@ __all__ = [
     "extract_roi_meta",
     "extract_roi_names",
     "rtstruct_reference_uids",
+    "DicomInput",
 ]

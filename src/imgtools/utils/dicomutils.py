@@ -79,10 +79,14 @@ def get_modality_metadata(dicom_data, modality: str):
     return metadata
 
 
-def all_modalities_metadata(dicom_data: pydicom.dataset.FileDataset) -> Dict[str, T]:
+def all_modalities_metadata(
+    dicom_data: pydicom.dataset.FileDataset,
+) -> Dict[str, T]:
     metadata = get_modality_metadata(dicom_data, "ALL")
 
-    if hasattr(dicom_data, "PixelSpacing") and hasattr(dicom_data, "SliceThickness"):
+    if hasattr(dicom_data, "PixelSpacing") and hasattr(
+        dicom_data, "SliceThickness"
+    ):
         pixel_size = copy.copy(dicom_data.PixelSpacing)
         pixel_size.append(dicom_data.SliceThickness)
         metadata["PixelSize"] = str(tuple(pixel_size))
