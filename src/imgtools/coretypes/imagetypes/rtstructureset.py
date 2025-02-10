@@ -36,6 +36,17 @@ if TYPE_CHECKING:
     from imgtools.dicom import DicomInput
 
 
+__all__ = [
+    "SelectionPattern",
+    "ROINamePatterns",
+    "ROIContourGeometricType",
+    "ContourPointsAcrossSlicesError",
+    "ROI",
+    "RTStructureSetMetadata",
+    "RTStructureSet",
+    "load_rtstructureset",
+]
+
 # Define type aliases
 """Alias for a string or a list of strings used to represent selection patterns."""
 SelectionPattern: TypeAlias = str | List[str] | List[List[str]]
@@ -408,6 +419,22 @@ class RTStructureSet(DataclassMixin):
                     map_dict[str(name)] = handle_str_list(pattern)
                 return map_dict
         return None
+
+
+def load_rtstructureset(dicom: DicomInput) -> RTStructureSet:
+    """Load an RTSTRUCT DICOM file and return the RTStructureSet object.
+
+    Parameters
+    ----------
+    dicom : str | Path | bytes | FileDataset
+        The RTSTRUCT DICOM object.
+
+    Returns
+    -------
+    RTStructureSet
+        The structure set data extracted from the RTSTRUCT.
+    """
+    return RTStructureSet.from_dicom(dicom)
 
 
 if __name__ == "__main__":  # pragma: no cover
