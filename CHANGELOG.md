@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.4 (2025-02-10)
+
+### Bug Fixes
+
+- Add function to handle out of bounds coordinates for a RegionBox in an image
+  ([#221](https://github.com/bhklab/med-imagetools/pull/221),
+  [`9949a4f`](https://github.com/bhklab/med-imagetools/commit/9949a4fa1463ae2c45acb7282a039333a2960253))
+
+This works the same way as `_adjust_negative_coordinates`, but requires the image as an addition
+  input and modifies the RegionBox object directly.
+
+A message is logged in the debugger if a dimension is adjusted.
+
+I also updated the `crop_image` function to call this before applying the crop.
+
+
 ## v2.0.0-rc.3 (2025-02-07)
 
 ### Chores
