@@ -17,7 +17,8 @@
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
-![Codecov](https://img.shields.io/codecov/c/github/bhklab/med-imagetools?labelColor=violet&color=white)
+[![Codecov](https://img.shields.io/codecov/c/github/bhklab/med-imagetools?labelColor=violet&color=white)](https://codecov.io/gh/bhklab/med-imagetools)
+
 
 </div>
 <!--intro-start-->
