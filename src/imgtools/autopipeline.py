@@ -1,4 +1,3 @@
-from aifc import Error
 import os
 import pathlib
 import shutil
@@ -174,7 +173,7 @@ class AutoPipeline(Pipeline):
                     if folder_name.startswith("Task") and folder_name[4:7].isnumeric() and int(folder_name[4:7]) in available_numbers:
                         available_numbers.remove(int(folder_name[4:7]))
                 if len(available_numbers) == 0:
-                    raise Error("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
+                    raise ValueError("There are not enough task ID's for the nnUNet output. Please make sure that there is at least one task ID available between 500 and 999, inclusive")
                 task_folder_name = f"Task{available_numbers[0]}_{study_name}"
                 self.output_directory = pathlib.Path(self.output_directory, task_folder_name).as_posix()
                 self.task_id = available_numbers[0]
