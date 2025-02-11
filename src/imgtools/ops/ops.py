@@ -1,3 +1,4 @@
+import csv
 import pathlib
 import re
 import time
@@ -24,8 +25,8 @@ from imgtools.io.writers import (
     SegNrrdWriter,
 )
 from imgtools.logging import logger
+from imgtools.modules import Segmentation, StructureSet, map_over_labels
 from imgtools.modules.datagraph import DataGraph
-from imgtools.modules import Segmentation, map_over_labels, StructureSet
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
@@ -58,8 +59,12 @@ class BaseOp:
         raise NotImplementedError
 
     def __repr__(self):
-        attrs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
-        attrs = [(k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs]
+        attrs = [
+            (k, v) for k, v in self.__dict__.items() if not k.startswith("_")
+        ]
+        attrs = [
+            (k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs
+        ]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__name__}({args})"
 
@@ -118,7 +123,11 @@ class ImageAutoInput(BaseInput):
         Whether to update crawled index
     """
 
-    imgtools_dir: str = ".imgtools"
+    imgtools_dir_name: str = ".imgtools"
+
+    csv_path: pathlib.Path
+    json_path: pathlib.Path
+    edge_path: pathlib.Path
 
     def __init__(
         self,
@@ -127,22 +136,18 @@ class ImageAutoInput(BaseInput):
         n_jobs: int = -1,
         visualize: bool = False,
         update: bool = False,
+        readers: list[LoaderFunction] | None = None,
     ):
         self.modalities = modalities
 
         self.dir_path = pathlib.Path(dir_path)
         self.parent = self.dir_path.parent
-        self.dataset_name = self.dir_path.name
+        dataset_name = self.dir_path.name
 
-        self.csv_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
-        )
-        self.json_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.json"
-        )
-        self.edge_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
-        )
+        imgtoolsdir = self.parent / self.imgtools_dir_name
+        self.csv_path = imgtoolsdir / f"imgtools_{dataset_name}.csv"
+        self.json_path = imgtoolsdir / f"imgtools_{dataset_name}.json"
+        self.edge_path = imgtoolsdir / f"imgtools_{dataset_name}_edges.csv"
 
         start = time.time()
         # CRAWLER
@@ -182,16 +187,30 @@ class ImageAutoInput(BaseInput):
         # not sure what this is really doing...
 
         self.column_names = [
-            cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"
+            cols
+            for cols in self.df_combined.columns
+            if cols.split("_")[0] == "folder"
         ]
         self.series_names = [
-            cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"
+            cols
+            for cols in self.df_combined.columns
+            if cols.split("_")[0] == "series"
         ]
         logger.info(
             f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities."
         )
 
-        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
+        # self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
+        if not readers:
+            self.readers = [
+                read_dicom_auto for _ in range(len(self.output_streams))
+            ]
+        elif len(readers) != len(self.output_streams):
+            errmsg = f"Number of readers {len(readers)} must match the number of output streams {len(self.output_streams)}"
+            raise ValueError(errmsg)
+        else:
+            self.readers = readers
+
         logger.info(f"Total time taken: {time.time() - start:.2f} seconds")
         loader = ImageCSVLoader(
             self.df_combined,
@@ -357,7 +376,10 @@ class ImageFileOutput(BaseOutput):
             writer_class = ImageFileWriter
 
         writer = writer_class(
-            self.root_directory, self.filename_format, self.create_dirs, self.compress
+            self.root_directory,
+            self.filename_format,
+            self.create_dirs,
+            self.compress,
         )
 
         super().__init__(writer)
@@ -378,7 +400,10 @@ class ImageSubjectFileOutput(BaseOutput):
         self.compress = compress
 
         writer = BaseSubjectWriter(
-            self.root_directory, self.filename_format, self.create_dirs, self.compress
+            self.root_directory,
+            self.filename_format,
+            self.create_dirs,
+            self.compress,
         )
 
         super().__init__(writer)
@@ -415,7 +440,9 @@ class ImageAutoOutput:
             if not nnunet_info and not inference:
                 self.output[colname_process] = ImageSubjectFileOutput(
                     pathlib.Path(
-                        root_directory, "{subject_id}", colname_process.split(".")[0]
+                        root_directory,
+                        "{subject_id}",
+                        colname_process.split(".")[0],
                     ).as_posix(),
                     filename_format="{}.nii.gz".format(colname_process),
                 )
@@ -927,7 +954,9 @@ class Crop(BaseOp):
     """
 
     def __init__(
-        self, crop_centre: Sequence[float], size: Union[int, Sequence[int], np.ndarray]
+        self,
+        crop_centre: Sequence[float],
+        size: Union[int, Sequence[int], np.ndarray],
     ):
         self.crop_centre = crop_centre
         self.size = size
@@ -1011,7 +1040,9 @@ class BoundingBox(BaseOp):
         result = obj(mask, label)
     """
 
-    def __call__(self, mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
+    def __call__(
+        self, mask: sitk.Image, label: int = 1
+    ) -> Tuple[Tuple, Tuple]:
         """BoundingBox callable object: Find the axis-aligned
         bounding box of a region descriibed by a segmentation mask.
 
@@ -1076,7 +1107,9 @@ class Centroid(BaseOp):
             The centroid coordinates.
         """
 
-        return centroid(mask, label=label, world_coordinates=self.world_coordinates)
+        return centroid(
+            mask, label=label, world_coordinates=self.world_coordinates
+        )
 
 
 class CropToMaskBoundingBox(BaseOp):
@@ -1130,7 +1163,9 @@ class CropToMaskBoundingBox(BaseOp):
             The cropped image and mask.
         """
 
-        return crop_to_mask_bounding_box(image, mask, margin=self.margin, label=label)
+        return crop_to_mask_bounding_box(
+            image, mask, margin=self.margin, label=label
+        )
 
 
 # Intensity ops
@@ -1307,7 +1342,9 @@ class StandardScale(BaseOp):
     """
 
     def __init__(
-        self, rescale_mean: Optional[float] = 0.0, rescale_std: Optional[float] = 1.0
+        self,
+        rescale_mean: Optional[float] = 0.0,
+        rescale_std: Optional[float] = 1.0,
     ):
         self.rescale_mean = rescale_mean
         self.rescale_std = rescale_std
@@ -1343,7 +1380,9 @@ class StandardScale(BaseOp):
             The rescaled image.
         """
 
-        return standard_scale(image, mask, self.rescale_mean, self.rescale_std, label)
+        return standard_scale(
+            image, mask, self.rescale_mean, self.rescale_std, label
+        )
 
 
 class MinMaxScale(BaseOp):
@@ -1463,7 +1502,10 @@ class ImageFunction(BaseOp):
     """
 
     def __init__(
-        self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
+        self,
+        function: Function,
+        copy_geometry: bool = True,
+        **kwargs: Optional[Any],
     ):
         self.function = function
         self.copy_geometry = copy_geometry
@@ -1517,7 +1559,10 @@ class ArrayFunction(BaseOp):
     """
 
     def __init__(
-        self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
+        self,
+        function: Function,
+        copy_geometry: bool = True,
+        **kwargs: Optional[Any],
     ):
         self.function = function
         self.copy_geometry = copy_geometry
@@ -1599,7 +1644,9 @@ class StructureSetToSegmentation(BaseOp):
 
     def __init__(
         self,
-        roi_names: Union[str, List[str], Dict[str, Union[str, List[str]]], None] = None,
+        roi_names: Union[
+            str, List[str], Dict[str, Union[str, List[str]]], None
+        ] = None,
         continuous: bool = True,
     ):
         """Initialize the op."""
@@ -1706,7 +1753,9 @@ class FilterSegmentation:
                         if roi_select_first and matched:
                             break  # break if roi_select_first and we're matched
                         for n, name in enumerate(self.roi_names):
-                            if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
+                            if re.fullmatch(
+                                subpattern, name, flags=re.IGNORECASE
+                            ):
                                 matched = True
                                 if not roi_separate:
                                     labels[name] = cur_label
@@ -1738,9 +1787,13 @@ class FilterSegmentation:
                 .SourceImageSequence[0]
                 .ReferencedSOPInstanceUID
             )  # unused but references InstanceUID of slice
-            assert ref_uid is not None, "There was no ref_uid"  # dodging linter
+            assert (
+                ref_uid is not None
+            ), "There was no ref_uid"  # dodging linter
 
-            frame_coords = np.array(frame.PlanePositionSequence[0].ImagePositionPatient)
+            frame_coords = np.array(
+                frame.PlanePositionSequence[0].ImagePositionPatient
+            )
             img_coords = physical_points_to_idxs(
                 reference_image, np.expand_dims(frame_coords, (0, 1))
             )[0][0]
@@ -1799,7 +1852,9 @@ class FilterSegmentation:
                     labels[name] = []
                     for pattern_one in pattern:
                         matching_names = list(
-                            self._assign_labels([pattern_one], roi_select_first).keys()
+                            self._assign_labels(
+                                [pattern_one], roi_select_first
+                            ).keys()
                         )
                         if matching_names:
                             labels[name].extend(
@@ -1834,13 +1889,18 @@ class FilterSegmentation:
         if self.roi_patterns != {} and isinstance(self.roi_patterns, dict):
             for i, (name, label_list) in enumerate(labels.items()):
                 for label in label_list:
-                    self.get_mask(reference_image, seg, mask, label, i, self.continuous)
+                    self.get_mask(
+                        reference_image, seg, mask, label, i, self.continuous
+                    )
                 seg_roi_indices[name] = i
         else:
             for name, label in labels.items():
-                self.get_mask(reference_image, seg, mask, name, label, self.continuous)
+                self.get_mask(
+                    reference_image, seg, mask, name, label, self.continuous
+                )
             seg_roi_indices = {
-                "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
+                "_".join(k): v
+                for v, k in groupby(labels, key=lambda x: labels[x])
             }
 
         mask[mask > 1] = 1
@@ -1870,7 +1930,10 @@ class MapOverLabels(BaseOp):
     """
 
     def __init__(
-        self, op, include_background: bool = False, return_segmentation: bool = True
+        self,
+        op,
+        include_background: bool = False,
+        return_segmentation: bool = True,
     ):
         self.op = op
         self.include_background = include_background

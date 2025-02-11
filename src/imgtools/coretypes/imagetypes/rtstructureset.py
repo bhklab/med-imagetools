@@ -27,6 +27,7 @@ from imgtools.exceptions import (
     ROIContourError,
 )
 from imgtools.logging import logger
+from imgtools.ops.ops import ImageAutoInput
 from imgtools.utils import DataclassMixin, physical_points_to_idxs
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ if TYPE_CHECKING:
     from imgtools.dicom import DicomInput
 
 
-__all__ = [
+__all__: List[str] = [
     "SelectionPattern",
     "ROINamePatterns",
     "ROIContourGeometricType",
@@ -48,9 +49,12 @@ __all__ = [
 ]
 
 # Define type aliases
-"""Alias for a string or a list of strings used to represent selection patterns."""
 SelectionPattern: TypeAlias = str | List[str] | List[List[str]]
+"""Alias for a string or a list of strings used to represent selection patterns."""
 
+ROINamePatterns: TypeAlias = (
+    SelectionPattern | Mapping[str, SelectionPattern] | None
+)
 """Alias for ROI names, which can be:
 - SelectionPattern:
     - A single string pattern.
@@ -58,9 +62,6 @@ SelectionPattern: TypeAlias = str | List[str] | List[List[str]]
 - A dictionary mapping strings to patterns or lists of patterns.
 - None, to represent the absence of any selection.
 """
-ROINamePatterns: TypeAlias = (
-    SelectionPattern | Mapping[str, SelectionPattern] | None
-)
 
 
 class ROIContourGeometricType(str, Enum):
@@ -223,7 +224,9 @@ class RTStructureSet(DataclassMixin):
         )
         if isinstance(dicom, (str, pathlib.Path)):
             metadata.update(filepath=str(dicom))
-        rois = {roi.ROIName: roi for roi in ROI.from_dicom(dicom_rt)}
+        rois: dict[str, ROI] = {
+            roi.ROIName: roi for roi in ROI.from_dicom(dicom_rt)
+        }
         return cls(metadata=metadata, rois=rois)
 
     def match_roi(
@@ -353,12 +356,14 @@ class RTStructureSet(DataclassMixin):
 
             z_int = int(z_idx)
 
-            # make sure z_int is within the bounds of the mask array
-            assert 0 <= z_int < mask_array.shape[0]
-
-            assert (
-                0 <= roi_index < mask_array.shape[3]
-            )  # Ensure roi_index is within bounds
+            # Ensure z_int and roi_index are within bounds
+            if not (
+                0 <= z_int < mask_array.shape[0]
+                and 0 <= roi_index < mask_array.shape[3]
+            ):
+                msg = f"Index out of bounds: z_int={z_int}, roi_index={roi_index}"
+                msg += f"mask_array shape: {mask_array.shape}"
+                raise IndexError(msg)
 
             try:
                 mask_array[z_int, :, :, roi_index] += filled_mask_array
@@ -421,7 +426,7 @@ class RTStructureSet(DataclassMixin):
         return None
 
 
-def load_rtstructureset(dicom: DicomInput) -> RTStructureSet:
+def load_rtstructureset(dicom: DicomInput, *args: str,  **kwargs: str) -> RTStructureSet:
     """Load an RTSTRUCT DICOM file and return the RTStructureSet object.
 
     Parameters
@@ -480,23 +485,31 @@ if __name__ == "__main__":  # pragma: no cover
     subset_paths = all_paths[:100]
     logger.setLevel("WARNING")  # type: ignore
 
-    def run(subset_paths, setting) -> None:  # noqa
-        start = time.time()
+    # def run(subset_paths, setting) -> None:  # noqa
+    #     start = time.time()
 
-        if setting == 1:
-            rts = [RTStructureSet.from_dicom(rtp) for rtp in subset_paths]
-            # for rt in rts:
-            #     for rn in rt.roi_names:
-            #         _ = rt._get_contour_data(rn)
-        elif setting == 2:
-            _ = [
-                StructureSet.from_dicom(rtp, suppress_warnings=True)
-                for rtp in subset_paths
-            ]
-        print(f"Time taken: {time.time() - start:.2f}s for setting {setting}")
+    #     if setting == 1:
+    #         rts = [RTStructureSet.from_dicom(rtp) for rtp in subset_paths]
+    #         # for rt in rts:
+    #         #     for rn in rt.roi_names:
+    #         #         _ = rt._get_contour_data(rn)
+    #     elif setting == 2:
+    #         _ = [
+    #             StructureSet.from_dicom(rtp, suppress_warnings=True)
+    #             for rtp in subset_paths
+    #         ]
+    #     print(f"Time taken: {time.time() - start:.2f}s for setting {setting}")
 
-    run(subset_paths, setting=1)
-    run(subset_paths, setting=2)
+    # run(subset_paths, setting=1)
+    # run(subset_paths, setting=2)
+    from imgtools.io import read_dicom_auto
+
+    inin = ImageAutoInput(
+        dir_path="data",
+        update=False,
+        modalities="CT,RTSTRUCT",
+        readers=[read_dicom_auto, load_rtstructureset],
+    )
 
     # for rt in tqdm(rt_df["file_path"].values):
     #     try:

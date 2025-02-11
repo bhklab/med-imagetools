@@ -1,5 +1,26 @@
 from __future__ import annotations
 
+from .rtstructureset import (
+    ROI,
+    ContourPointsAcrossSlicesError,
+    ROIContourGeometricType,
+    ROINamePatterns,
+    RTStructureSet,
+    RTStructureSetMetadata,
+    SelectionPattern,
+    load_rtstructureset,
+)
+
+__all__: list[str] = [
+    "SelectionPattern",
+    "ROINamePatterns",
+    "ROIContourGeometricType",
+    "ContourPointsAcrossSlicesError",
+    "ROI",
+    "RTStructureSetMetadata",
+    "RTStructureSet",
+    "load_rtstructureset",
+]
 # from dataclasses import dataclass
 # from typing import TYPE_CHECKING, Sequence
 
