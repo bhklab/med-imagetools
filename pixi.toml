@@ -72,7 +72,6 @@ cmd = "pytest -c config/pytest.ini --rootdir ."
 [feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
 inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
-depends-on = ["test"]
 description = "Run pytest and generate coverage report"
 
 [feature.test.tasks.clean_tests]
