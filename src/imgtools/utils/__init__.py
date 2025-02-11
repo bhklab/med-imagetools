@@ -1,6 +1,9 @@
+from imgtools.dicom.dicom_metadata import (
+    all_modalities_metadata,
+    get_modality_metadata,
+)
+
 from .args import parser
-from .autopipeutils import save_data
-from .dicomutils import all_modalities_metadata, get_modality_metadata
 from .imageutils import (
     Array3D,
     ImageArrayMetadata,
@@ -17,6 +20,7 @@ from .nnunet import (
     subfiles,
 )
 from .optional_import import OptionalImportError, optional_import
+from .sanitize_file_name import sanitize_file_name
 
 __all__ = [
     "array_to_image",
@@ -33,8 +37,9 @@ __all__ = [
     "get_identifiers_from_splitted_files",
     "subfiles",
     "generate_dataset_json",
-    "save_data",
     # Optional import
     "OptionalImportError",
     "optional_import",
+    # sanitize_file_name
+    "sanitize_file_name",
 ]
