@@ -33,6 +33,7 @@ jobs:
           environments: ${{ matrix.env }}
           pixi-version: v0.40.0
           cache: true
+          frozen: false
 
       - name: Run pytest
         env:

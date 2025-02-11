@@ -100,11 +100,11 @@ patch_without_tag = true
 [tool.semantic_release.branches.main]
 match = "(main|master)"
 
-[tool.semantic_release.branches.dev]
-# any branch that contains "dev" will be considered a dev branch
-match = "(development|dev)"
-prerelease = true
-prerelease_token = "rc"
+# [tool.semantic_release.branches.dev]
+# # any branch that contains "dev" will be considered a dev branch
+# match = "(development|dev)"
+# prerelease = true
+# prerelease_token = "rc"
 
 [tool.ruff]
 # Extend the `pyproject.toml` file in the parent directory...
