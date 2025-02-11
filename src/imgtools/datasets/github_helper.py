@@ -8,7 +8,7 @@ import tarfile
 import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Pattern
 
 import aiohttp
 from rich import print  # noqa
@@ -306,7 +306,7 @@ class MedImageTestData:
         self,
         dest: Path,
         assets: Optional[List[GitHubReleaseAsset]] = None,
-        exclude: Optional[List[str]] = None,
+        exclude: Optional[List[Pattern[str]]] = None,
         force: bool = False,
         cores: Optional[int] = None,
     ) -> List[Path]:
@@ -334,7 +334,9 @@ class MedImageTestData:
         if exclude:
             import re
 
-            console.log(f"Excluding assets on patterns: {', '.join(exclude)}")
+            console.log(
+                f"Excluding assets on patterns: {', '.join([str(x) for x in exclude])}"
+            )
             # try matching OR finding exact names
             exclude = [re.compile(f".*{name}.*") for name in exclude]
             exclude_assets = [

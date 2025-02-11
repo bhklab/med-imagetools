@@ -1,5 +1,5 @@
 import pathlib
-from typing import List
+from typing import List, Pattern
 
 import click
 
@@ -42,7 +42,9 @@ if is_testdata_available():
     "-h",
     "--help",
 )
-def testdata(dest: pathlib.Path, assets: List[str], no: List[str]) -> None:
+def testdata(
+    dest: pathlib.Path, assets: List[str], no: List[Pattern[str]]
+) -> None:
     """Download test data from the latest GitHub release.
 
     DEST is the directory where the test data will be saved.
@@ -73,9 +75,7 @@ def testdata(dest: pathlib.Path, assets: List[str], no: List[str]) -> None:
     downloaded_files = manager.download(
         dest, assets=selected_assets, exclude=no
     )
-    # click.echo(
-    #     f"Downloaded files: {', '.join(str(file) for file in downloaded_files)}"
-    # )
+
     click.echo("Downloaded files:")
     for file in downloaded_files:
         click.echo(f"\t{file}")
