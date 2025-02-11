@@ -6,7 +6,9 @@ import pydicom
 T = TypeVar("T")
 
 
-def get_modality_metadata(dicom_data, modality: str):
+def get_modality_metadata(
+    dicom_data: pydicom.FileDataset, modality: str
+) -> Dict[str, str]:
     keys = {
         "ALL": {
             "BodyPartExamined": "BodyPartExamined",
@@ -52,13 +54,9 @@ def get_modality_metadata(dicom_data, modality: str):
             "RadionuclideHalfLife",
         ],
     }
-
-    # initialize metadata dictionary
-    if modality == "ALL":
-        metadata = {}
-    else:
-        metadata = all_modalities_metadata(dicom_data)
-
+    metadata: Dict[str, str] = (
+        {} if modality == "ALL" else all_modalities_metadata(dicom_data)
+    )
     # populating metadata
     if modality == "RTSTRUCT":
         if hasattr(dicom_data, "StructureSetROISequence"):
@@ -74,15 +72,20 @@ def get_modality_metadata(dicom_data, modality: str):
                 if hasattr(dicom_data, k):
                     metadata[k] = getattr(dicom_data, k)
         else:
-            print("WAGUANWAGUANWAGUAN")
+            errmsg = f"Invalid keys for modality '{modality}'."
+            raise ValueError(errmsg)
 
     return metadata
 
 
-def all_modalities_metadata(dicom_data: pydicom.dataset.FileDataset) -> Dict[str, T]:
+def all_modalities_metadata(
+    dicom_data: pydicom.dataset.FileDataset,
+) -> Dict[str, T]:
     metadata = get_modality_metadata(dicom_data, "ALL")
 
-    if hasattr(dicom_data, "PixelSpacing") and hasattr(dicom_data, "SliceThickness"):
+    if hasattr(dicom_data, "PixelSpacing") and hasattr(
+        dicom_data, "SliceThickness"
+    ):
         pixel_size = copy.copy(dicom_data.PixelSpacing)
         pixel_size.append(dicom_data.SliceThickness)
         metadata["PixelSize"] = str(tuple(pixel_size))
