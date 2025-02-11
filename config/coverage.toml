@@ -3,7 +3,7 @@ omit = [
   "src/imgtools/utils/args.py",
   "src/imgtools/logging/**/*.py",
   "src/imgtools/cli/**/*.py",
-  "src/imgtools/dicom/index/**/*.py",
+  "src/imgtools/_deprecated/**/*.py",
   "tests/**/*.py",
 ]
 
