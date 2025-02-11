@@ -20,135 +20,135 @@ from imgtools.modules.datagraph import DataGraph
 from .base_classes import BaseInput
 
 
-class CrawlGraphInput(BaseInput):
-    """CrawlGraphInput class for loading and indexing datasets.
+# class CrawlGraphInput(BaseInput):
+#     """CrawlGraphInput class for loading and indexing datasets.
 
-    This class crawls through the specified directory to index the dataset,
-    creates a graph of the dataset, and allows querying the graph based on modalities.
+#     This class crawls through the specified directory to index the dataset,
+#     creates a graph of the dataset, and allows querying the graph based on modalities.
 
-    Parameters
-    ----------
-    dir_path : str | pathlib.Path
-        Path to the dataset's top-level directory. The crawler/indexer will start at this directory.
+#     Parameters
+#     ----------
+#     dir_path : str | pathlib.Path
+#         Path to the dataset's top-level directory. The crawler/indexer will start at this directory.
 
-    n_jobs : int
-        Number of parallel jobs to run when crawling. Default is -1.
+#     n_jobs : int
+#         Number of parallel jobs to run when crawling. Default is -1.
 
-    update_crawl : bool
-        Whether to update the crawled index. Default is False.
+#     update_crawl : bool
+#         Whether to update the crawled index. Default is False.
 
-    imgtools_dir : str
-        Directory name for imgtools output files. Default is ".imgtools".
+#     imgtools_dir : str
+#         Directory name for imgtools output files. Default is ".imgtools".
 
-    db : dict
-        Dictionary containing the indexed dataset, created by the crawler.
+#     db : dict
+#         Dictionary containing the indexed dataset, created by the crawler.
 
-    graph : DataGraph
-        DataGraph object containing the dataset graph.
-    """
+#     graph : DataGraph
+#         DataGraph object containing the dataset graph.
+#     """
 
-    dir_path: str
-    n_jobs: int
-    update_crawl: bool
-    imgtools_dir: str
+#     dir_path: str
+#     n_jobs: int
+#     update_crawl: bool
+#     imgtools_dir: str
 
-    db: dict
-    graph: DataGraph
+#     db: dict
+#     graph: DataGraph
 
-    def __init__(
-        self,
-        dir_path: str | pathlib.Path,
-        n_jobs: int = -1,
-        update_crawl: bool = False,
-        imgtools_dir: str = ".imgtools",
-    ) -> None:
-        self.dir_path = pathlib.Path(dir_path)
-        self.dataset_name = self.dir_path.name
-        self.n_jobs = n_jobs
-        self.update_crawl = update_crawl
-        self.imgtools_dir = imgtools_dir
+#     def __init__(
+#         self,
+#         dir_path: str | pathlib.Path,
+#         n_jobs: int = -1,
+#         update_crawl: bool = False,
+#         imgtools_dir: str = ".imgtools",
+#     ) -> None:
+#         self.dir_path = pathlib.Path(dir_path)
+#         self.dataset_name = self.dir_path.name
+#         self.n_jobs = n_jobs
+#         self.update_crawl = update_crawl
+#         self.imgtools_dir = imgtools_dir
 
-        self.csv_path = self._create_path(f"imgtools_{self.dataset_name}.csv")
-        self.json_path = self._create_path(
-            f"imgtools_{self.dataset_name}.json"
-        )
-        self.edge_path = self._create_path(
-            f"imgtools_{self.dataset_name}_edges.csv"
-        )
+#         self.csv_path = self._create_path(f"imgtools_{self.dataset_name}.csv")
+#         self.json_path = self._create_path(
+#             f"imgtools_{self.dataset_name}.json"
+#         )
+#         self.edge_path = self._create_path(
+#             f"imgtools_{self.dataset_name}_edges.csv"
+#         )
 
-        start = time.time()
-        self.db = self._crawl()
-        self.graph = self._init_graph()
+#         start = time.time()
+#         self.db = self._crawl()
+#         self.graph = self._init_graph()
 
-        logger.info("Crawl and graph completed", time=time.time() - start)
+#         logger.info("Crawl and graph completed", time=time.time() - start)
 
-    def _create_path(self, file_name: str) -> pathlib.Path:
-        """Helper function to create paths.
+#     def _create_path(self, file_name: str) -> pathlib.Path:
+#         """Helper function to create paths.
 
-        TODO: would be nice to allow users to specify this better
-        """
-        return self.dir_path.parent / self.imgtools_dir / file_name
+#         TODO: would be nice to allow users to specify this better
+#         """
+#         return self.dir_path.parent / self.imgtools_dir / file_name
 
-    def _crawl(self) -> dict:
-        # CRAWLER
-        # -------
-        # Checks if dataset has already been indexed
-        if not self.csv_path.exists() or self.update:
-            logger.debug("Output exists, force updating.", path=self.csv_path)
-            logger.info("Indexing the dataset...")
-            db = crawl(
-                top=self.dir_path,
-                n_jobs=self.n_jobs,
-                csv_path=self.csv_path,
-                json_path=self.json_path,
-            )
-            logger.info(f"Number of patients in the dataset: {len(db)}")
-        else:
-            logger.warning(
-                "The dataset has already been indexed. Use --update to force update."
-            )
-        return db
+#     def _crawl(self) -> dict:
+#         # CRAWLER
+#         # -------
+#         # Checks if dataset has already been indexed
+#         if not self.csv_path.exists() or self.update:
+#             logger.debug("Output exists, force updating.", path=self.csv_path)
+#             logger.info("Indexing the dataset...")
+#             db = crawl(
+#                 top=self.dir_path,
+#                 n_jobs=self.n_jobs,
+#                 csv_path=self.csv_path,
+#                 json_path=self.json_path,
+#             )
+#             logger.info(f"Number of patients in the dataset: {len(db)}")
+#         else:
+#             logger.warning(
+#                 "The dataset has already been indexed. Use --update to force update."
+#             )
+#         return db
 
-    def parse_graph(self, modalities: str | List[str]) -> pd.DataFrame:
-        """Parse the graph based on the provided modalities.
+#     def parse_graph(self, modalities: str | List[str]) -> pd.DataFrame:
+#         """Parse the graph based on the provided modalities.
 
-        TODO: establish how users can use the df columns to filter the data.
+#         TODO: establish how users can use the df columns to filter the data.
 
-        Parameters
-        ----------
-        modalities : str | List[str]
-            Either a list of strings or a single string of comma-separated modalities.
-            For example, ["CT", "RTSTRUCT"] or "CT,RTSTRUCT".
-            Only samples with ALL specified modalities will be processed.
-            Ensure there are no spaces between list elements if provided as a string.
+#         Parameters
+#         ----------
+#         modalities : str | List[str]
+#             Either a list of strings or a single string of comma-separated modalities.
+#             For example, ["CT", "RTSTRUCT"] or "CT,RTSTRUCT".
+#             Only samples with ALL specified modalities will be processed.
+    #         Ensure there are no spaces between list elements if provided as a string.
 
-        Returns
-        -------
-        pd.DataFrame
-            A pandas DataFrame containing the parsed graph.
-        """
-        assert self.graph is not None, "Graph not initialized."
-        modalities = (
-            modalities if isinstance(modalities, str) else ",".join(modalities)
-        )
-        logger.info("Querying graph", modality=modalities)
-        self.df_combined = self.graph.parser(modalities)
-        return self.df_combined
+    #     Returns
+    #     -------
+    #     pd.DataFrame
+    #         A pandas DataFrame containing the parsed graph.
+    #     """
+    #     assert self.graph is not None, "Graph not initialized."
+    #     modalities = (
+    #         modalities if isinstance(modalities, str) else ",".join(modalities)
+    #     )
+    #     logger.info("Querying graph", modality=modalities)
+    #     self.df_combined = self.graph.parser(modalities)
+    #     return self.df_combined
 
-    def _init_graph(self) -> DataGraph:
-        # GRAPH
-        # -----
-        # Form the graph
-        logger.debug("Creating edge path", edge_path=self.edge_path)
-        return DataGraph(
-            path_crawl=self.csv_path.resolve().as_posix(),
-            edge_path=self.edge_path.as_posix(),
-            update=self.update_crawl,
-        )
+    # def _init_graph(self) -> DataGraph:
+    #     # GRAPH
+    #     # -----
+    #     # Form the graph
+    #     logger.debug("Creating edge path", edge_path=self.edge_path)
+    #     return DataGraph(
+    #         path_crawl=self.csv_path.resolve().as_posix(),
+    #         edge_path=self.edge_path.as_posix(),
+    #         update=self.update_crawl,
+    #     )
 
-    def __call__(self, key: object) -> object:
-        """Retrieve input data."""
-        return self._loader.get(key)
+    # def __call__(self, key: object) -> object:
+    #     """Retrieve input data."""
+    #     return self._loader.get(key)
 
 
 # TODO: these two are useful, but need some work.
