@@ -9375,7 +9375,7 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 2.0.0rc4
-  sha256: 41a392f3dd0211077bdbf69ca8606a0858104d0cbeb1191be1945f6319b7599c
+  sha256: e3ed3d3acf988c8788c998692035e0e3673b3b4bbb980f5113e100b5c9e7e679
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9
