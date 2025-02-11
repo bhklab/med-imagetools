@@ -1,3 +1,4 @@
+from .dicom_metadata import all_modalities_metadata, get_modality_metadata
 from .input import (
     extract_roi_meta,
     extract_roi_names,
@@ -20,4 +21,7 @@ __all__ = [
     "extract_roi_meta",
     "extract_roi_names",
     "rtstruct_reference_uids",
+    # dicom_metadata
+    "get_modality_metadata",
+    "all_modalities_metadata",
 ]
