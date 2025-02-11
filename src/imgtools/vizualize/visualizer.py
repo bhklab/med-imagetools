@@ -23,6 +23,12 @@ if TYPE_CHECKING:
 
     import SimpleITK as sitk
 
+__all__: list[str] = [
+    "ImageSlices",
+    "SliceImage3D",
+    "view_multiple_SliceImage3DObjects",
+]
+
 
 @dataclass
 class ImageSlices:
