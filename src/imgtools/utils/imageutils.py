@@ -23,7 +23,7 @@ def array_to_image(
         1.0,
     ),
     spacing: Array3D = (1.0, 1.0, 1.0),
-    reference_image: sitk.Image = None,
+    reference_image: sitk.Image | None = None,
 ) -> sitk.Image:
     """Convert a numpy array to a SimpleITK image with optional metadata.
 
@@ -48,10 +48,16 @@ def array_to_image(
     image = sitk.GetImageFromArray(array)
     if reference_image is not None:
         image.CopyInformation(reference_image)
-    else:
+    elif all(x is not None for x in (origin, direction, spacing)):
         image.SetOrigin(origin)
         image.SetDirection(direction)
         image.SetSpacing(spacing)
+    else:
+        errmsg = (
+            "Either a reference image or all of the origin, direction, and spacing "
+            "must be provided to create a new image."
+        )
+        raise ValueError(errmsg)
 
     return image
 
@@ -66,7 +72,7 @@ def image_to_array(image: sitk.Image) -> ImageArrayMetadata:
 
     Returns
     -------
-    ImageArrayMetadata
+    ImageArrayMetadata : Tuple[np.ndarray, Array3D, Array3D, Array3D]
         A tuple containing:
         - The image as a numpy array.
         - The origin of the image (tuple of floats).
