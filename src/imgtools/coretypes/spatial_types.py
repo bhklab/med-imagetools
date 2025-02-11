@@ -158,7 +158,7 @@ class Coordinate3D:
                 )
                 raise TypeError(errmsg)
 
-
+@dataclass
 class Spacing3D:
     """Represent the spacing in 3D space."""
 
@@ -182,7 +182,7 @@ class Spacing3D:
 
     def __repr__(self) -> str:
         """Return a string representation of the Spacing3D."""
-        return f"Spacing3D(x={self.x}, y={self.y}, z={self.z})"
+        return f"Spacing3D(x={self.x:.5f}, y={self.y:.5f}, z={self.z:.5f})"
 
     def __iter__(self) -> Iterator[float]:
         """Allow iteration over the components."""
