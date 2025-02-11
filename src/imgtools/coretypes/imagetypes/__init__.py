@@ -10,6 +10,7 @@ from .rtstructureset import (
     SelectionPattern,
     load_rtstructureset,
 )
+from .scan import Scan
 
 __all__: list[str] = [
     "SelectionPattern",
@@ -20,6 +21,8 @@ __all__: list[str] = [
     "RTStructureSetMetadata",
     "RTStructureSet",
     "load_rtstructureset",
+    # Scan
+    "Scan",
 ]
 # from dataclasses import dataclass
 # from typing import TYPE_CHECKING, Sequence

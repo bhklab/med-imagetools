@@ -13,7 +13,8 @@ import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
 
-from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modules import PET, Dose, Segmentation, StructureSet
+from imgtools.coretypes import Scan
 from imgtools.utils.dicomutils import get_modality_metadata
 
 
@@ -194,108 +195,6 @@ class BaseLoader(ABC):
             return default
 
 
-class ImageTreeLoader(BaseLoader):
-    def __init__(
-        self,
-        json_path,
-        csv_path_or_dataframe,
-        col_names=None,
-        study_names=None,
-        series_names=None,
-        subseries_names=None,
-        id_column=None,
-        expand_paths=False,
-        readers=None,
-    ) -> None:
-        if subseries_names is None:
-            subseries_names = []
-        if series_names is None:
-            series_names = []
-        if study_names is None:
-            study_names = []
-        if col_names is None:
-            col_names = []
-        if readers is None:
-            readers = [
-                read_image
-            ]  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
-
-        self.expand_paths = expand_paths
-        self.readers = readers
-        self.colnames = col_names
-        self.studynames = study_names
-        self.seriesnames = series_names
-        self.subseriesnames = subseries_names
-
-        if isinstance(csv_path_or_dataframe, str):
-            if id_column is not None and id_column not in self.colnames:
-                self.colnames.append(id_column)
-            self.paths = pd.read_csv(
-                csv_path_or_dataframe, index_col=id_column
-            )
-        elif isinstance(csv_path_or_dataframe, pd.DataFrame):
-            self.paths = csv_path_or_dataframe
-            if id_column:
-                self.paths = self.paths.set_index(id_column)
-            if len(self.colnames) == 0:
-                self.colnames = self.paths.columns
-        else:
-            msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
-            raise ValueError(msg)
-
-        if isinstance(json_path, str):
-            with open(json_path, "r") as f:
-                self.tree = json.load(f)
-        else:
-            msg = f"Expected a path to a json file, not {type(json_path)}."
-            raise ValueError(msg)
-
-        if not isinstance(readers, list):
-            readers = [readers] * len(self.colnames)
-
-        self.output_tuple = namedtuple("Output", self.colnames)
-
-    def __getitem__(self, subject_id):
-        row = self.paths.loc[subject_id]
-        paths = {col: row[col] for col in self.colnames}
-        study = {col: row[col] for col in self.studynames}
-        series = {col: row[col] for col in self.seriesnames}
-        subseries = {col: row[col] for col in self.subseriesnames}
-        paths = {k: v if pd.notna(v) else None for k, v in paths.items()}
-
-        if self.expand_paths:
-            # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
-            paths = {
-                col: glob.glob(path)[0] if pd.notna(path) else None
-                for col, path in paths.items()
-            }
-
-        for i, (col, path) in enumerate(paths.items()):
-            files = self.tree[subject_id][
-                study["study_" + ("_").join(col.split("_")[1:])]
-            ][series["series_" + ("_").join(col.split("_")[1:])]][
-                subseries["subseries_" + ("_").join(col.split("_")[1:])]
-            ]
-            self.readers[i](
-                path, series["series_" + ("_").join(col.split("_")[1:])]
-            )
-        outputs = {
-            col: self.readers[i](
-                path,
-                series["series_" + ("_").join(col.split("_")[1:])],
-                file_names=files,
-            )
-            for i, (col, path) in enumerate(paths.items())
-        }
-        return self.output_tuple(**outputs)
-
-    def keys(self):
-        return list(self.paths.index)
-
-    def items(self):
-        return ((k, self[k]) for k in self.keys())
-
-
 class ImageCSVLoader(BaseLoader):
     def __init__(
         self,
@@ -447,3 +346,105 @@ class ImageFileLoader(BaseLoader):
 
     def keys(self):
         return self.paths.keys()
+
+
+# class ImageTreeLoader(BaseLoader):
+#     def __init__(
+#         self,
+#         json_path,
+#         csv_path_or_dataframe,
+#         col_names=None,
+#         study_names=None,
+#         series_names=None,
+#         subseries_names=None,
+#         id_column=None,
+#         expand_paths=False,
+#         readers=None,
+#     ) -> None:
+#         if subseries_names is None:
+#             subseries_names = []
+#         if series_names is None:
+#             series_names = []
+#         if study_names is None:
+#             study_names = []
+#         if col_names is None:
+#             col_names = []
+#         if readers is None:
+#             readers = [
+#                 read_image
+#             ]  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
+
+#         self.expand_paths = expand_paths
+#         self.readers = readers
+#         self.colnames = col_names
+#         self.studynames = study_names
+#         self.seriesnames = series_names
+#         self.subseriesnames = subseries_names
+
+#         if isinstance(csv_path_or_dataframe, str):
+#             if id_column is not None and id_column not in self.colnames:
+#                 self.colnames.append(id_column)
+#             self.paths = pd.read_csv(
+#                 csv_path_or_dataframe, index_col=id_column
+#             )
+#         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
+#             self.paths = csv_path_or_dataframe
+#             if id_column:
+#                 self.paths = self.paths.set_index(id_column)
+#             if len(self.colnames) == 0:
+#                 self.colnames = self.paths.columns
+#         else:
+#             msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
+#             raise ValueError(msg)
+
+#         if isinstance(json_path, str):
+#             with open(json_path, "r") as f:
+#                 self.tree = json.load(f)
+#         else:
+#             msg = f"Expected a path to a json file, not {type(json_path)}."
+#             raise ValueError(msg)
+
+#         if not isinstance(readers, list):
+#             readers = [readers] * len(self.colnames)
+
+#         self.output_tuple = namedtuple("Output", self.colnames)
+
+#     def __getitem__(self, subject_id):
+#         row = self.paths.loc[subject_id]
+#         paths = {col: row[col] for col in self.colnames}
+#         study = {col: row[col] for col in self.studynames}
+#         series = {col: row[col] for col in self.seriesnames}
+#         subseries = {col: row[col] for col in self.subseriesnames}
+#         paths = {k: v if pd.notna(v) else None for k, v in paths.items()}
+
+#         if self.expand_paths:
+#             # paths = {col: glob.glob(path)[0] for col, path in paths.items()}
+#             paths = {
+#                 col: glob.glob(path)[0] if pd.notna(path) else None
+#                 for col, path in paths.items()
+#             }
+
+#         for i, (col, path) in enumerate(paths.items()):
+#             files = self.tree[subject_id][
+#                 study["study_" + ("_").join(col.split("_")[1:])]
+#             ][series["series_" + ("_").join(col.split("_")[1:])]][
+#                 subseries["subseries_" + ("_").join(col.split("_")[1:])]
+#             ]
+#             self.readers[i](
+#                 path, series["series_" + ("_").join(col.split("_")[1:])]
+#             )
+#         outputs = {
+#             col: self.readers[i](
+#                 path,
+#                 series["series_" + ("_").join(col.split("_")[1:])],
+#                 file_names=files,
+#             )
+#             for i, (col, path) in enumerate(paths.items())
+#         }
+#         return self.output_tuple(**outputs)
+
+#     def keys(self):
+#         return list(self.paths.index)
+
+#     def items(self):
+#         return ((k, self[k]) for k in self.keys())
