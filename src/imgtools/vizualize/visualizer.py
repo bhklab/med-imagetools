@@ -191,8 +191,16 @@ class SliceImage3D:
             (img_slice - vmin) / (vmax - vmin) * 255, 0, 255
         ).astype(np.uint8)
 
-        # Convert image slice to PIL image (grayscale → RGB)
-        image = Image.fromarray(img_slice, mode="L").convert("RGB")
+        match img_slice.ndim:
+            case 2:
+                # Convert image slice to PIL image (grayscale → RGB)
+                image = Image.fromarray(img_slice, mode="L").convert("RGB")
+            case 3:
+                # Convert image slice to PIL image (RGB)
+                image = Image.fromarray(img_slice, mode="RGB")
+            case 4:
+                # image probably is RGBA
+                image = Image.fromarray(img_slice, mode="RGBA")
 
         if mask_slice is not None:
             # mask should be all 1s and 0s
@@ -230,9 +238,15 @@ class SliceImage3D:
         )
 
     def view(self) -> None:
-        def display_slice(index: int) -> None:
-            img = self.slices[index]
-            display(img)
+        """Display an interactive slider to view the generated slices."""
+
+        slice_list = self.slices.image_list
+
+        # resize the images to a fixed size
+        slice_list = [img.resize((512, 512)) for img in slice_list]
+
+        def display_slice(index: int, slice_list) -> None:
+            slice_list[index].show()
 
         max_slider = len(self.slices) - 1
         widgets.interact(
@@ -240,6 +254,7 @@ class SliceImage3D:
             index=widgets.IntSlider(
                 min=0, max=max_slider, step=1, value=max_slider // 2
             ),
+            slice_list=widgets.fixed(slice_list),
         )
 
 
