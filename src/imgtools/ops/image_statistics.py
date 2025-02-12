@@ -53,16 +53,13 @@ class MaskData:
     """Class for representing mask data and associated ROI statistics."""
 
     hash: str
-    label: int
     spacing: Spacing3D
     size: Size3D
     dimensions: int
-    minimum: float
-    maximum: float
-    sum: float
-    mean: float
-    variance: float
-    standard_deviation: float
+    num_labels: int
+    label: int
+    perimeter: float
+    touching_border: bool
     voxel_count: int
     volume_count: int
     bbox: RegionBox
@@ -74,10 +71,19 @@ class MaskData:
     ) -> "MaskData":
         """Create an instance for mask data and associated statistics."""
 
+        # # probably can check if this is a vector label image which would be different i think
+        # all_labels = list(
+        #     map(int, np.unique(sitk.GetArrayViewFromImage(mask)))
+        # )
+
         # Compute shape-related properties
         label_stats = sitk.LabelShapeStatisticsImageFilter()
+        label_stats.ComputePerimeterOn()
         label_stats.Execute(mask)
         bbox = RegionBox.from_mask_bbox(mask)
+
+        label_perimeter = round(label_stats.GetPerimeter(label), 5)
+        label_touching_border = label_stats.GetPerimeterOnBorder(label) > 0
 
         centroid_coordinates = label_stats.GetCentroid(label)
         centroid_index = mask.TransformPhysicalPointToIndex(
@@ -92,27 +98,6 @@ class MaskData:
         cc_filter.Execute(label_map)
         volume_count = cc_filter.GetObjectCount()
 
-
-        binary_mask = sitk.BinaryThreshold(
-            mask,
-            lowerThreshold=label,
-            upperThreshold=label,
-            insideValue=1,
-            outsideValue=0,
-        )
-
-        masked_image = sitk.Mask(image, binary_mask)
-        # Compute statistics using SimpleITK
-        # Extract statistics only for the region of interest (non-zero pixels in the mask)
-        # filter_ = sitk.StatisticsImageFilter()
-        # filter_.Execute(masked_image)
-
-        # Calculate statistics over non-zero regions only
-        filter_ = sitk.StatisticsImageFilter()
-        filter_.Execute(
-            masked_image * sitk.Cast(binary_mask, pixelID=image.GetPixelID())
-        )
-
         return cls(
             hash=sitk.Hash(mask),
             label=label,
@@ -123,52 +108,64 @@ class MaskData:
             volume_count=volume_count,
             bbox=bbox,
             centroid_index=Coordinate3D(*centroid_index),
-            minimum=filter_.GetMinimum(),
-            maximum=filter_.GetMaximum(),
-            sum=filter_.GetSum(),
-            mean=filter_.GetMean(),
-            variance=filter_.GetVariance(),
-            standard_deviation=filter_.GetSigma(),
+            num_labels=label_stats.GetNumberOfLabels(),
+            perimeter=label_perimeter,
+            touching_border=label_touching_border,
         )
 
 
 def main() -> None:
     from rich import print  # noqa
-    import time
     from dataclasses import asdict
+    from imgtools.ops import ImageAutoInput
     from imgtools.datasets.examples import data_images
+    from imgtools.coretypes import RegionBox
 
     img, mask = data_images()["duck"], data_images()["mask"]
 
     img_data = ImageData.from_image(img)
     mask_data = MaskData.from_image_and_mask(mask, mask, 1)
 
-    print(img_data)
-    print(mask_data)
-    start = time.time()
+    # print(img_data)
+    # print(mask_data)
     img = sitk.ReadImage(
         "/home/jermiah/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-7_RADCURE-2639/CT_79752_original.nii.gz"
     )
     mask = sitk.ReadImage(
         "/home/jermiah/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-7_RADCURE-2639/RTSTRUCT_49024_GTV.nii.gz"
     )
-    end_reading = time.time()
-    read_time = end_reading - start
-    start = time.time()
-    img_data = ImageData.from_image(img)
-    mask_data = MaskData.from_image_and_mask(mask, mask, 1)
-    end = time.time()
-    print(img_data)
-    print(mask_data)
-    print(f"Reading time: {read_time}")
-    print(f"Processing time: {end - start}")
-
-    print("Image data:")
+    print("scan_stats")
     print(asdict(img_data))
 
-    print("Mask data:")
+    print("mask_stats")
     print(asdict(mask_data))
 
+    inputter = ImageAutoInput(
+        "devnotes/notebooks/dicoms", modalities="CT,RTSTRUCT"
+    )
+    subjectids = list(inputter._loader.keys())
+
+    scan, rtss = inputter(subjectids[0])
+    img = scan.image
+    # print(rtss.roi_names)
+    mask_rtss = rtss.to_segmentation(img, {"GTV": "GTV.*"})
+    # print(mask_rtss.roi_indices)
+    mask = mask_rtss.get_label(1)
+
+    img_data = ImageData.from_image(img)
+    mask_data = MaskData.from_image_and_mask(mask, mask, 1)
+    print("scan_stats")
+    print(asdict(img_data))
+
+    print("mask_stats")
+    print(asdict(mask_data))
+
+    cropped_mask = RegionBox.from_mask_bbox(mask).crop_image(mask)
+    cropped_mask_data = MaskData.from_image_and_mask(
+        cropped_mask, cropped_mask, 1
+    )
+    print("mask_stats(cropped to exactly bbox)")
+    print(asdict(cropped_mask_data))
 
 if __name__ == "__main__":
     main()
