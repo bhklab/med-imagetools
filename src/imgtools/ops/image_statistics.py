@@ -1,12 +1,7 @@
-"""
-Combination of imgtools.ops.functional.image_statistics and pyradiomics general info
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-import numpy as np
 import SimpleITK as sitk
 
 from imgtools.coretypes import Coordinate3D, RegionBox, Size3D, Spacing3D
@@ -71,11 +66,6 @@ class MaskData:
     ) -> "MaskData":
         """Create an instance for mask data and associated statistics."""
 
-        # # probably can check if this is a vector label image which would be different i think
-        # all_labels = list(
-        #     map(int, np.unique(sitk.GetArrayViewFromImage(mask)))
-        # )
-
         # Compute shape-related properties
         label_stats = sitk.LabelShapeStatisticsImageFilter()
         label_stats.ComputePerimeterOn()
@@ -121,24 +111,24 @@ def main() -> None:
     from imgtools.datasets.examples import data_images
     from imgtools.coretypes import RegionBox
 
-    img, mask = data_images()["duck"], data_images()["mask"]
+    # img, mask = data_images()["duck"], data_images()["mask"]
 
-    img_data = ImageData.from_image(img)
-    mask_data = MaskData.from_image_and_mask(mask, mask, 1)
+    # img_data = ImageData.from_image(img)
+    # mask_data = MaskData.from_image_and_mask(mask, mask, 1)
 
     # print(img_data)
     # print(mask_data)
+    # print("scan_stats")
+    # print(asdict(img_data))
+
+    # print("mask_stats")
+    # print(asdict(mask_data))
     img = sitk.ReadImage(
         "/home/jermiah/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-7_RADCURE-2639/CT_79752_original.nii.gz"
     )
     mask = sitk.ReadImage(
         "/home/jermiah/bhklab/radiomics/readii-negative-controls/rawdata/RADCURE/images/niftis/SubjectID-7_RADCURE-2639/RTSTRUCT_49024_GTV.nii.gz"
     )
-    print("scan_stats")
-    print(asdict(img_data))
-
-    print("mask_stats")
-    print(asdict(mask_data))
 
     inputter = ImageAutoInput(
         "devnotes/notebooks/dicoms", modalities="CT,RTSTRUCT"
@@ -166,6 +156,7 @@ def main() -> None:
     )
     print("mask_stats(cropped to exactly bbox)")
     print(asdict(cropped_mask_data))
+
 
 if __name__ == "__main__":
     main()
