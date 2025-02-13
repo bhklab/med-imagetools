@@ -21,7 +21,9 @@ class Scan(sitk.Image):
         # convert metadata and img_stats to string
         # with angulated brackets
         metadata = "\n\t".join([f"{k}={v}" for k, v in self.metadata.items()])
-        img_stats = "\n\t".join([f"{k}={v}" for k, v in self._img_stats.items()])
+        img_stats = "\n\t".join(
+            [f"{k}={v}" for k, v in self._img_stats.items()]
+        )
         return f"Scan<\n{metadata}, {img_stats}\n>"
 
     def __rich_repr__(self) -> Generator[tuple[str, str], Any, None]:
@@ -29,3 +31,8 @@ class Scan(sitk.Image):
             yield k, v
         for k, v in self._img_stats.items():
             yield k, v
+
+    @property
+    def image(self) -> sitk.Image:
+        """This is for backward compatibility."""
+        return self

@@ -228,7 +228,7 @@ class ImageAutoInput(BaseInput):
 
         super().__init__(loader)
     
-    def keys(self):
+    def keys(self) -> None:
         return self._loader.keys()
 
     def __iter__(self) -> Generator[Any, Any, None]:
