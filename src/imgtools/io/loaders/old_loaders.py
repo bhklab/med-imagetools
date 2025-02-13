@@ -21,7 +21,7 @@ from imgtools.modules import (
     StructureSet,
     PETImageType,
 )
-from imgtools.utils.dicomutils import get_modality_metadata
+from imgtools.dicom.dicom_metadata import get_modality_metadata
 from imgtools.logging import logger
 
 
