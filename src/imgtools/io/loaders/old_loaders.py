@@ -375,7 +375,7 @@ class ImageCSVLoader(BaseLoader):
         self.output_tuple = NamedTuple(  # type: ignore
             "Output", [(c, str) for c in tuple_names]
         )
-        self.output_tuple.__getitem__ = lambda self, idx: getattr(self, idx)
+        self.output_tuple.__getitem__ = lambda self, idx: getattr(self, idx)  # type: ignore
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]

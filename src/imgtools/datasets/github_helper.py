@@ -347,7 +347,6 @@ class MedImageTestData:
             )
             assets = [asset for asset in assets if asset not in exclude_assets]
 
-        console.print(f"Downloading assets to {dest.absolute()}...")
         with Progress(
             TextColumn("[bold blue]{task.description}", justify="right"),
             BarColumn(),
