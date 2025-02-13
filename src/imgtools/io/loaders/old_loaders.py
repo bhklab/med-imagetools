@@ -7,14 +7,22 @@ import pathlib
 import re
 from abc import ABC, abstractmethod
 from collections import namedtuple
-from typing import Optional, Union
+from typing import NamedTuple, Optional, Union
 
 import pandas as pd
 import SimpleITK as sitk
-from pydicom import dcmread
+from pydicom import FileDataset, dcmread
 
-from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
-from imgtools.dicom.dicom_metadata import get_modality_metadata
+from imgtools.modules import (
+    PET,
+    Dose,
+    Scan,
+    Segmentation,
+    StructureSet,
+    PETImageType,
+)
+from imgtools.utils.dicomutils import get_modality_metadata
+from imgtools.logging import logger
 
 
 def read_image(path: str) -> sitk.Image:
@@ -35,9 +43,10 @@ def read_image(path: str) -> sitk.Image:
 
 def read_dicom_series(
     path: str,
-    series_id: list[str] | None = None,
+    series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
+    **kwargs,  # unused
 ) -> sitk.Image:
     """Read DICOM series as SimpleITK Image.
 
@@ -87,9 +96,10 @@ def read_dicom_series(
 
 def read_dicom_scan(
     path: str,
-    series_id: list[str] | None = None,
+    series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
+    **kwargs,  # unused
 ) -> Scan:
     image = read_dicom_series(
         path,
@@ -102,9 +112,10 @@ def read_dicom_scan(
 
 def read_dicom_rtstruct(
     path: str,
-    suppress_warnings: bool = False,
-    roi_name_pattern: str | None = None,
+    **kwargs,
 ) -> StructureSet:
+    roi_name_pattern = kwargs.get("roi_name_pattern", None)
+    suppress_warnings = kwargs.get("suppress_warnings", False)
     return StructureSet.from_dicom(
         path,
         suppress_warnings=suppress_warnings,
@@ -112,16 +123,22 @@ def read_dicom_rtstruct(
     )
 
 
-def read_dicom_rtdose(path: str) -> Dose:
+def read_dicom_rtdose(path: str, **kwargs) -> Dose:
     return Dose.from_dicom(path=path)
 
 
-def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
-    return PET.from_dicom(path=path, series_id=series, pet_image_type="SUV")
+def read_dicom_pet(path: str, series: Optional[str] = None, **kwargs) -> PET:
+    _pet_image_type = kwargs.get("pet_image_type", "SUV")
+
+    return PET.from_dicom(
+        path=path,
+        series_id=series,
+        pet_image_type=PETImageType(_pet_image_type),
+    )
 
 
 def read_dicom_seg(
-    path: str, meta: dict, series: Optional[str] = None
+    path: str, meta: FileDataset, series: Optional[str] = None, **kwargs
 ) -> Segmentation:
     seg_img = read_dicom_series(path, series)
     return Segmentation.from_dicom(seg_img, meta)
@@ -131,13 +148,16 @@ auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
 
 
 def read_dicom_auto(
-    path: str, series=None, file_names=None
+    path: str, series=None, file_names=None, **kwargs
 ) -> auto_dicom_result:
     dcms = (
         list(pathlib.Path(path).rglob("*.dcm"))
         if not path.endswith(".dcm")
         else [pathlib.Path(path)]
     )
+    if len(dcms) == 0:
+        errmsg = f"No DICOM files found in {path}."
+        raise FileNotFoundError(errmsg)
 
     for dcm_path in dcms:
         dcm = dcm_path.as_posix()
@@ -146,18 +166,18 @@ def read_dicom_auto(
             continue
 
         modality = meta.Modality
-
+        obj: auto_dicom_result
         match modality:
             case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
             case "PT":
-                obj = read_dicom_pet(path, series)
+                obj = read_dicom_pet(path, series, **kwargs)
             case "RTSTRUCT":
-                obj = read_dicom_rtstruct(dcm)
+                obj = read_dicom_rtstruct(dcm, **kwargs)
             case "RTDOSE":
-                obj = read_dicom_rtdose(dcm)
+                obj = read_dicom_rtdose(dcm, **kwargs)
             case "SEG":
-                obj = read_dicom_seg(path, meta, series)
+                obj = read_dicom_seg(path, meta, series, **kwargs)
             case _:
                 errmsg = (
                     f"Modality {modality} not supported in read_dicom_auto."
@@ -166,6 +186,9 @@ def read_dicom_auto(
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
+
+    errmsg = f'Something went wrong reading DICOM files in "{path}".'
+    raise FileNotFoundError(errmsg)
 
 
 # ruff: noqa
@@ -297,6 +320,12 @@ class ImageTreeLoader(BaseLoader):
 
 
 class ImageCSVLoader(BaseLoader):
+    paths: pd.DataFrame
+    expand_paths: bool
+    readers: list
+    colnames: list
+    seriesnames: list
+
     def __init__(
         self,
         csv_path_or_dataframe,
@@ -306,10 +335,6 @@ class ImageCSVLoader(BaseLoader):
         expand_paths=False,
         readers=None,
     ) -> None:
-        if seriesnames is None:
-            seriesnames = []
-        if colnames is None:
-            colnames = []
         if readers is None:
             readers = [
                 read_image
@@ -318,8 +343,8 @@ class ImageCSVLoader(BaseLoader):
         self.expand_paths = expand_paths
         self.readers = readers
 
-        self.colnames = colnames
-        self.seriesnames = seriesnames
+        self.colnames = colnames or []
+        self.seriesnames = seriesnames or []
         if isinstance(csv_path_or_dataframe, str):
             if id_column is not None and id_column not in colnames:
                 colnames.append(id_column)
@@ -327,11 +352,12 @@ class ImageCSVLoader(BaseLoader):
                 csv_path_or_dataframe, index_col=id_column
             )
         elif isinstance(csv_path_or_dataframe, pd.DataFrame):
+            # i dont think this branch actually works as expected
             self.paths = csv_path_or_dataframe
             if id_column:
                 self.paths = self.paths.set_index(id_column)
             if len(self.colnames) == 0:
-                self.colnames = self.paths.columns
+                self.colnames = self.paths.columns  # type: ignore
         else:
             msg = f"Expected a path to csv file or pd.DataFrame, not {type(csv_path_or_dataframe)}."
             raise ValueError(msg)
@@ -339,7 +365,17 @@ class ImageCSVLoader(BaseLoader):
         if not isinstance(readers, list):
             readers = [readers] * len(self.colnames)
 
-        self.output_tuple = namedtuple("Output", self.colnames)
+        tuple_names: list[str]
+        if all([c.startswith("folder_")] for c in self.colnames):
+            tuple_names = [c.split("_")[1] for c in self.colnames]
+            logger.debug(f"Tuple names: {tuple_names}")
+        else:
+            tuple_names = self.colnames
+
+        self.output_tuple = NamedTuple(  # type: ignore
+            "Output", [(c, str) for c in tuple_names]
+        )
+        self.output_tuple.__getitem__ = lambda self, idx: getattr(self, idx)  # type: ignore
 
     def __getitem__(self, subject_id):
         row = self.paths.loc[subject_id]
@@ -353,15 +389,23 @@ class ImageCSVLoader(BaseLoader):
                 for col, path in paths.items()
             }
 
+        _namedtupledkeys = self.output_tuple._fields
+
+        # outputs = {
+        #     col: self.readers[i](
+        #         path, series["series_" + ("_").join(col.split("_")[1:])]
+        #     )
+        #     for i, (col, path) in enumerate(paths.items())
+        # }
         outputs = {
-            col: self.readers[i](
+            _namedtupledkeys[i]: self.readers[i](
                 path, series["series_" + ("_").join(col.split("_")[1:])]
             )
             for i, (col, path) in enumerate(paths.items())
         }
         return self.output_tuple(**outputs)
 
-    def keys(self):
+    def keys(self) -> list:
         return list(self.paths.index)
 
     def items(self):

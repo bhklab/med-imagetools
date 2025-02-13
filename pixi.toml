@@ -22,6 +22,7 @@ py310 = { features = ["py310", "test"], no-default-feature = true }
 py311 = { features = ["py311", "test"], no-default-feature = true }
 py312 = { features = ["py312", "test"], no-default-feature = true }
 py313 = { features = ["py313", "test"], no-default-feature = true }
+
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"]}
@@ -30,6 +31,7 @@ med-imagetools = { path = ".", editable = true, extras = ["all"]}
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+pyvis = ">=0.3.2,<0.4"
 ipympl = ">=0.9.6,<0.10"
 
 [feature.dev.activation.env]
@@ -46,6 +48,7 @@ clean = {	cmd = [
 
 [feature.py310.dependencies]
 python = "3.10.*"
+
 [feature.py311.dependencies]
 python = "3.11.*"
 [feature.py312.dependencies]
