@@ -81,7 +81,9 @@ def resolve_path(
     Tuple[Path, Path]
         The source path and resolved path.
     """
-    tags: Dict[str, str] = read_tags(path, list(keys), truncate=truncate)
+    tags: Dict[str, str] = read_tags(
+        path, list(keys), truncate=truncate
+    )
     resolved_path = Path(format_str % tags, path.name)
     if check_existing and not resolved_path.exists():
         resolved_path = resolved_path.resolve()

@@ -16,7 +16,7 @@ class BaseOp(ABC):
     """
 
     @abstractmethod
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # noqa: ANN401
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # noqa
         """Perform the operation."""
         pass
 
@@ -57,7 +57,7 @@ class BaseInput(BaseOp):
         self._loader = loader
 
     @abstractmethod
-    def __call__(self, key: Any) -> Any:  # noqa: ANN401
+    def __call__(self, key: Any) -> Any:  # noqa
         """Retrieve input data."""
         pass
 
@@ -80,7 +80,7 @@ class BaseOutput(BaseOp):
         self._writer = writer
 
     @abstractmethod
-    def __call__(self, key: Any, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    def __call__(self, key: Any, *args: Any, **kwargs: Any) -> None:  # noqa
         """Write output data.
 
         Parameters
