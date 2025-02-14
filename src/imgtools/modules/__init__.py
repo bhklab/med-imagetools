@@ -12,6 +12,7 @@ __all__ = [
     "accepts_segmentations",
     "StructureSet",
     "PET",
+    "PETImageType",
     "Dose",
     "DataGraph",
     "SparseMask",
