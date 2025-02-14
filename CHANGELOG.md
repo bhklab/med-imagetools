@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.7 (2025-02-14)
+
+### Bug Fixes
+
+- Update SEG value for ISPY2 dataset in test configuration
+  ([`d9a83d1`](https://github.com/bhklab/med-imagetools/commit/d9a83d1b20f93df2a551a56a8646765f3cc5a2c5))
+
+
 ## v2.0.0-rc.6 (2025-02-14)
 
 
