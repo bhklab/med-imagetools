@@ -65,7 +65,9 @@ def resample(
 
     Examples
     --------
-    >>> resampled_image = resample_image(example_image, [1, 1, 1])
+    >>> resampled_image = resample_image(
+    ...     example_image, [1, 1, 1]
+    ... )
     >>> print(resampled_image.GetSpacing())
     [1, 1, 1]
     """
@@ -108,9 +110,9 @@ def resample(
         if not anti_alias_sigma:
             # sigma computation adapted from scikit-image
             # https://github.com/scikit-image/scikit-image/blob/master/skimage/transform/_warps.py
-            anti_alias_sigma = list(np.maximum(
-                1e-11, (original_spacing / new_spacing - 1) / 2
-            ))
+            anti_alias_sigma = list(
+                np.maximum(1e-11, (original_spacing / new_spacing - 1) / 2)
+            )
         sigma = np.where(downsample, anti_alias_sigma, 1e-11)
         image = sitk.SmoothingRecursiveGaussian(image, sigma)
 
@@ -161,11 +163,13 @@ def resize(
 
     Examples
     --------
-    >>> print('Original Size:', example_image.GetSize())
+    >>> print("Original Size:", example_image.GetSize())
     Original Size: [512, 512, 97]
 
-    >>> resized_image = resize_image(example_image, [256, 256, 0])
-    >>> print('Resized Size:', resized_image.GetSize())
+    >>> resized_image = resize_image(
+    ...     example_image, [256, 256, 0]
+    ... )
+    >>> print("Resized Size:", resized_image.GetSize())
     Resized Size: [256, 256, 97]
     """
 
@@ -285,8 +289,12 @@ def rotate(
     Examples
     --------
     >>> size = example_image.GetSize()
-    >>> center_voxel = [size[i] // 2 for i in range(len(size))]
-    >>> rotated_image = rotate_image(example_image, center_voxel, [45, 45, 45])
+    >>> center_voxel = [
+    ...     size[i] // 2 for i in range(len(size))
+    ... ]
+    >>> rotated_image = rotate_image(
+    ...     example_image, center_voxel, [45, 45, 45]
+    ... )
     """
     if isinstance(rotation_centre, np.ndarray):
         rotation_centre = rotation_centre.tolist()
@@ -347,12 +355,16 @@ def crop(
     -------
     sitk.Image
         The cropped image.
-    
+
     Examples
     --------
     >>> size = example_image.GetSize()
-    >>> center_voxel = [size[i] // 2 for i in range(len(size))]
-    >>> cropped_image = crop(example_image, center_voxel, [45, 45, 45])
+    >>> center_voxel = [
+    ...     size[i] // 2 for i in range(len(size))
+    ... ]
+    >>> cropped_image = crop(
+    ...     example_image, center_voxel, [45, 45, 45]
+    ... )
     """
     crop_centre = np.asarray(crop_centre, dtype=np.float64)
     original_size = np.asarray(image.GetSize())
@@ -409,7 +421,9 @@ def crop(
 #     crop_dims = np.where(size < original_size)
 
 
-def bounding_box(mask: sitk.Image, label: int = 1) -> Tuple[Tuple | np.ndarray, Tuple | np.ndarray]:
+def bounding_box(
+    mask: sitk.Image, label: int = 1
+) -> Tuple[Tuple | np.ndarray, Tuple | np.ndarray]:
     """Find the axis-aligned bounding box of a region descriibed by a
     segmentation mask.
 
@@ -472,7 +486,7 @@ def centroid(
     -------
     tuple
         The centroid coordinates.
-    
+
     Examples
     --------
     >>> centre_coords = centroid(mask)
@@ -523,10 +537,14 @@ def crop_to_mask_bounding_box(
     -------
     tuple of sitk.Image
         The cropped image, the cropped mask, and the crop centre.
-    
+
     Examples
     --------
-    >>> cropped_image, cropped_mask, crop_centre = crop_to_mask_bounding_box(example_image, mask)
+    >>> cropped_image, cropped_mask, crop_centre = (
+    ...     crop_to_mask_bounding_box(
+    ...         example_image, mask
+    ...     )
+    ... )
     """
 
     if isinstance(mask, Segmentation):
@@ -604,17 +622,19 @@ def window_intensity(
     upper = level + window / 2
     return clip_intensity(image, lower, upper)
 
+
 ImageStatistics = namedtuple(
-        "ImageStatistics",
-        [
-            "minimum",
-            "maximum",
-            "sum",
-            "mean",
-            "variance",
-            "standard_deviation",
-        ],
-    )
+    "ImageStatistics",
+    [
+        "minimum",
+        "maximum",
+        "sum",
+        "mean",
+        "variance",
+        "standard_deviation",
+    ],
+)
+
 
 def image_statistics(
     image: sitk.Image, mask: sitk.Image | None = None, label: int = 1
