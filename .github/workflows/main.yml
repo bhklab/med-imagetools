@@ -229,7 +229,6 @@ jobs:
 
       - name: Publish to PyPI
         # only push to pypi if on main
-        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
