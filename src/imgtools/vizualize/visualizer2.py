@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import math
 import time
 from dataclasses import dataclass, field
 from io import BytesIO
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
 
     import SimpleITK as sitk
 
+from collections import namedtuple
 from enum import Enum
 
 
@@ -57,9 +59,12 @@ def display_slices(
     plt.show()
 
 
+SliceWidgets = namedtuple("SliceWidgets", ["x", "y", "z"])
+
+
 def create_interactive(
     array: np.ndarray,
-) -> None:
+) -> SliceWidgets:
     x = widgets.IntSlider(
         min=0, max=array.shape[0] - 1, value=0, description="X Slice"
     )
@@ -77,6 +82,8 @@ def create_interactive(
         z_index=z,
         array=widgets.fixed(array),
     )
+
+    return SliceWidgets(x=x, y=y, z=z)
 
 
 @dataclass
@@ -96,20 +103,21 @@ class ImageVisualizer:
         image: sitk.Image,
         mask: sitk.Image,
         label: int = 1,
+        as_countour: bool = False,
         # overlay settings
         mask_color: MaskColor = MaskColor.GREEN,
         opacity: float = 0.5,
         background_label: int = 0,
         # preprocessing settings
         crop_to_bbox: bool = True,
-        as_countour: bool = False,
+        croppad: int = 2,
     ) -> ImageVisualizer:
         """Thiis should overlay the mask on the image"""
 
         region = (
             RegionBox.from_mask_bbox(mask, label=label)
-            .expand_to_cube()
-            .pad(10)
+            .expand_to_cube()  # cube expanding will help for grid
+            .pad(croppad)
         )
 
         if as_countour:
@@ -134,49 +142,47 @@ class ImageVisualizer:
     def array(self) -> np.ndarray:
         return sitk.GetArrayFromImage(self.main_image)
 
-    def view_slices(self) -> None:
-        create_interactive(self.array)
+    def view_slices(self) -> SliceWidgets:
+        return create_interactive(self.array)
 
-    def view_grid(self, cols: int = 5, rows: int = 5, pad: int = 5) -> None:
-        nslices = cols * rows
-        # figure size should be calculate based on the number of slices
-        size_per_slice = 5
-        fig_size = (size_per_slice * cols, size_per_slice * rows)
-        fig = plt.figure(figsize=fig_size)
+    def view_grid(
+        self,
+        every: int = 1,
+        fig: plt.Figure | None = None,
+    ) -> plt.Figure:
+        dimension = 2
+        plot_size = 3
 
         image = self.main_image
-
-        if image.GetPixelID() == 13:
-            # Padding values for each spatial dimension (x, y, z), no padding for color channels
-            pad_width = (
-                (pad, pad),
-                (pad, pad),
-                (pad, pad),
-                (0, 0),
-            )  # Padding 10 on each side for x, y, z dimensions
-
-            # Pad with black (0)
-            array = sitk.GetArrayFromImage(image)
-            padded_array = np.pad(
-                array, pad_width=pad_width, mode="constant", constant_values=0
-            )
-            image = sitk.GetImageFromArray(padded_array, isVector=True)
-        else:
-            image = sitk.ConstantPad(image, [pad, pad, pad], [pad, pad, pad])
-
         size = image.GetSize()
-        slices = [
-            image[:, :, int(round(s))]
-            for s in np.linspace(pad, size[2] - pad - 1, nslices)
-        ]
-        # get the middle nslices slices
-        slices = slices[
-            len(slices) // 2 - nslices // 2 : len(slices) // 2 + nslices // 2 + 1
-        ]
 
-        print(f"Number of slices: {len(slices)}")
-        timg = sitk.Tile(slices, [cols, rows, 0])
-        print(f"Tile size: {timg.GetSize()}")
+        slice_indices = list(range(0, size[dimension], every))
 
-        array = sitk.GetArrayFromImage(timg)
-        plt.imshow(array, cmap="gray")
+        # should be a square number of slices
+        cols = math.ceil(np.sqrt(len(slice_indices)))
+        rows = math.ceil(len(slice_indices) / cols)
+        figsize = (plot_size * cols, plot_size * rows)
+
+        if fig is None:
+            fig, axes = plt.subplots(
+                rows, cols, figsize=figsize, constrained_layout=True
+            )
+        else:
+            axes = fig.subplots(rows, cols)
+
+        axes = axes.ravel()
+
+        for idx, slice_index in enumerate(slice_indices):
+            slice_image = image[:, :, slice_index]
+            array = sitk.GetArrayViewFromImage(slice_image)
+
+            ax = axes[idx]
+            ax.imshow(array, cmap="gray")
+            ax.set_title(f"Slice {slice_index + 1}/{size[2]}", fontsize=8)
+            ax.axis("off")
+
+        # Hide any extra axes if the grid is larger than the number of slices
+        for idx in range(len(slice_indices), rows * cols):
+            axes[idx].axis("off")
+
+        return fig
