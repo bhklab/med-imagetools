@@ -1,13 +1,13 @@
 from pathlib import Path
-from typing import List
 
 import pytest
 
 from imgtools.datasets.github_helper import (
     GitHubRelease,
-    GitHubReleaseAsset,
     MedImageTestData,
 )
+
+MINIMUM_RELEASE_VERSION = "v0.17"
 
 
 @pytest.fixture
@@ -17,17 +17,27 @@ def med_image_test_data() -> MedImageTestData:
     return manager
 
 
-def test_get_latest_release_and_extract(med_image_test_data: MedImageTestData, tmp_path: Path) -> None:
+def test_get_latest_release_and_extract(
+    med_image_test_data: MedImageTestData, tmp_path: Path
+) -> None:
     # Test get_latest_release
     latest_release: GitHubRelease = med_image_test_data.get_latest_release()
+
     assert latest_release is not None
     assert latest_release.tag_name is not None
+    # check minimum version
+    assert latest_release.tag_name >= MINIMUM_RELEASE_VERSION
+    
     assert latest_release.name is not None
+    
     assert isinstance(latest_release.tag_name, str)
     assert isinstance(latest_release.name, str)
 
-def test_downloaded_data_is_sound(download_all_test_data: dict[str, Path])-> None:
-    assert len(download_all_test_data) > 5 
+
+def test_downloaded_data_is_sound(
+    download_all_test_data: dict[str, Path],
+) -> None:
+    assert len(download_all_test_data) > 5
     datasets_of_interest = [
         "NSCLC-Radiomics",
         "NSCLC_Radiogenomics",
@@ -35,8 +45,10 @@ def test_downloaded_data_is_sound(download_all_test_data: dict[str, Path])-> Non
     ]
 
     assert all(
-        dataset in download_all_test_data.keys() for dataset in datasets_of_interest
+        dataset in download_all_test_data.keys()
+        for dataset in datasets_of_interest
     )
     assert all(
-        download_all_test_data[dataset].exists() for dataset in datasets_of_interest
+        download_all_test_data[dataset].exists()
+        for dataset in datasets_of_interest
     )
