@@ -2,6 +2,7 @@
 Input classes refactored to use the BaseInput abstract base class.
 """
 
+from collections import namedtuple
 from enum import Enum
 import pathlib
 import time
@@ -227,7 +228,23 @@ class ImageMaskInput(BaseInput):
 
     def __call__(self, key: object) -> object:
         """Retrieve input data."""
-        return self.loader.get(key)
+        # return self.loader.get(key)
+        output_tuple = namedtuple(
+            "ImageMask", ["scan", "mask"]
+        )
+        case_scan, rtss_or_seg = self.loader.get(key)
+
+        match self.modality_list[1]:
+            case "RTSTRUCT":
+                # need to convert to Segmentation
+                mask = rtss_or_seg.to_segmentation(case_scan)
+            case "SEG":
+                mask = rtss_or_seg
+            case _:
+                errmsg = f"Modality {self.modality_list[1]} not recognized."
+                raise ValueError(errmsg)
+
+        return output_tuple(case_scan, mask)
 
     def __getitem__(self, key: str | int) -> object:
         match key:
@@ -270,3 +287,14 @@ if __name__ == "__main__":  # pragma: no cover
         update_edges=True,
     )
     print(dataset)
+    
+    datasetindex = Path("data/NSCLC-Radiomics")
+
+    dataset2 = ImageMaskInput(
+        datasetindex,
+        modalities=ImageMaskModalities.CT_SEG,
+        update_crawl=False,
+        update_edges=True,
+    )
+    
+    img, seg = dataset2[0]
