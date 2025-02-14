@@ -38,7 +38,7 @@ COLLECTIONS = {
     },
     "ISPY2": {
         "MR": 63 +24, # 4 of the series have 6 extra subseries
-        "SEG": 3,
+        "SEG": 8,
     },
     "LIDC-IDRI": {
         "CT": 3,
