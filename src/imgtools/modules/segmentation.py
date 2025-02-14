@@ -68,6 +68,7 @@ from typing import Any, Callable, List, Optional, Set, Tuple, Union
 import numpy as np
 import SimpleITK as sitk
 
+from imgtools.coretypes import Size3D, RegionBox
 from imgtools.logging import logger
 from imgtools.utils import array_to_image, image_to_array
 
@@ -304,6 +305,35 @@ class Segmentation(sitk.Image):
     def from_dicom_seg(cls, mask: sitk.Image, meta: Any) -> Segmentation:  # noqa
         """Alias for `from_dicom`."""
         return cls.from_dicom(mask=mask, meta=meta)
+    
+
+    def get_label_from_name(self, name: str) -> int:
+        """
+        Get the label index from a given name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the region of interest to retrieve the label index for.
+
+        Returns
+        -------
+        int
+            The label index corresponding to the given name.
+
+        Raises
+        ------
+        KeyError
+            If the name is not found in the ROI indices.
+        """
+        # Retrieve the label index from the name
+        try:
+            return self.roi_indices[name]
+        except KeyError as e:
+            msg = f"Label name {name} not found in ROI indices for this segmentation. Options are: {self.roi_indices.keys()}"
+            logger.exception(msg)
+            raise e
+        
 
     def get_label(
         self,
@@ -326,7 +356,7 @@ class Segmentation(sitk.Image):
         Returns
         -------
         sitk.Image
-            The label image corresponding to the given label or name.
+            The label image corresponding to the given label or name. The mask values are now 1.
 
         Raises
         ------
@@ -338,7 +368,7 @@ class Segmentation(sitk.Image):
 
         if label is None:
             # Retrieve the label index from the name
-            label = self.roi_indices[name]
+            label = self.get_label_from_name(name)
 
         if label == 0:
             # Background is stored implicitly and needs to be computed
@@ -385,6 +415,96 @@ class Segmentation(sitk.Image):
                 pass
 
         return res
+    
+    def compute_statistics(self, label_image:sitk.Image) -> sitk.LabelShapeStatisticsImageFilter:
+        """
+        Convert the label image to a label map and compute statistics.
+
+        Parameters
+        ----------
+        label_image : sitk.Image
+            The label image to convert to a label map.
+
+        Returns
+        -------
+        sitk.LabelShapeStatisticsImageFilter
+            The label map statistics can be computed on.
+        """
+        label_stats = sitk.LabelShapeStatisticsImageFilter()
+        label_stats.Execute(label_image)
+        return label_stats
+    
+    def get_label_bounding_box(self, 
+                               label: Optional[int] = None, 
+                               name: Optional[str] = None
+                               ) -> RegionBox:
+        """
+        Get bounding box around a label image for a given label or name. Can be used to find dimensions and volume of the mask.
+
+        Parameters
+        ----------
+        label : Optional[int]
+            The label index to retrieve. If None, the name parameter must be provided.
+        name : Optional[str]
+            The name of the region of interest to retrieve. If None, the label parameter must be provided.
+
+        Returns
+        -------
+        RegionBox
+            Bounding box around non-zero voxels in the label image. Contains min and max coordinates and size.
+
+        """
+        # Get the binary mask for the given label or name - mask label is 1
+        label_image = self.get_label(label=label, name=name)
+        return RegionBox.from_mask_bbox(label_image, label=1)
+        
+    def get_label_dimensions(self, 
+                             label: Optional[int] = None,
+                             name: Optional[str] = None
+                            ) -> Size3D:
+        """
+        Get size of the ROI mask in a label image as width, height, and depth (x,y,z).
+
+        Parameters
+        ----------
+        label : Optional[int]
+            The label index to retrieve. If None, the name parameter must be provided.
+        name : Optional[str]
+            The name of the region of interest to retrieve. If None, the label parameter must be provided.
+
+        Returns
+        -------
+        Size3D
+            Dimensions of the ROI mask in the label image. Has width, height, and depth.
+        """
+        label_image_bbox = self.get_label_bounding_box(label=label, name=name)
+        return label_image_bbox.size
+
+    def get_label_number_of_pixels(self, 
+                                   label: Optional[int] = None,
+                                   name: Optional[str] = None
+                                  ) -> int:
+        """
+        Get number of pixels in the ROI mask in a label image.
+
+        Parameters
+        ----------
+        label : Optional[int]
+            The label index to retrieve. If None, the name parameter must be provided.
+        name : Optional[str]
+            The name of the region of interest to retrieve. If None, the label parameter must be provided.
+
+        Returns
+        -------
+        int
+            Number of pixels in the ROI mask in the label image.
+        """
+        # Get the binary mask for the given label or name - mask label is 1
+        label_image = self.get_label(label=label, name=name)
+        # Convert the label image to a label map
+        label_image_stats = self.compute_statistics(label_image)
+        # Return the number of ROI mask pixels in the label image
+        return label_image_stats.GetNumberOfPixels(label=1)
 
     def __repr__(self) -> str:
         return f"<Segmentation with ROIs: {self.roi_indices!r}>"
