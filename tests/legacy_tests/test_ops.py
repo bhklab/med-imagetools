@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import SimpleITK as sitk
 
-from imgtools.ops.ops import (
+from imgtools.ops import (
     CentreCrop,
     ClipIntensity,
     Crop,
@@ -21,7 +21,6 @@ from imgtools.ops.ops import (
     Zoom,
 )
 
-
 img_shape = (100, 100, 100)
 direction = (1, 0, 0, 0, 1, 0, 0, 0, 1)
 origin = (37, 37, 37)
@@ -35,10 +34,11 @@ blank.SetSpacing(spacing)
 
 
 class TestOutput:
-    @pytest.mark.parametrize('op', [NumpyOutput, HDF5Output])  # , "CT,RTDOSE,PT"])
+    @pytest.mark.parametrize(
+        "op", [NumpyOutput, HDF5Output]
+    )  # , "CT,RTDOSE,PT"])
     def test_output(self, op, tmp_path) -> None:
-
-        output_path = tmp_path / 'temp_outputs'
+        output_path = tmp_path / "temp_outputs"
         output_path.mkdir()
         # get class name
         class_name = op.__name__
@@ -51,13 +51,13 @@ class TestOutput:
         ).as_posix()
 
         # check output
-        if class_name == 'HDF5Output':
-            f = h5py.File(saved_path, 'r')
-            img = f['image']
-            assert tuple(img.attrs['origin']) == origin
-            assert tuple(img.attrs['direction']) == direction
-            assert tuple(img.attrs['spacing']) == spacing
-        elif class_name == 'NumpyOutput':
+        if class_name == "HDF5Output":
+            f = h5py.File(saved_path, "r")
+            img = f["image"]
+            assert tuple(img.attrs["origin"]) == origin
+            assert tuple(img.attrs["direction"]) == direction
+            assert tuple(img.attrs["spacing"]) == spacing
+        elif class_name == "NumpyOutput":
             img = np.load(saved_path)
 
         # class-agnostic
@@ -66,13 +66,13 @@ class TestOutput:
 
 class TestTransform:
     @pytest.mark.parametrize(
-        'op,params',
+        "op,params",
         [
-            (Resample, {'spacing': 3.7}),
-            (Resize, {'size': 10}),
-            (Zoom, {'scale_factor': 0.1}),
-            (Crop, {'crop_centre': (20, 20, 20), 'size': 10}),
-            (CentreCrop, {'size': 10}),
+            (Resample, {"spacing": 3.7}),
+            (Resize, {"size": 10}),
+            (Zoom, {"scale_factor": 0.1}),
+            (Crop, {"crop_centre": (20, 20, 20), "size": 10}),
+            (CentreCrop, {"size": 10}),
         ],
     )
     def test_transform(self, op, params) -> None:
@@ -96,12 +96,12 @@ class TestTransform:
 
 class TestIntensity:
     @pytest.mark.parametrize(
-        'op,params',
+        "op,params",
         [
-            (ClipIntensity, {'lower': 0, 'upper': 500}),
-            (WindowIntensity, {'window': 500, 'level': 250}),
+            (ClipIntensity, {"lower": 0, "upper": 500}),
+            (WindowIntensity, {"window": 500, "level": 250}),
             (StandardScale, {}),
-            (MinMaxScale, {'minimum': 0, 'maximum': 1000}),
+            (MinMaxScale, {"minimum": 0, "maximum": 1000}),
         ],
     )
     def test_intesity(self, op, params) -> None:

@@ -79,11 +79,8 @@ def image_to_array(image: sitk.Image) -> ImageArrayMetadata:
         - The direction cosines of the image (tuple of floats).
         - The pixel spacing of the image (tuple of floats).
     """
-    origin: Array3D = image.GetOrigin()
-    direction: Array3D = image.GetDirection()
-    spacing: Array3D = image.GetSpacing()
     array: np.ndarray = sitk.GetArrayFromImage(image)
-    return array, origin, direction, spacing
+    return array, image["origin"], image["direction"], image["spacing"]
 
 
 def physical_points_to_idxs(
@@ -172,12 +169,19 @@ def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
         Physical coordinates corresponding to the given indices.
     """
     continuous = np.issubdtype(idxs.dtype, np.floating)
+    
+    # TransformIndexToPhysicalPoint expects a list not a numpy array
+
     transform = (
         image.TransformContinuousIndexToPhysicalPoint
         if continuous
         else image.TransformIndexToPhysicalPoint
     )
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
-    return vectorized_transform(idxs)
+    # vectorized_transform = np.vectorize(
+    #     lambda x: np.array(transform(x)), signature="(3)->(3)"
+    # )
+    # return vectorized_transform(idxs)
+
+    # Convert indices to lists of lists and apply the transformation
+    idxs_list = idxs.tolist()
+    return np.array([transform(idx) for idx in idxs_list])
