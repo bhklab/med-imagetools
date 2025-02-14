@@ -1,31 +1,15 @@
-import pathlib
-import re
-import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     BaseLoader,
-    ImageCSVLoader,
-    ImageFileLoader,
-    read_dicom_auto,
-    read_image,
 )
 from imgtools.io.writers import (
-    BaseSubjectWriter,
     BaseWriter,
-    HDF5Writer,
-    ImageFileWriter,
-    MetadataWriter,
-    NumpyWriter,
-    SegNrrdWriter,
 )
-from imgtools.logging import logger
-from imgtools.modules.datagraph import DataGraph
-from imgtools.modules import Segmentation, map_over_labels, StructureSet
+from imgtools.modules import Segmentation, StructureSet, map_over_labels
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
@@ -41,11 +25,6 @@ from imgtools.ops.functional import (
     window_intensity,
     zoom,
 )
-from imgtools.utils import (
-    array_to_image,
-    image_to_array,
-    physical_points_to_idxs,
-)
 
 LoaderFunction = TypeVar("LoaderFunction")
 ImageFilter = TypeVar("ImageFilter")
@@ -58,8 +37,12 @@ class BaseOp:
         raise NotImplementedError
 
     def __repr__(self):
-        attrs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
-        attrs = [(k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs]
+        attrs = [
+            (k, v) for k, v in self.__dict__.items() if not k.startswith("_")
+        ]
+        attrs = [
+            (k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs
+        ]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__name__}({args})"
 
@@ -88,481 +71,6 @@ class BaseOutput(BaseOp):
 
     def __call__(self, key, *args, **kwargs):
         self._writer.put(key, *args, **kwargs)
-
-
-class ImageAutoInput(BaseInput):
-    """ImageAutoInput class is a wrapper class around ImgCSVloader which looks for the specified
-    directory and crawls through it as the first step. Using the crawled output data, a graph on
-    modalties present in the dataset is formed which stores the relation between all the modalities.
-    Based on the user provided modalities, this class loads the information of the user provided modalities
-
-    Parameters
-    ----------
-    dir_path: str
-        Path to dataset top-level directory. The crawler/indexer will start at this directory.
-
-    modalities: str | List[str]
-        Either as a list of strings or a single string of comma-separated modalities.
-        i.e ["CT", "RTSTRUCT"] or "CT,RTSTRUCT".
-        Only samples with ALL modalities will be processed.
-        Make sure there are no space between list elements as it is parsed as a string.
-
-    n_jobs: int
-        Number of parallel jobs to run when crawling. Default is -1.
-
-    visualize: bool
-        Whether to return visualization of the data graph. Requires pyvis to be installed.
-        Default is False.
-
-    update: bool
-        Whether to update crawled index
-    """
-
-    imgtools_dir: str = ".imgtools"
-
-    def __init__(
-        self,
-        dir_path: str,
-        modalities: str | List[str],
-        n_jobs: int = -1,
-        visualize: bool = False,
-        update: bool = False,
-    ):
-        self.modalities = modalities
-
-        self.dir_path = pathlib.Path(dir_path)
-        self.parent = self.dir_path.parent
-        self.dataset_name = self.dir_path.name
-
-        self.csv_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.csv"
-        )
-        self.json_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}.json"
-        )
-        self.edge_path = (
-            self.parent / self.imgtools_dir / f"imgtools_{self.dataset_name}_edges.csv"
-        )
-
-        start = time.time()
-        # CRAWLER
-        # -------
-        # Checks if dataset has already been indexed
-        if not self.csv_path.exists() or update:
-            logger.debug("Output exists, force updating.", path=self.csv_path)
-            logger.info("Indexing the dataset...")
-            db = crawl(self.dir_path, n_jobs=n_jobs)
-            logger.info(f"Number of patients in the dataset: {len(db)}")
-        else:
-            logger.warning(
-                "The dataset has already been indexed. Use --update to force update."
-            )
-
-        # GRAPH
-        # -----
-        # Form the graph
-        logger.debug("Creating edge path", edge_path=self.edge_path)
-        self.graph = DataGraph(
-            path_crawl=self.csv_path.resolve().as_posix(),
-            edge_path=self.edge_path.as_posix(),
-            visualize=visualize,
-            update=update,
-        )
-        logger.info(
-            f"Forming the graph based on the given modalities: {self.modalities}"
-        )
-        self.df_combined = self.graph.parser(self.modalities)
-
-        self.output_streams = [
-            ("_").join(cols.split("_")[1:])
-            for cols in self.df_combined.columns
-            if cols.split("_")[0] == "folder"
-        ]
-
-        # not sure what this is really doing...
-
-        self.column_names = [
-            cols for cols in self.df_combined.columns if cols.split("_")[0] == "folder"
-        ]
-        self.series_names = [
-            cols for cols in self.df_combined.columns if cols.split("_")[0] == "series"
-        ]
-        logger.info(
-            f"There are {len(self.df_combined)} cases containing all {self.modalities} modalities."
-        )
-
-        self.readers = [read_dicom_auto for _ in range(len(self.output_streams))]
-        logger.info(f"Total time taken: {time.time() - start:.2f} seconds")
-        loader = ImageCSVLoader(
-            self.df_combined,
-            colnames=self.column_names,
-            seriesnames=self.series_names,
-            id_column=None,
-            expand_paths=False,
-            readers=self.readers,
-        )
-
-        super().__init__(loader)
-
-
-class ImageCSVInput(BaseInput):
-    """ImageCSVInput class looks for a CSV file in a specified directory and loads images based on the information in the file.
-
-    Parameters
-    ----------
-    csv_path: str
-        Directory where the CSV file is stored.
-
-    colnames: List[str]
-        List of column names in the CSV file to be used for image loading.
-
-    id_column: str, optional
-        A column name to be used as the subject ID.
-
-    reader: LoaderFunction
-        The functions used to read images.
-        The functions are implemented in the imgtools.io module.
-        The options are:
-        - read_image
-        - read_dicom_series
-        - read_dicom_rtstruct
-        - read_segmentation
-    """
-
-    def __init__(
-        self,
-        csv_path_or_dataframe: str,
-        colnames: List[str] = None,
-        id_column: Optional[str] = None,
-        expand_paths: bool = True,
-        readers: List[LoaderFunction] = None,
-    ):  # no mutable defaults: https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
-        if colnames is None:
-            colnames = []
-        if readers is None:
-            readers = [read_image]
-        self.csv_path_or_dataframe = csv_path_or_dataframe
-        self.colnames = colnames
-        self.id_column = id_column
-        self.expand_paths = expand_paths
-        self.readers = readers
-        loader = ImageCSVLoader(
-            self.csv_path_or_dataframe,
-            colnames=self.colnames,
-            id_column=self.id_column,
-            expand_paths=self.expand_paths,
-            readers=self.readers,
-        )
-        super().__init__(loader)
-
-
-class ImageFileInput(BaseInput):
-    """ImageFileInput class looks for images in a specified directory and reads them by using a reader function.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the image files are stored.
-
-    get_subject_id_from: str
-        How to extract the subject ID. The options are:
-        - 'filename' indicates the image reader to use filename as the subject ID. (default)
-        - 'subject_directory' indicates the image reader to use the name of the subject directory.
-
-    subdir_path: str, optional
-        Path to a subdirectory where the image is stored.
-
-    exclude_paths: List[str], optional
-        Directory paths to be excluded when searching for the image files to be loaded.
-
-    reader: LoaderFunction
-        The function used to read individual images.
-        The functions are implemented in the imgtools.io module.
-        The options are:
-        - read_image
-        - read_dicom_series
-        - read_dicom_rtstruct
-        - read_segmentation
-        - read_dicom_auto
-        - read_dicom_rtdose
-        - read_dicom_pet
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        get_subject_id_from: str = "filename",
-        subdir_path: Optional[str] = None,
-        exclude_paths: Optional[
-            List[str]
-        ] = None,  # no mutable defaults https://florimond.dev/en/posts/2018/08/python-mutable-defaults-are-the-source-of-all-evil/
-        reader: LoaderFunction = None,
-    ):
-        if exclude_paths is None:
-            exclude_paths = []
-        if reader is None:
-            reader = read_image
-        self.root_directory = root_directory
-        self.get_subject_id_from = get_subject_id_from
-        self.subdir_path = subdir_path
-        self.exclude_paths = exclude_paths
-        self.reader = reader
-        loader = ImageFileLoader(
-            self.root_directory,
-            self.get_subject_id_from,
-            self.subdir_path,
-            self.exclude_paths,
-            self.reader,
-        )
-        super().__init__(loader)
-
-
-class ImageFileOutput(BaseOutput):
-    """ImageFileOutput class outputs processed images as one of the image file formats.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the processed image files will be stored.
-
-    filename_format: str, optional
-        The filename template.
-        Set to be {subject_id}.nrrd as default.
-        {subject_id} will be replaced by each subject's ID at runtime.
-
-    create_dirs: bool, optional
-        Specify whether to create an output directory if it does not exit.
-        Set to be True as default.
-
-    compress: bool, optional
-        Specify whether to enable compression for NRRD format.
-        Set to be true as default.
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        filename_format: Optional[str] = "{subject_id}.nrrd",
-        create_dirs: Optional[bool] = True,
-        compress: Optional[bool] = True,
-    ):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        self.compress = compress
-
-        if ".seg" in filename_format:  # from .seg.nrrd bc it is now .nii.gz
-            writer_class = SegNrrdWriter
-        else:
-            writer_class = ImageFileWriter
-
-        writer = writer_class(
-            self.root_directory, self.filename_format, self.create_dirs, self.compress
-        )
-
-        super().__init__(writer)
-
-
-# Resampling ops
-class ImageSubjectFileOutput(BaseOutput):
-    def __init__(
-        self,
-        root_directory: str,
-        filename_format: Optional[str] = "{subject_id}.nii.gz",
-        create_dirs: Optional[bool] = True,
-        compress: Optional[bool] = True,
-    ):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        self.compress = compress
-
-        writer = BaseSubjectWriter(
-            self.root_directory, self.filename_format, self.create_dirs, self.compress
-        )
-
-        super().__init__(writer)
-
-
-class ImageAutoOutput:
-    """
-    Wrapper class around ImageFileOutput. This class supports multiple modalities writers and calls ImageFileOutput for writing the files
-
-    Parameters
-    ----------
-    root_directory: str
-        The directory where all the processed files will be stored in the form of nrrd
-
-    output_streams: List[str]
-        The modalties that should be stored. This is typically equal to the column names of the table returned after graph querying. Examples is provided in the
-        dictionary file_name
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        output_streams: List[str],
-        nnunet_info: Dict = None,
-        inference: bool = False,
-    ):
-        self.output = {}
-        for colname in output_streams:
-            # Not considering colnames ending with alphanumeric
-            colname_process = ("_").join(
-                [item for item in colname.split("_") if not item.isnumeric()]
-            )
-            colname_process = colname  # temproary force #
-            if not nnunet_info and not inference:
-                self.output[colname_process] = ImageSubjectFileOutput(
-                    pathlib.Path(
-                        root_directory, "{subject_id}", colname_process.split(".")[0]
-                    ).as_posix(),
-                    filename_format="{}.nii.gz".format(colname_process),
-                )
-            elif inference:
-                self.output[colname_process] = ImageSubjectFileOutput(
-                    root_directory,
-                    filename_format="{subject_id}_{modality_index}.nii.gz",
-                )
-            else:
-                self.output[colname_process] = ImageSubjectFileOutput(
-                    pathlib.Path(
-                        root_directory, "{label_or_image}{train_or_test}"
-                    ).as_posix(),
-                    filename_format="{subject_id}_{modality_index}.nii.gz",
-                )
-
-    def __call__(
-        self,
-        subject_id: str,
-        img: sitk.Image,
-        output_stream,
-        is_mask: bool = False,
-        mask_label: Optional[str] = "",
-        label_or_image: str = "images",
-        train_or_test: str = "Tr",
-        nnunet_info: Dict = None,
-    ):
-        self.output[output_stream](
-            subject_id,
-            img,
-            is_mask=is_mask,
-            mask_label=mask_label,
-            label_or_image=label_or_image,
-            train_or_test=train_or_test,
-            nnunet_info=nnunet_info,
-        )
-
-
-class NumpyOutput(BaseOutput):
-    """NumpyOutput class processed images as NumPy files.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the processed NumPy files will be stored.
-
-    filename_format: str, optional
-        The filename template.
-        Set to be {subject_id}.npy as default.
-        {subject_id} will be replaced by each subject's ID at runtime.
-
-    create_dirs: bool, optional
-        Specify whether to create an output directory if it does not exit.
-        Set to be True as default.
-
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        filename_format: Optional[str] = "{subject_id}.npy",
-        create_dirs: Optional[bool] = True,
-    ):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        writer = NumpyWriter(
-            self.root_directory, self.filename_format, self.create_dirs
-        )
-        super().__init__(writer)
-
-
-class HDF5Output(BaseOutput):
-    """HDF5Output class outputs the processed image data in HDF5 format.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the processed .h5 file will be stored.
-
-    filename_format: str, optional
-        The filename template.
-        Set to be {subject_id}.h5 as default.
-        {subject_id} will be replaced by each subject's ID at runtime.
-
-    create_dirs: bool, optional
-        Specify whether to create an output directory if it does not exit.
-        Set to be True as default.
-
-    save_geometry: bool, optional
-        Specify whether to save geometry data.
-        Set to be True as default.
-
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        filename_format: Optional[str] = "{subject_id}.h5",
-        create_dirs: Optional[bool] = True,
-        save_geometry: Optional[bool] = True,
-    ):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        self.save_geometry = save_geometry
-        writer = HDF5Writer(
-            self.root_directory,
-            self.filename_format,
-            self.create_dirs,
-            self.save_geometry,
-        )
-        super().__init__(writer)
-
-
-class MetadataOutput(BaseOutput):
-    """MetadataOutput class outputs the metadata of processed image files in .json format.
-
-    Parameters
-    ----------
-    root_directory: str
-        Root directory where the processed .json file will be stored.
-
-    filename_format: str, optional
-        The filename template.
-        Set to be {subject_id}.json as default.
-        {subject_id} will be replaced by each subject's ID at runtime.
-
-    create_dirs: bool, optional
-        Specify whether to create an output directory if it does not exit.
-        Set to be True as default.
-
-    """
-
-    def __init__(
-        self,
-        root_directory: str,
-        filename_format: Optional[str] = "{subject_id}.json",
-        create_dirs: Optional[bool] = True,
-    ):
-        self.root_directory = root_directory
-        self.filename_format = filename_format
-        self.create_dirs = create_dirs
-        writer = MetadataWriter(
-            self.root_directory, self.filename_format, self.create_dirs
-        )
-        super().__init__(writer)
 
 
 # Resampling ops
@@ -927,7 +435,9 @@ class Crop(BaseOp):
     """
 
     def __init__(
-        self, crop_centre: Sequence[float], size: Union[int, Sequence[int], np.ndarray]
+        self,
+        crop_centre: Sequence[float],
+        size: Union[int, Sequence[int], np.ndarray],
     ):
         self.crop_centre = crop_centre
         self.size = size
@@ -1011,7 +521,9 @@ class BoundingBox(BaseOp):
         result = obj(mask, label)
     """
 
-    def __call__(self, mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
+    def __call__(
+        self, mask: sitk.Image, label: int = 1
+    ) -> Tuple[Tuple, Tuple]:
         """BoundingBox callable object: Find the axis-aligned
         bounding box of a region descriibed by a segmentation mask.
 
@@ -1076,7 +588,9 @@ class Centroid(BaseOp):
             The centroid coordinates.
         """
 
-        return centroid(mask, label=label, world_coordinates=self.world_coordinates)
+        return centroid(
+            mask, label=label, world_coordinates=self.world_coordinates
+        )
 
 
 class CropToMaskBoundingBox(BaseOp):
@@ -1130,7 +644,9 @@ class CropToMaskBoundingBox(BaseOp):
             The cropped image and mask.
         """
 
-        return crop_to_mask_bounding_box(image, mask, margin=self.margin, label=label)
+        return crop_to_mask_bounding_box(
+            image, mask, margin=self.margin, label=label
+        )
 
 
 # Intensity ops
@@ -1307,7 +823,9 @@ class StandardScale(BaseOp):
     """
 
     def __init__(
-        self, rescale_mean: Optional[float] = 0.0, rescale_std: Optional[float] = 1.0
+        self,
+        rescale_mean: Optional[float] = 0.0,
+        rescale_std: Optional[float] = 1.0,
     ):
         self.rescale_mean = rescale_mean
         self.rescale_std = rescale_std
@@ -1343,7 +861,9 @@ class StandardScale(BaseOp):
             The rescaled image.
         """
 
-        return standard_scale(image, mask, self.rescale_mean, self.rescale_std, label)
+        return standard_scale(
+            image, mask, self.rescale_mean, self.rescale_std, label
+        )
 
 
 class MinMaxScale(BaseOp):
@@ -1463,7 +983,10 @@ class ImageFunction(BaseOp):
     """
 
     def __init__(
-        self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
+        self,
+        function: Function,
+        copy_geometry: bool = True,
+        **kwargs: Optional[Any],
     ):
         self.function = function
         self.copy_geometry = copy_geometry
@@ -1490,61 +1013,61 @@ class ImageFunction(BaseOp):
         return result
 
 
-class ArrayFunction(BaseOp):
-    """ArrayFunction operation class:
-    A callable class that takes in a function to be used to process an image from numpy array,
-    and executes it.
+# class ArrayFunction(BaseOp):
+#     """ArrayFunction operation class:
+#     A callable class that takes in a function to be used to process an image from numpy array,
+#     and executes it.
 
-    To instantiate:
-        obj = ArrayFunction(function, copy_geometry, **kwargs)
-    To call:
-        result = obj(image)
+#     To instantiate:
+#         obj = ArrayFunction(function, copy_geometry, **kwargs)
+#     To call:
+#         result = obj(image)
 
-    Parameters
-    ----------
-    function
-        A function to be used for image processing.
-        This function needs to have the following signature:
-        - function(image: sitk.Image, **args)
-        - The first argument needs to be an sitkImage, followed by optional arguments.
+#     Parameters
+#     ----------
+#     function
+#         A function to be used for image processing.
+#         This function needs to have the following signature:
+#         - function(image: sitk.Image, **args)
+#         - The first argument needs to be an sitkImage, followed by optional arguments.
 
-    copy_geometry, optional
-        An optional argument to specify whether information about the image should be copied to the
-        resulting image. Set to be true as a default.
+#     copy_geometry, optional
+#         An optional argument to specify whether information about the image should be copied to the
+#         resulting image. Set to be true as a default.
 
-    kwargs, optional
-        Any number of arguements used in the given function.
-    """
+#     kwargs, optional
+#         Any number of arguements used in the given function.
+#     """
 
-    def __init__(
-        self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
-    ):
-        self.function = function
-        self.copy_geometry = copy_geometry
-        self.kwargs = kwargs
+#     def __init__(
+#         self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
+#     ):
+#         self.function = function
+#         self.copy_geometry = copy_geometry
+#         self.kwargs = kwargs
 
-    def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ArrayFunction callable object:
-        Processes an image from numpy array.
+#     def __call__(self, image: sitk.Image) -> sitk.Image:
+#         """ArrayFunction callable object:
+#         Processes an image from numpy array.
 
-        Parameters
-        ----------
-        image
-            sitk.Image object to be processed.
+#         Parameters
+#         ----------
+#         image
+#             sitk.Image object to be processed.
 
-        Returns
-        -------
-        sitk.Image
-            The image processed with a given function.
-        """
+#         Returns
+#         -------
+#         sitk.Image
+#             The image processed with a given function.
+#         """
 
-        array, origin, direction, spacing = image_to_array(image)
-        result = self.function(array, **self.kwargs)
-        if self.copy_geometry:
-            result = array_to_image(result, origin, direction, spacing)
-        else:
-            result = array_to_image(result)
-        return result
+#         array, origin, direction, spacing = image_to_array(image)
+#         result = self.function(array, **self.kwargs)
+#         if self.copy_geometry:
+#             result = array_to_image(result, origin, direction, spacing)
+#         else:
+#             result = array_to_image(result)
+#         return result
 
 
 # Segmentation ops
@@ -1599,7 +1122,9 @@ class StructureSetToSegmentation(BaseOp):
 
     def __init__(
         self,
-        roi_names: Union[str, List[str], Dict[str, Union[str, List[str]]], None] = None,
+        roi_names: Union[
+            str, List[str], Dict[str, Union[str, List[str]]], None
+        ] = None,
         continuous: bool = True,
     ):
         """Initialize the op."""
@@ -1614,7 +1139,7 @@ class StructureSetToSegmentation(BaseOp):
         ignore_missing_regex: bool,
         roi_select_first: bool = False,
         roi_separate: bool = False,
-    ) -> Segmentation:
+    ) -> Segmentation | None:
         """Convert the structure set to a Segmentation object.
 
         Parameters
@@ -1626,7 +1151,7 @@ class StructureSetToSegmentation(BaseOp):
 
         Returns
         -------
-        Segmentation
+        Segmentation | None
             The segmentation object.
         """
         return structure_set.to_segmentation(
@@ -1640,268 +1165,268 @@ class StructureSetToSegmentation(BaseOp):
         )
 
 
-class FilterSegmentation:
-    """FilterSegmentation operation class:
-    A callable class that accepts ROI names, a Segmentation mask with all labels
-    and returns only the desired Segmentation masks based on accepted ROI names.
+# class FilterSegmentation:
+#     """FilterSegmentation operation class:
+#     A callable class that accepts ROI names, a Segmentation mask with all labels
+#     and returns only the desired Segmentation masks based on accepted ROI names.
 
-    To instantiate:
-        obj = StructureSet(roi_names)
-    To call:
-        mask = obj(structure_set, reference_image)
+#     To instantiate:
+#         obj = StructureSet(roi_names)
+#     To call:
+#         mask = obj(structure_set, reference_image)
 
-    Parameters
-    ----------
-    roi_names
-        List of Region of Interests
-    """
+#     Parameters
+#     ----------
+#     roi_names
+#         List of Region of Interests
+#     """
 
-    def __init__(self, roi_patterns: Dict[str, str], continuous: bool = False):
-        """Initialize the op.
+#     def __init__(self, roi_patterns: Dict[str, str], continuous: bool = False):
+#         """Initialize the op.
 
-        Parameters
-        ----------
-        roi_names
-            List of ROI names to export. Both full names and
-            case-insensitive regular expressions are allowed.
-            All labels within one sublist will be assigned
-            the same label.
+#         Parameters
+#         ----------
+#         roi_names
+#             List of ROI names to export. Both full names and
+#             case-insensitive regular expressions are allowed.
+#             All labels within one sublist will be assigned
+#             the same label.
 
-        """
-        self.roi_patterns = roi_patterns
-        self.continuous = continuous
+#         """
+#         self.roi_patterns = roi_patterns
+#         self.continuous = continuous
 
-    def _assign_labels(
-        self, names, roi_select_first: bool = False, roi_separate: bool = False
-    ):
-        """
-        Parameters
-        ----
-        roi_select_first
-            Select the first matching ROI/regex for each OAR, no duplicate matches.
+#     def _assign_labels(
+#         self, names, roi_select_first: bool = False, roi_separate: bool = False
+#     ):
+#         """
+#         Parameters
+#         ----
+#         roi_select_first
+#             Select the first matching ROI/regex for each OAR, no duplicate matches.
 
-        roi_separate
-            Process each matching ROI/regex as individual masks, instead of consolidating into one mask
-            Each mask will be named ROI_n, where n is the nth regex/name/string.
-        """
-        labels = {}
-        cur_label = 0
-        if names == self.roi_patterns:
-            for i, name in enumerate(self.roi_patterns):
-                labels[name] = i
-        else:
-            for _, pattern in enumerate(names):
-                if sorted(names) == sorted(
-                    list(labels.keys())
-                ):  # checks if all ROIs have already been processed.
-                    break
-                if isinstance(pattern, str):
-                    for i, name in enumerate(self.roi_names):
-                        if re.fullmatch(pattern, name, flags=re.IGNORECASE):
-                            labels[name] = cur_label
-                            cur_label += 1
-                else:  # if multiple regex/names to match
-                    matched = False
-                    for subpattern in pattern:
-                        if roi_select_first and matched:
-                            break  # break if roi_select_first and we're matched
-                        for n, name in enumerate(self.roi_names):
-                            if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
-                                matched = True
-                                if not roi_separate:
-                                    labels[name] = cur_label
-                                else:
-                                    labels[f"{name}_{n}"] = cur_label
+#         roi_separate
+#             Process each matching ROI/regex as individual masks, instead of consolidating into one mask
+#             Each mask will be named ROI_n, where n is the nth regex/name/string.
+#         """
+#         labels = {}
+#         cur_label = 0
+#         if names == self.roi_patterns:
+#             for i, name in enumerate(self.roi_patterns):
+#                 labels[name] = i
+#         else:
+#             for _, pattern in enumerate(names):
+#                 if sorted(names) == sorted(
+#                     list(labels.keys())
+#                 ):  # checks if all ROIs have already been processed.
+#                     break
+#                 if isinstance(pattern, str):
+#                     for i, name in enumerate(self.roi_names):
+#                         if re.fullmatch(pattern, name, flags=re.IGNORECASE):
+#                             labels[name] = cur_label
+#                             cur_label += 1
+#                 else:  # if multiple regex/names to match
+#                     matched = False
+#                     for subpattern in pattern:
+#                         if roi_select_first and matched:
+#                             break  # break if roi_select_first and we're matched
+#                         for n, name in enumerate(self.roi_names):
+#                             if re.fullmatch(subpattern, name, flags=re.IGNORECASE):
+#                                 matched = True
+#                                 if not roi_separate:
+#                                     labels[name] = cur_label
+#                                 else:
+#                                     labels[f"{name}_{n}"] = cur_label
 
-                    cur_label += 1
-        return labels
+#                     cur_label += 1
+#         return labels
 
-    def get_mask(self, reference_image, seg, mask, label, idx, continuous):
-        size = seg.GetSize()
-        seg_arr = sitk.GetArrayFromImage(seg)
-        if len(size) == 5:
-            size = size[:-1]
-        elif len(size) == 3:
-            size = size.append(1)
+#     def get_mask(self, reference_image, seg, mask, label, idx, continuous):
+#         size = seg.GetSize()
+#         seg_arr = sitk.GetArrayFromImage(seg)
+#         if len(size) == 5:
+#             size = size[:-1]
+#         elif len(size) == 3:
+#             size = size.append(1)
 
-        idx_seg = (
-            self.roi_names[label] - 1
-        )  # SegmentSequence numbering starts at 1 instead of 0
-        if (
-            size[:-1] == reference_image.GetSize()
-        ):  # Assumes `size` is length of 4: (x, y, z, channels)
-            mask[:, :, :, idx] += seg[:, :, :, idx_seg]
-        else:  # if 2D segmentations on 3D images
-            frame = seg.frame_groups[idx_seg]
-            ref_uid = (
-                frame.DerivationImageSequence[0]
-                .SourceImageSequence[0]
-                .ReferencedSOPInstanceUID
-            )  # unused but references InstanceUID of slice
-            assert ref_uid is not None, "There was no ref_uid"  # dodging linter
+#         idx_seg = (
+#             self.roi_names[label] - 1
+#         )  # SegmentSequence numbering starts at 1 instead of 0
+#         if (
+#             size[:-1] == reference_image.GetSize()
+#         ):  # Assumes `size` is length of 4: (x, y, z, channels)
+#             mask[:, :, :, idx] += seg[:, :, :, idx_seg]
+#         else:  # if 2D segmentations on 3D images
+#             frame = seg.frame_groups[idx_seg]
+#             ref_uid = (
+#                 frame.DerivationImageSequence[0]
+#                 .SourceImageSequence[0]
+#                 .ReferencedSOPInstanceUID
+#             )  # unused but references InstanceUID of slice
+#             assert ref_uid is not None, "There was no ref_uid"  # dodging linter
 
-            frame_coords = np.array(frame.PlanePositionSequence[0].ImagePositionPatient)
-            img_coords = physical_points_to_idxs(
-                reference_image, np.expand_dims(frame_coords, (0, 1))
-            )[0][0]
-            z = img_coords[0]
+#             frame_coords = np.array(frame.PlanePositionSequence[0].ImagePositionPatient)
+#             img_coords = physical_points_to_idxs(
+#                 reference_image, np.expand_dims(frame_coords, (0, 1))
+#             )[0][0]
+#             z = img_coords[0]
 
-            mask[z, :, :, idx] += seg_arr[0, idx_seg, :, :]
+#             mask[z, :, :, idx] += seg_arr[0, idx_seg, :, :]
 
-    def __call__(
-        self,
-        reference_image: sitk.Image,
-        seg: Segmentation,
-        existing_roi_indices: Dict[str, int],
-        ignore_missing_regex: bool = False,
-        roi_select_first: bool = False,
-        roi_separate: bool = False,
-    ) -> Segmentation:
-        """Convert the structure set to a Segmentation object.
+#     def __call__(
+#         self,
+#         reference_image: sitk.Image,
+#         seg: Segmentation,
+#         existing_roi_indices: Dict[str, int],
+#         ignore_missing_regex: bool = False,
+#         roi_select_first: bool = False,
+#         roi_separate: bool = False,
+#     ) -> Segmentation:
+#         """Convert the structure set to a Segmentation object.
 
-        Parameters
-        ----------
-        structure_set
-            The structure set to convert.
-        reference_image
-            Image used as reference geometry.
+#         Parameters
+#         ----------
+#         structure_set
+#             The structure set to convert.
+#         reference_image
+#             Image used as reference geometry.
 
-        Returns
-        -------
-        Segmentation
-            The segmentation object.
-        """
-        from itertools import groupby
+#         Returns
+#         -------
+#         Segmentation
+#             The segmentation object.
+#         """
+#         from itertools import groupby
 
-        # variable name isn't ideal, but follows StructureSet.to_segmentation convention
-        self.roi_names = seg.raw_roi_names
-        labels = {}
+#         # variable name isn't ideal, but follows StructureSet.to_segmentation convention
+#         self.roi_names = seg.raw_roi_names
+#         labels = {}
 
-        # `roi_names` in .to_segmentation() method = self.roi_patterns
-        if self.roi_patterns is None or self.roi_patterns == {}:
-            self.roi_patterns = self.roi_names
-            labels = self._assign_labels(
-                self.roi_patterns, roi_select_first, roi_separate
-            )  # only the ones that match the regex
-        elif isinstance(self.roi_patterns, dict):
-            for name, pattern in self.roi_patterns.items():
-                if isinstance(pattern, str):
-                    matching_names = list(
-                        self._assign_labels([pattern], roi_select_first).keys()
-                    )
-                    if matching_names:
-                        labels[name] = (
-                            matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
-                        )
-                elif isinstance(
-                    pattern, list
-                ):  # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
-                    labels[name] = []
-                    for pattern_one in pattern:
-                        matching_names = list(
-                            self._assign_labels([pattern_one], roi_select_first).keys()
-                        )
-                        if matching_names:
-                            labels[name].extend(
-                                matching_names
-                            )  # {"GTV": ["GTV1", "GTV2"]}
-        elif isinstance(
-            self.roi_patterns, list
-        ):  # won't this always trigger after the previous?
-            labels = self._assign_labels(self.roi_patterns, roi_select_first)
-        else:
-            raise ValueError(f"{self.roi_patterns} not expected datatype")
-        logger.debug(f"Found {len(labels)} labels", labels=labels)
+#         # `roi_names` in .to_segmentation() method = self.roi_patterns
+#         if self.roi_patterns is None or self.roi_patterns == {}:
+#             self.roi_patterns = self.roi_names
+#             labels = self._assign_labels(
+#                 self.roi_patterns, roi_select_first, roi_separate
+#             )  # only the ones that match the regex
+#         elif isinstance(self.roi_patterns, dict):
+#             for name, pattern in self.roi_patterns.items():
+#                 if isinstance(pattern, str):
+#                     matching_names = list(
+#                         self._assign_labels([pattern], roi_select_first).keys()
+#                     )
+#                     if matching_names:
+#                         labels[name] = (
+#                             matching_names  # {"GTV": ["GTV1", "GTV2"]} is the result of _assign_labels()
+#                         )
+#                 elif isinstance(
+#                     pattern, list
+#                 ):  # for inputs that have multiple patterns for the input, e.g. {"GTV": ["GTV.*", "HTVI.*"]}
+#                     labels[name] = []
+#                     for pattern_one in pattern:
+#                         matching_names = list(
+#                             self._assign_labels([pattern_one], roi_select_first).keys()
+#                         )
+#                         if matching_names:
+#                             labels[name].extend(
+#                                 matching_names
+#                             )  # {"GTV": ["GTV1", "GTV2"]}
+#         elif isinstance(
+#             self.roi_patterns, list
+#         ):  # won't this always trigger after the previous?
+#             labels = self._assign_labels(self.roi_patterns, roi_select_first)
+#         else:
+#             raise ValueError(f"{self.roi_patterns} not expected datatype")
+#         logger.debug(f"Found {len(labels)} labels", labels=labels)
 
-        # removing empty labels from dictionary to prevent processing empty masks
-        all_empty = True
-        for v in labels.values():
-            if v != []:
-                all_empty = False
-        if all_empty:
-            if not ignore_missing_regex:
-                raise ValueError(
-                    f"No ROIs matching {self.roi_patterns} found in {self.roi_names}."
-                )
-            else:
-                return None
+#         # removing empty labels from dictionary to prevent processing empty masks
+#         all_empty = True
+#         for v in labels.values():
+#             if v != []:
+#                 all_empty = False
+#         if all_empty:
+#             if not ignore_missing_regex:
+#                 raise ValueError(
+#                     f"No ROIs matching {self.roi_patterns} found in {self.roi_names}."
+#                 )
+#             else:
+#                 return None
 
-        labels = {k: v for (k, v) in labels.items() if v != []}
-        size = reference_image.GetSize()[::-1] + (len(labels),)
-        mask = np.zeros(size, dtype=np.uint8)
+#         labels = {k: v for (k, v) in labels.items() if v != []}
+#         size = reference_image.GetSize()[::-1] + (len(labels),)
+#         mask = np.zeros(size, dtype=np.uint8)
 
-        seg_roi_indices = {}
-        if self.roi_patterns != {} and isinstance(self.roi_patterns, dict):
-            for i, (name, label_list) in enumerate(labels.items()):
-                for label in label_list:
-                    self.get_mask(reference_image, seg, mask, label, i, self.continuous)
-                seg_roi_indices[name] = i
-        else:
-            for name, label in labels.items():
-                self.get_mask(reference_image, seg, mask, name, label, self.continuous)
-            seg_roi_indices = {
-                "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
-            }
+#         seg_roi_indices = {}
+#         if self.roi_patterns != {} and isinstance(self.roi_patterns, dict):
+#             for i, (name, label_list) in enumerate(labels.items()):
+#                 for label in label_list:
+#                     self.get_mask(reference_image, seg, mask, label, i, self.continuous)
+#                 seg_roi_indices[name] = i
+#         else:
+#             for name, label in labels.items():
+#                 self.get_mask(reference_image, seg, mask, name, label, self.continuous)
+#             seg_roi_indices = {
+#                 "_".join(k): v for v, k in groupby(labels, key=lambda x: labels[x])
+#             }
 
-        mask[mask > 1] = 1
-        mask = sitk.GetImageFromArray(mask, isVector=True)
-        mask.CopyInformation(reference_image)
-        return Segmentation(
-            mask,
-            roi_indices=seg_roi_indices,
-            existing_roi_indices=existing_roi_indices,
-            raw_roi_names=labels,
-        )
+#         mask[mask > 1] = 1
+#         mask = sitk.GetImageFromArray(mask, isVector=True)
+#         mask.CopyInformation(reference_image)
+#         return Segmentation(
+#             mask,
+#             roi_indices=seg_roi_indices,
+#             existing_roi_indices=existing_roi_indices,
+#             raw_roi_names=labels,
+#         )
 
 
-class MapOverLabels(BaseOp):
-    """MapOverLabels operation class:
+# class MapOverLabels(BaseOp):
+#     """MapOverLabels operation class:
 
-    To instantiate:
-        obj = MapOverLabels(op, include_background, return_segmentation)
-    To call:
-        mask = obj(segmentation, **kwargs)
+#     To instantiate:
+#         obj = MapOverLabels(op, include_background, return_segmentation)
+#     To call:
+#         mask = obj(segmentation, **kwargs)
 
-    Parameters
-    ----------
-    op
-        A processing function to be used for the operation.
+#     Parameters
+#     ----------
+#     op
+#         A processing function to be used for the operation.
 
-    """
+#     """
 
-    def __init__(
-        self, op, include_background: bool = False, return_segmentation: bool = True
-    ):
-        self.op = op
-        self.include_background = include_background
-        self.return_seg = return_segmentation
+#     def __init__(
+#         self, op, include_background: bool = False, return_segmentation: bool = True
+#     ):
+#         self.op = op
+#         self.include_background = include_background
+#         self.return_seg = return_segmentation
 
-    def __call__(
-        self, segmentation: Segmentation, **kwargs: Optional[Any]
-    ) -> Segmentation:
-        """MapOverLabels callable object:
+#     def __call__(
+#         self, segmentation: Segmentation, **kwargs: Optional[Any]
+#     ) -> Segmentation:
+#         """MapOverLabels callable object:
 
-        Parameters
-        ----------
-        include_background
-            Specify whether to include background. Set to be false as a default.
+#         Parameters
+#         ----------
+#         include_background
+#             Specify whether to include background. Set to be false as a default.
 
-        return_segmentation
-            Specify whether to return segmentation. Set to be true as a default.
+#         return_segmentation
+#             Specify whether to return segmentation. Set to be true as a default.
 
-        **kwargs
-            Arguments used for the processing function.
+#         **kwargs
+#             Arguments used for the processing function.
 
-        Returns
-        -------
-        Segmentation
-            The segmentation mask.
-        """
+#         Returns
+#         -------
+#         Segmentation
+#             The segmentation mask.
+#         """
 
-        return map_over_labels(
-            segmentation,
-            self.op,
-            include_background=self.include_background,
-            return_segmentation=self.return_seg,
-            **kwargs,
-        )
+#         return map_over_labels(
+#             segmentation,
+#             self.op,
+#             include_background=self.include_background,
+#             return_segmentation=self.return_seg,
+#             **kwargs,
+#         )

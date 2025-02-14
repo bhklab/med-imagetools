@@ -6,7 +6,8 @@ import click
 from imgtools.crawler import crawl
 from imgtools.logging import logger
 
-DEFAULT_WORKERS = os.cpu_count() - 2
+cpu_count: int | None = os.cpu_count()
+DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
 
 
 @click.command()

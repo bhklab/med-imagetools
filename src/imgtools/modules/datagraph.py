@@ -195,7 +195,9 @@ class DataGraph:
 
         vis_path = self.edge_path.parent / "datanet.html"
         logger.info(f"Saving HTML of visualization at {vis_path}")
-        data_net.show(vis_path)
+
+        # Save the visualization
+        data_net.show(name=vis_path.as_posix(), notebook=False)
 
     def _form_edges(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -854,3 +856,26 @@ class DataGraph:
             key_series = f"series_{node}_{dest}_{i}"
             i += 1
         return key, key_series
+
+
+if __name__ == "__main__":
+    datasetindex = Path("data/Vestibular-Schwannoma-SEG")
+    dataset_name = datasetindex.name
+
+    datagraph = DataGraph(
+        path_crawl=datasetindex.parent
+        / ".imgtools"
+        / f"imgtools_{dataset_name}.csv",
+        edge_path=datasetindex.parent
+        / ".imgtools"
+        / f"imgtools_{dataset_name}_edges2.csv",
+        update=True,
+        visualize=True,
+    )
+    query = "MR,RTSTRUCT,RTDOSE,RTPLAN"
+    final_df = datagraph.parser(query)
+
+    query = "MR,RTSTRUCT"
+    final_df2 = datagraph.parser(query)
+
+    # check how they are different
