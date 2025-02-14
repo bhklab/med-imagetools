@@ -1,6 +1,3 @@
-import pathlib
-import re
-import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
@@ -12,8 +9,7 @@ from imgtools.io.loaders import (
 from imgtools.io.writers import (
     BaseWriter,
 )
-from imgtools.logging import logger
-from imgtools.modules import Segmentation, map_over_labels, StructureSet
+from imgtools.modules import Segmentation, StructureSet, map_over_labels
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
@@ -29,11 +25,6 @@ from imgtools.ops.functional import (
     window_intensity,
     zoom,
 )
-from imgtools.utils import (
-    array_to_image,
-    image_to_array,
-    physical_points_to_idxs,
-)
 
 LoaderFunction = TypeVar("LoaderFunction")
 ImageFilter = TypeVar("ImageFilter")
@@ -46,8 +37,12 @@ class BaseOp:
         raise NotImplementedError
 
     def __repr__(self):
-        attrs = [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
-        attrs = [(k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs]
+        attrs = [
+            (k, v) for k, v in self.__dict__.items() if not k.startswith("_")
+        ]
+        attrs = [
+            (k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs
+        ]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__name__}({args})"
 
@@ -76,9 +71,6 @@ class BaseOutput(BaseOp):
 
     def __call__(self, key, *args, **kwargs):
         self._writer.put(key, *args, **kwargs)
-
-
-
 
 
 # Resampling ops
@@ -443,7 +435,9 @@ class Crop(BaseOp):
     """
 
     def __init__(
-        self, crop_centre: Sequence[float], size: Union[int, Sequence[int], np.ndarray]
+        self,
+        crop_centre: Sequence[float],
+        size: Union[int, Sequence[int], np.ndarray],
     ):
         self.crop_centre = crop_centre
         self.size = size
@@ -527,7 +521,9 @@ class BoundingBox(BaseOp):
         result = obj(mask, label)
     """
 
-    def __call__(self, mask: sitk.Image, label: int = 1) -> Tuple[Tuple, Tuple]:
+    def __call__(
+        self, mask: sitk.Image, label: int = 1
+    ) -> Tuple[Tuple, Tuple]:
         """BoundingBox callable object: Find the axis-aligned
         bounding box of a region descriibed by a segmentation mask.
 
@@ -592,7 +588,9 @@ class Centroid(BaseOp):
             The centroid coordinates.
         """
 
-        return centroid(mask, label=label, world_coordinates=self.world_coordinates)
+        return centroid(
+            mask, label=label, world_coordinates=self.world_coordinates
+        )
 
 
 class CropToMaskBoundingBox(BaseOp):
@@ -646,7 +644,9 @@ class CropToMaskBoundingBox(BaseOp):
             The cropped image and mask.
         """
 
-        return crop_to_mask_bounding_box(image, mask, margin=self.margin, label=label)
+        return crop_to_mask_bounding_box(
+            image, mask, margin=self.margin, label=label
+        )
 
 
 # Intensity ops
@@ -823,7 +823,9 @@ class StandardScale(BaseOp):
     """
 
     def __init__(
-        self, rescale_mean: Optional[float] = 0.0, rescale_std: Optional[float] = 1.0
+        self,
+        rescale_mean: Optional[float] = 0.0,
+        rescale_std: Optional[float] = 1.0,
     ):
         self.rescale_mean = rescale_mean
         self.rescale_std = rescale_std
@@ -859,7 +861,9 @@ class StandardScale(BaseOp):
             The rescaled image.
         """
 
-        return standard_scale(image, mask, self.rescale_mean, self.rescale_std, label)
+        return standard_scale(
+            image, mask, self.rescale_mean, self.rescale_std, label
+        )
 
 
 class MinMaxScale(BaseOp):
@@ -979,7 +983,10 @@ class ImageFunction(BaseOp):
     """
 
     def __init__(
-        self, function: Function, copy_geometry: bool = True, **kwargs: Optional[Any]
+        self,
+        function: Function,
+        copy_geometry: bool = True,
+        **kwargs: Optional[Any],
     ):
         self.function = function
         self.copy_geometry = copy_geometry
@@ -1115,7 +1122,9 @@ class StructureSetToSegmentation(BaseOp):
 
     def __init__(
         self,
-        roi_names: Union[str, List[str], Dict[str, Union[str, List[str]]], None] = None,
+        roi_names: Union[
+            str, List[str], Dict[str, Union[str, List[str]]], None
+        ] = None,
         continuous: bool = True,
     ):
         """Initialize the op."""

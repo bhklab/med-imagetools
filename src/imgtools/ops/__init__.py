@@ -1,5 +1,4 @@
 from .input_classes import (
-    CrawlGraphInput,
     ImageAutoInput,
     ImageCSVInput,
     ImageFileInput,
@@ -12,3 +11,14 @@ from .old_output_ops import (
     NumpyOutput,
 )
 from .ops import *
+
+__all__ = [
+    "ImageAutoInput",
+    "ImageCSVInput",
+    "ImageFileInput",
+    "HDF5Output",
+    "ImageAutoOutput",
+    "ImageFileOutput",
+    "ImageSubjectFileOutput",
+    "NumpyOutput",
+]
