@@ -2,7 +2,6 @@
 Input classes refactored to use the BaseInput abstract base class.
 """
 
-import csv
 import pathlib
 import time
 from typing import Any, List, Optional
@@ -44,11 +43,19 @@ from imgtools.ops.base_classes import BaseInput
 LoaderFunction = Callable[..., sitk.Image | StructureSet | Segmentation]
 
 
-def timer(name: str):
-    """Decorator to measure the execution time of a function and log it with a custom name."""
+def timer(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    Decorator to measure the execution time of a function and log it with a custom name.
 
-    def decorator(func: Callable):
-        def wrapper(*args, **kwargs):
+    Args:
+        name (str): The custom name to use in the log message.
+
+    Returns:
+        Callable[[Callable[..., Any]], Callable[..., Any]]: A decorator that wraps the function to measure its execution time.
+    """
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             start_time = time.time()
             result = func(*args, **kwargs)
             end_time = time.time()
@@ -119,7 +126,7 @@ class ImageMaskInput(BaseInput):
 
     parsed_df: pd.DataFrame = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """order of steps summarized
 
         1. crawl
@@ -264,7 +271,7 @@ class ImageMaskInput(BaseInput):
     def __call__(self, key: object) -> object:
         """Retrieve input data."""
         # return self.loader.get(key)
-        output_tuple = namedtuple("ImageMask", ["scan", "mask"])
+        ImageMask = namedtuple("ImageMask", ["scan", "mask"])
         case_scan, rtss_or_seg = self.loader.get(key)
 
         match self.modality_list[1]:
@@ -277,7 +284,7 @@ class ImageMaskInput(BaseInput):
                 errmsg = f"Modality {self.modality_list[1]} not recognized."
                 raise ValueError(errmsg)
 
-        return output_tuple(case_scan, mask)
+        return ImageMask(case_scan, mask)
 
     def __getitem__(self, key: str | int) -> object:
         match key:

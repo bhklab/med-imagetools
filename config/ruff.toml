@@ -11,8 +11,7 @@ include = [
   "src/imgtools/utils/imageutils.py",
   "src/imgtools/io/**/*.py",
   "src/imgtools/coretypes/**/*.py",
-  # "src/imgtools/types.py",
-  # "src/imgtools/utils/crawl.py",
+  "src/imgtools/ops/input_classes.py",
 ]
 
 extend-exclude = [

@@ -9,7 +9,7 @@ from imgtools.io.loaders import (
 from imgtools.io.writers import (
     BaseWriter,
 )
-from imgtools.modules import Segmentation, StructureSet, map_over_labels
+from imgtools.modules import Segmentation, StructureSet
 from imgtools.ops.functional import (
     bounding_box,
     centroid,
