@@ -519,11 +519,20 @@ class ImageFileInput(BaseInput):
 
 # ruff: noqa
 if __name__ == "__main__":  # pragma: no cover
-    # Demonstrating usage with mock data
-    example_csv_input = ImageCSVInput(
-        "path/to/csv", colnames=["image", "label"]
+    # Define the path to the data
+    testdata = pathlib.Path("data")
+    # for this tutorial we will use some test image data
+    datasets_name = ["NSCLC-Radiomics", "Vestibular-Schwannoma-SEG"]
+    vs_seg = ImageMaskInput(
+    dir_path=testdata / datasets_name[1],
+    modalities=ImageMaskModalities.MR_RTSTRUCT
     )
-    print("ExampleCSVInput repr:", repr(example_csv_input))
 
-    example_file_input = ImageFileInput("path/to/directory")
-    print("ExampleFileInput repr:", repr(example_file_input))
+    nsclsc_rtstruct = ImageMaskInput(
+        dir_path=testdata / datasets_name[0],
+        modalities=ImageMaskModalities.CT_RTSTRUCT
+    )
+    nsclsc_seg = ImageMaskInput(
+        dir_path=testdata / datasets_name[0],
+        modalities=ImageMaskModalities.CT_SEG
+    )
