@@ -31,6 +31,7 @@ med-imagetools = { path = ".", editable = true, extras = ["all"]}
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+pyvis = ">=0.3.2,<0.4"
 
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
@@ -46,6 +47,7 @@ clean = {	cmd = [
 
 [feature.py310.dependencies]
 python = "3.10.*"
+
 [feature.py311.dependencies]
 python = "3.11.*"
 [feature.py312.dependencies]

@@ -24,7 +24,7 @@ class Scan(sitk.Image):
         img_stats = "\n\t".join(
             [f"{k}={v}" for k, v in self._img_stats.items()]
         )
-        return f"Scan<\n{metadata}, {img_stats}\n>"
+        return f"Scan<\n\t{metadata}, {img_stats}\n>"
 
     def __rich_repr__(self) -> Generator[tuple[str, str], Any, None]:
         for k, v in self.metadata.items():
