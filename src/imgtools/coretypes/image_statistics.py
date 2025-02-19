@@ -169,10 +169,6 @@ class MaskData:
         label_stats = sitk.LabelShapeStatisticsImageFilter()
         label_stats.ComputePerimeterOn()
         label_stats.Execute(mask)
-        bbox = RegionBox.from_mask_bbox(mask)
-
-        label_perimeter = round(label_stats.GetPerimeter(label), 5)
-        label_touching_border = label_stats.GetPerimeterOnBorder(label) > 0
 
         centroid_coordinates = label_stats.GetCentroid(label)
         centroid_index = mask.TransformPhysicalPointToIndex(
@@ -181,7 +177,9 @@ class MaskData:
 
         masked_image = sitk.Mask(image, mask == label)
         masked_array = sitk.GetArrayFromImage(masked_image)
-        masked_array_nonzero = masked_array[masked_array != 0]
+        if (masked_array_nonzero := masked_array[masked_array != 0]) is None:
+            msg = f"No non-zero values found in masked region with {label=}."
+            raise ValueError(msg)
 
         # Count connected components
         label_map = sitk.BinaryThreshold(
@@ -190,14 +188,14 @@ class MaskData:
         cc_filter = sitk.ConnectedComponentImageFilter()
         cc_filter.FullyConnectedOn()
         cc_filter.Execute(label_map)
-        volume_count = cc_filter.GetObjectCount()
 
         return cls(
             hash=sitk.Hash(mask),
-            label=label,
             spacing=Spacing3D(*mask.GetSpacing()),
             size=Size3D(*mask.GetSize()),
             dimensions=mask.GetDimension(),
+            num_labels=label_stats.GetNumberOfLabels(),
+            label=label,
             masked_max=int(masked_array_nonzero.max()),
             masked_min=int(masked_array_nonzero.min()),
             masked_mean=float(masked_array_nonzero.mean()),
@@ -205,19 +203,18 @@ class MaskData:
             masked_variance=float(masked_array_nonzero.var()),
             masked_sum=masked_array_nonzero.sum(),
             voxel_count=label_stats.GetNumberOfPixels(label),
-            volume_count=volume_count,
-            bbox=bbox,
+            volume_count=cc_filter.GetObjectCount(),
+            bbox=RegionBox.from_mask_bbox(mask),
             centroid_index=Coordinate3D(*centroid_index),
-            num_labels=label_stats.GetNumberOfLabels(),
-            perimeter=label_perimeter,
-            touching_border=label_touching_border,
+            perimeter=round(label_stats.GetPerimeter(label), 5),
+            touching_border=label_stats.GetPerimeterOnBorder(label) > 0,
         )
 
 
 def main() -> None:
     from rich import print  # noqa
     from imgtools.ops import ImageAutoInput
-    from dataclasses import asdict
+    # from dataclasses import asdict
     from imgtools.coretypes import RegionBox
 
     inputter = ImageAutoInput(
@@ -236,7 +233,7 @@ def main() -> None:
     print("*" * 80)
     print("*" * 80)
 
-    print(asdict(img_data))
+    print(img_data)
     # print('[red]printed as json: [/red]')
     # print(asdict(img_data))
 
@@ -244,7 +241,7 @@ def main() -> None:
     print("*" * 80)
     mask = mask_rtss.get_label(1)
     mask_data = MaskData.from_image_and_mask(img, mask, 1)
-    print(asdict(mask_data))
+    print(mask_data)
     # print("*" * 80)
     # print(asdict(mask_data))
 
@@ -256,7 +253,7 @@ def main() -> None:
         cropped_image, cropped_mask, 1
     )
     print("[bold green]\nmask_stats(cropped to exactly bbox)")
-    print(asdict(cropped_mask_data))
+    print(cropped_mask_data)
 
 
 if __name__ == "__main__":
