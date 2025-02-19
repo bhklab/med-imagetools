@@ -217,6 +217,7 @@ class MaskData:
 def main() -> None:
     from rich import print  # noqa
     from imgtools.ops import ImageAutoInput
+    from dataclasses import asdict
     from imgtools.datasets.examples import data_images
     from imgtools.coretypes import RegionBox
 
@@ -227,28 +228,36 @@ def main() -> None:
 
     scan, rtss = inputter(subjectids[0])
     img = scan.image
-    print(rtss.roi_names)
 
     mask_rtss = rtss.to_segmentation(
         img, {"GTV": "GTV.*"}
     )  # because of the way the we handle dictionaries, this will have 2 volumes in the same mask
 
-    mask = mask_rtss.get_label(1)
-    sitk.WriteImage(mask, "mask.nii.gz")
-
     img_data = ImageData.from_image(img)
-    print(img_data)
+    print("*" * 80)
+    print("*" * 80)
 
+    print(asdict(img_data))
+    # print('[red]printed as json: [/red]')
+    # print(asdict(img_data))
+
+    print("*" * 80)
+    print("*" * 80)
+    mask = mask_rtss.get_label(1)
     mask_data = MaskData.from_image_and_mask(img, mask, 1)
-    print(mask_data)
+    print(asdict(mask_data))
+    # print("*" * 80)
     # print(asdict(mask_data))
 
-    # cropped_mask = RegionBox.from_mask_bbox(mask).crop_image(mask)
-    # cropped_mask_data = MaskData.from_image_and_mask(
-    #     cropped_mask, cropped_mask, 1
-    # )
-    # print("mask_stats(cropped to exactly bbox)")
-    # print(asdict(cropped_mask_data))
+    cropped_image, cropped_mask = RegionBox.from_mask_bbox(
+        mask
+    ).crop_image_and_mask(img, mask)
+
+    cropped_mask_data = MaskData.from_image_and_mask(
+        cropped_image, cropped_mask, 1
+    )
+    print("[bold green]\nmask_stats(cropped to exactly bbox)")
+    print(asdict(cropped_mask_data))
 
 
 if __name__ == "__main__":
