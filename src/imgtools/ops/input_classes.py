@@ -31,11 +31,14 @@ def timer(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Decorator to measure the execution time of a function and log it with a custom name.
 
-    Args:
+    Parameters
+    ----------
         name (str): The custom name to use in the log message.
 
-    Returns:
-        Callable[[Callable[..., Any]], Callable[..., Any]]: A decorator that wraps the function to measure its execution time.
+    Returns
+    -------
+        Callable[[Callable[..., Any]], Callable[..., Any]]:
+        A decorator that wraps the function to measure its execution time.
     """
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -67,10 +70,10 @@ class ImageMaskInput(BaseInput):
     """
     Easily index and load scan-mask pairs.
 
-    This class crawls through the specified 
-	directory to index the dataset,
+    This class crawls through the specified
+        directory to index the dataset,
     creates a graph of the dataset, automatically
-	querying the graph for image-mask pairs.
+        querying the graph for image-mask pairs.
 
     Parameters
     ----------
@@ -120,11 +123,7 @@ class ImageMaskInput(BaseInput):
         5. create output streams
         """
         self.dataset_name = self.dir_path.name
-        create_path = (
-            lambda f: self.dir_path.parent
-            / self.imgtools_dir
-            / f
-        )
+        create_path = lambda f: self.dir_path.parent / self.imgtools_dir / f
 
         self.csv_path = create_path(f"imgtools_{self.dataset_name}.csv")
         self.json_path = create_path(f"imgtools_{self.dataset_name}.json")
@@ -203,21 +202,23 @@ class ImageMaskInput(BaseInput):
         # CRAWLER
         # -------
         # Checks if dataset has already been indexed
-        if not self.csv_path.exists() or self.update_crawl:
-            logger.debug("Output exists, force updating.", path=self.csv_path)
-            logger.info("Indexing the dataset...")
-            crawl(
-                top=self.dir_path,
-                n_jobs=self.n_jobs,
-                csv_path=self.csv_path,
-                json_path=self.json_path,
-            )
-        else:
+        if self.csv_path.exists() and not self.update_crawl:
             warnmsg = (
                 "The dataset has already been indexed."
                 " Use update_crawl to force update."
             )
             logger.warning(warnmsg)
+            return
+        elif self.csv_path.exists() and self.update_crawl:
+            logger.debug("Output exists, force updating.", path=self.csv_path)
+
+        logger.info("Indexing the dataset...", path=self.dir_path)
+        crawl(
+            top=self.dir_path,
+            n_jobs=self.n_jobs,
+            csv_path=self.csv_path,
+            json_path=self.json_path,
+        )
 
     @timer("Parsing the graph")
     def parse_graph(self, modalities: str | List[str]) -> pd.DataFrame:
@@ -226,14 +227,18 @@ class ImageMaskInput(BaseInput):
         # object, but a string or a list of strings
         match modalities:
             case str():
-                # probably can do another check to check validity of the string
+                # probably can do another check to check
+                # validity of the string
                 modalities = modalities
             case list():
                 modalities = ",".join(modalities)
             case ImageMaskModalities():
                 modalities = ",".join(modalities.value)
             case _:
-                errmsg = f"Modalities must be a string or a list of strings got {type(modalities)}"
+                errmsg = (
+                    f"Modalities must be a string or a"
+                    "list of strings got {type(modalities)}"
+                )
                 raise ValueError(errmsg)
 
         logger.info("Querying graph", modality=modalities)
@@ -253,10 +258,10 @@ class ImageMaskInput(BaseInput):
 
     def __call__(self, key: object) -> object:
         """Retrieve input data."""
-        # return self.loader.get(key)
         ImageMask = namedtuple("ImageMask", ["scan", "mask"])
         case_scan, rtss_or_seg = self.loader.get(key)
-
+        # assumption: first modality is the scan (CT/MR)
+        # second modality is the mask (RTSTRUCT/SEG)
         match self.modality_list[1]:
             case "RTSTRUCT":
                 # need to convert to Segmentation
@@ -277,8 +282,7 @@ class ImageMaskInput(BaseInput):
                 if key < len(self):
                     return self.__call__(self.keys()[key])
                 errmsg = (
-                    f"Index {key} out of range "
-                    "Dataset has {len(self)} cases."
+                    f"Index {key} out of range Dataset has {len(self)} cases."
                 )
                 raise IndexError(errmsg)
             case _:
@@ -524,15 +528,15 @@ if __name__ == "__main__":  # pragma: no cover
     # for this tutorial we will use some test image data
     datasets_name = ["NSCLC-Radiomics", "Vestibular-Schwannoma-SEG"]
     vs_seg = ImageMaskInput(
-    dir_path=testdata / datasets_name[1],
-    modalities=ImageMaskModalities.MR_RTSTRUCT
+        dir_path=testdata / datasets_name[1],
+        modalities=ImageMaskModalities.MR_RTSTRUCT,
     )
 
     nsclsc_rtstruct = ImageMaskInput(
         dir_path=testdata / datasets_name[0],
-        modalities=ImageMaskModalities.CT_RTSTRUCT
+        modalities=ImageMaskModalities.CT_RTSTRUCT,
     )
     nsclsc_seg = ImageMaskInput(
         dir_path=testdata / datasets_name[0],
-        modalities=ImageMaskModalities.CT_SEG
+        modalities=ImageMaskModalities.CT_SEG,
     )
