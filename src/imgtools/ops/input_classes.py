@@ -54,6 +54,21 @@ def timer(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
 
     return decorator
 
+class ImageMask(NamedTuple):
+    """
+    NamedTuple for storing image-mask pairs.
+
+    Parameters
+    ----------
+    scan : Scan
+        The scan image.
+    mask : Segmentation
+        The mask image.
+    """
+
+    scan: Scan
+    mask: Segmentation
+
 
 class ImageMaskModalities(Enum):
     CT_RTSTRUCT = ("CT", "RTSTRUCT")
@@ -256,9 +271,9 @@ class ImageMaskInput(BaseInput):
             update=self.update_edges,
         )
 
-    def __call__(self, key: object) -> object:
+    def __call__(self, key: object) -> ImageMask:
         """Retrieve input data."""
-        ImageMask = namedtuple("ImageMask", ["scan", "mask"])
+        # ImageMask = namedtuple("ImageMask", ["scan", "mask"])
         case_scan, rtss_or_seg = self.loader.get(key)
         # assumption: first modality is the scan (CT/MR)
         # second modality is the mask (RTSTRUCT/SEG)
