@@ -65,12 +65,12 @@ class ImageMaskModalities(Enum):
 @dataclass
 class ImageMaskInput(BaseInput):
     """
-    ImageMaskInput class for loading and indexing datasets.
+    Easily index and load scan-mask pairs.
 
-    This class crawls through the specified directory to index the dataset,
-    creates a graph of the dataset, and allows querying the graph based on modalities.
-
-    After initialization, the user can call the `parse_graph` method to query the graph.
+    This class crawls through the specified 
+	directory to index the dataset,
+    creates a graph of the dataset, automatically
+	querying the graph for image-mask pairs.
 
     Parameters
     ----------
