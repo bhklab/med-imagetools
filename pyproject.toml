@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "2.0.0-rc.4"
+version = "2.0.0-rc.7"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -104,11 +104,11 @@ patch_without_tag = true
 [tool.semantic_release.branches.main]
 match = "(main|master)"
 
-# [tool.semantic_release.branches.dev]
-# # any branch that contains "dev" will be considered a dev branch
-# match = "(development|dev)"
-# prerelease = true
-# prerelease_token = "rc"
+[tool.semantic_release.branches.dev]
+# any branch that contains "dev" will be considered a dev branch
+match = "(development|dev)"
+prerelease = true
+prerelease_token = "rc"
 
 [tool.ruff]
 # Extend the `pyproject.toml` file in the parent directory...

@@ -1,6 +1,170 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.7 (2025-02-14)
+
+### Bug Fixes
+
+- Update SEG value for ISPY2 dataset in test configuration
+  ([`d9a83d1`](https://github.com/bhklab/med-imagetools/commit/d9a83d1b20f93df2a551a56a8646765f3cc5a2c5))
+
+
+## v2.0.0-rc.6 (2025-02-14)
+
+
+## v2.0.0-rc.5 (2025-02-14)
+
+### Bug Fixes
+
+- Add function to handle out of bounds coordinates for a RegionBox in an image
+  ([#221](https://github.com/bhklab/med-imagetools/pull/221),
+  [`fc36464`](https://github.com/bhklab/med-imagetools/commit/fc364640fa9766fb41e1de3db4f1f0add8aebd3b))
+
+This works the same way as `_adjust_negative_coordinates`, but requires the image as an addition
+  input and modifies the RegionBox object directly.
+
+A message is logged in the debugger if a dimension is adjusted.
+
+I also updated the `crop_image` function to call this before applying the crop.
+
+- Handle odd extra dimension values in expand_to_min_size
+  ([#220](https://github.com/bhklab/med-imagetools/pull/220),
+  [`881dcfc`](https://github.com/bhklab/med-imagetools/commit/881dcfc4b53276228cbae2049215592bdff1ca37))
+
+- Removed import
+  ([`c9d3b4f`](https://github.com/bhklab/med-imagetools/commit/c9d3b4f94e76154c6ea91d3a2f3eefd20554f5d3))
+
+- Replace Error with ValueError for task ID validation in AutoPipeline
+  ([`7d911be`](https://github.com/bhklab/med-imagetools/commit/7d911be62bc4558812bab20b2a0c997068d579f8))
+
+- Update array_to_image function to require either a reference image or all spatial parameters
+  ([`e35c842`](https://github.com/bhklab/med-imagetools/commit/e35c842516992df8ea0936b4c5560c503353daa0))
+
+- Update import path for get_modality_metadata in old_loaders.py
+  ([`93a16c1`](https://github.com/bhklab/med-imagetools/commit/93a16c140d28b5a4a52ca1fdb5e6cfb21cc32357))
+
+- Update testdata function to accept patterns for exclusion
+  ([`d321275`](https://github.com/bhklab/med-imagetools/commit/d321275ee692ae550948d9097f27859672d4a832))
+
+### Chores
+
+- Add Python 3.13 to classifiers and include project URLs in pyproject.toml
+  ([`e1eca75`](https://github.com/bhklab/med-imagetools/commit/e1eca7505cdb3189553fa5be4c1d435125872cb5))
+
+- Deprecate
+  ([`2d9d86d`](https://github.com/bhklab/med-imagetools/commit/2d9d86da9a8052203d3fc967b77ceab0380ccbc7))
+
+- Deprecate
+  ([`e060e79`](https://github.com/bhklab/med-imagetools/commit/e060e794b1b183e78164316651d9e4ca7b6c1577))
+
+- Deprecate
+  ([`2123ed8`](https://github.com/bhklab/med-imagetools/commit/2123ed83c8ff298bb3d0c2899e97c8ea527986c1))
+
+- Deprecate autopipeutils and nifti_to_dicom modules
+  ([`3cf82c9`](https://github.com/bhklab/med-imagetools/commit/3cf82c9a2375f08bd1c2ce2c7508e994ceca2e1e))
+
+- Import sanitize_file_name and update __all__ to include it
+  ([`a28db1d`](https://github.com/bhklab/med-imagetools/commit/a28db1d8a8c812cfd84115c521c707180cd8dbac))
+
+- Ruff qc
+  ([`2de2416`](https://github.com/bhklab/med-imagetools/commit/2de2416c3e2b86552d8af67d5b88c3d9094e1ae2))
+
+- Update coverage and mypy configurations to reflect deprecation of modules and increase pytest max
+  processes
+  ([`bd32522`](https://github.com/bhklab/med-imagetools/commit/bd3252224b69fe4d5653838215c2c2e1a1889c89))
+
+- Update GitHub Actions workflow and modify semantic release configuration
+  ([`d622168`](https://github.com/bhklab/med-imagetools/commit/d62216842d43cd19bed185f05a35467b36f917f1))
+
+- Update GitHub Actions workflow to include Python 3.13 and upgrade pixi version to 0.41.1
+  ([`1b767e1`](https://github.com/bhklab/med-imagetools/commit/1b767e1cb6cadeafef26e65986c894c1ca7d363a))
+
+- Update GitHub Actions workflow to set locked option to false
+  ([`53cc645`](https://github.com/bhklab/med-imagetools/commit/53cc64572ce6a47c803866f020cd273ad89b6490))
+
+- Update pixi toml and lock
+  ([`ca942a0`](https://github.com/bhklab/med-imagetools/commit/ca942a0b6f588f1b72746609dc09aab16ac302a4))
+
+- Update pixi.lock to reflect dependency changes
+  ([`9982560`](https://github.com/bhklab/med-imagetools/commit/998256015a6c62df3a9d14f6d9439afee73ad558))
+
+### Documentation
+
+- Update README.md so codecov badge takes you to codecov.io
+  ([`b39528f`](https://github.com/bhklab/med-imagetools/commit/b39528f5ec03193857dac63884227cb8d0d8523a))
+
+### Features
+
+- Add desired_size to centroid bounding box generation
+  ([#219](https://github.com/bhklab/med-imagetools/pull/219),
+  [`066844d`](https://github.com/bhklab/med-imagetools/commit/066844df24b615298b91387caf80c0029a375f8e))
+
+In old version, bounding box was a single voxel. Now is expanded to at least the minimum dimension
+  default.
+
+- **New Features** - Now, users can optionally specify a desired size when generating image bounding
+  boxes for enhanced control.
+
+- **Chores** - Updated the software version from 1.21.1 to 1.22.0.
+
+- Add DICOM metadata extraction functions for various modalities
+  ([`fbfb509`](https://github.com/bhklab/med-imagetools/commit/fbfb509a171fe1cf5fcf803004b93f0e439a043f))
+
+- Add index command to crawl and index DICOM images
+  ([`0234fe0`](https://github.com/bhklab/med-imagetools/commit/0234fe0cbc2de192ca31e7f378b718c016d2548d))
+
+- Add optional import functionality and clean up dependencies
+  ([#217](https://github.com/bhklab/med-imagetools/pull/217),
+  [`072e6ce`](https://github.com/bhklab/med-imagetools/commit/072e6ce3920283f0323392d9af934cbd3451d8df))
+
+Introduce optional import functionality for h5py and pynrrd, while removing unused dependencies and
+  refactoring the codebase for better maintainability.
+
+- Documentation • Updated installation instructions with new environment setup commands and
+  streamlined guidance.
+
+- Refactor • Removed legacy imaging processing and indexing functionalities to simplify the toolset.
+
+- New Features • Enhanced error handling for optional dependencies to offer clearer messaging when
+  modules are missing.
+
+- Enhance filename sanitization by removing disallowed characters at the edges and adding
+  comprehensive tests
+  ([`57283e2`](https://github.com/bhklab/med-imagetools/commit/57283e2067dc00928769bb92454a6148e18503c2))
+
+- Enhance RegionBox to support desired size in from_mask_centroid and adjust bounding box
+  calculations
+  ([`0e85352`](https://github.com/bhklab/med-imagetools/commit/0e853527d2da2019798863e1485be87158fc970c))
+
+- Improve code structure and refactor image processing utilities
+  ([`d036547`](https://github.com/bhklab/med-imagetools/commit/d036547ceac610c17363eb9718a7ad3d4aaeb85f))
+
+- **New Features** - Introduced a new PET image type for enhanced imaging support. - Enabled
+  automated dataset indexing and visualization for quicker data previews. - Expanded image
+  input/output capabilities with versatile export options. - Enhanced scanning functionality with
+  improved metadata and statistics. - Upgraded CLI worker allocation for more reliable performance.
+
+- **Refactor** - Streamlined image processing operations and improved overall code clarity.
+
+- **Tests** - Extended test coverage across image conversion and region handling functions.
+
+### Refactoring
+
+- Remove structureset_helpers module and its utilities
+  ([`cc68dc7`](https://github.com/bhklab/med-imagetools/commit/cc68dc7cef399b4bb2cc9ce7faa298d409d49493))
+
+- Simplify type hints and clean up mypy configuration
+  ([`7c3c97a`](https://github.com/bhklab/med-imagetools/commit/7c3c97a8b80233552220a91c2771619bd67f94ba))
+
+- Update dataset collections and enhance test coverage for shared data directory
+  ([`22c8202`](https://github.com/bhklab/med-imagetools/commit/22c82024ecba911d48d3de8cf8056caaad375664))
+
+### Testing
+
+- Add minimum release version check and improve test readability
+  ([`576884b`](https://github.com/bhklab/med-imagetools/commit/576884b64e0eeed29c325f8b3e0d94558a881f31))
+
+
 ## v2.0.0-rc.4 (2025-02-10)
 
 ### Bug Fixes
