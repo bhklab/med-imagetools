@@ -2,24 +2,6 @@
 Input classes refactored to use the BaseInput abstract base class.
 """
 
-import pathlib
-import time
-from typing import Any, List, Optional
-
-import pandas as pd
-
-from imgtools.crawler import crawl
-from imgtools.io.loaders import (
-    ImageCSVLoader,
-    ImageFileLoader,
-    read_image,
-    read_dicom_auto,
-)
-from imgtools.logging import logger
-from imgtools.modules.datagraph import DataGraph
-
-from .base_classes import BaseInput
-
 from collections import namedtuple
 from enum import Enum
 import pathlib
@@ -33,7 +15,9 @@ import pandas as pd
 from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     ImageCSVLoader,
+    ImageFileLoader,
     read_dicom_auto,
+    read_image,
 )
 from imgtools.logging import logger
 from imgtools.modules.datagraph import DataGraph
@@ -157,7 +141,6 @@ class ImageMaskInput(BaseInput):
             raise ValueError(errmsg) from e
         parsed_cols = self.parsed_df.columns.tolist()
         for colname in parsed_cols:
-            # prefix = colname.split("_")
             prefix, *rest = colname.split("_")
             match prefix:
                 case "folder":
