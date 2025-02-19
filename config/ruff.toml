@@ -11,22 +11,22 @@ include = [
   "src/imgtools/utils/imageutils.py",
   "src/imgtools/io/**/*.py",
   "src/imgtools/coretypes/**/*.py",
-  "src/imgtools/ops/input_classes.py",
+  "src/imgtools/ops/**/*.py",
+  # "src/imgtools/ops/functional.py"
 ]
 
 extend-exclude = [
   ".pixi/**/*",
   "tests/**/*.py",
   "src/imgtools/ops/ops.py",
+  "src/imgtools/ops/old_output_ops.py",
   "src/imgtools/autopipeline.py",
   "src/imgtools/pipeline.py",
   "src/imgtools/io/writers/old_writers.py",
-  "src/imgtools/coretypes/deprecated_bbox.py",
 ]
 
 cache-dir = ".cache/.ruff-cache"
 
-extend-include = ["src/imgtools/ops/functional.py"]
 
 line-length = 79
 
