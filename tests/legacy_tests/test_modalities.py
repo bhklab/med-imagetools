@@ -18,7 +18,7 @@ def test_modalities(
     modalities, modalities_path
 ) -> None:  # modalities_path is a fixture defined in conftest.py
     path = modalities_path
-    img = read_dicom_auto(path['CT']).image
+    img = read_dicom_auto(path['CT'])
     if modalities != 'RTSTRUCT':
         # Checks for dimensions
         dcm = pydicom.dcmread(
@@ -27,7 +27,7 @@ def test_modalities(
         instances = len(os.listdir(path[modalities]))
         dicom = read_dicom_auto(path[modalities])
         if modalities == 'CT':
-            dicom = dicom.image
+            dicom = dicom
         if instances > 1:  # For comparing CT and PT modalities
             assert dcm.shape == (dicom.GetHeight(), dicom.GetWidth())
             assert instances == dicom.GetDepth()
