@@ -2,15 +2,14 @@
 Input classes refactored to use the BaseInput abstract base class.
 """
 
-from collections import namedtuple
-from enum import Enum
 import pathlib
 import time
-from typing import Any, Generator, List, NamedTuple, Optional, Callable
-import SimpleITK as sitk
-from imgtools.modules import StructureSet, Segmentation, Scan
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Generator, List, NamedTuple, Optional
+
 import pandas as pd
+import SimpleITK as sitk
 
 from imgtools.crawler import crawl
 from imgtools.io.loaders import (
@@ -20,8 +19,8 @@ from imgtools.io.loaders import (
     read_image,
 )
 from imgtools.logging import logger
+from imgtools.modules import Scan, Segmentation, StructureSet
 from imgtools.modules.datagraph import DataGraph
-
 from imgtools.ops.base_classes import BaseInput
 from imgtools.utils.timer import timer
 
@@ -174,7 +173,7 @@ class ImageMaskInput(BaseInput):
             yield self.__call__(case)
 
     def __repr__(self) -> str:
-        rprstring = f"ImageMaskInput<\n\t"
+        rprstring = "ImageMaskInput<\n\t"
         rprstring += f"num_cases={len(self)},\n\t"
         rprstring += f"dataset_name='{self.dataset_name}',\n\t"
         rprstring += f"modalities={self.modalities},\n\t"
@@ -218,14 +217,14 @@ class ImageMaskInput(BaseInput):
             case str():
                 # probably can do another check to check
                 # validity of the string
-                modalities = modalities
+                pass
             case list():
                 modalities = ",".join(modalities)
             case ImageMaskModalities():
                 modalities = ",".join(modalities.value)
             case _:
                 errmsg = (
-                    f"Modalities must be a string or a"
+                    "Modalities must be a string or a"
                     "list of strings got {type(modalities)}"
                 )
                 raise ValueError(errmsg)
@@ -316,7 +315,7 @@ class ImageAutoInput(BaseInput):
         n_jobs: int = -1,
         visualize: bool = False,
         update: bool = False,
-    ):
+    ) -> None:
         self.modalities = modalities
 
         self.dir_path = pathlib.Path(dir_path)
@@ -405,7 +404,7 @@ class ImageAutoInput(BaseInput):
 
         super().__init__(loader)
 
-    def __call__(self, key: Any) -> Any:  # noqa: ANN001
+    def __call__(self, key: Any) -> Any:  # noqa
         """Retrieve input data."""
         return self._loader.get(key)
 
@@ -510,7 +509,6 @@ class ImageFileInput(BaseInput):
         return self._loader.get(key)
 
 
-# ruff: noqa
 if __name__ == "__main__":  # pragma: no cover
     # Define the path to the data
     testdata = pathlib.Path("data")
