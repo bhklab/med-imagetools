@@ -218,7 +218,6 @@ def main() -> None:
     from rich import print  # noqa
     from imgtools.ops import ImageAutoInput
     from dataclasses import asdict
-    from imgtools.datasets.examples import data_images
     from imgtools.coretypes import RegionBox
 
     inputter = ImageAutoInput(

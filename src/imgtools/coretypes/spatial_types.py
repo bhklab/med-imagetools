@@ -158,6 +158,7 @@ class Coordinate3D:
                 )
                 raise TypeError(errmsg)
 
+
 @dataclass
 class Spacing3D:
     """Represent the spacing in 3D space."""
