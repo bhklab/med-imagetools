@@ -54,12 +54,28 @@ class ImageMaskModalities(Enum):
 
 @dataclass
 class ImageMaskInput(BaseInput):
-    """ImageMaskInput class for loading and indexing datasets.
+    """
+    ImageMaskInput class for loading and indexing datasets.
 
     This class crawls through the specified directory to index the dataset,
     creates a graph of the dataset, and allows querying the graph based on modalities.
 
     After initialization, the user can call the `parse_graph` method to query the graph.
+
+    Parameters
+    ----------
+    dir_path : pathlib.Path
+        Path to the directory containing the dataset.
+    modalities : ImageMaskModalities
+        Modalities to be used for querying the graph.
+    n_jobs : int, optional
+        Number of jobs to use for crawling, by default -1.
+    update_crawl : bool, optional
+        Whether to force update the crawl, by default False.
+    update_edges : bool, optional
+        Whether to force update the edges, by default False.
+    imgtools_dir : str, optional
+        Directory name for imgtools, by default ".imgtools".
     """
 
     dir_path: pathlib.Path
@@ -229,9 +245,7 @@ class ImageMaskInput(BaseInput):
     def __call__(self, key: object) -> object:
         """Retrieve input data."""
         # return self.loader.get(key)
-        output_tuple = namedtuple(
-            "ImageMask", ["scan", "mask"]
-        )
+        output_tuple = namedtuple("ImageMask", ["scan", "mask"])
         case_scan, rtss_or_seg = self.loader.get(key)
 
         match self.modality_list[1]:
@@ -287,7 +301,7 @@ if __name__ == "__main__":  # pragma: no cover
         update_edges=True,
     )
     print(dataset)
-    
+
     datasetindex = Path("data/NSCLC-Radiomics")
 
     dataset2 = ImageMaskInput(
@@ -296,5 +310,5 @@ if __name__ == "__main__":  # pragma: no cover
         update_crawl=False,
         update_edges=True,
     )
-    
+
     img, seg = dataset2[0]
