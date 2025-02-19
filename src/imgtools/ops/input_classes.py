@@ -121,9 +121,9 @@ class ImageMaskInput(BaseInput):
         """
         self.dataset_name = self.dir_path.name
         create_path = (
-            lambda file_name: self.dir_path.parent
+            lambda f: self.dir_path.parent
             / self.imgtools_dir
-            / file_name
+            / f
         )
 
         self.csv_path = create_path(f"imgtools_{self.dataset_name}.csv")
