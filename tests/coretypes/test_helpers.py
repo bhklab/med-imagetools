@@ -179,4 +179,4 @@ class TestSpacing3D:
     def test_repr(self) -> None:
         """Ensure Spacing3D has a readable representation."""
         sp = Spacing3D(1.0, 2.0, 3.0)
-        assert repr(sp) == "Spacing3D(x=1.0, y=2.0, z=3.0)"
+        assert repr(sp) == "Spacing3D(x=1.00000, y=2.00000, z=3.00000)"
