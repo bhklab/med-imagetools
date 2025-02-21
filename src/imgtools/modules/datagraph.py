@@ -655,7 +655,7 @@ class DataGraph:
         final_df = self._get_df(
             df_processed, relevant_study_id, remove_less_comp
         )
-
+        
         # Removing columns
         for bad in change_df:
             # Find columns with change_df string present
@@ -673,7 +673,8 @@ class DataGraph:
 
     def _form_agg(self) -> None:
         """
-        Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
+        Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. 
+        This way one can do regex based on what type of subgraph the user wants
         """
 
         def list_edges(series) -> str:  # noqa
@@ -819,8 +820,7 @@ class DataGraph:
                     )
                     save_folder_comp[k][key_series] = edge["series_y"]
                     save_folder_comp[k][key] = edge["folder_y"]
-
-            remove_index = []
+            keep_index = []
             if remove_less_comp:
                 for j in range(len(ct_series)):
                     # Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
@@ -833,12 +833,11 @@ class DataGraph:
                     )
                     # Checking if all the read modalities are present in a component
                     if desired_modalities.issubset(present_modalities):
-                        remove_index.append(j)
+                        keep_index.append(j)
                 save_folder_comp = [
-                    save_folder_comp[idx] for idx in remove_index
+                    save_folder_comp[idx] for idx in keep_index
                 ]
-                comp = [comp[idx] for idx in remove_index]
-
+                comp = [comp[idx] for idx in keep_index]
             self.final_dict.extend(comp)
             final_df.extend(save_folder_comp)
 
