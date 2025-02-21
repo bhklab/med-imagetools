@@ -438,7 +438,17 @@ class DataGraph:
             elif edge_type == 7:  # SEG->CT/MR
                 # keep final_df as is
                 final_df = self.df_edges.loc[
-                    self.df_edges.edge_type == edge_type
+                    self.df_edges.edge_type == edge_type,
+                    [
+                        "patient_ID_x",
+                        "study_x",
+                        "series_x",
+                        "folder_x",
+                        "series_y",
+                        "folder_y",
+                        "subseries_x",
+                        "subseries_y",
+                    ],
                 ].copy()
                 node_dest, node_origin = valid_query.split(",")
                 final_df.rename(
