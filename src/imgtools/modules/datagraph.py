@@ -33,7 +33,7 @@ class DataGraph:
         path_crawl: str | Path,
         edge_path: str | Path = "./patient_id_full_edges.csv",
         visualize: bool = False,
-        update: bool = False,
+        update: bool = True,
     ) -> None:
         """
         Parameters
@@ -47,7 +47,7 @@ class DataGraph:
         visualize: bool, default = False
             Whether to generate graph visualization using Pyviz
 
-        update: bool, default = False
+        update: bool, default = True
             Whether to force update existing edge table
         """
         self.df = pd.read_csv(path_crawl, index_col=0)
