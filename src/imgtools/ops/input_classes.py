@@ -126,6 +126,7 @@ class ImageMaskInput(BaseInput):
             errmsg = f"Error parsing the graph: {e}"
             logger.exception(errmsg)
             raise ValueError(errmsg) from e
+
         parsed_cols = self.parsed_df.columns.tolist()
         for colname in parsed_cols:
             prefix, *rest = colname.split("_")
