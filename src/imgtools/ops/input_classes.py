@@ -224,7 +224,7 @@ class ImageMaskInput(BaseInput):
             case _:
                 errmsg = (
                     "Modalities must be a string or a"
-                    "list of strings got {type(modalities)}"
+                    f"list of strings got {type(modalities)}"
                 )
                 raise ValueError(errmsg)
         try:
