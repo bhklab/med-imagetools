@@ -110,7 +110,7 @@ class AutoPipeline(Pipeline):
 
         self.continue_processing = continue_processing
         self.dry_run = dry_run
-        self.v = verbose
+        self.verbose = verbose
 
         if dry_run:
             nnunet = False
@@ -384,7 +384,7 @@ class AutoPipeline(Pipeline):
                 # mult_conn = colname.split("_")[-1].isnumeric()
                 # num = colname.split("_")[-1]
 
-                if self.v:
+                if self.verbose:
                     print("output_stream:", output_stream)
 
                 if read_results[i] is None:
@@ -401,7 +401,7 @@ class AutoPipeline(Pipeline):
                         extractor.SetIndex([0, 0, 0, 0])    
                         
                         image = extractor.Execute(image)
-                        if self.v:
+                        if self.verbose:
                             print("image.GetSize():", image.GetSize())
                     try:
                         image = self.resample(image)
@@ -531,7 +531,7 @@ class AutoPipeline(Pipeline):
                             self.existing_roi_indices[name] = len(self.existing_roi_indices)
                     mask.existing_roi_indices = self.existing_roi_indices
 
-                    if self.v:
+                    if self.verbose:
                         print("mask.GetSize():", mask.GetSize())
                     mask_arr = np.transpose(sitk.GetArrayFromImage(mask))
                     
@@ -548,7 +548,7 @@ class AutoPipeline(Pipeline):
                         if len(mask_arr.shape) == 3:
                             mask_arr = mask_arr.reshape(1, mask_arr.shape[0], mask_arr.shape[1], mask_arr.shape[2])
                         
-                        if self.v:
+                        if self.verbose:
                             print(mask_arr.shape)
 
                         roi_names_list = list(mask.roi_indices.keys())
@@ -663,7 +663,7 @@ class AutoPipeline(Pipeline):
         """Execute the pipeline, possibly in parallel.
         """
         # Joblib prints progress to stdout if verbose > 50
-        verbose = 51 if self.v or self.show_progress else 0
+        verbose = 51 if self.verbose or self.show_progress else 0
 
         subject_ids = self._get_loader_subject_ids()
         patient_ids = []
