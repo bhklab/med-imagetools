@@ -68,7 +68,7 @@ from typing import Any, Callable, List, Optional, Set, Tuple, Union
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.coretypes import Size3D, RegionBox
+from imgtools.coretypes import RegionBox, Size3D
 from imgtools.logging import logger
 from imgtools.utils import array_to_image, image_to_array
 
