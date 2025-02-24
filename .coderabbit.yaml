@@ -35,7 +35,7 @@ reviews:
         Review the Python code for compliance with PEP 8 and PEP 257 (docstring conventions). Ensure the
         following:
         - Variables and functions follow meaningful naming conventions.
-        - Docstrings are present, accurate, and align with the implementation.
+        - For ALL docstrings, ensure they follow numpydoc convention, AND are correctly aligned with the code's type annotations.
         - Code is efficient and avoids redundancy while adhering to DRY principles.
         - Consider suggestions to enhance readability and maintainability.
         - Highlight any potential performance issues, edge cases, or logical errors.
@@ -78,6 +78,9 @@ reviews:
     base_branches: []
   finishing_touches:
     docstrings:
+      enabled: true
+  tools:
+    ruff:
       enabled: true
 chat:
   auto_reply: true

@@ -2,24 +2,283 @@
 Input classes refactored to use the BaseInput abstract base class.
 """
 
-import csv
 import pathlib
 import time
-from typing import Any, List, Optional
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Generator, List, NamedTuple, Optional
 
 import pandas as pd
+import SimpleITK as sitk
 
 from imgtools.crawler import crawl
 from imgtools.io.loaders import (
     ImageCSVLoader,
     ImageFileLoader,
-    read_image,
     read_dicom_auto,
+    read_image,
 )
 from imgtools.logging import logger
+from imgtools.modules import Scan, Segmentation, StructureSet
 from imgtools.modules.datagraph import DataGraph
+from imgtools.ops.base_classes import BaseInput
+from imgtools.utils.timer import timer
 
-from .base_classes import BaseInput
+LoaderFunction = Callable[..., sitk.Image | StructureSet | Segmentation]
+
+
+class ImageMask(NamedTuple):
+    """
+    NamedTuple for storing image-mask pairs.
+
+    Parameters
+    ----------
+    scan : Scan
+        The scan image.
+    mask : Segmentation
+        The mask image.
+    """
+
+    scan: Scan
+    mask: Segmentation
+
+
+class ImageMaskModalities(Enum):
+    CT_RTSTRUCT = ("CT", "RTSTRUCT")
+    CT_SEG = ("CT", "SEG")
+    MR_RTSTRUCT = ("MR", "RTSTRUCT")
+    MR_SEG = ("MR", "SEG")
+
+    def __str__(self) -> str:
+        return f"<{self.value[0]},{self.value[1]}>"
+
+
+@dataclass
+class ImageMaskInput(BaseInput):
+    """
+    Easily index and load scan-mask pairs.
+
+    This class crawls through the specified
+        directory to index the dataset,
+    creates a graph of the dataset, automatically
+        querying the graph for image-mask pairs.
+
+    Parameters
+    ----------
+    dir_path : pathlib.Path
+        Path to the directory containing the dataset.
+    modalities : ImageMaskModalities
+        Modalities to be used for querying the graph.
+    n_jobs : int (default=-1)
+        Number of parallel jobs to run when crawling.
+    update_crawl : bool (default=False)
+        Whether to force update the crawl index.
+    update_edges : bool (default=False)
+        Whether to force update the edges index.
+    imgtools_dir : str (default=".imgtools")
+        Directory name for crawl and edge index files.
+    dataset_name : str, optional
+        Name of the dataset. By default, will take the
+        name of the `dir_path`.
+    """
+
+    dir_path: pathlib.Path
+    modalities: ImageMaskModalities
+    n_jobs: int = -1
+    update_crawl: bool = False
+    update_edges: bool = False
+
+    imgtools_dir: str = ".imgtools"
+    dataset_name: str | None = None
+
+    csv_path: pathlib.Path = field(init=False)
+    json_path: pathlib.Path = field(init=False)
+    edge_path: pathlib.Path = field(init=False)
+
+    readers: List[LoaderFunction] = field(default_factory=list)
+    output_streams: List[str] = field(default_factory=list)
+    column_names: List[str] = field(default_factory=list)
+    series_names: List[str] = field(default_factory=list)
+    modality_list: List[str] = field(default_factory=list)
+
+    graph: DataGraph = field(init=False)
+
+    parsed_df: pd.DataFrame = field(init=False)
+
+    def __post_init__(self) -> None:
+        """order of steps summarized
+
+        1. crawl
+        2. init graph
+        3. parse graph
+        4. init loader
+        """
+        self.dataset_name = self.dataset_name or self.dir_path.name
+        create_path = lambda f: self.dir_path.parent / self.imgtools_dir / f
+
+        self.csv_path = create_path(f"imgtools_{self.dataset_name}.csv")
+        self.json_path = create_path(f"imgtools_{self.dataset_name}.json")
+        self.edge_path = create_path(f"imgtools_{self.dataset_name}_edges.csv")
+
+        self._crawl()  # 1.
+        self.graph = self._init_graph()  # 2.
+        self.parsed_df = self.parse_graph(self.modalities)  # 3.
+
+        # 4.
+        parsed_cols = self.parsed_df.columns.tolist()
+        for colname in parsed_cols:
+            prefix, *rest = colname.split("_")
+            match prefix:
+                case "folder":
+                    self.output_streams.append("_".join(rest))
+                    self.column_names.append(colname)
+                    self.modality_list.append(rest[0])
+                    self.readers.append(read_dicom_auto)
+                case "series" if any(
+                    modality in rest for modality in self.modalities.value
+                ):
+                    # we want to check if any of the modalities are the 'rest'
+                    # if they are, we want to add the series name to the series_names
+                    self.series_names.append(colname)
+                case _:
+                    pass
+
+        logger.info(
+            "Parsing completed",
+            output_streams=self.output_streams,
+            modalities=self.modalities,
+            column_names=self.column_names,
+            series_names=self.series_names,
+            readers=self.readers,
+        )
+
+        self.loader = ImageCSVLoader(
+            self.parsed_df,
+            colnames=self.column_names,
+            seriesnames=self.series_names,
+            id_column=None,
+            expand_paths=False,
+            readers=self.readers,
+        )
+
+    def keys(self) -> List[str]:
+        """Return the keys of the parsed DataFrame."""
+        return self.loader.keys()
+
+    def __iter__(self) -> Generator[Any, Any, None]:
+        cases = list(self.keys())
+        assert len(cases) > 0, "No cases found in the dataset."
+        for case in cases:
+            yield self.__call__(case)
+
+    def __repr__(self) -> str:
+        rprstring = "ImageMaskInput<\n\t"
+        rprstring += f"num_cases={len(self)},\n\t"
+        rprstring += f"dataset_name='{self.dataset_name}',\n\t"
+        rprstring += f"modalities={self.modalities},\n\t"
+        rprstring += f"output_streams={self.output_streams},\n\t"
+        rprstring += f"series_col_names={self.series_names},\n"
+        rprstring += ">"
+        return rprstring
+
+    def __len__(self) -> int:
+        return len(self.loader)
+
+    @timer("Crawling the dataset")
+    def _crawl(self) -> None:
+        # CRAWLER
+        # -------
+        # Checks if dataset has already been indexed
+        if self.csv_path.exists() and not self.update_crawl:
+            warnmsg = (
+                "The dataset has already been indexed."
+                " Use update_crawl to force update."
+            )
+            logger.warning(warnmsg)
+            return
+        elif self.csv_path.exists() and self.update_crawl:
+            logger.debug("Output exists, force updating.", path=self.csv_path)
+
+        logger.info("Indexing the dataset...", path=self.dir_path)
+        crawl(
+            top=self.dir_path,
+            n_jobs=self.n_jobs,
+            csv_path=self.csv_path,
+            json_path=self.json_path,
+        )
+
+    @timer("Parsing the graph")
+    def parse_graph(self, modalities: str | List[str]) -> pd.DataFrame:
+        """Parse the graph based on the provided modalities."""
+        # lets just assume that the user doesn't pass in a ImageMaskModalities
+        # object, but a string or a list of strings
+        match modalities:
+            case str():
+                # probably can do another check to check
+                # validity of the string
+                pass
+            case list():
+                modalities = ",".join(modalities)
+            case ImageMaskModalities():
+                modalities = ",".join(modalities.value)
+            case _:
+                errmsg = (
+                    "Modalities must be a string or a"
+                    f"list of strings got {type(modalities)}"
+                )
+                raise ValueError(errmsg)
+        try:
+            logger.info("Querying graph", modality=modalities)
+            return self.graph.parser(modalities)
+        except Exception as e:
+            errmsg = f"Error parsing the graph: {e}"
+            logger.exception(errmsg)
+            raise ValueError(errmsg) from e
+
+    @timer("Graph initialization")
+    def _init_graph(self) -> DataGraph:
+        # GRAPH
+        # -----
+        # Form the graph
+        logger.debug("Creating edge path", edge_path=self.edge_path)
+        return DataGraph(
+            path_crawl=self.csv_path.resolve().as_posix(),
+            edge_path=self.edge_path.as_posix(),
+            update=self.update_edges,
+        )
+
+    def __call__(self, key: object) -> ImageMask:
+        """Retrieve input data."""
+        # ImageMask = namedtuple("ImageMask", ["scan", "mask"])
+        case_scan, rtss_or_seg = self.loader.get(key)
+        # assumption: first modality is the scan (CT/MR)
+        # second modality is the mask (RTSTRUCT/SEG)
+        match self.modality_list[1]:
+            case "RTSTRUCT":
+                # need to convert to Segmentation
+                mask = rtss_or_seg.to_segmentation(case_scan)
+            case "SEG":
+                mask = rtss_or_seg
+            case _:
+                errmsg = f"Modality {self.modality_list[1]} not recognized."
+                raise ValueError(errmsg)
+
+        return ImageMask(case_scan, mask)
+
+    def __getitem__(self, key: str | int) -> object:
+        match key:
+            case str():
+                return self.__call__(key)
+            case int():
+                if key < len(self):
+                    return self.__call__(self.keys()[key])
+                errmsg = (
+                    f"Index {key} out of range Dataset has {len(self)} cases."
+                )
+                raise IndexError(errmsg)
+            case _:
+                errmsg = f"Key {type(key)=} must be a str/int"
+                raise ValueError(errmsg)
 
 
 class ImageAutoInput(BaseInput):
@@ -59,7 +318,7 @@ class ImageAutoInput(BaseInput):
         n_jobs: int = -1,
         visualize: bool = False,
         update: bool = False,
-    ):
+    ) -> None:
         self.modalities = modalities
 
         self.dir_path = pathlib.Path(dir_path)
@@ -148,7 +407,7 @@ class ImageAutoInput(BaseInput):
 
         super().__init__(loader)
 
-    def __call__(self, key: Any) -> Any:  # noqa: ANN001
+    def __call__(self, key: Any) -> Any:  # noqa
         """Retrieve input data."""
         return self._loader.get(key)
 
@@ -253,13 +512,21 @@ class ImageFileInput(BaseInput):
         return self._loader.get(key)
 
 
-# ruff: noqa
 if __name__ == "__main__":  # pragma: no cover
-    # Demonstrating usage with mock data
-    example_csv_input = ImageCSVInput(
-        "path/to/csv", colnames=["image", "label"]
+    # Define the path to the data
+    testdata = pathlib.Path("data")
+    # for this tutorial we will use some test image data
+    datasets_name = ["NSCLC-Radiomics", "Vestibular-Schwannoma-SEG"]
+    vs_seg = ImageMaskInput(
+        dir_path=testdata / datasets_name[1],
+        modalities=ImageMaskModalities.MR_RTSTRUCT,
     )
-    print("ExampleCSVInput repr:", repr(example_csv_input))
 
-    example_file_input = ImageFileInput("path/to/directory")
-    print("ExampleFileInput repr:", repr(example_file_input))
+    nsclsc_rtstruct = ImageMaskInput(
+        dir_path=testdata / datasets_name[0],
+        modalities=ImageMaskModalities.CT_RTSTRUCT,
+    )
+    nsclsc_seg = ImageMaskInput(
+        dir_path=testdata / datasets_name[0],
+        modalities=ImageMaskModalities.CT_SEG,
+    )
