@@ -69,14 +69,17 @@ class ImageMaskInput(BaseInput):
         Path to the directory containing the dataset.
     modalities : ImageMaskModalities
         Modalities to be used for querying the graph.
-    n_jobs : int, optional
-        Number of jobs to use for crawling, by default -1.
-    update_crawl : bool, optional
-        Whether to force update the crawl, by default False.
-    update_edges : bool, optional
-        Whether to force update the edges, by default False.
-    imgtools_dir : str, optional
-        Directory name for imgtools, by default ".imgtools".
+    n_jobs : int (default=-1)
+        Number of parallel jobs to run when crawling.
+    update_crawl : bool (default=False)
+        Whether to force update the crawl index.
+    update_edges : bool (default=False)
+        Whether to force update the edges index.
+    imgtools_dir : str (default=".imgtools")
+        Directory name for crawl and edge index files.
+    dataset_name : str, optional
+        Name of the dataset. By default, will take the
+        name of the `dir_path`.
     """
 
     dir_path: pathlib.Path
@@ -86,7 +89,8 @@ class ImageMaskInput(BaseInput):
     update_edges: bool = False
 
     imgtools_dir: str = ".imgtools"
-    dataset_name: str = field(init=False)
+    dataset_name: str | None = None
+
     csv_path: pathlib.Path = field(init=False)
     json_path: pathlib.Path = field(init=False)
     edge_path: pathlib.Path = field(init=False)
@@ -108,25 +112,19 @@ class ImageMaskInput(BaseInput):
         2. init graph
         3. parse graph
         4. init loader
-        5. create output streams
         """
-        self.dataset_name = self.dir_path.name
+        self.dataset_name = self.dataset_name or self.dir_path.name
         create_path = lambda f: self.dir_path.parent / self.imgtools_dir / f
 
         self.csv_path = create_path(f"imgtools_{self.dataset_name}.csv")
         self.json_path = create_path(f"imgtools_{self.dataset_name}.json")
         self.edge_path = create_path(f"imgtools_{self.dataset_name}_edges.csv")
 
-        self._crawl()
-        self.graph = self._init_graph()
+        self._crawl()  # 1.
+        self.graph = self._init_graph()  # 2.
+        self.parsed_df = self.parse_graph(self.modalities)  # 3.
 
-        try:
-            self.parsed_df = self.parse_graph(self.modalities)
-        except Exception as e:
-            errmsg = f"Error parsing the graph: {e}"
-            logger.exception(errmsg)
-            raise ValueError(errmsg) from e
-
+        # 4.
         parsed_cols = self.parsed_df.columns.tolist()
         for colname in parsed_cols:
             prefix, *rest = colname.split("_")
@@ -229,9 +227,13 @@ class ImageMaskInput(BaseInput):
                     "list of strings got {type(modalities)}"
                 )
                 raise ValueError(errmsg)
-
-        logger.info("Querying graph", modality=modalities)
-        return self.graph.parser(modalities)
+        try:
+            logger.info("Querying graph", modality=modalities)
+            return self.graph.parser(modalities)
+        except Exception as e:
+            errmsg = f"Error parsing the graph: {e}"
+            logger.exception(errmsg)
+            raise ValueError(errmsg) from e
 
     @timer("Graph initialization")
     def _init_graph(self) -> DataGraph:
