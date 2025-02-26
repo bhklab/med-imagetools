@@ -211,18 +211,21 @@ def create_sop_to_series_map(metadata: dict) -> dict:
 )
 @click.option("--check-header", is_flag=True, help="Check header for DICOM")
 @click.option("-n", default=1, help="Number of parallel jobs")
+@click.option("--force", is_flag=True, help="Force overwrite of cache")
 def main(
     top: str,
     extension: str,
     no_recursive: bool,
     check_header: bool,
     n: int,
+    force: bool,
 ) -> t.Dict:
     start = time.time()
     top_dir = pathlib.Path(top).resolve()
     meta_path_cache_file = pathlib.Path(".imgtools/cache/meta_cache.json")
     meta_path_cache_file.parent.mkdir(exist_ok=True)
-    if meta_path_cache_file.exists():
+    if meta_path_cache_file.exists() and not force:
+        logger.info("Loading metadata from cache")
         with meta_path_cache_file.open("r") as f:
             metadata = json.load(f)
     else:
