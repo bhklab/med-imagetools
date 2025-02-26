@@ -1,5 +1,3 @@
-import time
-from collections import defaultdict
 from typing import Dict, List, Set
 
 from pathlib import Path
@@ -56,7 +54,7 @@ class Branch:
 
 class Interlacer:
     def __init__(self, df: pd.DataFrame) -> None:
-        self.forest: Dict[str, SeriesNode] = defaultdict() 
+        self.forest: Dict[str, SeriesNode] = {} 
         self.root_nodes: List[SeriesNode] = [] 
         self.df: pd.DataFrame = df
         self.branches: List[Branch] = []
@@ -160,9 +158,9 @@ class Interlacer:
         net = Network(height='800px', width='100%', notebook=False, directed=True)
 
         def add_node_and_edges(node, parent=None):
-            net.add_node(node.Series, label=node.Modality, title=node.Modality)
+            net.add_node(node.Series, label=node.Modality, title=node.Series)  # Display Series on click
             if parent:
-                net.add_edge(parent.Series, node.Series) 
+                net.add_edge(node.Series, parent.Series) 
             for child in node.children:
                 add_node_and_edges(child, node) 
 
