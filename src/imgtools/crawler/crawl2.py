@@ -1,19 +1,21 @@
+import json
 import logging
+import os
 import pathlib
 import time
 import typing as t
 from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 
 import click
+import pandas as pd
+from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
 from pydicom.errors import InvalidDicomError
-from rich import print as rprint
 from tqdm import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm
-from imgtools.dicom.input import rtstruct_reference_uids
+from tqdm.contrib.logging import logging_redirect_tqdm  # type: ignore
+
 from imgtools.dicom import find_dicoms
+from imgtools.dicom.input import rtstruct_reference_uids
 from imgtools.logging import logger
 
 TAGS_OF_INTEREST = [
@@ -25,7 +27,16 @@ TAGS_OF_INTEREST = [
 ]
 
 
-def parse_dicom(dcm_path: pathlib.Path, top: pathlib.Path) -> t.Dict:
+# A lightweight subclass of dict that allows for attribute access
+class AttrDict(dict):
+    def __getattr__(self, key: str) -> str | list:
+        return self[key]
+
+    def __setattr__(self, key: str, value: str | list) -> None:
+        self[key] = value
+
+
+def parse_dicom(dcm_path: str) -> t.Dict:
     try:
         dcm = dcmread(
             dcm_path,
@@ -36,32 +47,43 @@ def parse_dicom(dcm_path: pathlib.Path, top: pathlib.Path) -> t.Dict:
         logger.error(f"Error reading {dcm_path}: {e}")
         raise
 
-    meta = {tag: str(dcm.get(tag, "")) for tag in TAGS_OF_INTEREST}
-
+    meta = AttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
+    meta.filepath = dcm_path
     match meta["Modality"]:
-        case "RTSTRUCT":
-            refseries, refstudy = rtstruct_reference_uids(dcm)
-            meta["ReferencedSeriesUID"] = refseries
-        case "RTPLAN":
-            meta["ReferencedRTStructInstanceUID"] = (
-                dcm.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID
-            )
-        case "RTDOSE":
-            meta["ReferencedRTPlanInstanceUID"] = dcm.ReferencedRTPlanSequence[
-                0
-            ].ReferencedSOPInstanceUID
         case "SEG":
             try:
-                meta["ReferencedSeriesUID"] = dcm.ReferencedSeriesSequence[
-                    0
-                ].SeriesInstanceUID
+                ref_series = dcm.ReferencedSeriesSequence[0].SeriesInstanceUID
+                meta.ReferencedSeriesUID = ref_series
             except AttributeError:
-                # No referenced series i.e ISPY2
-                # get the first referenced instance
-                # hope that we can find the series from that
-                meta["ReferencedSOPInstanceUID"] = dcm.SourceImageSequence[
+                ref_seg_instance = dcm.SourceImageSequence[
                     0
                 ].ReferencedSOPInstanceUID
+                meta.ReferencedSOPInstanceUID = ref_seg_instance
+        case "RTSTRUCT":
+            ref_series, _ = rtstruct_reference_uids(dcm)
+            meta.ReferencedSeriesUID = ref_series
+
+        # For RTPLAN and RTDOSE, we store the same id Twice, for debugging, but we will
+        # only use the common `ReferencedSOPInstanceUID` (also used in SEG)
+        case "RTPLAN":
+            ref_struct = dcm.ReferencedStructureSetSequence[
+                0
+            ].ReferencedSOPInstanceUID
+            meta.ReferencedRTStructInstanceUID = ref_struct
+            meta.ReferencedSOPInstanceUID = ref_struct
+        case "RTDOSE":
+            ref_plan = dcm.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
+            meta.ReferencedRTPlanInstanceUID = ref_plan
+            meta.ReferencedSOPInstanceUID = ref_plan
+        case "SR":
+            if sr_seq := getattr(
+                dcm, "CurrentRequestedProcedureEvidenceSequence", None
+            ):
+                ref_series = {
+                    sr.ReferencedSeriesSequence[0].SeriesInstanceUID
+                    for sr in sr_seq
+                }
+                meta.ReferencedSeriesUID = list(ref_series)
         case _:
             pass
 
@@ -77,56 +99,110 @@ def crawl_directory(
 ) -> t.Dict:
     start = time.time()
 
-    dcms = find_dicoms(
+    dcms_p: t.List[pathlib.Path] = find_dicoms(
         directory=top,
         recursive=recursive,
         check_header=check_header,
         extension=extension,
     )
+    dcms = [dcm.as_posix() for dcm in dcms_p]
 
     logger.info(
         f"Found {len(dcms)} DICOM files in {time.time() - start:.2f} seconds"
     )
 
-    database_list = []
-
     logger.info(
-        f"Using {n_jobs} workers for parallel processing",
+        f"Using {n_jobs} workers for parallel processing with",
         param_n_jobs=n_jobs,
     )
     start = time.time()
-
-    parse_dicom_partial = partial(parse_dicom, top=top)
-    start = time.time()
-    with (
-        ProcessPoolExecutor(n_jobs) as executor,
-        logging_redirect_tqdm([logging.getLogger("imgtools")]),
-        tqdm(total=len(dcms), desc="Processing DICOM files") as pbar,
-    ):
-        for database in executor.map(parse_dicom_partial, dcms):
-            database_list.append(database)
-
-            pbar.update(1)
-    logger.info(f"Total time: {time.time() - start:.2f} seconds")
-
-    logger.info(
-        f"Database: {len(database_list)} out of {len(dcms)} DICOM files in {time.time() - start:.2f} seconds"
-    )
-    # Combine all the JSON files into one
-    logger.info("Combining JSON files...")
-
-    start = time.time()
     grouped = defaultdict(list)
-    for item in database_list:
-        grouped[item["SeriesInstanceUID"]].append(item)
 
-    logger.info(f"Grouping took {time.time() - start:.2f} seconds")
+    # this seems to be faster than using ProcessPoolExecutor
+    with logging_redirect_tqdm([logging.getLogger("imgtools")]):
+        result = Parallel(n_jobs=n_jobs)(
+            delayed(parse_dicom)(dcm)
+            for dcm in tqdm(dcms, desc="Processing DICOM files", mininterval=1)
+        )
+        for res in result:
+            if res:
+                grouped[res["SeriesInstanceUID"]].append(res)
 
+    logger.info(f"Total time: {time.time() - start:.2f} seconds")
     return grouped
 
 
+def extract_compact_data(entries: list, root: pathlib.Path) -> dict:
+    """Extracts unique metadata and instance-to-filepath mapping.
+
+    Parameters
+    ----------
+    data : dict
+        The input dictionary containing DICOM metadata.
+
+    Returns
+    -------
+    dict
+        A dictionary with compact metadata and instance-filepath mapping.
+    """
+    # Extract the first item (since all share common metadata)
+    common_metadata = {
+        "PatientID": entries[0]["PatientID"],
+        "StudyInstanceUID": entries[0]["StudyInstanceUID"],
+        "SeriesInstanceUID": entries[0]["SeriesInstanceUID"],
+        "Modality": entries[0]["Modality"],
+    }
+    if "ReferencedSeriesUID" in entries[0]:
+        common_metadata["ReferencedSeriesUID"] = entries[0][
+            "ReferencedSeriesUID"
+        ]
+    elif "ReferencedSOPInstanceUID" in entries[0]:
+        common_metadata["ReferencedSOPInstanceUID"] = entries[0][
+            "ReferencedSOPInstanceUID"
+        ]
+
+    instance_files = {
+        entry["SOPInstanceUID"]: pathlib.Path(entry["filepath"])
+        for entry in entries
+    }
+
+    instance_map = {
+        uid: filepath.relative_to(root).as_posix()
+        for uid, filepath in instance_files.items()
+    }
+
+    # we do assume that all instances share a common root
+    # but just in case...
+    common_root = os.path.commonpath(instance_files.values())
+
+    return {
+        **common_metadata,
+        "common_root": common_root,
+        "instances": instance_map,
+    }
+
+
+def create_sop_to_series_map(metadata: dict) -> dict:
+    """Create a mapping of SOPInstanceUID to SeriesInstanceUID.
+
+    Parameters
+    ----------
+    compact_metadata : dict
+
+    Returns
+    -------
+    dict
+        A dictionary mapping SOPInstanceUID to SeriesInstanceUID.
+    """
+    sop_to_series_map = {}
+    for series_uid, meta in metadata.items():
+        for sop_instance_uid in meta["instances"]:  # .keys():
+            sop_to_series_map[sop_instance_uid] = series_uid
+    return sop_to_series_map
+
+
 @click.command()
-@click.argument("top", type=click.Path(exists=True))
+@click.argument("top", type=click.Path(exists=True, path_type=pathlib.Path))
 @click.option(
     "--extension", default="dcm", help="File extension to search for"
 )
@@ -141,101 +217,229 @@ def main(
     no_recursive: bool,
     check_header: bool,
     n: int,
-) -> None:
+) -> t.Dict:
+    start = time.time()
     top_dir = pathlib.Path(top).resolve()
+    meta_path_cache_file = pathlib.Path(".imgtools/cache/meta_cache.json")
+    meta_path_cache_file.parent.mkdir(exist_ok=True)
+    if meta_path_cache_file.exists():
+        with meta_path_cache_file.open("r") as f:
+            metadata = json.load(f)
+    else:
+        metadata = crawl_directory(
+            top=top_dir,
+            extension=extension,
+            recursive=not no_recursive,
+            check_header=check_header,
+            n_jobs=n,
+        )
+        json.dump(metadata, meta_path_cache_file.open("w"), indent=4)
 
-    crawl_directory(
-        top=top_dir,
-        extension=extension,
-        recursive=not no_recursive,
-        check_header=check_header,
-        n_jobs=n,
+    logger.info("Remapping final metadata")
+    meta = {
+        series_uid: extract_compact_data(data, top_dir)
+        for series_uid, data in metadata.items()
+    }
+    with pathlib.Path(".imgtools/cache/meta_compact.json").open("w") as f:
+        json.dump(meta, f, indent=4)
+
+    sop_to_series_map = create_sop_to_series_map(meta)
+    with pathlib.Path(".imgtools/cache/sop_to_series_map.json").open("w") as f:
+        json.dump(sop_to_series_map, f, indent=4)
+
+    final_meta = []
+    # doing this manually for now
+    # refactor would just be make a huge dataframe and then filter columns
+    for series_uid, data in meta.items():
+        base_meta = {
+            "PatientID": data["PatientID"],
+            "StudyInstanceUID": data["StudyInstanceUID"],
+            "SeriesInstanceUID": series_uid,
+            "Modality": data["Modality"],
+            "ReferencedSeriesUID": data.get("ReferencedSeriesUID", None),
+            "Instances": len(data["instances"]),
+        }
+
+        match data["Modality"]:
+            case "CT" | "MR" | "PT" | "RTSTRUCT":
+                # would've been processed in the first pass
+                pass
+            case "SEG":
+                base_meta["ReferencedSeriesUID"] = data.get(
+                    "ReferencedSeriesUID",
+                    sop_to_series_map.get(
+                        data.get("ReferencedSOPInstanceUID"), None
+                    ),
+                )
+            case "RTPLAN" | "RTDOSE":
+                base_meta["ReferencedSeriesUID"] = sop_to_series_map.get(
+                    data.get("ReferencedSOPInstanceUID"), None
+                )
+            case "SR":
+                base_meta["ReferencedSeriesUID"] = "|".join(
+                    data["ReferencedSeriesUID"]
+                )
+            case _:
+                debugmsg = (
+                    f"Modality {data['Modality']} not accounted for in mapping"
+                )
+                logger.debug(debugmsg)
+
+        if (path := pathlib.Path(data.get("common_root"))).is_file():  # type: ignore
+            base_meta["folder"] = path.parent.relative_to(top_dir.parent).as_posix()
+            base_meta["file"] = path.relative_to(top_dir.parent).as_posix()
+        else:
+            base_meta["folder"] = path.relative_to(top_dir.parent).as_posix()
+
+        final_meta.append(base_meta)
+
+    df = pd.DataFrame(final_meta)
+    # set the index to the SeriesInstanceUID
+    df.set_index("SeriesInstanceUID", inplace=True)
+
+    # create a new column that uses the ReferencedSeriesUID to get the Modality of the referenced series
+    # if the ReferencedSeriesUID has a "|" in it, then we have multiple references
+    # and we will get both and separate them by "|"
+    for row in df.itertuples():
+        if pd.notna(row.ReferencedSeriesUID):
+            ref_series = str(row.ReferencedSeriesUID).split("|")
+            ref_modality = "|".join(
+                [
+                    str(df.loc[ref, "Modality"])
+                    if (pd.notna(ref) and ref in df.index)
+                    else ""
+                    for ref in ref_series
+                ]
+            )
+            df.at[row.Index, "ReferencedModality"] = ref_modality
+        else:
+            df.at[row.Index, "ReferencedModality"] = ""
+
+    df.sort_values(
+        by=["PatientID", "StudyInstanceUID", "Modality"],
+        inplace=True,
     )
+
+    # use normal indexing
+    df.reset_index(inplace=True)
+
+    # reorganize columns
+    df = df[
+        [
+            "PatientID",
+            "StudyInstanceUID",
+            "SeriesInstanceUID",
+            "Instances",
+            "Modality",
+            "ReferencedModality",
+            "ReferencedSeriesUID",
+            "folder",
+            "file",
+        ]
+    ]
+
+    df.to_csv(".imgtools/cache/final_meta.csv", index=False)
+    logger.info(f"Total time: {time.time() - start:.2f} seconds")
+    return meta
 
 
 if __name__ == "__main__":
-    # main()
-    all_start = time.time()
-    x = crawl_directory(
-        pathlib.Path("./data").resolve(),
-        extension="dcm",
-        recursive=True,
-        n_jobs=12,
-    )
+    main()
 
-    keys = list(x.keys())
+    # main(
+    #     top="./data",
+    #     extension="dcm",
+    #     no_recursive=False,
+    #     check_header=False,
+    #     n=12,
+    # )
 
-    # Group by Modality
-    modality_group = defaultdict(list)
-    for key in keys:
-        modality = x[key][0]["Modality"]
-        match modality:
-            case "RTSTRUCT" | "RTPLAN" | "RTDOSE" | "SEG":
-                # should only be one instance
-                modality_group[modality].append(x[key][0])
-            case _:
-                modality_group[modality].extend(x[key])
+    # modality_group = defaultdict(list)
 
-    # create a hashmap of
-    # sop_instance_uid -> series_instance_uid
-    
-    sop_to_series_map = {}
-    for series_uid, items in x.items():
-        for item in items:
-            sop_instance_uid = item["SOPInstanceUID"]
-            sop_to_series_map[sop_instance_uid] = series_uid
+    # for series_uid, instances in meta.items():
+    #     modality = instances[0]["Modality"]
 
-    start = time.time()
-    for instance in tqdm(
-        modality_group["RTPLAN"], desc="Mapping RTPLAN instances"
-    ):
-        instance["ReferencedSeriesUID"] = sop_to_series_map[
-            instance["ReferencedRTStructInstanceUID"]
-        ]
+    #     match modality:
+    #         case "RTSTRUCT" | "RTPLAN" | "RTDOSE" | "SEG":
+    #             modality_group[modality].append(instances[0])
+    #         case _:
+    #             modality_group[modality].extend(instances)
 
-    for instance in tqdm(
-        modality_group["RTDOSE"], desc="Mapping RTDOSE instances"
-    ):
-        instance["ReferencedSeriesUID"] = sop_to_series_map[
-            instance["ReferencedRTPlanInstanceUID"]
-        ]
+    # keys = list(meta.keys())
 
-    for instance in tqdm(modality_group["SEG"], desc="Mapping   SEG instances"):
-        if "ReferencedSOPInstanceUID" in instance:
-            if instance["ReferencedSOPInstanceUID"] in sop_to_series_map:
-                instance["ReferencedSeriesUID"] = sop_to_series_map[
-                    instance["ReferencedSOPInstanceUID"]
-                ]
-            else:
-                errmsg = f"Could not find {instance['meta']['ReferencedSOPInstanceUID']=} in mapping"
-                raise ValueError(errmsg)
-        elif "ReferencedSeriesUID" in instance:
-            assert instance["ReferencedSeriesUID"] in x
-        else:
-            errmsg = "Something went wrong"
-            raise ValueError(errmsg)
+    # # Group by Modality
+    # modality_group = defaultdict(list)
+    # for key in keys:
+    #     modality = meta[key][0]["Modality"]
+    #     match modality:
+    #         case "RTSTRUCT" | "RTPLAN" | "RTDOSE" | "SEG":
+    #             # should only be one instance
+    #             modality_group[modality].append(meta[key][0])
+    #         case _:
+    #             modality_group[modality].extend(meta[key])
 
-    rprint(f"Remapping instances took {time.time() - start:.2f} seconds")
-    new_series_dicts = []
+    # # create a hashmap of
+    # # sop_instance_uid -> series_instance_uid
 
-    for series_uid, instances in x.items():
-        modality = instances[0]["Modality"]
-        patient = instances[0]["PatientID"]
-        study = instances[0]["StudyInstanceUID"]
+    # sop_to_series_map = {}
+    # for series_uid, items in x.items():
+    #     for item in items:
+    #         sop_instance_uid = item["SOPInstanceUID"]
+    #         sop_to_series_map[sop_instance_uid] = series_uid
 
-        ref_series = instances[0].get("ReferencedSeriesUID", None)
+    # start = time.time()
+    # for instance in tqdm(
+    #     modality_group["RTPLAN"], desc="Mapping RTPLAN instances"
+    # ):
+    #     instance["ReferencedSeriesUID"] = sop_to_series_map[
+    #         instance["ReferencedRTStructInstanceUID"]
+    #     ]
 
-        new_series_dicts.append(
-            {
-                "PatientID": patient,
-                "StudyInstanceUID": study,
-                "SeriesInstanceUID": series_uid,
-                "Modality": modality,
-                "ReferencedSeriesUID": ref_series,
-            }
-        )
-    
-    rprint(f"Total time: {time.time() - all_start:.2f} seconds")
+    # for instance in tqdm(
+    #     modality_group["RTDOSE"], desc="Mapping RTDOSE instances"
+    # ):
+    #     instance["ReferencedSeriesUID"] = sop_to_series_map[
+    #         instance["ReferencedRTPlanInstanceUID"]
+    #     ]
+
+    # for instance in tqdm(
+    #     modality_group["SEG"], desc="Mapping   SEG instances"
+    # ):
+    #     if "ReferencedSOPInstanceUID" in instance:
+    #         if instance["ReferencedSOPInstanceUID"] in sop_to_series_map:
+    #             instance["ReferencedSeriesUID"] = sop_to_series_map[
+    #                 instance["ReferencedSOPInstanceUID"]
+    #             ]
+    #         else:
+    #             errmsg = f"Could not find {instance['meta']['ReferencedSOPInstanceUID']=} in mapping"
+    #             raise ValueError(errmsg)
+    #     elif "ReferencedSeriesUID" in instance:
+    #         assert instance["ReferencedSeriesUID"] in x
+    #     else:
+    #         errmsg = "Something went wrong"
+    #         raise ValueError(errmsg)
+
+    # rprint(f"Remapping instances took {time.time() - start:.2f} seconds")
+    # new_series_dicts = []
+
+    # for series_uid, instances in x.items():
+    #     modality = instances[0]["Modality"]
+    #     patient = instances[0]["PatientID"]
+    #     study = instances[0]["StudyInstanceUID"]
+
+    #     ref_series = instances[0].get("ReferencedSeriesUID", None)
+
+    #     new_series_dicts.append(
+    #         {
+    #             "PatientID": patient,
+    #             "StudyInstanceUID": study,
+    #             "SeriesInstanceUID": series_uid,
+    #             "Modality": modality,
+    #             "ReferencedSeriesUID": ref_series,
+    #         }
+    #     )
+
+    # rprint(f"Total time: {time.time() - all_start:.2f} seconds")
     # import json
 
     # with pathlib.Path("series_crawl.json").open("w") as f:
