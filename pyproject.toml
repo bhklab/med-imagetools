@@ -70,6 +70,7 @@ all = [
   "aiohttp>=3.8.1",
   "h5py>=3.11.0",
   "pynrrd>=1.0.0",
+  "pyvis",  # debug
 ]
 
 # Entry points for CLI commands

@@ -15,17 +15,7 @@ from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm  # type: ignore
 
 from imgtools.dicom import find_dicoms
-from imgtools.dicom.input import (
-    RTPLANReferenceSOPInstanceUIDs,
-    SEGRefSeries,
-    SEGRefSOPs,
-    SR_RefSeries,
-    SR_RefSOPs,
-    rtplan_reference_uids,
-    rtstruct_reference_uids,
-    seg_reference_uids,
-    sr_reference_uids,
-)
+from imgtools.dicom.input import rtstruct_reference_uids
 from imgtools.logging import logger
 
 TAGS_OF_INTEREST = [
@@ -59,34 +49,41 @@ def parse_dicom(dcm_path: str) -> t.Dict:
 
     meta = AttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
     meta.filepath = dcm_path
-
-    # Types are inferred from the assignments in the match statement below
     match meta["Modality"]:
-        case "RTSTRUCT":  # simplest case
-            match rtstruct_reference_uids(dcm):
-                case [rt_ref_series, _]:  # we dont care about ref study
-                    meta.ReferencedSeriesUID = rt_ref_series
         case "SEG":
-            match seg_reference_uids(dcm):
-                case SEGRefSeries(ref_uid), SEGRefSOPs(ref_sops):
-                    meta.ReferencedSeriesUID = ref_uid
-                    meta.ReferencedSOPInstanceUID = ref_sops
-                case SEGRefSOPs(ref_sops):
-                    # sometimes the ReferencedSeriesUID is not present
-                    meta.ReferencedSOPInstanceUID = ref_sops
+            try:
+                ref_series = dcm.ReferencedSeriesSequence[0].SeriesInstanceUID
+                meta.ReferencedSeriesUID = ref_series
+            except AttributeError:
+                ref_seg_instance = dcm.SourceImageSequence[
+                    0
+                ].ReferencedSOPInstanceUID
+                meta.ReferencedSOPInstanceUID = ref_seg_instance
+        case "RTSTRUCT":
+            ref_series, _ = rtstruct_reference_uids(dcm)
+            meta.ReferencedSeriesUID = ref_series
+
+        # For RTPLAN and RTDOSE, we store the same id Twice, for debugging, but we will
+        # only use the common `ReferencedSOPInstanceUID` (also used in SEG)
         case "RTPLAN":
-            match rtplan_reference_uids(dcm):
-                case RTPLANReferenceSOPInstanceUIDs(rtp_sop_uids):
-                    meta.ReferencedSOPInstanceUID = rtp_sop_uids
+            ref_struct = dcm.ReferencedStructureSetSequence[
+                0
+            ].ReferencedSOPInstanceUID
+            meta.ReferencedRTStructInstanceUID = ref_struct
+            meta.ReferencedSOPInstanceUID = ref_struct
         case "RTDOSE":
-            match rtplan_reference_uids(dcm):
-                case RTPLANReferenceSOPInstanceUIDs(rtp_sop_uids):
-                    meta.ReferencedSOPInstanceUID = rtp_sop_uids
+            ref_plan = dcm.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID
+            meta.ReferencedRTPlanInstanceUID = ref_plan
+            meta.ReferencedSOPInstanceUID = ref_plan
         case "SR":
-            match sr_reference_uids(dcm):
-                case SR_RefSeries(sr_ref_series), SR_RefSOPs(sr_ref_sops):
-                    meta.ReferencedSeriesUID = sr_ref_series
-                    meta.ReferencedSOPInstanceUID = sr_ref_sops
+            if sr_seq := getattr(
+                dcm, "CurrentRequestedProcedureEvidenceSequence", None
+            ):
+                ref_series = {
+                    sr.ReferencedSeriesSequence[0].SeriesInstanceUID
+                    for sr in sr_seq
+                }
+                meta.ReferencedSeriesUID = list(ref_series)
         case _:
             pass
 
@@ -292,9 +289,7 @@ def main(
                 logger.debug(debugmsg)
 
         if (path := pathlib.Path(data.get("common_root"))).is_file():  # type: ignore
-            base_meta["folder"] = path.parent.relative_to(
-                top_dir.parent
-            ).as_posix()
+            base_meta["folder"] = path.parent.relative_to(top_dir.parent).as_posix()
             base_meta["file"] = path.relative_to(top_dir.parent).as_posix()
         else:
             base_meta["folder"] = path.relative_to(top_dir.parent).as_posix()
