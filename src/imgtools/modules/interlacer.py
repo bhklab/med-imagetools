@@ -1,29 +1,34 @@
-from typing import Dict, List, Set
-
+from __future__ import annotations
+from typing import Dict, Iterator, List, Set
 from pathlib import Path
+
 import pandas as pd
 
-from pyvis.network import Network
+from imgtools.logging import logger
+from imgtools.utils import optional_import, OptionalImportError
+
+pyvis, _pyvis_available = optional_import("pyvis")
 
 class SeriesNode():
-    def __init__(self, row: pd.Series):
-        self.Series: str = row.Index 
-        for field in row._fields[1:]:  # Skip "Index" (first field)
-            setattr(self, field, getattr(row, field)) 
+    def __init__(self, series: str, row: pd.Series) -> None:
+        self.Series = series
+        self.Modality = row.Modality
+        self.PatientID = row.PatientID
+        self.folder = row.folder
 
         self.children: List[SeriesNode] = []  
 
-    def add_child(self, child_node):
+    def add_child(self, child_node: SeriesNode) -> None:
         """Add SeriesNode to children"""
         self.children.append(child_node)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Equality check based on index"""
         if isinstance(other, str):  # Direct index check
             return self.Series == other
         return isinstance(other, SeriesNode) and self.Series == other.Series
 
-    def __repr__(self, level=0):
+    def __repr__(self, level:int = 0) -> str:
         """Recursive representation of the tree structure"""
         indent = "  " * level
         result = f"{indent}- {self.Modality}, (SERIES: {self.Series})\n"
@@ -32,31 +37,32 @@ class SeriesNode():
         return result
     
 class Branch:
-    def __init__(self, series_nodes: List[SeriesNode] = []):
-        self.series_nodes = series_nodes
+    def __init__(self, series_nodes: List[SeriesNode] | None = None) -> None:
+        self.series_nodes = [] if series_nodes is None else series_nodes
 
-    def add_node(self, node: SeriesNode):
+    def add_node(self, node: SeriesNode) -> None:
         """Add a SeriesNode to the branch."""
         self.series_nodes.append(node)
     
-    def get_modality_map(self) -> dict:
+    def get_modality_map(self) -> Dict[str, SeriesNode]:
         """Returns a dictionary mapping Modality to SeriesNode."""
         return {node.Modality: node for node in self.series_nodes}
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[SeriesNode]:
         """Yield the node from each SeriesNode in the branch."""
         for node in self.series_nodes:
             yield node
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return a string representation of the branch."""
         return ' -> '.join(node.Modality for node in self.series_nodes)
 
 class Interlacer:
-    def __init__(self, df: pd.DataFrame) -> None:
+    def __init__(self, crawl_path: str | Path) -> None:
+        self.df = pd.read_csv(crawl_path, index_col='SeriesInstanceUID')
+
         self.forest: Dict[str, SeriesNode] = {} 
         self.root_nodes: List[SeriesNode] = [] 
-        self.df: pd.DataFrame = df
         self.branches: List[Branch] = []
 
         self._build_forest()
@@ -65,12 +71,13 @@ class Interlacer:
     def _build_forest(self) -> None:
         """Constructs a forest of trees from the DataFrame by defining parent-child relationships."""
         # Step 1: Create nodes for all rows
-        for row in self.df.itertuples():
-            self.forest[row.Index] = SeriesNode(row)
+        for index, row in self.df.iterrows():
+            series_instance_uid = str(index)
+            self.forest[series_instance_uid] = SeriesNode(series_instance_uid, row.astype(str))
 
         # Step 2: Establish parent-child relationships
-        for row in self.df.itertuples():
-            series_instance_uid = row.Index
+        for index, row in self.df.iterrows():
+            series_instance_uid = str(index)
             modality = row.Modality
             reference_series_uid = row.ReferencedSeriesUID
 
@@ -136,7 +143,7 @@ class Interlacer:
 
         data = [
             {
-                'Patient_ID': branch.series_nodes[0].PatientID,  # Patient ID (same for all nodes)
+                'PatientID': branch.series_nodes[0].PatientID,  # Patient ID (same for all nodes)
                 **{
                     f'{field}_{modality}': getattr(branch.get_modality_map().get(modality), field)
                     for field in ['Series', 'folder']
@@ -146,18 +153,24 @@ class Interlacer:
             for branch in query_result
         ]
         
-        return pd.DataFrame.from_dict(data)
+        return pd.DataFrame(data)
     
-    def visualize_forest(self) -> None:
+    def visualize_forest(self, save_path: str | Path) -> None:
         """
         Visualizes the forest of `SeriesNode` objects as an interactive network graph.
 
         The visualization is saved as an HTML file (`forest_visualization.html`), displaying nodes 
         for each `SeriesNode` and edges representing parent-child relationships.
         """
-        net = Network(height='800px', width='100%', notebook=False, directed=True)
+        if not _pyvis_available:
+            raise OptionalImportError("pyvis")
 
-        def add_node_and_edges(node, parent=None):
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+
+        net = pyvis.network.Network(height='800px', width='100%', notebook=False, directed=True)
+
+        def add_node_and_edges(node: SeriesNode, parent: SeriesNode | None = None) -> None:
             net.add_node(node.Series, label=node.Modality, title=node.Series)  # Display Series on click
             if parent:
                 net.add_edge(node.Series, parent.Series) 
@@ -170,9 +183,6 @@ class Interlacer:
         net.force_atlas_2based()
         net.show_buttons(filter_=['physics'])
 
-        save_path = Path.cwd() / 'forest_visualization.html'
-        save_path.parent.mkdir(parents=True, exist_ok=True)
+        logger.info("Saving forest visualization...", path=save_path)
         net.write_html(save_path.as_posix())
-
-        print(f"Visualization saved at: {save_path}")
 
