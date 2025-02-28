@@ -15,10 +15,14 @@ __all__ = [
 
 
 class SEGRefSeries(str):
+    """A single string to store the ReferencedSeriesInstanceUID for a SEG file"""
+
     pass
 
 
 class SEGRefSOPs(list):
+    """A list representing all the ReferencedSOPInstanceUIDs for a SEG file"""
+
     pass
 
 
@@ -27,13 +31,13 @@ def seg_reference_uids(
 ) -> tuple[SEGRefSeries, SEGRefSOPs] | SEGRefSOPs | None:
     """Get the ReferencedSeriesInstanceUID or ReferencedSOPInstanceUIDs from a SEG file
 
-    Modern Segmentation objects have a ReferencedSeriesSequence attribute
-    which contains the SeriesInstanceUID of the referenced series and
-    a ReferencedInstanceSequence attribute which contains the SOPInstanceUIDs
+    Modern Segmentation objects have a `ReferencedSeriesSequence` attribute
+    which contains the `SeriesInstanceUID` of the referenced series and
+    a `ReferencedInstanceSequence` attribute which contains the SOPInstanceUIDs
     of the referenced instances.
 
-    Older Segmentation objects have a SourceImageSequence attribute which
-    only contains the SOPInstanceUIDs of the referenced instances.
+    Older Segmentation objects have a `SourceImageSequence` attribute which
+    only contains the `SOPInstanceUIDs` of the referenced instances.
 
     Parameters
     ----------

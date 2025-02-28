@@ -6,8 +6,8 @@ __all__ = ["rtplan_reference_uids", "RTPLANRefStructSOP"]
 
 class RTPLANRefStructSOP(str):
     """
-    Represents a list of SOPInstanceUIDs pertaining to a RTSTRUCT
-    referenced in an RTPLAN file
+    Represents a list of SOPInstanceUIDs pointing to a RTSTRUCT
+    referenced by a RTPLAN file
     """
 
     pass

@@ -44,8 +44,7 @@ __all__ = [
 
 class SR_RefSeries(list):  # noqa
     """
-    Represents a list of SeriesInstanceUIDs pertaining to a SR
-    referenced in an SR file
+    Represents a list of `SeriesInstanceUID`s referenced by a `SR` file
     """
 
     pass
@@ -53,8 +52,7 @@ class SR_RefSeries(list):  # noqa
 
 class SR_RefSOPs(list):  # noqa
     """
-    Represents a list of SOPInstanceUIDs pertaining to a SR
-    referenced in an SR file
+    Represents a list of unique `SOPInstanceUID`s referenced in by a `SR` file
     """
 
     pass
@@ -63,7 +61,7 @@ class SR_RefSOPs(list):  # noqa
 def sr_reference_uids(
     sr: DicomInput,
 ) -> tuple[SR_RefSeries, SR_RefSOPs] | None:
-    """Get the ReferencedSeriesInstanceUIDs from an SR file
+    """Get the `ReferencedSeriesInstanceUID`s from an SR file
 
     We assume SR only references a `RTSTRUCT` file.
 
@@ -79,6 +77,9 @@ def sr_reference_uids(
     sop_uids = set()
 
     for evidence_seq in sr.CurrentRequestedProcedureEvidenceSequence:
+        if not "ReferencedSeriesSequence" in evidence_seq:
+            continue
+
         for series_seq in evidence_seq.ReferencedSeriesSequence:
             series_uids.add(series_seq.SeriesInstanceUID)
             for ref_seq in series_seq.ReferencedSOPSequence:
