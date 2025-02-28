@@ -21,6 +21,7 @@ from .nnunet import (
 )
 from .optional_import import OptionalImportError, optional_import
 from .sanitize_file_name import sanitize_file_name
+from .timer import timer
 
 __all__ = [
     "array_to_image",
@@ -42,4 +43,6 @@ __all__ = [
     "optional_import",
     # sanitize_file_name
     "sanitize_file_name",
+    # timer
+    "timer",
 ]

@@ -26,19 +26,37 @@ def optional_import(
     raise_error: bool = False,
 ) -> Tuple[Any, bool]:
     """
-    Attempt to import a module, returning (module, success).
+    Attempt to import an optional module and handle its absence gracefully.
+
+    This function is useful when you want to provide optional features that depend
+    on modules that may not be installed.
 
     Parameters
     ----------
     module_name : str
-      Name of the module to import.
+        Name of the module to import (e.g., 'numpy', 'torch').
     raise_error : bool, optional
-      If True, raise an OptionalImportError when the module is not found. Otherwise, return (None, False).
+        If True, raise an OptionalImportError when the module is not found.
+        If False, return (None, False) when import fails.
 
     Returns
     -------
     tuple
-      (imported module or None, True if import succeeded, False otherwise)
+        A tuple containing (module, success_flag), where:
+        - module: The imported module if successful, None if failed
+        - success_flag: True if import succeeded, False otherwise
+    Examples
+    --------
+    >>> # Basic usage - silent failure
+    >>> numpy, has_numpy = optional_import("numpy")
+    >>> if not has_numpy:
+    ...     raise OptionalImportError("numpy")
+
+    >>> # Usage with error raising
+    >>> torch, _ = optional_import(
+    ...     "torch", raise_error=True
+    ... )
+    >>> # Will raise OptionalImportError if torch is not installed
     """
     try:
         module = importlib.import_module(module_name)
