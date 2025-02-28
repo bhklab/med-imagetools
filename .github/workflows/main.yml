@@ -66,6 +66,11 @@ jobs:
   Linting:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      checks: write
+      issues: write
+      pull-requests: write
     timeout-minutes: 15 # Consider increasing timeout
 
     steps:
@@ -84,7 +89,7 @@ jobs:
 
       - name: Run ruff format
         run: |
-          pixi run -e test ruff-format | tee ruff-format.log
+          pixi run -e test ruff-format --check | tee ruff-format.log
           echo "::group::Formatted output"
           cat ruff-format.log
           echo "::endgroup::"
