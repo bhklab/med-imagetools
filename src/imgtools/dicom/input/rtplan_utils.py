@@ -6,8 +6,10 @@ __all__ = ["rtplan_reference_uids", "RTPLANRefStructSOP"]
 
 class RTPLANRefStructSOP(str):
     """
-    Represents a list of SOPInstanceUIDs pointing to a RTSTRUCT
-    referenced by a RTPLAN file
+    Represents a `SOPInstanceUID` pointing to a `RTSTRUCT`
+    referenced by a `RTPLAN` file
+
+    extracted via `ReferencedStructureSetSequence.ReferencedSOPInstanceUID`
     """
 
     pass
@@ -24,8 +26,8 @@ def rtplan_reference_uids(
     -------
     >>> p = "/path/to/rtplan.dcm"
     >>> match rtplan_reference_uids(p):
-    ...     case RTPLANReferenceSOPInstanceUIDs(uids):
-    ...         print(f"SOPInstanceUIDs: {uids=}")
+    ...     case RTPLANRefStructSOP(uid):
+    ...         print(f"SOPInstanceUID: {uid=}")
     ...     case None:
     ...         print("No Reference UIDs found")
     """
