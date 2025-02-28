@@ -1,9 +1,10 @@
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
+from imgtools.logging import logger
 
-__all__ = ["rtplan_reference_uids", "RTPLANReferenceSOPInstanceUIDs"]
+__all__ = ["rtplan_reference_uids", "RTPLANRefStructSOP"]
 
 
-class RTPLANReferenceSOPInstanceUIDs(list):
+class RTPLANRefStructSOP(str):
     """
     Represents a list of SOPInstanceUIDs pertaining to a RTSTRUCT
     referenced in an RTPLAN file
@@ -11,9 +12,10 @@ class RTPLANReferenceSOPInstanceUIDs(list):
 
     pass
 
+
 def rtplan_reference_uids(
     rtplan: DicomInput,
-) -> RTPLANReferenceSOPInstanceUIDs | None:
+) -> RTPLANRefStructSOP | None:
     """Get the ReferencedSOPInstanceUIDs from an RTPLAN file
 
     We assume RTPLAN only references a `RTSTRUCT` file.
@@ -29,15 +31,19 @@ def rtplan_reference_uids(
     """
     plan = load_dicom(rtplan)
     if "ReferencedStructureSetSequence" in plan:
-        return RTPLANReferenceSOPInstanceUIDs(
-            [
-                seq.ReferencedSOPInstanceUID
-                for seq in plan.ReferencedStructureSetSequence
-            ]
-        )
+        refs = [
+            RTPLANRefStructSOP(seq.ReferencedSOPInstanceUID)
+            for seq in plan.ReferencedStructureSetSequence
+        ]
+        if len(refs) > 1:
+            warnmsg = (
+                f"Found {len(refs)} RTSTRUCT references in {rtplan=}. "
+                "Only the first one will be used."
+            )
+            logger.warning(warnmsg)
+        return refs[0]
+
     return None
-
-
 
 
 if __name__ == "__main__":
@@ -54,7 +60,7 @@ if __name__ == "__main__":
     ]
     for p in ps:
         match rtplan_reference_uids(p):
-            case RTPLANReferenceSOPInstanceUIDs(uids):
+            case RTPLANRefStructSOP(uids):
                 print(f"For {p=}:\n{len(uids)=}\n{uids=}\n\n")
             case None:
                 print("No Reference UIDs found")

@@ -1,0 +1,238 @@
+import json
+import logging
+import os
+import pathlib
+import time
+import typing as t
+from collections import defaultdict
+from email.policy import default
+
+from dpath import merge
+from joblib import Parallel, delayed  # type: ignore
+from pydicom import dcmread
+from pydicom.errors import InvalidDicomError
+from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm  # type: ignore
+
+from imgtools.dicom.input import (
+    RTDOSERefPlanSOP,
+    RTDOSERefStructSOP,
+    RTPLANRefStructSOP,
+    SEGRefSeries,
+    SEGRefSOPs,
+    SR_RefSeries,
+    SR_RefSOPs,
+    rtdose_reference_uids,
+    rtplan_reference_uids,
+    rtstruct_reference_uids,
+    seg_reference_uids,
+    sr_reference_uids,
+)
+from imgtools.logging import logger
+
+TAGS_OF_INTEREST = [
+    "PatientID",
+    "StudyInstanceUID",
+    "SeriesInstanceUID",
+    "Modality",
+]
+from imgtools.dicom import find_dicoms
+
+
+class SeriesInstanceUID(str):
+    pass
+
+
+# A lightweight subclass of dict that allows for attribute access
+class MetaAttrDict(dict):
+    def __getattr__(self, key: str) -> str | list:
+        return self[key]
+
+    def __setattr__(self, key: str, value: str | list | dict) -> None:
+        self[key] = value
+
+
+# A simple 1 key dictionary that maps a dicoms 'SOPInstanceUID' to its 'SeriesInstanceUID'
+class SOPHashMap(dict[str, SeriesInstanceUID]):
+    """A simple 1 key dictionary that maps a dicoms 'SOPInstanceUID' to its 'SeriesInstanceUID'"""
+
+    pass
+
+
+def parse_dicom(  # noqa: PLR0912
+    dcm_path: str, top: pathlib.Path
+) -> t.Tuple[t.Dict[SeriesInstanceUID, MetaAttrDict], SOPHashMap]:
+    try:
+        dcm = dcmread(
+            dcm_path,
+            force=True,
+            stop_before_pixels=True,
+        )
+    except InvalidDicomError as e:
+        logger.error(f"Error reading {dcm_path}: {e}")
+        raise
+
+    meta = MetaAttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
+    meta.FrameOfReferenceUID = str(dcm.get("FrameOfReferenceUID", ""))
+
+    # Types are inferred from the assignments in the match statement below
+    match meta["Modality"]:
+        case "RTSTRUCT":  # simplest case
+            match rtstruct_reference_uids(dcm):
+                case [rt_ref_series, _]:  # we dont care about ref study
+                    meta.ReferencedSeriesUID = rt_ref_series
+        case "SEG":
+            match seg_reference_uids(dcm):
+                case SEGRefSeries(ref_uid), SEGRefSOPs(ref_sops):
+                    meta.ReferencedSeriesUID = ref_uid
+                    meta.ReferencedSOPInstanceUID = ref_sops
+                case SEGRefSOPs(ref_sops):  # no series reference
+                    meta.ReferencedSOPInstanceUID = ref_sops
+        case "RTDOSE":
+            match rtdose_reference_uids(dcm):
+                case RTDOSERefStructSOP(rtstruct_sop_uid):
+                    meta.ReferencedSOPInstanceUID = rtstruct_sop_uid
+                    meta.RTDOSERefStructSOP = rtstruct_sop_uid  # per sejin's request, we will keep this
+                case RTDOSERefPlanSOP(rtplan_sop_uid):
+                    meta.ReferencedSOPInstanceUID = rtplan_sop_uid
+                    meta.RTDOSERefPlanSOP = rtplan_sop_uid  # per sejin's req
+        case "RTPLAN":
+            match rtplan_reference_uids(dcm):
+                case RTPLANRefStructSOP(referenced_rtstruct_uid):
+                    meta.ReferencedSOPInstanceUID = referenced_rtstruct_uid
+                    meta.RTPLANRefStructSOP = referenced_rtstruct_uid  # sejin
+        case "SR":
+            match sr_reference_uids(dcm):
+                case SR_RefSeries(sr_ref_series), SR_RefSOPs(sr_ref_sops):
+                    meta.ReferencedSeriesUID = sr_ref_series
+                    meta.ReferencedSOPInstanceUID = sr_ref_sops
+        case _:
+            pass
+
+    instance_uid = str(object=dcm.get("SOPInstanceUID"))
+    sopuid_to_seriesuid = SOPHashMap(
+        {instance_uid: SeriesInstanceUID(meta["SeriesInstanceUID"])}
+    )
+    meta.intances = {instance_uid: os.path.relpath(dcm_path, top)}
+
+    seriesuid_to_meta = {
+        SeriesInstanceUID(meta["SeriesInstanceUID"]): meta,
+    }
+
+    return seriesuid_to_meta, sopuid_to_seriesuid
+
+
+def merge_series_meta(
+    series_meta: tuple[SeriesInstanceUID, list[MetaAttrDict]],
+) -> t.Dict[SeriesInstanceUID, MetaAttrDict]:
+    merged: dict[SeriesInstanceUID, MetaAttrDict] = defaultdict(MetaAttrDict)
+    series_uid, meta_list = series_meta
+    for meta in meta_list:
+        merge(merged[series_uid], meta)
+    return merged
+
+
+if __name__ == "__main__":
+    force = True
+    top = pathlib.Path("testdata").absolute()
+    n_jobs = os.cpu_count()
+    cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}.json"
+    cache_file.parent.mkdir(parents=True, exist_ok=True)
+
+    all_start = time.time()
+    if cache_file.exists() and not force:
+        logger.info(f"Using cache file {cache_file}")
+        with cache_file.open("r") as f:
+            series_meta_merged = json.load(f)
+        logger.info(
+            f"Loaded {len(series_meta_merged)} series from cache in {time.time() - all_start:.2f} seconds"
+        )
+    else:
+        # find all dicom files
+        dcms: t.List[str] = [
+            str(path)
+            for path in find_dicoms(
+                directory=top,
+                recursive=True,
+                check_header=False,
+                extension="dcm",
+            )
+        ]
+        logger.info(
+            f"Found {len(dcms)} DICOM files in {time.time() - all_start:.2f} seconds"
+        )
+
+        logger.info(
+            f"Using {n_jobs} workers for parallel processing with",
+            param_n_jobs=n_jobs,
+        )
+
+        # setup data structures
+        series_meta_raw: t.Dict[SeriesInstanceUID, list[MetaAttrDict]] = (
+            defaultdict(list[MetaAttrDict])
+        )
+        sop_map = SOPHashMap()
+        ############################################################
+        # use parallel to run parse_dicom on every item in dcms
+
+        parse_start = time.time()
+        with logging_redirect_tqdm([logging.getLogger("imgtools")]):
+            results = Parallel(n_jobs=n_jobs)(
+                delayed(parse_dicom)(dcm, top)
+                for dcm in tqdm(
+                    dcms,
+                    desc="Processing DICOM files",
+                    mininterval=1,
+                    leave=False,
+                )
+            )
+
+            for series_dict, sop_dict in results:
+                for series_uid, meta in series_dict.items():
+                    series_meta_raw[series_uid].append(meta)
+
+                sop_map.update(sop_dict)
+            logger.info(
+                f"Total parsing time: {time.time() - parse_start:.2f} seconds"
+            )
+
+        ############################################################
+        # use parallel to run merge_series_meta on every item in series_meta_raw
+        series_meta_merged = defaultdict(MetaAttrDict)
+
+        merge_start = time.time()
+        with logging_redirect_tqdm([logging.getLogger("imgtools")]):
+            series_merge_results = Parallel(n_jobs=n_jobs)(
+                delayed(merge_series_meta)(series_meta_item)
+                for series_meta_item in tqdm(
+                    series_meta_raw.items(),
+                    desc="Merging series meta",
+                    mininterval=1,
+                    leave=False,
+                )
+            )
+
+            for merged in series_merge_results:
+                series_meta_merged.update(merged)
+
+            logger.info(f"Merge time: {time.time() - merge_start:.2f} seconds")
+
+        with cache_file.open("w") as f:
+            json.dump(
+                # {"series_meta": series_meta_merged, "sop_map": sop_map}, f, indent=4
+                series_meta_merged,
+                f,
+                indent=4,
+            )
+
+    logger.info(f"Total time: {time.time() - all_start:.2f} seconds")
+
+
+# ###
+# s_meta: t.Dict[SeriesInstanceUID, list[MetaAttrDict]] = defaultdict(
+#         list[MetaAttrDict]
+#     )
+# start = time.time()
+# for sd, sopd in results[:500]:
+#     dpath.merge(s_meta, sd);
+# end = time.time()

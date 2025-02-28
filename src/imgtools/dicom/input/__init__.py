@@ -4,8 +4,12 @@ from .dicom_reader import (
     load_seg_dcm,
     path_from_pathlike,
 )
-from .rtdose_utils import RTDOSEReferenceSOPInstanceUIDs, rtdose_reference_uids
-from .rtplan_utils import RTPLANReferenceSOPInstanceUIDs, rtplan_reference_uids
+from .rtdose_utils import (
+    RTDOSERefPlanSOP,
+    RTDOSERefStructSOP,
+    rtdose_reference_uids,
+)
+from .rtplan_utils import RTPLANRefStructSOP, rtplan_reference_uids
 from .rtstruct_utils import (
     extract_roi_meta,
     extract_roi_names,
@@ -37,10 +41,11 @@ __all__ = [
     "SEGRefSOPs",
     # rtplan
     "rtplan_reference_uids",
-    "RTPLANReferenceSOPInstanceUIDs",
+    "RTPLANRefStructSOP",
     # rtdose
     "rtdose_reference_uids",
-    "RTDOSEReferenceSOPInstanceUIDs",
+    "RTDOSERefStructSOP",
+    "RTDOSERefPlanSOP",
     # sr
     "sr_reference_uids",
     "SR_RefSeries",
