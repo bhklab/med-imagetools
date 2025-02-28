@@ -18,7 +18,7 @@ CurrentRequestedProcedureEvidenceSequence = [
                 ReferencedSOPInstanceUID = str
           },
           {
-            SeriesInstanceUID = str,
+            SeriesInstanceUID = str, # this can be different from the above
             ReferencedSOPSequence = [
                 ReferencedSOPInstanceUID = str
           }

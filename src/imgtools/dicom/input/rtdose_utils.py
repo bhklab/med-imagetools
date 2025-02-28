@@ -28,7 +28,15 @@ def rtdose_reference_uids(
 ) -> RTDOSERefStructSOP | RTDOSERefPlanSOP | None:
     """Get the ReferencedSOPInstanceUIDs from an RTDOSE file
 
-    We assume RTDOSE only references a `RTSTRUCT` file.
+    Notes
+    -----
+    We prioritize the ReferencedStructureSetSequence over the
+    ReferencedRTPlanSequence. If both are present, we return the
+    ReferencedStructureSetSequence SOPInstanceUID.
+
+    If the ReferencedStructureSetSequence is not present, we return 
+    the ReferencedRTPlanSequence SOPInstanceUID and hope that the 
+    RTPLAN references the RTSTRUCT.
 
     Example
     -------
