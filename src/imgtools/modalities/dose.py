@@ -1,33 +1,25 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, TypeVar, Union
+from dataclasses import dataclass
+from typing import Dict, Union
 
 import numpy as np
 import SimpleITK as sitk
-from matplotlib import pyplot as plt
 from pydicom import Dataset, dcmread
 
 from imgtools.logging import logger
+from imgtools.modules.utils import read_image
 
-from .utils import read_image
+"""
+TODO:: Move metadata extraction to on load
+"""
 
-T = TypeVar("T")
 
-
+@dataclass
 class Dose(sitk.Image):
-    def __init__(
-        self,
-        img_dose: sitk.Image,
-        df: Dataset,
-        metadata: Optional[Dict[str, T]] = None,
-    ) -> None:
-        super().__init__(img_dose)
-        self.img_dose = img_dose
-        self.df = df
-        if metadata:
-            self.metadata = metadata
-        else:
-            self.metadata = {}
+    img_dose: sitk.Image
+    dcm: Dataset
+    metadata: Dict[str, str] | None = None
 
     @classmethod
     def from_dicom(cls, path: str) -> Dose:
@@ -48,7 +40,7 @@ class Dose(sitk.Image):
         img_dose = sitk.Cast(dose, sitk.sitkFloat32)
         img_dose = img_dose * factor
 
-        metadata = {}
+        metadata: Dict[str, str] = {}
 
         return cls(img_dose, df, metadata)
 
@@ -62,32 +54,15 @@ class Dose(sitk.Image):
         )  # , interpolator=sitk.sitkNearestNeighbor)
         return resampled_dose
 
-    def show_overlay(
-        self, ct_scan: sitk.Image, slice_number: int
-    ) -> plt.Figure:
-        """
-        For a given slice number, the function resamples RTDOSE scan and overlays on top of the CT scan and returns the figure of the
-        overlay
-        """
-        resampled_dose = self.resample_dose(ct_scan)
-        fig = plt.figure("Overlayed RTdose image", figsize=[15, 10])
-        dose_arr = sitk.GetArrayFromImage(resampled_dose)
-        plt.subplot(1, 3, 1)
-        plt.imshow(dose_arr[slice_number, :, :])
-        plt.subplot(1, 3, 2)
-        ct_arr = sitk.GetArrayFromImage(ct_scan)
-        plt.imshow(ct_arr[slice_number, :, :])
-        plt.subplot(1, 3, 3)
-        plt.imshow(ct_arr[slice_number, :, :], cmap=plt.cm.gray)
-        plt.imshow(dose_arr[slice_number, :, :], cmap=plt.cm.hot, alpha=0.4)
-        return fig
-
     def get_metadata(
         self,
     ) -> Dict[
         Union[str, int], Union[str, float, Dict[str, Union[str, float, list]]]
     ]:
         """
+        dict[str | int, str | float | dict[str, str | float | list]]:
+
+
         Forms Dose-Value Histogram (DVH) from DICOM metadata
         {
             dvh_type
@@ -105,21 +80,21 @@ class Dose(sitk.Image):
         }
         """
         try:
-            num_roi = len(self.df.DVHSequence)
+            num_roi = len(self.dcm.DVHSequence)
             self.dvh = {}
             # These properties are uniform across all the ROIs
-            self.dvh["dvh_type"] = self.df.DVHSequence[0].DVHType
-            self.dvh["dose_units"] = self.df.DVHSequence[0].DoseUnits
-            self.dvh["dose_type"] = self.df.DVHSequence[0].DoseType
-            self.dvh["vol_units"] = self.df.DVHSequence[0].DVHVolumeUnits
+            self.dvh["dvh_type"] = self.dcm.DVHSequence[0].DVHType
+            self.dvh["dose_units"] = self.dcm.DVHSequence[0].DoseUnits
+            self.dvh["dose_type"] = self.dcm.DVHSequence[0].DoseType
+            self.dvh["vol_units"] = self.dcm.DVHSequence[0].DVHVolumeUnits
             # ROI specific properties
             for i in range(num_roi):
-                raw_data = np.array(self.df.DVHSequence[i].DVHData)
+                raw_data = np.array(self.dcm.DVHSequence[i].DVHData)
                 n = len(raw_data)
 
                 # ROI ID
                 roi_reference = (
-                    self.df.DVHSequence[i]
+                    self.dcm.DVHSequence[i]
                     .DVHReferencedROISequence[0]
                     .ReferencedROINumber
                 )
@@ -149,4 +124,4 @@ class Dose(sitk.Image):
             )
             self.dvh = {}
 
-        return self.dvh
+        return self.dvh  # type: ignore

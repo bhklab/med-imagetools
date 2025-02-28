@@ -13,7 +13,7 @@ import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
 
-from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools._deprecated import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.dicom.dicom_metadata import get_modality_metadata
 
 

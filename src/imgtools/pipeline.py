@@ -3,7 +3,7 @@ from itertools import chain
 
 from joblib import Parallel, delayed
 
-from .ops.base_classes import BaseInput, BaseOp, BaseOutput
+from .io.base_classes import BaseInput, BaseIO, BaseOutput
 
 
 class Pipeline:
@@ -76,13 +76,13 @@ class Pipeline:
     @property
     def ops(self):
         # TODO (Michal) return ops in actual order of execution
-        return [v for v in self.__dict__.values() if isinstance(v, BaseOp)]
+        return [v for v in self.__dict__.values() if isinstance(v, BaseIO)]
 
     def __repr__(self):
         attrs = [
             (k, v)
             for k, v in self.__dict__.items()
-            if not isinstance(v, BaseOp) and not k.startswith("_")
+            if not isinstance(v, BaseIO) and not k.startswith("_")
         ]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__module__}.{self.__class__.__name__}({args})"
