@@ -47,7 +47,7 @@ def rtplan_reference_uids(
 
 
 if __name__ == "__main__":
-    from rich import print  # type: ignore
+    from rich import print  # type: ignore # noqa
 
     ps = [
         "testdata/HN-HGJ-072/RTPLAN_Series-58071/1-1.dcm",

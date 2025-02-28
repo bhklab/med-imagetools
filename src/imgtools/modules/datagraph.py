@@ -881,9 +881,7 @@ if __name__ == "__main__":
     # # check how they are different
 
     graph = DataGraph(
-        Path(
-            "TRASH/.imgtools/imgtools_HEAD.csv"
-        ),
+        Path("TRASH/.imgtools/imgtools_HEAD.csv"),
         update=True,
     )
     query = "CT,PT,RTSTRUCT"
