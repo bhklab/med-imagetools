@@ -82,7 +82,7 @@ def sr_reference_uids(
 
         for series_seq in evidence_seq.ReferencedSeriesSequence:
             series_uids.add(series_seq.SeriesInstanceUID)
-            
+
             if not "ReferencedSOPSequence" in series_seq:
                 continue
             for ref_seq in series_seq.ReferencedSOPSequence:

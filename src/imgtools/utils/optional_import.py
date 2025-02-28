@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Tuple, Dict
+from typing import Any, Tuple
 
 
 class OptionalImportError(ImportError):

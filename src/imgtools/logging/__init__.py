@@ -1,9 +1,10 @@
 import os
-from contextlib import contextmanager
+from contextlib import _GeneratorContextManager, contextmanager
 from pathlib import Path
 from typing import Any, Generator
 
 import structlog
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 from imgtools.logging.logging_config import DEFAULT_LOG_LEVEL, LoggingManager
 
@@ -47,14 +48,12 @@ def temporary_log_level(
 ) -> Generator[None, Any, None]:
     """
     Temporarily change the log level of a logger within a context.
-
     Parameters
     ----------
     logger : structlog.stdlib.BoundLogger
         The logger instance to modify
     level : str
         The temporary log level to set
-
     Examples
     --------
     >>> with temporary_log_level(logger, "ERROR"):
@@ -70,6 +69,35 @@ def temporary_log_level(
         yield
     finally:
         logger.setLevel(original_level)
+
+
+def tqdm_logging_redirect(
+    logger_name: str = "imgtools",
+) -> _GeneratorContextManager[None, None, None]:
+    """Context manager to redirect logging output into tqdm for cleaner logging.
+
+    Parameters
+    ----------
+    logger_name : str, optional
+        The name of the logger to redirect, by default "imgtools".
+
+    Returns
+    -------
+    logging_redirect_tqdm
+        A context manager that redirects logging output.
+
+    Examples
+    --------
+    >>> from tqdm import tqdm
+    >>> import time
+    >>> with tqdm_logging_redirect():
+    ...     for i in tqdm(range(10), desc="Processing"):
+    ...         logger.info(f"Processing {i}")
+    ...         time.sleep(0.1)
+    """
+    import logging
+
+    return logging_redirect_tqdm([logging.getLogger(logger_name)])
 
 
 logger = get_logger("imgtools", DEFAULT_OR_ENV)
@@ -95,3 +123,11 @@ if __name__ == "__main__":
         logger.warning("This SHOULD be logged")
         logger.error("This will be logged")
         logger.critical("This will be logged")
+
+    import time  # noqa
+    from tqdm import tqdm
+
+    with tqdm_logging_redirect():
+        for i in tqdm(range(10), desc="Processing"):
+            logger.info(f"Processing {i}")
+            time.sleep(0.1)
