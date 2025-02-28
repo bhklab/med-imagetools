@@ -6,6 +6,7 @@ from .dicom_reader import (
 )
 from .rtdose_utils import (
     RTDOSERefPlanSOP,
+    RTDOSERefSeries,
     RTDOSERefStructSOP,
     rtdose_reference_uids,
 )
@@ -46,6 +47,7 @@ __all__ = [
     "rtdose_reference_uids",
     "RTDOSERefStructSOP",
     "RTDOSERefPlanSOP",
+    "RTDOSERefSeries",
     # sr
     "sr_reference_uids",
     "SR_RefSeries",

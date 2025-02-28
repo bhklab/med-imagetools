@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import pathlib
 import time
@@ -9,13 +8,12 @@ from collections import defaultdict
 from dpath import merge
 from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
-from pydicom.errors import InvalidDicomError
 from tqdm import tqdm
-from tqdm.contrib.logging import logging_redirect_tqdm  # type: ignore
 
 from imgtools.dicom.input import (
     RTDOSERefPlanSOP,
     RTDOSERefStructSOP,
+    RTDOSERefSeries,
     RTPLANRefStructSOP,
     SEGRefSeries,
     SEGRefSOPs,
@@ -27,7 +25,8 @@ from imgtools.dicom.input import (
     seg_reference_uids,
     sr_reference_uids,
 )
-from imgtools.logging import logger
+from imgtools.logging import logger, tqdm_logging_redirect
+from imgtools.utils import timer
 
 TAGS_OF_INTEREST = [
     "PatientID",
@@ -56,16 +55,9 @@ class MetaAttrDict(dict):
         self[key] = value
 
 
-# A simple 1 key dictionary that maps a dicoms 'SOPInstanceUID' to its 'SeriesInstanceUID'
-class SOPHashMap(dict[str, SeriesUID]):
-    """A simple 1 key dictionary that maps a dicoms 'SOPInstanceUID' to its 'SeriesInstanceUID'"""
-
-    pass
-
-
 def parse_dicom(  # noqa: PLR0912
     dcm_path: str, top: pathlib.Path
-) -> t.Tuple[t.Dict[SeriesUID, MetaAttrDict], SOPHashMap]:
+) -> t.Tuple[t.Dict[SeriesUID, MetaAttrDict], t.Dict[SopUID, SeriesUID]]:
     dcm = dcmread(
         dcm_path,
         force=True,
@@ -82,19 +74,18 @@ def parse_dicom(  # noqa: PLR0912
                     meta.ReferencedSeriesUID = rt_ref_series
         case "SEG":
             match seg_reference_uids(dcm):
-                case SEGRefSeries(ref_uid), SEGRefSOPs(ref_sops):
-                    meta.ReferencedSeriesUID = ref_uid
-                    meta.ReferencedSOPInstanceUID = ref_sops
-                case SEGRefSOPs(ref_sops):  # no series reference
-                    meta.ReferencedSOPInstanceUID = ref_sops
+                case SEGRefSeries(seg_ref_uid), SEGRefSOPs(seg_ref_sops):
+                    meta.ReferencedSeriesUID = seg_ref_uid
+                    meta.ReferencedSOPInstanceUID = seg_ref_sops
+                case SEGRefSOPs(seg_ref_sops):  # no series reference
+                    meta.ReferencedSOPInstanceUID = seg_ref_sops
         case "RTDOSE":
-            match rtdose_reference_uids(dcm):
-                case RTDOSERefStructSOP(rtstruct_sop_uid):
-                    meta.ReferencedSOPInstanceUID = rtstruct_sop_uid
-                    meta.RTDOSERefStructSOP = rtstruct_sop_uid  # per sejin's request, we will keep this
-                case RTDOSERefPlanSOP(rtplan_sop_uid):
-                    meta.ReferencedSOPInstanceUID = rtplan_sop_uid
-                    meta.RTDOSERefPlanSOP = rtplan_sop_uid  # per sejin's req
+            # this ones too complicated lol
+            refd_plan, refd_struct, refd_series = rtdose_reference_uids(dcm)
+            meta.ReferencedSeriesUID = str(refd_series or "")
+            meta.RTDOSERefPlanSOP = str(refd_plan or "")
+            meta.RTDOSERefStructSOP = str(refd_struct or "")
+
         case "RTPLAN":
             match rtplan_reference_uids(dcm):
                 case RTPLANRefStructSOP(referenced_rtstruct_uid):
@@ -124,14 +115,38 @@ def parse_dicom(  # noqa: PLR0912
     return series_meta_map, sop_series_map
 
 
-def merge_series_meta(
-    series_meta: tuple[SeriesUID, list[MetaAttrDict]],
-) -> t.Dict[SeriesUID, MetaAttrDict]:
-    merged: dict[SeriesUID, MetaAttrDict] = defaultdict(MetaAttrDict)
-    series_uid, meta_list = series_meta
-    for meta in meta_list:
-        merge(merged[series_uid], meta)
-    return merged
+@timer("Merging series meta")
+def merge_series_meta_main(
+    series_meta_raw_dict: dict[SeriesUID, list[MetaAttrDict]],
+    n_jobs: int = 1,
+) -> dict[SeriesUID, MetaAttrDict]:
+    """"""
+
+    def merge_metadata_by_series(
+        series_meta: tuple[SeriesUID, list[MetaAttrDict]],
+    ) -> t.Dict[SeriesUID, MetaAttrDict]:
+        merged: dict[SeriesUID, MetaAttrDict] = defaultdict(MetaAttrDict)
+        series_uid, meta_list = series_meta
+        for meta in meta_list:
+            merge(merged[series_uid], meta)
+        return merged
+
+    series_meta_merged: dict[SeriesUID, MetaAttrDict] = {}
+    with tqdm_logging_redirect():
+        series_merge_results = Parallel(n_jobs=n_jobs)(
+            delayed(merge_metadata_by_series)(series_meta_item)
+            for series_meta_item in tqdm(
+                series_meta_raw_dict.items(),
+                desc="Merging series meta",
+                mininterval=1,
+                leave=False,
+            )
+        )
+
+        for merged in series_merge_results:
+            series_meta_merged.update(merged)
+
+    return series_meta_merged
 
 
 if __name__ == "__main__":
@@ -147,7 +162,8 @@ if __name__ == "__main__":
         with cache_file.open("r") as f:
             series_meta_merged = json.load(f)
         logger.info(
-            f"Loaded {len(series_meta_merged)} series from cache in {time.time() - all_start:.2f} seconds"
+            f"Loaded {len(series_meta_merged)} series from"
+            " cache in {time.time() - all_start:.2f} seconds"
         )
     else:
         # find all dicom files
@@ -173,12 +189,12 @@ if __name__ == "__main__":
         series_meta_raw: t.Dict[SeriesUID, list[MetaAttrDict]] = defaultdict(
             list[MetaAttrDict]
         )
-        sop_map = SOPHashMap()
+        sop_map: t.Dict[SopUID, SeriesUID] = defaultdict(SeriesUID)
         ############################################################
         # use parallel to run parse_dicom on every item in dcms
 
         parse_start = time.time()
-        with logging_redirect_tqdm([logging.getLogger("imgtools")]):
+        with tqdm_logging_redirect():
             results = Parallel(n_jobs=n_jobs)(
                 delayed(parse_dicom)(dcm, top)
                 for dcm in tqdm(
@@ -200,24 +216,10 @@ if __name__ == "__main__":
 
         ############################################################
         # use parallel to run merge_series_meta on every item in series_meta_raw
-        series_meta_merged = defaultdict(MetaAttrDict)
 
-        merge_start = time.time()
-        with logging_redirect_tqdm([logging.getLogger("imgtools")]):
-            series_merge_results = Parallel(n_jobs=n_jobs)(
-                delayed(merge_series_meta)(series_meta_item)
-                for series_meta_item in tqdm(
-                    series_meta_raw.items(),
-                    desc="Merging series meta",
-                    mininterval=1,
-                    leave=False,
-                )
-            )
-
-            for merged in series_merge_results:
-                series_meta_merged.update(merged)
-
-            logger.info(f"Merge time: {time.time() - merge_start:.2f} seconds")
+        series_meta_merged = merge_series_meta_main(
+            series_meta_raw, n_jobs=n_jobs
+        )
 
         with cache_file.open("w") as f:
             json.dump(
@@ -226,6 +228,9 @@ if __name__ == "__main__":
                 f,
                 indent=4,
             )
+
+        with (cache_file.parent / "sop_map.json").open("w") as f:
+            json.dump(sop_map, f, indent=4)
 
     logger.info(f"Total time: {time.time() - all_start:.2f} seconds")
 
