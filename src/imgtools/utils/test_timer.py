@@ -2,7 +2,7 @@ import re
 import time
 from unittest.mock import patch
 
-from imgtools.utils.timer import timer
+from tests.utilities.timer_utils import timer
 
 
 @patch("imgtools.utils.timer.logger")
