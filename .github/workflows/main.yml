@@ -97,8 +97,8 @@ jobs:
       - name: Post lint results as PR comments
         uses: reviewdog/action-suggester@v1
         with:
-          tool_name: ruff
-          fail_on_error: false
+          tool_name: ruff-lint
+          fail_on_error: true
           filter_mode: added
           suggestions_file: ruff-lint.log
 
@@ -106,7 +106,7 @@ jobs:
         uses: reviewdog/action-suggester@v1
         with:
           tool_name: ruff-format
-          fail_on_error: false
+          fail_on_error: true
           filter_mode: added
           suggestions_file: ruff-format.log
 
