@@ -46,3 +46,4 @@ def index(
     crawl(top=source_directory, n_jobs=num_workers)
 
     logger.info("Indexing complete.")
+    

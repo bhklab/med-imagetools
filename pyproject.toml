@@ -38,6 +38,7 @@ dependencies = [
   "fasteners==0.19",
   "pyyaml>=6.0.1,<7",
   "dill>=0.3.8,<1",
+  "dpath>=2.2.0"
 ]
 
 classifiers = [
@@ -69,6 +70,7 @@ all = [
   "aiohttp>=3.8.1",
   "h5py>=3.11.0",
   "pynrrd>=1.0.0",
+  "pyvis",  # debug
 ]
 
 # Entry points for CLI commands
