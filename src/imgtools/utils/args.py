@@ -1,7 +1,7 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 
 
-def parser():
+def parser() -> Namespace:
     parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
 
     # arguments
