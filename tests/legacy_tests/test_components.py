@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 import SimpleITK as sitk
 
-from imgtools.autopipeline import AutoPipeline
+from imgtools._deprecated.autopipeline import AutoPipeline
 from imgtools.logging import logger
 
 

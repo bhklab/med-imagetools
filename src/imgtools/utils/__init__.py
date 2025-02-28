@@ -3,7 +3,7 @@ from imgtools.dicom.dicom_metadata import (
     get_modality_metadata,
 )
 
-from .args import parser
+from .._deprecated.args import parser
 from .imageutils import (
     Array3D,
     ImageArrayMetadata,
@@ -12,7 +12,7 @@ from .imageutils import (
     image_to_array,
     physical_points_to_idxs,
 )
-from .nnunet import (
+from .._deprecated.nnunet import (
     generate_dataset_json,
     get_identifiers_from_splitted_files,
     markdown_report_images,
