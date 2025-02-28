@@ -55,7 +55,6 @@ def sanitize_file_name(filename: str) -> str:
     # Remove spaces at the beginning and end
     filename = filename.strip()
 
-
     # Replace disallowed characters elsewhere with underscores
     sanitized_name = disallowed_characters_pattern.sub("_", filename)
     sanitized_name = sanitized_name.replace(" ", "_")

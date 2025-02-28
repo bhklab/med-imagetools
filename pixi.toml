@@ -12,7 +12,7 @@ pip = ">=24.3.1,<25"
 
 
 [pypi-dependencies]
-med-imagetools = { path = ".", editable = true}
+med-imagetools = { path = ".", editable = true }
 
 [environments]
 dev = ["test", "quality", "build", "dev", "docs"]
@@ -24,7 +24,7 @@ py312 = { features = ["py312", "test"], no-default-feature = true }
 py313 = { features = ["py313", "test"], no-default-feature = true }
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
-med-imagetools = { path = ".", editable = true, extras = ["all"]}
+med-imagetools = { path = ".", editable = true, extras = ["all"] }
 
 [feature.dev.dependencies]
 ipython = "*"
@@ -35,11 +35,11 @@ jupyterlab = "*"
 IMGTOOLS_LOG_LEVEL = "DEBUG"
 
 [feature.dev.tasks]
-clean = {	cmd = [
-		"bash",
-		"-c",
-		"rm -rf .cache && find . -type f -name '.coverage*' -exec rm -f {} +"
-	],	description = "Clear cache and coverage files"}
+clean = { cmd = [
+  "bash",
+  "-c",
+  "rm -rf .cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+], description = "Clear cache and coverage files" }
 
 ############################################## PYTHON ###############################################
 
@@ -53,7 +53,7 @@ python = "3.12.*"
 python = "3.13.*"
 ############################################## TEST ################################################
 [feature.test.pypi-dependencies]
-med-imagetools = { path = ".", editable = true, extras = ["all"]}
+med-imagetools = { path = ".", editable = true, extras = ["all"] }
 
 [feature.test.dependencies]
 pytest = "*"
@@ -117,11 +117,9 @@ pydoctest = ">=0.2.1, <0.3"
 
 [feature.quality.tasks]
 ruff-check.cmd = ["ruff", "--config", "config/ruff.toml", "check", "src"]
-ruff-check.inputs = ["config/ruff.toml", "src"]
 ruff-check.description = "Run ruff check"
 
 ruff-format.cmd = ["ruff", "--config", "config/ruff.toml", "format", "src"]
-ruff-format.inputs = ["config/ruff.toml", "src"]
 ruff-format.description = "Run ruff format, run check first"
 
 type-check.cmd = ["mypy", "--config-file", "config/mypy.ini", "src"]
