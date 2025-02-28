@@ -57,6 +57,54 @@ jobs:
           show: "fail,skip"
         if: always()
 
+
+  ################################################################################################
+  # Linting: Run linting using Ruff & Mypy
+  ################################################################################################
+  # Goal here is to run ruff check and mypy, and then upload the results to the PR
+  # even if one fails, it should still run the other
+  Linting:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 15 # Consider increasing timeout
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.1
+        with:
+          environments: "test"
+          pixi-version: v0.41.1
+          cache: true
+          locked: false
+
+      - name: Run ruff check
+        run: pixi run -e test ruff-check --output-format github | tee ruff-lint.log
+
+      - name: Run ruff format
+        run: |
+          pixi run -e test ruff-format | tee ruff-format.log
+          echo "::group::Formatted output"
+          cat ruff-format.log
+          echo "::endgroup::"
+
+      - name: Post lint results as PR comments
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: ruff
+          fail_on_error: false
+          filter_mode: added
+          suggestions_file: ruff-lint.log
+
+      - name: Post format results as PR comments
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: ruff-format
+          fail_on_error: false
+          filter_mode: added
+          suggestions_file: ruff-format.log
+
   ################################################################################################
   # Build-Docs: Build documentation using mkdocs
   ################################################################################################
