@@ -9,88 +9,12 @@ from collections import defaultdict
 import click
 import pandas as pd
 from joblib import Parallel, delayed  # type: ignore
-from pydicom import dcmread
-from pydicom.errors import InvalidDicomError
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm  # type: ignore
 
+from imgtools.crawler.parse_dicom import parse_dicom
 from imgtools.dicom import find_dicoms
-from imgtools.dicom.input import (
-    RTPLANReferenceSOPInstanceUIDs,
-    SEGRefSeries,
-    SEGRefSOPs,
-    SR_RefSeries,
-    SR_RefSOPs,
-    rtplan_reference_uids,
-    rtstruct_reference_uids,
-    seg_reference_uids,
-    sr_reference_uids,
-)
 from imgtools.logging import logger
-
-TAGS_OF_INTEREST = [
-    "PatientID",
-    "StudyInstanceUID",
-    "SeriesInstanceUID",
-    "SOPInstanceUID",
-    "Modality",
-]
-
-
-# A lightweight subclass of dict that allows for attribute access
-class AttrDict(dict):
-    def __getattr__(self, key: str) -> str | list:
-        return self[key]
-
-    def __setattr__(self, key: str, value: str | list) -> None:
-        self[key] = value
-
-
-def parse_dicom(dcm_path: str) -> t.Dict:
-    try:
-        dcm = dcmread(
-            dcm_path,
-            force=True,
-            stop_before_pixels=True,
-        )
-    except InvalidDicomError as e:
-        logger.error(f"Error reading {dcm_path}: {e}")
-        raise
-
-    meta = AttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
-    meta.filepath = dcm_path
-
-    # Types are inferred from the assignments in the match statement below
-    match meta["Modality"]:
-        case "RTSTRUCT":  # simplest case
-            match rtstruct_reference_uids(dcm):
-                case [rt_ref_series, _]:  # we dont care about ref study
-                    meta.ReferencedSeriesUID = rt_ref_series
-        case "SEG":
-            match seg_reference_uids(dcm):
-                case SEGRefSeries(ref_uid), SEGRefSOPs(ref_sops):
-                    meta.ReferencedSeriesUID = ref_uid
-                    meta.ReferencedSOPInstanceUID = ref_sops
-                case SEGRefSOPs(ref_sops):
-                    # sometimes the ReferencedSeriesUID is not present
-                    meta.ReferencedSOPInstanceUID = ref_sops
-        case "RTPLAN":
-            match rtplan_reference_uids(dcm):
-                case RTPLANReferenceSOPInstanceUIDs(rtp_sop_uids):
-                    meta.ReferencedSOPInstanceUID = rtp_sop_uids
-        case "RTDOSE":
-            match rtplan_reference_uids(dcm):
-                case RTPLANReferenceSOPInstanceUIDs(rtp_sop_uids):
-                    meta.ReferencedSOPInstanceUID = rtp_sop_uids
-        case "SR":
-            match sr_reference_uids(dcm):
-                case SR_RefSeries(sr_ref_series), SR_RefSOPs(sr_ref_sops):
-                    meta.ReferencedSeriesUID = sr_ref_series
-                    meta.ReferencedSOPInstanceUID = sr_ref_sops
-        case _:
-            pass
-
-    return meta
 
 
 def crawl_directory(

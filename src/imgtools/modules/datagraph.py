@@ -859,23 +859,32 @@ class DataGraph:
 
 
 if __name__ == "__main__":
-    datasetindex = Path("data/Vestibular-Schwannoma-SEG")
-    dataset_name = datasetindex.name
+    # datasetindex = Path("data/Vestibular-Schwannoma-SEG")
+    # dataset_name = datasetindex.name
 
-    datagraph = DataGraph(
-        path_crawl=datasetindex.parent
-        / ".imgtools"
-        / f"imgtools_{dataset_name}.csv",
-        edge_path=datasetindex.parent
-        / ".imgtools"
-        / f"imgtools_{dataset_name}_edges2.csv",
+    # datagraph = DataGraph(
+    #     path_crawl=datasetindex.parent
+    #     / ".imgtools"
+    #     / f"imgtools_{dataset_name}.csv",
+    #     edge_path=datasetindex.parent
+    #     / ".imgtools"
+    #     / f"imgtools_{dataset_name}_edges2.csv",
+    #     update=True,
+    #     visualize=True,
+    # )
+    # query = "MR,RTSTRUCT,RTDOSE,RTPLAN"
+    # final_df = datagraph.parser(query)
+
+    # query = "MR,RTSTRUCT"
+    # final_df2 = datagraph.parser(query)
+
+    # # check how they are different
+
+    graph = DataGraph(
+        Path(
+            "TRASH/.imgtools/imgtools_HEAD.csv"
+        ),
         update=True,
-        visualize=True,
     )
-    query = "MR,RTSTRUCT,RTDOSE,RTPLAN"
-    final_df = datagraph.parser(query)
-
-    query = "MR,RTSTRUCT"
-    final_df2 = datagraph.parser(query)
-
-    # check how they are different
+    query = "CT,PT,RTSTRUCT"
+    final_df = graph.parser(query)
