@@ -63,7 +63,7 @@ def sr_reference_uids(
 ) -> tuple[SR_RefSeries, SR_RefSOPs] | None:
     """Get the `ReferencedSeriesInstanceUID`s from an SR file
 
-    We assume SR only references a `RTSTRUCT` file.
+    SR Dicom files can reference multiple SeriesInstanceUIDs and many SOPInstanceUIDs
 
     Since we might need to match on SOP Instance UIDs if the reference is
     a MR, we also get the SOP Instance UIDs
@@ -82,6 +82,9 @@ def sr_reference_uids(
 
         for series_seq in evidence_seq.ReferencedSeriesSequence:
             series_uids.add(series_seq.SeriesInstanceUID)
+            
+            if not "ReferencedSOPSequence" in series_seq:
+                continue
             for ref_seq in series_seq.ReferencedSOPSequence:
                 sop_uids.add(ref_seq.ReferencedSOPInstanceUID)
 
