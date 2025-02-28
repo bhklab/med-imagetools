@@ -21,7 +21,7 @@ from .nnunet import (
 )
 from .optional_import import OptionalImportError, optional_import
 from .sanitize_file_name import sanitize_file_name
-from ....tests.utilities.timer_utils import TimerContext, timed_context, timer
+from .timer_utils import TimerContext, timed_context, timer
 
 __all__ = [
     "array_to_image",
