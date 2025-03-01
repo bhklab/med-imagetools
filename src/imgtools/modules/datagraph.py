@@ -33,7 +33,7 @@ class DataGraph:
         path_crawl: str | Path,
         edge_path: str | Path = "./patient_id_full_edges.csv",
         visualize: bool = False,
-        update: bool = False,
+        update: bool = True,
     ) -> None:
         """
         Parameters
@@ -47,7 +47,7 @@ class DataGraph:
         visualize: bool, default = False
             Whether to generate graph visualization using Pyviz
 
-        update: bool, default = False
+        update: bool, default = True
             Whether to force update existing edge table
         """
         self.df = pd.read_csv(path_crawl, index_col=0)
@@ -438,7 +438,17 @@ class DataGraph:
             elif edge_type == 7:  # SEG->CT/MR
                 # keep final_df as is
                 final_df = self.df_edges.loc[
-                    self.df_edges.edge_type == edge_type
+                    self.df_edges.edge_type == edge_type,
+                    [
+                        "patient_ID_x",
+                        "study_x",
+                        "series_x",
+                        "folder_x",
+                        "series_y",
+                        "folder_y",
+                        "subseries_x",
+                        "subseries_y",
+                    ],
                 ].copy()
                 node_dest, node_origin = valid_query.split(",")
                 final_df.rename(
@@ -655,7 +665,7 @@ class DataGraph:
         final_df = self._get_df(
             df_processed, relevant_study_id, remove_less_comp
         )
-
+        
         # Removing columns
         for bad in change_df:
             # Find columns with change_df string present
@@ -673,7 +683,8 @@ class DataGraph:
 
     def _form_agg(self) -> None:
         """
-        Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. This way one can do regex based on what type of subgraph the user wants
+        Form aggregates for easier parsing, gets the edge types for each study and aggregates as a string. 
+        This way one can do regex based on what type of subgraph the user wants
         """
 
         def list_edges(series) -> str:  # noqa
@@ -819,8 +830,7 @@ class DataGraph:
                     )
                     save_folder_comp[k][key_series] = edge["series_y"]
                     save_folder_comp[k][key] = edge["folder_y"]
-
-            remove_index = []
+            keep_index = []
             if remove_less_comp:
                 for j in range(len(ct_series)):
                     # Check if the number of nodes in a components isn't less than the query nodes, if yes then remove that component
@@ -833,12 +843,11 @@ class DataGraph:
                     )
                     # Checking if all the read modalities are present in a component
                     if desired_modalities.issubset(present_modalities):
-                        remove_index.append(j)
+                        keep_index.append(j)
                 save_folder_comp = [
-                    save_folder_comp[idx] for idx in remove_index
+                    save_folder_comp[idx] for idx in keep_index
                 ]
-                comp = [comp[idx] for idx in remove_index]
-
+                comp = [comp[idx] for idx in keep_index]
             self.final_dict.extend(comp)
             final_df.extend(save_folder_comp)
 
