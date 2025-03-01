@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import Dict, Iterator, List, Set
+from enum import Enum
+from collections import defaultdict
 from pathlib import Path
 
 import pandas as pd
@@ -10,23 +12,24 @@ from imgtools.utils import optional_import, OptionalImportError
 pyvis, _pyvis_available = optional_import("pyvis")
 
 class SeriesNode():
+    """SeriesNode class representing a node in the series tree."""
     def __init__(self, series: str, row: pd.Series) -> None:
         self.Series = series
         self.Modality = row.Modality
         self.PatientID = row.PatientID
-        self.folder = row.folder
-
+        self.StudyInstanceUID = row.StudyInstanceUID
+        
         self.children: List[SeriesNode] = []  
 
     def add_child(self, child_node: SeriesNode) -> None:
         """Add SeriesNode to children"""
         self.children.append(child_node)
     
-    def get_all_nodes(self) -> List[SeriesNode]:
+    def _get_all_nodes(self) -> List[SeriesNode]:
         """Recursively return all nodes in the tree, including root node and all descendants"""
         all_nodes = [self]  # Start with the current node
         for child in self.children:
-            all_nodes.extend(child.get_all_nodes())  # Recursively add all nodes from children
+            all_nodes.extend(child._get_all_nodes())  # Recursively add all nodes from children
         return all_nodes
 
     def __eq__(self, other: object) -> bool:
@@ -34,6 +37,11 @@ class SeriesNode():
         if isinstance(other, str):  # Direct index check
             return self.Series == other
         return isinstance(other, SeriesNode) and self.Series == other.Series
+    
+    def __iter__(self) -> Iterator[SeriesNode]:
+        """Yield all nodes in the tree"""
+        for node in self._get_all_nodes():
+            yield node
 
     def __repr__(self, level:int = 0) -> str:
         """Recursive representation of the tree structure"""
@@ -44,6 +52,7 @@ class SeriesNode():
         return result
     
 class Branch:
+    """Branch class representing a unique path(branch) in the forest."""
     def __init__(self, series_nodes: List[SeriesNode] | None = None) -> None:
         self.series_nodes = [] if series_nodes is None else series_nodes
 
@@ -64,35 +73,93 @@ class Branch:
         """Return a string representation of the branch."""
         return ' -> '.join(node.Modality for node in self.series_nodes)
 
-class Interlacer:
-    def __init__(self, crawl_path: str | Path) -> None:
-        self.df = pd.read_csv(crawl_path, index_col='SeriesInstanceUID')
+class GroupBy(Enum):
+    """Enum for fields that reference other fields in the DataFrame."""
+    ReferencedSeriesUID = "ReferencedSeriesUID"
+    StudyInstanceUID = "StudyInstanceUID"
+    PatientID = "PatientID"
 
-        self.forest: Dict[str, SeriesNode] = {} 
+class Interlacer:
+    """
+    Interlacer class to build and query a forest of SeriesNode objects from the crawl.
+
+    Attributes
+    ----------
+    crawl_df : pd.DataFrame
+        DataFrame containing the data loaded from the CSV file.
+    group_field : GroupBy
+        Field to group by.
+    series_nodes : Dict[str, SeriesNode]
+        Dictionary mapping SeriesInstanceUID to SeriesNode objects.
+    trees : List[List[SeriesNode]]
+        List of trees, where each tree is a list of SeriesNode objects.
+    root_nodes : List[SeriesNode]
+        List of root nodes in the forest.
+    """
+    def __init__(
+            self, 
+            crawl_path: str | Path,
+            group_field: GroupBy = GroupBy.ReferencedSeriesUID
+        ) -> None:
+        """
+        Initializes the Interlacer object.
+
+        Parameters
+        ----------
+        crawl_path : str or Path
+            Path to the CSV file containing the data.
+        group_field : GroupBy, optional
+            Field to group by, by default GroupBy.ReferencedSeriesUID.
+        """
+        self.crawl_df = pd.read_csv(crawl_path, index_col='SeriesInstanceUID')
+        self.group_field = group_field
+
+        self.series_nodes: Dict[str, SeriesNode] = {} 
+        self._create_series_nodes()
+
+        self.trees: List[List[SeriesNode]]
         self.root_nodes: List[SeriesNode] = [] 
 
-        self._build_forest()
+        match group_field:
+            case GroupBy.ReferencedSeriesUID:
+                logger.info("Building forest from ReferencedSeriesUID...")
+                self._build_forest()
+            case GroupBy.StudyInstanceUID:
+                logger.info("Grouping by StudyInstanceUID...")
+                self.trees = self._group_by_attribute(self.series_nodes.values(), 'StudyInstanceUID')
+            case GroupBy.PatientID:
+                logger.info("Grouping by PatientID...")
+                self.trees = self._group_by_attribute(self.series_nodes.values(), 'PatientID')
+            case _:
+                raise NotImplementedError(f"Grouping by {group_field} is not supported.")
+
+    def _group_by_attribute(self, items, attribute):
+        """Groups items by a specific attribute."""
+        grouped_dict = defaultdict(list)
+        for item in items:
+            grouped_dict[getattr(item, attribute)].append(item)
+        return list(grouped_dict.values())
+
+    def _create_series_nodes(self) -> None:
+        """Creates a SeriesNode object for each row in the DataFrame."""
+        for index, row in self.crawl_df.iterrows():
+            series_instance_uid = str(index)
+            self.series_nodes[series_instance_uid] = SeriesNode(series_instance_uid, row.astype(str))
 
     def _build_forest(self) -> None:
-        """Constructs a forest of trees from the DataFrame by defining parent-child relationships."""
-        # Step 1: Create nodes for all rows
-        for index, row in self.df.iterrows():
-            series_instance_uid = str(index)
-            self.forest[series_instance_uid] = SeriesNode(series_instance_uid, row.astype(str))
-
-        # Step 2: Establish parent-child relationships
-        for index, row in self.df.iterrows():
+        """Constructs a forest of trees from the DataFrame by defining parent-child relationships using ReferenceSeriesUID."""
+        for index, row in self.crawl_df.iterrows():
             series_instance_uid = str(index)
             modality = row.Modality
             reference_series_uid = row.ReferencedSeriesUID
 
-            node = self.forest[series_instance_uid]
+            node = self.series_nodes[series_instance_uid]
 
             if modality in ["CT", "MR"] or (modality == "PT" and pd.isna(reference_series_uid)):
                 self.root_nodes.append(node)
 
-            if pd.notna(reference_series_uid) and reference_series_uid in self.forest:
-                parent_node = self.forest[reference_series_uid]
+            if pd.notna(reference_series_uid) and reference_series_uid in self.series_nodes:
+                parent_node = self.series_nodes[reference_series_uid]
                 parent_node.add_child(node)
 
     def _find_branches(self) -> List[Branch]:
@@ -111,27 +178,21 @@ class Interlacer:
         
         return(branches)
 
-    def _query(self, queried_modalities: Set[str], process_branches: bool = True) -> List[Branch]:
+    def _query(self, queried_modalities: Set[str], process_branches: bool = False) -> List[List[SeriesNode]]:
         """Returns samples that contain *all* specified modalities."""
         result = []
+        if GroupBy.ReferencedSeriesUID == self.group_field:
+            self.trees = self._find_branches() if process_branches else self.root_nodes
 
-        if process_branches: # Make branches from tree then query  
-            branches = self._find_branches()
-            for branch in branches:
-                series_nodes = [node for node in branch if node.Modality in queried_modalities]
-                present_modalities = {node.Modality for node in series_nodes} 
-                if queried_modalities <= present_modalities:
-                    result.append(series_nodes)
-        else: # Query on full tree
-            for root in self.root_nodes: 
-                series_nodes = [node for node in root.get_all_nodes() if node.Modality in queried_modalities]
-                present_modalities = {node.Modality for node in series_nodes} 
-                if queried_modalities == present_modalities:
-                    result.append(series_nodes)
+        for tree in self.trees:
+            series_nodes = [node for node in tree if node.Modality in queried_modalities]
+            present_modalities = {node.Modality for node in series_nodes} 
+            if queried_modalities <= present_modalities:
+                result.append(series_nodes)
 
         return result
 
-    def query(self, query_string: str, process_branches: bool = False) -> pd.DataFrame:
+    def query(self, query_string: str, process_branches: bool = False) -> List[List[Dict[str, str]]]:
         """
         Queries the forest for specific modalities and returns a DataFrame containing relevant patient data.
 
@@ -140,7 +201,7 @@ class Interlacer:
         query_string : str
             A comma-separated string representing the modalities to query (e.g., 'CT,MR').
         process_branches : bool, optional, default=False
-            If True, queries all branches as different samples
+            If True, queries all branches as different samples(Only applicable when grouping by ReferencedSeriesUID).
         Returns
         -------
         pd.DataFrame
@@ -156,8 +217,10 @@ class Interlacer:
         - 'RTSTRUCT'  : Radiotherapy Structure
         - 'RTDOSE'    : Radiotherapy Dose
         """
-        queried_modalities = query_string.split(',')
-        query_results = self._query(set(queried_modalities), process_branches)
+        if process_branches and self.group_field != GroupBy.ReferencedSeriesUID:
+            raise ValueError("process_branches is only applicable when grouping by ReferencedSeriesUID.")
+
+        query_results = self._query(set(query_string.split(',')), process_branches)
 
         data = [
             [
@@ -181,6 +244,9 @@ class Interlacer:
         """
         if not _pyvis_available:
             raise OptionalImportError("pyvis")
+
+        if self.group_field != GroupBy.ReferencedSeriesUID:
+            raise NotImplementedError("Visualization is only supported when grouping by ReferencedSeriesUID.")
 
         save_path = './forest_visualization.html' if save_path is None else save_path
         save_path = Path(save_path)
