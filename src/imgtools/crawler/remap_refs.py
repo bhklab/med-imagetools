@@ -3,9 +3,11 @@
 import json
 import os
 from pathlib import Path
-from rich import print
+
 import dpath
 import pandas as pd
+from rich import print
+
 from imgtools.logging import logger
 
 # %%
@@ -27,44 +29,102 @@ all_series = list(merge_series_meta_main.values())
 
 # %%
 # filter all_series if "ReferencedSOPInstanceUID" exists
+all_remapped_series = []
+all_refd_series = []
+for metadata in all_series:
+    for subseries, i in metadata.items():
+        match i["Modality"]:
 
-for i in all_series:
-    match i["Modality"]:
-        case "RTDOSE":
-            if i.get("ReferencedSeriesUID") in merge_series_meta_main:
-                continue
-            if i.get("RTDOSERefStructSOP") in sop_map:
-                i["ReferencedSeriesUID"] = sop_map[i["RTDOSERefStructSOP"]]
-            elif i.get("RTDOSERefPlanSOP") in sop_map:
-                i["ReferencedSeriesUID"] = sop_map[i["RTDOSERefPlanSOP"]]
-            else:
-                warnmsg = (
-                    f"RTDOSE SeriesInstanceUID={i['SeriesInstanceUID']}"
-                    "has no reference"
-                )
-                logger.warning(warnmsg)
+            case "SEG":
+                # we want to iterate over all the referenced SOPInstanceUIDs
+                # and find the corresponding SeriesInstanceUID
+                # and hope that its a set of 1 element
 
-        case "RTPLAN":
-            if i.get("RTPLANRefStructSOP") in sop_map:
-                i["ReferencedSeriesUID"] = sop_map[i["RTPLANRefStructSOP"]]
-            else:
-                warnmsg = (
-                    f"RTPLAN SeriesInstanceUID={i['SeriesInstanceUID']}"
-                    "has no reference"
-                )
-                logger.warning(warnmsg)
+                series_uids = set()
 
-        #     sop = dpath.get(i, "ReferencedSOPInstanceUID")
-        #     print(sop)
-        #     series = sop_map.get(sop)
-        #     print(series)
-        # print(merge_series_meta_main[series])
-        # case "RTDOSE":
-        #     sop = dpath.get(i, "ReferencedSOPInstanceUID")
-        #     print(sop)
-        #     series = sop_map.get(sop)
-        #     print(series)
-        # print(merge_series_meta_main[series])
+                for sop in i.get("ReferencedSOPInstanceUID"):
+                    if sop in sop_map:
+                        series_uids.add(sop_map[sop])
+                    else:
+                        warnmsg = (
+                            f"SEG SeriesInstanceUID={i['SeriesInstanceUID']}"
+                            f"references an unknown SOPInstanceUID: {sop}"
+                        )
+                        logger.warning(warnmsg)
+
+                if not series_uids:
+                    warnmsg = (
+                        f"SEG SeriesInstanceUID={i['SeriesInstanceUID']}"
+                        "has no references"
+                    )
+                    logger.warning(warnmsg)
+                elif len(series_uids) > 1:
+                    warnmsg = (
+                        f"SEG SeriesInstanceUID={i['SeriesInstanceUID']}"
+                        " has multiple references"
+                    )
+                    logger.warning(warnmsg)
+                else:
+                    # check if the single series UID is in the main dict
+                    series_uid = series_uids.pop()
+                    if series_uid in merge_series_meta_main:
+                        if (
+                            i.get("ReferencedSeriesInstanceUID")
+                            and i["SeriesInstanceUID"] != series_uid
+                        ):
+                            warnmsg = (
+                                f"SEG SeriesInstanceUID={i['SeriesInstanceUID']}"
+                                f"references a different SeriesInstanceUID: {series_uid}"
+                            )
+                            logger.warning(warnmsg)
+                            raise ValueError(warnmsg)
+
+                        i["SeriesInstanceUID"] = series_uid
+                    else:
+                        warnmsg = (
+                            f"SEG SeriesInstanceUID={i['SeriesInstanceUID']}"
+                            "references an unknown SeriesInstanceUID: {series_uid}"
+                        )
+                        logger.warning(warnmsg)
+                    all_refd_series.append(series_uid)
+                all_remapped_series.append(i)
+            case "RTDOSE":
+                if i.get("ReferencedSeriesUID") in merge_series_meta_main:
+                    continue
+                if i.get("RTDOSERefStructSOP") in sop_map:
+                    i["ReferencedSeriesUID"] = sop_map[i["RTDOSERefStructSOP"]]
+                elif i.get("RTDOSERefPlanSOP") in sop_map:
+                    i["ReferencedSeriesUID"] = sop_map[i["RTDOSERefPlanSOP"]]
+                else:
+                    warnmsg = (
+                        f"RTDOSE SeriesInstanceUID={i['SeriesInstanceUID']}"
+                        "has no reference"
+                    )
+                    logger.warning(warnmsg)
+
+            case "RTPLAN":
+                if i.get("RTPLANRefStructSOP") in sop_map:
+                    i["ReferencedSeriesUID"] = sop_map[i["RTPLANRefStructSOP"]]
+                else:
+                    warnmsg = (
+                        f"RTPLAN SeriesInstanceUID={i['SeriesInstanceUID']}"
+                        "has no reference"
+                    )
+                    logger.warning(warnmsg)
+
+                refd_sops = i.get("ReferencedSOPInstanceUID")
+
+                if i.get("ReferencedSeriesUID") in merge_series_meta_main:
+
+                    sop = dpath.get(i, "ReferencedSOPInstanceUID")
+                print(sop)
+                series = sop_map.get(sop)
+                print(series)
+            case "RTDOSE":
+                sop = dpath.get(i, "ReferencedSOPInstanceUID")
+                print(sop)
+                series = sop_map.get(sop)
+                print(series)
 
 
-# %%
+    # %%

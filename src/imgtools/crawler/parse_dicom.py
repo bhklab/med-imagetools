@@ -11,9 +11,6 @@ from pydicom import dcmread
 from tqdm import tqdm
 
 from imgtools.dicom.input import (
-    RTDOSERefPlanSOP,
-    RTDOSERefStructSOP,
-    RTDOSERefSeries,
     RTPLANRefStructSOP,
     SEGRefSeries,
     SEGRefSOPs,
@@ -42,6 +39,10 @@ class SeriesUID(str):
     pass
 
 
+class SubSeriesID(str):
+    pass
+
+
 class SopUID(str):
     pass
 
@@ -57,7 +58,10 @@ class MetaAttrDict(dict):
 
 def parse_dicom(  # noqa: PLR0912
     dcm_path: str, top: pathlib.Path
-) -> t.Tuple[t.Dict[SeriesUID, MetaAttrDict], t.Dict[SopUID, SeriesUID]]:
+) -> t.Tuple[
+    t.Dict[SeriesUID, t.Dict[SubSeriesID, MetaAttrDict]],
+    t.Dict[SopUID, SeriesUID],
+]:
     dcm = dcmread(
         dcm_path,
         force=True,
@@ -65,8 +69,7 @@ def parse_dicom(  # noqa: PLR0912
     )
 
     meta = MetaAttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
-
-    # Types are inferred from the assignments in the match statement below
+    # by default copy the seriesuid
     match meta["Modality"]:
         case "RTSTRUCT":  # simplest case
             match rtstruct_reference_uids(dcm):
@@ -103,14 +106,22 @@ def parse_dicom(  # noqa: PLR0912
     instance_uid = SopUID(object=dcm.get("SOPInstanceUID"))
 
     # We make this a dictionary so merges are straightforward
-    meta.intances = {instance_uid: os.path.relpath(dcm_path, top)}
+    filepath = os.path.relpath(dcm_path, top)
+    meta.folder = os.path.dirname(filepath)  # noqa
+    # we are going to assume that all instances for a series::acquisition are in the same folder
+    meta.instances = {instance_uid: os.path.basename(filepath)}  # noqa
+
+    raw_acq = dcm.get("AcquisitionNumber", "None")
+    meta["SubSeriesID"] = str(raw_acq) if raw_acq != "None" else "default"
 
     # We need to keep track of the mapping between SOPInstanceUID and SeriesInstanceUID
     sop_series_map: dict[SopUID, SeriesUID] = {}
     sop_series_map[instance_uid] = SeriesUID(meta["SeriesInstanceUID"])
 
-    series_meta_map: dict[SeriesUID, MetaAttrDict] = {}
-    series_meta_map[SeriesUID(meta["SeriesInstanceUID"])] = meta
+    series_meta_map: dict[SeriesUID, dict[SubSeriesID, MetaAttrDict]] = {}
+    series_meta_map[SeriesUID(meta["SeriesInstanceUID"])] = {
+        SubSeriesID(meta["SubSeriesID"]): meta
+    }
 
     return series_meta_map, sop_series_map
 
