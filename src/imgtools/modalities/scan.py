@@ -2,6 +2,8 @@ from typing import Any, Dict, Generator
 
 import SimpleITK as sitk
 
+__all__ = ["Scan"]
+
 
 class Scan(sitk.Image):
     def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:
