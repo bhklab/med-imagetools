@@ -87,8 +87,8 @@ def seg_reference_uids(
         else:
             errmsg = (
                 "Multiple ReferencedSeriesInstanceUIDs found in ReferencedSeriesSequence"
-                "This is unexpected and may cause issues."
-                f"Found {len(ref_series)} ReferencedSeriesInstanceUIDs"
+                " This is unexpected and may cause issues. "
+                f"Found {len(ref_series)} ReferencedSeriesInstanceUIDs."
             )
             raise ValueError(errmsg)
     elif "SourceImageSequence" in seg:
