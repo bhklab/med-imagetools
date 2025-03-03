@@ -10,6 +10,7 @@ from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
 from tqdm import tqdm
 
+from imgtools.dicom import find_dicoms
 from imgtools.dicom.input import (
     RTDOSERefPlanSOP,
     RTDOSERefSeries,
@@ -38,7 +39,6 @@ TAGS_OF_INTEREST = [
     "Modality",
     "FrameOfReferenceUID",
 ]
-from imgtools.dicom import find_dicoms
 
 
 class SeriesUID(str):
@@ -186,7 +186,7 @@ def parse_all_dicoms(
         results = Parallel(n_jobs=n_jobs)(
             delayed(parse_dicom)(dcm, top)
             for dcm in tqdm(
-                dcms,
+                dicom_files,
                 desc="Processing DICOM files",
                 mininterval=1,
                 leave=False,
