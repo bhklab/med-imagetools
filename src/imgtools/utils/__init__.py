@@ -21,6 +21,7 @@ from .._deprecated.nnunet import (
 )
 from .optional_import import OptionalImportError, optional_import
 from .sanitize_file_name import sanitize_file_name
+from .timer_utils import TimerContext, timed_context, timer
 
 __all__ = [
     "array_to_image",
@@ -42,4 +43,8 @@ __all__ = [
     "optional_import",
     # sanitize_file_name
     "sanitize_file_name",
+    # timer
+    "timer",
+    "timed_context",
+    "TimerContext",
 ]
