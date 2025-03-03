@@ -12,7 +12,6 @@ from typing import Optional, Union
 import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
-aww
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.dicom.dicom_metadata import get_modality_metadata
 
