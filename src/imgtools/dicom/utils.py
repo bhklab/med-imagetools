@@ -58,13 +58,13 @@ def find_dicoms(
         Whether to validate files by checking for a valid DICOM header.
             - If `True`, perform DICOM header validation (slower but more accurate).
             - If `False`, skip header validation and rely on extension.
-
     extension : str, optional
         File extension to search for (e.g., "dcm"). If `None`, consider all files
         regardless of extension.
-
     limit : int, optional
         Maximum number of DICOM files to return. If `None`, return all found files.
+    search_input : List[str], optional
+        A list of search terms to filter the results. If `None`, return all found files.
 
     Returns
     -------
@@ -173,7 +173,7 @@ def find_dicoms(
         for file in glob_method(pattern)
         if (
             not search_input
-            or all(term in str(file.as_posix()) for term in search_input)
+            or all(term in str(file.resolve()) for term in search_input)
         )
         and _is_valid_dicom(file, check_header)
     )
