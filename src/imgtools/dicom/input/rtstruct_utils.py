@@ -83,7 +83,21 @@ def extract_roi_names(rtstruct: DicomInput) -> list[str]:
     return roi_names
 
 
-def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
+class RTSTRUCTRefSeries(str):
+    pass
+
+
+class RTSTRUCTRefStudy(str):
+    pass
+
+
+class RTSTRUCTRefSOP(str):
+    pass
+
+
+def rtstruct_reference_uids(
+    rtstruct: DicomInput,
+) -> tuple[RTSTRUCTRefSeries, RTSTRUCTRefStudy] | RTSTRUCTRefSOP:
     """Retrieve the referenced SeriesInstanceUID and StudyInstanceUID from an RTSTRUCT.
 
     Parameters
@@ -93,9 +107,9 @@ def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
 
     Returns
     -------
-    tuple[str, str]
-        - Referenced `SeriesInstanceUID` (str).
-        - Referenced `StudyInstanceUID` (str).
+    tuple[RTSTRUCTRefSeries, RTSTRUCTRefStudy]
+        - Referenced `SeriesInstanceUID` (RTSTRUCTRefSeries)
+        - Referenced `StudyInstanceUID` (RTSTRUCTRefStudy)
 
     Raises
     ------
@@ -104,13 +118,13 @@ def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
     """
     dcm_rtstruct: FileDataset = load_rtstruct_dcm(rtstruct)
     try:
-        referenced_series_instance_uid = str(
+        referenced_series_instance_uid = RTSTRUCTRefSeries(
             dcm_rtstruct.ReferencedFrameOfReferenceSequence[0]
             .RTReferencedStudySequence[0]
             .RTReferencedSeriesSequence[0]
             .SeriesInstanceUID
         )
-        referenced_study_instance_uid = str(
+        referenced_study_instance_uid = RTSTRUCTRefStudy(
             dcm_rtstruct.ReferencedFrameOfReferenceSequence[0]
             .RTReferencedStudySequence[0]
             .ReferencedSOPInstanceUID
@@ -118,4 +132,27 @@ def rtstruct_reference_uids(rtstruct: DicomInput) -> tuple[str, str]:
         return referenced_series_instance_uid, referenced_study_instance_uid
     except (AttributeError, IndexError) as e:
         errmsg = "Failed to extract Referenced SeriesInstanceUID or Referenced StudyInstanceUID from the RTSTRUCT file."
-        raise RTSTRUCTAttributeError(errmsg) from e
+        errmsg += " Attempting to extract ReferencedSOPInstanceUID."
+
+        try:
+            ref_sequence = dcm_rtstruct.ReferencedFrameOfReferenceSequence[0]
+
+            # ref_frame_ref = ref_sequence.FrameOfReferenceUID
+            ref_sop = (
+                ref_sequence.RTReferencedStudySequence[0]
+                .RTReferencedSeriesSequence[0]
+                .ContourImageSequence[0]
+                .ReferencedSOPInstanceUID
+            )
+
+            return RTSTRUCTRefSOP(ref_sop)
+        except (AttributeError, IndexError) as e2:
+            errmsg += f"First error message: {e}. Second error message: {e2}"
+            raise RTSTRUCTAttributeError(errmsg) from e2
+
+
+if __name__ == "__main__":
+    x = rtstruct_reference_uids(
+        "/home/gpudual/bhklab/radiomics/Projects/med-imagetools/privatedata/SAR_5SAR2_112001/StudyUID-574.1/RTSTRUCT_Series-59402_SeriesNum-200/RTstruc.dcm"
+    )
+    print(x)
