@@ -12,6 +12,9 @@ from tqdm import tqdm
 
 from imgtools.dicom.input import (
     RTPLANRefStructSOP,
+    RTSTRUCTRefSeries,
+    RTSTRUCTRefSOP,
+    RTSTRUCTRefStudy,
     SEGRefSeries,
     SEGRefSOPs,
     SR_RefSeries,
@@ -73,8 +76,11 @@ def parse_dicom(  # noqa: PLR0912
     match meta["Modality"]:
         case "RTSTRUCT":  # simplest case
             match rtstruct_reference_uids(dcm):
-                case [rt_ref_series, _]:  # we dont care about ref study
+                case RTSTRUCTRefSeries(rt_ref_series), RTSTRUCTRefStudy(rt_ref_study):  # fmt: skip
                     meta.ReferencedSeriesUID = rt_ref_series
+                    meta.ReferencedStudyUID = rt_ref_study
+                case RTSTRUCTRefSOP(rt_ref_sop):
+                    meta.RTSTRUCTRefSOP = rt_ref_sop
         case "SEG":
             match seg_reference_uids(dcm):
                 case SEGRefSeries(seg_ref_uid), SEGRefSOPs(seg_ref_sops):
@@ -162,7 +168,7 @@ def merge_series_meta_main(
 
 if __name__ == "__main__":
     force = True
-    top = pathlib.Path("testdata").absolute()
+    top = pathlib.Path("privatedata/SARC021").absolute()
     n_jobs = os.cpu_count()
     cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}.json"
     cache_file.parent.mkdir(parents=True, exist_ok=True)
