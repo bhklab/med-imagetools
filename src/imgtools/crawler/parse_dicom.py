@@ -169,6 +169,39 @@ def merge_series_meta_main(
     return series_meta_merged
 
 
+@timer("Parsing all DICOMs")
+def parse_all_dicoms(
+    dicom_files: t.List[str], top: pathlib.Path
+) -> t.Tuple[
+    t.Dict[SeriesUID, list[MetaAttrDict]],
+    t.Dict[SopUID, SeriesUID],
+]:
+    series_meta_raw: t.Dict[SeriesUID, list[MetaAttrDict]] = defaultdict(
+        list[MetaAttrDict]
+    )
+    sop_map: t.Dict[SopUID, SeriesUID] = defaultdict(SeriesUID)
+    ############################################################
+    # use parallel to run parse_dicom on every item in dcms
+    with tqdm_logging_redirect():
+        results = Parallel(n_jobs=n_jobs)(
+            delayed(parse_dicom)(dcm, top)
+            for dcm in tqdm(
+                dcms,
+                desc="Processing DICOM files",
+                mininterval=1,
+                leave=False,
+            )
+        )
+
+        for series_dict, sop_dict in results:
+            for series_uid, meta in series_dict.items():
+                series_meta_raw[series_uid].append(meta)
+
+            sop_map.update(sop_dict)
+
+    return series_meta_raw, sop_map
+
+
 if __name__ == "__main__":
     force = True
     top = pathlib.Path("privatedata/SARC021").absolute()
@@ -200,11 +233,6 @@ if __name__ == "__main__":
             f"Found {len(dcms)} DICOM files in {time.time() - all_start:.2f} seconds"
         )
 
-        logger.info(
-            f"Using {n_jobs} workers for parallel processing with",
-            param_n_jobs=n_jobs,
-        )
-
         # setup data structures
         series_meta_raw: t.Dict[SeriesUID, list[MetaAttrDict]] = defaultdict(
             list[MetaAttrDict]
@@ -213,30 +241,10 @@ if __name__ == "__main__":
         ############################################################
         # use parallel to run parse_dicom on every item in dcms
 
-        parse_start = time.time()
-        with tqdm_logging_redirect():
-            results = Parallel(n_jobs=n_jobs)(
-                delayed(parse_dicom)(dcm, top)
-                for dcm in tqdm(
-                    dcms,
-                    desc="Processing DICOM files",
-                    mininterval=1,
-                    leave=False,
-                )
-            )
-
-            for series_dict, sop_dict in results:
-                for series_uid, meta in series_dict.items():
-                    series_meta_raw[series_uid].append(meta)
-
-                sop_map.update(sop_dict)
-            logger.info(
-                f"Total parsing time: {time.time() - parse_start:.2f} seconds"
-            )
+        series_meta_raw, sop_map = parse_all_dicoms(dcms, top)
 
         ############################################################
         # use parallel to run merge_series_meta on every item in series_meta_raw
-
         series_meta_merged = merge_series_meta_main(
             series_meta_raw, n_jobs=n_jobs
         )
