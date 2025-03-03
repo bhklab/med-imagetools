@@ -210,18 +210,20 @@ if __name__ == "__main__":
     force = True
     top = pathlib.Path("testdata").absolute()
     n_jobs = os.cpu_count()
-    cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}_crawl.json"
-    cache_file.parent.mkdir(parents=True, exist_ok=True)
 
+    cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}_crawl.json"
+    sopmap_cache = cache_file.with_name(f"{top.name}_sop-map.json")
+    
     all_start = time.time()
-    if cache_file.exists() and not force:
+    if (
+        cache_file.exists() and sopmap_cache.exists()
+    ) and not force:
         logger.info(f"Using cache file {cache_file}")
         with cache_file.open("r") as f:
             series_meta_merged = json.load(f)
-        logger.info(
-            f"Loaded {len(series_meta_merged)} series from"
-            " cache in {time.time() - all_start:.2f} seconds"
-        )
+        logger.info(f'Using cache file {sopmap_cache}')
+        with sopmap_cache.open("r") as f:
+            sop_map = json.load(f)
     else:
         # find all dicom files
         dcms: t.List[str] = [
@@ -238,10 +240,10 @@ if __name__ == "__main__":
         )
 
         # setup data structures
-        series_meta_raw: t.Dict[SeriesUID, list[MetaAttrDict]] = defaultdict(
-            list[MetaAttrDict]
-        )
-        sop_map: t.Dict[SopUID, SeriesUID] = defaultdict(SeriesUID)
+        # series_meta_raw: t.Dict[SeriesUID, list[MetaAttrDict]] = defaultdict(
+        #     list[MetaAttrDict]
+        # )
+        # sop_map: t.Dict[SopUID, SeriesUID] = defaultdict(SeriesUID)
         ############################################################
         # use parallel to run parse_dicom on every item in dcms
 
@@ -253,6 +255,7 @@ if __name__ == "__main__":
             series_meta_raw, n_jobs=n_jobs
         )
 
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
         with cache_file.open("w") as f:
             json.dump(
                 # {"series_meta": series_meta_merged, "sop_map": sop_map}, f, indent=4
@@ -261,7 +264,7 @@ if __name__ == "__main__":
                 indent=4,
             )
 
-        with (cache_file.parent / f"{top.name}_sop-map.json").open("w") as f:
+        with sopmap_cache.open("w") as f:
             json.dump(sop_map, f, indent=4)
 
     logger.info(f"Total time: {time.time() - all_start:.2f} seconds")
