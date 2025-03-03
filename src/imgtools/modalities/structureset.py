@@ -40,7 +40,7 @@ from pydicom import dcmread
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
-from imgtools.modules.segmentation import Segmentation
+from imgtools.modalities.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:

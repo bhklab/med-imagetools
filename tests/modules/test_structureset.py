@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import SimpleITK as sitk
 
-from imgtools.modules.structureset import (
+from imgtools.modalities.structureset import (
     StructureSet,
 )  # Replace `your_module` with the actual module name
 

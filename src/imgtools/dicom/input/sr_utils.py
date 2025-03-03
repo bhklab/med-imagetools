@@ -70,20 +70,20 @@ def sr_reference_uids(
 
     """
     sr = load_dicom(sr)
-    if not "CurrentRequestedProcedureEvidenceSequence" in sr:
+    if "CurrentRequestedProcedureEvidenceSequence" not in sr:
         return None
 
     series_uids = set()
     sop_uids = set()
 
     for evidence_seq in sr.CurrentRequestedProcedureEvidenceSequence:
-        if not "ReferencedSeriesSequence" in evidence_seq:
+        if "ReferencedSeriesSequence" not in evidence_seq:
             continue
 
         for series_seq in evidence_seq.ReferencedSeriesSequence:
             series_uids.add(series_seq.SeriesInstanceUID)
 
-            if not "ReferencedSOPSequence" in series_seq:
+            if "ReferencedSOPSequence" not in series_seq:
                 continue
             for ref_seq in series_seq.ReferencedSOPSequence:
                 sop_uids.add(ref_seq.ReferencedSOPInstanceUID)

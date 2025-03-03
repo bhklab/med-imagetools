@@ -14,7 +14,7 @@ from pydicom import dcmread
 
 from imgtools.logging import logger
 
-from .utils import read_image
+from ..modules.utils import read_image
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset

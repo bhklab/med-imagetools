@@ -12,12 +12,12 @@ import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
 from imgtools.pipeline import Pipeline
-from imgtools.utils.nnunet import generate_dataset_json, markdown_report_images
-from imgtools.utils.args import parser
+from imgtools._deprecated.nnunet import generate_dataset_json, markdown_report_images
+from imgtools._deprecated.args import parser
 from imgtools.logging import logger
 
 from joblib import Parallel, delayed
-from imgtools.modules import Segmentation
+from imgtools._deprecated import Segmentation
 from sklearn.model_selection import train_test_split
 
 import dill
