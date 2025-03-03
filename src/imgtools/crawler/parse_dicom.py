@@ -5,7 +5,7 @@ import time
 import typing as t
 from collections import defaultdict
 
-from dpath import merge
+from dpath import merge # type: ignore
 from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
 from tqdm import tqdm
@@ -62,7 +62,7 @@ class MetaAttrDict(dict):
         self[key] = value
 
 
-def parse_dicom(  # noqa: PLR0912
+def parse_dicom(
     dcm_path: str, top: pathlib.Path
 ) -> t.Tuple[
     t.Dict[SeriesUID, t.Dict[SubSeriesID, MetaAttrDict]],
@@ -75,39 +75,43 @@ def parse_dicom(  # noqa: PLR0912
     )
 
     meta = MetaAttrDict({tag: str(dcm.get(tag)) for tag in TAGS_OF_INTEREST})
-    # by default copy the seriesuid
+    # TODO:: standardize the naming of the attributes we set here
+    # i.e RTDOSERefPlanSOP but we use just ReferencedSOPInstanceUID
     match meta["Modality"]:
         case "RTSTRUCT":  # simplest case
             match rtstruct_reference_uids(dcm):
                 case RTSTRUCTRefSeries(rt_ref_series), RTSTRUCTRefStudy(rt_ref_study):  # fmt: skip
                     meta.ReferencedSeriesUID = rt_ref_series
                     meta.ReferencedStudyUID = rt_ref_study
-                case RTSTRUCTRefSOP(rt_ref_sop):
-                    meta.RTSTRUCTRefSOP = rt_ref_sop
+                case RTSTRUCTRefSOP(rt_ref_sop): # single SOP reference at the moment
+                    meta.ReferencedSOPUIDs = rt_ref_sop
         case "SEG":
             match seg_reference_uids(dcm):
                 case SEGRefSeries(seg_ref_uid), SEGRefSOPs(seg_ref_sops):
                     meta.ReferencedSeriesUID = seg_ref_uid
-                    meta.ReferencedSOPInstanceUID = seg_ref_sops
+                    meta.ReferencedSOPUIDs = seg_ref_sops
                 case SEGRefSOPs(seg_ref_sops):  # no series reference
-                    meta.ReferencedSOPInstanceUID = seg_ref_sops
+                    meta.ReferencedSOPUIDs = seg_ref_sops
         case "RTDOSE":
             # this ones too complicated lol
             match rtdose_reference_uids(dcm):
                 case RTDOSERefPlanSOP(dose_ref_plan),  RTDOSERefStructSOP(dose_ref_struct), RTDOSERefSeries(dose_ref_series):  # fmt: skip
-                    meta.RTDOSERefPlanSOP = dose_ref_plan
-                    meta.RTDOSERefStructSOP = dose_ref_struct
                     meta.ReferencedSeriesUID = dose_ref_series
+                    # we prioritize the rtstruct reference
+                    meta.ReferencedSOPUIDs = dose_ref_struct or dose_ref_plan
+                    # sejin wants to keep 'rawdata' format as well...
+                    meta.ReferencedRTPlanSOPUID = dose_ref_plan
+                    meta.ReferencedRTStructSOPUID = dose_ref_struct
         case "RTPLAN":
             match rtplan_reference_uids(dcm):
-                case RTPLANRefStructSOP(referenced_rtstruct_uid):
-                    meta.ReferencedSOPInstanceUID = referenced_rtstruct_uid
-                    meta.RTPLANRefStructSOP = referenced_rtstruct_uid  # sejin
+                case RTPLANRefStructSOP(plan_ref_struct):
+                    meta.ReferencedSOPUIDs =plan_ref_struct 
+                    meta.ReferencedRTStructSOPUID = plan_ref_struct  # sejin
         case "SR":
             match sr_reference_uids(dcm):
                 case SR_RefSeries(sr_ref_series), SR_RefSOPs(sr_ref_sops):
                     meta.ReferencedSeriesUID = sr_ref_series
-                    meta.ReferencedSOPInstanceUID = sr_ref_sops
+                    meta.ReferencedSOPUIDs = sr_ref_sops
         case _:
             pass
 
@@ -204,9 +208,9 @@ def parse_all_dicoms(
 
 if __name__ == "__main__":
     force = True
-    top = pathlib.Path("privatedata/SARC021").absolute()
+    top = pathlib.Path("testdata").absolute()
     n_jobs = os.cpu_count()
-    cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}.json"
+    cache_file = top.parent / ".imgtools" / "cache" / f"{top.name}_crawl.json"
     cache_file.parent.mkdir(parents=True, exist_ok=True)
 
     all_start = time.time()
@@ -257,7 +261,7 @@ if __name__ == "__main__":
                 indent=4,
             )
 
-        with (cache_file.parent / "sop_map.json").open("w") as f:
+        with (cache_file.parent / f"{top.name}_sop-map.json").open("w") as f:
             json.dump(sop_map, f, indent=4)
 
     logger.info(f"Total time: {time.time() - all_start:.2f} seconds")
