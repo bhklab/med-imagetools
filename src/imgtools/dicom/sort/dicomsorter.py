@@ -105,6 +105,7 @@ class DICOMSorter(SorterBase):
         overwrite: bool = False,
         dry_run: bool = False,
         num_workers: int = 1,
+        truncate_uids: int = 5,
     ) -> None:
         """Execute the file action on DICOM files.
 
@@ -121,13 +122,15 @@ class DICOMSorter(SorterBase):
         Parameters
         ----------
         action : FileAction, default: FileAction.MOVE
-                The action to apply to the DICOM files (e.g., move, copy).
+            The action to apply to the DICOM files (e.g., move, copy).
         overwrite : bool, default: False
-                If True, overwrite existing files at the destination.
+            If True, overwrite existing files at the destination.
         dry_run : bool, default: False
-                If True, perform a dry run without making any changes.
+            If True, perform a dry run without making any changes.
         num_workers : int, default: 1
-                The number of worker threads to use for processing files.
+            The number of worker threads to use for processing files.
+        truncate_uids : int, default: 5
+            The number of characters to truncate from the UID.
 
         Raises
         ------
@@ -147,7 +150,9 @@ class DICOMSorter(SorterBase):
             # Resolve new paths
             ################################################################################
             file_map: Dict[Path, Path] = self._resolve_new_paths(
-                progress_bar=progress_bar, num_workers=num_workers
+                progress_bar=progress_bar,
+                num_workers=num_workers,
+                truncate_uids=truncate_uids,
             )
         self.logger.info("Finished resolving paths")
 
@@ -237,7 +242,10 @@ class DICOMSorter(SorterBase):
         return file_map
 
     def _resolve_new_paths(
-        self, progress_bar: progress.Progress, num_workers: int = 1
+        self,
+        progress_bar: progress.Progress,
+        num_workers: int = 1,
+        truncate_uids: int = 5,
     ) -> Dict[Path, Path]:
         """Resolve the new paths for all DICOM files using parallel processing.
 
@@ -247,6 +255,8 @@ class DICOMSorter(SorterBase):
                 Progress bar to use for tracking the progress of the operation.
         num_workers : int, default=1
                 Number of threads to use for parallel processing.
+        truncate_uids : int, default=5
+                Number of characters to truncate from the UID.
 
         Returns
         -------
@@ -262,7 +272,7 @@ class DICOMSorter(SorterBase):
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             future_to_path = {
                 executor.submit(
-                    resolve_path, path, self.keys, self.format
+                    resolve_path, path, self.keys, self.format, truncate_uids
                 ): path
                 for path in self.dicom_files
             }

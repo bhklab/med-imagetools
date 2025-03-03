@@ -57,8 +57,8 @@ def resolve_path(
     path: Path,
     keys: Set[str],
     format_str: str,
+    truncate: int,
     check_existing: bool = True,
-    truncate: bool = True,
     force: bool = True,
 ) -> Tuple[Path, Path]:
     """
@@ -74,8 +74,8 @@ def resolve_path(
         The format string for the resolved path.
     check_existing : bool, optional
         If True, check if the resolved path already exists (default is True).
-    truncate : bool, optional
-        If True, truncate long values in the resolved path (default is True).
+    truncate : int, optional
+        The number of characters to trunctae UID values (default is 5).
     force : bool, optional
         passed to pydicom.dcmread() to force reading the file (default is False).
 

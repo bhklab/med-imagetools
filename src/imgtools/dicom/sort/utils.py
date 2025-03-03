@@ -84,7 +84,7 @@ def truncate_uid(uid: str, last_digits: int = 5) -> str:
 def read_tags(
     file: Path,
     tags: List[str],
-    truncate: bool = True,
+    truncate: int = 5,
     default: Optional[str] = "",
     force: bool = False,
 ) -> Dict[str, str]:
@@ -100,8 +100,9 @@ def read_tags(
         Path to the DICOM file.
     tags : list of str
         List of DICOM tags to read.
-    truncate : bool, optional
-        If True, truncate UIDs to the last 5 characters (default is True).
+    truncate : int, optional
+        Number of characters to keep at the end of UIDs (default is 5).
+        0 or negative values will keep the entire UID.
     default : str, optional
         Default value to use for missing tags (default is "").
     force : bool, optional
@@ -186,8 +187,8 @@ def read_tags(
     for tag in tags:
         value = str(dicom.get(tag, default=default))
 
-        if truncate and tag.endswith("UID"):
-            value = truncate_uid(value)
+        if tag.endswith("UID") and truncate > 0:
+            value = truncate_uid(value, last_digits=truncate)
 
         result[tag] = value
     return result
