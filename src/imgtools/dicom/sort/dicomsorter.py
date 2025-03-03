@@ -41,6 +41,8 @@ class DICOMSorter(SorterBase):
         DICOM tags extracted from the target pattern.
     invalid_keys : Set[str]
         DICOM tags from the pattern that are invalid.
+    force_dcmread : bool
+        If True, force the use of `pydicom.dcmread` for reading DICOM files.
     """
 
     def __init__(
@@ -224,7 +226,7 @@ class DICOMSorter(SorterBase):
         duplicates = False
         for resolved_path, source_paths in duplicate_paths.items():
             if len(source_paths) > 1:
-                msg = f"Duplicate paths found for {resolved_path}: {source_paths}"
+                msg = f"Duplicate paths found for \n{resolved_path}\n{source_paths}"
                 self.logger.warning(msg)
                 duplicates = True
 

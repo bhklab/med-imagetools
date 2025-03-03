@@ -86,6 +86,7 @@ def read_tags(
     tags: List[str],
     truncate: bool = True,
     default: Optional[str] = "",
+    force: bool = False,
 ) -> Dict[str, str]:
     """
     Read the specified tags from a DICOM file.
@@ -101,6 +102,11 @@ def read_tags(
         List of DICOM tags to read.
     truncate : bool, optional
         If True, truncate UIDs to the last 5 characters (default is True).
+    default : str, optional
+        Default value to use for missing tags (default is "").
+    force : bool, optional
+        If True, force reading the file even if it is not a valid DICOM file
+        (default is False).
 
     Returns
     -------
@@ -162,7 +168,7 @@ def read_tags(
     )
 
     try:
-        dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True)
+        dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True, force=force)
     except FileNotFoundError as fnfe:
         errmsg = f"File not found: {file}"
         raise FileNotFoundError(errmsg) from fnfe

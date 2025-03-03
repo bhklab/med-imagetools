@@ -59,6 +59,7 @@ def resolve_path(
     format_str: str,
     check_existing: bool = True,
     truncate: bool = True,
+    force: bool = True,
 ) -> Tuple[Path, Path]:
     """
     Worker function to resolve a single path.
@@ -75,13 +76,17 @@ def resolve_path(
         If True, check if the resolved path already exists (default is True).
     truncate : bool, optional
         If True, truncate long values in the resolved path (default is True).
+    force : bool, optional
+        passed to pydicom.dcmread() to force reading the file (default is False).
 
     Returns
     -------
     Tuple[Path, Path]
         The source path and resolved path.
     """
-    tags: Dict[str, str] = read_tags(path, list(keys), truncate=truncate)
+    tags: Dict[str, str] = read_tags(
+        path, list(keys), truncate=truncate, force=force, default="Unknown"
+    )
     resolved_path = Path(format_str % tags, path.name)
     if check_existing and not resolved_path.exists():
         resolved_path = resolved_path.resolve()
