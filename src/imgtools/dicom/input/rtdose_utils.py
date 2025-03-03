@@ -1,10 +1,20 @@
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
 
-__all__ = ["rtdose_reference_uids", "RTDOSERefStructSOP", "RTDOSERefPlanSOP"]
+__all__ = [
+    "rtdose_reference_uids",
+    "RTDOSERefStructSOP",
+    "RTDOSERefPlanSOP",
+    "RTDOSERefSeries",
+]
 
-from imgtools.logging import logger
 
-# class representing a ReferencedRTStructureSetSequence
+class RTDOSERefSeries(str):
+    """
+    Sometimes... they reference the SERIESUID as well (Head-Neck-Pet-CT...)
+    but they also call it the SOPInstanceUID for some reason lol
+
+    `dose.ReferencedImageSequence[0].ReferencedSOPInstanceUID`
+    """
 
 
 class RTDOSERefStructSOP(str):
@@ -25,56 +35,60 @@ class RTDOSERefPlanSOP(str):
 
 def rtdose_reference_uids(
     rtdose: DicomInput,
-) -> RTDOSERefStructSOP | RTDOSERefPlanSOP | None:
-    """Get the ReferencedSOPInstanceUIDs from an RTDOSE file
+) -> tuple[RTDOSERefPlanSOP, RTDOSERefStructSOP, RTDOSERefSeries]:
+    """Extracts referenced SOPInstanceUIDs from an RTDOSE file.
 
-    Notes
-    -----
-    We prioritize the ReferencedStructureSetSequence over the
-    ReferencedRTPlanSequence. If both are present, we return the
-    ReferencedStructureSetSequence SOPInstanceUID.
-    If the ReferencedStructureSetSequence is not present, we return
-    the ReferencedRTPlanSequence SOPInstanceUID and hope that the
-    RTPLAN references the RTSTRUCT.
-
-    Example
+    Returns
     -------
-    >>> d = "/path/to/rtdose.dcm"
-    >>> match rtdose_reference_uids(d):
-    ...     case RTDOSERefStructSOP(uid):
-    ...         print(f"RTSTRUCT UID: {uid}")
-    ...     case RTDOSERefPlanSOP(uid):
-    ...         print(f"RTPLAN UID: {uid}")
-    ...     case None:
-    ...         print(
-    ...             "No ReferencedSOPInstanceUID found"
-    ...         )
+    tuple
+        A tuple containing:
+        - plan: RTDOSERefPlanSOP (empty string if not found)
+        - struct: RTDOSERefStructSOP (empty string if not found)
+        - series: RTDOSERefSeries (empty string if not found)
     """
     dose = load_dicom(rtdose)
-    if "ReferencedStructureSetSequence" in dose:
-        ref_struct = [
-            seq.ReferencedSOPInstanceUID
-            for seq in dose.ReferencedStructureSetSequence
-        ]
-        if len(ref_struct) > 1:
-            warnmsg = (
-                f"Found {len(ref_struct)}"
-                " ReferencedStructureSetSequence in RTDOSE file"
-                "Using the first one"
-            )
-            logger.warning(warnmsg, file=rtdose)
-        return RTDOSERefStructSOP(ref_struct[0])
-    elif "ReferencedRTPlanSequence" in dose:
-        ref_pl = [
-            seq.ReferencedSOPInstanceUID
-            for seq in dose.ReferencedRTPlanSequence
-        ]
-        if len(ref_pl) > 1:
-            warnmsg = (
-                f"Found {len(ref_pl)} ReferencedRTPlanSequence in RTDOSE file"
-                "Using the first one"
-            )
-            logger.warning(warnmsg, file=rtdose)
-        return RTDOSERefPlanSOP(ref_pl[0])
 
-    return None
+    # Extract plan UID
+    plan_uid = RTDOSERefPlanSOP("")
+    if "ReferencedRTPlanSequence" in dose and dose.ReferencedRTPlanSequence:
+        plan_uid = RTDOSERefPlanSOP(dose.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+
+    # Extract structure set UID
+    struct_uid = RTDOSERefStructSOP("")
+    if ("ReferencedStructureSetSequence" in dose and dose.ReferencedStructureSetSequence):  # fmt: skip
+        struct_uid = RTDOSERefStructSOP(dose.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+
+    # Extract series UID
+    series_uid = RTDOSERefSeries("")
+    if "ReferencedImageSequence" in dose and dose.ReferencedImageSequence:
+        series_uid = RTDOSERefSeries(dose.ReferencedImageSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+
+    return plan_uid, struct_uid, series_uid
+
+
+# from rich import print
+
+# p = "data/OCTANE_DATA/OCTANE_ALL/HN-HGJ-072/StudyUID-16252/RTDOSE/6780042-SeriesUID-98557/1-1.dcm"
+
+# refd_plan, refd_struct, refd_series = rtdose_reference_uids(p)
+
+#     case [refd_plan, refd_struct, refd_series]:
+#         print(f"RTPLAN UID: {refd_plan}, RTSTRUCT UID: {refd_struct}, Series UID: {refd_series}")
+
+# print(f"RTSTRUCT UID: {s}, RTPLAN UID: {p}, Series UID: {sr}")
+# case [RTDOSERefPlanSOP(p), None, RTDOSERefSeries(sr)]:
+#     print(f"RTPLAN UID: {p}, Series UID: {sr}")
+# case RTDOSERefs(struct=uid, plan=None, series=None):
+#     print(f"Only RTSTRUCT UID found: {uid}")
+# case RTDOSERefs(struct=None, plan=RTDOSERefPlanSOP(uid), series=None):
+#     print(f"Only RTPLAN UID found: {uid}")
+# case RTDOSERefs(struct=None, plan=None, series=RTDOSERefSeries(uid)):
+#     print(f"Only Series UID found: {uid}")
+# case RTDOSERefs(
+#     struct=s,
+#     plan=p,
+#     series=sr,
+# ):
+#     print(f"RTSTRUCT UID: {s}, RTPLAN UID: {p}, Series UID: {sr}")
+# case RTDOSERefs():
+#     print("No referenced UIDs found")
