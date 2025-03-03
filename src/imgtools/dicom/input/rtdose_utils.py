@@ -99,11 +99,11 @@ def rtdose_reference_uids(
     return result
 
 
-from rich import print
+# from rich import print
 
-p = "data/OCTANE_DATA/OCTANE_ALL/HN-HGJ-072/StudyUID-16252/RTDOSE/6780042-SeriesUID-98557/1-1.dcm"
+# p = "data/OCTANE_DATA/OCTANE_ALL/HN-HGJ-072/StudyUID-16252/RTDOSE/6780042-SeriesUID-98557/1-1.dcm"
 
-refd_plan, refd_struct, refd_series = rtdose_reference_uids(p)
+# refd_plan, refd_struct, refd_series = rtdose_reference_uids(p)
 
 #     case [refd_plan, refd_struct, refd_series]:
 #         print(f"RTPLAN UID: {refd_plan}, RTSTRUCT UID: {refd_struct}, Series UID: {refd_series}")
