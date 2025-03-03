@@ -14,10 +14,10 @@ from pydicom import dcmread
 
 from imgtools.logging import logger
 
-from ..modules.utils import read_image
-
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
+
+__all__ = ["PET", "PETImageType"]
 
 
 # alternative to StrEnum for python 3.10 compatibility

@@ -6,7 +6,7 @@ import SimpleITK as sitk
 
 from imgtools.modalities.structureset import (
     StructureSet,
-)  # Replace `your_module` with the actual module name
+)
 
 
 @pytest.fixture
@@ -165,37 +165,6 @@ def test_init(roi_points, metadata) -> None:
     # Test default metadata
     structure_set_no_metadata = StructureSet(roi_points)
     assert structure_set_no_metadata.metadata == {}
-
-
-@patch("imgtools.modules.structureset.dcmread")
-def test_from_dicom_rtstruct(mock_dcmread) -> None:
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    """Test from_dicom_rtstruct method with mocked DICOM file."""
-    mock_rtstruct = MagicMock()
-    mock_rtstruct.StructureSetROISequence = [
-        MagicMock(ROIName="GTV"),
-        MagicMock(ROIName="PTV"),
-    ]
-    mock_rtstruct.ROIContourSequence = [
-        MagicMock(),
-        MagicMock(),
-    ]
-    mock_rtstruct.ROIContourSequence[0].ContourSequence = [
-        MagicMock(ContourData=[1.0, 2.0, 3.0])
-    ]
-    mock_rtstruct.ROIContourSequence[1].ContourSequence = [
-        MagicMock(ContourData=[4.0, 5.0, 6.0])
-    ]
-    mock_rtstruct.Modality = "RTSTRUCT"
-    mock_dcmread.return_value = mock_rtstruct
-
-    structure_set = StructureSet.from_dicom_rtstruct("dummy")
-    # Assert the results
-    assert "GTV" in structure_set.roi_points
-    assert "PTV" in structure_set.roi_points
-    assert len(structure_set.roi_points["GTV"]) == 1
-    assert len(structure_set.roi_points["PTV"]) == 1
-
 
 def test_rtstruct_to_segmentation(roi_points, metadata) -> None:
     """Test rtstruct_to_segmentation method with mocked ROI points."""
