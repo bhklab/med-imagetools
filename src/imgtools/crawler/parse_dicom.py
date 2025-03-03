@@ -19,6 +19,9 @@ from imgtools.dicom.input import (
     SEGRefSOPs,
     SR_RefSeries,
     SR_RefSOPs,
+    RTDOSERefPlanSOP,
+    RTDOSERefSeries,
+    RTDOSERefStructSOP,
     rtdose_reference_uids,
     rtplan_reference_uids,
     rtstruct_reference_uids,
@@ -90,11 +93,11 @@ def parse_dicom(  # noqa: PLR0912
                     meta.ReferencedSOPInstanceUID = seg_ref_sops
         case "RTDOSE":
             # this ones too complicated lol
-            refd_plan, refd_struct, refd_series = rtdose_reference_uids(dcm)
-            meta.ReferencedSeriesUID = str(refd_series or "")
-            meta.RTDOSERefPlanSOP = str(refd_plan or "")
-            meta.RTDOSERefStructSOP = str(refd_struct or "")
-
+            match rtdose_reference_uids(dcm):
+                case RTDOSERefPlanSOP(dose_ref_plan),  RTDOSERefStructSOP(dose_ref_struct), RTDOSERefSeries(dose_ref_series):  # fmt: skip
+                    meta.RTDOSERefPlanSOP = dose_ref_plan
+                    meta.RTDOSERefStructSOP = dose_ref_struct
+                    meta.ReferencedSeriesUID = dose_ref_series
         case "RTPLAN":
             match rtplan_reference_uids(dcm):
                 case RTPLANRefStructSOP(referenced_rtstruct_uid):

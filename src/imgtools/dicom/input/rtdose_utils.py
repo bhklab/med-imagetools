@@ -2,7 +2,12 @@ from dataclasses import dataclass
 
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
 
-__all__ = ["rtdose_reference_uids", "RTDOSERefStructSOP", "RTDOSERefPlanSOP"]
+__all__ = [
+    "rtdose_reference_uids",
+    "RTDOSERefStructSOP",
+    "RTDOSERefPlanSOP",
+    "RTDOSERefSeries",
+]
 
 from imgtools.logging import logger
 
@@ -35,68 +40,35 @@ class RTDOSERefPlanSOP(str):
 
 def rtdose_reference_uids(
     rtdose: DicomInput,
-) -> list[RTDOSERefPlanSOP | RTDOSERefStructSOP | RTDOSERefSeries | None]:
+) -> tuple[RTDOSERefPlanSOP, RTDOSERefStructSOP, RTDOSERefSeries]:
     """Extracts referenced SOPInstanceUIDs from an RTDOSE file.
 
     Returns
     -------
-    RTDOSERefs
-            - struct: RTDOSERefStructSOP or None
-            - plan: RTDOSERefPlanSOP or None
-            - series: RTDOSERefSeries or None
+    tuple
+        A tuple containing:
+        - plan: RTDOSERefPlanSOP (empty string if not found)
+        - struct: RTDOSERefStructSOP (empty string if not found)
+        - series: RTDOSERefSeries (empty string if not found)
     """
     dose = load_dicom(rtdose)
 
-    result: list[
-        RTDOSERefPlanSOP | RTDOSERefStructSOP | RTDOSERefSeries | None
-    ] = [None for _ in range(3)]
+    # Extract plan UID
+    plan_uid = RTDOSERefPlanSOP("")
+    if "ReferencedRTPlanSequence" in dose and dose.ReferencedRTPlanSequence:
+        plan_uid = RTDOSERefPlanSOP(dose.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
-    if "ReferencedRTPlanSequence" in dose:
-        plan_uids = [
-            seq.ReferencedSOPInstanceUID
-            for seq in dose.ReferencedRTPlanSequence
-        ]
-        if plan_uids:
-            result[0] = RTDOSERefPlanSOP(plan_uids[0])
+    # Extract structure set UID
+    struct_uid = RTDOSERefStructSOP("")
+    if ("ReferencedStructureSetSequence" in dose and dose.ReferencedStructureSetSequence):  # fmt: skip
+        struct_uid = RTDOSERefStructSOP(dose.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
-        if len(plan_uids) > 1:
-            logger.warning(
-                f"Found {len(plan_uids)} ReferencedRTPlanSequence in"
-                "RTDOSE file, using the first one",
-                file=rtdose,
-            )
+    # Extract series UID
+    series_uid = RTDOSERefSeries("")
+    if "ReferencedImageSequence" in dose and dose.ReferencedImageSequence:
+        series_uid = RTDOSERefSeries(dose.ReferencedImageSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
-    if "ReferencedStructureSetSequence" in dose:
-        struct_uids = [
-            seq.ReferencedSOPInstanceUID
-            for seq in dose.ReferencedStructureSetSequence
-        ]
-        if struct_uids:
-            result[1] = RTDOSERefStructSOP(struct_uids[0])
-
-        if len(struct_uids) > 1:
-            logger.warning(
-                f"Found {len(struct_uids)} ReferencedStructureSetSequence"
-                "in RTDOSE file, using the first one",
-                file=rtdose,
-            )
-
-    if "ReferencedImageSequence" in dose:
-        series_uids = [
-            seq.ReferencedSOPInstanceUID
-            for seq in dose.ReferencedImageSequence
-        ]
-        if series_uids:
-            result[2] = RTDOSERefSeries(series_uids[0])
-
-        if len(series_uids) > 1:
-            logger.warning(
-                f"Found {len(series_uids)} ReferencedRTImageSequence"
-                "in RTDOSE file, using the first one",
-                file=rtdose,
-            )
-
-    return result
+    return plan_uid, struct_uid, series_uid
 
 
 # from rich import print
