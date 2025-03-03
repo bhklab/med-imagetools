@@ -168,7 +168,9 @@ def read_tags(
     )
 
     try:
-        dicom = dcmread(file, specific_tags=tags, stop_before_pixels=True, force=force)
+        dicom = dcmread(
+            file, specific_tags=tags, stop_before_pixels=True, force=force
+        )
     except FileNotFoundError as fnfe:
         errmsg = f"File not found: {file}"
         raise FileNotFoundError(errmsg) from fnfe

@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
 
 __all__ = [
@@ -9,10 +7,7 @@ __all__ = [
     "RTDOSERefSeries",
 ]
 
-from imgtools.logging import logger
 
-
-# class representing a ReferencedRTStructureSetSequence
 class RTDOSERefSeries(str):
     """
     Sometimes... they reference the SERIESUID as well (Head-Neck-Pet-CT...)

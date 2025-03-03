@@ -11,6 +11,9 @@ from pydicom import dcmread
 from tqdm import tqdm
 
 from imgtools.dicom.input import (
+    RTDOSERefPlanSOP,
+    RTDOSERefSeries,
+    RTDOSERefStructSOP,
     RTPLANRefStructSOP,
     RTSTRUCTRefSeries,
     RTSTRUCTRefSOP,
@@ -19,9 +22,6 @@ from imgtools.dicom.input import (
     SEGRefSOPs,
     SR_RefSeries,
     SR_RefSOPs,
-    RTDOSERefPlanSOP,
-    RTDOSERefSeries,
-    RTDOSERefStructSOP,
     rtdose_reference_uids,
     rtplan_reference_uids,
     rtstruct_reference_uids,
