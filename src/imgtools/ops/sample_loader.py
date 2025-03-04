@@ -1,12 +1,10 @@
 from collections import defaultdict
 from typing import Dict, List
-from pathlib import Path
 import json
 
 from imgtools.logging import logger
 
-from imgtools.io import *
-from imgtools.ops import StructureSetToSegmentation
+from imgtools.io import read_dicom_auto, auto_dicom_result
 
 from imgtools.modules.scan import Scan
 from imgtools.modules.pet import PET
@@ -16,16 +14,14 @@ from imgtools.modules.segmentation import Segmentation
 class SampleLoader():
     def __init__(
             self,
-            dir_path: str,
-            crawl_path: str | None = '.imgtools/crawl.json',
+            crawl_path: str,
             roi_names: Dict[str, str] | None = None,
             multiple_subseries_setting_toggle: bool = False,
         ) -> None:
-        self.dir_path = dir_path
         self.roi_names = roi_names
         self.multiple_subseries_setting_toggle = multiple_subseries_setting_toggle
 
-        with open((Path(dir_path) / crawl_path), 'r') as f:
+        with open((crawl_path), 'r') as f:
             self.crawl_info = json.load(f)      
 
     def _reader(self, series_uid: str) -> auto_dicom_result:
@@ -38,9 +34,10 @@ class SampleLoader():
         file_names = [
             file_name for _, file_name in series_info[subseries_uids[0]]['instances'].items()
         ]
+        folder = series_info[subseries_uids[0]]['folder']
 
         return read_dicom_auto(
-            self.dir_path, 
+            folder, 
             series_uid, 
             file_names
         )
@@ -54,24 +51,19 @@ class SampleLoader():
             file_names = [
                 file_name for _, file_name in series_info[subseries_uid]['instances'].items()
             ]
+            folder = series_info[subseries_uid]['folder']
 
             images.append(read_dicom_auto(
-                self.dir_path, 
+                folder, 
                 series_uid, 
                 file_names
             ))
         
         return images
-    
-    def _reader_RTSTRUCT(self, series_uid: str, reference_image: Scan) -> Segmentation:
-        """Convert RTSTRUCT series to Segmentation using the reference image."""
-        rtstruct_to_segmentation = StructureSetToSegmentation(self.roi_names, continuous=False)
-        struct = self._reader(series_uid)
-        return rtstruct_to_segmentation(struct, reference_image=reference_image, **kwargs)
 
-    def _sort_sample(self, sample: List[Dict[str, str]]) -> Dict[str, List[str]]:
+    def _group_by_modality(self, sample: List[Dict[str, str]]) -> Dict[str, List[str]]:
         """
-        Sorts the sample into a dictionary with modalities as keys and lists of series UIDs as values.
+        Groups the sample into a dictionary with modalities as keys and lists of series UIDs as values.
 
         Args:
             sample (List[Dict[str, str]]): List of dictionaries containing image metadata.
@@ -79,33 +71,13 @@ class SampleLoader():
         Returns:
             Dict[str, List[str]]: Dictionary with modalities as keys and lists of series UIDs as values.
         """
-        sorted_images: Dict[str, List[str]] = defaultdict(list)
+        grouped_images: Dict[str, List[str]] = defaultdict(list)
         
         for image in sample:
             modality = image['modality']
-            sorted_images[modality].append(image['series_uid'])
+            grouped_images[modality].append(image['series_uid'])
 
-        return sorted_images
-    
-    def _load_reference(self, sorted_sample: Dict[str, List[str]]) -> Scan:
-        """
-        Load the reference scan from the sorted sample.
-
-        This method selects the first CT or MR series from the sorted sample
-        to use as the reference scan. If both CT and MR series are present,
-        CT is preferred. If multiple series of the selected modality are found,
-        a warning is logged and the first series is used.
-        """
-
-        modality = 'CT' if 'CT' in sorted_sample else 'MR' if 'MR' in sorted_sample else None
-        if not modality:
-            raise ValueError("No CT or MR series found to use as reference.")
-
-        if len(sorted_sample[modality]) > 1:
-            logger.warning(f"Found >1 {modality} series, using the first one")
-
-        series_uid = sorted_sample.pop(modality)[0]
-        return self._reader(series_uid)
+        return grouped_images
 
     def load(self, sample: List[Dict[str, str]]) -> List[Scan | PET | Dose | Segmentation]:
         """
@@ -129,19 +101,31 @@ class SampleLoader():
         if len(sample) == 1 and self.multiple_subseries_setting_toggle: # EDGE CASE
             return self._reader_multiple(sample[0]['series_uid'])
         else:   
-            sorted_sample = self._sort_sample(sample)     
+            grouped_images = self._group_by_modality(sample)     
 
             # Load reference image
-            reference_image = self._load_reference(sorted_sample)
+            reference_modality = 'CT' if 'CT' in grouped_images else 'MR' if 'MR' in grouped_images else None
+            if not reference_modality:
+                raise ValueError("No CT or MR series found to use as reference.")
+
+            if len(grouped_images[reference_modality]) > 1:
+                logger.warning(f"Found >1 {reference_modality} series, using the first one")
+
+            series_uid = grouped_images.pop(reference_modality)[0]
+            reference_image = self._reader(series_uid)
             loaded_images.append(reference_image)
 
             # Load remaining images
-            for modality, series_uids in sorted_sample.items():
-                if modality == 'RTSTRUCT':
+            for modality, series_uids in grouped_images.items():
                     for series_uid in series_uids:
-                        loaded_images.append(self._reader_RTSTRUCT(series_uid, reference_image))
-                else:
-                    for series_uid in series_uids:
-                        loaded_images.append(self._reader(series_uid))
+                        image = self._reader(series_uid)
+                        if modality == 'RTSTRUCT':
+                            image = image.to_segmentation(
+                                reference_image, 
+                                self.roi_names, 
+                                continuous=False, 
+                                **kwargs
+                            )
+                        loaded_images.append(image)
             
             return loaded_images

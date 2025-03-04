@@ -74,7 +74,15 @@ class Branch:
         return ' -> '.join(node.Modality for node in self.series_nodes)
 
 class GroupBy(Enum):
-    """Enum for fields that reference other fields in the DataFrame."""
+    """
+    Enum for fields that reference other fields in the DataFrame.
+
+    ReferencedSeriesUID is the default grouping field, 
+    which groups series based on their references by building a forest of trees.
+
+    StudyInstanceUID and PatientID are alternatives that can be used when the references are broken or not applicable.
+    Here the forest is built by grouping series based on the StudyInstanceUID or PatientID.
+    """
     ReferencedSeriesUID = "ReferencedSeriesUID"
     StudyInstanceUID = "StudyInstanceUID"
     PatientID = "PatientID"
@@ -95,11 +103,14 @@ class Interlacer:
         List of trees, where each tree is a list of SeriesNode objects.
     root_nodes : List[SeriesNode]
         List of root nodes in the forest.
+    query_branches : bool
+            Queries all branches as different samples.
     """
     def __init__(
             self, 
             crawl_path: str | Path,
-            group_field: GroupBy = GroupBy.ReferencedSeriesUID
+            group_field: GroupBy = GroupBy.ReferencedSeriesUID,
+            query_branches: bool = False
         ) -> None:
         """
         Initializes the Interlacer object.
@@ -110,9 +121,19 @@ class Interlacer:
             Path to the CSV file containing the data.
         group_field : GroupBy, optional
             Field to group by, by default GroupBy.ReferencedSeriesUID.
+        query_branches : bool, optional, default=False
+            If True, queries all branches as different samples(Only applicable when grouping by ReferencedSeriesUID).
         """
-        self.crawl_df = pd.read_csv(crawl_path, index_col='SeriesInstanceUID')
+        # Load and drop duplicate SeriesInstanceUID
+        self.crawl_path = Path(crawl_path)
+        self.crawl_df = pd.read_csv(self.crawl_path, index_col='SeriesInstanceUID')
+        self.crawl_df = self.crawl_df[~self.crawl_df.index.duplicated(keep='first')]
+        
         self.group_field = group_field
+        self.query_branches = query_branches
+        if self.query_branches and self.group_field != GroupBy.ReferencedSeriesUID:
+            logger.warning("query_branches is only applicable when grouping by ReferencedSeriesUID.", 
+                           query_branches=self.query_branches, group_field=self.group_field)
 
         self.series_nodes: Dict[str, SeriesNode] = {} 
         self._create_series_nodes()
@@ -124,6 +145,7 @@ class Interlacer:
             case GroupBy.ReferencedSeriesUID:
                 logger.info("Building forest from ReferencedSeriesUID...")
                 self._build_forest()
+                self.trees = self._find_branches() if self.query_branches else self.root_nodes
             case GroupBy.StudyInstanceUID:
                 logger.info("Grouping by StudyInstanceUID...")
                 self.trees = self._group_by_attribute(self.series_nodes.values(), 'StudyInstanceUID')
@@ -178,11 +200,9 @@ class Interlacer:
         
         return(branches)
 
-    def _query(self, queried_modalities: Set[str], process_branches: bool = False) -> List[List[SeriesNode]]:
+    def _query(self, queried_modalities: Set[str]) -> List[List[SeriesNode]]:
         """Returns samples that contain *all* specified modalities."""
         result = []
-        if GroupBy.ReferencedSeriesUID == self.group_field:
-            self.trees = self._find_branches() if process_branches else self.root_nodes
 
         for tree in self.trees:
             series_nodes = [node for node in tree if node.Modality in queried_modalities]
@@ -192,7 +212,7 @@ class Interlacer:
 
         return result
 
-    def query(self, query_string: str, process_branches: bool = False) -> List[List[Dict[str, str]]]:
+    def query(self, query_string: str) -> List[List[Dict[str, str]]]:
         """
         Queries the forest for specific modalities and returns a DataFrame containing relevant patient data.
 
@@ -200,8 +220,7 @@ class Interlacer:
         ----------
         query_string : str
             A comma-separated string representing the modalities to query (e.g., 'CT,MR').
-        process_branches : bool, optional, default=False
-            If True, queries all branches as different samples(Only applicable when grouping by ReferencedSeriesUID).
+
         Returns
         -------
         pd.DataFrame
@@ -217,10 +236,7 @@ class Interlacer:
         - 'RTSTRUCT'  : Radiotherapy Structure
         - 'RTDOSE'    : Radiotherapy Dose
         """
-        if process_branches and self.group_field != GroupBy.ReferencedSeriesUID:
-            raise ValueError("process_branches is only applicable when grouping by ReferencedSeriesUID.")
-
-        query_results = self._query(set(query_string.split(',')), process_branches)
+        query_results = self._query(set(query_string.split(',')))
 
         data = [
             [
@@ -248,7 +264,7 @@ class Interlacer:
         if self.group_field != GroupBy.ReferencedSeriesUID:
             raise NotImplementedError("Visualization is only supported when grouping by ReferencedSeriesUID.")
 
-        save_path = './forest_visualization.html' if save_path is None else save_path
+        save_path = self.crawl_path.parent / 'forest_visualization.html' if save_path is None else save_path
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -329,7 +345,7 @@ class Interlacer:
         <script>
             function focusNode(nodeId) {
                 network.selectNodes([nodeId]); 
-                network.focus(nodeId, { scale: 1.5, animation: true });
+                network.focus(nodeId, { scale: 3.5, animation: true });
             }
         </script>
         """
