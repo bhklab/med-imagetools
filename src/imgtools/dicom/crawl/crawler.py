@@ -36,7 +36,24 @@ class Crawler:
         self._crawl_db = crawl_db
         self._sop_map = sop_map
         logger.info(f"Found {len(crawl_db)} Series in {db_path}")
-        logger.info(f"Found {len(sop_map)} distinct Instances in {sopmap_path}")
+        logger.info(
+            f"Found {len(sop_map)} distinct Instances in {sopmap_path}"
+        )
+
+    def remap_refs(self) -> None:
+        """Remap references in the database.
+
+        The goal is to get the `ReferencedSeriesUID` for as many series as possible.
+        Whereas some series directly reference the `SeriesInstanceUID` of another series,
+        others reference one or more `SOPInstanceUID` of instances in another series.
+        This method tries to resolve the latter case by mapping the `SOPInstanceUID` to the
+        `SeriesInstanceUID` of the series it belongs to.
+        """
+
+        # structure of crawldb is : {seriesuid: { subseriesuid: { metadatadictionary } } }
+        # structure of sopmap is : { sopuid: seriesuid }
+
+        
 
 
 if __name__ == "__main__":
