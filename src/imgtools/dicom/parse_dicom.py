@@ -6,6 +6,7 @@ from collections import defaultdict
 
 from dpath import merge  # type: ignore
 from joblib import Parallel, delayed  # type: ignore
+from pydicom import FileDataset
 from tqdm import tqdm
 
 from imgtools.dicom import find_dicoms, load_dicom
@@ -86,19 +87,20 @@ TAGS_OF_INTEREST = [
 ]
 
 
-def parse_one_dicom(  # noqa: PLR0912
-    dcm_path: str, top: pathlib.Path
-) -> t.Tuple[SeriesMetaMap, SopSeriesMap]:
-    dcm = load_dicom(
-        dcm_path,
-        force=True,
-        stop_before_pixels=True,
-    )
+def update_modality_specific_references(  # noqa: PLR0912
+    dcm: FileDataset, meta: MetaAttrDict
+) -> None:
+    """
+    Update metadata with modality-specific references from the DICOM object.
 
-    # Get the main metadata
-    meta = MetaAttrDict({tag: dcm.get(tag) for tag in TAGS_OF_INTEREST})
-
-    # Modality specific parsing. Get the refrerences
+    Parameters
+    ----------
+    dcm : pydicom.dataset.Dataset
+        The DICOM object to extract references from
+    meta : MetaAttrDict
+        The metadata dictionary to update in-place
+    """
+    # Modality specific parsing. Get the references
     match meta["Modality"]:
         case "RTSTRUCT":  # simplest case
             match rtstruct_reference_uids(dcm):
@@ -136,6 +138,27 @@ def parse_one_dicom(  # noqa: PLR0912
                 case SR_RefSeries(sr_ref_series), SR_RefSOPs(sr_ref_sops):
                     meta.ReferencedSeriesUID = sr_ref_series
                     meta.ReferencedSOPUIDs = sr_ref_sops
+
+
+def parse_one_dicom(
+    dcm_path: str, top: pathlib.Path
+) -> t.Tuple[SeriesMetaMap, SopSeriesMap]:
+    dcm = load_dicom(
+        dcm_path,
+        force=True,
+        stop_before_pixels=True,
+    )
+
+    # Get the main metadata
+    meta = MetaAttrDict({tag: dcm.get(tag) for tag in TAGS_OF_INTEREST})
+
+    try:
+        update_modality_specific_references(dcm, meta)
+    except Exception as e:
+        logger.error(
+            f"Error updating modality-specific references for {dcm_path}: {e}",
+            modality=meta.Modality,
+        )
 
     # Extract UID and file path
     instance_uid = SopUID(dcm.get("SOPInstanceUID"))
