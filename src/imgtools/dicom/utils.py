@@ -10,15 +10,10 @@ This module provides utilities for:
 
 import difflib
 import functools
-from pathlib import Path
 from typing import FrozenSet, List, Optional
 
 from pydicom._dicom_dict import DicomDictionary
 from pydicom.datadict import dictionary_has_tag, tag_for_keyword
-
-
-
-
 
 ###############################################################################
 # DICOM TAG UTILITIES

@@ -200,6 +200,3 @@ if __name__ == "__main__":
                 sop_uid_list.append(sop_uid)
 
     # print table of # of series_uids and sop_uids
-    print(f"{'series_uid':<20}|{'sop_uid':<20}")
-    print(f"{'-' * 20:<20}{'-' * 20:<20}")
-    print(f"{len(series_uid_list):<20}|{len(sop_uid_list):<20}")
