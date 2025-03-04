@@ -15,8 +15,8 @@ class SampleLoader():
     def __init__(
             self,
             crawl_path: str,
-            roi_names: Dict[str, str] | None = None,
             multiple_subseries_setting_toggle: bool = False,
+            roi_names: Dict[str, str] | None = None,
         ) -> None:
         self.roi_names = roi_names
         self.multiple_subseries_setting_toggle = multiple_subseries_setting_toggle
@@ -24,42 +24,56 @@ class SampleLoader():
         with open((crawl_path), 'r') as f:
             self.crawl_info = json.load(f)      
 
-    def _reader(self, series_uid: str) -> auto_dicom_result:
+    def _reader(self, series_uid: str, load_subseries: bool = False) -> auto_dicom_result | List[auto_dicom_result]:
+        """
+        Reads DICOM files for a given series UID.
+
+        Parameters
+        ----------
+        series_uid : str
+            The series UID to read.
+        load_subseries : bool, optional
+            Whether to load multiple subseries, by default False.
+
+        Returns
+        -------
+        auto_dicom_result | List[auto_dicom_result]
+            The loaded DICOM data or a list of loaded DICOM data for each subseries.
+        """
         series_info = self.crawl_info[series_uid]
         subseries_uids = list(series_info.keys())
-        
-        if len(subseries_uids) > 1:
-            logger.warning(f"Found >1 subseries, reading first one")
 
-        file_names = [
-            file_name for _, file_name in series_info[subseries_uids[0]]['instances'].items()
-        ]
-        folder = series_info[subseries_uids[0]]['folder']
+        if load_subseries:         
+            images = []
+            for subseries_uid in subseries_uids:
+                file_names = [
+                    file_name for _, file_name in series_info[subseries_uid]['instances'].items()
+                ]
+                folder = series_info[subseries_uid]['folder']
 
-        return read_dicom_auto(
-            folder, 
-            series_uid, 
-            file_names
-        )
-    
-    def _reader_multiple(self, series_uid: str) -> List[auto_dicom_result]:
-        series_info = self.crawl_info[series_uid]
-        subseries_uids = list(series_info.keys())
-        images = []
+                images.append(read_dicom_auto(
+                    folder, 
+                    series_uid, 
+                    file_names
+                ))
+            
+            return images
+        else:
+            if len(subseries_uids) > 1:
+                logger.warning(f"Found >1 subseries, combining them into one image")
 
-        for subseries_uid in subseries_uids:
-            file_names = [
-                file_name for _, file_name in series_info[subseries_uid]['instances'].items()
-            ]
-            folder = series_info[subseries_uid]['folder']
+            folder = series_info[subseries_uids[0]]['folder']
+            file_names = []
+            for subseries_uid in subseries_uids:
+                file_names += [
+                    file_name for _, file_name in series_info[subseries_uid]['instances'].items()
+                ]
 
-            images.append(read_dicom_auto(
+            return read_dicom_auto(
                 folder, 
                 series_uid, 
                 file_names
-            ))
-        
-        return images
+            )
 
     def _group_by_modality(self, sample: List[Dict[str, str]]) -> Dict[str, List[str]]:
         """
@@ -87,6 +101,7 @@ class SampleLoader():
         sample : List[Dict[str, str]]
             A list of dictionaries where each dictionary contains information about a specific imaging series.
             The keys in the dictionary represent the modality (e.g., 'CT', 'MR', 'RTSTRUCT') and the values are the series UIDs.
+            Example sample: [{'CT': '1.2.3'}, {'RTSTRUCT': '1.2.3.4'}, {'RTSTRUCT': '1.2.3.5'},]
         Returns
         -------
         List[Scan | PET | Dose | Segmentation]
@@ -99,7 +114,7 @@ class SampleLoader():
         loaded_images: List[Scan | PET | Dose | Segmentation] = []
 
         if len(sample) == 1 and self.multiple_subseries_setting_toggle: # EDGE CASE
-            return self._reader_multiple(sample[0]['series_uid'])
+            return self._reader(sample[0]['series_uid'], load_subseries=True)
         else:   
             grouped_images = self._group_by_modality(sample)     
 
@@ -107,9 +122,8 @@ class SampleLoader():
             reference_modality = 'CT' if 'CT' in grouped_images else 'MR' if 'MR' in grouped_images else None
             if not reference_modality:
                 raise ValueError("No CT or MR series found to use as reference.")
-
             if len(grouped_images[reference_modality]) > 1:
-                logger.warning(f"Found >1 {reference_modality} series, using the first one")
+                raise ValueError(f"Found >1 {reference_modality} series, using the first one")
 
             series_uid = grouped_images.pop(reference_modality)[0]
             reference_image = self._reader(series_uid)
@@ -124,7 +138,7 @@ class SampleLoader():
                                 reference_image, 
                                 self.roi_names, 
                                 continuous=False, 
-                                **kwargs
+                                # **kwargs
                             )
                         loaded_images.append(image)
             
