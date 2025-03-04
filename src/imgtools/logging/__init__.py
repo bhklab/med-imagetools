@@ -1,5 +1,5 @@
 import os
-from contextlib import _GeneratorContextManager, contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 from typing import Any, Generator
 
@@ -73,7 +73,7 @@ def temporary_log_level(
 
 def tqdm_logging_redirect(
     logger_name: str = "imgtools",
-) -> _GeneratorContextManager[None, None, None]:
+) -> AbstractContextManager[None]:
     """Context manager to redirect logging output into tqdm for cleaner logging.
 
     Parameters
