@@ -17,9 +17,18 @@ class SampleLoader():
             crawl_path: str,
             multiple_subseries_setting_toggle: bool = False,
             roi_names: Dict[str, str] | None = None,
+            existing_roi_indices: Dict[str, int] | None = None,
+            ignore_missing_regex: bool = False,
+            roi_select_first: bool = False,
+            roi_separate: bool = False
         ) -> None:
-        self.roi_names = roi_names
         self.multiple_subseries_setting_toggle = multiple_subseries_setting_toggle
+
+        self.roi_names = roi_names
+        self.existing_roi_indices = existing_roi_indices
+        self.ignore_missing_regex = ignore_missing_regex
+        self.roi_select_first = roi_select_first
+        self.roi_separate = roi_separate
 
         with open((crawl_path), 'r') as f:
             self.crawl_info = json.load(f)      
@@ -137,8 +146,11 @@ class SampleLoader():
                             image = image.to_segmentation(
                                 reference_image, 
                                 self.roi_names, 
-                                continuous=False, 
-                                # **kwargs
+                                continuous=False,
+                                existing_roi_indices=self.existing_roi_indices, 
+                                ignore_missing_regex=self.ignore_missing_regex, 
+                                roi_select_first=self.roi_select_first, 
+                                roi_separate=self.roi_separate
                             )
                         loaded_images.append(image)
             
