@@ -2,6 +2,9 @@ from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Generator
 
+import dpath
+import pandas as pd
+from matplotlib.pylab import f
 from tqdm import tqdm
 
 from imgtools.dicom.crawl import parse_dicom_dir
@@ -40,12 +43,13 @@ class Crawler:
         self._crawl_db = crawl_db
         self._sop_map = sop_map
         logger.info(f"Found {len(crawl_db)} Series in {db_path}")
-        logger.info(
-            f"Found {len(sop_map)} distinct Instances in {sopmap_path}"
-        )
+        logger.info(f"Found {len(sop_map)} Instances in {sopmap_path}")
 
         # initialize metadata generator
         self._metadata_gen = self._metadata_generator()
+
+        # remap references
+        self.remap_refs()
 
     def __getitem__(self, seriesuid: str) -> dict:
         return self._crawl_db[seriesuid]
@@ -77,6 +81,9 @@ class Crawler:
         """Helper generator to flatten the nested structure of the crawldb."""
         for seriesuid in self.series_uids:
             yield from self._crawl_db[seriesuid].values()
+
+        # reset the generator
+        self._metadata_gen = self._metadata_generator()
 
     @property
     def metadata_dictionaries(self) -> Generator[dict, None, None]:
@@ -112,8 +119,7 @@ class Crawler:
 
         # structure of crawldb is : {seriesuid: { subseriesuid: { metadatadictionary } } }
         # structure of sopmap is : { sopuid: seriesuid }
-
-        for meta in tqdm(self.metadata_dictionaries):
+        for meta in self.metadata_dictionaries:
             if (ref := meta.get("ReferencedSeriesUID")) and ref in self.series_uids:  # fmt: skip
                 continue
 
@@ -151,13 +157,70 @@ class Crawler:
                         continue
                     if seriesuid := self.lookup_sop(sop_ref):
                         meta["ReferencedSeriesUID"] = seriesuid
+                case "PT": 
+                    # this is really expensive.... :(
+                    # we can probably find a hashmap solution
+                    # to speed this up
+                    if not (ref_frame := meta.get("FrameOfReferenceUID")):  # fmt: skip
+                        continue
+                    for same_frame_series in dpath.search(
+                        self._crawl_db,
+                        "*/**/FrameOfReferenceUID",
+                        afilter=lambda x: str(x) == ref_frame,
+                    ):
+                        # we take the first match to "CT"
+                        if self.series_to_modality(same_frame_series) == "CT":
+                            meta["ReferencedSeriesUID"] = same_frame_series
+                            break
+
+    def series_to_modality(self, seriesuid: str) -> str:
+        """Return the modality of the series with the given SeriesInstanceUID."""
+        return list(self._crawl_db[seriesuid].values())[0].get("Modality")
+
+    def to_df(self) -> pd.DataFrame:
+        """Convert the crawldb to a pandas DataFrame."""
+        raw_df = pd.DataFrame(self.metadata_dictionaries)
+        raw_df.set_index("SeriesInstanceUID", inplace=True)
+        cleaned_dicts = []
+
+        for seriesuid, row in raw_df.iterrows():
+            reference_series = row.get("ReferencedSeriesUID", None)
+            match reference_series:
+                case [*multiple_refs]:  # SR modality
+                    # in this case, there can be multiple references
+                    # so we just concatenate them with a "|" pipe
+                    ref_series = "|".join(multiple_refs)
+                    ref_modality = "|".join(
+                        [
+                            raw_df.loc[ref, "Modality"]
+                            for ref in multiple_refs
+                            if ref in raw_df.index
+                        ]
+                    )
+                case value if pd.isna(value):  # no references
+                    ref_series = ""
+                    ref_modality = ""
+                case one_ref:  # anything but SR modality
+                    ref_series = one_ref
+                    ref_modality = raw_df.loc[one_ref, "Modality"]
+
+            cleaned_dicts.append(
+                {
+                    "PatientID": row.get("PatientID"),
+                    "StudyInstanceUID": row.get("StudyInstanceUID"),
+                    "SeriesInstanceUID": seriesuid,
+                    "Modality": row.get("Modality"),
+                    "ReferencedModality": ref_modality,
+                    "ReferencedSeriesUID": ref_series,
+                    "instances": len(row.get("instances", [])),
+                    "folder": row.get("folder"),
+                }
+            )
+
+        return pd.DataFrame(cleaned_dicts)
 
 
 if __name__ == "__main__":
     from rich import print
 
     crawler = Crawler(dicom_dir=Path("data"))
-
-    crawler.remap_refs()
-
-
