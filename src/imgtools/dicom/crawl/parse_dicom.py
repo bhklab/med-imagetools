@@ -31,6 +31,17 @@ from imgtools.dicom.input import (
 from imgtools.logging import logger, tqdm_logging_redirect
 from imgtools.utils import timer
 
+__all__ = [
+    "SeriesUID",
+    "SubSeriesID",
+    "SopUID",
+    "MetaAttrDict",
+    "SeriesMetaMap",
+    "SeriesMetaListMap",
+    "SopSeriesMap",
+    "parse_dicom_dir",
+    "parse_one_dicom",
+]
 ###################################################################################################
 # Helper types
 ###################################################################################################
@@ -284,20 +295,32 @@ def parse_dicom_dir(
     force: bool = True,
     imgtools_dir: str = ".imgtools",
 ) -> tuple[
-    dict[SeriesUID, MetaAttrDict],
+    pathlib.Path,
+    dict[SeriesUID, dict[SubSeriesID, MetaAttrDict]],
+    pathlib.Path,
     dict[SopUID, SeriesUID],
 ]:
-    top = pathlib.Path(dicom_dir)
+    """Parse all DICOM files in a directory and return the metadata.
+
+    Returns
+    -------
+    tuple[pathlib.Path, dict, pathlib.Path, dict]
+        A tuple containing the paths to the crawl JSON file, the series metadata,
+        the SOP map JSON file, and the SOP
+    """
+    top = pathlib.Path(dicom_dir).absolute()
     # we consider the `dataset name` as the top directory name
     dataset_name = top.name
 
     if crawl_json is None:
-        crawl_json = top / imgtools_dir / f"{dataset_name}_crawl.json"
+        crawl_json = (
+            top.parent / imgtools_dir / f"Dataset-{dataset_name}_crawl.json"
+        )
     else:
         crawl_json = pathlib.Path(crawl_json)
 
     # sop_map file is the same as the crawl file, named sop_map.json
-    sop_map_json = crawl_json.with_name("sop_map.json")
+    sop_map_json = crawl_json.with_name(f"Dataset-{dataset_name}_sopmap.json")
 
     if (crawl_json.exists() and sop_map_json.exists()) and not force:
         logger.info(f"{crawl_json} exists and {force=}. Loading from file.")
@@ -306,7 +329,13 @@ def parse_dicom_dir(
         logger.info(f"{sop_map_json} exists and {force=}. Loading from file.")
         with sop_map_json.open("r") as f:
             sop_map = json.load(f)
-        return series_meta_merged, sop_map
+        # return series_meta_merged, sop_map
+        return (
+            crawl_json,
+            series_meta_merged,
+            sop_map_json,
+            sop_map,
+        )
 
     dicom_files = find_dicoms(top, extension=extension)
 
@@ -324,11 +353,13 @@ def parse_dicom_dir(
     with sop_map_json.open("w") as f:
         json.dump(sop_map, f, indent=4)
 
-    return series_meta_merged, sop_map
+    # log saved paths:
+    logger.info(f"Saved crawl JSON to {crawl_json}")
+    logger.info(f"Saved SOP map JSON to {sop_map_json}")
 
-
-if __name__ == "__main__":
-    # from rich import print as rprint
-
-    dicom_dir = "testdata"
-    series_meta_merged, sop_map = parse_dicom_dir(dicom_dir, n_jobs=11)
+    return (
+        crawl_json,
+        series_meta_merged,
+        sop_map_json,
+        sop_map,
+    )
