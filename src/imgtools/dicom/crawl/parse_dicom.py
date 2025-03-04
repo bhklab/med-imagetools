@@ -130,9 +130,8 @@ def update_modality_specific_references(  # noqa: PLR0912
         case "RTDOSE":
             match rtdose_reference_uids(dcm):
                 case RTDOSERefPlanSOP(dose_ref_plan),  RTDOSERefStructSOP(dose_ref_struct), RTDOSERefSeries(dose_ref_series):  # fmt: skip
-                    if (
-                        dose_ref_series
-                    ):  # series is often missing, but sometimes present
+                    if dose_ref_series:
+                        # series is often missing, but sometimes present
                         meta.ReferencedSeriesUID = dose_ref_series
                     # we prioritize the rtstruct reference
                     meta.ReferencedSOPUIDs = dose_ref_struct or dose_ref_plan
