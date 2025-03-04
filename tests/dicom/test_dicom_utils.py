@@ -6,8 +6,7 @@ import pytest
 # from imgtools.sort import lookup_tag, similar_tags, tag_exists
 # from imgtools.sort.exceptions import InvalidPatternError, SorterBaseError
 # from imgtools.sort.sorter_base import SorterBase
-from imgtools.dicom import find_dicoms, lookup_tag, similar_tags, tag_exists
-from imgtools.dicom.utils import find_dicoms
+from imgtools.dicom import lookup_tag, similar_tags, tag_exists, find_dicoms
 
 ########################################################################
 # Test Helpers

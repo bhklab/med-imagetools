@@ -71,7 +71,11 @@ import SimpleITK as sitk
 from imgtools.logging import logger
 from imgtools.utils import array_to_image, image_to_array
 
-from .._deprecated.sparsemask import SparseMask
+__all__ = [
+    "Segmentation",
+    "accepts_segmentations",
+    "map_over_labels",
+]
 
 
 def accepts_segmentations(f: Callable) -> Callable:

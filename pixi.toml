@@ -100,7 +100,7 @@ doc-build.cmd = "mkdocs build -f mkdocs.yml"
 doc-build.inputs = ["docs", "mkdocs.yml"]
 doc-build.outputs = ["site"]
 
-serve.description = "Serve the documentation to http://localhost:8000/"
+serve.description = "Serve the documentation to http://localhost:8001/"
 serve.cmd = "mkdocs serve -f mkdocs.yml"
 
 
