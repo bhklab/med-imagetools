@@ -13,7 +13,7 @@ import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
-from imgtools.dicom.dicom_metadata import get_modality_metadata
+from imgtools.dicom.dicom_metadata_old import get_modality_metadata
 
 
 def read_image(path: str) -> sitk.Image:
