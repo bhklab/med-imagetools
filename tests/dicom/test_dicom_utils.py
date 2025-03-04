@@ -40,13 +40,13 @@ class TestFindDicoms:
         assert all(file.suffix == '.dcm' for file in result)
 
     def test_non_recursive_with_header_check(self, temp_dir_with_files, mocker) -> None:
-        mocker.patch('imgtools.dicom.utils.is_dicom', return_value=True)
+        mocker.patch('imgtools.dicom.find_dicoms.is_dicom', return_value=True)
         result = find_dicoms(temp_dir_with_files, recursive=False, check_header=True)
         assert len(result) == 2
         assert all(file.suffix == '.dcm' for file in result)
 
     def test_recursive_with_header_check(self, temp_dir_with_files, mocker) -> None:
-        mocker.patch('imgtools.dicom.utils.is_dicom', return_value=True)
+        mocker.patch('imgtools.dicom.find_dicoms.is_dicom', return_value=True)
         result = find_dicoms(temp_dir_with_files, recursive=True, check_header=True)
         assert len(result) == 4
         assert all(file.suffix == '.dcm' for file in result)
@@ -74,7 +74,7 @@ class TestFindDicoms:
         assert all('scan' in file.name for file in result)
 
     def test_combined_options(self, temp_dir_with_files, mocker) -> None:
-        mocker.patch('imgtools.dicom.utils.is_dicom', return_value=True)
+        mocker.patch('imgtools.dicom.find_dicoms.is_dicom', return_value=True)
         (temp_dir_with_files / 'scan1.dcm').touch()
         result = find_dicoms(
             temp_dir_with_files,
