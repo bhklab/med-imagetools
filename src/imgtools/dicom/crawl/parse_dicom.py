@@ -222,6 +222,7 @@ def parse_all_dicoms(
             )
         )
 
+        # Aggregate the results into a single SeriesInstanceUID Key : List[MetaAttrDict] value
         for series_dict, sop_dict in results:
             for series_uid, subseries_to_meta in series_dict.items():
                 series_meta_raw[series_uid].append(subseries_to_meta)
@@ -266,6 +267,8 @@ def merge_series_meta_main(
         merged: dict[SeriesUID, dict] = defaultdict(dict)
         series_uid, meta_list = series_meta
         for meta in meta_list:
+            # merge using dpath.merge which is a recursive dictionary merge
+            # and will handle nested dictionaries where a value could be a list
             merge(merged[series_uid], meta)
         return merged
 
