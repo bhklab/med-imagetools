@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
     from tqdm import tqdm
 
-    from imgtools.dicom.find_dicoms import find_dicoms
+    from imgtools.dicom.dicom_find import find_dicoms
 
     seg_paths = find_dicoms(
         Path("testdata").expanduser(),

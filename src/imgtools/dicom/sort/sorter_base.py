@@ -45,7 +45,7 @@ from rich.text import Text
 from rich.theme import Theme
 from rich.tree import Tree
 
-from imgtools.dicom.find_dicoms import find_dicoms
+from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
 from imgtools.dicom.sort.utils import read_tags
 from imgtools.logging import logger
