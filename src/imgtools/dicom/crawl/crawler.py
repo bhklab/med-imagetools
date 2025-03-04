@@ -47,13 +47,12 @@ class Crawler:
         # initialize metadata generator
         self._metadata_gen = self._metadata_generator()
 
+    def __getitem__(self, seriesuid: str) -> dict:
+        return self._crawl_db[seriesuid]
+
     @property
     def series_uids(self) -> list[str]:
         return list(self._crawl_db.keys())
-
-    def _metadata_generator(self) -> Generator[dict, None, None]:
-        for seriesuid in self.series_uids:
-            yield from self._crawl_db[seriesuid].values()
 
     def lookup_sop(self, sop_instance_uid: str) -> str | None:
         """Get the SeriesInstanceUID corresponding to a SOPInstanceUID.
@@ -73,6 +72,11 @@ class Crawler:
         >>> series_uid = crawler.lookup_sop("1.2.3.4.5")
         """
         return self._sop_map.get(sop_instance_uid)
+
+    def _metadata_generator(self) -> Generator[dict, None, None]:
+        """Helper generator to flatten the nested structure of the crawldb."""
+        for seriesuid in self.series_uids:
+            yield from self._crawl_db[seriesuid].values()
 
     @property
     def metadata_dictionaries(self) -> Generator[dict, None, None]:
@@ -98,6 +102,12 @@ class Crawler:
         others reference one or more `SOPInstanceUID` of instances in another series.
         This method tries to resolve the latter case by mapping the `SOPInstanceUID` to the
         `SeriesInstanceUID` of the series it belongs to.
+
+        Notes
+        -----
+        This mutates the metadata dictionaries in the crawldb in place.
+        i.e the `ReferencedSeriesUID` field is added to metadata dicts
+            in `self._crawl_db` database.
         """
 
         # structure of crawldb is : {seriesuid: { subseriesuid: { metadatadictionary } } }
@@ -121,7 +131,6 @@ class Crawler:
                     _all_seg_refs: set[str] = set()
                     if not (meta.get("ReferencedSOPUIDs")):
                         continue
-
                     # this one is a list for SEG
                     for ref in meta.get("ReferencedSOPUIDs", []):
                         if seriesuid := self.lookup_sop(ref):
@@ -143,13 +152,12 @@ class Crawler:
                     if seriesuid := self.lookup_sop(sop_ref):
                         meta["ReferencedSeriesUID"] = seriesuid
 
-    def __getitem__(self, seriesuid: str) -> dict:
-        return self._crawl_db[seriesuid]
-
 
 if __name__ == "__main__":
     from rich import print
 
     crawler = Crawler(dicom_dir=Path("data"))
 
-    # crawler.remap_refs()
+    crawler.remap_refs()
+
+
