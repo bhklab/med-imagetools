@@ -132,7 +132,7 @@ class Interlacer:
         self.group_field = group_field
         self.query_branches = query_branches
         if self.query_branches and self.group_field != GroupBy.ReferencedSeriesUID:
-            logger.warning("query_branches is only applicable when grouping by ReferencedSeriesUID.", 
+            logger.warning("ingoring query_branches as it is only applicable when grouping by ReferencedSeriesUID",
                            query_branches=self.query_branches, group_field=self.group_field)
 
         self.series_nodes: Dict[str, SeriesNode] = {} 
