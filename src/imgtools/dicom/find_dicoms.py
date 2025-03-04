@@ -1,10 +1,10 @@
-from imgtools.logging import logger
-
-
 from itertools import islice
 from pathlib import Path
 from typing import List
+
 from pydicom.misc import is_dicom
+
+from imgtools.logging import logger
 
 
 def _is_valid_dicom(file: Path, check_header: bool) -> bool:
