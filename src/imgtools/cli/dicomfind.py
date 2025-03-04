@@ -4,7 +4,7 @@ from typing import List
 
 import click
 
-from imgtools.dicom.find_dicoms import find_dicoms
+from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.logging import logger
 
 

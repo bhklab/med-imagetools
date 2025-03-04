@@ -1,6 +1,6 @@
+from .dicom_find import find_dicoms
 from .dicom_metadata import MODALITY_TAGS, extract_dicom_tags
 from .dicom_metadata_old import all_modalities_metadata, get_modality_metadata
-from .find_dicoms import find_dicoms
 from .input import (
     extract_roi_meta,
     extract_roi_names,
