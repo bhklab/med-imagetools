@@ -1,4 +1,4 @@
-from imgtools.dicom.dicom_metadata import (
+from imgtools.dicom.dicom_metadata_old import (
     all_modalities_metadata,
     get_modality_metadata,
 )
