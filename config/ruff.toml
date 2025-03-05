@@ -11,6 +11,7 @@ include = [
   "src/imgtools/utils/*.py",
   "src/imgtools/io/**/*.py",
   "src/imgtools/coretypes/**/*.py",
+  "src/imgtools/transforms/*.py",
   # "src/imgtools/types.py",
   # "src/imgtools/utils/crawl.py",
 ]
