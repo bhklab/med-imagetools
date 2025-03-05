@@ -147,9 +147,8 @@ class SampleLoader:
                     "No CT or MR series found to use as reference."
                 )
             if len(grouped_images[reference_modality]) > 1:
-                raise ValueError(
-                    f"Found >1 {reference_modality} series, using the first one"
-                )
+                msg = f"Found >1 {reference_modality} series, using the first one"
+                raise ValueError(msg)
 
             series_uid = grouped_images.pop(reference_modality)[0]
             reference_image = self._reader(series_uid)
