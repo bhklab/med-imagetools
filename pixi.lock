@@ -10107,7 +10107,7 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 2.0.0rc7
-  sha256: 322c005859a72d394a1902cc96e8f4bdad096674f4df10b1dbbb06bca94546df
+  sha256: e649d5a27c76c3a71d0baab86d8f1095fa8d3ed7e3a4af5c1313e409a8f6b573
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9
@@ -10126,7 +10126,7 @@ packages:
   - dill>=0.3.8,<1
   - torch ; extra == 'torch'
   - torchio ; extra == 'torch'
-  - pyvis ; extra == 'debug'
+  - pyvis ; extra == 'pyvis'
   - h5py>=3.11.0 ; extra == 'hdf5'
   - pynrrd>=1.0.0 ; extra == 'nrrd'
   - pygithub>=2.5.0 ; extra == 'test'

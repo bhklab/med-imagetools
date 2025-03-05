@@ -1,13 +1,14 @@
 from __future__ import annotations
-from typing import Dict, Iterator, List, Set
-from enum import Enum
+
 from collections import defaultdict
+from enum import Enum
 from pathlib import Path
+from typing import Dict, Iterator, List, Set
 
 import pandas as pd
 
 from imgtools.logging import logger
-from imgtools.utils import optional_import, OptionalImportError, timer
+from imgtools.utils import OptionalImportError, optional_import, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
@@ -138,7 +139,7 @@ class Interlacer:
         self.series_nodes: Dict[str, SeriesNode] = {} 
         self._create_series_nodes()
 
-        self.trees: List[List[SeriesNode]]
+        self.trees: List[List[SeriesNode]] | List[SeriesNode]
         self.root_nodes: List[SeriesNode] = [] 
 
         match group_field:
@@ -147,14 +148,14 @@ class Interlacer:
                 self.trees = self._find_branches() if self.query_branches else self.root_nodes
             case GroupBy.StudyInstanceUID:
                 logger.warning("Grouping by StudyInstanceUID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED.")
-                self.trees = self._group_by_attribute(self.series_nodes.values(), 'StudyInstanceUID')
+                self.trees = self._group_by_attribute(list(self.series_nodes.values()), 'StudyInstanceUID')
             case GroupBy.PatientID:
                 logger.warning("Grouping by PatientID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED.")
-                self.trees = self._group_by_attribute(self.series_nodes.values(), 'PatientID')
+                self.trees = self._group_by_attribute(list(self.series_nodes.values()), 'PatientID')
             case _:
-                raise NotImplementedError(f"Grouping by {group_field} is not supported.")
+                raise NotImplementedError(f"Grouping by {group_field} is not supported.") # noqa
 
-    def _group_by_attribute(self, items, attribute):
+    def _group_by_attribute(self, items: List[SeriesNode], attribute: str) -> List[List[SeriesNode]]:
         """Groups items by a specific attribute."""
         grouped_dict = defaultdict(list)
         for item in items:
@@ -361,7 +362,7 @@ class Interlacer:
         save_path.write_text(full_html, encoding="utf-8")
 
 if __name__ == '__main__':
-    from rich import print
+    from rich import print # noqa
 
     interlacer = Interlacer('.imgtools/data/crawldb.csv')
     interlacer.visualize_forest()
