@@ -31,7 +31,7 @@ class SimpleITKFilter(BaseTransform):
     def __init__(
         self,
         sitk_filter: sitk.ImageFilter,
-        *execute_args: Any | None,
+        *execute_args: Any | None,  # noqa: ANN401
     ) -> None:
         """Initialize a SimpleITKFilter with a filter and execution args.
 
@@ -95,7 +95,7 @@ class ImageFunction(BaseTransform):
         self,
         function: Callable[..., sitk.Image],
         copy_geometry: bool = True,
-        **kwargs: Any | None,
+        **kwargs: Any | None,  # noqa: ANN401
     ) -> None:
         """Initialize an ImageFunction transform.
 

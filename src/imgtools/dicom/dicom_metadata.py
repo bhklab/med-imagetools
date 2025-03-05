@@ -177,7 +177,7 @@ def extract_dicom_tags(
 
 
 if __name__ == "__main__":
-    from rich import print
+    from rich import print  # noqa: A004
 
     from imgtools.dicom import similar_tags, tag_exists
 
