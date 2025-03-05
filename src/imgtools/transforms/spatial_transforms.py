@@ -79,7 +79,7 @@ class Resample(SpatialTransform):
     anti_alias: bool = True
     anti_alias_sigma: Optional[float] = None
     transform: Optional[sitk.Transform] = None
-    output_size: Optional[Sequence[float]] = None
+    output_size: Optional[list[float]] = None
 
     def __call__(
         self, image: sitk.Image, ref: None | sitk.Image
@@ -149,7 +149,7 @@ class Resize(SpatialTransform):
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
 
-    size: Union[int, Sequence[int], np.ndarray]
+    size: Union[int, list[int], np.ndarray]
     interpolation: str = "linear"
     anti_alias: bool = True
     anti_alias_sigma: Optional[float] = None
@@ -212,7 +212,7 @@ class Zoom(SpatialTransform):
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
 
-    scale_factor: Union[float, Sequence[float]]
+    scale_factor: Union[float, list[float]]
     interpolation: str = "linear"
     anti_alias: bool = True
     anti_alias_sigma: Optional[float] = None
@@ -270,9 +270,13 @@ class Rotate(SpatialTransform):
         - "bspline" for order-3 b-spline interpolation
     """
 
-    rotation_centre: Sequence[float]
-    angles: Union[float, Sequence[float]]
+    rotation_centre: list[float]
+    angles: Union[float, list[float]]
     interpolation: str = "linear"
+
+    def __post_init__(self) -> None:
+        if isinstance(self.angles, float):
+            self.angles = [self.angles, self.angles, self.angles]
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
         """Rotate callable object: Rotates an image around a given centre.
@@ -287,7 +291,6 @@ class Rotate(SpatialTransform):
         sitk.Image
             The rotated image.
         """
-
         return rotate(
             image,
             rotation_centre=self.rotation_centre,
@@ -337,7 +340,7 @@ class InPlaneRotate(SpatialTransform):
 
         image_size = np.array(image.GetSize())
         image_centre = image_size // 2
-        angles = (0.0, 0.0, self.angle)
+        angles = [0.0, 0.0, self.angle]
         return rotate(
             image,
             rotation_centre=image_centre.tolist(),
