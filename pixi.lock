@@ -36,6 +36,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ba/99/6794142b90b853a9155316c8f470d2e4821fe6f086b03e372aca848227dd/contourpy-1.3.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e8/07/4b8a5c8a746cc8c8103c6462d057d8806bd925347ac3905055686dd40e94/fonttools-4.55.8-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -89,6 +90,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/37/6b/175f60227d3e7f5f1549fcb374592be311293132207e451c3d7c654c25fb/contourpy-1.3.1-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/3d/7a906f58f80c1ed37bbdf7b3f9b6792906156cb9143b067bf54c38405134/fonttools-4.55.8-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -142,6 +144,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6b/6a/7833cfae2c1e63d1d8875a50fd23371394f540ce809d7383550681a1fa64/contourpy-1.3.1-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e9/ce/8358af1c353d890d4c6cbcc3d64242631f91a93f8384b76bc49db800f1de/fonttools-4.55.8-cp312-cp312-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -198,6 +201,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a1/35/c2de8823211d07e8a79ab018ef03960716c5dff6f4d5bff5af87fd682992/contourpy-1.3.1-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/cf/08c4954c944799458690eb0e498209fb6a2e79e20a869189f56d18e909b6/fonttools-4.55.8-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -497,6 +501,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e8/07/4b8a5c8a746cc8c8103c6462d057d8806bd925347ac3905055686dd40e94/fonttools-4.55.8-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/af/f2/64b73a9bb86f5a89fb55450e97cd5c1f84a862d4ff90d9fd1a73ab0f64a5/frozenlist-1.5.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -777,6 +782,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/3d/7a906f58f80c1ed37bbdf7b3f9b6792906156cb9143b067bf54c38405134/fonttools-4.55.8-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/ab/04/ea8bf62c8868b8eada363f20ff1b647cf2e93377a7b284d36062d21d81d1/frozenlist-1.5.0-cp312-cp312-macosx_10_13_x86_64.whl
@@ -1057,6 +1063,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e9/ce/8358af1c353d890d4c6cbcc3d64242631f91a93f8384b76bc49db800f1de/fonttools-4.55.8-cp312-cp312-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/d0/9a/8e479b482a6f2070b26bda572c5e6889bb3ba48977e81beea35b5ae13ece/frozenlist-1.5.0-cp312-cp312-macosx_11_0_arm64.whl
@@ -1343,6 +1350,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/cf/08c4954c944799458690eb0e498209fb6a2e79e20a869189f56d18e909b6/fonttools-4.55.8-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/b1/56/4e45136ffc6bdbfa68c29ca56ef53783ef4c2fd395f7cbf99a2624aa9aaa/frozenlist-1.5.0-cp312-cp312-win_amd64.whl
@@ -1539,6 +1547,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ba/99/6794142b90b853a9155316c8f470d2e4821fe6f086b03e372aca848227dd/contourpy-1.3.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e8/07/4b8a5c8a746cc8c8103c6462d057d8806bd925347ac3905055686dd40e94/fonttools-4.55.8-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -1711,6 +1720,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/37/6b/175f60227d3e7f5f1549fcb374592be311293132207e451c3d7c654c25fb/contourpy-1.3.1-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/3d/7a906f58f80c1ed37bbdf7b3f9b6792906156cb9143b067bf54c38405134/fonttools-4.55.8-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -1883,6 +1893,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/6b/6a/7833cfae2c1e63d1d8875a50fd23371394f540ce809d7383550681a1fa64/contourpy-1.3.1-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e9/ce/8358af1c353d890d4c6cbcc3d64242631f91a93f8384b76bc49db800f1de/fonttools-4.55.8-cp312-cp312-macosx_10_13_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -2055,6 +2066,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/a1/35/c2de8823211d07e8a79ab018ef03960716c5dff6f4d5bff5af87fd682992/contourpy-1.3.1-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/cf/08c4954c944799458690eb0e498209fb6a2e79e20a869189f56d18e909b6/fonttools-4.55.8-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
@@ -2139,6 +2151,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0e/16/eff3be24cecb9336639148c40507f949c193642d8369352af480597633fb/fonttools-4.55.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -2245,6 +2258,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/86/8f/9c5f2172e9f6dcf52bb6477bcd5a023d056114787c8184b683c34996f5a1/fonttools-4.55.8-cp310-cp310-macosx_10_9_x86_64.whl
@@ -2351,6 +2365,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/54/b8/82b3444cb081798eabb8397452ddf73680e623d7fdf9c575594a2240b8a2/fonttools-4.55.8-cp310-cp310-macosx_10_9_universal2.whl
@@ -2459,6 +2474,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/78/bc/f5a24229edd8cdd7494f2099e1c62fca288dad4c8637ee62df04459db27e/fonttools-4.55.8-cp310-cp310-win_amd64.whl
@@ -2578,6 +2594,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/f2/e0/e58b10ef50830145ba94dbeb64b70773af61cfccea663d485c7fae2aab65/fonttools-4.55.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -2685,6 +2702,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/b6/f9/9cf7fc04da85d37cfa1c287f0a25c274d6940dad259dbaa9fd796b87bd3c/fonttools-4.55.8-cp311-cp311-macosx_10_9_x86_64.whl
@@ -2792,6 +2810,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0a/e3/834e0919b34b40a6a2895f533323231bba3b8f5ae22c19ab725b84cf84c0/fonttools-4.55.8-cp311-cp311-macosx_10_9_universal2.whl
@@ -2901,6 +2920,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/42/d6/96dc2462006ffa16c8d475244e372abdc47d03a7bd38be0f29e7ae552af4/fonttools-4.55.8-cp311-cp311-win_amd64.whl
@@ -3021,6 +3041,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e8/07/4b8a5c8a746cc8c8103c6462d057d8806bd925347ac3905055686dd40e94/fonttools-4.55.8-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -3128,6 +3149,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/3d/7a906f58f80c1ed37bbdf7b3f9b6792906156cb9143b067bf54c38405134/fonttools-4.55.8-cp312-cp312-macosx_10_13_x86_64.whl
@@ -3235,6 +3257,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e9/ce/8358af1c353d890d4c6cbcc3d64242631f91a93f8384b76bc49db800f1de/fonttools-4.55.8-cp312-cp312-macosx_10_13_universal2.whl
@@ -3344,6 +3367,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/cf/08c4954c944799458690eb0e498209fb6a2e79e20a869189f56d18e909b6/fonttools-4.55.8-cp312-cp312-win_amd64.whl
@@ -3463,6 +3487,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/be/6a/fd4018e0448c8a5e12138906411282c5eab51a598493f080a9f0960e658f/fonttools-4.56.0-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -3571,6 +3596,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/59/db/d2c7c9b6dd5cbd46f183e650a47403ffb88fca17484eb7c4b1cd88f9e513/fonttools-4.56.0-cp313-cp313-macosx_10_13_x86_64.whl
@@ -3679,6 +3705,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/a5/55/f06b48d48e0b4ec3a3489efafe9bd4d81b6e0802ac51026e3ee4634e89ba/fonttools-4.56.0-cp313-cp313-macosx_10_13_universal2.whl
@@ -3789,6 +3816,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/27/6d/3edda54f98a550a0473f032d8050315fbc8f1b76a0d9f3879b72ebb2cdd6/fonttools-4.56.0-cp313-cp313-win_amd64.whl
@@ -3939,6 +3967,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e8/07/4b8a5c8a746cc8c8103c6462d057d8806bd925347ac3905055686dd40e94/fonttools-4.55.8-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
@@ -4073,6 +4102,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1b/3d/7a906f58f80c1ed37bbdf7b3f9b6792906156cb9143b067bf54c38405134/fonttools-4.55.8-cp312-cp312-macosx_10_13_x86_64.whl
@@ -4207,6 +4237,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/e9/ce/8358af1c353d890d4c6cbcc3d64242631f91a93f8384b76bc49db800f1de/fonttools-4.55.8-cp312-cp312-macosx_10_13_universal2.whl
@@ -4346,6 +4377,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/4e/8c/f3147f5c4b73e7550fe5f9352eaa956ae838d5c51eb58e7a25b9f3e2643b/decorator-5.2.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/46/d1/e73b6ad76f0b1fb7f23c35c6d95dbc506a9c8804f43dda8cb5b0fa6331fd/dill-0.3.9-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7b/8f/c4d9bafc34ad7ad5d8dc16dd1347ee0e507a52c3adb6bfa8887e1c6a26ba/executing-2.2.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/bf/fd60001b3abc5222d8eaa4a204cd8c0ae78e75adc688f33ce4bf25b7fafa/fasteners-0.19-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/61/cf/08c4954c944799458690eb0e498209fb6a2e79e20a869189f56d18e909b6/fonttools-4.55.8-cp312-cp312-win_amd64.whl
@@ -5543,7 +5575,7 @@ packages:
   version: 8.1.8
   sha256: 63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2
   requires_dist:
-  - colorama ; platform_system == 'Windows'
+  - colorama ; sys_platform == 'win32'
   - importlib-metadata ; python_full_version < '3.8'
   requires_python: '>=3.7'
 - conda: https://conda.anaconda.org/conda-forge/noarch/click-8.1.8-pyh707e725_0.conda
@@ -6557,6 +6589,11 @@ packages:
   - pkg:pypi/dotty-dict?source=hash-mapping
   size: 12829
   timestamp: 1735227799623
+- pypi: https://files.pythonhosted.org/packages/05/d1/8952806fbf9583004ab479d8f58a9496c3d35f6b6009ddd458bdd9978eaf/dpath-2.2.0-py3-none-any.whl
+  name: dpath
+  version: 2.2.0
+  sha256: b330a375ded0a0d2ed404440f6c6a715deae5313af40bbb01c8a41d891900576
+  requires_python: '>=3.7'
 - conda: https://conda.anaconda.org/conda-forge/noarch/editables-0.5-pyhd8ed1ab_1.conda
   sha256: 8d4f908e670be360617d418c328213bc46e7100154c3742db085148141712f60
   md5: 2cf824fe702d88e641eec9f9f653e170
@@ -10106,8 +10143,8 @@ packages:
   timestamp: 1733255681319
 - pypi: .
   name: med-imagetools
-  version: 2.0.0rc7
-  sha256: e649d5a27c76c3a71d0baab86d8f1095fa8d3ed7e3a4af5c1313e409a8f6b573
+  version: 2.0.0rc8
+  sha256: 88a4e3b14bd0f3243a5f33191bc4016a06a60bc89392fafb27ab4430fc290c8c
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9
@@ -10117,6 +10154,7 @@ packages:
   - matplotlib>=3.8.4,<4
   - numpy<3
   - pandas<3
+  - dpath>=2.2.0
   - pydicom>=2.4.4
   - scikit-image>=0.23.2,<1
   - scikit-learn>=1.4.2,<2
@@ -10126,7 +10164,7 @@ packages:
   - dill>=0.3.8,<1
   - torch ; extra == 'torch'
   - torchio ; extra == 'torch'
-  - pyvis ; extra == 'pyvis'
+  - pyvis>=0.3.2,<0.4 ; extra == 'pyvis'
   - h5py>=3.11.0 ; extra == 'hdf5'
   - pynrrd>=1.0.0 ; extra == 'nrrd'
   - pygithub>=2.5.0 ; extra == 'test'
@@ -18225,7 +18263,7 @@ packages:
   version: 4.67.1
   sha256: 26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2
   requires_dist:
-  - colorama ; platform_system == 'Windows'
+  - colorama ; sys_platform == 'win32'
   - pytest>=6 ; extra == 'dev'
   - pytest-cov ; extra == 'dev'
   - pytest-timeout ; extra == 'dev'
