@@ -29,6 +29,7 @@ dependencies = [
   "matplotlib>=3.8.4,<4",
   "numpy<3",
   "pandas<3",
+  "dpath>=2.2.0",
   # image processing
   "pydicom>=2.4.4",
   "scikit-image>=0.23.2,<1",
