@@ -22,8 +22,10 @@ class IntensityTransform(BaseTransform):
 
 @dataclass
 class ClipIntensity(IntensityTransform):
-    """ClipIntensity operation class:
-    A callable class that clips image grey level intensities to specified range.
+    """ClipIntensity operation class.
+
+    A callable class that clips image grey level intensities to specified
+    range.
 
     To instantiate:
         obj = ClipIntensity(lower, upper)
@@ -36,11 +38,10 @@ class ClipIntensity(IntensityTransform):
 
     Parameters
     ----------
-    lower
+    lower : float
         The lower bound on grey level intensity. Voxels with lower intensity
         will be set to this value.
-
-    upper
+    upper : float
         The upper bound on grey level intensity. Voxels with higer intensity
         will be set to this value.
     """
@@ -49,26 +50,32 @@ class ClipIntensity(IntensityTransform):
     upper: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ClipIntensity callable object:
-        Clips image grey level intensities to specified range.
+        """Clip image intensities within a specified range.
+
+        This method processes the input image by resetting pixel values lower
+        than the lower bound to the lower value and those above the upper
+        bound to the upper value.
 
         Parameters
         ----------
-        image
-            The intensity image to clip.
+        image : sitk.Image
+            A SimpleITK image to be intensity-clipped.
 
         Returns
         -------
         sitk.Image
-            The clipped intensity image.
+            A SimpleITK image with intensities constrained to the range
+            [self.lower, self.upper].
         """
         return clip_intensity(image, self.lower, self.upper)
 
 
 @dataclass
 class WindowIntensity(IntensityTransform):
-    """WindowIntensity operation class:
-    A callable class that restricts image grey level intensities to a given window and level.
+    """WindowIntensity operation class.
+
+    A callable class that restricts image grey level intensities to a given
+    window and level.
 
     To instantiate:
         obj = WindowIntensity(window, level)
@@ -81,10 +88,9 @@ class WindowIntensity(IntensityTransform):
 
     Parameters
     ----------
-    window
+    window : float
         The width of the intensity window.
-
-    level
+    level : float
         The mid-point of the intensity window.
     """
 
@@ -92,18 +98,21 @@ class WindowIntensity(IntensityTransform):
     level: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """WindowIntensity callable object:
-        Restricts image grey level intensities to a given window and level.
+        """Apply a windowing transform to adjust image intensities.
+
+        Adjusts the input image so that intensities falling outside the range
+        defined by [level - window/2, level + window/2] are clipped to the
+        corresponding bound.
 
         Parameters
         ----------
-        image
-            The intensity image to window.
+        image : sitk.Image
+            The input intensity image.
 
         Returns
         -------
         sitk.Image
-            The windowed intensity image.
+            The intensity image after applying the windowing transform.
         """
 
         return window_intensity(image, self.window, self.level)
