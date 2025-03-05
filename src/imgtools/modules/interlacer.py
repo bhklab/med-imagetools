@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from imgtools.logging import logger
-from imgtools.utils import optional_import, OptionalImportError
+from imgtools.utils import optional_import, OptionalImportError, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
@@ -143,7 +143,6 @@ class Interlacer:
 
         match group_field:
             case GroupBy.ReferencedSeriesUID:
-                logger.info("Building forest from ReferencedSeriesUID...")
                 self._build_forest()
                 self.trees = self._find_branches() if self.query_branches else self.root_nodes
             case GroupBy.StudyInstanceUID:
@@ -168,6 +167,7 @@ class Interlacer:
             series_instance_uid = str(index)
             self.series_nodes[series_instance_uid] = SeriesNode(series_instance_uid, row.astype(str))
 
+    @timer("Building forest based on references")
     def _build_forest(self) -> None:
         """Constructs a forest of trees from the DataFrame by defining parent-child relationships using ReferenceSeriesUID."""
         for index, row in self.crawl_df.iterrows():
@@ -184,6 +184,7 @@ class Interlacer:
                 parent_node = self.series_nodes[reference_series_uid]
                 parent_node.add_child(node)
 
+    @timer("Finding individual branches of tree")
     def _find_branches(self) -> List[Branch]:
         """Finds and records all branches in the forest using depth-first search (DFS)."""
         branches: List[Branch] = []
@@ -212,6 +213,7 @@ class Interlacer:
 
         return result
 
+    @timer("Querying forest")
     def query(self, query_string: str) -> List[List[Dict[str, str]]]:
         """
         Queries the forest for specific modalities and returns a DataFrame containing relevant patient data.
