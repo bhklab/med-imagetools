@@ -9,7 +9,7 @@ from imgtools.io.loaders import BaseLoader
 from imgtools.io.writers import BaseWriter
 
 
-class BaseOp(ABC):
+class BaseIO(ABC):
     """Abstract base class for operations.
 
     Classes inheriting from this must implement the `__call__` method.
@@ -39,7 +39,7 @@ class BaseOp(ABC):
         return f"{self.__class__.__name__}({args})"
 
 
-class BaseInput(BaseOp):
+class BaseInput(BaseIO):
     """Abstract base class for input operations.
 
     Parameters
@@ -62,7 +62,7 @@ class BaseInput(BaseOp):
         pass
 
 
-class BaseOutput(BaseOp):
+class BaseOutput(BaseIO):
     """Abstract base class for output operations.
 
     Parameters

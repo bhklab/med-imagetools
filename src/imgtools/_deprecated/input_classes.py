@@ -17,9 +17,9 @@ from imgtools.io.loaders import (
     read_dicom_auto,
 )
 from imgtools.logging import logger
-from imgtools.modules.datagraph import DataGraph
+from imgtools._deprecated.datagraph import DataGraph
 
-from .base_classes import BaseInput
+from ..io.base_classes import BaseInput
 
 
 class ImageAutoInput(BaseInput):
