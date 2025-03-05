@@ -271,7 +271,7 @@ def zoom(
 
 def rotate(
     image: sitk.Image,
-    rotation_centre: List[float],
+    rotation_centre: List[int],
     angles: List[float],
     interpolation: str = "linear",
 ) -> sitk.Image:
