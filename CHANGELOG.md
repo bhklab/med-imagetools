@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.8 (2025-03-03)
+
+### Features
+
+- Add timer decorator and enhance DICOM utilities for reference handling
+  ([#237](https://github.com/bhklab/med-imagetools/pull/237),
+  [`b05b1bf`](https://github.com/bhklab/med-imagetools/commit/b05b1bf9e64b923148e4dd289b9b5a36414686d9))
+
+Introduce a timer decorator for measuring function execution time and improve the retrieval logic
+  for RTDOSE reference UIDs. Additionally, add new utilities for handling modality-specific
+  references in DICOM files.
+
+## Summary by CodeRabbit
+
+- **New Features** - Expanded DICOM processing capabilities with enhanced extraction of imaging
+  references. - Introduced advanced utilities for performance tracking and logging integration,
+  improving progress monitoring.
+
+- **Refactor** - Streamlined internal configuration and code formatting for improved consistency.
+
+- **Documentation** - Updated guidance and examples for optional imports and logging utilities.
+
+- **Tests** - Added tests to verify the new timer functionality and performance measurement.
+
+
 ## v2.0.0-rc.7 (2025-02-14)
 
 ### Bug Fixes
