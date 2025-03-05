@@ -125,7 +125,6 @@ def rtstruct_reference_uids(
         If the RTSTRUCT file contains the required reference fields:
             - Referenced `SeriesInstanceUID` (RTSTRUCTRefSeries)
             - Referenced `StudyInstanceUID` (RTSTRUCTRefStudy)
-
         If the RTSTRUCT file does not contain the required reference fields:
             - Referenced `SOPInstanceUID` (RTSTRUCTRefSOP)
 

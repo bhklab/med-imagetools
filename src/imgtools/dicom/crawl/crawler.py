@@ -272,6 +272,6 @@ class Crawler:
 
 
 if __name__ == "__main__":
-    from rich import print
+    from rich import print  # noqa: A004, F401
 
     crawler = Crawler(dicom_dir=Path("data"), n_jobs=12, force=True)

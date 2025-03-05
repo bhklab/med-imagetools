@@ -58,7 +58,7 @@ issues = "https://github.com/bhklab/med-imagetools/issues"
 # Optional dependencies (extras)
 [project.optional-dependencies]
 torch = ["torch", "torchio"] # dont think these are even used anymore
-debug = ["pyvis"]
+pyvis = ["pyvis>=0.3.2,<0.4"]
 hdf5 = ["h5py>=3.11.0"]
 nrrd = ["pynrrd>=1.0.0"]
 test = [
@@ -70,6 +70,7 @@ all = [
   "aiohttp>=3.8.1",
   "h5py>=3.11.0",
   "pynrrd>=1.0.0",
+  "pyvis>=0.3.2,<0.4"
 ]
 
 # Entry points for CLI commands
