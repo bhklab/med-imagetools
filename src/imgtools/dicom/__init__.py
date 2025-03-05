@@ -9,6 +9,7 @@ from .input import (
     load_seg_dcm,
     rtstruct_reference_uids,
 )
+from .interlacer import GroupBy, Interlacer
 from .utils import lookup_tag, similar_tags, tag_exists
 
 __all__ = [
@@ -28,4 +29,7 @@ __all__ = [
     "all_modalities_metadata",  # OLD
     "MODALITY_TAGS",
     "extract_dicom_tags",
+    # interlacer
+    "Interlacer",
+    "GroupBy",
 ]

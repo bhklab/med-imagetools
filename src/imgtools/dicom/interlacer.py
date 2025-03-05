@@ -12,6 +12,8 @@ from imgtools.utils import OptionalImportError, optional_import, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
+__all__ = ["Interlacer", "GroupBy"]
+
 
 class SeriesNode:
     """
