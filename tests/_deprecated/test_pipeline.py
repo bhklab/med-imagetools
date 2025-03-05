@@ -9,8 +9,8 @@ import pytest
 import SimpleITK as sitk
 
 from imgtools.io import ImageFileLoader, ImageFileWriter
-from imgtools.io.base_classes import BaseInput, BaseOutput
-from imgtools.pipeline import Pipeline
+from imgtools.io.base_core import BaseInput, BaseOutput
+from imgtools._deprecated.pipeline import Pipeline
 
 
 class Input(BaseInput):

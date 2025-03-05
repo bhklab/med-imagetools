@@ -19,7 +19,7 @@ from imgtools.io.loaders import (
 from imgtools.logging import logger
 from imgtools._deprecated.datagraph import DataGraph
 
-from ..io.base_classes import BaseInput
+from ..io.base_core import BaseInput
 
 
 class ImageAutoInput(BaseInput):

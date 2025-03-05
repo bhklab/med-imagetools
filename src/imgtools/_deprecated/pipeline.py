@@ -3,7 +3,7 @@ from itertools import chain
 
 from joblib import Parallel, delayed
 
-from .io.base_classes import BaseInput, BaseIO, BaseOutput
+from ..io import BaseInput, BaseIO, BaseOutput
 
 
 class Pipeline:

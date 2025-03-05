@@ -11,7 +11,7 @@ import json
 import SimpleITK as sitk
 
 from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOutput, Resample
-from imgtools.pipeline import Pipeline
+from imgtools._deprecated.pipeline import Pipeline
 from imgtools._deprecated.nnunet import generate_dataset_json, markdown_report_images
 from imgtools._deprecated.args import parser
 from imgtools.logging import logger
