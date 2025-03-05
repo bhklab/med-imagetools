@@ -165,6 +165,7 @@ def read_dicom_auto(
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
+    raise FileNotFoundError(f"No DICOM files found in {path}.")
 
 
 # ruff: noqa

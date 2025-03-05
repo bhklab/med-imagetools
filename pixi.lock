@@ -507,6 +507,13 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/af/f2/64b73a9bb86f5a89fb55450e97cd5c1f84a862d4ff90d9fd1a73ab0f64a5/frozenlist-1.5.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/fa/63/eeaacff417b393491beebabb8a3dc5342950409eb6d7b39d437289abdbae/h5py-3.12.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/ae/26/75863a4835f26878a9f8ee0d95fead8ba0f2820dea6bd72aae548d65a9cb/itk-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/48/f1/50b3441d5c5ca77470e608e32322a35f0f242d27e7ace21c1ba1276f8818/itk_core-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/00/2b/1f2ab3e3cda3710c98d515da865abb90d7bd71ac86a83c9801e8809abc88/itk_filtering-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/fd/e0/8532ca2b60c4acb9eff15945a7551b7698b623e5838d2fea08ad8733f227/itk_io-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/f6/78/d93b125838c2b54ea04b12b86f54d2a1fd0d49c00978ba1be307d45bcf26/itk_numerics-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/bf/92/36327a28b6a0fc2f56c070b1f81c90e2e55515f5927f213d5c71e1b3eed0/itk_registration-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/e0/f4/d0aa282362700d8b86c235b48f2ff9f60041452f39752b2bc72f82595f9c/itk_segmentation-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bc/b3/9458adb9472e61a998c8c4d95cfdfec91c73c53a375b30b1428310f923e4/kiwisolver-1.4.8-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl
@@ -786,6 +793,13 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/ab/04/ea8bf62c8868b8eada363f20ff1b647cf2e93377a7b284d36062d21d81d1/frozenlist-1.5.0-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/d4/e1/ea9bfe18a3075cdc873f0588ff26ce394726047653557876d7101bf0c74e/h5py-3.12.1-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/a7/3b/e0484d912dd6247b4dcd4bc6f9a6a2d76f365156c9d8664a932b73af61db/itk-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/3f/de/6c61b4b6267b528a59dc09652c94dce7468632b00283d80a95c07b1d5185/itk_core-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/4f/41/dc6b2040bd74ea6bf60eb292b3ef931a1ee28ddf45a768e236402f2b844c/itk_filtering-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/da/1d/b3ffee9b8604564b8c1aa2aa1ed8121f05a44bbf35cbae630dbad134c309/itk_io-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/fa/50/f88a461174ace21f24d2ea1115d8a31e09a5fabde6c25233c2cae3ca48db/itk_numerics-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/00/ef/3a00e94ea305877eedc4f35746ada8fc80782b04345a6a640d401e55ad9f/itk_registration-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/a9/cc/ee6b90a783625210dfb6871ff82edd79a2083cace7dbf863d9e0b8505ae9/itk_segmentation-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c5/0b/8db6d2e2452d60d5ebc4ce4b204feeb16176a851fd42462f66ade6808084/kiwisolver-1.4.8-cp312-cp312-macosx_10_13_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl
@@ -1065,6 +1079,13 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/d0/9a/8e479b482a6f2070b26bda572c5e6889bb3ba48977e81beea35b5ae13ece/frozenlist-1.5.0-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/0d/74/1009b663387c025e8fa5f3ee3cf3cd0d99b1ad5c72eeb70e75366b1ce878/h5py-3.12.1-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/2e/99/1014efd9e7bbab2db7c3727e724d7582061baa08a09560904ac5c16ba8dd/itk-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/9a/90/ee74250ce613f9482698807717d582adbd777fb3c2dfd864f6467d524c01/itk_core-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/bf/f1/f34d55002c782a85ea7315e63f6acfb4253fee6e1ce8e251933be4e8cf75/itk_filtering-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/d8/7f/0e707192253015c190d883c391d06265b265779026a79cecf318b8bf8028/itk_io-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/bc/f9/451f5d5da1bd200c0160f3950aa725caefc78baf6178a4837e7c6205df57/itk_numerics-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/4a/ce/21bb738fa1a63588459b94a1f0ba7f569a112c7bd5ab2f1ef2d7442b0af0/itk_registration-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+      - pypi: https://files.pythonhosted.org/packages/26/9b/86fc058729c8d3ea1086e196db0f38b57bfa2e0818b419ff4f4b6171be38/itk_segmentation-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/60/26/d6a0db6785dd35d3ba5bf2b2df0aedc5af089962c6eb2cbf67a15b81369e/kiwisolver-1.4.8-cp312-cp312-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl
@@ -1350,6 +1371,13 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/b1/56/4e45136ffc6bdbfa68c29ca56ef53783ef4c2fd395f7cbf99a2624aa9aaa/frozenlist-1.5.0-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/86/f7/bb465dcb92ca3521a15cbe1031f6d18234dbf1fb52a6796a00bfaa846ebf/h5py-3.12.1-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/cb/bd/b394387b598ed84d8d0fa90611a90bee0adc2021820ad5729f7ced74a8e2/imageio-2.37.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/13/5b/3b6f1898ee839b3cb80daabf0305026fc1025805bdb943b47b96e0436ac6/itk-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/88/62/dff356cf62bd5440d0901b63d28bc0f4eeafb157ad317bfd269152018b80/itk_core-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/21/53/367f2ef6ea20647b8ce0502b1a502ede391fc1fbca5468ab1bef5ffd5be2/itk_filtering-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/01/aa/52a567434e475869dcad463cd5abde2e5f7e85e3f1fd1ef5793d7141fa59/itk_io-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/66/8a/36432eca74da33edd6429a067acb927b7493f6a510ba78e18a7056ed4980/itk_numerics-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/95/9a/2adfad51019f8fdc935ff7a3662de46b9276fd7e685ba34e30a2ea8603f6/itk_registration-5.4.2.post1-cp311-abi3-win_amd64.whl
+      - pypi: https://files.pythonhosted.org/packages/f7/30/2b51812a7751ced1f73225302991059c7d9b3ded707aee0759290f650edc/itk_segmentation-5.4.2.post1-cp311-abi3-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/91/29/df4b9b42f2be0b623cbd5e2140cafcaa2bef0759a00b7b70104dcfe2fb51/joblib-1.4.2-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/bd/72/dfff0cc97f2a0776e1c9eb5bef1ddfd45f46246c6533b0191887a427bca5/kiwisolver-1.4.8-cp312-cp312-win_amd64.whl
       - pypi: https://files.pythonhosted.org/packages/83/60/d497a310bde3f01cb805196ac61b7ad6dc5dcf8dce66634dc34364b20b4f/lazy_loader-0.4-py3-none-any.whl
@@ -7558,6 +7586,226 @@ packages:
   - pkg:pypi/isoduration?source=hash-mapping
   size: 19832
   timestamp: 1733493720346
+- pypi: https://files.pythonhosted.org/packages/13/5b/3b6f1898ee839b3cb80daabf0305026fc1025805bdb943b47b96e0436ac6/itk-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk
+  version: 5.4.2.post1
+  sha256: 57140d0d46c9577d8a17327baad9d5872a2e449a0c162fc4d55e11a8438ee13e
+  requires_dist:
+  - itk-core==5.4.2.post1
+  - itk-numerics==5.4.2.post1
+  - itk-io==5.4.2.post1
+  - itk-filtering==5.4.2.post1
+  - itk-registration==5.4.2.post1
+  - itk-segmentation==5.4.2.post1
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/2e/99/1014efd9e7bbab2db7c3727e724d7582061baa08a09560904ac5c16ba8dd/itk-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk
+  version: 5.4.2.post1
+  sha256: 53c49f03708110a1d1f9a879738f7ab83ba3aebf4ad5eb01be0e61a7d11affb5
+  requires_dist:
+  - itk-core==5.4.2.post1
+  - itk-numerics==5.4.2.post1
+  - itk-io==5.4.2.post1
+  - itk-filtering==5.4.2.post1
+  - itk-registration==5.4.2.post1
+  - itk-segmentation==5.4.2.post1
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/a7/3b/e0484d912dd6247b4dcd4bc6f9a6a2d76f365156c9d8664a932b73af61db/itk-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk
+  version: 5.4.2.post1
+  sha256: 64fef2660139eab18346820f95cdcd0d6a2797d3843bdd98ed8dd1ad4c3274cf
+  requires_dist:
+  - itk-core==5.4.2.post1
+  - itk-numerics==5.4.2.post1
+  - itk-io==5.4.2.post1
+  - itk-filtering==5.4.2.post1
+  - itk-registration==5.4.2.post1
+  - itk-segmentation==5.4.2.post1
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/ae/26/75863a4835f26878a9f8ee0d95fead8ba0f2820dea6bd72aae548d65a9cb/itk-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk
+  version: 5.4.2.post1
+  sha256: 175a94d890cae2a5e112b6b9508761bea1b56babd471b542e88a8f96f0600ef7
+  requires_dist:
+  - itk-core==5.4.2.post1
+  - itk-numerics==5.4.2.post1
+  - itk-io==5.4.2.post1
+  - itk-filtering==5.4.2.post1
+  - itk-registration==5.4.2.post1
+  - itk-segmentation==5.4.2.post1
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/3f/de/6c61b4b6267b528a59dc09652c94dce7468632b00283d80a95c07b1d5185/itk_core-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-core
+  version: 5.4.2.post1
+  sha256: 4db8015331f2ab75a908eccae7029ea830ceea0ba42490cb95ebaf003acabf5c
+  requires_dist:
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/48/f1/50b3441d5c5ca77470e608e32322a35f0f242d27e7ace21c1ba1276f8818/itk_core-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-core
+  version: 5.4.2.post1
+  sha256: 6fbfcab5ba07118ec3cddc8045343ab3cc4b9f3c69cf5628f03b9bf47e1eeadb
+  requires_dist:
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/88/62/dff356cf62bd5440d0901b63d28bc0f4eeafb157ad317bfd269152018b80/itk_core-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-core
+  version: 5.4.2.post1
+  sha256: 3c55cece04aee771d9befc62fc6a37e7eef8f0bfed079b4f1042df0205ebcbfe
+  requires_dist:
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/9a/90/ee74250ce613f9482698807717d582adbd777fb3c2dfd864f6467d524c01/itk_core-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-core
+  version: 5.4.2.post1
+  sha256: 8a7d5e8889e27942649b61a4426260d778a7961ed24bafd14c8733ded414be72
+  requires_dist:
+  - numpy
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/00/2b/1f2ab3e3cda3710c98d515da865abb90d7bd71ac86a83c9801e8809abc88/itk_filtering-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-filtering
+  version: 5.4.2.post1
+  sha256: 3bc53bbabc711643f34de79dc3d8aa26c62eff73354a88427b760b1044d93aa0
+  requires_dist:
+  - itk-numerics==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/21/53/367f2ef6ea20647b8ce0502b1a502ede391fc1fbca5468ab1bef5ffd5be2/itk_filtering-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-filtering
+  version: 5.4.2.post1
+  sha256: 43ead8212ef10ece273afd0331bbea4cecdeedcf26271debf965406f6a1cbc1a
+  requires_dist:
+  - itk-numerics==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/4f/41/dc6b2040bd74ea6bf60eb292b3ef931a1ee28ddf45a768e236402f2b844c/itk_filtering-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-filtering
+  version: 5.4.2.post1
+  sha256: aff07bb7711a77f05b186bfed546eb3f27db90c66344f1334a5066521ab31324
+  requires_dist:
+  - itk-numerics==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/bf/f1/f34d55002c782a85ea7315e63f6acfb4253fee6e1ce8e251933be4e8cf75/itk_filtering-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-filtering
+  version: 5.4.2.post1
+  sha256: 862b89f89d70f77068f694b96718ecdb7ba7d30481730f49db62b53b656762d9
+  requires_dist:
+  - itk-numerics==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/01/aa/52a567434e475869dcad463cd5abde2e5f7e85e3f1fd1ef5793d7141fa59/itk_io-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-io
+  version: 5.4.2.post1
+  sha256: e38ec0e9b23d4e01d85cf2681c9e7b12a16c95591cc923485a744433399cf58a
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/d8/7f/0e707192253015c190d883c391d06265b265779026a79cecf318b8bf8028/itk_io-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-io
+  version: 5.4.2.post1
+  sha256: cd771539c4a681f73e8c8aa312997ebd989908278af76ef8e09946402832b30e
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/da/1d/b3ffee9b8604564b8c1aa2aa1ed8121f05a44bbf35cbae630dbad134c309/itk_io-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-io
+  version: 5.4.2.post1
+  sha256: 918819a33a93bf96ab29738fa271d4b0b824b30935942b874ff41c864916049d
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/fd/e0/8532ca2b60c4acb9eff15945a7551b7698b623e5838d2fea08ad8733f227/itk_io-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-io
+  version: 5.4.2.post1
+  sha256: b90ad20729428581ae39d6980b780851a01067ff28d2cc90b8eb0bbf0d53ea2d
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/66/8a/36432eca74da33edd6429a067acb927b7493f6a510ba78e18a7056ed4980/itk_numerics-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-numerics
+  version: 5.4.2.post1
+  sha256: 4222b5438278d41e7fc792dce565b2455d568e50f9ab137679f0d3c7a481c291
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/bc/f9/451f5d5da1bd200c0160f3950aa725caefc78baf6178a4837e7c6205df57/itk_numerics-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-numerics
+  version: 5.4.2.post1
+  sha256: d9f828690706ada3eb10333fdeed19f60f5ec5e26a4df31b9083584f4fe0900c
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/f6/78/d93b125838c2b54ea04b12b86f54d2a1fd0d49c00978ba1be307d45bcf26/itk_numerics-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-numerics
+  version: 5.4.2.post1
+  sha256: 3bc3ebf558f44e999db65b8e78d023cc43ed6e5367fde133ff26865d67a8a330
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/fa/50/f88a461174ace21f24d2ea1115d8a31e09a5fabde6c25233c2cae3ca48db/itk_numerics-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-numerics
+  version: 5.4.2.post1
+  sha256: f735de8eb9e74deea68093165ec9e20ee92c92739daf5580bfaa03e5d99fc0db
+  requires_dist:
+  - itk-core==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/00/ef/3a00e94ea305877eedc4f35746ada8fc80782b04345a6a640d401e55ad9f/itk_registration-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-registration
+  version: 5.4.2.post1
+  sha256: 7a621bde2632a9fb79a6bf16ab0ff67ed0128428a7534e0985cd7baecca8307c
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/4a/ce/21bb738fa1a63588459b94a1f0ba7f569a112c7bd5ab2f1ef2d7442b0af0/itk_registration-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-registration
+  version: 5.4.2.post1
+  sha256: 5685c19f6f191dc61bd412a66c633f0bee22ec5242223a78e7517d96e43f251f
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/95/9a/2adfad51019f8fdc935ff7a3662de46b9276fd7e685ba34e30a2ea8603f6/itk_registration-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-registration
+  version: 5.4.2.post1
+  sha256: 9a91a08e93156476e55f205f706a0676b26c3d10a5f7ced3d89e72c11ac42d00
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/bf/92/36327a28b6a0fc2f56c070b1f81c90e2e55515f5927f213d5c71e1b3eed0/itk_registration-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-registration
+  version: 5.4.2.post1
+  sha256: 5bfef2cc0d838cd68ed9168f421ffb4eceeebddcc6c3502b5d1ea07803616f8a
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/26/9b/86fc058729c8d3ea1086e196db0f38b57bfa2e0818b419ff4f4b6171be38/itk_segmentation-5.4.2.post1-cp311-abi3-macosx_11_0_arm64.whl
+  name: itk-segmentation
+  version: 5.4.2.post1
+  sha256: d7ec44694a16d00923638b3d1c230cb39a9e1ba679422285d6be8182d57893b0
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/a9/cc/ee6b90a783625210dfb6871ff82edd79a2083cace7dbf863d9e0b8505ae9/itk_segmentation-5.4.2.post1-cp311-abi3-macosx_10_9_x86_64.whl
+  name: itk-segmentation
+  version: 5.4.2.post1
+  sha256: a8177c54f2f468fe5f065fb675f0c5e5b29543ce8e133c11d98112fd460878c9
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/e0/f4/d0aa282362700d8b86c235b48f2ff9f60041452f39752b2bc72f82595f9c/itk_segmentation-5.4.2.post1-cp311-abi3-manylinux_2_28_x86_64.whl
+  name: itk-segmentation
+  version: 5.4.2.post1
+  sha256: fdbc8d1586faef7b2b4d5e9754e04ab11a5cde3406466a148cab82a728992a08
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/f7/30/2b51812a7751ced1f73225302991059c7d9b3ded707aee0759290f650edc/itk_segmentation-5.4.2.post1-cp311-abi3-win_amd64.whl
+  name: itk-segmentation
+  version: 5.4.2.post1
+  sha256: fa0ccbcb41f17d86f48eca5da3624a059ddbcca8b9dd057c6f02d9f6935c49fd
+  requires_dist:
+  - itk-filtering==5.4.2.post1
+  requires_python: '>=3.8'
 - conda: https://conda.anaconda.org/conda-forge/noarch/jaraco.classes-3.4.0-pyhd8ed1ab_2.conda
   sha256: 3d16a0fa55a29fe723c918a979b2ee927eb0bf9616381cdfd26fa9ea2b649546
   md5: ade6b25a6136661dadd1a43e4350b10b
