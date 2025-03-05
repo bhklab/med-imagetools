@@ -1,4 +1,4 @@
-from .parse_dicom import ( # noqa
+from .parse_dicom import (  # noqa
     MetaAttrDict,
     SeriesMetaListMap,
     SeriesMetaMap,
@@ -9,7 +9,7 @@ from .parse_dicom import ( # noqa
     parse_dicom_dir,
     parse_one_dicom,
 )
-from .crawler import Crawler # noqa
+from .crawler import Crawler  # noqa
 
 __all__ = [
     "Crawler",
