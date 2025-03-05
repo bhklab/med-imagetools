@@ -147,10 +147,10 @@ class Interlacer:
                 self._build_forest()
                 self.trees = self._find_branches() if self.query_branches else self.root_nodes
             case GroupBy.StudyInstanceUID:
-                logger.info("Grouping by StudyInstanceUID...")
+                logger.warning("Grouping by StudyInstanceUID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED.")
                 self.trees = self._group_by_attribute(self.series_nodes.values(), 'StudyInstanceUID')
             case GroupBy.PatientID:
-                logger.info("Grouping by PatientID...")
+                logger.warning("Grouping by PatientID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED.")
                 self.trees = self._group_by_attribute(self.series_nodes.values(), 'PatientID')
             case _:
                 raise NotImplementedError(f"Grouping by {group_field} is not supported.")
