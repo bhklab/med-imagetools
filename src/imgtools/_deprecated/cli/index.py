@@ -3,7 +3,7 @@ import pathlib
 
 import click
 
-from imgtools.crawler import crawl
+# from imgtools.crawler import crawl
 from imgtools.logging import logger
 
 cpu_count: int | None = os.cpu_count()
@@ -43,6 +43,6 @@ def index(
     logger.info(f"Indexing images in {source_directory}.")
 
     # TODO: extend parameters such as csv_path, json_path, etc.
-    crawl(top=source_directory, n_jobs=num_workers)
+    # crawl(top=source_directory, n_jobs=num_workers)
 
     logger.info("Indexing complete.")
