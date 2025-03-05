@@ -8,11 +8,11 @@ import SimpleITK as sitk
 from pydicom import Dataset, dcmread
 
 from imgtools.logging import logger
-from imgtools.modules.utils import read_image
 
 """
 TODO:: Move metadata extraction to on load
 """
+__all__ = ["Dose"]
 
 
 @dataclass

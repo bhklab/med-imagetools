@@ -8,7 +8,7 @@ include = [
   "src/imgtools/modules/*.py",
   "src/imgtools/dicom/**/*.py",
   "src/imgtools/__init__.py",
-  "src/imgtools/utils/imageutils.py",
+  "src/imgtools/utils/*.py",
   "src/imgtools/io/**/*.py",
   "src/imgtools/coretypes/**/*.py",
   # "src/imgtools/types.py",
@@ -23,6 +23,7 @@ extend-exclude = [
   "src/imgtools/pipeline.py",
   "src/imgtools/io/writers/old_writers.py",
   "src/imgtools/coretypes/deprecated_bbox.py",
+  "src/imgtools/utils/nnunet.py"
 ]
 
 cache-dir = ".cache/.ruff-cache"

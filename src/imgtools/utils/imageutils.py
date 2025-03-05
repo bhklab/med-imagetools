@@ -169,7 +169,7 @@ def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
         Physical coordinates corresponding to the given indices.
     """
     continuous = np.issubdtype(idxs.dtype, np.floating)
-    
+
     # TransformIndexToPhysicalPoint expects a list not a numpy array
 
     transform = (
