@@ -12,7 +12,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
 
 @click.command(no_args_is_help=True)
 @click.argument(
-    "source_dictory",
+    "source_directory",
     type=click.Path(
         exists=True,
         file_okay=False,
@@ -69,7 +69,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     "--help",
 )
 def index(
-    source_dictory: pathlib.Path,
+    source_directory: pathlib.Path,
     output_json: pathlib.Path | None,
     output_csv: pathlib.Path | None,
     dataset_name: str | None,
@@ -84,7 +84,7 @@ def index(
     in a `.imgtools` directory in the SOURCE_DIRECTORY's parent directory.
     """
     logger.info(
-        f"Indexing DICOM files in {source_dictory} with {num_workers} worker(s)."
+        f"Indexing DICOM files in {source_directory} with {num_workers} worker(s)."
     )
 
     if dataset_name and (output_json or output_csv):
@@ -93,7 +93,7 @@ def index(
         )
 
     _crawler = Crawler(
-        dicom_dir=source_dictory,
+        dicom_dir=source_directory,
         dcm_extension="dcm",
         dataset_name=dataset_name,
         db_json=output_json,
