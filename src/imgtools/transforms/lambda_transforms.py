@@ -31,22 +31,31 @@ class SimpleITKFilter(BaseTransform):
         sitk_filter: sitk.ImageFilter,
         *execute_args: Optional[Any],  # noqa: ANN401
     ) -> None:
+        """
+        Initialize a SimpleITKFilter with a filter and execution args.
+        
+        Args:
+            sitk_filter: A SimpleITK image filter instance to process images.
+            *execute_args: Optional positional arguments to pass to the filter's Execute method.
+        """
         self.sitk_filter = sitk_filter
         self.execute_args = execute_args
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """SimpleITKFilter callable object:
-        A callable class that uses an sitk.ImageFilter object to add a filter to an image.
-
+        """Apply a SimpleITK image filter to an image.
+        
+        Executes the underlying filter with the provided image and any additional execution
+        arguments.
+        
         Parameters
         ----------
-        image
-            sitk.Image object to be processed.
-
+        image : sitk.Image
+            The image to process.
+        
         Returns
         -------
         sitk.Image
-            The processed image with a given filter.
+            The filtered image.
         """
         return self.sitk_filter.Execute(image, *self.execute_args)  # type: ignore
 
@@ -83,23 +92,40 @@ class ImageFunction(BaseTransform):
         copy_geometry: bool = True,
         **kwargs: Optional[Any],  # noqa: ANN401
     ) -> None:
+        """
+        Initializes an ImageFunction transform.
+        
+        Registers a user-defined function for image processing along with its settings.
+        The supplied function must accept a SimpleITK image and return a processed image.
+        If copy_geometry is True, the geometry of the input image will be copied to the output.
+        Additional keyword arguments are stored to be passed to the function during processing.
+        
+        Args:
+            function: A callable that processes a SimpleITK image and returns a processed image.
+            copy_geometry: If True, copies the input image's geometry to the result.
+            **kwargs: Optional keyword arguments to be passed to the processing function.
+        """
         self.function = function
         self.copy_geometry = copy_geometry
         self.kwargs = kwargs
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ImageFunction callable object:
-        Process an image based on a given function.
-
+        """
+        Process an image using a custom function.
+        
+        This method applies the user-defined function to the input image with any additional
+        keyword arguments. If the `copy_geometry` flag is set, it copies the geometric information
+        from the original image to the result.
+        
         Parameters
         ----------
-        image
-            sitk.Image object to be processed.
-
+        image : sitk.Image
+            The image to be processed.
+        
         Returns
         -------
         sitk.Image
-            The image processed with the given function.
+            The processed image.
         """
 
         result = self.function(image, **self.kwargs)

@@ -86,14 +86,21 @@ class Resample(SpatialTransform):
     def __call__(
         self, image: sitk.Image, ref: None | sitk.Image
     ) -> sitk.Image:
-        """Resample callable object:
-        Resamples image to a given spacing, optionally applying a transformation..
-
+        """
+        Resamples an image to a designated spacing.
+        
+        If a reference image is provided, its spacing is used for resampling;
+        otherwise, the object's preset spacing is applied. The method uses the
+        configured interpolation, anti-aliasing, and transformation settings
+        to produce the resampled image.
+        
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to resample.
-
+        ref : None or sitk.Image
+            An optional reference image whose spacing is used if provided.
+        
         Returns
         -------
         sitk.Image
@@ -157,13 +164,17 @@ class Resize(SpatialTransform):
     anti_alias_sigma: Optional[float] = None
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Resize callable object: Resizes image to a given size by resampling coordinates.
-
+        """
+        Resizes the input image to the configured dimensions.
+        
+        Uses the specified size, interpolation, and anti-alias sigma settings to resample
+        the image and generate a resized output.
+        
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to resize.
-
+        
         Returns
         -------
         sitk.Image
@@ -280,6 +291,12 @@ class Rotate(SpatialTransform):
     _angles_list: list[float] = field(init=False)
 
     def __post_init__(self) -> None:
+        """
+        Validates and normalizes the rotation angles.
+        
+        Converts a single float into a triplet by repeating it for all three axes or verifies that a list of three floats
+        was provided. Raises a ValueError if the angles attribute does not match these requirements.
+        """
         match self.angles:
             case float(one_angle):
                 self._angles_list = [one_angle, one_angle, one_angle]
@@ -291,13 +308,14 @@ class Rotate(SpatialTransform):
                 raise ValueError(errmsg)
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Rotate callable object: Rotates an image around a given centre.
-
+        """
+        Rotates an image around a specified center.
+        
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to rotate.
-
+        
         Returns
         -------
         sitk.Image
@@ -337,13 +355,15 @@ class InPlaneRotate(SpatialTransform):
     interpolation: str = "linear"
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """InPlaneRotate callable object: Rotates an image on a plane.
-
+        """Rotate an image in its plane.
+        
+        The image is rotated around its geometric center using the instance's angle and interpolation settings.
+        
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to rotate.
-
+        
         Returns
         -------
         sitk.Image

@@ -240,10 +240,23 @@ class Size3D:
         return f"Size3D(w={self.width}, h={self.height}, d={self.depth})"
 
     def __truediv__(self, other: int | Size3D | tuple) -> Size3D:
-        """Divide this vector by another value.
+        """
+        Divide a Size3D by an integer, Size3D, or 3-tuple using floor division.
         
-        Uses `//` operator for floor division by default because
-        division of sizes should always return an integer.
+        Divides each dimension (width, height, depth) by the corresponding value from
+        the divisor. If the divisor is an integer, all dimensions are divided uniformly.
+        If a Size3D or a 3-tuple is provided, each dimension is divided by its counterpart.
+        Division is carried out using floor division (//) so that the result remains an integer.
+        
+        Args:
+            other: The divisor, which can be an int, a Size3D instance, or a tuple of
+                   three integers representing (width, height, depth).
+        
+        Returns:
+            A new Size3D instance with dimensions divided by the given divisor.
+        
+        Raises:
+            TypeError: If the divisor is not an int, Size3D, or a 3-tuple.
         """
         match other:
             case int() as value:
@@ -272,7 +285,14 @@ class Size3D:
                 raise TypeError(errmsg)
 
     def __floordiv__(self, other: int | Size3D | tuple) -> Size3D:
-        """Floor divide this vector by another value."""
+        """
+        Perform floor division on a Size3D instance.
+        
+        Returns a new Size3D with each dimension calculated using floor division by the provided
+        divisor. The divisor may be an integer, a Size3D instance, or a tuple of three integers.
+        This method delegates to __truediv__, which handles input validation and performs the actual
+        division.
+        """
         return self.__truediv__(
             other
         )  # Since truediv already uses // operator

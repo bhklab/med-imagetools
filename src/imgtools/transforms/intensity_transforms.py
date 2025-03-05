@@ -49,18 +49,17 @@ class ClipIntensity(IntensityTransform):
     upper: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ClipIntensity callable object:
-        Clips image grey level intensities to specified range.
-
-        Parameters
-        ----------
-        image
-            The intensity image to clip.
-
-        Returns
-        -------
-        sitk.Image
-            The clipped intensity image.
+        """
+        Clip image intensities within a specified range.
+        
+        This method processes the input image by resetting pixel values lower than the lower
+        bound to the lower value and those above the upper bound to the upper value.
+        
+        Parameters:
+            image: A SimpleITK image to be intensity-clipped.
+        
+        Returns:
+            A SimpleITK image with intensities constrained to the range [self.lower, self.upper].
         """
         return clip_intensity(image, self.lower, self.upper)
 
@@ -92,18 +91,21 @@ class WindowIntensity(IntensityTransform):
     level: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """WindowIntensity callable object:
-        Restricts image grey level intensities to a given window and level.
-
+        """
+        Applies a windowing transform to adjust image intensities.
+        
+        Adjusts the input image so that intensities falling outside the range defined by
+        [level - window/2, level + window/2] are clipped to the corresponding bound.
+        
         Parameters
         ----------
-        image
-            The intensity image to window.
-
+        image : sitk.Image
+            The input intensity image.
+        
         Returns
         -------
         sitk.Image
-            The windowed intensity image.
+            The intensity image after applying the windowing transform.
         """
 
         return window_intensity(image, self.window, self.level)
