@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Dict, List
 import json
+from pathlib import Path
 
 from imgtools.logging import logger
 
@@ -31,7 +32,7 @@ class SampleLoader():
         self.roi_separate = roi_separate
 
         with open((crawl_path), 'r') as f:
-            self.crawl_info = json.load(f)      
+            self.crawl_info = json.load(f)    
 
     def _reader(self, series_uid: str, load_subseries: bool = False) -> auto_dicom_result | List[auto_dicom_result]:
         """
@@ -55,11 +56,12 @@ class SampleLoader():
         if load_subseries:         
             images = []
             for subseries_uid in subseries_uids:
-                file_names = [
-                    file_name for _, file_name in series_info[subseries_uid]['instances'].items()
-                ]
                 folder = series_info[subseries_uid]['folder']
-
+                file_names = [
+                    (Path(folder) / file_name).as_posix() 
+                    for file_name in series_info[subseries_uid]['instances'].values()
+                ]
+                
                 images.append(read_dicom_auto(
                     folder, 
                     series_uid, 
@@ -75,7 +77,8 @@ class SampleLoader():
             file_names = []
             for subseries_uid in subseries_uids:
                 file_names += [
-                    file_name for _, file_name in series_info[subseries_uid]['instances'].items()
+                    (Path(folder) / file_name).as_posix() 
+                    for file_name in series_info[subseries_uid]['instances'].values()
                 ]
 
             return read_dicom_auto(
@@ -97,8 +100,8 @@ class SampleLoader():
         grouped_images: Dict[str, List[str]] = defaultdict(list)
         
         for image in sample:
-            modality = image['modality']
-            grouped_images[modality].append(image['series_uid'])
+            modality = image['Modality']
+            grouped_images[modality].append(image['Series'])
 
         return grouped_images
 
@@ -155,3 +158,5 @@ class SampleLoader():
                         loaded_images.append(image)
             
             return loaded_images
+
+
