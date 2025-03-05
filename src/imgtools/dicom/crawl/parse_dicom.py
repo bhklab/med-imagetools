@@ -28,7 +28,7 @@ from imgtools.dicom.input import (
     seg_reference_uids,
     sr_reference_uids,
 )
-from imgtools.logging import logger, tqdm_logging_redirect
+from imgtools.logging import logger
 from imgtools.utils import timer
 
 __all__ = [
@@ -210,23 +210,22 @@ def parse_all_dicoms(
     sop_map: dict[SopUID, SeriesUID] = {}
     ############################################################
     # use parallel to run parse_dicom on every item in dcms
-    with tqdm_logging_redirect():
-        results = Parallel(n_jobs=n_jobs)(
-            delayed(parse_one_dicom)(dcm, top)
-            for dcm in tqdm(
-                dicom_files,
-                desc="Processing DICOM files",
-                mininterval=1,
-                leave=False,
-            )
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(parse_one_dicom)(dcm, top)
+        for dcm in tqdm(
+            dicom_files,
+            desc="Processing DICOM files",
+            mininterval=1,
+            leave=False,
         )
+    )
 
-        # Aggregate the results into a single SeriesInstanceUID Key : List[MetaAttrDict] value
-        for series_dict, sop_dict in results:
-            for series_uid, subseries_to_meta in series_dict.items():
-                series_meta_raw[series_uid].append(subseries_to_meta)
+    # Aggregate the results into a single SeriesInstanceUID Key : List[MetaAttrDict] value
+    for series_dict, sop_dict in results:
+        for series_uid, subseries_to_meta in series_dict.items():
+            series_meta_raw[series_uid].append(subseries_to_meta)
 
-            sop_map.update(sop_dict)
+        sop_map.update(sop_dict)
 
     return series_meta_raw, sop_map
 
@@ -272,30 +271,28 @@ def merge_series_meta_main(
         return merged
 
     series_meta_merged: dict[SeriesUID, dict] = {}
-    with tqdm_logging_redirect():
-        series_merge_results = Parallel(n_jobs=n_jobs)(
-            delayed(merge_metadata_by_series)(series_meta_item)
-            for series_meta_item in tqdm(
-                series_meta_raw_dict.items(),
-                desc="Merging series meta",
-                mininterval=1,
-                leave=False,
-            )
+    series_merge_results = Parallel(n_jobs=n_jobs)(
+        delayed(merge_metadata_by_series)(series_meta_item)
+        for series_meta_item in tqdm(
+            series_meta_raw_dict.items(),
+            desc="Merging series meta",
+            mininterval=1,
+            leave=False,
         )
+    )
 
-        for merged in series_merge_results:
-            series_meta_merged.update(merged)
+    for merged in series_merge_results:
+        series_meta_merged.update(merged)
 
     return series_meta_merged
 
 
 def parse_dicom_dir(
     dicom_dir: str | pathlib.Path,
+    raw_output_path: pathlib.Path,
     extension: str = "dcm",
-    crawl_json: pathlib.Path | None = None,
     n_jobs: int = -1,
     force: bool = True,
-    imgtools_dir: str = ".imgtools",
 ) -> tuple[
     pathlib.Path,
     dict[SeriesUID, dict[SubSeriesID, MetaAttrDict]],
@@ -307,22 +304,19 @@ def parse_dicom_dir(
     Returns
     -------
     tuple[pathlib.Path, dict, pathlib.Path, dict]
-        A tuple containing the paths to the crawl JSON file, the series metadata,
-        the SOP map JSON file, and the SOP
+        A tuple containing the:
+        1) paths to the crawl JSON file
+        2) the series metadata dictionary
+        3) the SOP map JSON file
+        4) and the SOP Map dictionary.
     """
     top = pathlib.Path(dicom_dir).absolute()
-    # we consider the `dataset name` as the top directory name
-    dataset_name = top.name
 
-    if crawl_json is None:
-        crawl_json = (
-            top.parent / imgtools_dir / f"Dataset-{dataset_name}_crawl.json"
-        )
-    else:
-        crawl_json = pathlib.Path(crawl_json)
+    # we consider the `dataset name` as the top directory name
+    crawl_json = pathlib.Path(raw_output_path)
 
     # sop_map file is the same as the crawl file, named sop_map.json
-    sop_map_json = crawl_json.with_name(f"Dataset-{dataset_name}_sopmap.json")
+    sop_map_json = crawl_json.with_name(crawl_json.stem + "-sop_map.json")
 
     if (crawl_json.exists() and sop_map_json.exists()) and not force:
         logger.info(f"{crawl_json} exists and {force=}. Loading from file.")
@@ -349,6 +343,8 @@ def parse_dicom_dir(
 
     series_meta_merged = merge_series_meta_main(series_meta_raw, n_jobs=n_jobs)
 
+    # Save the results to JSON files
+    crawl_json.parent.mkdir(parents=True, exist_ok=True)
     with crawl_json.open("w") as f:
         json.dump(series_meta_merged, f, indent=4)
 
