@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from imgtools.io import auto_dicom_result, read_dicom_auto
 from imgtools.logging import logger
-from imgtools.modalities import PET, Dose, Scan, Segmentation
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
 
 
 class SampleLoader:
@@ -29,12 +29,12 @@ class SampleLoader:
         self.roi_select_first = roi_select_first
         self.roi_separate = roi_separate
 
-        with open((crawl_path), "r") as f:
+        with Path(crawl_path).open("r") as f:
             self.crawl_info = json.load(f)
 
     def _reader(
         self, series_uid: str, load_subseries: bool = False
-    ) -> auto_dicom_result | List[auto_dicom_result]:
+    ) -> List[auto_dicom_result]:
         """
         Reads DICOM files for a given series UID.
 
@@ -47,14 +47,14 @@ class SampleLoader:
 
         Returns
         -------
-        auto_dicom_result | List[auto_dicom_result]
-            The loaded DICOM data or a list of loaded DICOM data for each subseries.
+        List[auto_dicom_result]
+            list of loaded DICOM data for each subseries.
         """
         series_info = self.crawl_info[series_uid]
         subseries_uids = list(series_info.keys())
 
+        images = []
         if load_subseries:
-            images = []
             for subseries_uid in subseries_uids:
                 folder = series_info[subseries_uid]["folder"]
                 file_names = [
@@ -66,7 +66,6 @@ class SampleLoader:
 
                 images.append(read_dicom_auto(folder, series_uid, file_names))
 
-            return images
         else:
             if len(subseries_uids) > 1:
                 logger.warning(
@@ -83,7 +82,9 @@ class SampleLoader:
                     ].values()
                 ]
 
-            return read_dicom_auto(folder, series_uid, file_names)
+            images.append(read_dicom_auto(folder, series_uid, file_names))
+
+        return images
 
     def _group_by_modality(
         self, sample: List[Dict[str, str]]
@@ -130,47 +131,66 @@ class SampleLoader:
         if (
             len(sample) == 1 and self.multiple_subseries_setting_toggle
         ):  # EDGE CASE
-            return self._reader(sample[0]["series_uid"], load_subseries=True)
-        else:
-            grouped_images = self._group_by_modality(sample)
-
-            # Load reference image
-            reference_modality = (
-                "CT"
-                if "CT" in grouped_images
-                else "MR"
-                if "MR" in grouped_images
-                else None
-            )
-            if not reference_modality:
-                raise ValueError(
-                    "No CT or MR series found to use as reference."
+            loaded_images = [
+                image
+                for image in self._reader(
+                    sample[0]["series_uid"], load_subseries=True
                 )
-            if len(grouped_images[reference_modality]) > 1:
-                msg = f"Found >1 {reference_modality} series, using the first one"
-                raise ValueError(msg)
-
-            series_uid = grouped_images.pop(reference_modality)[0]
-            reference_image = self._reader(series_uid)
-            loaded_images.append(reference_image)
-
-            # Load remaining images
-            for modality, series_uids in grouped_images.items():
-                for series_uid in series_uids:
-                    image = self._reader(series_uid)
-                    if modality == "RTSTRUCT":
-                        image = image.to_segmentation(
-                            reference_image,
-                            self.roi_names,
-                            continuous=False,
-                            existing_roi_indices=self.existing_roi_indices,
-                            ignore_missing_regex=self.ignore_missing_regex,
-                            roi_select_first=self.roi_select_first,
-                            roi_separate=self.roi_separate,
-                        )
-                    loaded_images.append(image)
-
+                if not isinstance(image, StructureSet)
+            ]
             return loaded_images
+
+        grouped_images = self._group_by_modality(sample)
+
+        # Load reference image
+        reference_modality = (
+            "CT"
+            if "CT" in grouped_images
+            else "MR"
+            if "MR" in grouped_images
+            else None
+        )
+        if not reference_modality:
+            raise ValueError("No CT or MR series found to use as reference.")
+        if len(grouped_images[reference_modality]) > 1:
+            msg = f"Found >1 {reference_modality} series, using the first one as reference."
+            logger.warning(msg)
+
+        series_uid = grouped_images.pop(reference_modality)[0]
+        _image = self._reader(series_uid)
+        assert (len(_image) == 1) and isinstance(_image[0], Scan)
+        reference_image: Scan = _image[0]
+
+        loaded_images.append(reference_image)
+
+        # Load remaining images
+        for modality, series_uids in grouped_images.items():
+            for series_uid in series_uids:
+                image = self._reader(series_uid)[0]
+                if modality == "RTSTRUCT" and isinstance(image, StructureSet):
+                    segmentation = image.to_segmentation(
+                        reference_image=reference_image,
+                        roi_names=self.roi_names,  # type: ignore
+                        continuous=False,
+                        existing_roi_indices=self.existing_roi_indices,
+                        ignore_missing_regex=self.ignore_missing_regex,
+                        roi_select_first=self.roi_select_first,
+                        roi_separate=self.roi_separate,
+                    )
+                    if segmentation is None:
+                        logger.warning(
+                            f"Failed to load segmentation for series {series_uid}"
+                        )
+                        continue
+                    else:
+                        loaded_images.append(segmentation)
+                        continue
+                assert not isinstance(
+                    image, StructureSet
+                )  # stupid auto_dicom_result
+                loaded_images.append(image)
+
+        return loaded_images
 
 
 if __name__ == "__main__":
