@@ -360,3 +360,11 @@ class Interlacer:
         # Write the final HTML file
         save_path.write_text(full_html, encoding="utf-8")
 
+if __name__ == '__main__':
+    from rich import print
+
+    interlacer = Interlacer('.imgtools/data/crawldb.csv')
+    interlacer.visualize_forest()
+    result = interlacer.query('CT,RTSTRUCT')
+
+    print(result)
