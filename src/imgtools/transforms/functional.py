@@ -29,53 +29,46 @@ def resample(
     transform: sitk.Transform | None = None,
     output_size: List[float] | None = None,
 ) -> sitk.Image:
-    """Resample image to a given spacing, optionally applying a transformation.
-
+    """
+    Resample image to a specified spacing, optionally applying a transformation.
+    
     Parameters
     ----------
-    image
+    image : sitk.Image
         The image to be resampled.
-
-    spacing
-        The new image spacing. If float, assumes the same spacing in all
-        directions. Alternatively, a sequence of floats can be passed to
-        specify spacing along each dimension. Passing 0 at any position will
-        keep the original spacing along that dimension (useful for in-plane
-        resampling).
-
-    interpolation, optional
-        The interpolation method to use. Valid options are:
-        - "linear" for bi/trilinear interpolation (default)
-        - "nearest" for nearest neighbour interpolation
-        - "bspline" for order-3 b-spline interpolation
-
-    anti_alias, optional
-        Whether to smooth the image with a Gaussian kernel before resampling.
-        Only used when downsampling, i.e. when `spacing < image.GetSpacing()`.
-        This should be used to avoid aliasing artifacts.
-
-    anti_alias_sigma, optional
-        The standard deviation of the Gaussian kernel used for anti-aliasing.
-
-    transform, optional
-        Transform to apply to input coordinates when resampling. If None,
-        defaults to identity transformation.
-
-    output_size, optional
-        Size of the output image. If None, it is computed to preserve the
-        whole extent of the input image.
-
+    spacing : float, list of float, or np.ndarray
+        The desired spacing. If a single float is provided, that spacing is applied
+        uniformly across all dimensions. Alternatively, a sequence can specify spacing
+        per dimension. Passing 0 for any dimension retains the original spacing for that
+        dimension (useful for in-plane resampling).
+    interpolation : str, optional
+        The interpolation method to use. Supported methods include "linear" (default),
+        "nearest", and "bspline".
+    anti_alias : bool, optional
+        Whether to apply Gaussian smoothing for anti-aliasing when downsampling.
+    anti_alias_sigma : float, list of float, or None, optional
+        The standard deviation(s) of the Gaussian kernel for anti-aliasing.
+        If None, sigma is computed based on the ratio of original to new spacing.
+    transform : sitk.Transform or None, optional
+        A transformation to apply to input coordinates during resampling.
+    output_size : list of float or None, optional
+        The desired output image size. If None, the size is computed automatically
+        to preserve the original spatial extent.
+    
     Returns
     -------
     sitk.Image
         The resampled image.
-
+    
+    Raises
+    ------
+    ValueError
+        If the provided interpolation method is not supported.
+    
     Examples
     --------
-    >>> resampled_image = resample_image(
-    ...     example_image, [1, 1, 1]
-    ... )
-    >>> print(resampled_image.GetSpacing())
+    >>> resampled = resample(example_image, [1, 1, 1])
+    >>> print(resampled.GetSpacing())
     [1, 1, 1]
     """
 
@@ -136,46 +129,40 @@ def resize(
     anti_alias: bool = True,
     anti_alias_sigma: float | None = None,
 ) -> sitk.Image:
-    """Resize image to a given size by resampling coordinates.
-
+    """
+    Resize an image to a new size using resampling.
+    
+    The target size is specified by the `size` parameter, which can be an integer for
+    uniform dimensions or a sequence to define each dimension independently. A value
+    of 0 in any dimension indicates that the original size for that axis should be preserved.
+    The function computes the corresponding new spacing and uses the resampling operation
+    to generate the resized image.
+    
     Parameters
     ----------
     image
-        The image to be resize.
-
+        The SimpleITK image to be resized.
     size
-        The new image size. If float, assumes the same size in all directions.
-        Alternatively, a sequence of floats can be passed to specify size along
-        each dimension. Passing 0 at any position will keep the original
-        size along that dimension.
-
+        Target image size. Provide an integer for a uniform size across all dimensions or a 
+        sequence for per-axis sizes. Use 0 to keep the original size in a given axis.
     interpolation, optional
-        The interpolation method to use. Valid options are:
-        - "linear" for bi/trilinear interpolation (default)
-        - "nearest" for nearest neighbour interpolation
-        - "bspline" for order-3 b-spline interpolation
-
+        The interpolation method: "linear" (default) for bi/trilinear interpolation, "nearest" for 
+        nearest neighbor, or "bspline" for order-3 b-spline interpolation.
     anti_alias, optional
-        Whether to smooth the image with a Gaussian kernel before resampling.
-        Only used when downsampling, i.e. when `size < image.GetSize()`.
-        This should be used to avoid aliasing artifacts.
-
+        If True, apply Gaussian smoothing before resampling when downsampling to reduce aliasing artifacts.
     anti_alias_sigma, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
-
+    
     Returns
     -------
     sitk.Image
         The resized image.
-
+    
     Examples
     --------
     >>> print("Original Size:", example_image.GetSize())
     Original Size: [512, 512, 97]
-
-    >>> resized_image = resize_image(
-    ...     example_image, [256, 256, 0]
-    ... )
+    >>> resized_image = resize(example_image, [256, 256, 0])
     >>> print("Resized Size:", resized_image.GetSize())
     Resized Size: [256, 256, 97]
     """
@@ -208,44 +195,39 @@ def zoom(
     anti_alias: bool = True,
     anti_alias_sigma: float | None = None,
 ) -> sitk.Image:
-    """Rescale image, preserving its spatial extent.
-
-    The rescaled image will have the same spatial extent (size) but will be
-    rescaled by `scale_factor` in each dimension. Alternatively, a separate
-    scale factor for each dimension can be specified by passing a sequence
-    of floats.
-
+    """
+    Rescale image while preserving its spatial extent.
+    
+    Applies a scaling transformation centered on the image to resample it such that
+    its overall physical extent remains unchanged. A uniform scale factor or a
+    separate factor for each dimension can be provided. Gaussian smoothing (anti-
+    aliasing) may be applied during downsampling to reduce aliasing artifacts.
+    
     Parameters
     ----------
     image
-        The image to rescale.
-
+        The input SimpleITK image.
     scale_factor
-        If float, each dimension will be scaled by that factor. If tuple, each
-        dimension will be scaled by the corresponding element.
-
-    interpolation, optional
-        The interpolation method to use. Valid options are:
-        - "linear" for bi/trilinear interpolation (default)
-        - "nearest" for nearest neighbour interpolation
-        - "bspline" for order-3 b-spline interpolation
-
-    anti_alias, optional
-        Whether to smooth the image with a Gaussian kernel before resampling.
-        Only used when downsampling, i.e. when `size < image.GetSize()`.
-        This should be used to avoid aliasing artifacts.
-
-    anti_alias_sigma, optional
+        Scale factor for each dimension. If a single float is provided, the same
+        factor is applied across all dimensions; otherwise, a sequence of factors is
+        used.
+    interpolation : str, optional
+        Interpolation method to use. Options include "linear" (default), "nearest",
+        and "bspline".
+    anti_alias : bool, optional
+        If True, applies Gaussian smoothing to minimize aliasing when the image is
+        downsampled.
+    anti_alias_sigma : float or None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
-
+    
     Returns
     -------
     sitk.Image
-        The rescaled image.
-
+        The rescaled image with its spatial extent preserved.
+    
     Examples
-    -------
-    >>> zoomed_image = zoom_image(example_image, 2.0)
+    --------
+    >>> zoomed_image = zoom(example_image, 2.0)
     """
     dimension = image.GetDimension()
 
@@ -275,33 +257,37 @@ def rotate(
     angles: List[float],
     interpolation: str = "linear",
 ) -> sitk.Image:
-    """Rotate an image around a given centre.
-
+    """
+    Rotate an image around a specified center.
+    
+    Rotates a 2D or 3D image using an Euler transformation. The rotation center is
+    expected in image index coordinates and is converted to physical space internally.
+    For 2D images, supply a single rotation angle (in a one-element list) in radians;
+    for 3D images, provide three rotation angles in radians corresponding to rotations
+    about the x, y, and z axes, respectively.
+    
     Parameters
     ----------
-    image
+    image : sitk.Image
         The image to rotate.
-
-    rotation_centre
-        The centre of rotation in image coordinates.
-
-    angles
-        The angles of rotation around x, y and z axes.
-
+    rotation_centre : list of float
+        The center of rotation in image index (voxel) coordinates.
+    angles : list of float
+        Rotation angle(s) in radians. Use one value for 2D images or three values for 3D.
+    interpolation : str, optional
+        The interpolation method to use (e.g. "linear").
+    
     Returns
     -------
     sitk.Image
         The rotated image.
-
+    
     Examples
     --------
     >>> size = example_image.GetSize()
-    >>> center_voxel = [
-    ...     size[i] // 2 for i in range(len(size))
-    ... ]
-    >>> rotated_image = rotate_image(
-    ...     example_image, center_voxel, [45, 45, 45]
-    ... )
+    >>> center_voxel = [size[i] // 2 for i in range(len(size))]
+    >>> # Rotate by 45 degrees (approximately 0.785 radians) for a 3D image.
+    >>> rotated_image = rotate(example_image, center_voxel, [0.785, 0.785, 0.785])
     """
     if isinstance(rotation_centre, np.ndarray):
         rotation_centre = rotation_centre.tolist()
@@ -405,28 +391,23 @@ def crop(
 def clip_intensity(
     image: sitk.Image, lower: float, upper: float
 ) -> sitk.Image:
-    """Clip image grey level intensities to specified range.
-
-    The grey level intensities in the resulting image will fall in the range
-    [lower, upper].
-
+    """Clip image grey level intensities to a specified range.
+    
+    All voxel intensities in the output image will be constrained within the range [lower, upper]. Intensities below the lower bound are set to lower, and those above the upper bound are set to upper.
+    
     Parameters
     ----------
     image
-        The intensity image to clip.
-
+        The SimpleITK image to be processed.
     lower
-        The lower bound on grey level intensity. Voxels with lower intensity
-        will be set to this value.
-
+        The minimum allowable intensity value.
     upper
-        The upper bound on grey level intensity. Voxels with higer intensity
-        will be set to this value.
-
+        The maximum allowable intensity value.
+    
     Returns
     -------
     sitk.Image
-        The clipped intensity image.
+        The image with intensity values clipped to the specified range.
     """
     return sitk.Clamp(image, image.GetPixelID(), lower, upper)
 

@@ -84,14 +84,19 @@ class Resample(SpatialTransform):
     def __call__(
         self, image: sitk.Image, ref: None | sitk.Image
     ) -> sitk.Image:
-        """Resample callable object:
-        Resamples image to a given spacing, optionally applying a transformation..
-
+        """
+        Resample the input image to a specified spacing.
+        
+        If a reference image is provided, its spacing is used; otherwise, the instance's spacing is applied.
+        This callable applies interpolation, anti-aliasing, and an optional transformation during resampling.
+        
         Parameters
         ----------
-        image
-            The image to resample.
-
+        image : sitk.Image
+            The image to be resampled.
+        ref : sitk.Image or None
+            Optional reference image to determine the spacing.
+        
         Returns
         -------
         sitk.Image
@@ -275,13 +280,16 @@ class Rotate(SpatialTransform):
     interpolation: str = "linear"
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Rotate callable object: Rotates an image around a given centre.
-
+        """
+        Rotates an image around a specified center.
+        
+        Applies a rotation transform using the object's configured rotation center, angles, and interpolation method.
+        
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to rotate.
-
+        
         Returns
         -------
         sitk.Image

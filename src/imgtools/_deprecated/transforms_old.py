@@ -77,18 +77,18 @@ class Resample(SpatialTransform):
     def __call__(
         self, image: sitk.Image, ref: None | sitk.Image
     ) -> sitk.Image:
-        """Resample callable object:
-        Resamples image to a given spacing, optionally applying a transformation..
-
-        Parameters
-        ----------
-        image
-            The image to resample.
-
-        Returns
-        -------
-        sitk.Image
-            The resampled image.
+        """Resample image using a specified spacing.
+        
+        If a reference image is provided, its spacing is used for resampling; otherwise, the transform's
+        default spacing is applied. The image is resampled using the instance's interpolation, anti-aliasing,
+        anti-alias sigma, transformation, and output size settings.
+        
+        Parameters:
+            image (sitk.Image): The image to be resampled.
+            ref (Optional[sitk.Image]): A reference image whose spacing is used if provided.
+        
+        Returns:
+            sitk.Image: The resampled image.
         """
 
         # whether or not a reference image is provided
@@ -315,17 +315,19 @@ class InPlaneRotate(SpatialTransform):
     interpolation: str = "linear"
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """InPlaneRotate callable object: Rotates an image on a plane.
-
-        Parameters
-        ----------
-        image
-            The image to rotate.
-
-        Returns
-        -------
-        sitk.Image
-            The rotated image.
+        """
+        Rotates an image in-plane about its center.
+        
+        Calculates the image's center (by halving its dimensions) and rotates it by the
+        stored angle using the specified interpolation method. Returns a new image with
+        the rotation applied.
+        
+        Parameters:
+            image: sitk.Image
+                The input image to be rotated.
+        
+        Returns:
+            sitk.Image: The rotated image.
         """
 
         image_size = np.array(image.GetSize())
@@ -373,18 +375,19 @@ class ClipIntensity(IntensityTransform):
     upper: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ClipIntensity callable object:
-        Clips image grey level intensities to specified range.
-
+        """
+        Clips image intensity values to a specified range.
+        
         Parameters
         ----------
         image
-            The intensity image to clip.
-
+            The input SimpleITK image whose intensities will be limited between the 
+            specified lower and upper bounds.
+        
         Returns
         -------
         sitk.Image
-            The clipped intensity image.
+            The resulting image with intensities clipped accordingly.
         """
         return clip_intensity(image, self.lower, self.upper)
 
@@ -416,18 +419,18 @@ class WindowIntensity(IntensityTransform):
     level: float
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """WindowIntensity callable object:
-        Restricts image grey level intensities to a given window and level.
-
+        """
+        Restricts image intensities to a specified window and level.
+        
         Parameters
         ----------
-        image
-            The intensity image to window.
-
+        image : sitk.Image
+            The input intensity image to process.
+        
         Returns
         -------
         sitk.Image
-            The windowed intensity image.
+            The image with intensity values clipped according to the window and level.
         """
 
         return window_intensity(image, self.window, self.level)
@@ -455,22 +458,31 @@ class SimpleITKFilter(BaseTransform):
     def __init__(
         self, sitk_filter: sitk.ImageFilter, *execute_args: Optional[Any]
     ):
+        """
+        Initializes a SimpleITKFilter instance.
+        
+        Stores the provided SimpleITK filter and any additional arguments for later use when
+        applying the filter to an image.
+        
+        Args:
+            sitk_filter: A SimpleITK filter (sitk.ImageFilter) to be applied to images.
+            *execute_args: Additional positional arguments for the filter's execution.
+        """
         self.sitk_filter = sitk_filter
         self.execute_args = execute_args
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """SimpleITKFilter callable object:
-        A callable class that uses an sitk.ImageFilter object to add a filter to an image.
-
-        Parameters
-        ----------
-        image
-            sitk.Image object to be processed.
-
-        Returns
-        -------
-        sitk.Image
-            The processed image with a given filter.
+        """
+        Apply the SimpleITK filter to an image.
+        
+        Executes the configured SimpleITK image filter on the provided image using any additional execution arguments,
+        and returns the filtered result.
+        
+        Parameters:
+            image (sitk.Image): The image to be processed.
+        
+        Returns:
+            sitk.Image: The image after applying the filter.
         """
         return self.sitk_filter.Execute(image, *self.execute_args)
 
@@ -507,23 +519,42 @@ class ImageFunction(BaseTransform):
         copy_geometry: bool = True,
         **kwargs: Optional[Any],
     ):
+        """
+        Initializes an ImageFunction instance.
+        
+        This transformation processes sitk.Image objects using a user-defined callable.
+        The provided function should accept a sitk.Image (and optionally additional
+        keyword arguments) and return a processed sitk.Image. If copy_geometry is True,
+        the geometry of the input image will be preserved in the output image.
+        
+        Args:
+            function: A callable that takes a sitk.Image (and optionally keyword arguments)
+                and returns a modified sitk.Image.
+            copy_geometry: If True, transfers the input image's geometric metadata to the
+                resulting image.
+            kwargs: Additional keyword arguments to pass to the function.
+        """
         self.function = function
         self.copy_geometry = copy_geometry
         self.kwargs = kwargs
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """ImageFunction callable object:
-        Process an image based on a given function.
-
+        """
+        Process a SimpleITK image using a specified function.
+        
+        Applies the user-provided function to the input image with any preset keyword arguments.
+        If geometry copying is enabled, the spatial metadata from the input image is transferred
+        to the processed image.
+        
         Parameters
         ----------
-        image
-            sitk.Image object to be processed.
-
+        image : sitk.Image
+            The SimpleITK image to be processed.
+        
         Returns
         -------
         sitk.Image
-            The image processed with the given function.
+            The image after processing and optional geometry transfer.
         """
 
         result = self.function(image, **self.kwargs)
