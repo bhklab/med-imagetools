@@ -1,8 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Sequence, Union
 
 import numpy as np
 import SimpleITK as sitk
+
+from imgtools.coretypes import Size3D
 
 from .base_transform import BaseTransform
 from .functional import (
@@ -270,13 +272,23 @@ class Rotate(SpatialTransform):
         - "bspline" for order-3 b-spline interpolation
     """
 
-    rotation_centre: list[float]
+    rotation_centre: list[int]
     angles: Union[float, list[float]]
     interpolation: str = "linear"
 
+    # internal variable to store angles as a list after validation
+    _angles_list: list[float] = field(init=False)
+
     def __post_init__(self) -> None:
-        if isinstance(self.angles, float):
-            self.angles = [self.angles, self.angles, self.angles]
+        match self.angles:
+            case float(one_angle):
+                self._angles_list = [one_angle, one_angle, one_angle]
+            case [float(x_ang), float(y_ang), float(z_ang)]:
+                self._angles_list = [x_ang, y_ang, z_ang]
+            case _:
+                errmsg = "angles must be a float or a list of 3 floats"
+                errmsg += f" but got {self.angles}"
+                raise ValueError(errmsg)
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
         """Rotate callable object: Rotates an image around a given centre.
@@ -294,7 +306,7 @@ class Rotate(SpatialTransform):
         return rotate(
             image,
             rotation_centre=self.rotation_centre,
-            angles=self.angles,
+            angles=self._angles_list,
             interpolation=self.interpolation,
         )
 
@@ -338,12 +350,12 @@ class InPlaneRotate(SpatialTransform):
             The rotated image.
         """
 
-        image_size = np.array(image.GetSize())
-        image_centre = image_size // 2
+        image_size = Size3D(image.GetSize())
+        image_centre: Size3D = image_size // 2
         angles = [0.0, 0.0, self.angle]
         return rotate(
             image,
-            rotation_centre=image_centre.tolist(),
+            rotation_centre=list(image_centre),
             angles=angles,
             interpolation=self.interpolation,
         )

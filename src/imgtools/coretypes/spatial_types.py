@@ -239,6 +239,44 @@ class Size3D:
         """Return a string representation of the Size3D."""
         return f"Size3D(w={self.width}, h={self.height}, d={self.depth})"
 
+    def __truediv__(self, other: int | Size3D | tuple) -> Size3D:
+        """Divide this vector by another value.
+        
+        Uses `//` operator for floor division by default because
+        division of sizes should always return an integer.
+        """
+        match other:
+            case int() as value:
+                return Size3D(
+                    self.width // value,
+                    self.height // value,
+                    self.depth // value,
+                )
+            case Size3D(width, height, depth):
+                return Size3D(
+                    self.width // width,
+                    self.height // height,
+                    self.depth // depth,
+                )
+            case tuple() if len(other) == 3:
+                return Size3D(
+                    self.width // other[0],
+                    self.height // other[1],
+                    self.depth // other[2],
+                )
+            case _:
+                errmsg = (
+                    f"Unsupported type for division: {type(other)}."
+                    " Expected int, tuple, or Size3D."
+                )
+                raise TypeError(errmsg)
+
+    def __floordiv__(self, other: int | Size3D | tuple) -> Size3D:
+        """Floor divide this vector by another value."""
+        return self.__truediv__(
+            other
+        )  # Since truediv already uses // operator
+
 
 if __name__ == "__main__":  # pragma: no cover
     # ruff : noqa
