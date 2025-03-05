@@ -7,10 +7,10 @@ from imgtools.logging import logger
 
 from imgtools.io import read_dicom_auto, auto_dicom_result
 
-from imgtools.modules.scan import Scan
-from imgtools.modules.pet import PET
-from imgtools.modules.dose import Dose
-from imgtools.modules.segmentation import Segmentation
+from imgtools.modalities.scan import Scan
+from imgtools.modalities.pet import PET
+from imgtools.modalities.dose import Dose
+from imgtools.modalities.segmentation import Segmentation
 
 class SampleLoader():
     def __init__(
