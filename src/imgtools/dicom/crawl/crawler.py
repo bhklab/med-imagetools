@@ -189,40 +189,35 @@ class Crawler:
                 )  # add to the aggregated db for easy conversion to df
                 continue
 
-            # TODO:: RTSTRUCT, RTDOSE, & RTPLAN can all be combined into one case
-            #       since they all have a single ReferencedSOPUIDs field
             # but for now....
             match meta["Modality"]:
-                case "RTSTRUCT":
-                    # sop_ref is a single string for RTSTRUCT
+                case "RTSTRUCT" | "RTDOSE" | "RTPLAN":
+                    # sop_ref is a single string for RTSTRUCT, RTDOSE, RTPLAN
                     if not (sop_ref := meta.get("ReferencedSOPUIDs")):
                         continue
                     if seriesuid := self.lookup_sop(sop_ref):
                         meta["ReferencedSeriesUID"] = seriesuid
                 case "SEG":
-                    _all_seg_refs: set[str] = set()
-                    if not (meta.get("ReferencedSOPUIDs")):
+                    if not (sop_refs := meta.get("ReferencedSOPUIDs", [])):
                         continue
                     # this one is a list for SEG
-                    for ref in meta.get("ReferencedSOPUIDs", []):
-                        if seriesuid := self.lookup_sop(ref):
+                    # we could just say screw it and take the first one
+                    # but we still havent encountered a case where
+                    # a seg spans multiple...
+                    _all_seg_refs: set[str] = set()
+                    for ref in sop_refs:
+                        if (
+                            seriesuid := self.lookup_sop(ref)
+                        ) and seriesuid in self.series_uids:
                             _all_seg_refs.add(seriesuid)
                     if _all_seg_refs:
-                        if len(_all_seg_refs) >= 1:
-                            # we could raise a warning here??
-                            pass
-                        if _all_seg_refs.pop() in self.series_uids:
-                            meta["ReferencedSeriesUID"] = seriesuid
-                case "RTDOSE":
-                    if not (sop_ref := meta.get("ReferencedSOPUIDs")):
-                        continue
-                    if seriesuid := self.lookup_sop(sop_ref):
-                        meta["ReferencedSeriesUID"] = seriesuid
-                case "RTPLAN":
-                    if not (sop_ref := meta.get("ReferencedSOPUIDs")):
-                        continue
-                    if seriesuid := self.lookup_sop(sop_ref):
-                        meta["ReferencedSeriesUID"] = seriesuid
+                        if len(_all_seg_refs) > 1:
+                            warnmsg = (
+                                f"Multiple series referenced in SEG {meta['SeriesInstanceUID']}"
+                                f" ({_all_seg_refs})"
+                            )
+                            logger.warning(warnmsg)
+                        meta["ReferencedSeriesUID"] = _all_seg_refs.pop()
                 case "PT":
                     # this is really expensive.... :(
                     # we can probably find a hashmap solution
