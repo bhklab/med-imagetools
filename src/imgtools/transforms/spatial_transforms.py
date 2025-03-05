@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, Union
+from typing import Sequence
 
 import numpy as np
 import SimpleITK as sitk
@@ -35,72 +35,69 @@ class SpatialTransform(BaseTransform):
 
 @dataclass
 class Resample(SpatialTransform):
-    """Resample operation class:
-    A callable class that resamples image to a given spacing, optionally applying a transformation.
+    """Resample operation class.
+
+    A callable class that resamples image to a given spacing, optionally
+    applying a transformation.
 
     To instantiate:
-        obj = Resample(spacing, interpolation, anti_alias, anti_alias_sigma, transform, output_size)
+        obj = Resample(spacing, interpolation, anti_alias, anti_alias_sigma,
+                      transform, output_size)
 
     To call:
         result = obj(image)
 
     Parameters
     ----------
-    spacing
+    spacing : float | Sequence[float] | np.ndarray
         The new image spacing. If float, assumes the same spacing in all
         directions. Alternatively, a sequence of floats can be passed to
         specify spacing along each dimension. Passing 0 at any position will
         keep the original spacing along that dimension (useful for in-plane
         resampling).
-
-    interpolation, optional
+    interpolation : str, optional
         The interpolation method to use. Valid options are:
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
-
-    anti_alias, optional
+    anti_alias : bool, optional
         Whether to smooth the image with a Gaussian kernel before resampling.
         Only used when downsampling, i.e. when `spacing < image.GetSpacing()`.
         This should be used to avoid aliasing artifacts.
-
-    anti_alias_sigma, optional
+    anti_alias_sigma : float | None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
-
-    transform, optional
+    transform : sitk.Transform | None, optional
         Transform to apply to input coordinates when resampling. If None,
         defaults to identity transformation.
-
-    output_size, optional
+    output_size : list[float] | None, optional
         Size of the output image. If None, it is computed to preserve the
         whole extent of the input image.
     """
 
-    spacing: Union[float, Sequence[float], np.ndarray]
+    spacing: float | Sequence[float] | np.ndarray
     interpolation: str = "linear"
     anti_alias: bool = True
-    anti_alias_sigma: Optional[float] = None
-    transform: Optional[sitk.Transform] = None
-    output_size: Optional[list[float]] = None
+    anti_alias_sigma: float | None = None
+    transform: sitk.Transform | None = None
+    output_size: list[float] | None = None
 
     def __call__(
-        self, image: sitk.Image, ref: None | sitk.Image
+        self, image: sitk.Image, ref: sitk.Image | None = None
     ) -> sitk.Image:
-        """
-        Resamples an image to a designated spacing.
-        
+        """Resample an image to a designated spacing.
+
         If a reference image is provided, its spacing is used for resampling;
         otherwise, the object's preset spacing is applied. The method uses the
         configured interpolation, anti-aliasing, and transformation settings
         to produce the resampled image.
-        
+
         Parameters
         ----------
         image : sitk.Image
             The image to resample.
-        ref : None or sitk.Image
+        ref : sitk.Image | None, optional
             An optional reference image whose spacing is used if provided.
-        
+
         Returns
         -------
         sitk.Image
@@ -108,14 +105,16 @@ class Resample(SpatialTransform):
         """
 
         # whether or not a reference image is provided
-        if ref is not None:
-            spacing = ref.GetSpacing()
-        else:
-            spacing = self.spacing
+        spacing = ref.GetSpacing() if ref is not None else self.spacing
+        spacing_list = (
+            list(spacing)
+            if isinstance(spacing, (tuple, Sequence))
+            else spacing
+        )
 
         return resample(
             image,
-            spacing=spacing,
+            spacing=spacing_list,
             interpolation=self.interpolation,
             anti_alias=self.anti_alias,
             anti_alias_sigma=self.anti_alias_sigma,
@@ -126,8 +125,10 @@ class Resample(SpatialTransform):
 
 @dataclass
 class Resize(SpatialTransform):
-    """Resize operation class:
-    A callable class that resizes image to a given size by resampling coordinates.
+    """Resize operation class.
+
+    A callable class that resizes image to a given size by resampling
+    coordinates.
 
     To instantiate:
         obj = Resize(size, interpolation, anti_alias, anti_alias_sigma)
@@ -137,44 +138,40 @@ class Resize(SpatialTransform):
 
     Parameters
     ----------
-    size
+    size : int | list[int] | np.ndarray
         The new image size. If float, assumes the same size in all directions.
         Alternatively, a sequence of floats can be passed to specify size along
         each dimension. Passing 0 at any position will keep the original
         size along that dimension.
-
-    interpolation, optional
+    interpolation : str, optional
         The interpolation method to use. Valid options are:
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
-
-    anti_alias, optional
+    anti_alias : bool, optional
         Whether to smooth the image with a Gaussian kernel before resampling.
         Only used when downsampling, i.e. when `size < image.GetSize()`.
         This should be used to avoid aliasing artifacts.
-
-    anti_alias_sigma, optional
+    anti_alias_sigma : float | None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
 
-    size: Union[int, list[int], np.ndarray]
+    size: int | list[int] | np.ndarray
     interpolation: str = "linear"
     anti_alias: bool = True
-    anti_alias_sigma: Optional[float] = None
+    anti_alias_sigma: float | None = None
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """
-        Resizes the input image to the configured dimensions.
-        
-        Uses the specified size, interpolation, and anti-alias sigma settings to resample
-        the image and generate a resized output.
-        
+        """Resize the input image to the configured dimensions.
+
+        Uses the specified size, interpolation, and anti-alias settings to
+        resample the image and generate a resized output.
+
         Parameters
         ----------
         image : sitk.Image
             The image to resize.
-        
+
         Returns
         -------
         sitk.Image
@@ -185,13 +182,16 @@ class Resize(SpatialTransform):
             image,
             size=self.size,
             interpolation=self.interpolation,
+            anti_alias=self.anti_alias,
             anti_alias_sigma=self.anti_alias_sigma,
         )
 
 
 @dataclass
 class Zoom(SpatialTransform):
-    """Zoom operation class: A callable class that rescales image, preserving its spatial extent.
+    """Zoom operation class.
+
+    A callable class that rescales image, preserving its spatial extent.
 
     To instantiate:
         obj = Zoom(scale_factor, interpolation, anti_alias, anti_alias_sigma)
@@ -206,32 +206,29 @@ class Zoom(SpatialTransform):
 
     Parameters
     ----------
-    scale_factor
+    scale_factor : float | list[float]
         If float, each dimension will be scaled by that factor. If tuple, each
         dimension will be scaled by the corresponding element.
-
-    interpolation, optional
+    interpolation : str, optional
         The interpolation method to use. Valid options are:
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
-
-    anti_alias, optional
+    anti_alias : bool, optional
         Whether to smooth the image with a Gaussian kernel before resampling.
         Only used when downsampling, i.e. when `size < image.GetSize()`.
         This should be used to avoid aliasing artifacts.
-
-    anti_alias_sigma, optional
+    anti_alias_sigma : float | None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
     """
 
-    scale_factor: Union[float, list[float]]
+    scale_factor: float | list[float]
     interpolation: str = "linear"
     anti_alias: bool = True
-    anti_alias_sigma: Optional[float] = None
+    anti_alias_sigma: float | None = None
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """Zoom callable object: Rescales image, preserving its spatial extent.
+        """Rescale image, preserving its spatial extent.
 
         The rescaled image will have the same spatial extent (size) but will be
         rescaled by `scale_factor` in each dimension. Alternatively, a separate
@@ -240,7 +237,7 @@ class Zoom(SpatialTransform):
 
         Parameters
         ----------
-        image
+        image : sitk.Image
             The image to rescale.
 
         Returns
@@ -260,7 +257,9 @@ class Zoom(SpatialTransform):
 
 @dataclass
 class Rotate(SpatialTransform):
-    """Rotate operation class: A callable class that rotates an image around a given centre.
+    """Rotate operation class.
+
+    A callable class that rotates an image around a given centre.
 
     To instantiate:
         obj = Rotate(rotation_centre, angles, interpolation)
@@ -270,13 +269,11 @@ class Rotate(SpatialTransform):
 
     Parameters
     ----------
-    rotation_centre
+    rotation_centre : list[int]
         The centre of rotation in image coordinates.
-
-    angles
+    angles : float | list[float]
         The angles of rotation around x, y and z axes.
-
-    interpolation, optional
+    interpolation : str, optional
         The interpolation method to use. Valid options are:
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
@@ -284,18 +281,18 @@ class Rotate(SpatialTransform):
     """
 
     rotation_centre: list[int]
-    angles: Union[float, list[float]]
+    angles: float | list[float]
     interpolation: str = "linear"
 
     # internal variable to store angles as a list after validation
     _angles_list: list[float] = field(init=False)
 
     def __post_init__(self) -> None:
-        """
-        Validates and normalizes the rotation angles.
-        
-        Converts a single float into a triplet by repeating it for all three axes or verifies that a list of three floats
-        was provided. Raises a ValueError if the angles attribute does not match these requirements.
+        """Validate and normalize the rotation angles.
+
+        Converts a single float into a triplet by repeating it for all three
+        axes or verifies that a list of three floats was provided. Raises a
+        ValueError if the angles attribute does not match these requirements.
         """
         match self.angles:
             case float(one_angle):
@@ -308,14 +305,13 @@ class Rotate(SpatialTransform):
                 raise ValueError(errmsg)
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
-        """
-        Rotates an image around a specified center.
-        
+        """Rotate an image around a specified center.
+
         Parameters
         ----------
         image : sitk.Image
             The image to rotate.
-        
+
         Returns
         -------
         sitk.Image
@@ -331,7 +327,9 @@ class Rotate(SpatialTransform):
 
 @dataclass
 class InPlaneRotate(SpatialTransform):
-    """InPlaneRotate operation class: A callable class that rotates an image on a plane.
+    """InPlaneRotate operation class.
+
+    A callable class that rotates an image on a plane.
 
     To instantiate:
         obj = InPlaneRotate(angle, interpolation)
@@ -341,10 +339,9 @@ class InPlaneRotate(SpatialTransform):
 
     Parameters
     ----------
-    angle
+    angle : float
         The angle of rotation.
-
-    interpolation, optional
+    interpolation : str, optional
         The interpolation method to use. Valid options are:
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
@@ -356,14 +353,15 @@ class InPlaneRotate(SpatialTransform):
 
     def __call__(self, image: sitk.Image) -> sitk.Image:
         """Rotate an image in its plane.
-        
-        The image is rotated around its geometric center using the instance's angle and interpolation settings.
-        
+
+        The image is rotated around its geometric center using the instance's
+        angle and interpolation settings.
+
         Parameters
         ----------
         image : sitk.Image
             The image to rotate.
-        
+
         Returns
         -------
         sitk.Image

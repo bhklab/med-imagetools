@@ -248,14 +248,17 @@ class Size3D:
         If a Size3D or a 3-tuple is provided, each dimension is divided by its counterpart.
         Division is carried out using floor division (//) so that the result remains an integer.
         
-        Args:
+        Parameters
+        ----------
             other: The divisor, which can be an int, a Size3D instance, or a tuple of
                    three integers representing (width, height, depth).
         
-        Returns:
+        Returns
+        -------
             A new Size3D instance with dimensions divided by the given divisor.
         
-        Raises:
+        Raises
+        ------
             TypeError: If the divisor is not an int, Size3D, or a 3-tuple.
         """
         match other:
