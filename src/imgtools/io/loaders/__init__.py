@@ -1,4 +1,4 @@
-from .old_loaders import (
+from .utils import (
     BaseLoader,
     ImageCSVLoader,
     ImageFileLoader,
