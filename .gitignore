@@ -230,3 +230,5 @@ test_data
 
 notebooks
 .imgtools
+
+testdata/**/*

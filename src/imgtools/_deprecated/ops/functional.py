@@ -4,7 +4,7 @@ from typing import List, Optional, Sequence, Tuple
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.modules import Segmentation
+from imgtools._deprecated import Segmentation
 
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,

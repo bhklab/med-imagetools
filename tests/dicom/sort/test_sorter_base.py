@@ -66,7 +66,7 @@ class TestResolvePath:
         path = dicom_test_file
         keys = {'PatientID', 'StudyInstanceUID'}
         format_str = '/resolved/path/%(PatientID)s/%(StudyInstanceUID)s'
-        result = resolve_path(path, keys, format_str, truncate=False)
+        result = resolve_path(path, keys, format_str, truncate=0)
         assert result[0].resolve() == path.resolve()
         assert result[1].resolve() == Path(
             format_str
@@ -90,13 +90,13 @@ class TestResolvePath:
         expected_path.parent.mkdir(parents=True, exist_ok=True)
         expected_path.touch()
         with pytest.raises(FileExistsError):
-            result = resolve_path(path, keys, format_str, truncate=False)
+            result = resolve_path(path, keys, format_str, truncate=0)
 
     def test_resolve_path_with_absolute_path(self, dicom_test_file) -> None:
         path = dicom_test_file
         keys = {'PatientID', 'StudyInstanceUID'}
         format_str = '/resolved/path/%(PatientID)s/%(StudyInstanceUID)s'
-        result = resolve_path(path, keys, format_str, truncate=True)
+        result = resolve_path(path, keys, format_str, truncate=5)
         assert result[0] == path
         assert (
             result[1]
@@ -110,4 +110,4 @@ class TestResolvePath:
         keys = {'PatientID', 'StudyInstanceUID'}
         format_str = '/resolved/path/%(PatientID)s/%(StudyInstanceUID)s'
         with pytest.raises(FileNotFoundError):
-            resolve_path(path, keys, format_str)
+            resolve_path(path, keys, format_str, truncate = 5)

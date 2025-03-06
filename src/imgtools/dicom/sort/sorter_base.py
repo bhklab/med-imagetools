@@ -45,7 +45,7 @@ from rich.text import Text
 from rich.theme import Theme
 from rich.tree import Tree
 
-from imgtools.dicom import find_dicoms
+from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
 from imgtools.dicom.sort.utils import read_tags
 from imgtools.logging import logger
@@ -57,8 +57,9 @@ def resolve_path(
     path: Path,
     keys: Set[str],
     format_str: str,
+    truncate: int,
     check_existing: bool = True,
-    truncate: bool = True,
+    force: bool = True,
 ) -> Tuple[Path, Path]:
     """
     Worker function to resolve a single path.
@@ -73,15 +74,19 @@ def resolve_path(
         The format string for the resolved path.
     check_existing : bool, optional
         If True, check if the resolved path already exists (default is True).
-    truncate : bool, optional
-        If True, truncate long values in the resolved path (default is True).
+    truncate : int, optional
+        The number of characters to trunctae UID values (default is 5).
+    force : bool, optional
+        passed to pydicom.dcmread() to force reading the file (default is False).
 
     Returns
     -------
     Tuple[Path, Path]
         The source path and resolved path.
     """
-    tags: Dict[str, str] = read_tags(path, list(keys), truncate=truncate)
+    tags: Dict[str, str] = read_tags(
+        path, list(keys), truncate=truncate, force=force, default="Unknown"
+    )
     resolved_path = Path(format_str % tags, path.name)
     if check_existing and not resolved_path.exists():
         resolved_path = resolved_path.resolve()
