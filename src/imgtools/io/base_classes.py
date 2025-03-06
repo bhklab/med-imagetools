@@ -3,9 +3,11 @@ This is a work in progress to break up the ops/ops.py file into smaller, more ma
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 from imgtools.io.writers import AbstractBaseWriter
+
+T = TypeVar("T")
 
 
 class BaseIO(ABC):
@@ -60,7 +62,7 @@ class BaseIO(ABC):
 #         pass
 
 
-class BaseOutput(BaseIO):
+class BaseOutput(BaseIO, Generic[T]):
     """Abstract base class for output operations.
 
     Parameters
@@ -78,7 +80,7 @@ class BaseOutput(BaseIO):
         self._writer = writer
 
     @abstractmethod
-    def __call__(self, key: Any, *args: Any, **kwargs: Any) -> None:  # noqa
+    def __call__(self, data: T, *args: Any, **kwargs: Any) -> None:  # noqa
         """Write output data.
 
         Parameters

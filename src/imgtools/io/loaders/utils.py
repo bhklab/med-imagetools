@@ -6,6 +6,7 @@ from typing import Optional, Union
 import SimpleITK as sitk
 from pydicom import dcmread
 
+from imgtools.dicom.dicom_metadata import extract_dicom_tags
 from imgtools.dicom.dicom_metadata_old import get_modality_metadata
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
 
@@ -57,13 +58,25 @@ def read_dicom_series(
     The loaded image.
     """
     reader = sitk.ImageSeriesReader()
+    sitk_file_names = reader.GetGDCMSeriesFileNames(
+        path,
+        seriesID=series_id if series_id else "",
+        recursive=recursive,
+    )
     if file_names is None:
-        # extract the names of the dicom files that are in the path variable, which is a directory
-        file_names = reader.GetGDCMSeriesFileNames(
-            path,
-            seriesID=series_id if series_id else "",
-            recursive=recursive,
+        file_names = sitk_file_names
+    elif set(file_names) <= set(
+        sitk_file_names
+    ):  # Extracts the same order provided by sitk
+        file_names = [fn for fn in sitk_file_names if fn in file_names]
+    else:
+        errmsg = (
+            "The provided file_names are not a subset of the files in the "
+            "directory."
         )
+        errmsg += f"\nProvided file_names: {file_names}"
+        errmsg += f"\n\nFiles in directory: {sitk_file_names}"
+        raise ValueError(errmsg)
 
     reader.SetFileNames(file_names)
 
@@ -139,14 +152,16 @@ def read_dicom_auto(
             continue
 
         modality = meta.Modality
-
+        obj: auto_dicom_result
         match modality:
             case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
+                obj.metadata.update(extract_dicom_tags(meta))
             case "PT":
                 obj = read_dicom_pet(path, series)
             case "RTSTRUCT":
                 obj = read_dicom_rtstruct(dcm)
+                obj.metadata.update(extract_dicom_tags(meta))
             case "RTDOSE":
                 obj = read_dicom_rtdose(dcm)
             case "SEG":
@@ -157,5 +172,5 @@ def read_dicom_auto(
                 )
                 raise NotImplementedError(errmsg)
 
-        obj.metadata.update(get_modality_metadata(meta, modality))
+        # obj.metadata.update(get_modality_metadata(meta, modality))
         return obj

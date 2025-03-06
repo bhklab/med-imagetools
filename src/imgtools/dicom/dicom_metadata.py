@@ -5,6 +5,11 @@ __all__ = ["MODALITY_TAGS", "extract_dicom_tags"]
 # Define modality-based tag mapping
 MODALITY_TAGS = {
     "ALL": {
+        # Patient Information
+        "PatientID",
+        "SeriesInstanceUID",
+        "StudyInstanceUID",
+        "Modality",
         # Image Geometry & Size
         "BodyPartExamined",
         "DataCollectionDiameter",
@@ -143,7 +148,9 @@ MODALITY_TAGS = {
 
 
 def extract_dicom_tags(
-    dicom_dataset: FileDataset, modality: str | None = None
+    dicom_dataset: FileDataset,
+    modality: str | None = None,
+    default="",
 ) -> dict[str, str | None]:
     """
     Extracts relevant DICOM tags based on the modality.
@@ -173,7 +180,7 @@ def extract_dicom_tags(
         relevant_tags.update(MODALITY_TAGS[modality])
 
     # Extract values
-    return {tag: str(dicom_dataset.get(tag, None)) for tag in relevant_tags}
+    return {tag: str(dicom_dataset.get(tag, default)) for tag in relevant_tags}
 
 
 if __name__ == "__main__":
