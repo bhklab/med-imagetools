@@ -71,7 +71,9 @@ def read_dicom_series(
     if file_names is None:
         file_names = sitk_file_names
     else:
-        if set(file_names) <= set(sitk_file_names): # Extracts the same order provided by sitk
+        if set(file_names) <= set(
+            sitk_file_names
+        ):  # Extracts the same order provided by sitk
             file_names = [fn for fn in sitk_file_names if fn in file_names]
         else:
             raise ValueError("The provided file_names might be broken.")
@@ -170,6 +172,8 @@ def read_dicom_auto(
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
+
+    raise FileNotFoundError(f"No DICOM files found in {path}.")
 
 
 # ruff: noqa
