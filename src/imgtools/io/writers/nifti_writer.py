@@ -146,5 +146,6 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             out_path,
             filepath_column="filepath",
             replace_existing=out_path.exists(),
+            **kwargs,
         )
         return out_path

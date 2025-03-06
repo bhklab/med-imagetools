@@ -251,7 +251,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             **self.context,
             **kwargs,
         }
-        self.set_context(**save_context)
+        # self.set_context(**save_context)
         try:
             filename = self.pattern_resolver.resolve(save_context)
         except MissingPlaceholderValueError as e:
