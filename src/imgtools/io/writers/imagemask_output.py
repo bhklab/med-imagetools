@@ -156,7 +156,7 @@ if __name__ == "__main__":
             )
             assert isinstance(image_scan, Scan)
 
-            rt = read_dicom_rtstruct(mask_filenames[0])
+            rt = read_dicom_rtstruct(mask_filenames[0], roi_name_pattern="GTV.*")
             seg = rt.to_segmentation(
                 image_scan, roi_names="GTV.*", continuous=False
             )
