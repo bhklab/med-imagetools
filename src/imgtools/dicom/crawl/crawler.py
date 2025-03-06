@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Generator
+from tqdm import tqdm
+from collections import defaultdict
 
 import dpath
 import pandas as pd
@@ -178,16 +180,29 @@ class Crawler:
         i.e the `ReferencedSeriesUID` field is added to metadata dicts
             in `self._crawl_db` database.
         """
+        frame_mapping = defaultdict(set)
 
-        # structure of crawldb is : {seriesuid: { subseriesuid: { metadatadictionary } } }
-        # structure of sopmap is : { sopuid: seriesuid }
-        for meta in self.metadata_dictionaries:
+        # create a frame of reference map
+        for seriesuid, subseries in dpath.search(
+            self._raw_db, "*/**/FrameOfReferenceUID"
+        ).items():
+            for meta in subseries.values():
+                if frame := meta.get("FrameOfReferenceUID"):
+                    frame_mapping[frame].add(seriesuid)
+
+        for meta in tqdm(
+            list(self.metadata_dictionaries),
+            desc="Remapping references",
+            leave=False,
+        ):
             if (ref := meta.get("ReferencedSeriesUID")) and ref in self.series_uids:  # fmt: skip
                 # early exit if the reference is already a SeriesInstanceUID
                 self._agg_db.append(
                     meta
                 )  # add to the aggregated db for easy conversion to df
                 continue
+            else:
+                meta["ReferencedSeriesUID"] = None
 
             # but for now....
             match meta["Modality"]:
@@ -224,15 +239,15 @@ class Crawler:
                     # to speed this up
                     if not (ref_frame := meta.get("FrameOfReferenceUID")):  # fmt: skip
                         continue
-                    for same_frame_series in dpath.search(
-                        self._raw_db,
-                        "*/**/FrameOfReferenceUID",
-                        afilter=lambda x: str(x) == ref_frame,
-                    ):
-                        # we take the first match to "CT"
-                        if self.series_to_modality(same_frame_series) == "CT":
-                            meta["ReferencedSeriesUID"] = same_frame_series
-                            break
+                    if ref_series := frame_mapping.get(ref_frame):
+                        while ref_series:
+                            seriesuid = ref_series.pop()
+                            if (
+                                seriesuid in self.series_uids
+                                and self.series_to_modality(seriesuid) == "CT"
+                            ):
+                                meta["ReferencedSeriesUID"] = seriesuid
+                                break
 
             # add the metadata to the aggregated db for easy conversion to df
             self._agg_db.append(meta)
@@ -274,4 +289,6 @@ class Crawler:
 if __name__ == "__main__":
     from rich import print  # noqa: A004, F401
 
-    crawler = Crawler(dicom_dir=Path("data"), n_jobs=12, force=True)
+    crawler = Crawler(
+        dicom_dir=Path("testdata/Head-Neck-PET-CT"), n_jobs=12, force=True
+    )
