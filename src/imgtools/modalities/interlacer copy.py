@@ -11,6 +11,28 @@ from imgtools.logging import logger
 from imgtools.utils import OptionalImportError, optional_import, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")
+jinja2, _jinja2_available = optional_import("jinja2")
+# from jinja2 import Environment, FileSystemLoader
+
+
+def render_multi_group_html(group_htmls: dict[str, str]) -> str:
+    """
+    Renders a single HTML page containing all group Pyvis HTML
+    sections, hidden by default.
+    """
+    if not _jinja2_available:
+        raise OptionalImportError("jinja2", "pyvis")
+
+    from jinja2 import Environment, FileSystemLoader
+
+    # Adjust the template path to your actual folder
+    template_dir = Path(__file__).parent / "templates"
+    env = Environment(loader=FileSystemLoader(str(template_dir)))
+    template = env.get_template("multi_group_vis.html.jinja")
+
+    # 'group_htmls' is a dict like { "GroupA": "<html>pyvisstuff</html>", ... }
+    rendered_html = template.render(group_htmls=group_htmls)
+    return rendered_html
 
 
 class SeriesNode:
@@ -402,11 +424,12 @@ class Interlacer:
         )
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
+        import pyvis
+        # net = pyvis.network.Network(
+        #     height="800px", width="100%", notebook=False, directed=True
+        # )
 
-        net = pyvis.network.Network(
-            height="800px", width="100%", notebook=False, directed=True
-        )
-
+        group_htmls = {}
         modality_colors = {
             "CT": "#1f77b4",  # Blue
             "MR": "#ff7f0e",  # Orange
@@ -417,94 +440,34 @@ class Interlacer:
             "RTDOSE": "#e377c2",  # Pink
         }
 
-        patient_trees = {}  # Store patient-to-root mappings
-
-        def add_node_and_edges(
-            node: SeriesNode, parent: SeriesNode | None = None
-        ) -> None:
-            color = modality_colors.get(
-                node.Modality, "#7f7f7f"
-            )  # Default gray if unknown
-            title = f"PatientID: {node.PatientID}\nSeries: {node.Series}"
-            net.add_node(
-                node.Series, label=node.Modality, title=title, color=color
+        def build_network_for_root(root_node: SeriesNode) -> str:
+            net = pyvis.network.Network(
+                height="800px", width="100%", notebook=False, directed=True
             )
-            if parent:
-                net.add_edge(node.Series, parent.Series)
 
-            for child in node.children:
-                add_node_and_edges(child, node)
+            def add_node_and_edges(node, parent=None):
+                color = modality_colors.get(node.Modality, "#7f7f7f")
+                title = f"PatientID: {node.PatientID}\\nSeries: {node.Series}"
+                net.add_node(
+                    node.Series, label=node.Modality, title=title, color=color
+                )
+                if parent:
+                    net.add_edge(node.Series, parent.Series)
+                for child in node.children:
+                    add_node_and_edges(child, node)
 
-        # Add root nodes (each representing a patient)
-        for root in self.root_nodes:
-            add_node_and_edges(root)
-            patient_trees[root.PatientID] = (
-                root.Series
-            )  # Store the root Series as entry point for the patient
+            add_node_and_edges(root_node)
+            net.force_atlas_2based()
+            return net.generate_html()
 
-        net.force_atlas_2based()
+        # Build a separate network for each root node
+        for root_node in self.root_nodes[:5]:
+            html_snippet = build_network_for_root(root_node)
+            group_htmls[root_node.PatientID] = html_snippet
 
-        # Generate the sidebar HTML with clickable patient IDs
-        sidebar_html = """
-        <div id="sidebar">
-            <h2>Patient List</h2>
-            <ul>
-        """
-        for patient_id, root_series in patient_trees.items():
-            sidebar_html += f'<li><a href="#" onclick="focusNode(\'{root_series}\')">{patient_id}</a></li>'
+        final_html = render_multi_group_html(group_htmls=group_htmls)
 
-        sidebar_html += """
-            </ul>
-        </div>
-        <style>
-            #sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                width: 250px;
-                height: 100%;
-                background: #f4f4f4;
-                padding: 20px;
-                overflow-y: auto;
-                box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-            }
-            #sidebar h2 {
-                text-align: center;
-            }
-            #sidebar ul {
-                list-style: none;
-                padding: 0;
-            }
-            #sidebar li {
-                margin: 10px 0;
-            }
-            #sidebar a {
-                text-decoration: none;
-                color: #007bff;
-                font-weight: bold;
-            }
-            #sidebar a:hover {
-                text-decoration: underline;
-            }
-        </style>
-        <script>
-            function focusNode(nodeId) {
-                network.selectNodes([nodeId]); 
-                network.focus(nodeId, { scale: 3.5, animation: true });
-            }
-        </script>
-        """
-
-        # Generate the full HTML file
-        logger.info("Saving forest visualization...", path=save_path)
-        net_html = net.generate_html()
-        full_html = net_html.replace(
-            "<body>", f"<body>{sidebar_html}"
-        )  # Insert sidebar into HTML
-
-        # Write the final HTML file
-        save_path.write_text(full_html, encoding="utf-8")
-
+        save_path.write_text(final_html, encoding="utf-8")
         return save_path
 
 

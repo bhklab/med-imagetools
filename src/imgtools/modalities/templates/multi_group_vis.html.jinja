@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Multi-Group Visualization</title>
+  <style>
+    /* Basic styling for sidebar layout */
+    #sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 200px;
+      height: 100%;
+      background: #f4f4f4;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+    }
+    #sidebar h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    #sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    #sidebar li {
+      margin: 10px 0;
+    }
+    #sidebar a {
+      text-decoration: none;
+      color: #007bff;
+    }
+    #main-content {
+      margin-left: 220px; /* Make space for sidebar */
+      padding: 10px;
+    }
+    /* Each group's container (hidden by default) */
+    .group-div {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>Groups</h2>
+    <ul>
+      {% for grp_name, grp_html in group_htmls.items() %}
+      <li>
+        <a href="#" onclick="showGroup('{{ grp_name }}')">
+          {{ grp_name }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div id="main-content">
+    {% for grp_name, grp_html in group_htmls.items() %}
+    <div
+      id="group-{{ grp_name }}"
+      class="group-div"
+      data-group="{{ grp_name }}"
+    >
+      <!-- Insert the Pyvis HTML snippet for this group -->
+      {{ grp_html|safe }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    function showGroup(groupName) {
+      // Hide all group divs
+      document.querySelectorAll('.group-div').forEach(
+        (div) => { div.style.display = 'none'; }
+      );
+      // Show only the clicked group
+      const target = document.getElementById('group-' + groupName);
+      if (target) {
+        target.style.display = 'block';
+      }
+    }
+
+    // If you want to auto-show the first group, you can call:
+    // showGroup('{{ group_htmls.keys()|list|first }}');
+  </script>
+</body>
+</html>

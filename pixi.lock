@@ -10144,7 +10144,7 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 2.0.0rc8
-  sha256: 88a4e3b14bd0f3243a5f33191bc4016a06a60bc89392fafb27ab4430fc290c8c
+  sha256: 4f4f42c70cd42e82798b4c84b7d68f0a4a97989a4e3b51925bf1fc670f9eaac0
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9
@@ -10165,6 +10165,7 @@ packages:
   - torch ; extra == 'torch'
   - torchio ; extra == 'torch'
   - pyvis>=0.3.2,<0.4 ; extra == 'pyvis'
+  - jinja2>=3.0 ; extra == 'pyvis'
   - h5py>=3.11.0 ; extra == 'hdf5'
   - pynrrd>=1.0.0 ; extra == 'nrrd'
   - pygithub>=2.5.0 ; extra == 'test'
@@ -10174,6 +10175,80 @@ packages:
   - h5py>=3.11.0 ; extra == 'all'
   - pynrrd>=1.0.0 ; extra == 'all'
   - pyvis>=0.3.2,<0.4 ; extra == 'all'
+  requires_python: '>=3.10,<4'
+  editable: true
+- pypi: .
+  name: med-imagetools
+  version: 2.0.0rc8
+  sha256: 8461c68653a003bdc66e8191f208e07168891ac5490a2a2b139c33904d61aa2a
+  requires_dist:
+  - structlog>=24.0,<25
+  - click>=8.1,<9
+  - tqdm>=4.66.4,<5
+  - rich>=13.9.4
+  - joblib>=1.4.2,<2
+  - matplotlib>=3.8.4,<4
+  - numpy<3
+  - pandas<3
+  - dpath>=2.2.0
+  - pydicom>=2.4.4
+  - scikit-image>=0.23.2,<1
+  - scikit-learn>=1.4.2,<2
+  - simpleitk>=2.3.1,<3
+  - fasteners==0.19
+  - pyyaml>=6.0.1,<7
+  - dill>=0.3.8,<1
+  - torch ; extra == 'torch'
+  - torchio ; extra == 'torch'
+  - pyvis>=0.3.2,<0.4 ; extra == 'pyvis'
+  - jinja2>=3.0 ; extra == 'pyvis'
+  - h5py>=3.11.0 ; extra == 'hdf5'
+  - pynrrd>=1.0.0 ; extra == 'nrrd'
+  - pygithub>=2.5.0 ; extra == 'test'
+  - aiohttp>=3.8.1 ; extra == 'test'
+  - pygithub>=2.5.0 ; extra == 'all'
+  - aiohttp>=3.8.1 ; extra == 'all'
+  - h5py>=3.11.0 ; extra == 'all'
+  - pynrrd>=1.0.0 ; extra == 'all'
+  - pyvis>=0.3.2,<0.4 ; extra == 'all'
+  - jinja2>=3.0 ; extra == 'all'
+  requires_python: '>=3.10,<4'
+  editable: true
+- pypi: .
+  name: med-imagetools
+  version: 2.0.0rc8
+  sha256: cfbec805580111861a2fdc5418746f121fe14e6667b65a64f1c69094030bdd0f
+  requires_dist:
+  - structlog>=24.0,<25
+  - click>=8.1,<9
+  - tqdm>=4.66.4,<5
+  - rich>=13.9.4
+  - joblib>=1.4.2,<2
+  - matplotlib>=3.8.4,<4
+  - numpy<3
+  - pandas<3
+  - dpath>=2.2.0
+  - pydicom>=2.4.4
+  - scikit-image>=0.23.2,<1
+  - scikit-learn>=1.4.2,<2
+  - simpleitk>=2.3.1,<3
+  - fasteners==0.19
+  - pyyaml>=6.0.1,<7
+  - dill>=0.3.8,<1
+  - torch ; extra == 'torch'
+  - torchio ; extra == 'torch'
+  - pyvis>=0.3.2,<0.4 ; extra == 'pyvis'
+  - jinja2>=3.0 ; extra == 'pyvis'
+  - h5py>=3.11.0 ; extra == 'hdf5'
+  - pynrrd>=1.0.0 ; extra == 'nrrd'
+  - pygithub>=2.5.0 ; extra == 'test'
+  - aiohttp>=3.8.1 ; extra == 'test'
+  - pygithub>=2.5.0 ; extra == 'all'
+  - aiohttp>=3.8.1 ; extra == 'all'
+  - h5py>=3.11.0 ; extra == 'all'
+  - pynrrd>=1.0.0 ; extra == 'all'
+  - pyvis>=0.3.2,<0.4 ; extra == 'all'
+  - jinja2>=3.0 ; extra == 'all'
   requires_python: '>=3.10,<4'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/mergedeep-1.3.4-pyhd8ed1ab_1.conda
