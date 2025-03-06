@@ -64,7 +64,6 @@ class ImageMaskOutput(BaseOutput[ImageMaskData]):
             ImageID="Scan",
             **data.image.metadata,
             **kwargs,
-            # **getattr(data.image, "metadata", {}),
         )
 
         mask = data.mask
@@ -85,7 +84,6 @@ if __name__ == "__main__":
 
     from tqdm import tqdm
 
-    from imgtools.dicom.dicom_metadata import extract_dicom_tags
     from imgtools.io.loaders.utils import (
         read_dicom_auto,
         read_dicom_rtstruct,
@@ -104,7 +102,7 @@ if __name__ == "__main__":
     )
 
     samples = interlacer.query("CT,RTSTRUCT")
-    print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")
+    print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")  # noqa: T201
     # Extract unique pairs from the samples list
     unique_pairs = {
         tuple((entry[0]["Series"], entry[1]["Series"]))
@@ -119,7 +117,7 @@ if __name__ == "__main__":
         ]
         for pair in unique_pairs
     ]
-    print(f"Found {len(samples)} UNIQUE pairs of CT and RTSTRUCT series")
+    print(f"Found {len(samples)} UNIQUE pairs of CT and RTSTRUCT series")  # noqa: T201
     output: ImageMaskOutput
     samplesets = list(enumerate(samples[:10], start=1))
     with tqdm_logging_redirect():
@@ -162,6 +160,8 @@ if __name__ == "__main__":
             seg = rt.to_segmentation(
                 image_scan, roi_names="GTV.*", continuous=False
             )
+            if not seg:
+                continue
 
             if sample_num == 1:
                 keys = list(image_scan.metadata.keys()) + list(
