@@ -6,6 +6,7 @@ import dpath
 
 from imgtools.io.base_classes import BaseOutput
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter
+from imgtools.logging import logger
 from imgtools.modalities import Scan, Segmentation
 from imgtools.utils import sanitize_file_name
 
@@ -103,9 +104,24 @@ if __name__ == "__main__":
     )
 
     samples = interlacer.query("CT,RTSTRUCT")
+    print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")
+    # Extract unique pairs from the samples list
+    unique_pairs = {
+        tuple((entry[0]["Series"], entry[1]["Series"]))
+        for entry in samples
+    }
 
+    # Convert back to a list of dictionaries
+    samples = [
+        [
+            {"Series": pair[0], "Modality": "CT"},
+            {"Series": pair[1], "Modality": "RTSTRUCT"},
+        ]
+        for pair in unique_pairs
+    ]
+    print(f"Found {len(samples)} UNIQUE pairs of CT and RTSTRUCT series")
     output: ImageMaskOutput
-    samplesets = list(enumerate(samples, start=1))
+    samplesets = list(enumerate(samples[:10], start=1))
     with tqdm_logging_redirect():
         for sample_num, (image_series, mask_series) in tqdm(
             samplesets, total=len(samplesets)
@@ -127,7 +143,13 @@ if __name__ == "__main__":
                 root / mask_folder / f
                 for f in list(dpath.get(maskmeta, "**/instances").values())  # type: ignore
             ]
-            assert len(mask_filenames) == 1
+            try:
+                assert len(mask_filenames) == 1, (
+                    f"Expected 1 mask file, got {mask_filenames}"
+                )
+            except AssertionError as e:
+                logger.error(f"{e}", image_series=image_series, mask_series=mask_series, imagemeta=imagemeta, maskmeta=maskmeta)
+                raise e
 
             image_scan = read_dicom_auto(
                 path=str(image_folder),
@@ -138,9 +160,8 @@ if __name__ == "__main__":
 
             rt = read_dicom_rtstruct(mask_filenames[0])
             seg = rt.to_segmentation(
-                image_scan, roi_names="GTV.*", continuous=True
+                image_scan, roi_names="GTV.*", continuous=False
             )
-
 
             if sample_num == 1:
                 keys = list(image_scan.metadata.keys()) + list(
