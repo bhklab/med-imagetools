@@ -10,6 +10,8 @@ from .utils import (
     read_image,
 )
 
+from .imagemask_input import ImageMaskInput, ImageMaskModalities  # isort:skip
+
 __all__ = [
     "read_image",
     "read_dicom_series",
@@ -20,4 +22,7 @@ __all__ = [
     "read_dicom_seg",
     "read_dicom_auto",
     "auto_dicom_result",
+    # imagemask
+    "ImageMaskInput",
+    "ImageMaskModalities",
 ]

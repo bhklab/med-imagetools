@@ -1,5 +1,3 @@
-from pydicom.dataset import FileDataset
-
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
 
 __all__ = ["MODALITY_TAGS", "extract_dicom_tags"]
@@ -147,6 +145,11 @@ MODALITY_TAGS = {
         "EnergyWindowUpperLimit",
     },
 }
+
+
+def modality_metadata_keys(modality: str) -> list[str]:
+    """Given a modality, get a predictable list of keys."""
+    return sorted(MODALITY_TAGS["ALL"].union(MODALITY_TAGS[modality]))
 
 
 def extract_dicom_tags(

@@ -1,49 +1,82 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
+from imgtools.io.types import ImageMask
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter
-from imgtools.modalities import Scan, Segmentation
 from imgtools.utils import sanitize_file_name
 
 
 @dataclass
-class ImageMaskData:
-    image: Scan
-    mask: Segmentation
+class ImageMaskOutput(BaseOutput[ImageMask]):
+    """Class for writing ImageMask data to NIFTI files.
 
+    This class handles writing both image scans and their associated masks to NIFTI files.
+    The writer initializes with context keys containing all possible metadata keys
+    that could be included in the output's index file.
 
-class ImageMaskOutput(BaseOutput[ImageMaskData]):
-    def __init__(self, context_keys: list[str]) -> None:
-        """Initialize the ImageMaskOutput class.
+    Attributes
+    ----------
+    context_keys : list[str]
+        All possible keys that should be included in the index file.
+    root_directory : Path
+        Root directory for output files.
+    filename_format : str
+        Format string for output filenames.
+    create_dirs : bool
+        Whether to create directories if they don't exist.
+    existing_file_mode : ExistingFileMode
+        How to handle existing files.
+    sanitize_filenames : bool
+        Whether to sanitize filenames.
+    """
 
-        When dumping to the index file, the writer asssumes
-        that the keys used for each `save` call are the only headers that
-        matter.
-        However, since image and mask have different metadata, we need to
-        pre-set the header with all the possible keys that could be used.
+    context_keys: list[str]
+    root_directory: Path = field(default=Path("testdata/niftiwriter"))
+    filename_format: str = field(
+        default="{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
+    )
+    create_dirs: bool = field(default=True)
+    existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.SKIP)
+    sanitize_filenames: bool = field(default=True)
 
-        Parameters
-        ----------
-        context_keys : list[str]
-            All possible keys that could be passed into the `save` method
-            and that should be dumped into the index file.
-        """
+    _writer: NIFTIWriter = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Initialize the NIFTIWriter with the provided parameters and set up the context."""
         niftiwriter = NIFTIWriter(
-            root_directory=Path("testdata/niftiwriter"),
-            filename_format="{SampleID}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz",
-            create_dirs=True,
-            existing_file_mode=ExistingFileMode.SKIP,
-            sanitize_filenames=True,
+            root_directory=self.root_directory,
+            filename_format=self.filename_format,
+            create_dirs=self.create_dirs,
+            existing_file_mode=self.existing_file_mode,
+            sanitize_filenames=self.sanitize_filenames,
         )
 
         context = {k: "" for k in niftiwriter.pattern_resolver.keys}
-        context.update({k: "" for k in context_keys})
+        context.update({k: "" for k in self.context_keys})
         niftiwriter.set_context(**context)
         super().__init__(niftiwriter)
 
-    def __call__(self, data: ImageMaskData, *_: Any, **kwargs: Any) -> None:  # noqa: ANN401
+    @property
+    def writer(self) -> NIFTIWriter:
+        """NIFTIWriter: The NIFTI writer."""
+        return self._writer
+
+    def __call__(self, data: ImageMask, **kwargs: Any) -> None:  # noqa: ANN401
+        """Write output data.
+
+        Parameters
+        ----------
+        data : ImageMaskData
+            The data to be written.
+        **kwargs : Any
+            Keyword arguments for the writing process.
+        """
+
+        self._write_data(data, **kwargs)
+
+    def _write_data(self, data: ImageMask, *_: Any, **kwargs: Any) -> None:  # noqa: ANN401
         """Write output data.
 
         Parameters
@@ -57,9 +90,9 @@ class ImageMaskOutput(BaseOutput[ImageMaskData]):
         """
 
         self._writer.save(
-            data.image,
-            ImageID="Scan",
-            **data.image.metadata,
+            data.scan,
+            ImageID="reference",
+            **data.scan.metadata,
             **kwargs,
         )
 

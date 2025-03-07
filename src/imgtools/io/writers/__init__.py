@@ -5,6 +5,8 @@ from .nifti_writer import (
     NiftiWriterValidationError,
 )
 
+from .imagemask_output import ImageMaskOutput  # fmt isort:skip
+
 __all__ = [
     "AbstractBaseWriter",
     "ExistingFileMode",

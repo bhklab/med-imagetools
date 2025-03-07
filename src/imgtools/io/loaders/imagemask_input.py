@@ -2,10 +2,9 @@ import pathlib
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import reduce
-from typing import Callable, Generator, List, NamedTuple
+from typing import Generator, List
 
 import dpath
-import SimpleITK as sitk
 
 from imgtools.dicom import Interlacer
 from imgtools.dicom.crawl import Crawler, CrawlerSettings
@@ -14,26 +13,11 @@ from imgtools.io.loaders.utils import (
     extract_dicom_tags,
     read_dicom_scan,
 )
-from imgtools.modalities import Scan, Segmentation, StructureSet
+from imgtools.io.types import ImageMask
+from imgtools.modalities import StructureSet
 from imgtools.utils import timer
 
-LoaderFunction = Callable[..., sitk.Image | StructureSet | Segmentation]
-
-
-class ImageMask(NamedTuple):
-    """
-    NamedTuple for storing image-mask pairs.
-
-    Parameters
-    ----------
-    scan : Scan
-        The scan image.
-    mask : Segmentation
-        The mask image.
-    """
-
-    scan: Scan
-    mask: Segmentation
+__all__ = ["ImageMaskInput", "ImageMaskModalities"]
 
 
 class ImageMaskModalities(Enum):
@@ -59,7 +43,7 @@ class ImageMaskInput:
     _imagemask_db: dict[str, dict[str, dict]] = field(default_factory=dict)
     modalities: ImageMaskModalities = ImageMaskModalities.CT_RTSTRUCT
 
-    roi_pattern: str | None = "GTV.*"
+    roi_pattern: str | None = "(GTV.*|Tumor.*|(oO)(aA)(rR).*)"
 
     @timer("Initiating ImageMaskInput")
     def __post_init__(self) -> None:
@@ -74,7 +58,9 @@ class ImageMaskInput:
 
         rawdb = self.crawler._raw_db.copy()
 
-        for case in self._get_cases():
+        # based on num of digits in casenum, create lambda padder
+
+        for _, case in self._get_cases():
             scan = case[0]
             if len(rawdb[scan.Series]) == 1:
                 s = list(rawdb[scan.Series].values())[0]
@@ -88,16 +74,19 @@ class ImageMaskInput:
             m["filepaths"] = [str(f) for f in m["instances"].values()]
 
             assert s["PatientID"] == m["PatientID"], "PatientID mismatch"
-            case_id = f"{s['PatientID']}"
+            case_id = "__".join(
+                [str(s["PatientID"]), s["SeriesInstanceUID"][-5:]]
+            )
+            print(case_id)
 
             self._imagemask_db[case_id] = {
                 "scan": s,
                 "mask": m,
             }
-            print(s,m)
-            break
 
-    def _get_cases(self) -> Generator[list[SeriesNode], None, None]:
+    def _get_cases(
+        self, start: int = 1
+    ) -> Generator[tuple[int, list[SeriesNode]], None, None]:
         query = self.interlacer._get_valid_query(list(self.modalities))
         all_cases = list(self.interlacer._query(query))
         # First value in each case is a scan
@@ -107,15 +96,18 @@ class ImageMaskInput:
         if len(all_cases) == 0:
             msg = f"No cases found for modalities {self.modalities}."
             raise ValueError(msg)
+        counter = start
         for sample in all_cases:
             scan = sample[0]
             masks: List[SeriesNode] = sample[1:]
             match masks:
                 case [onemask]:
-                    yield [scan, onemask]
-                case [*many_masks] if isinstance(many_masks, list):
+                    yield counter, [scan, onemask]
+                    counter += 1
+                case [*many_masks]:
                     for mask in many_masks:
-                        yield [scan, mask]
+                        yield counter, [scan, mask]
+                    counter += 1
 
     def __len__(self) -> int:
         return len(self._imagemask_db)
@@ -123,7 +115,19 @@ class ImageMaskInput:
     def keys(self) -> List[str]:
         return list(self._imagemask_db.keys())
 
-    def __getitem__(self, key: str | int) -> ImageMask:
+    def __getitem__(self, key: str | int) -> dict[str, dict]:
+        match key:
+            case str(caseid) if caseid in self._imagemask_db:
+                # return self._load_image_mask(caseid)
+                return self._imagemask_db[key]
+            case int(caseid) if 0 <= caseid < len(self):
+                # return self._load_image_mask(self.keys()[caseid])
+                return self._imagemask_db[self.keys()[caseid]]
+            case _:
+                msg = f"Case {key} not found: {self!r}."
+                raise KeyError(msg)
+
+    def __call__(self, key: str | int) -> ImageMask:
         match key:
             case str(caseid) if caseid in self._imagemask_db:
                 return self._load_image_mask(caseid)
@@ -175,6 +179,7 @@ class ImageMaskInput:
                     reference_image=image,
                     roi_names=self.roi_pattern,
                     continuous=False,
+                    ignore_missing_regex=True,
                 )
                 if not seg:
                     msg = f"No ROIs found for case {key}."
@@ -187,25 +192,38 @@ class ImageMaskInput:
                 msg = f"Modality {mask['Modality']} not supported."
                 raise ValueError(msg)
 
+        # dd case_id to metadata for both
+        image.metadata["CaseID"] = key
+        seg.metadata["CaseID"] = key
+
         return ImageMask(scan=image, mask=seg)
 
     def __repr__(self) -> str:
         ncases = len(self)
         modalities = str(self.modalities)
-        return f"ImageMaskInput(cases={ncases}, modalities={modalities})"
+        top = f"ImageMaskInput(cases={ncases}, modalities={modalities})"
+        for key in self.keys()[:5]:
+            top += f"\n{key}:"
+            top += f"\n\tScan({self[key]['scan']['Modality']}): {self[key]['scan']['SeriesInstanceUID']}"
+            top += f"\n\tScan({self[key]['mask']['Modality']}): {self[key]['mask']['SeriesInstanceUID']}"
+        if ncases > 5:
+            top += f"\n...{ncases - 5} more cases."
+        return top
 
     def __iter__(self) -> Generator[ImageMask, None, None]:
         for key in self.keys():
-            yield self[key]
+            yield self(key)
 
 
 if __name__ == "__main__":
     from rich import print
+
     crawler_settings = CrawlerSettings(
         dicom_dir=pathlib.Path("testdata/Head-Neck-PET-CT"),
+        # dicom_dir=pathlib.Path("data"),
         n_jobs=12,
     )
     loader = ImageMaskInput(crawler_settings=crawler_settings)
 
     first = loader.keys()[0]
-    print(f"{loader[first]=}")
+    # print(f"{loader[first]=}")
