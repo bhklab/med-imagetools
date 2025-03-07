@@ -73,7 +73,7 @@ class SeriesNode:
             return self.Series == other
         return isinstance(other, SeriesNode) and self.Series == other.Series
     
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.Series)
 
     def __iter__(self) -> Iterator[SeriesNode]:
@@ -121,7 +121,8 @@ class Branch:
         """Add a SeriesNode to the branch."""
         self.series_nodes.append(node)
 
-    def query(self, query): # SHOULD CONSECUTIVE ORDER MATTER???????????
+    def query(self, query: list[str]) -> list[SeriesNode]:
+        """Check if the given query is a consecutive sub-sequence of the nodes in the branch."""
         n, m = len(self.series_nodes), len(query)
 
         for i in range(n - m + 1):
@@ -322,24 +323,23 @@ class Interlacer:
 
         return branches
     
-    def _get_valid_query(self, query):
+    def _get_valid_query(self, query: list[str]) -> list[str]:
         """
-        Validates the query based on the given rules.
-        
-        Rules:
-        - RTSTRUCT or SEG can only be present if CT, MR, or PT is present.
-        - RTDOSE can only be present if RTSTRUCT is present.
+        Validates the query based on the following rules:
+
+        Rules
+        -----
+            1. RTSTRUCT and RTDOSE require CT, MR, or PT.
+            2. SEG requires CT or MR.
         """
         valid_order = ["CT", "MR", "PT", "SEG", "RTSTRUCT", "RTDOSE"]
         query_set = set(query)
 
-        # Rule 1: RTSTRUCT or SEG needs CT, MR, or PT
-        if ("RTSTRUCT" in query_set or "SEG" in query_set) and not query_set.intersection({"CT", "MR", "PT"}):
-            return []
-
-        # Rule 2: RTDOSE needs RTSTRUCT
-        if "RTDOSE" in query_set and "RTSTRUCT" not in query_set:
-            return []
+        if ("RTSTRUCT" in query_set or "RTDOSE" in query_set) and not query_set.intersection({"CT", "MR", "PT"}):
+            raise ValueError("RTSTRUCT and RTDOSE require CT, MR, or PT")
+        
+        if "SEG" in query_set and not query_set.intersection({"CT", "MR"}):
+            raise ValueError("SEG requires CT or MR")
 
         return [modality for modality in valid_order if modality in query_set]
         
@@ -348,20 +348,21 @@ class Interlacer:
         results = []
         seen_result = set()
 
+        # Step 1: Query each tree(Branch)
         for tree in self.trees:
+            assert isinstance(tree, Branch) # To be updated, when supporting other grouping
             query_result = tree.query(queried_modalities)
             if query_result and not tuple(query_result) in seen_result:
                 results.append(query_result)
                 seen_result.add(tuple(query_result))
 
-        grouped_results = defaultdict(list) 
-
+        # Step 2: Group results by root node
+        grouped_results: dict[SeriesNode, set[SeriesNode]] = defaultdict(set)
         for result in results:
-            if not grouped_results[result[0]]:
-                grouped_results[result[0]].append(result[0])
-            grouped_results[result[0]].extend(result[1:])
+            grouped_results[result[0]].add(result[0])  
+            grouped_results[result[0]].update(result[1:])  
 
-        return grouped_results.values()
+        return [list(values) for values in grouped_results.values()]
     
     @timer("Querying forest")
     def query(self, query_string: str) -> list[list[dict[str, str]]]:
@@ -390,11 +391,13 @@ class Interlacer:
         - RTDOSE: Radiotherapy Dose
         """
         if self.group_field != GroupBy.ReferencedSeriesUID:
-            raise NotImplementedError(f"Querying currently not supported for {self.group_field}")
+            msg = f"Querying currently not supported for {self.group_field}"
+            raise NotImplementedError(msg)
         
         queried_modalities = self._get_valid_query(query_string.split(","))
         if not queried_modalities:
-            raise ValueError(f"Invalid query, {query_string}")
+            msg = f"Invalid query, {query_string}"
+            raise ValueError(msg)
 
         query_results = self._query(queried_modalities)
 
