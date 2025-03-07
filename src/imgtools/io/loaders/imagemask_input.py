@@ -64,7 +64,6 @@ class ImageMaskInput:
     interlacer: Interlacer = field(init=False, repr=False)
 
     _imagemask_db: dict[str, dict[str, dict]] = field(default_factory=dict)
-    raw_db: dict[str, dict] = field(default_factory=dict)
     modalities: ImageMaskModalities = ImageMaskModalities.CT_RTSTRUCT
 
     roi_pattern: str | None = "GTV.*"
@@ -82,20 +81,19 @@ class ImageMaskInput:
             crawl_path=self.crawler.db_csv, query_branches=True
         )
 
-        # perform a deepcopy of rawdb
-        self.raw_db = self.crawler._raw_db.copy()
+        rawdb = self.crawler._raw_db.copy()
         allcases = list(self.interlacer._query(set(self.modalities)))
 
         # based on num of digits in casenum, create lambda padder
         padder = lambda x: str(x).zfill(len(str(len(allcases))))
 
         for casenum, (scan, mask) in enumerate(allcases, start=1):
-            if len(self.raw_db[scan.Series]) == 1:
-                s = list(self.raw_db[scan.Series].values())[0]
+            if len(rawdb[scan.Series]) == 1:
+                s = list(rawdb[scan.Series].values())[0]
             else:
-                s = reduce(dpath.merge, self.raw_db[scan.Series].values())
+                s = reduce(dpath.merge, rawdb[scan.Series].values())
 
-            m = list(self.raw_db[mask.Series].values())[0]
+            m = list(rawdb[mask.Series].values())[0]
 
             s["filepaths"] = [str(f) for f in s["instances"].values()]
             m["filepaths"] = [str(f) for f in m["instances"].values()]
