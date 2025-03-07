@@ -2,27 +2,20 @@ import pathlib
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import reduce
-from typing import Any, Callable, Generator, List, NamedTuple, Optional
+from typing import Callable, Generator, List, NamedTuple
 
 import dpath
 import SimpleITK as sitk
 
+from imgtools.dicom import Interlacer
 from imgtools.dicom.crawl import Crawler, CrawlerSettings
+from imgtools.dicom.interlacer import SeriesNode
 from imgtools.io.loaders.utils import (
-    read_dicom_auto,
-    read_dicom_scan,
     extract_dicom_tags,
-    read_dicom_rtstruct,
+    read_dicom_scan,
 )
-from imgtools.logging import logger
 from imgtools.modalities import Scan, Segmentation, StructureSet
-from imgtools.modalities.interlacer import Interlacer
 from imgtools.utils import timer
-
-# from imgtools.modules import Scan, Segmentation, StructureSet
-# from imgtools.modules.datagraph import DataGraph
-# from imgtools.ops.base_classes import BaseInput
-# from imgtools.utils.timer import timer
 
 LoaderFunction = Callable[..., sitk.Image | StructureSet | Segmentation]
 
@@ -77,21 +70,17 @@ class ImageMaskInput:
             msg = "Crawler must have a db attribute to use interlacer."
             raise ValueError(msg)
 
-        self.interlacer = Interlacer(
-            crawl_path=self.crawler.db_csv, query_branches=True
-        )
+        self.interlacer = Interlacer(crawl_path=self.crawler.db_csv)
 
         rawdb = self.crawler._raw_db.copy()
-        allcases = list(self.interlacer._query(set(self.modalities)))
 
-        # based on num of digits in casenum, create lambda padder
-        _padder = lambda x: str(x).zfill(len(str(len(allcases))))
-
-        for casenum, (scan, mask) in enumerate(allcases, start=1):
+        for case in self._get_cases():
+            scan = case[0]
             if len(rawdb[scan.Series]) == 1:
                 s = list(rawdb[scan.Series].values())[0]
             else:
                 s = reduce(dpath.merge, rawdb[scan.Series].values())
+            mask = case[1]
 
             m = list(rawdb[mask.Series].values())[0]
 
@@ -99,12 +88,34 @@ class ImageMaskInput:
             m["filepaths"] = [str(f) for f in m["instances"].values()]
 
             assert s["PatientID"] == m["PatientID"], "PatientID mismatch"
-            case_id = f"{_padder(casenum)}__{s['PatientID']}"
+            case_id = f"{s['PatientID']}"
 
             self._imagemask_db[case_id] = {
                 "scan": s,
                 "mask": m,
             }
+            print(s,m)
+            break
+
+    def _get_cases(self) -> Generator[list[SeriesNode], None, None]:
+        query = self.interlacer._get_valid_query(list(self.modalities))
+        all_cases = list(self.interlacer._query(query))
+        # First value in each case is a scan
+        # positions 1 onward are masks
+        # if there is only one mask, it is one element
+        # if there are multiple masks, they are in a list
+        if len(all_cases) == 0:
+            msg = f"No cases found for modalities {self.modalities}."
+            raise ValueError(msg)
+        for sample in all_cases:
+            scan = sample[0]
+            masks: List[SeriesNode] = sample[1:]
+            match masks:
+                case [onemask]:
+                    yield [scan, onemask]
+                case [*many_masks] if isinstance(many_masks, list):
+                    for mask in many_masks:
+                        yield [scan, mask]
 
     def __len__(self) -> int:
         return len(self._imagemask_db)
@@ -189,6 +200,7 @@ class ImageMaskInput:
 
 
 if __name__ == "__main__":
+    from rich import print
     crawler_settings = CrawlerSettings(
         dicom_dir=pathlib.Path("testdata/Head-Neck-PET-CT"),
         n_jobs=12,
@@ -196,4 +208,4 @@ if __name__ == "__main__":
     loader = ImageMaskInput(crawler_settings=crawler_settings)
 
     first = loader.keys()[0]
-    # print(f"{first=} : {loader[first]=}")
+    print(f"{loader[first]=}")

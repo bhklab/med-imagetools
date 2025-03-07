@@ -2,11 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import dpath
-
 from imgtools.io.base_classes import BaseOutput
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter
-from imgtools.logging import logger
 from imgtools.modalities import Scan, Segmentation
 from imgtools.utils import sanitize_file_name
 
@@ -78,105 +75,105 @@ class ImageMaskOutput(BaseOutput[ImageMaskData]):
             )
 
 
-if __name__ == "__main__":
-    import json
-    import shutil
+# if __name__ == "__main__":
+#     import json
+#     import shutil
 
-    from tqdm import tqdm
+#     from tqdm import tqdm
 
-    from imgtools.io.loaders.utils import (
-        read_dicom_auto,
-        read_dicom_rtstruct,
-    )
-    from imgtools.logging import tqdm_logging_redirect
-    from imgtools.modalities.interlacer import Interlacer
+#     from imgtools.io.loaders.utils import (
+#         read_dicom_auto,
+#         read_dicom_rtstruct,
+#     )
+#     from imgtools.logging import tqdm_logging_redirect
+#     from imgtools.modalities.interlacer import Interlacer
 
-    shutil.rmtree("testdata/niftiwriter", ignore_errors=True)
+#     shutil.rmtree("testdata/niftiwriter", ignore_errors=True)
 
-    root = Path("testdata")
-    with Path(root, ".imgtools/Head-Neck-PET-CT/crawldb.json").open("r") as f:
-        db = json.load(f)
-    interlacer = Interlacer(
-        crawl_path="testdata/.imgtools/Head-Neck-PET-CT/crawldb.csv",
-        query_branches=True,
-    )
+#     root = Path("testdata")
+#     with Path(root, ".imgtools/Head-Neck-PET-CT/crawldb.json").open("r") as f:
+#         db = json.load(f)
+#     interlacer = Interlacer(
+#         crawl_path="testdata/.imgtools/Head-Neck-PET-CT/crawldb.csv",
+#         query_branches=True,
+#     )
 
-    samples = interlacer.query("CT,RTSTRUCT")
-    print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")  # noqa: T201
-    # Extract unique pairs from the samples list
-    unique_pairs = {
-        tuple((entry[0]["Series"], entry[1]["Series"])) for entry in samples
-    }
+#     samples = interlacer.query("CT,RTSTRUCT")
+#     print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")  # noqa: T201
+#     # Extract unique pairs from the samples list
+#     unique_pairs = {
+#         tuple((entry[0]["Series"], entry[1]["Series"])) for entry in samples
+#     }
 
-    # Convert back to a list of dictionaries
-    samples = [
-        [
-            {"Series": pair[0], "Modality": "CT"},
-            {"Series": pair[1], "Modality": "RTSTRUCT"},
-        ]
-        for pair in unique_pairs
-    ]
-    print(f"Found {len(samples)} UNIQUE pairs of CT and RTSTRUCT series")  # noqa: T201
-    output: ImageMaskOutput
-    samplesets = list(enumerate(samples[:10], start=1))
-    with tqdm_logging_redirect():
-        for sample_num, (image_series, mask_series) in tqdm(
-            samplesets, total=len(samplesets)
-        ):
-            imagemeta = db[image_series["Series"]]
-            maskmeta = db[mask_series["Series"]]
+#     # Convert back to a list of dictionaries
+#     samples = [
+#         [
+#             {"Series": pair[0], "Modality": "CT"},
+#             {"Series": pair[1], "Modality": "RTSTRUCT"},
+#         ]
+#         for pair in unique_pairs
+#     ]
+#     print(f"Found {len(samples)} UNIQUE pairs of CT and RTSTRUCT series")  # noqa: T201
+#     output: ImageMaskOutput
+#     samplesets = list(enumerate(samples[:10], start=1))
+#     with tqdm_logging_redirect():
+#         for sample_num, (image_series, mask_series) in tqdm(
+#             samplesets, total=len(samplesets)
+#         ):
+#             imagemeta = db[image_series["Series"]]
+#             maskmeta = db[mask_series["Series"]]
 
-            # get folder quick
-            image_folder = root.absolute() / (
-                str(dpath.get(imagemeta, "**/folder"))
-            )
-            image_filenames = [
-                str((image_folder / f).as_posix())
-                for f in list(dpath.get(imagemeta, "**/instances").values())  # type: ignore
-            ]
+#             # get folder quick
+#             image_folder = root.absolute() / (
+#                 str(dpath.get(imagemeta, "**/folder"))
+#             )
+#             image_filenames = [
+#                 str((image_folder / f).as_posix())
+#                 for f in list(dpath.get(imagemeta, "**/instances").values())  # type: ignore
+#             ]
 
-            mask_folder = Path(str(dpath.get(maskmeta, "**/folder")))
-            mask_filenames = [
-                root / mask_folder / f
-                for f in list(dpath.get(maskmeta, "**/instances").values())  # type: ignore
-            ]
-            try:
-                assert len(mask_filenames) == 1, (
-                    f"Expected 1 mask file, got {mask_filenames}"
-                )
-            except AssertionError as e:
-                logger.error(
-                    f"{e}",
-                    image_series=image_series,
-                    mask_series=mask_series,
-                    imagemeta=imagemeta,
-                    maskmeta=maskmeta,
-                )
-                raise e
+#             mask_folder = Path(str(dpath.get(maskmeta, "**/folder")))
+#             mask_filenames = [
+#                 root / mask_folder / f
+#                 for f in list(dpath.get(maskmeta, "**/instances").values())  # type: ignore
+#             ]
+#             try:
+#                 assert len(mask_filenames) == 1, (
+#                     f"Expected 1 mask file, got {mask_filenames}"
+#                 )
+#             except AssertionError as e:
+#                 logger.error(
+#                     f"{e}",
+#                     image_series=image_series,
+#                     mask_series=mask_series,
+#                     imagemeta=imagemeta,
+#                     maskmeta=maskmeta,
+#                 )
+#                 raise e
 
-            image_scan = read_dicom_auto(
-                path=str(image_folder),
-                series=image_series["Series"],
-                file_names=image_filenames,
-            )
-            assert isinstance(image_scan, Scan)
+#             image_scan = read_dicom_auto(
+#                 path=str(image_folder),
+#                 series=image_series["Series"],
+#                 file_names=image_filenames,
+#             )
+#             assert isinstance(image_scan, Scan)
 
-            rt = read_dicom_rtstruct(
-                mask_filenames[0], roi_name_pattern="GTV.*"
-            )
-            seg = rt.to_segmentation(
-                image_scan, roi_names="GTV.*", continuous=False
-            )
-            if not seg:
-                continue
+#             rt = read_dicom_rtstruct(
+#                 mask_filenames[0], roi_name_pattern="GTV.*"
+#             )
+#             seg = rt.to_segmentation(
+#                 image_scan, roi_names="GTV.*", continuous=False
+#             )
+#             if not seg:
+#                 continue
 
-            if sample_num == 1:
-                keys = list(image_scan.metadata.keys()) + list(
-                    seg.metadata.keys()
-                )
-                output = ImageMaskOutput(context_keys=keys)
+#             if sample_num == 1:
+#                 keys = list(image_scan.metadata.keys()) + list(
+#                     seg.metadata.keys()
+#                 )
+#                 output = ImageMaskOutput(context_keys=keys)
 
-            output(
-                ImageMaskData(image=image_scan, mask=seg),
-                SampleID=f"{sample_num:03d}",
-            )
+#             output(
+#                 ImageMaskData(image=image_scan, mask=seg),
+#                 SampleID=f"{sample_num:03d}",
+#             )
