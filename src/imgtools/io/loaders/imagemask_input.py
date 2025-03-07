@@ -85,7 +85,7 @@ class ImageMaskInput:
         allcases = list(self.interlacer._query(set(self.modalities)))
 
         # based on num of digits in casenum, create lambda padder
-        padder = lambda x: str(x).zfill(len(str(len(allcases))))
+        _padder = lambda x: str(x).zfill(len(str(len(allcases))))
 
         for casenum, (scan, mask) in enumerate(allcases, start=1):
             if len(rawdb[scan.Series]) == 1:
@@ -99,7 +99,7 @@ class ImageMaskInput:
             m["filepaths"] = [str(f) for f in m["instances"].values()]
 
             assert s["PatientID"] == m["PatientID"], "PatientID mismatch"
-            case_id = f"{padder(casenum)}__{s['PatientID']}"
+            case_id = f"{_padder(casenum)}__{s['PatientID']}"
 
             self._imagemask_db[case_id] = {
                 "scan": s,
@@ -121,19 +121,18 @@ class ImageMaskInput:
         scan = sample["scan"]
         mask = sample["mask"]
 
+        # because folder is relative to dicom_dir
+        root = self.crawler.dicom_dir.parent
+
         scan_folder = scan["folder"]
         mask_folder = mask["folder"]
 
         scan_paths = [
-            str((self.crawler.dicom_dir.parent / scan_folder / f).as_posix())
-            for f in scan["filepaths"]
+            str((root / scan_folder / f).as_posix()) for f in scan["filepaths"]
         ]
         assert len(scan_paths) > 0
 
-        mask_paths = [
-            self.crawler.dicom_dir.parent / mask_folder / f
-            for f in mask["filepaths"]
-        ]
+        mask_paths = [root / mask_folder / f for f in mask["filepaths"]]
 
         assert len(mask_paths) == 1, (
             f"Expected only one mask file, but found {len(mask_paths)} "
@@ -141,7 +140,7 @@ class ImageMaskInput:
         )
 
         image = read_dicom_scan(
-            self.crawler.dicom_dir.parent / scan_folder,
+            root / scan_folder,
             scan["SeriesInstanceUID"],
             file_names=scan_paths,
         )
