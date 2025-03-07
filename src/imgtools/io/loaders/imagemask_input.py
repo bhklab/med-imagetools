@@ -112,11 +112,17 @@ class ImageMaskInput:
     def keys(self) -> List[str]:
         return list(self._imagemask_db.keys())
 
-    def __getitem__(self, key: str) -> ImageMask:
-        if key not in self._imagemask_db:
-            msg = f"{key} not found in the image-mask database."
-            raise KeyError(msg)
+    def __getitem__(self, key: str | int) -> ImageMask:
+        match key:
+            case str(caseid) if caseid in self._imagemask_db:
+                return self._load_image_mask(caseid)
+            case int(caseid) if 0 <= caseid < len(self):
+                return self._load_image_mask(self.keys()[caseid])
+            case _:
+                msg = f"Case {key} not found: {self!r}."
+                raise KeyError(msg)
 
+    def _load_image_mask(self, key: str) -> ImageMask:
         sample = self._imagemask_db[key]
         scan = sample["scan"]
         mask = sample["mask"]
@@ -171,6 +177,15 @@ class ImageMaskInput:
                 raise ValueError(msg)
 
         return ImageMask(scan=image, mask=seg)
+
+    def __repr__(self) -> str:
+        ncases = len(self)
+        modalities = str(self.modalities)
+        return f"ImageMaskInput(cases={ncases}, modalities={modalities})"
+
+    def __iter__(self) -> Generator[ImageMask, None, None]:
+        for key in self.keys():
+            yield self[key]
 
 
 if __name__ == "__main__":
