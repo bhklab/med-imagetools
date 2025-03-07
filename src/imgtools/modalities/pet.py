@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 from pydicom import dcmread
 
 from imgtools.logging import logger
+from imgtools.modalities.utils import read_image
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
