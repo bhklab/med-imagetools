@@ -6,6 +6,7 @@ from typing import Dict, List
 from imgtools.io import auto_dicom_result, read_dicom_auto
 from imgtools.logging import logger
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.utils import timer
 
 
 class SampleLoader:
@@ -106,6 +107,7 @@ class SampleLoader:
 
         return grouped_images
 
+    @timer("Loading sample")
     def load(
         self, sample: List[Dict[str, str]]
     ) -> List[Scan | PET | Dose | Segmentation]:
@@ -148,18 +150,21 @@ class SampleLoader:
             if "CT" in grouped_images
             else "MR"
             if "MR" in grouped_images
+            else "PT"
+            if "PT" in grouped_images
             else None
         )
         if not reference_modality:
-            raise ValueError("No CT or MR series found to use as reference.")
+            raise ValueError("No CT, MR, or PT series found to use as reference.")
         if len(grouped_images[reference_modality]) > 1:
             msg = f"Found >1 {reference_modality} series, using the first one as reference."
             logger.warning(msg)
 
         series_uid = grouped_images.pop(reference_modality)[0]
         _image = self._reader(series_uid)
-        assert (len(_image) == 1) and isinstance(_image[0], Scan)
-        reference_image: Scan = _image[0]
+        assert (len(_image) == 1) and ((isinstance(_image[0], Scan) or isinstance(_image[0], PET)))
+        reference_image: Scan | PET = _image[0]
+        reference_image.patient_id = sample[0]["PatientID"]
 
         loaded_images.append(reference_image)
 
