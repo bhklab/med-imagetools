@@ -162,9 +162,8 @@ class SampleLoader:
 
         series_uid = grouped_images.pop(reference_modality)[0]
         _image = self._reader(series_uid)
-        assert (len(_image) == 1) and ((isinstance(_image[0], Scan) or isinstance(_image[0], PET)))
+        assert len(_image) == 1 and isinstance(_image[0], (Scan, PET))
         reference_image: Scan | PET = _image[0]
-        reference_image.patient_id = sample[0]["PatientID"]
 
         loaded_images.append(reference_image)
 
@@ -204,9 +203,13 @@ if __name__ == "__main__":
 
     interlacer = Interlacer(".imgtools/data/crawldb.csv")
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
+    samples = interlacer.query("MR,SEG")
+
+    print(samples)
 
     loader = SampleLoader(".imgtools/data/crawldb.json")
 
     for sample in samples:
         print(loader.load(sample))
+
+
