@@ -251,7 +251,6 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             **self.context,
             **kwargs,
         }
-        self.set_context(**save_context)
         try:
             filename = self.pattern_resolver.resolve(save_context)
         except MissingPlaceholderValueError as e:
@@ -312,10 +311,6 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         if not out_path.exists():
             if self.create_dirs:
                 self._ensure_directory_exists(out_path.parent)
-            # should we raise this error here?
-            # elif not out_path.parent.exists():
-            #     msg = f"Directory {out_path.parent} does not exist."
-            #     raise DirectoryNotFoundError(msg)
             return out_path
         match self.existing_file_mode:
             case ExistingFileMode.SKIP:
@@ -654,6 +649,8 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
                             f"not contain the column '{filepath_column}'."
                         )
                         raise ValueError(msg)
+                    # save header for writing back
+                    fieldnames = reader.fieldnames
                     # Filter out the existing entry for the resolved path
                     rows = [
                         row

@@ -143,12 +143,16 @@ class PatternResolver:
         PatternResolverError
             If a required key is missing from the context dictionary.
         """
-
+        none_keys = [
+            k for k, v in context.items() if not v and k in self.keys
+        ]
         # simultaneously check for None values and validate the pattern
-        if len(none_keys := [k for k, v in context.items() if v is None]) > 0:
+        if len(none_keys) > 0:
             msg = "None is not a valid value for a placeholder in the pattern."
             msg += f" None keys: {none_keys}"
             raise PatternResolverError(msg)
+        
+
 
         try:
             return self.formatted_pattern % context

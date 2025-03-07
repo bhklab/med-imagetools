@@ -5,10 +5,13 @@ import pydicom
 
 
 def get_modality_metadata(
-    dicom_data: pydicom.FileDataset, modality: str
+    dicom_data: pydicom.FileDataset,
+    modality: str,
 ) -> Dict[str, str]:
     keys = {
         "ALL": {
+            "PatientID": "PatientID",
+            "SeriesInstanceUID": "SeriesInstanceUID",
             "BodyPartExamined": "BodyPartExamined",
             "DataCollectionDiameter": "DataCollectionDiameter",
             "NumberofSlices": "NumberofSlices",
@@ -52,6 +55,9 @@ def get_modality_metadata(
             "RadionuclideHalfLife",
         ],
     }
+    if modality != dicom_data.get("Modality"):
+        errmsg = f"Modality '{modality}' does not match DICOM modality '{dicom_data.get('Modality')}'."
+        raise ValueError(errmsg)
     metadata: Dict[str, str] = (
         {} if modality == "ALL" else all_modalities_metadata(dicom_data)
     )

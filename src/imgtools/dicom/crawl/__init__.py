@@ -9,9 +9,10 @@ from .parse_dicom import (  # noqa
     parse_dicom_dir,
     parse_one_dicom,
 )
-from .crawler import Crawler  # noqa
+from .crawler import Crawler, CrawlerSettings  # noqa
 
 __all__ = [
+    "CrawlerSettings",
     "Crawler",
     # parse_dicom
     "SeriesUID",

@@ -1,12 +1,45 @@
+from __future__ import annotations
+
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Generator
 
 import dpath
 import pandas as pd
+from tqdm import tqdm
 
 from imgtools.dicom.crawl import parse_dicom_dir
 from imgtools.logging import logger, tqdm_logging_redirect
+
+__all__ = ["CrawlerSettings", "Crawler"]
+
+
+@dataclass
+class CrawlerSettings:
+    """Settings for the DICOM crawler."""
+
+    dicom_dir: Path
+    n_jobs: int
+    dcm_extension: str = "dcm"
+    force: bool = False
+    db_json: Path | None = None
+    db_csv: Path | None = None
+    dataset_name: str | None = None
+
+    def __str__(self) -> str:
+        """Return a string representation of the settings."""
+        return (
+            f"CrawlerSettings(\n"
+            f"  dicom_dir: {self.dicom_dir}\n"
+            f"  n_jobs: {self.n_jobs}\n"
+            f"  dcm_extension: {self.dcm_extension}\n"
+            f"  force: {self.force}\n"
+            f"  db_json: {self.db_json}\n"
+            f"  db_csv: {self.db_csv}\n"
+            f"  dataset_name: {self.dataset_name}\n"
+            ")"
+        )
 
 
 @dataclass
@@ -27,6 +60,19 @@ class Crawler:
     # aggregated database to create a pandas DataFrame after remapping
     # unused if reading from an existing crawldb (i.e `force=False`)
     _agg_db: list[dict] = field(init=False, repr=False, default_factory=list)
+
+    @classmethod
+    def from_settings(cls, settings: CrawlerSettings) -> Crawler:
+        """Create a Crawler instance from a CrawlerSettings object."""
+        return cls(
+            dicom_dir=settings.dicom_dir,
+            n_jobs=settings.n_jobs,
+            dcm_extension=settings.dcm_extension,
+            force=settings.force,
+            db_json=settings.db_json,
+            db_csv=settings.db_csv,
+            dataset_name=settings.dataset_name,
+        )
 
     def __post_init__(self) -> None:
         if not self.dicom_dir.is_dir():
@@ -58,33 +104,34 @@ class Crawler:
                 import json
 
                 self._raw_db = json.load(f)
-            return
 
-        # run the crawl
-        self.crawl(raw_output_path)
+        else:
+            # run the crawl
+            self.crawl(raw_output_path)
 
-        # initialize metadata generator
-        self._metadata_gen = self._metadata_generator()
+            # initialize metadata generator
+            self._metadata_gen = self._metadata_generator()
 
-        # remap references
-        logger.info("Remapping references in the crawldb...")
-        self.remap_refs()
+            # remap references
+            logger.info("Remapping references in the crawldb...")
+            self.remap_refs()
 
-        # save the updated crawl_db
-        with self.db_json.open("w") as f:
-            import json
+            # save the updated crawl_db
+            with self.db_json.open("w") as f:
+                import json
 
-            json.dump(self._raw_db, f, indent=2)
-        logger.info(f"Remapped crawldb saved to {self.db_json}")
+                json.dump(self._raw_db, f, indent=2)
+            logger.info(f"Remapped crawldb saved to {self.db_json}")
 
-        # convert to pandas DataFrame
-        df = self.to_df().sort_values(
-            ["PatientID", "StudyInstanceUID", "Modality"]
-        )
-        df.to_csv(self.db_csv, index=False)
-        logger.info(
-            f"Converted crawldb to DataFrame and saved to {self.db_csv}"
-        )
+        if not self.db_csv.exists() or self.force:
+            # convert to pandas DataFrame
+            df = self.to_df().sort_values(
+                ["PatientID", "StudyInstanceUID", "Modality"]
+            )
+            df.to_csv(self.db_csv, index=False)
+            logger.info(
+                f"Converted crawldb to DataFrame and saved to {self.db_csv}"
+            )
 
     def crawl(self, raw_output_path: Path) -> None:
         """Crawl the DICOM directory and build the crawldb.
@@ -178,16 +225,29 @@ class Crawler:
         i.e the `ReferencedSeriesUID` field is added to metadata dicts
             in `self._crawl_db` database.
         """
+        frame_mapping = defaultdict(set)
 
-        # structure of crawldb is : {seriesuid: { subseriesuid: { metadatadictionary } } }
-        # structure of sopmap is : { sopuid: seriesuid }
-        for meta in self.metadata_dictionaries:
+        # create a frame of reference map
+        for seriesuid, subseries in dpath.search(
+            self._raw_db, "*/**/FrameOfReferenceUID"
+        ).items():
+            for meta in subseries.values():
+                if frame := meta.get("FrameOfReferenceUID"):
+                    frame_mapping[frame].add(seriesuid)
+
+        for meta in tqdm(
+            list(self.metadata_dictionaries),
+            desc="Remapping references",
+            leave=False,
+        ):
             if (ref := meta.get("ReferencedSeriesUID")) and ref in self.series_uids:  # fmt: skip
                 # early exit if the reference is already a SeriesInstanceUID
                 self._agg_db.append(
                     meta
                 )  # add to the aggregated db for easy conversion to df
                 continue
+            else:
+                meta["ReferencedSeriesUID"] = None
 
             # but for now....
             match meta["Modality"]:
@@ -224,15 +284,15 @@ class Crawler:
                     # to speed this up
                     if not (ref_frame := meta.get("FrameOfReferenceUID")):  # fmt: skip
                         continue
-                    for same_frame_series in dpath.search(
-                        self._raw_db,
-                        "*/**/FrameOfReferenceUID",
-                        afilter=lambda x: str(x) == ref_frame,
-                    ):
-                        # we take the first match to "CT"
-                        if self.series_to_modality(same_frame_series) == "CT":
-                            meta["ReferencedSeriesUID"] = same_frame_series
-                            break
+                    if ref_series := frame_mapping.get(ref_frame):
+                        while ref_series:
+                            seriesuid = ref_series.pop()
+                            if (
+                                seriesuid in self.series_uids
+                                and self.series_to_modality(seriesuid) == "CT"
+                            ):
+                                meta["ReferencedSeriesUID"] = seriesuid
+                                break
 
             # add the metadata to the aggregated db for easy conversion to df
             self._agg_db.append(meta)
@@ -240,6 +300,12 @@ class Crawler:
     def to_df(self) -> pd.DataFrame:
         """Convert the crawldb to a pandas DataFrame."""
         cleaned_dicts = []
+
+        if not self._agg_db:
+            # probably reading from an existing crawldb
+            # so we can just iterate over the raw db
+            self._agg_db = list(self._metadata_generator())
+
         for meta in self._agg_db:
             # SR is annoying
             match meta.get("ReferencedSeriesUID", None):
@@ -274,4 +340,6 @@ class Crawler:
 if __name__ == "__main__":
     from rich import print  # noqa: A004, F401
 
-    crawler = Crawler(dicom_dir=Path("data"), n_jobs=12, force=True)
+    crawler = Crawler(
+        dicom_dir=Path("testdata/Head-Neck-PET-CT"), n_jobs=12, force=True
+    )

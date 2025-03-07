@@ -6,6 +6,8 @@ __all__ = ["Scan"]
 
 
 class Scan(sitk.Image):
+    metadata: Dict[str, str]
+
     def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:
         super().__init__(image)
         self.metadata = metadata
@@ -22,7 +24,7 @@ class Scan(sitk.Image):
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string
         # with angulated brackets
-        metadata = "\n\t".join([f"{k}={v}" for k, v in self.metadata.items()])
+        metadata = "\n\t".join(sorted([f"{k}={v}" for k, v in self.metadata.items()]))
         img_stats = "\n\t".join(
             [f"{k}={v}" for k, v in self._img_stats.items()]
         )

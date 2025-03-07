@@ -3,10 +3,11 @@ This is a work in progress to break up the ops/ops.py file into smaller, more ma
 """
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Generic, TypeVar
 
-from imgtools.io.loaders import BaseLoader
-from imgtools.io.writers import BaseWriter
+from imgtools.io.writers import AbstractBaseWriter
+
+T = TypeVar("T")
 
 
 class BaseIO(ABC):
@@ -16,53 +17,52 @@ class BaseIO(ABC):
     """
 
     @abstractmethod
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # noqa
-        """Perform the operation."""
+    def __call__(self, *args: Any, **kwargs: Any) -> None:  # noqa
+        """
+        This abstract method must be implemented by subclasses to apply a specific
+        transformation. It takes an image along with optional positional and keyword
+        arguments to customize the transformation and returns the resulting image.
+
+        Parameters
+        ----------
+            *args: Additional positional arguments for the transformation.
+            **kwargs: Additional keyword arguments for the transformation.
+        """
         pass
 
     def __repr__(self) -> str:
-        """
-        Generate a string representation of the operation instance.
-
-        Returns
-        -------
-        str
-            The string representation of the object.
-        """
-        attrs = [
-            (k, v) for k, v in self.__dict__.items() if not k.startswith("_")
-        ]
-        attrs = [
-            (k, f"'{v}'") if isinstance(v, str) else (k, v) for k, v in attrs
-        ]
+        attrs = sorted(
+            [(k, v) for k, v in self.__dict__.items() if not k.startswith("_")]
+        )
+        attrs = [(k, repr(v)) for k, v in attrs]
         args = ", ".join(f"{k}={v}" for k, v in attrs)
         return f"{self.__class__.__name__}({args})"
 
 
-class BaseInput(BaseIO):
-    """Abstract base class for input operations.
+# class BaseInput(BaseIO):
+#     """Abstract base class for input operations.
 
-    Parameters
-    ----------
-    loader : BaseLoader
-        An instance of a subclass of `BaseLoader` responsible for loading input data.
-    """
+#     Parameters
+#     ----------
+#     loader : BaseLoader
+#         An instance of a subclass of `BaseLoader` responsible for loading input data.
+#     """
 
-    _loader: BaseLoader
+#     _loader: BaseLoader
 
-    def __init__(self, loader: BaseLoader) -> None:
-        if not isinstance(loader, BaseLoader):
-            msg = f"loader must be a subclass of io.BaseLoader, got {type(loader)}"
-            raise ValueError(msg)
-        self._loader = loader
+#     def __init__(self, loader: BaseLoader) -> None:
+#         if not isinstance(loader, BaseLoader):
+#             msg = f"loader must be a subclass of io.BaseLoader, got {type(loader)}"
+#             raise ValueError(msg)
+#         self._loader = loader
 
-    @abstractmethod
-    def __call__(self, key: Any) -> Any:  # noqa
-        """Retrieve input data."""
-        pass
+#     @abstractmethod
+#     def __call__(self, key: Any) -> Any:  # noqa
+#         """Retrieve input data."""
+#         pass
 
 
-class BaseOutput(BaseIO):
+class BaseOutput(BaseIO, Generic[T]):
     """Abstract base class for output operations.
 
     Parameters
@@ -71,16 +71,16 @@ class BaseOutput(BaseIO):
         An instance of a subclass of `BaseWriter` responsible for writing output data.
     """
 
-    _writer: BaseWriter
+    _writer: AbstractBaseWriter
 
-    def __init__(self, writer: BaseWriter) -> None:
-        if not isinstance(writer, BaseWriter):
-            msg = f"writer must be a subclass of io.BaseWriter, got {type(writer)}"
+    def __init__(self, writer: AbstractBaseWriter) -> None:
+        if not isinstance(writer, AbstractBaseWriter):
+            msg = f"writer must be a subclass of io.AbstractBaseWriter, got {type(writer)}"
             raise ValueError(msg)
         self._writer = writer
 
     @abstractmethod
-    def __call__(self, key: Any, *args: Any, **kwargs: Any) -> None:  # noqa
+    def __call__(self, data: T, *args: Any, **kwargs: Any) -> None:  # noqa
         """Write output data.
 
         Parameters

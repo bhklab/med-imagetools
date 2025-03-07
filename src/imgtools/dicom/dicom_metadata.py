@@ -1,10 +1,15 @@
-from pydicom.dataset import FileDataset
+from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
 
 __all__ = ["MODALITY_TAGS", "extract_dicom_tags"]
 
 # Define modality-based tag mapping
 MODALITY_TAGS = {
     "ALL": {
+        # Patient Information
+        "PatientID",
+        "SeriesInstanceUID",
+        "StudyInstanceUID",
+        "Modality",
         # Image Geometry & Size
         "BodyPartExamined",
         "DataCollectionDiameter",
@@ -142,25 +147,33 @@ MODALITY_TAGS = {
 }
 
 
+def modality_metadata_keys(modality: str) -> list[str]:
+    """Given a modality, get a predictable list of keys."""
+    return sorted(MODALITY_TAGS["ALL"].union(MODALITY_TAGS[modality]))
+
+
 def extract_dicom_tags(
-    dicom_dataset: FileDataset, modality: str | None = None
-) -> dict[str, str | None]:
+    dicom_dataset: DicomInput,
+    modality: str | None = None,
+    default: str = "",
+) -> dict[str, str]:
     """
     Extracts relevant DICOM tags based on the modality.
 
     Parameters
     ----------
-    dicom_dataset : FileDataset
-        A loaded DICOM dataset.
+    dicom_dataset : FileDataset | str | Path | bytes | BinaryIO
+        Input DICOM file as a `pydicom.FileDataset`, file path, byte stream, or file-like object.
     modality : str | None, optional
         The modality of the DICOM dataset. If not provided, the modality will be
         extracted from the dicom file itself.
 
     Returns
     -------
-    dict[str, str | None]
+    dict[str, str]
         Extracted tags and their values, if available.
     """
+    dicom_dataset = load_dicom(dicom_dataset)
     # Retrieve the modality
     modality = modality or dicom_dataset.get("Modality")
     if not modality:
@@ -173,7 +186,7 @@ def extract_dicom_tags(
         relevant_tags.update(MODALITY_TAGS[modality])
 
     # Extract values
-    return {tag: str(dicom_dataset.get(tag, None)) for tag in relevant_tags}
+    return {tag: str(dicom_dataset.get(tag, default)) for tag in relevant_tags}
 
 
 if __name__ == "__main__":

@@ -12,6 +12,8 @@ from .input import (
 from .interlacer import GroupBy, Interlacer
 from .utils import lookup_tag, similar_tags, tag_exists
 
+from .crawl import Crawler, CrawlerSettings  # fmt isort:skip
+
 __all__ = [
     "find_dicoms",
     "lookup_tag",
@@ -29,6 +31,9 @@ __all__ = [
     "all_modalities_metadata",  # OLD
     "MODALITY_TAGS",
     "extract_dicom_tags",
+    # crawler
+    "CrawlerSettings",
+    "Crawler",
     # interlacer
     "Interlacer",
     "GroupBy",
