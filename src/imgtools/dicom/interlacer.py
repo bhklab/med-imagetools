@@ -357,12 +357,16 @@ class Interlacer:
                 seen_result.add(tuple(query_result))
 
         # Step 2: Group results by root node
-        grouped_results: dict[SeriesNode, set[SeriesNode]] = defaultdict(set)
+        grouped_results: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
         for result in results:
-            grouped_results[result[0]].add(result[0])  
-            grouped_results[result[0]].update(result[1:])  
+            if result[0] not in grouped_results[result[0]]:
+                grouped_results[result[0]].append(result[0])
+            
+            for node in result[1:]:
+                if node not in grouped_results[result[0]]:
+                    grouped_results[result[0]].append(node)
 
-        return [list(values) for values in grouped_results.values()]
+        return list(grouped_results.values())
     
     @timer("Querying forest")
     def query(self, query_string: str) -> list[list[dict[str, str]]]:
