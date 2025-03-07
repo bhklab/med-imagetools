@@ -105,8 +105,7 @@ if __name__ == "__main__":
     print(f"Found {len(samples)} pairs of CT and RTSTRUCT series")  # noqa: T201
     # Extract unique pairs from the samples list
     unique_pairs = {
-        tuple((entry[0]["Series"], entry[1]["Series"]))
-        for entry in samples
+        tuple((entry[0]["Series"], entry[1]["Series"])) for entry in samples
     }
 
     # Convert back to a list of dictionaries
@@ -146,7 +145,13 @@ if __name__ == "__main__":
                     f"Expected 1 mask file, got {mask_filenames}"
                 )
             except AssertionError as e:
-                logger.error(f"{e}", image_series=image_series, mask_series=mask_series, imagemeta=imagemeta, maskmeta=maskmeta)
+                logger.error(
+                    f"{e}",
+                    image_series=image_series,
+                    mask_series=mask_series,
+                    imagemeta=imagemeta,
+                    maskmeta=maskmeta,
+                )
                 raise e
 
             image_scan = read_dicom_auto(
@@ -156,7 +161,9 @@ if __name__ == "__main__":
             )
             assert isinstance(image_scan, Scan)
 
-            rt = read_dicom_rtstruct(mask_filenames[0], roi_name_pattern="GTV.*")
+            rt = read_dicom_rtstruct(
+                mask_filenames[0], roi_name_pattern="GTV.*"
+            )
             seg = rt.to_segmentation(
                 image_scan, roi_names="GTV.*", continuous=False
             )
