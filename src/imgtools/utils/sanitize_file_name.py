@@ -45,7 +45,7 @@ def sanitize_file_name(filename: str) -> str:
     assert filename is not None and filename != ""
     assert isinstance(filename, str)
 
-    disallowed_characters_pattern = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+    disallowed_characters_pattern = re.compile(r'[<>:"/\\|?*\x00-\x1f+.]')
 
     # Remove disallowed characters at the beginning and end
     filename = re.sub(

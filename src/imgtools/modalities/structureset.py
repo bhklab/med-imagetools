@@ -40,11 +40,19 @@ from pydicom import dcmread
 from skimage.draw import polygon2mask
 
 from imgtools.logging import logger
-from imgtools.modules.segmentation import Segmentation
+from imgtools.modalities.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
+
+__all__ = [
+    "StructureSet",
+    "RTSTRUCTMetadata",
+    "extract_metadata",
+    "roi_names_from_dicom",
+    "rtstruct_reference_seriesuid",
+]
 
 
 def roi_names_from_dicom(

@@ -1,8 +1,4 @@
-from .old_loaders import (
-    BaseLoader,
-    ImageCSVLoader,
-    ImageFileLoader,
-    ImageTreeLoader,
+from .utils import (
     auto_dicom_result,
     read_dicom_auto,
     read_dicom_pet,
@@ -14,6 +10,8 @@ from .old_loaders import (
     read_image,
 )
 
+from .imagemask_input import ImageMaskInput, ImageMaskModalities  # isort:skip
+
 __all__ = [
     "read_image",
     "read_dicom_series",
@@ -24,8 +22,7 @@ __all__ = [
     "read_dicom_seg",
     "read_dicom_auto",
     "auto_dicom_result",
-    "BaseLoader",
-    "ImageTreeLoader",
-    "ImageCSVLoader",
-    "ImageFileLoader",
+    # imagemask
+    "ImageMaskInput",
+    "ImageMaskModalities",
 ]

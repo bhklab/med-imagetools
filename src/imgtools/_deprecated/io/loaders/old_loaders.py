@@ -12,9 +12,8 @@ from typing import Optional, Union
 import pandas as pd
 import SimpleITK as sitk
 from pydicom import dcmread
-
-from imgtools.modules import PET, Dose, Scan, Segmentation, StructureSet
-from imgtools.dicom.dicom_metadata import get_modality_metadata
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.dicom.dicom_metadata_old import get_modality_metadata
 
 
 def read_image(path: str) -> sitk.Image:
@@ -64,13 +63,20 @@ def read_dicom_series(
     The loaded image.
     """
     reader = sitk.ImageSeriesReader()
+    sitk_file_names = reader.GetGDCMSeriesFileNames(
+        path,
+        seriesID=series_id if series_id else "",
+        recursive=recursive,
+    )
     if file_names is None:
-        # extract the names of the dicom files that are in the path variable, which is a directory
-        file_names = reader.GetGDCMSeriesFileNames(
-            path,
-            seriesID=series_id if series_id else "",
-            recursive=recursive,
-        )
+        file_names = sitk_file_names
+    else:
+        if set(file_names) <= set(
+            sitk_file_names
+        ):  # Extracts the same order provided by sitk
+            file_names = [fn for fn in sitk_file_names if fn in file_names]
+        else:
+            raise ValueError("The provided file_names might be broken.")
 
     reader.SetFileNames(file_names)
 
@@ -166,6 +172,8 @@ def read_dicom_auto(
 
         obj.metadata.update(get_modality_metadata(meta, modality))
         return obj
+
+    raise FileNotFoundError(f"No DICOM files found in {path}.")
 
 
 # ruff: noqa
