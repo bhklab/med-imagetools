@@ -121,16 +121,20 @@ class Branch:
         """Add a SeriesNode to the branch."""
         self.series_nodes.append(node)
 
-    def query(self, query: list[str]) -> list[SeriesNode]:
-        """Check if the given query is a consecutive sub-sequence of the nodes in the branch."""
-        n, m = len(self.series_nodes), len(query)
-
-        for i in range(n - m + 1):
-            if [node.Modality for node in self][i:i + m] == query:
-                return self.series_nodes[i:i + m]  # Return the matching consecutive query
-
-        return []  # Return empty if no match is found
-
+    def check_branch(self, query: list[str]) -> list[SeriesNode]:
+        """Check if the given query is a sub-sequence and has the same order as the nodes in the branch."""
+        node_mode = [node.Modality for node in self.series_nodes]
+        
+        if ["CT", "RTSTRUCT"] == query: # EXCEPTION: Avoid PT in between CT and RTSTRUCT
+            return next((self.series_nodes[idx:idx+2] for idx in range(len(self.series_nodes) - 1) 
+                                if node_mode[idx:idx+2] == query), [])
+        
+        elif all(item in node_mode for item in query):
+            return [node for node in self.series_nodes if node.Modality in query]
+        
+        else:
+            return []
+        
     def __iter__(self) -> Iterator[SeriesNode]:
         """Yield the node from each SeriesNode in the branch."""
         for node in self.series_nodes:
@@ -167,9 +171,6 @@ class Interlacer:
         Path to the CSV file containing the series data
     group_field : GroupBy, optional
         Field to group series by, by default GroupBy.ReferencedSeriesUID
-    query_branches : bool, optional
-        If True, queries all branches as different samples. Only applies when
-        grouping by ReferencedSeriesUID. Default is False.
 
     Attributes
     ----------
@@ -183,8 +184,6 @@ class Interlacer:
         Forest structure containing all series relationships
     root_nodes : list[SeriesNode]
         List of root nodes in the forest
-    query_branches : bool
-        Whether to query all branches as different samples
     """
 
     def __init__(
@@ -201,9 +200,6 @@ class Interlacer:
             Path to the CSV file containing the data.
         group_field : GroupBy, optional
             Field to group by, by default GroupBy.ReferencedSeriesUID.
-        query_branches : bool, optional, default=False
-            If True, queries all branches as different samples
-            (Only applicable when grouping by ReferencedSeriesUID).
         """
         # Load and drop duplicate SeriesInstanceUID
         self.crawl_path = Path(crawl_path)
@@ -351,7 +347,7 @@ class Interlacer:
         # Step 1: Query each tree(Branch)
         for tree in self.trees:
             assert isinstance(tree, Branch) # To be updated, when supporting other grouping
-            query_result = tree.query(queried_modalities)
+            query_result = tree.check_branch(queried_modalities)
             if query_result and not tuple(query_result) in seen_result:
                 results.append(query_result)
                 seen_result.add(tuple(query_result))
@@ -359,15 +355,16 @@ class Interlacer:
         # Step 2: Group results by root node
         grouped_results: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
         for result in results:
-            if result[0] not in grouped_results[result[0]]:
-                grouped_results[result[0]].append(result[0])
+            root_node = result[0]
+            if not grouped_results[root_node]:
+                grouped_results[root_node].append(root_node)
             
             for node in result[1:]:
-                if node not in grouped_results[result[0]]:
-                    grouped_results[result[0]].append(node)
+                if node not in grouped_results[root_node]:
+                    grouped_results[root_node].append(node)
 
         return list(grouped_results.values())
-    
+        
     @timer("Querying forest")
     def query(self, query_string: str) -> list[list[dict[str, str]]]:
         """
