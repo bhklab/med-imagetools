@@ -5,19 +5,16 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import click
 from joblib import Parallel, delayed  # type: ignore
 
 from imgtools.coretypes import Spacing3D
-from imgtools.dicom import Crawler
-from imgtools.logging import logger
-from imgtools.modalities.interlacer import Interlacer
-from imgtools.pipeline import Pipeline
+from imgtools.dicom import Crawler, Interlacer
 from imgtools.transforms import Resample, Transformer, WindowIntensity
-
+from imgtools.io import SampleInput, SampleOutput
+# from imgtools import Pipeline
 
 @dataclass
-class BetaPipeline(Pipeline):
+class BetaPipeline():
     """
     This pipeline automatically goes through the following steps:
         1. Crawl and connect modalities as samples
@@ -34,7 +31,7 @@ class BetaPipeline(Pipeline):
     update_crawl: bool = False
 
     # Interlacer parameters
-    modalities: list[str] = field(default_factory=lambda: ["CT"])
+    query: str = "CT,RTSTRUCT"
 
     # Transformer parameters
     spacing: Spacing3D = field(
@@ -54,94 +51,53 @@ class BetaPipeline(Pipeline):
             force=self.update_crawl,
             dataset_name=None, # if you want to rename the .imgtools/{dataset_name} folder
         )
-    #     self.lacer = Interlacer()
-    #     transforms = [Resample(self.spacing)]
+        self.lacer = Interlacer(self.crawl.db_csv) # uses CSV of crawl
+        transforms = [Resample(self.spacing)]
 
-    #     # add W/L adjustment to transforms
-    #     if self.window is not None and self.level is not None:
-    #         transforms.append(WindowIntensity(self.window, self.level))
+        # add W/L adjustment to transforms
+        if self.window is not None and self.level is not None:
+            transforms.append(WindowIntensity(self.window, self.level))
 
-    #     self.loader = SampleLoader()
-    #     self.saver = SampleSaver(self.output_directory)
-    #     self.transformer = Transformer(transforms)
+        self.input = SampleInput(self.crawl.db_json) # uses JSON of crawl
+        self.output = SampleOutput(self.output_directory)
+        self.transformer = Transformer(transforms)
 
-    # def process_one_subject(self, sample):
-    #     images = self.loader.load(sample)
-    #     transformed_images = self.transform_all(self.transforms, images)
-    #     metadata = self.saver.save(transformed_images)
-    #     return metadata
+    def process_one_subject(self, sample):
+        # Load images
+        images = self.input.load(sample)
 
-    # def run(self):
-    #     # JSON/Dictionary of {SeriesUID: {metadata}}
-    #     self.db = crawl(self.input_directory)
+        # Apply transforms to all images
+        transformed_images = self.transform_all(self.transforms, images)
 
-    #     # List of samples of images [[{seriesuid: 'value', modality: 'value'}, ...]]
-    #     self.samples = lacer(self.crawl, self.query)
+        # Save transformed images
+        metadata = self.output.save(transformed_images)
 
-    #     # Process the gooners
-    #     self.metadata = Parallel(n_jobs=self.n_jobs, verbose=self.v)(
-    #         delayed(self._process_wrapper)(sample) for sample in self.samples
-    #     )
+        # Return metadata from each sample
+        return metadata
 
+    def run(self):
+        # Query Interlacer for samples of desired modalities
+        # List of samples of images [[{seriesuid: 'value', modality: 'value'}, ...]]
+        self.samples = self.lacer.query(self.query)
 
-@click.command()
-@click.argument(
-    "input_directory",
-    type=click.Path(
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        path_type=Path,
-        resolve_path=True,
-        exists=True,
-    ),
-    help="Path to the input directory",
-)
-@click.argument(
-    "output_directory",
-    type=click.Path(
-        file_okay=False,
-        dir_okay=True,
-        writable=True,
-        path_type=Path,
-        resolve_path=True,
-    ),
-    help="Path to the output directory",
-)
-@click.option(
-    "--modalities",
-    default="CT",
-    type=str,
-    help="Modalities to process as a comma separated string",
-)
-@click.option("--spacing", default=[1.0, 1.0, 0.0], type=tuple)
-def main(
-    input_directory: Path,
-    output_directory: Path,
-    modalities: str,
-    spacing: tuple,
-) -> None:
-    logger.debug("Running BetaPipeline via cli with args: %s", locals())
+        print(self.samples)
 
-    # paths will be resolved and validated by click params
+        # Process the samples in parallel
+        # self.metadata = Parallel(n_jobs=self.n_jobs)(
+        #     delayed(self.process_one_subject)(sample) for sample in self.samples
+        # )
 
-    # validate modalities
-    valid_modalities = ["CT", "MR", "PT", "RTSTRUCT", "RTDOSE", "RTPLAN"]
-    mods = set([mod.strip().upper() for mod in modalities.split(",")])
-    if not all([mod in valid_modalities for mod in mods]):
-        bad_modalities = mods - set(valid_modalities)
-        errmsg = (
-            "Invalid modalities provided: %s. Valid modalities are: %s"
-            % (bad_modalities, valid_modalities)
-        )
-        logger.error(errmsg)
-        raise ValueError(errmsg)
+        for sample in self.samples:
+            self.process_one_subject(sample)
 
+    
+def main():
     autopipe = BetaPipeline(
-        input_directory=input_directory,
-        output_directory=output_directory,
-        modalities=list(mods),
-        spacing=spacing,
+        input_directory=Path("./data"),
+        output_directory=Path("./procdata"),
+        query="MR,RTSTRUCT",
+        spacing=(1., 1., 0.),
+        update_crawl=True,
     )
     autopipe.run()
 
