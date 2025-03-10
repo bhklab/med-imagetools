@@ -29,7 +29,7 @@ class SampleOutput(BaseOutput):
     sanitize_filenames : bool
         Whether to sanitize filenames.
     """
-    context_keys: list[str]
+    # context_keys: list[str]
     root_directory: Path
     filename_format: str = field(
         default="{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
@@ -59,7 +59,7 @@ class SampleOutput(BaseOutput):
             sanitize_filenames=self.sanitize_filenames,
         )
         context = {k: "" for k in self._writer.pattern_resolver.keys}
-        context.update({k: "" for k in self.context_keys})
+        # context.update({k: "" for k in self.context_keys})
         self._writer.set_context(**context)
         super().__init__(self._writer)
 
@@ -96,13 +96,13 @@ class SampleOutput(BaseOutput):
 if __name__ == "__main__":
     from rich import print  # noqa
     from imgtools.dicom.interlacer import Interlacer
-    from imgtools.io.loaders.sample_loader import SampleLoader
+    from imgtools.io.loaders import SampleInput
 
     interlacer = Interlacer(".imgtools/data/crawldb.csv")
     interlacer.visualize_forest()
     samples = interlacer.query("CT,RTSTRUCT")
 
-    loader = SampleLoader(".imgtools/data/crawldb.json")
+    loader = SampleInput(".imgtools/data/crawldb.json")
 
     for sample_id, sample in enumerate(samples, start=1):
         print(sample)

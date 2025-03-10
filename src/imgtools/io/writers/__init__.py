@@ -7,6 +7,7 @@ from .nifti_writer import (
 from .hdf5_writer import HDF5Writer, HDF5WriterError
 
 from .imagemask_output import ImageMaskOutput  # fmt isort:skip
+from .sample_output import SampleOutput  # fmt isort:skip
 
 __all__ = [
     "AbstractBaseWriter",
@@ -16,4 +17,6 @@ __all__ = [
     "NiftiWriterValidationError",
     "HDF5Writer",
     "HDF5WriterError",
+    "ImageMaskOutput",
+    "SampleOutput",
 ]

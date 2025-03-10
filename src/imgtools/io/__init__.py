@@ -8,6 +8,7 @@ from .loaders import (
     read_dicom_seg,
     read_dicom_series,
     read_image,
+    SampleInput,
 )
 from .writers import (
     AbstractBaseWriter,
@@ -15,7 +16,10 @@ from .writers import (
     NIFTIWriter,
     NiftiWriterIOError,
     NiftiWriterValidationError,
+    SampleOutput,
 )
+
+
 
 __all__ = [
     "read_image",
@@ -27,10 +31,12 @@ __all__ = [
     "read_dicom_seg",
     "read_dicom_auto",
     "auto_dicom_result",
+    "SampleInput"
     # writer
     "AbstractBaseWriter",
     "ExistingFileMode",
     "NIFTIWriter",
     "NiftiWriterIOError",
     "NiftiWriterValidationError",
+    "SampleOutput",
 ]

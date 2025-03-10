@@ -11,6 +11,7 @@ from .utils import (
 )
 
 from .imagemask_input import ImageMaskInput, ImageMaskModalities  # isort:skip
+from .sample_input import SampleInput  # isort:skip
 
 __all__ = [
     "read_image",
@@ -25,4 +26,5 @@ __all__ = [
     # imagemask
     "ImageMaskInput",
     "ImageMaskModalities",
+    "SampleInput",
 ]

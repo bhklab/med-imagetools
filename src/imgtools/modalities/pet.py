@@ -157,10 +157,6 @@ class PET(sitk.Image):
         self.metadata["Values_Assumed"] = self.calc
         return self.metadata
 
-    def resample_pet(self, ct_scan: sitk.Image) -> sitk.Image:
-        resampled_pt: sitk.Image = sitk.Resample(self.img_pet, ct_scan)
-        return resampled_pt
-
     def show_overlay(
         self, ct_scan: sitk.Image, slice_number: int
     ) -> plt.figure:

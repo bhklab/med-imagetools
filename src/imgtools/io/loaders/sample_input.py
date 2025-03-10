@@ -3,13 +3,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
 
-from imgtools.io import auto_dicom_result, read_dicom_auto
+from imgtools.io.loaders.utils import auto_dicom_result, read_dicom_auto
 from imgtools.logging import logger
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.utils import timer
 
 
-class SampleLoader:
+class SampleInput:
     def __init__(
         self,
         crawl_path: str,
@@ -207,7 +207,7 @@ if __name__ == "__main__":
 
     print(samples)
 
-    loader = SampleLoader(".imgtools/data/crawldb.json")
+    loader = SampleInput(".imgtools/data/crawldb.json")
 
     for sample in samples:
         print(loader.load(sample))

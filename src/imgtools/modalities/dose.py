@@ -46,16 +46,6 @@ class Dose(sitk.Image):
 
         return cls(img_dose, df, metadata)
 
-    def resample_dose(self, ct_scan: sitk.Image) -> sitk.Image:
-        """
-        Resamples the RTDOSE information so that it can be overlayed with CT scan. The beginning and end slices of the
-        resampled RTDOSE scan might be empty due to the interpolation
-        """
-        resampled_dose = sitk.Resample(
-            self.img_dose, ct_scan
-        )  # , interpolator=sitk.sitkNearestNeighbor)
-        return resampled_dose
-
     def get_metadata(
         self,
     ) -> Dict[
