@@ -95,14 +95,23 @@ class SampleOutput(BaseOutput):
 
 if __name__ == "__main__":
     from rich import print  # noqa
+    from imgtools.dicom.crawl import CrawlerSettings, Crawler
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.io.loaders import SampleInput
 
-    interlacer = Interlacer(".imgtools/data/crawldb.csv")
+    crawler_settings = CrawlerSettings(
+        dicom_dir=Path("data"),
+        n_jobs=12,
+        force=True
+    )
+
+    crawler = Crawler.from_settings(crawler_settings)
+
+    interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
     samples = interlacer.query("CT,RTSTRUCT")
 
-    loader = SampleInput(".imgtools/data/crawldb.json")
+    loader = SampleInput(crawler.db_json)
 
     for sample_id, sample in enumerate(samples, start=1):
         print(sample)
