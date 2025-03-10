@@ -9,7 +9,7 @@ from joblib import Parallel, delayed  # type: ignore
 from pydicom import FileDataset
 from tqdm import tqdm
 
-from imgtools.dicom import find_dicoms, load_dicom
+from imgtools.dicom.dicom_find import find_dicoms 
 from imgtools.dicom.input import (
     RTDOSERefPlanSOP,
     RTDOSERefSeries,
@@ -27,6 +27,7 @@ from imgtools.dicom.input import (
     rtstruct_reference_uids,
     seg_reference_uids,
     sr_reference_uids,
+    load_dicom
 )
 from imgtools.logging import logger
 from imgtools.utils import timer
