@@ -82,7 +82,7 @@ class SampleLoader:
                         "instances"
                     ].values()
                 ]
-
+            
             images.append(read_dicom_auto(folder, series_uid, file_names))
 
         return images
@@ -200,14 +200,21 @@ class SampleLoader:
 if __name__ == "__main__":
     from rich import print  # noqa
     from imgtools.dicom.interlacer import Interlacer
+    from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
-    interlacer = Interlacer(".imgtools/data/crawldb.csv")
+    crawler_settings = CrawlerSettings(
+        dicom_dir=Path("data"),
+        n_jobs=12,
+        force=True
+    )
+
+    crawler = Crawler.from_settings(crawler_settings)
+
+    interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("MR,SEG")
+    samples = interlacer.query("CT,RTSTRUCT")
 
-    print(samples)
-
-    loader = SampleLoader(".imgtools/data/crawldb.json")
+    loader = SampleLoader(crawler.db_json)
 
     for sample in samples:
         print(loader.load(sample))
