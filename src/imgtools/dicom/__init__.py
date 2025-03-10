@@ -1,3 +1,4 @@
+from .crawl import Crawler
 from .dicom_find import find_dicoms
 from .dicom_metadata import MODALITY_TAGS, extract_dicom_tags
 from .dicom_metadata_old import all_modalities_metadata, get_modality_metadata
@@ -15,6 +16,9 @@ from .utils import lookup_tag, similar_tags, tag_exists
 from .crawl import Crawler, CrawlerSettings  # fmt isort:skip
 
 __all__ = [
+    # crawl
+    "Crawler",
+    # utils
     "find_dicoms",
     "lookup_tag",
     "similar_tags",
