@@ -229,6 +229,8 @@ def map_over_labels(
 
 
 class Segmentation(sitk.Image):
+    metadata: dict
+
     def __init__(
         self,
         segmentation: sitk.Image,
@@ -390,8 +392,13 @@ class Segmentation(sitk.Image):
 
         return res
 
-    def __repr__(self) -> str:
-        return f"<Segmentation with ROIs: {self.roi_indices!r}>"
+    def __repr__(self) -> str:  # type: ignore
+        # convert metadata and img_stats to string
+        # with angulated brackets
+        metadata = "\n\t".join(sorted([f"{k}={v}" for k, v in self.metadata.items()]))
+        return f"Segmentation with ROIs: {self.roi_indices!r}<\n\t{metadata}\n>"
+        # return f"<Segmentation with ROIs: {self.roi_indices!r}>"
+        
 
     def generate_sparse_mask(self, verbose: bool = False) -> SparseMask:
         """
