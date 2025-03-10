@@ -4,15 +4,9 @@ from .nifti_writer import (
     NiftiWriterIOError,
     NiftiWriterValidationError,
 )
-from .old_writers import (
-    BaseSubjectWriter,
-    BaseWriter,
-    HDF5Writer,
-    ImageFileWriter,
-    MetadataWriter,
-    NumpyWriter,
-    SegNrrdWriter,
-)
+from .hdf5_writer import HDF5Writer, HDF5WriterError
+
+from .imagemask_output import ImageMaskOutput  # fmt isort:skip
 
 __all__ = [
     "AbstractBaseWriter",
@@ -20,12 +14,6 @@ __all__ = [
     "NIFTIWriter",
     "NiftiWriterIOError",
     "NiftiWriterValidationError",
-    # Old writers
-    "BaseWriter",
-    "BaseSubjectWriter",
-    "ImageFileWriter",
-    "SegNrrdWriter",
-    "NumpyWriter",
     "HDF5Writer",
-    "MetadataWriter",
+    "HDF5WriterError",
 ]

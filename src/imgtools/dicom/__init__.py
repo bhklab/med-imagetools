@@ -10,7 +10,10 @@ from .input import (
     load_seg_dcm,
     rtstruct_reference_uids,
 )
+from .interlacer import GroupBy, Interlacer
 from .utils import lookup_tag, similar_tags, tag_exists
+
+from .crawl import Crawler, CrawlerSettings  # fmt isort:skip
 
 __all__ = [
     # crawl
@@ -32,4 +35,10 @@ __all__ = [
     "all_modalities_metadata",  # OLD
     "MODALITY_TAGS",
     "extract_dicom_tags",
+    # crawler
+    "CrawlerSettings",
+    "Crawler",
+    # interlacer
+    "Interlacer",
+    "GroupBy",
 ]
