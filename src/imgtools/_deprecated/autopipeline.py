@@ -14,7 +14,7 @@ from imgtools.ops import StructureSetToSegmentation, ImageAutoInput, ImageAutoOu
 from imgtools.pipeline import Pipeline
 from imgtools._deprecated.nnunet import generate_dataset_json, markdown_report_images
 from imgtools._deprecated.args import parser
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 from joblib import Parallel, delayed
 from imgtools._deprecated import Segmentation

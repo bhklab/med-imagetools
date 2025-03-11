@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from imgtools.io.loaders.utils import auto_dicom_result, read_dicom_auto
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
 from imgtools.utils import timer
 

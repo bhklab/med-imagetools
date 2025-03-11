@@ -7,7 +7,7 @@ from typing import Iterator
 
 import pandas as pd
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.utils import OptionalImportError, optional_import, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")

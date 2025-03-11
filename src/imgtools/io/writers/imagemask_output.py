@@ -118,7 +118,7 @@ class ImageMaskOutput(BaseOutput[ImageMask]):
 #         read_dicom_auto,
 #         read_dicom_rtstruct,
 #     )
-#     from imgtools.logging import tqdm_logging_redirect
+#     from imgtools.loggers import tqdm_logging_redirect
 #     from imgtools.modalities.interlacer import Interlacer
 
 #     shutil.rmtree("testdata/niftiwriter", ignore_errors=True)

@@ -16,7 +16,7 @@ from imgtools.io.loaders import (
     read_image,
     read_dicom_auto,
 )
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools._deprecated.datagraph import DataGraph
 
 from ..io.base_classes import BaseInput

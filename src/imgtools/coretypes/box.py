@@ -6,7 +6,7 @@ from enum import Enum
 
 import SimpleITK as sitk
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 from .spatial_types import Coordinate3D, Size3D
 

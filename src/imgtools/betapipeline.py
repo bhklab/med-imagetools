@@ -5,7 +5,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from joblib import Parallel, delayed  # type: ignore
+# from joblib import Parallel, delayed  # type: ignore
 
 from imgtools.coretypes import Spacing3D
 from imgtools.dicom import Crawler, Interlacer
@@ -66,11 +66,13 @@ class BetaPipeline():
         # Load images
         images = self.input.load(sample)
 
+        print(images)
+
         # Apply transforms to all images
-        transformed_images = self.transform_all(self.transforms, images)
+        # images = self.transformer(images)
 
         # Save transformed images
-        metadata = self.output.save(transformed_images)
+        metadata = self.output(images)
 
         # Return metadata from each sample
         return metadata
@@ -89,6 +91,7 @@ class BetaPipeline():
 
         for sample in self.samples:
             self.process_one_subject(sample)
+            break
 
     
 def main():
@@ -97,7 +100,7 @@ def main():
         output_directory=Path("./procdata"),
         query="MR,RTSTRUCT",
         spacing=(1., 1., 0.),
-        update_crawl=True,
+        # update_crawl=True,
     )
     autopipe.run()
 

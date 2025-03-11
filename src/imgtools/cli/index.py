@@ -4,7 +4,7 @@ import pathlib
 import click
 
 from imgtools.dicom.crawl import Crawler
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 cpu_count: int | None = os.cpu_count()
 DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
