@@ -147,7 +147,7 @@ class SampleOutput(BaseOutput):
     root_directory: Path
     context_keys: list[str] | None = field(default=None)
     filename_format: str = field(
-        default="{CaseID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
+        default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
     )
     create_dirs: bool = field(default=True)
     existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.SKIP)
@@ -182,7 +182,7 @@ class SampleOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
-            sample_id: str,
+            sample_idx: int,
             **kwargs: Any) -> None:
         """Write output data.
 
@@ -190,12 +190,12 @@ class SampleOutput(BaseOutput):
         ----------
         sample : list[Scan | Dose | Segmentation | PET]
             The sample data to be written.
-        sample_id : str
-            The sample id to be used in the output filename.
+        sample_idx : int
+            The sample idx to be used in the SampleID field.
         **kwargs : Any
             Keyword arguments for the writing process.
         """
-        case_id = f'{sample[0].metadata["PatientID"]}_{sample_id:03}'
+        SampleID = f'{sample[0].metadata["PatientID"]}_{sample_idx:03}'
         for item in sample:
             if isinstance(item, Segmentation):
                 for name, label in item.roi_indices.items():
@@ -203,7 +203,7 @@ class SampleOutput(BaseOutput):
                         self._writer.save(
                             roi_seg,
                             ImageID=f"{sanitize_file_name(name)}",
-                            CaseID=case_id,
+                            SampleID=SampleID,
                             **item.metadata,
                             **kwargs,
                         )      
@@ -212,7 +212,7 @@ class SampleOutput(BaseOutput):
                 self._writer.save(
                     item,
                     ImageID=item.metadata["Modality"],
-                    CaseID=case_id,
+                    SampleID=SampleID,
                     **item.metadata,
                     **kwargs,
                 )
@@ -242,10 +242,10 @@ if __name__ == "__main__":
     )
     output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti")
 
-    for sample_id, sample in enumerate(samples, start=1):
+    for sample_idx, sample in enumerate(samples, start=1):
         output(
             input(sample),
-            sample_id=sample_id
+            sample_idx=sample_idx
         )
 
 
