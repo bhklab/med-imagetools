@@ -33,6 +33,10 @@ class SampleInput:
         with Path(crawl_path).open("r") as f:
             self.crawl_info = json.load(f)
 
+    def __call__(self, sample: List[Dict[str, str]]):
+        """Load medical imaging data from a given sample."""
+        return self._load(sample)
+
     def _reader(
         self, series_uid: str, load_subseries: bool = False
     ) -> List[auto_dicom_result]:
@@ -108,7 +112,7 @@ class SampleInput:
         return grouped_images
 
     @timer("Loading sample")
-    def load(
+    def _load(
         self, sample: List[Dict[str, str]]
     ) -> List[Scan | PET | Dose | Segmentation]:
         """
@@ -217,6 +221,6 @@ if __name__ == "__main__":
     loader = SampleInput(crawler.db_json)
 
     for sample in samples:
-        print(loader.load(sample))
+        print(loader(sample))
 
 

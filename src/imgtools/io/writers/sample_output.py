@@ -29,7 +29,7 @@ class SampleOutput(BaseOutput):
     sanitize_filenames : bool
         Whether to sanitize filenames.
     """
-    # context_keys: list[str]
+    context_keys: list[str]
     root_directory: Path
     filename_format: str = field(
         default="{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
@@ -59,7 +59,7 @@ class SampleOutput(BaseOutput):
             sanitize_filenames=self.sanitize_filenames,
         )
         context = {k: "" for k in self._writer.pattern_resolver.keys}
-        # context.update({k: "" for k in self.context_keys})
+        context.update({k: "" for k in self.context_keys})
         self._writer.set_context(**context)
         super().__init__(self._writer)
 
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     for sample_id, sample in enumerate(samples, start=1):
         print(sample)
-        loaded_samples = loader.load(sample)
+        loaded_samples = loader(sample)
 
         if sample_id == 1:
             keys = set().union(*[set(item.metadata.keys()) for item in loaded_samples])
