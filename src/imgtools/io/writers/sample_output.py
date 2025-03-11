@@ -124,10 +124,9 @@ CONTEXT_KEYS = [
 
 @dataclass
 class SampleOutput(BaseOutput):
-    """Class for writing ImageMask data to NIFTI files.
-    This class handles writing both image scans and their associated masks to NIFTI files.
-    The writer initializes with context keys containing all possible metadata keys
-    that could be included in the output's index file.
+    """
+    Class for writing Sample data.
+
     Attributes
     ----------
     context_keys : list[str]
@@ -142,6 +141,8 @@ class SampleOutput(BaseOutput):
         How to handle existing files.
     sanitize_filenames : bool
         Whether to sanitize filenames.
+    writer_type : str
+        Type of writer to use.
     """
     root_directory: Path
     context_keys: list[str] | None = field(default=None)
@@ -164,7 +165,6 @@ class SampleOutput(BaseOutput):
                 raise ValueError(f"Unsupported writer type: {self.writer_type}")
     
     def __post_init__(self) -> None:
-        """Initialize the NIFTIWriter with the provided parameters and set up the context."""
         self.context_keys = self.context_keys or CONTEXT_KEYS
         print(self.context_keys)
         self._writer = self.writer(
@@ -183,13 +183,15 @@ class SampleOutput(BaseOutput):
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
             sample_id: str,
-            **kwargs: Any) -> None:  # noqa: ANN401
+            **kwargs: Any) -> None:
         """Write output data.
 
         Parameters
         ----------
-        data : ImageMaskData
-            The data to be written.
+        sample : list[Scan | Dose | Segmentation | PET]
+            The sample data to be written.
+        sample_id : str
+            The sample id to be used in the output filename.
         **kwargs : Any
             Keyword arguments for the writing process.
         """
