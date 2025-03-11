@@ -23,6 +23,9 @@ class Dose(sitk.Image):
     dcm: Dataset
     metadata: Dict[str, str] | None = None
 
+    def __post_init__(self):
+        super().__init__(self.img_dose)
+
     @classmethod
     def from_dicom(cls, path: str) -> Dose:
         """

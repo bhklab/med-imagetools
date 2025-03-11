@@ -3,10 +3,124 @@ from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
-from imgtools.io.types import ImageMask
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter, HDF5Writer
 from imgtools.utils import sanitize_file_name
 from imgtools.modalities import Scan, Dose, Segmentation, PET 
+
+CONTEXT_KEYS = [
+    'ContrastBolusStopTime', 
+    'PixelSpacing', 
+    'CTDIvol', 
+    'AcquisitionTime', 
+    'NumberOfTemporalPositions', 
+    'ExtractedNumberOfROIs', 
+    'SliceThickness', 
+    'ImagePositionPatient', 
+    'PatientPosition', 
+    'RescaleSlope', 
+    'PatientID', 
+    'ConvolutionKernel', 
+    'DiffusionGradientDirectionSequence', 
+    'ReconstructionMethod', 
+    'AcquisitionDate', 
+    'BodyPartExamined', 
+    'DiffusionBMatrixSequence', 
+    'PixelBandwidth', 
+    'StationName', 
+    'TotalCollimationWidth', 
+    'ParallelAcquisitionTechnique', 
+    'TableMotion', 
+    'Exposure', 
+    'ContrastBolusIngredientConcentration', 
+    'DataCollectionDiameter', 
+    'InstitutionName', 
+    'TemporalResolution', 
+    'SingleCollimationWidth', 
+    'FrameReferenceTime', 
+    'ProtocolName', 
+    'ExposureTime', 
+    'AcquisitionContrast', 
+    'Modality', 
+    'ReconstructionAlgorithm', 
+    'RescaleIntercept', 
+    'TransmitCoilName', 
+    'ReconstructionFieldOfView', 
+    'NumberOfAverages', 
+    'NumberOfSlices', 
+    'ScanOptions', 
+    'EchoTrainLength', 
+    'ParallelReductionFactorOutOfPlane', 
+    'ManufacturerModelName', 
+    'DetectorType', 
+    'RepetitionTime', 
+    'TableSpeed', 
+    'SeriesInstanceUID', 
+    'ContrastBolusStartTime', 
+    'AcquisitionType', 
+    'RescaleType', 
+    'SpiralPitchFactor', 
+    'SequenceName', 
+    'MagneticFieldStrength', 
+    'ImagingFrequency', 
+    'SequenceVariant', 
+    'ContrastBolusAgent', 
+    'DataCollectionCenterPatient', 
+    'DetectorConfiguration', 
+    'KVP', 
+    'EchoTime', 
+    'PercentSampling', 
+    'Manufacturer', 
+    'ContrastFlowRate', 
+    'DeviceSerialNumber', 
+    'ReferencedSeriesInstanceUID', 
+    'StudyInstanceUID', 
+    'ScanProgressionDirection', 
+    'ContrastFlowDuration', 
+    'ImageOrientationPatient', 
+    'ContrastBolusVolume', 
+    'ReconstructionDiameter', 
+    'ContrastBolusIngredient', 
+    'ParallelReductionFactorInPlane', 
+    'SpacingBetweenSlices', 
+    'AcquisitionDateTime', 
+    'SoftwareVersions', 
+    'XRayTubeCurrent', 
+    'OriginalNumberOfROIs', 
+    'GantryDetectorTilt', 
+    'ScanType', 
+    'InversionTime', 
+    'PercentPhaseFieldOfView', 
+    'ExposureModulationType', 
+    'ScanningSequence', 
+    'ReconstructionTargetCenterPatient', 
+    'FlipAngle',
+    'RadiopharmaceuticalCodeSequence', 
+    'Radiopharmaceutical', 
+    'DecayCorrected', 
+    'AcquisitionTerminationCondition', 
+    'DecayCorrection', 
+    'AcquisitionStartCondition', 
+    'RadiopharmaceuticalStopDateTime', 
+    'EnergyWindowUpperLimit', 
+    'ActualFrameDuration', 
+    'RadiopharmaceuticalStartDateTime', 
+    'EnergyWindowLowerLimit', 
+    'RadiopharmaceuticalRoute', 
+    'SUVType', 
+    'RadiopharmaceuticalVolume', 
+    'RadionuclideHalfLife', 
+    'RadionuclidePositronFraction', 
+    'ScatterCorrectionMethod', 
+    'RadionuclideTotalDose', 
+    'DeadTimeCorrectionFlag', 
+    'RadiopharmaceuticalStartTime', 
+    'DecayFactor', 
+    'TimeSliceVector', 
+    'FrameTime', 
+    'RadiopharmaceuticalSpecificActivity', 
+    'CoincidenceWindowWidth', 
+    'AttenuationCorrectionMethod'
+]
 
 @dataclass
 class SampleOutput(BaseOutput):
@@ -29,10 +143,10 @@ class SampleOutput(BaseOutput):
     sanitize_filenames : bool
         Whether to sanitize filenames.
     """
-    context_keys: list[str]
     root_directory: Path
+    context_keys: list[str] | None = field(default=None)
     filename_format: str = field(
-        default="{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
+        default="{CaseID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
     )
     create_dirs: bool = field(default=True)
     existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.SKIP)
@@ -51,6 +165,8 @@ class SampleOutput(BaseOutput):
     
     def __post_init__(self) -> None:
         """Initialize the NIFTIWriter with the provided parameters and set up the context."""
+        self.context_keys = self.context_keys or CONTEXT_KEYS
+        print(self.context_keys)
         self._writer = self.writer(
             root_directory=self.root_directory,
             filename_format=self.filename_format,
@@ -63,8 +179,11 @@ class SampleOutput(BaseOutput):
         self._writer.set_context(**context)
         super().__init__(self._writer)
 
-    def __call__(self, data: list[Scan | Dose | Segmentation | PET], 
-                 **kwargs: Any) -> None:  # noqa: ANN401
+    def __call__(
+            self, 
+            sample: list[Scan | Dose | Segmentation | PET], 
+            sample_id: str,
+            **kwargs: Any) -> None:  # noqa: ANN401
         """Write output data.
 
         Parameters
@@ -74,13 +193,15 @@ class SampleOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
-        for item in data:
+        case_id = f'{sample[0].metadata["PatientID"]}_{sample_id:03}'
+        for item in sample:
             if isinstance(item, Segmentation):
-                for roi in item.roi_indices:
-                        roi_seg = item.get_label(name=roi)
+                for name, label in item.roi_indices.items():
+                        roi_seg = item[label]
                         self._writer.save(
                             roi_seg,
-                            ImageID=f"{sanitize_file_name(roi)}",
+                            ImageID=f"{sanitize_file_name(name)}",
+                            CaseID=case_id,
                             **item.metadata,
                             **kwargs,
                         )      
@@ -88,7 +209,8 @@ class SampleOutput(BaseOutput):
             else:    
                 self._writer.save(
                     item,
-                    ImageID=item.metadata['Modality'],
+                    ImageID=item.metadata["Modality"],
+                    CaseID=case_id,
                     **item.metadata,
                     **kwargs,
                 )
@@ -98,32 +220,30 @@ if __name__ == "__main__":
     from imgtools.dicom.crawl import CrawlerSettings, Crawler
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.io.loaders import SampleInput
+    from imgtools.transforms import Transformer, Resample
 
     crawler_settings = CrawlerSettings(
         dicom_dir=Path("data"),
         n_jobs=12,
-        force=True
+        force=False
     )
 
     crawler = Crawler.from_settings(crawler_settings)
 
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
+    samples = interlacer.query("CT,SEG")
 
-    loader = SampleInput(crawler.db_json)
+    input = SampleInput(crawler.db_json)
+    transform = Transformer(
+        [Resample(1)]
+    )
+    output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti")
 
     for sample_id, sample in enumerate(samples, start=1):
-        print(sample)
-        loaded_samples = loader(sample)
-
-        if sample_id == 1:
-            keys = set().union(*[set(item.metadata.keys()) for item in loaded_samples])
-            print(keys)
-            writer = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=keys)
-
-        case_id = f"Case-{sample_id}"
-        writer(loaded_samples)
-
+        output(
+            input(sample),
+            sample_id=sample_id
+        )
 
 

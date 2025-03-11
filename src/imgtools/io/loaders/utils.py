@@ -156,12 +156,10 @@ def read_dicom_auto(
         match modality:
             case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
-                obj.metadata.update(extract_dicom_tags(meta))
             case "PT":
                 obj = read_dicom_pet(path, series)
             case "RTSTRUCT":
                 obj = read_dicom_rtstruct(dcm)
-                obj.metadata.update(extract_dicom_tags(meta))
             case "RTDOSE":
                 obj = read_dicom_rtdose(dcm)
             case "SEG":
@@ -173,4 +171,5 @@ def read_dicom_auto(
                 raise NotImplementedError(errmsg)
 
         # obj.metadata.update(get_modality_metadata(meta, modality))
+        obj.metadata.update(extract_dicom_tags(meta))
         return obj
