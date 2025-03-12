@@ -84,7 +84,7 @@ class SampleOutput(BaseOutput):
 
             if isinstance(image, Segmentation):
                 for name, label in image.roi_indices.items():
-                        roi_seg = image.get_label(label) #image[label]
+                        roi_seg = image.get_label(label) 
                         self._writer.save(
                             roi_seg,
                             ImageID=f"{sanitize_file_name(name)}",
