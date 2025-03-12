@@ -11,6 +11,7 @@ from imgtools.coretypes import Spacing3D
 from imgtools.dicom import Crawler, Interlacer
 from imgtools.transforms import Resample, Transformer, WindowIntensity
 from imgtools.io import SampleInput, SampleOutput
+from imgtools.dicom.dicom_metadata import MODALITY_TAGS
 # from imgtools import Pipeline
 
 @dataclass
@@ -58,28 +59,33 @@ class BetaPipeline():
         if self.window is not None and self.level is not None:
             transforms.append(WindowIntensity(self.window, self.level))
 
+        context_keys = list(
+        set.union(*[MODALITY_TAGS["ALL"], 
+                    *[MODALITY_TAGS.get(modality, {}) for modality in self.query.split(",")]]
+                )
+        )
+
         self.input = SampleInput(self.crawl.db_json) # uses JSON of crawl
-        self.output = SampleOutput(self.output_directory)
+        self.output = SampleOutput(context_keys=context_keys, root_directory=self.output_directory)
         self.transformer = Transformer(transforms)
 
-    def process_one_subject(self, sample):
+    def process_one_subject(self, sample, idx):
         # Load images
-        images = self.input.load(sample)
+        images = self.input(sample)
 
         print(images)
 
         # Apply transforms to all images
-        # images = self.transformer(images)
+        images = self.transformer(images)
 
         # Save transformed images
-        metadata = self.output(images)
+        metadata = self.output(images, SampleID=idx)
 
         # Return metadata from each sample
         return metadata
 
     def run(self):
         # Query Interlacer for samples of desired modalities
-        # List of samples of images [[{seriesuid: 'value', modality: 'value'}, ...]]
         self.samples = self.lacer.query(self.query)
 
         print(self.samples)
@@ -89,9 +95,9 @@ class BetaPipeline():
         #     delayed(self.process_one_subject)(sample) for sample in self.samples
         # )
 
-        for sample in self.samples:
-            self.process_one_subject(sample)
-            break
+        for n, sample in enumerate(self.samples, start=1):
+            self.process_one_subject(sample, n)
+            # break
 
     
 def main():

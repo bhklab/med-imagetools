@@ -28,31 +28,37 @@ class Transformer:
             errmsg = "All transforms must be instances of `BaseTransform`"
             errors.append(errmsg)
             raise ValueError("\n".join(errors))
+    
+    def _apply_transforms(self, image: Scan | Dose | PET | Segmentation, 
+            ref: Scan | Dose | PET | Segmentation | None = None) -> Scan | Dose | PET | Segmentation:
+        """Apply transforms to an image."""
+        metadata = image.metadata
+        new_image: Scan | Dose | PET | Segmentation = image
+        for n, transform in enumerate(self.transforms, start=1):
+            try:
+                if isinstance(transform, SpatialTransform):
+                    new_image = transform(new_image, ref=ref) # this is still problematic if the SpatialTransform doesn't have `ref` kwarg
+                # doesn't apply intensity transform to non-reference images
+                elif isinstance(transform, IntensityTransform) and ref is None:
+                    new_image = transform(new_image)
+                else:
+                    raise ValueError(f"Invalid transform type: {type(transform)}")
+            except Exception as e:
+                msg = f"Error applying transform {n}: {transform}."
+                logger.exception(msg)
+                raise ValueError(msg) from e
+
+        return type(image)(new_image, metadata)
 
     def __call__(self, images: List[Scan | Segmentation | Dose | PET]) -> List[Scan | Segmentation | Dose | PET]:  
         """Apply transforms to images."""
-        new_images: list[Scan | Segmentation | Dose | PET] = []
-
         # handle reference image first
-        ref_image: Scan = deepcopy(images[0])
-        for n, transform in enumerate(self.transforms, start=1):
-            if isinstance(transform, (SpatialTransform, IntensityTransform)):
-                try:
-                    ref_image = transform(ref_image)
-                except Exception as e:
-                    msg = f"Error applying transform {n}: {transform}."
-                    logger.exception(msg)
-                    raise ValueError(msg) from e
-            new_images.append(ref_image)
-
+        new_images = [self._apply_transforms(images[0])]
+        
         # apply all other transforms
         for image in images[1:]:
-            new_image: Scan | Segmentation | Dose | PET = deepcopy(image)
-            for transform in self.transforms:
-                if isinstance(transform, SpatialTransform):
-                    new_image = transform(new_image, ref=ref_image)
-
-            new_images.append(new_image)
+            new_image: Scan | Segmentation | Dose | PET = image
+            new_images.append(self._apply_transforms(new_image, ref=images[0]))
 
         return new_images
 
