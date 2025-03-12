@@ -5,7 +5,7 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# from joblib import Parallel, delayed  # type: ignore
+from joblib import Parallel, delayed  # type: ignore
 
 from imgtools.coretypes import Spacing3D
 from imgtools.dicom import Crawler, Interlacer
@@ -35,9 +35,7 @@ class BetaPipeline():
     query: str = "CT,RTSTRUCT"
 
     # Transformer parameters
-    spacing: Spacing3D = field(
-        default_factory=lambda: Spacing3D(1.0, 1.0, 0.0)
-    )
+    spacing: tuple[float] = (1.0, 1.0, 0.) #field(default_factory=lambda: Spacing3D(1.0, 1.0, 0.0)) 
     window: float | None = None
     level: float | None = None
 
@@ -73,13 +71,11 @@ class BetaPipeline():
         # Load images
         images = self.input(sample)
 
-        print(images)
-
         # Apply transforms to all images
         images = self.transformer(images)
 
         # Save transformed images
-        metadata = self.output(images, SampleID=idx)
+        metadata = self.output(images, SampleID=f"{self.input_directory.name}_{idx:03d}") 
 
         # Return metadata from each sample
         return metadata
@@ -88,24 +84,18 @@ class BetaPipeline():
         # Query Interlacer for samples of desired modalities
         self.samples = self.lacer.query(self.query)
 
-        print(self.samples)
-
         # Process the samples in parallel
-        # self.metadata = Parallel(n_jobs=self.n_jobs)(
-        #     delayed(self.process_one_subject)(sample) for sample in self.samples
-        # )
-
-        for n, sample in enumerate(self.samples, start=1):
-            self.process_one_subject(sample, n)
-            # break
+        self.metadata = Parallel(n_jobs=self.n_jobs)(
+            delayed(self.process_one_subject)(sample, idx) for idx, sample in enumerate(self.samples, start=1)
+        )
 
     
 def main():
     autopipe = BetaPipeline(
         input_directory=Path("./data"),
-        output_directory=Path("./procdata"),
-        query="MR,RTSTRUCT",
-        spacing=(1., 1., 0.),
+        output_directory=Path("./procdata_autobots"),
+        query="CT,RTSTRUCT",
+        spacing=(0.5, 0.5, 0.5),
         # update_crawl=True,
     )
     autopipe.run()
