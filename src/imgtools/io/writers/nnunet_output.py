@@ -4,7 +4,6 @@ from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter
-from imgtools.io.writers.sample_output import CONTEXT_KEYS
 from imgtools.modalities import Scan, Dose, Segmentation, PET 
 
 @dataclass
@@ -30,7 +29,7 @@ class nnUNetOutput(BaseOutput):
         Type of writer to use.
     """
     root_directory: Path
-    context_keys: list[str] | None = field(default=None)
+    context_keys: list[str] | None = field(default_factory=list)
     filename_format: str = field(
         default="{DirType}{SplitType}/{Dataset}_{SampleID}.nii.gz"
     )
@@ -49,7 +48,6 @@ class nnUNetOutput(BaseOutput):
     
     def __post_init__(self) -> None:
         """Initialize the NIFTIWriter with the provided parameters and set up the context."""
-        self.context_keys = self.context_keys or CONTEXT_KEYS
         self._writer = self.writer(
             root_directory=self.root_directory,
             filename_format=self.filename_format,
@@ -72,6 +70,7 @@ class nnUNetOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
+            SampleID: str,
             **kwargs: Any) -> None:  # noqa: ANN401
         """Write output data.
 
@@ -82,22 +81,26 @@ class nnUNetOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
-        for item in sample:
-            if isinstance(item, Segmentation):
-                roi_seg = item.generate_sparse_mask()
+        for image in sample:
+            # Only include keys that are in the writer context
+            image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
+
+            if isinstance(image, Segmentation):
+                roi_seg = image.generate_sparse_mask()
                 self._writer.save(
                     roi_seg,
                     DirType="labels",
-                    **item.metadata,
+                    SampleID=SampleID,
+                    **image_metadata,
                     **kwargs,
                 )  
             
             else:    
-                kwargs["SampleID"] += f"_{self.modality_map[item.metadata['Modality']]}"
                 self._writer.save(
-                    item,
+                    image,
                     DirType="images",
-                    **item.metadata,
+                    SampleID=f"{SampleID}_{self.modality_map[image.metadata['Modality']]}",
+                    **image_metadata,
                     **kwargs,
                 )
 
@@ -108,9 +111,12 @@ if __name__ == "__main__":
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.io.loaders import SampleInput
     from imgtools.transforms import Transformer, Resample
+    from imgtools.dicom.dicom_metadata import MODALITY_TAGS
+
+    dicom_dir = Path("data")
 
     crawler_settings = CrawlerSettings(
-        dicom_dir=Path("data"),
+        dicom_dir=dicom_dir,
         n_jobs=12,
         force=False
     )
@@ -119,19 +125,26 @@ if __name__ == "__main__":
 
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
+
+    query = "MR,RTSTRUCT"
+    samples = interlacer.query(query)
 
     input = SampleInput(crawler.db_json)
     transform = Transformer(
         [Resample(1)]
     )
-    output = nnUNetOutput(root_directory=".imgtools/data/output", writer_type="nifti")
+    context_keys = list(
+        set.union(*[MODALITY_TAGS["ALL"], 
+                    *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+                )
+    )
+    output = nnUNetOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=context_keys)
 
     for sample_id, sample in enumerate(samples, start=1):
         output(
             input(sample),
             SampleID=f"{sample_id:03}",
             SplitType="Tr",
-            Dataset="all_test_data",
+            Dataset=dicom_dir.name,
         )
 
