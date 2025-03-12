@@ -31,7 +31,7 @@ class SampleOutput(BaseOutput):
         Type of writer to use.
     """
     root_directory: Path
-    context_keys: list[str] | None = field(default_factory=list)
+    context_keys: list[str] = field(default_factory=list)
     filename_format: str = field(
         default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
     )
