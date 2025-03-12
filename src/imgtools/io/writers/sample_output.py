@@ -7,120 +7,6 @@ from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWrite
 from imgtools.utils import sanitize_file_name
 from imgtools.modalities import Scan, Dose, Segmentation, PET 
 
-CONTEXT_KEYS = [
-    'ContrastBolusStopTime', 
-    'PixelSpacing', 
-    'CTDIvol', 
-    'AcquisitionTime', 
-    'NumberOfTemporalPositions', 
-    'ExtractedNumberOfROIs', 
-    'SliceThickness', 
-    'ImagePositionPatient', 
-    'PatientPosition', 
-    'RescaleSlope', 
-    'PatientID', 
-    'ConvolutionKernel', 
-    'DiffusionGradientDirectionSequence', 
-    'ReconstructionMethod', 
-    'AcquisitionDate', 
-    'BodyPartExamined', 
-    'DiffusionBMatrixSequence', 
-    'PixelBandwidth', 
-    'StationName', 
-    'TotalCollimationWidth', 
-    'ParallelAcquisitionTechnique', 
-    'TableMotion', 
-    'Exposure', 
-    'ContrastBolusIngredientConcentration', 
-    'DataCollectionDiameter', 
-    'InstitutionName', 
-    'TemporalResolution', 
-    'SingleCollimationWidth', 
-    'FrameReferenceTime', 
-    'ProtocolName', 
-    'ExposureTime', 
-    'AcquisitionContrast', 
-    'Modality', 
-    'ReconstructionAlgorithm', 
-    'RescaleIntercept', 
-    'TransmitCoilName', 
-    'ReconstructionFieldOfView', 
-    'NumberOfAverages', 
-    'NumberOfSlices', 
-    'ScanOptions', 
-    'EchoTrainLength', 
-    'ParallelReductionFactorOutOfPlane', 
-    'ManufacturerModelName', 
-    'DetectorType', 
-    'RepetitionTime', 
-    'TableSpeed', 
-    'SeriesInstanceUID', 
-    'ContrastBolusStartTime', 
-    'AcquisitionType', 
-    'RescaleType', 
-    'SpiralPitchFactor', 
-    'SequenceName', 
-    'MagneticFieldStrength', 
-    'ImagingFrequency', 
-    'SequenceVariant', 
-    'ContrastBolusAgent', 
-    'DataCollectionCenterPatient', 
-    'DetectorConfiguration', 
-    'KVP', 
-    'EchoTime', 
-    'PercentSampling', 
-    'Manufacturer', 
-    'ContrastFlowRate', 
-    'DeviceSerialNumber', 
-    'ReferencedSeriesInstanceUID', 
-    'StudyInstanceUID', 
-    'ScanProgressionDirection', 
-    'ContrastFlowDuration', 
-    'ImageOrientationPatient', 
-    'ContrastBolusVolume', 
-    'ReconstructionDiameter', 
-    'ContrastBolusIngredient', 
-    'ParallelReductionFactorInPlane', 
-    'SpacingBetweenSlices', 
-    'AcquisitionDateTime', 
-    'SoftwareVersions', 
-    'XRayTubeCurrent', 
-    'OriginalNumberOfROIs', 
-    'GantryDetectorTilt', 
-    'ScanType', 
-    'InversionTime', 
-    'PercentPhaseFieldOfView', 
-    'ExposureModulationType', 
-    'ScanningSequence', 
-    'ReconstructionTargetCenterPatient', 
-    'FlipAngle',
-    'RadiopharmaceuticalCodeSequence', 
-    'Radiopharmaceutical', 
-    'DecayCorrected', 
-    'AcquisitionTerminationCondition', 
-    'DecayCorrection', 
-    'AcquisitionStartCondition', 
-    'RadiopharmaceuticalStopDateTime', 
-    'EnergyWindowUpperLimit', 
-    'ActualFrameDuration', 
-    'RadiopharmaceuticalStartDateTime', 
-    'EnergyWindowLowerLimit', 
-    'RadiopharmaceuticalRoute', 
-    'SUVType', 
-    'RadiopharmaceuticalVolume', 
-    'RadionuclideHalfLife', 
-    'RadionuclidePositronFraction', 
-    'ScatterCorrectionMethod', 
-    'RadionuclideTotalDose', 
-    'DeadTimeCorrectionFlag', 
-    'RadiopharmaceuticalStartTime', 
-    'DecayFactor', 
-    'TimeSliceVector', 
-    'FrameTime', 
-    'RadiopharmaceuticalSpecificActivity', 
-    'CoincidenceWindowWidth', 
-    'AttenuationCorrectionMethod'
-]
 
 @dataclass
 class SampleOutput(BaseOutput):
@@ -145,7 +31,7 @@ class SampleOutput(BaseOutput):
         Type of writer to use.
     """
     root_directory: Path
-    context_keys: list[str] | None = field(default=None)
+    context_keys: list[str] | None = field(default_factory=list)
     filename_format: str = field(
         default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
     )
@@ -165,8 +51,6 @@ class SampleOutput(BaseOutput):
                 raise ValueError(f"Unsupported writer type: {self.writer_type}")
     
     def __post_init__(self) -> None:
-        self.context_keys = self.context_keys or CONTEXT_KEYS
-        print(self.context_keys)
         self._writer = self.writer(
             root_directory=self.root_directory,
             filename_format=self.filename_format,
@@ -182,7 +66,6 @@ class SampleOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
-            sample_idx: int,
             **kwargs: Any) -> None:
         """Write output data.
 
@@ -195,25 +78,25 @@ class SampleOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
-        SampleID = f'{sample[0].metadata["PatientID"]}_{sample_idx:03}'
-        for item in sample:
-            if isinstance(item, Segmentation):
-                for name, label in item.roi_indices.items():
-                        roi_seg = item[label]
+        for image in sample:
+            # Only include keys that are in the writer context
+            image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
+
+            if isinstance(image, Segmentation):
+                for name, label in image.roi_indices.items():
+                        roi_seg = image[label]
                         self._writer.save(
                             roi_seg,
                             ImageID=f"{sanitize_file_name(name)}",
-                            SampleID=SampleID,
-                            **item.metadata,
+                            **image_metadata,
                             **kwargs,
                         )      
             
             else:    
                 self._writer.save(
-                    item,
-                    ImageID=item.metadata["Modality"],
-                    SampleID=SampleID,
-                    **item.metadata,
+                    image,
+                    ImageID=image.metadata["Modality"],
+                    **image_metadata,
                     **kwargs,
                 )
 
@@ -223,9 +106,12 @@ if __name__ == "__main__":
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.io.loaders import SampleInput
     from imgtools.transforms import Transformer, Resample
+    from imgtools.dicom.dicom_metadata import MODALITY_TAGS
+
+    dicom_dir = Path("data")
 
     crawler_settings = CrawlerSettings(
-        dicom_dir=Path("data"),
+        dicom_dir=dicom_dir,
         n_jobs=12,
         force=False
     )
@@ -234,18 +120,25 @@ if __name__ == "__main__":
 
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,SEG")
+
+    query = "MR,RTSTRUCT,RTDOSE"
+    samples = interlacer.query(query)
 
     input = SampleInput(crawler.db_json)
     transform = Transformer(
         [Resample(1)]
     )
-    output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti")
+    context_keys = list(
+        set.union(*[MODALITY_TAGS["ALL"], 
+                    *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+                )
+    )
+    output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=context_keys)
 
     for sample_idx, sample in enumerate(samples, start=1):
         output(
             input(sample),
-            sample_idx=sample_idx
+            SampleID=f"{dicom_dir.name}_{sample_idx:03d}",
         )
 
 
