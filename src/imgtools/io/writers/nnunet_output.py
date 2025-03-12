@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
-from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter, HDF5Writer
+from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter
 from imgtools.io.writers.sample_output import CONTEXT_KEYS
 from imgtools.modalities import Scan, Dose, Segmentation, PET 
 
