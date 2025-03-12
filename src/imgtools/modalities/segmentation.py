@@ -400,7 +400,7 @@ class Segmentation(sitk.Image):
         # return f"<Segmentation with ROIs: {self.roi_indices!r}>"
         
 
-    def generate_sparse_mask(self, verbose: bool = False) -> SparseMask:
+    def generate_sparse_mask(self, verbose: bool = False) -> Segmentation:
         """
         Generate a sparse mask from the contours, taking the argmax of all overlaps
 
@@ -415,8 +415,9 @@ class Segmentation(sitk.Image):
             The sparse mask object.
         """
         mask_arr = np.transpose(sitk.GetArrayFromImage(self))
-        for name in self.roi_indices:
-            self.roi_indices[name] = self.existing_roi_indices[name]
+        if self.existing_roi_indices:
+            for name in self.roi_indices:
+                self.roi_indices[name] = self.existing_roi_indices[name]
 
         sparsemask_arr = np.zeros(mask_arr.shape[1:])
 
@@ -443,7 +444,7 @@ class Segmentation(sitk.Image):
         else:
             sparsemask_arr = mask_arr
 
-        sparsemask = SparseMask(sparsemask_arr, self.roi_indices)
+        sparsemask = Segmentation(sitk.GetImageFromArray(sparsemask_arr), self.metadata, self.roi_indices)
 
         if verbose and len(voxels_with_overlap) != 0:
             msg = (
