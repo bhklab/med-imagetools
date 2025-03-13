@@ -5,10 +5,12 @@ from typing import Optional, Union
 
 import SimpleITK as sitk
 from pydicom import dcmread
+import highdicom as hd
+import numpy as np
 
 from imgtools.dicom.dicom_metadata import extract_dicom_tags
 from imgtools.dicom.dicom_metadata_old import get_modality_metadata
-from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet, SEG
 
 
 def read_image(path: str) -> sitk.Image:
@@ -126,14 +128,11 @@ def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
     return PET.from_dicom(path=path, series_id=series, pet_image_type="SUV")
 
 
-def read_dicom_seg(
-    path: str, meta: dict, series: Optional[str] = None
-) -> Segmentation:
-    seg_img = read_dicom_series(path, series)
-    return Segmentation.from_dicom(seg_img, meta)
+def read_dicom_seg(path: str, meta: dict) -> SEG:
+    return SEG.from_dicom(path, meta)
 
 
-auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
+auto_dicom_result = Union[Scan, PET, StructureSet, Dose, SEG]
 
 
 def read_dicom_auto(
@@ -163,7 +162,7 @@ def read_dicom_auto(
             case "RTDOSE":
                 obj = read_dicom_rtdose(dcm)
             case "SEG":
-                obj = read_dicom_seg(path, meta, series)
+                obj = read_dicom_seg(dcm, meta)
             case _:
                 errmsg = (
                     f"Modality {modality} not supported in read_dicom_auto."

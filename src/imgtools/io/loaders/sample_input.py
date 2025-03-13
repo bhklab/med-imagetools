@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from imgtools.io.loaders.utils import auto_dicom_result, read_dicom_auto
 from imgtools.loggers import logger
-from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet, SEG
 from imgtools.utils import timer
 
 
@@ -175,7 +175,9 @@ class SampleInput:
         for modality, series_uids in grouped_images.items():
             for series_uid in series_uids:
                 image = self._reader(series_uid)[0]
-                if modality == "RTSTRUCT" and isinstance(image, StructureSet):
+                if (modality == "RTSTRUCT" and isinstance(image, StructureSet)) or (
+                    modality == "SEG" and isinstance(image, SEG)
+                ):
                     segmentation = image.to_segmentation(
                         reference_image=reference_image,
                         roi_names=self.roi_names,  # type: ignore
@@ -209,14 +211,13 @@ if __name__ == "__main__":
     crawler_settings = CrawlerSettings(
         dicom_dir=Path("data"),
         n_jobs=12,
-        force=True
     )
 
     crawler = Crawler.from_settings(crawler_settings)
 
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
+    samples = interlacer.query("CT,SEG")
 
     loader = SampleInput(crawler.db_json)
 
