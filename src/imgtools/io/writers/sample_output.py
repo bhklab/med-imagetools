@@ -33,7 +33,7 @@ class SampleOutput(BaseOutput):
     root_directory: Path
     context_keys: list[str] = field(default_factory=list)
     filename_format: str = field(
-        default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
+        default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}"
     )
     create_dirs: bool = field(default=True)
     existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.SKIP)
@@ -44,8 +44,10 @@ class SampleOutput(BaseOutput):
     def writer(self) -> AbstractBaseWriter:
         match self.writer_type:
             case "nifti":
+                self.filename_format += ".nii.gz"
                 return NIFTIWriter
             case "hdf5":
+                self.filename_format += ".h5"
                 return HDF5Writer
             case _:
                 raise ValueError(f"Unsupported writer type: {self.writer_type}")
