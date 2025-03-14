@@ -110,7 +110,30 @@ class SampleInput:
             grouped_images[modality].append(image["Series"])
 
         return grouped_images
+    
+    def _convert_to_segmentation(self, reference_image: Scan | PET, image: StructureSet | SEG) -> Segmentation | None:
+        assert isinstance(image, (StructureSet, SEG))
 
+        if isinstance(image, SEG):
+            assert isinstance(reference_image, Scan) # No PET <- SCAN
+            return image.to_segmentation(
+                reference_image,
+                roi_names=self.roi_names,
+                roi_select_first=self.roi_select_first,
+                roi_separate=self.roi_separate,
+                ignore_missing_regex=self.ignore_missing_regex
+            )
+        
+        return image.to_segmentation(
+            reference_image=reference_image,
+            roi_names=self.roi_names,  # type: ignore
+            continuous=False,
+            existing_roi_indices=self.existing_roi_indices,
+            ignore_missing_regex=self.ignore_missing_regex,
+            roi_select_first=self.roi_select_first,
+            roi_separate=self.roi_separate,
+        )
+        
     @timer("Loading sample")
     def _load(
         self, sample: List[Dict[str, str]]
@@ -178,15 +201,7 @@ class SampleInput:
                 if (modality == "RTSTRUCT" and isinstance(image, StructureSet)) or (
                     modality == "SEG" and isinstance(image, SEG)
                 ):
-                    segmentation = image.to_segmentation(
-                        reference_image=reference_image,
-                        roi_names=self.roi_names,  # type: ignore
-                        continuous=False,
-                        existing_roi_indices=self.existing_roi_indices,
-                        ignore_missing_regex=self.ignore_missing_regex,
-                        roi_select_first=self.roi_select_first,
-                        roi_separate=self.roi_separate,
-                    )
+                    segmentation = self._convert_to_segmentation(reference_image, image)
                     if segmentation is None:
                         logger.warning(
                             f"Failed to load segmentation for series {series_uid}"
