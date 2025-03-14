@@ -144,12 +144,6 @@ class BetaPipeline():
         images = self.input(sample)
 
         if self.nnunet:
-            for image in images:
-                if isinstance(image, Segmentation) and image.roi_indices.keys() != self.roi_names.keys():
-                    return {
-                        "SampleID": f"{idx:03}",
-                        "Error": f"ROI names do not match: {image.roi_indices.keys()} != {self.roi_names.keys()}. Skipping sample."
-                    }
             if not any(isinstance(image, Segmentation) for image in images):
                 return {
                     "SampleID": f"{idx:03}",
@@ -218,7 +212,7 @@ class BetaPipeline():
     
 def main():
     autopipe = BetaPipeline(
-        input_directory=Path("./data copy"),
+        input_directory=Path("./data"),
         output_directory=Path("./procdata_autobots"),
         query="CT,RTSTRUCT",
         n_jobs=1,
