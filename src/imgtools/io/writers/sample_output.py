@@ -68,7 +68,7 @@ class SampleOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
-            **kwargs: Any) -> None:
+            **kwargs: Any) -> dict[str, Any]:
         """Write output data.
 
         Parameters
@@ -80,11 +80,14 @@ class SampleOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
+        roi_names = {}
+
         for image in sample:
             # Only include keys that are in the writer context
             image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
 
             if isinstance(image, Segmentation):
+                roi_names.update(image.roi_indices)
                 for name, label in image.roi_indices.items():
                         roi_seg = image.get_label(label) 
                         self._writer.save(
@@ -101,6 +104,13 @@ class SampleOutput(BaseOutput):
                     **image_metadata,
                     **kwargs,
                 )
+
+        sample_metadata = {
+            "roi_names": roi_names,
+            **kwargs
+        }
+        return sample_metadata
+
 
 if __name__ == "__main__":
     from rich import print  # noqa

@@ -5,6 +5,7 @@ from typing import Any
 from imgtools.io.base_classes import BaseOutput
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter
 from imgtools.modalities import Scan, Dose, Segmentation, PET 
+from imgtools.utils.nnunet import nnUNet_MODALITY_MAP
 
 @dataclass
 class nnUNetOutput(BaseOutput):
@@ -60,19 +61,13 @@ class nnUNetOutput(BaseOutput):
         context.update({k: "" for k in self.context_keys})
         self._writer.set_context(**context)
 
-        self.modality_map = {
-            "CT": "0000",
-            "MR": "0001",
-            "PET": "0002",
-        }   
-
         super().__init__(self._writer)
 
     def __call__(
             self, 
-            sample: list[Scan | Dose | Segmentation | PET], 
+            sample: list[Scan | Segmentation | PET], 
             SampleID: str,
-            **kwargs: Any) -> None:  # noqa: ANN401
+            **kwargs: Any) -> dict[str, Any]:  # noqa: ANN401
         """Write output data.
 
         Parameters
@@ -82,12 +77,15 @@ class nnUNetOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
+        roi_names = {}
+
         for image in sample:
             # Only include keys that are in the writer context
             image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
 
             if isinstance(image, Segmentation):
                 roi_seg = image.generate_sparse_mask()
+                roi_names.update(roi_seg.roi_indices)
                 self._writer.save(
                     roi_seg,
                     DirType="labels",
@@ -100,10 +98,17 @@ class nnUNetOutput(BaseOutput):
                 self._writer.save(
                     image,
                     DirType="images",
-                    SampleID=f"{SampleID}_{self.modality_map[image.metadata['Modality']]}",
+                    SampleID=f"{SampleID}_{nnUNet_MODALITY_MAP[image.metadata['Modality']]}",
                     **image_metadata,
                     **kwargs,
                 )
+        
+        sample_metadata = {
+            "SampleID": SampleID,
+            "roi_names": roi_names,
+            **kwargs
+        }
+        return sample_metadata
 
 
 if __name__ == "__main__":
