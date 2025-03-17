@@ -1,25 +1,23 @@
-###############################################################
-# Example usage:
-# python radcure_simple.py ./data/RADCURE/data ./RADCURE_output
-###############################################################
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
-from joblib import Parallel, delayed  # type: ignore
 import yaml
+from joblib import Parallel, delayed  # type: ignore
 
-from imgtools.loggers import logger
 from imgtools.dicom import Crawler, Interlacer
-from imgtools.transforms import Resample, Transformer, WindowIntensity
-from imgtools.io import SampleInput, SampleOutput, nnUNetOutput
 from imgtools.dicom.dicom_metadata import MODALITY_TAGS
-from imgtools.utils.nnunet import (
-    create_train_test_mapping, 
-    generate_dataset_json, 
-    nnUNet_MODALITY_MAP,
-    create_preprocess_and_train_scripts
-)
+from imgtools.io import SampleInput, SampleOutput, nnUNetOutput
+from imgtools.loggers import logger
 from imgtools.modalities import Segmentation
+from imgtools.transforms import Resample, Transformer, WindowIntensity
+from imgtools.utils.nnunet import (
+    create_preprocess_and_train_scripts,
+    create_train_test_mapping,
+    generate_dataset_json,
+    nnUNet_MODALITY_MAP,
+)
+
 
 @dataclass
 class BetaPipeline():
@@ -35,31 +33,31 @@ class BetaPipeline():
     output_directory: Path
 
     # Crawl parameters
-    dcm_extension: str = "dcm"
-    update_crawl: bool = False
+    dcm_extension: str = field(default="dcm")
+    update_crawl: bool = field(default=False)
 
     # Interlacer parameters
-    query: str = "CT,RTSTRUCT"
+    query: str = field(default="CT,RTSTRUCT")
 
     # Transformer parameters
-    spacing: tuple[float] = (1.0, 1.0, 0.) #field(default_factory=lambda: Spacing3D(1.0, 1.0, 0.0)) 
-    window: float | None = None
-    level: float | None = None
+    spacing: tuple[float] = field(default=(1.0, 1.0, 0.0))
+    window: float | None = field(default=None)
+    level: float | None = field(default=None)
 
     # nnU-Net parameters
-    nnunet: bool = False
-    train_size: float = 1.0
-    random_state: int = 42
+    nnunet: bool = field(default=False)
+    train_size: float = field(default=1.0)
+    random_state: int = field(default=42)
 
-    n_jobs: int = -1
-    dataset_name: str | None = None
-    writer_type: str = "nifti"
+    n_jobs: int = field(default=-1)
+    dataset_name: str | None = field(default=None)
+    writer_type: str = field(default="nifti")
 
     # ROI parameters
-    roi_yaml_path: Path | None = None
-    ignore_missing_regex: bool = True # Needs to be true for nnU-Net
-    roi_select_first: bool = False
-    roi_separate: bool = False
+    roi_yaml_path: Path | None = field(default=None)
+    ignore_missing_regex: bool = field(default=True) # Needs to be true for nnU-Net
+    roi_select_first: bool = field(default=False)
+    roi_separate: bool = field(default=False)
 
     def __post_init__(self) -> None:
         self.dataset_name = self.dataset_name or self.input_directory.name
@@ -69,7 +67,7 @@ class BetaPipeline():
             n_jobs=self.n_jobs,
             dcm_extension="dcm",
             force=self.update_crawl,
-            dataset_name=self.dataset_name, # if you want to rename the .imgtools/{dataset_name} folder
+            dataset_name=self.dataset_name,
         )
         self.lacer = Interlacer(self.crawl.db_csv) # uses CSV of crawl
 
@@ -108,7 +106,8 @@ class BetaPipeline():
             case "hdf5":
                 self.file_ending = ".h5"
             case _:
-                raise ValueError(f"Unknown writer type: {self.writer_type}")
+                msg = f"Unknown writer type: {self.writer_type}"
+                raise ValueError(msg)
 
         if self.nnunet:
             if self.roi_names is None:
@@ -123,7 +122,6 @@ class BetaPipeline():
                 for folder in (self.output_directory / "nnUNet_raw").glob("*")
                 if Path(folder).name.startswith("Dataset")
             }
-            print(f"Used IDs: {used_ids}")
             all_ids = set(range(1, 1000))
             self.dataset_id = sorted(all_ids - used_ids)[0]
 
@@ -139,15 +137,14 @@ class BetaPipeline():
             writer_type=self.writer_type
         )
 
-    def process_one_subject(self, sample, idx):
+    def process_one_subject(self, sample: list[dict[str, str]], idx: int) -> dict[str, Any]:
         # Load images
         images = self.input(sample)
 
-        if self.nnunet:
-            if not any(isinstance(image, Segmentation) for image in images):
+        if self.nnunet and not any(isinstance(image, Segmentation) for image in images):
                 return {
                     "SampleID": f"{idx:03}",
-                    "Error": "No segmentation images found. Skipping sample."
+                    "Error": "No segmentation images found. This usually happens when ROIs are missing. Skipping sample."
                 }
 
         # Apply transforms to all images
@@ -169,7 +166,7 @@ class BetaPipeline():
         # Return metadata from each sample
         return metadata
 
-    def run(self):
+    def run(self) -> None:
         # Query Interlacer for samples of desired modalities
         if self.nnunet and not ("SEG" in self.query or "RTSTRUCT" in self.query):
             raise ValueError("nnU-Net requires SEG or RTSTRUCT")
@@ -188,7 +185,7 @@ class BetaPipeline():
         )
 
         logger.info(
-            f"Finished processing", 
+            "Finished processing", 
             input_directory=self.input_directory, 
             output_directory=self.output_directory, 
             metadata=self.metadata
@@ -210,7 +207,7 @@ class BetaPipeline():
             create_preprocess_and_train_scripts(self.output_directory, self.dataset_id)
 
     
-def main():
+def main() -> None:
     autopipe = BetaPipeline(
         input_directory=Path("./data"),
         output_directory=Path("./procdata_autobots"),
