@@ -33,31 +33,31 @@ class BetaPipeline():
     output_directory: Path
 
     # Crawl parameters
-    dcm_extension: str = field(default="dcm")
-    update_crawl: bool = field(default=False)
+    dcm_extension: str = "dcm"
+    update_crawl: bool = False
 
     # Interlacer parameters
-    query: str = field(default="CT,RTSTRUCT")
+    query: str = "CT,RTSTRUCT"
 
     # Transformer parameters
-    spacing: tuple[float] = field(default=(1.0, 1.0, 0.0))
-    window: float | None = field(default=None)
-    level: float | None = field(default=None)
+    spacing: tuple[float] = (1.0, 1.0, 0.0)
+    window: float | None = None
+    level: float | None = None
 
     # nnU-Net parameters
-    nnunet: bool = field(default=False)
-    train_size: float = field(default=1.0)
-    random_state: int = field(default=42)
+    nnunet: bool = False
+    train_size: float = 1.0
+    random_state: int = 42
 
-    n_jobs: int = field(default=-1)
-    dataset_name: str | None = field(default=None)
-    writer_type: str = field(default="nifti")
+    n_jobs: int = -1
+    dataset_name: str | None = None
+    writer_type: str = "nifti"
 
     # ROI parameters
-    roi_yaml_path: Path | None = field(default=None)
-    ignore_missing_regex: bool = field(default=True) # Needs to be true for nnU-Net
-    roi_select_first: bool = field(default=False)
-    roi_separate: bool = field(default=False)
+    roi_yaml_path: Path | None = None
+    ignore_missing_regex: bool = True  # Needs to be true for nnU-Net
+    roi_select_first: bool = False
+    roi_separate: bool = False
 
     def __post_init__(self) -> None:
         self.dataset_name = self.dataset_name or self.input_directory.name
