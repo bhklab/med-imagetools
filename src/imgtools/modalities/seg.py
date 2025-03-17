@@ -200,7 +200,7 @@ class SEG:
         for label, regex in roi_names.items():
             pattern = re.compile(regex, re.IGNORECASE)
             for seg_label, seg_num in self.roi_mapping.items():
-                if pattern.match(seg_label):
+                if pattern.fullmatch(seg_label):
                     matched_segments[label].append(seg_num)
 
         if not matched_segments:
