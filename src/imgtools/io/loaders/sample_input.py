@@ -15,7 +15,6 @@ class SampleInput:
         crawl_path: str,
         multiple_subseries_setting_toggle: bool = False,
         roi_names: Dict[str, str] | None = None,
-        existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,
         roi_separate: bool = False,
@@ -25,7 +24,6 @@ class SampleInput:
         )
 
         self.roi_names = roi_names
-        self.existing_roi_indices = existing_roi_indices
         self.ignore_missing_regex = ignore_missing_regex
         self.roi_select_first = roi_select_first
         self.roi_separate = roi_separate
@@ -110,29 +108,6 @@ class SampleInput:
             grouped_images[modality].append(image["Series"])
 
         return grouped_images
-    
-    def _convert_to_segmentation(self, reference_image: Scan | PET, image: StructureSet | SEG) -> Segmentation | None:
-        assert isinstance(image, (StructureSet, SEG))
-
-        if isinstance(image, SEG):
-            assert isinstance(reference_image, Scan) # No PET <- SEG
-            return image.to_segmentation(
-                reference_image,
-                roi_names=self.roi_names,
-                roi_select_first=self.roi_select_first,
-                roi_separate=self.roi_separate,
-                ignore_missing_regex=self.ignore_missing_regex
-            )
-        
-        return image.to_segmentation(
-            reference_image=reference_image,
-            roi_names=self.roi_names,  # type: ignore
-            continuous=False,
-            existing_roi_indices=self.existing_roi_indices,
-            ignore_missing_regex=self.ignore_missing_regex,
-            roi_select_first=self.roi_select_first,
-            roi_separate=self.roi_separate,
-        )
         
     @timer("Loading sample")
     def _load(
@@ -201,7 +176,13 @@ class SampleInput:
                 if (modality == "RTSTRUCT" and isinstance(image, StructureSet)) or (
                     modality == "SEG" and isinstance(image, SEG)
                 ):
-                    segmentation = self._convert_to_segmentation(reference_image, image)
+                    segmentation = image.to_segmentation(
+                        reference_image=reference_image,
+                        roi_names=self.roi_names,  # type: ignore
+                        ignore_missing_regex=self.ignore_missing_regex,
+                        roi_select_first=self.roi_select_first,
+                        roi_separate=self.roi_separate,
+                    )
                     if segmentation is None:
                         logger.warning(
                             f"Failed to load segmentation for series {series_uid}"
