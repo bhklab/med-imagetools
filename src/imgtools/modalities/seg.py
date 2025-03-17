@@ -101,29 +101,27 @@ class SEG:
         str
             The SOPInstanceUID for the given frame index.
         """
-        if ("DerivationImageSequence" in 
-            self.raw_dicom_meta.PerFrameFunctionalGroupsSequence[idx]):
-            return str(
-                self.raw_dicom_meta
-                .PerFrameFunctionalGroupsSequence[idx]
-                .DerivationImageSequence[0]
-                .SourceImageSequence[0]
-                .ReferencedSOPInstanceUID
-            )
-        
-        elif "ReferencedSeriesSequence" in self.raw_dicom_meta:
-            return str(
-                self.raw_dicom_meta.
-                get("ReferencedSeriesSequence")[0].
-                ReferencedInstanceSequence[idx].
-                ReferencedSOPInstanceUID
-            )
-        
-        return str(
-            self.raw_dicom_meta.
-            get("SourceImageSequence")[idx].
-            ReferencedSOPInstanceUID
-        )
+        per_frame_seq = getattr(self.raw_dicom_meta, "PerFrameFunctionalGroupsSequence", None)
+        ref_series_seq = getattr(self.raw_dicom_meta, "ReferencedSeriesSequence", None)
+        src_img_seq = getattr(self.raw_dicom_meta, "SourceImageSequence", None)
+
+        # Case 1: Check if DerivationImageSequence exists in the per-frame sequence
+        if per_frame_seq and idx:
+            derivation_seq = getattr(per_frame_seq[idx], "DerivationImageSequence", None)
+            if derivation_seq:
+                return str(derivation_seq[0].SourceImageSequence[0].ReferencedSOPInstanceUID)
+
+        # Case 2: Check ReferencedSeriesSequence
+        if ref_series_seq:
+            ref_instance_seq = getattr(ref_series_seq[0], "ReferencedInstanceSequence", None)
+            if ref_instance_seq:
+                return str(ref_instance_seq[idx].ReferencedSOPInstanceUID)
+
+        # Case 3: Default to SourceImageSequence
+        if src_img_seq:
+            return str(src_img_seq[idx].ReferencedSOPInstanceUID)
+    
+        raise KeyError(f"Couldn't find Referenced SOPInstanceUID in metadata for index {idx}.")
     
     def _align_to_reference(self, reference_image: Scan) -> None:
         """
