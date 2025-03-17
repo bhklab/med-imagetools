@@ -115,7 +115,7 @@ class SampleInput:
         assert isinstance(image, (StructureSet, SEG))
 
         if isinstance(image, SEG):
-            assert isinstance(reference_image, Scan) # No PET <- SCAN
+            assert isinstance(reference_image, Scan) # No PET <- SEG
             return image.to_segmentation(
                 reference_image,
                 roi_names=self.roi_names,
