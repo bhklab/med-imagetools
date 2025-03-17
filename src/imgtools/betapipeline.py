@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+import json
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -76,6 +77,7 @@ class BetaPipeline():
         if self.roi_yaml_path:
             with self.roi_yaml_path.open() as f:
                 self.roi_names = yaml.safe_load(f)
+            self.roi_indices = {name: idx+1 for idx, name in enumerate(self.roi_names)}
 
         self.input = SampleInput(
             crawl_path=self.crawl.db_json, # uses JSON of crawl
@@ -141,11 +143,19 @@ class BetaPipeline():
         # Load images
         images = self.input(sample)
 
-        if self.nnunet and not any(isinstance(image, Segmentation) for image in images):
+        if self.nnunet: 
+            if not any(isinstance(image, Segmentation) for image in images):
+                # Usually happens when none of the roi names match
                 return {
                     "SampleID": f"{idx:03}",
-                    "Error": "No segmentation images found. This usually happens when ROIs are missing. Skipping sample."
+                    "Error": "No segmentation images found. Skipping sample." 
                 }
+            for image in images:
+                if isinstance(image, Segmentation) and image.roi_indices != self.roi_indices:
+                    return {
+                        "SampleID": f"{idx:03}",
+                        "Error": "ROI names do not match. Skipping sample."
+                    }
 
         # Apply transforms to all images
         images = self.transformer(images)
@@ -159,7 +169,10 @@ class BetaPipeline():
                 Dataset=self.dataset_name,
             )
         else: 
-            metadata = self.output(images, SampleID=f"{self.input_directory.name}_{idx:03d}") 
+            metadata = self.output(
+                images, 
+                SampleID=f"{self.input_directory.name}_{idx:03d}"
+            ) 
         
         metadata["SampleID"] = f"{idx:03d}"
 
@@ -181,8 +194,13 @@ class BetaPipeline():
 
         # Process the samples in parallel
         self.metadata = Parallel(n_jobs=self.n_jobs)(
-            delayed(self.process_one_subject)(sample, idx) for idx, sample in enumerate(self.samples, start=1)
+            delayed(self.process_one_subject)(sample, idx) 
+            for idx, sample in enumerate(self.samples, start=1)
         )
+
+        metadata_path = self.input_directory.parent / ".imgtools" / f"{self.dataset_name}_metadata.json"
+        with metadata_path.open("w") as f:
+            json.dump(self.metadata, f, indent=4)
 
         logger.info(
             "Finished processing", 
@@ -200,8 +218,11 @@ class BetaPipeline():
                     for modality, channel_num in nnUNet_MODALITY_MAP.items() 
                     if modality in self.query.split(",")
                 },
-                labels={"background": 0, **{name: idx+1 for idx, name in enumerate(self.roi_names)}},
-                num_training_cases=sum(1 for file in Path(self.output_directory / "imagesTr").iterdir() if file.is_file()),
+                labels={"background": 0, **self.roi_indices},
+                num_training_cases=sum(
+                    1 for file in Path(self.output_directory / "imagesTr").iterdir() 
+                    if file.is_file()
+                ),
                 file_ending=self.file_ending,
             )
             create_preprocess_and_train_scripts(self.output_directory, self.dataset_id)
@@ -209,12 +230,13 @@ class BetaPipeline():
     
 def main() -> None:
     autopipe = BetaPipeline(
-        input_directory=Path("./data"),
-        output_directory=Path("./procdata_autobots"),
+        input_directory=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/manifest-1734617039967/"),
+        output_directory=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/proc_nnunet"),
         query="CT,RTSTRUCT",
         n_jobs=1,
         nnunet=True,
-        roi_yaml_path=Path("/home/joshua-siraj/Documents/CDI/IterativeSegNet/configs/roi_yaml_example.yaml"),
+        roi_yaml_path=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/oar_19.yaml"),
+        dataset_name="RADCURE",
         # update_crawl=True,
     )
     autopipe.run()
