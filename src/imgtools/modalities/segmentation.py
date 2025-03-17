@@ -444,13 +444,20 @@ class Segmentation(sitk.Image):
         else:
             sparsemask_arr = mask_arr
 
-        sparsemask = Segmentation(sitk.GetImageFromArray(sparsemask_arr), self.metadata, self.roi_indices)
+        sparsemask = Segmentation(
+            sitk.GetImageFromArray(np.transpose(sparsemask_arr)), 
+            self.metadata, 
+            self.roi_indices
+        )
+
+        sparsemask.CopyInformation(self)
 
         if verbose and len(voxels_with_overlap) != 0:
             msg = (
                 f"{len(voxels_with_overlap)} voxels have overlapping contours."
             )
             logger.warning(msg)
+
         return sparsemask
 
     def _max_adder(
