@@ -44,10 +44,12 @@ class SampleOutput(BaseOutput):
     def writer(self) -> AbstractBaseWriter:
         match self.writer_type:
             case "nifti":
-                self.filename_format += ".nii.gz"
+                self.file_ending = ".nii.gz"
+                self.filename_format += self.file_ending
                 return NIFTIWriter
             case "hdf5":
-                self.filename_format += ".h5"
+                self.file_ending = ".h5"
+                self.filename_format += self.file_ending
                 return HDF5Writer
             case _:
                 raise ValueError(f"Unsupported writer type: {self.writer_type}")
@@ -68,7 +70,7 @@ class SampleOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
-            **kwargs: Any) -> None:
+            **kwargs: Any) -> dict[str, Any]:
         """Write output data.
 
         Parameters
@@ -80,11 +82,14 @@ class SampleOutput(BaseOutput):
         **kwargs : Any
             Keyword arguments for the writing process.
         """
+        roi_names = {}
+
         for image in sample:
             # Only include keys that are in the writer context
             image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
 
             if isinstance(image, Segmentation):
+                roi_names.update(image.roi_indices)
                 for name, label in image.roi_indices.items():
                         roi_seg = image.get_label(label) 
                         self._writer.save(
@@ -101,6 +106,13 @@ class SampleOutput(BaseOutput):
                     **image_metadata,
                     **kwargs,
                 )
+
+        sample_metadata = {
+            "roi_names": roi_names,
+            **kwargs
+        }
+        return sample_metadata
+
 
 if __name__ == "__main__":
     from rich import print  # noqa
@@ -123,7 +135,7 @@ if __name__ == "__main__":
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
 
-    query = "MR,RTSTRUCT,RTDOSE"
+    query = "MR,SEG"
     samples = interlacer.query(query)
 
     input = SampleInput(crawler.db_json)

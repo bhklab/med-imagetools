@@ -517,11 +517,6 @@ class StructureSet:
                 msg = f"Invalid pattern type: {type(pattern)}, expected str or list."
                 raise ValueError(msg)
 
-        # Validate output
-        if not labels:
-            msg = f"No matching ROIs found for the provided patterns: {names}"
-            raise ValueError(msg)
-
         return labels
 
     def get_mask(
