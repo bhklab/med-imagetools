@@ -64,6 +64,7 @@ class SampleInput:
     def __init__(
         self,
         crawl_path: str,
+        root_directory: Path,
         multiple_subseries_setting_toggle: bool = False,
         roi_names: Dict[str, str] | None = None,
         ignore_missing_regex: bool = False,
@@ -74,6 +75,7 @@ class SampleInput:
             multiple_subseries_setting_toggle
         )
 
+        self.root_directory = root_directory
         self.roi_names = roi_names
         self.ignore_missing_regex = ignore_missing_regex
         self.roi_select_first = roi_select_first
@@ -110,9 +112,9 @@ class SampleInput:
         images = []
         if load_subseries:
             for subseries_uid in subseries_uids:
-                folder = series_info[subseries_uid]["folder"]
+                folder = self.root_directory / series_info[subseries_uid]["folder"]
                 file_names = [
-                    (Path(folder) / file_name).as_posix()
+                    (folder / file_name).as_posix()
                     for file_name in series_info[subseries_uid][
                         "instances"
                     ].values()
@@ -126,17 +128,17 @@ class SampleInput:
                     "Found >1 subseries, combining them into one image"
                 )
 
-            folder = series_info[subseries_uids[0]]["folder"]
+            folder = self.root_directory / series_info[subseries_uids[0]]["folder"]
             file_names = []
             for subseries_uid in subseries_uids:
                 file_names += [
-                    (Path(folder) / file_name).as_posix()
+                    (folder / file_name).as_posix()
                     for file_name in series_info[subseries_uid][
                         "instances"
                     ].values()
                 ]
             
-            images.append(read_dicom_auto(folder, series_uid, file_names))
+            images.append(read_dicom_auto(folder.as_posix(), series_uid, file_names))
 
         return images
 
@@ -255,8 +257,10 @@ if __name__ == "__main__":
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
+    dicom_dir = Path("data").resolve()
+
     crawler_settings = CrawlerSettings(
-        dicom_dir=Path("data"),
+        dicom_dir=dicom_dir,
         n_jobs=12,
     )
 
@@ -266,7 +270,7 @@ if __name__ == "__main__":
     interlacer.visualize_forest()
     samples = interlacer.query("CT,SEG")
 
-    loader = SampleInput(crawler.db_json)
+    loader = SampleInput(crawler.db_json, root_directory=dicom_dir.parent)
 
     for sample in samples:
         print(loader(sample))
