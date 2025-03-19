@@ -86,13 +86,32 @@ class SampleOutput(BaseOutput):
 
             if isinstance(image, Segmentation):
                 for name, label in image.roi_indices.items():
-                        roi_seg = image.get_label(label) 
-                        self._writer.save(
-                            roi_seg,
-                            ImageID=f"{sanitize_file_name(name)}",
-                            **image_metadata,
-                            **kwargs,
-                        )      
+                    ImageID = sanitize_file_name(name)
+                    out_path = self._writer.resolve_path(
+                        ImageID=ImageID, 
+                        **image_metadata, 
+                        **kwargs
+                    )
+
+                    identifier = 0
+                    while out_path.exists():
+                        identifier += 1
+                        out_path = self._writer.resolve_path(
+                            ImageID=f"{ImageID}_{identifier}", 
+                            **image_metadata, 
+                            **kwargs
+                        )
+
+                    if identifier > 0:
+                        ImageID = f"{ImageID}_{identifier}"
+
+                    roi_seg = image.get_label(label)
+                    self._writer.save(
+                        roi_seg, 
+                        ImageID=ImageID, 
+                        **image_metadata, 
+                        **kwargs
+                    )    
             
             else:    
                 self._writer.save(
