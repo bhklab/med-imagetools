@@ -568,7 +568,7 @@ class StructureSet:
         | List[str]
         | Dict[str, Union[str, List[str]]]
         | None = None,
-        continuous: bool = True,
+        continuous: bool = False,
         existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,

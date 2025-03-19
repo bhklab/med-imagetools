@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from imgtools.io.loaders.utils import auto_dicom_result, read_dicom_auto
 from imgtools.loggers import logger
-from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet, SEG
 from imgtools.utils import timer
 
 
@@ -15,7 +15,6 @@ class SampleInput:
         crawl_path: str,
         multiple_subseries_setting_toggle: bool = False,
         roi_names: Dict[str, str] | None = None,
-        existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,
         roi_separate: bool = False,
@@ -25,7 +24,6 @@ class SampleInput:
         )
 
         self.roi_names = roi_names
-        self.existing_roi_indices = existing_roi_indices
         self.ignore_missing_regex = ignore_missing_regex
         self.roi_select_first = roi_select_first
         self.roi_separate = roi_separate
@@ -110,7 +108,7 @@ class SampleInput:
             grouped_images[modality].append(image["Series"])
 
         return grouped_images
-
+        
     @timer("Loading sample")
     def _load(
         self, sample: List[Dict[str, str]]
@@ -175,12 +173,12 @@ class SampleInput:
         for modality, series_uids in grouped_images.items():
             for series_uid in series_uids:
                 image = self._reader(series_uid)[0]
-                if modality == "RTSTRUCT" and isinstance(image, StructureSet):
+                if (modality == "RTSTRUCT" and isinstance(image, StructureSet)) or (
+                    modality == "SEG" and isinstance(image, SEG)
+                ):
                     segmentation = image.to_segmentation(
                         reference_image=reference_image,
                         roi_names=self.roi_names,  # type: ignore
-                        continuous=False,
-                        existing_roi_indices=self.existing_roi_indices,
                         ignore_missing_regex=self.ignore_missing_regex,
                         roi_select_first=self.roi_select_first,
                         roi_separate=self.roi_separate,
@@ -209,14 +207,13 @@ if __name__ == "__main__":
     crawler_settings = CrawlerSettings(
         dicom_dir=Path("data"),
         n_jobs=12,
-        force=True
     )
 
     crawler = Crawler.from_settings(crawler_settings)
 
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
+    samples = interlacer.query("CT,SEG")
 
     loader = SampleInput(crawler.db_json)
 
