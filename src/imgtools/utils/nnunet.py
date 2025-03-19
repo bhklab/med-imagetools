@@ -87,7 +87,7 @@ def save_json(
         json.dump(obj, f, sort_keys=sort_keys, indent=indent)
 
 
-def create_preprocess_and_train_scripts(output_directory: str | pathlib.Path, dataset_id: int):
+def generate_nnunet_scripts(output_directory: str | pathlib.Path, dataset_id: int):
     """
     Creates two bash scripts:
     1. `nnunet_preprocess.sh` for running nnUNet preprocessing.

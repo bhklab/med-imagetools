@@ -5,20 +5,14 @@ from typing import Any
 
 import yaml
 from joblib import Parallel, delayed  # type: ignore
+from tqdm import tqdm
 
 from imgtools.dicom import Crawler, Interlacer
 from imgtools.dicom.dicom_metadata import MODALITY_TAGS
 from imgtools.io import SampleInput, SampleOutput, nnUNetOutput
-from imgtools.loggers import logger
-from imgtools.modalities import Segmentation
+from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.transforms import Resample, Transformer, WindowIntensity
-from imgtools.utils.nnunet import (
-    create_preprocess_and_train_scripts,
-    create_train_test_mapping,
-    generate_dataset_json,
-    nnUNet_MODALITY_MAP,
-)
-
+from imgtools.utils.nnunet import create_train_test_mapping
 
 @dataclass
 class BetaPipeline():
@@ -28,6 +22,49 @@ class BetaPipeline():
         2. Load individual samples
         3. Apply transforms to each image
         4. Save each sample as desired directory structure
+
+    Parameters
+    ----------
+    input_directory : Path
+        Input directory containing the raw DICOM data
+    output_directory : Path
+        Output directory where the processed data will be saved
+    dcm_extension : str
+        Extension of the DICOM files, default is "dcm"
+    update_crawl : bool
+        Whether to update the crawl data if it already exists, default is False
+    query : str
+        Comma-separated string of modalities to query, default is "CT,RTSTRUCT"
+    spacing : tuple[float]
+        Spacing of the resampled image, default is (1.0, 1.0, 0.0)
+    window : float | None
+        Window level of the intensity adjustment, default is None
+    level : float | None
+        Window width of the intensity adjustment, default is None
+    nnunet : bool
+        Whether to format the output for nnU-Net, default is False
+    train_size : float
+        Proportion of samples to use for training/test for nnU-Net, default is 1.0
+        Only used if nnunet is True
+    random_state : int
+        Random seed for shuffling the samples for nnU-Net, default is 42
+    require_all_rois : bool
+        Whether all ROIs must be present in each sample for nnU-Net, default is True
+    n_jobs : int
+        Number of jobs to run in parallel, default is -1
+    dataset_name : str | None
+        Name of the dataset, default is None
+    writer_type : str
+        Type of writer to use, default is "nifti"
+    roi_yaml_path : Path | None
+        Path to the YAML file containing the ROI names, default is None
+    ignore_missing_regex : bool
+        Whether to ignore missing ROIs from roi_yaml_path, default is False
+        This is set to True for nnU-Net
+    roi_select_first : bool
+        Whether to select only the first ROI match from roi_yaml_path, default is False
+    roi_separate : bool
+        Whether to separate matches from roi_yaml_path, default is False
     """
 
     input_directory: Path
@@ -49,6 +86,7 @@ class BetaPipeline():
     nnunet: bool = False
     train_size: float = 1.0
     random_state: int = 42
+    require_all_rois: bool = True
 
     n_jobs: int = -1
     dataset_name: str | None = None
@@ -56,13 +94,14 @@ class BetaPipeline():
 
     # ROI parameters
     roi_yaml_path: Path | None = None
-    ignore_missing_regex: bool = True  # Needs to be true for nnU-Net
+    ignore_missing_regex: bool = False
     roi_select_first: bool = False
     roi_separate: bool = False
 
     def __post_init__(self) -> None:
         self.dataset_name = self.dataset_name or self.input_directory.name
 
+        ### CRAWL/CONNECT
         self.crawl = Crawler(
             dicom_dir=self.input_directory,
             n_jobs=self.n_jobs,
@@ -77,7 +116,17 @@ class BetaPipeline():
         if self.roi_yaml_path:
             with self.roi_yaml_path.open() as f:
                 self.roi_names = yaml.safe_load(f)
+
+        if self.nnunet:
+            if self.roi_names is None:
+                raise ValueError("ROI names must be provided for nnU-Net")
             self.roi_indices = {name: idx+1 for idx, name in enumerate(self.roi_names)}
+
+            if not self.ignore_missing_regex:
+                logger.warning(
+                    "Set ignore_missing_regex=True to ignore missing ROIs for nnU-Net"
+                )
+                self.ignore_missing_regex = True 
 
         self.input = SampleInput(
             crawl_path=self.crawl.db_json, # uses JSON of crawl
@@ -102,61 +151,26 @@ class BetaPipeline():
                 )
         )
 
-        match self.writer_type:
-            case "nifti":
-                self.file_ending = ".nii.gz"
-            case "hdf5":
-                self.file_ending = ".h5"
-            case _:
-                msg = f"Unknown writer type: {self.writer_type}"
-                raise ValueError(msg)
-
         if self.nnunet:
-            if self.roi_names is None:
-                raise ValueError("ROI names must be provided for nnU-Net")
-
-            (self.output_directory / "nnUNet_results").mkdir(parents=True, exist_ok=True)
-            (self.output_directory / "nnUNet_preprocessed").mkdir(parents=True, exist_ok=True)
-            (self.output_directory / "nnUNet_raw").mkdir(parents=True, exist_ok=True)
-
-            used_ids = {
-                int(Path(folder).name[7:10]) 
-                for folder in (self.output_directory / "nnUNet_raw").glob("*")
-                if Path(folder).name.startswith("Dataset")
-            }
-            all_ids = set(range(1, 1000))
-            self.dataset_id = sorted(all_ids - used_ids)[0]
-
-            self.output_directory = self.output_directory / "nnUNet_raw" / f"Dataset{self.dataset_id:03d}_{self.dataset_name}"
-
-            output_class = nnUNetOutput
+            self.output = nnUNetOutput(
+                root_directory=self.output_directory,
+                roi_indices=self.roi_indices,
+                dataset_name=self.dataset_name,
+                context_keys=context_keys, 
+                writer_type=self.writer_type,
+                require_all_rois=self.require_all_rois
+            )
         else:
-            output_class = SampleOutput
-            
-        self.output = output_class(
-            context_keys=context_keys, 
-            root_directory=self.output_directory, 
-            writer_type=self.writer_type
-        )
+            self.output = SampleOutput(
+                context_keys=context_keys, 
+                root_directory=self.output_directory, 
+                writer_type=self.writer_type
+            )
 
-    def process_one_subject(self, sample: list[dict[str, str]], idx: int) -> dict[str, Any]:
+    def process_one_sample(self, sample: list[dict[str, str]], idx: int) -> dict[str, Any]:
         # Load images
         images = self.input(sample)
-
-        if self.nnunet: 
-            if not any(isinstance(image, Segmentation) for image in images):
-                # Usually happens when none of the roi names match
-                return {
-                    "SampleID": f"{idx:03}",
-                    "Error": "No segmentation images found. Skipping sample." 
-                }
-            for image in images:
-                if isinstance(image, Segmentation) and image.roi_indices != self.roi_indices:
-                    return {
-                        "SampleID": f"{idx:03}",
-                        "Error": "ROI names do not match. Skipping sample."
-                    }
-
+            
         # Apply transforms to all images
         images = self.transformer(images)
 
@@ -166,7 +180,6 @@ class BetaPipeline():
                 images,
                 SampleID=f"{idx:03}",
                 SplitType=self.train_test_mapping[idx],
-                Dataset=self.dataset_name,
             )
         else: 
             metadata = self.output(
@@ -181,8 +194,6 @@ class BetaPipeline():
 
     def run(self) -> None:
         # Query Interlacer for samples of desired modalities
-        if self.nnunet and not ("SEG" in self.query or "RTSTRUCT" in self.query):
-            raise ValueError("nnU-Net requires SEG or RTSTRUCT")
         self.samples = self.lacer.query(self.query)
 
         # Before processing
@@ -192,51 +203,35 @@ class BetaPipeline():
                 self.train_size, self.random_state
             )
 
-        # Process the samples in parallel
-        self.metadata = Parallel(n_jobs=self.n_jobs)(
-            delayed(self.process_one_subject)(sample, idx) 
-            for idx, sample in enumerate(self.samples, start=1)
-        )
+        with tqdm_logging_redirect():
+            # Process the samples in parallel
+            self.metadata = Parallel(n_jobs=self.n_jobs)(
+                delayed(self.process_one_sample)(sample, idx) 
+                for idx, sample in enumerate(tqdm(
+                    self.samples,
+                    desc="Processing Samples",
+                    mininterval=1,
+                    leave=False,
+                ), start=1)
+            )
 
-        metadata_path = self.input_directory.parent / ".imgtools" / f"{self.dataset_name}_metadata.json"
+        metadata_path = self.input_directory.parent / ".imgtools" / self.dataset_name / "metadata.json"
         with metadata_path.open("w") as f:
             json.dump(self.metadata, f, indent=4)
 
-        logger.info(
-            "Finished processing", 
-            input_directory=self.input_directory, 
-            output_directory=self.output_directory, 
-            metadata=self.metadata
-        )
-
         # After processing
         if self.nnunet:
-            generate_dataset_json(
-                self.output_directory,
-                channel_names={
-                    channel_num.lstrip('0') or '0': modality 
-                    for modality, channel_num in nnUNet_MODALITY_MAP.items() 
-                    if modality in self.query.split(",")
-                },
-                labels={"background": 0, **self.roi_indices},
-                num_training_cases=sum(
-                    1 for file in Path(self.output_directory / "imagesTr").iterdir() 
-                    if file.is_file()
-                ),
-                file_ending=self.file_ending,
-            )
-            create_preprocess_and_train_scripts(self.output_directory, self.dataset_id)
+            self.output.finalize_dataset(self.query)
 
     
 def main() -> None:
     autopipe = BetaPipeline(
-        input_directory=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/manifest-1734617039967/"),
-        output_directory=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/proc_nnunet"),
+        input_directory=Path("data"),
+        output_directory=Path("output"),
         query="CT,RTSTRUCT",
         n_jobs=1,
         nnunet=True,
-        roi_yaml_path=Path("/home/joshua-siraj/Documents/BHKLAB/RADCURE/oar_19.yaml"),
-        dataset_name="RADCURE",
+        roi_yaml_path=Path("roi.yaml"),
         # update_crawl=True,
     )
     autopipe.run()

@@ -400,63 +400,67 @@ class Segmentation(sitk.Image):
         # return f"<Segmentation with ROIs: {self.roi_indices!r}>"
         
 
-    def generate_sparse_mask(self, verbose: bool = False) -> Segmentation:
+    def generate_sparse_mask(
+        self, 
+        verbose: bool = False, 
+        new_roi_indices: dict[str, int] | None = None
+    ) -> Segmentation:
         """
-        Generate a sparse mask from the contours, taking the argmax of all overlaps
+        Generate a sparse segmentation mask by resolving overlapping contours.
+
+        This function creates a sparse mask from a multi-channel segmentation by 
+        taking the argmax of all overlapping regions. If `new_roi_indices` is provided, 
+        it remaps the region indices accordingly.
 
         Parameters
         ----------
-        mask
-            Segmentation object to build sparse mask from
+        verbose : bool, optional
+            If True, logs the number of overlapping voxels (default is False).
+        new_roi_indices : dict[str, int] | None, optional
+            Mapping of new ROI names to indices, used to update label values 
+            in the sparse mask. If None, the existing indices are used.
 
         Returns
         -------
-        SparseMask
-            The sparse mask object.
+        Segmentation
+            A new Segmentation object containing the sparse mask.
         """
-        mask_arr = np.transpose(sitk.GetArrayFromImage(self))
-        if self.existing_roi_indices:
+        mask_arr = sitk.GetArrayFromImage(self)
+
+        if self.existing_roi_indices:  # TODO: Investigate why this occurs
             for name in self.roi_indices:
                 self.roi_indices[name] = self.existing_roi_indices[name]
 
-        sparsemask_arr = np.zeros(mask_arr.shape[1:])
+        if mask_arr.ndim != 4:
+            return self  # Already a sparse mask
+
+        sparsemask_arr = np.zeros(mask_arr.shape[:-1])  # Remove channel dimension
 
         if verbose:
             voxels_with_overlap = set()
 
-        if len(mask_arr.shape) == 4:
-            for i in range(mask_arr.shape[0]):
-                slc = mask_arr[i, :, :, :]
-                slc *= list(
-                    self.roi_indices.values()
-                )[
-                    i
-                ]  # everything is 0 or 1, so this is fine to convert filled voxels to label indices
-                if verbose:
-                    res = self._max_adder(sparsemask_arr, slc)
-                    sparsemask_arr = res[0]
-                    for e in res[1]:
-                        voxels_with_overlap.add(e)
-                else:
-                    sparsemask_arr = np.fmax(
-                        sparsemask_arr, slc
-                    )  # elementwise maximum
-        else:
-            sparsemask_arr = mask_arr
+        updated_roi_indices = {} # Keeps track of updated ROI indices
+        for name, idx in self.roi_indices.items():
+            label_value = new_roi_indices.get(name, None) if new_roi_indices else idx
+            updated_roi_indices[name] = label_value
+
+            slc = mask_arr[..., idx-1] * label_value
+
+            if verbose:
+                sparsemask_arr, overlaps = self._max_adder(sparsemask_arr, slc)
+                voxels_with_overlap.update(overlaps)
+            else:
+                sparsemask_arr = np.fmax(sparsemask_arr, slc)
+
+        if verbose:
+            logger.warning(f"{len(voxels_with_overlap)} voxels have overlapping contours.")
 
         sparsemask = Segmentation(
-            sitk.GetImageFromArray(np.transpose(sparsemask_arr)), 
+            sitk.GetImageFromArray(sparsemask_arr), 
             self.metadata, 
-            self.roi_indices
+            updated_roi_indices
         )
-
         sparsemask.CopyInformation(self)
-
-        if verbose and len(voxels_with_overlap) != 0:
-            msg = (
-                f"{len(voxels_with_overlap)} voxels have overlapping contours."
-            )
-            logger.warning(msg)
 
         return sparsemask
 

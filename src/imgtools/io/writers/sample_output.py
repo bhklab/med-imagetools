@@ -44,10 +44,12 @@ class SampleOutput(BaseOutput):
     def writer(self) -> AbstractBaseWriter:
         match self.writer_type:
             case "nifti":
-                self.filename_format += ".nii.gz"
+                self.file_ending = ".nii.gz"
+                self.filename_format += self.file_ending
                 return NIFTIWriter
             case "hdf5":
-                self.filename_format += ".h5"
+                self.file_ending = ".h5"
+                self.filename_format += self.file_ending
                 return HDF5Writer
             case _:
                 raise ValueError(f"Unsupported writer type: {self.writer_type}")
@@ -133,7 +135,7 @@ if __name__ == "__main__":
     interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
 
-    query = "MR,RTSTRUCT,RTDOSE"
+    query = "MR,SEG"
     samples = interlacer.query(query)
 
     input = SampleInput(crawler.db_json)
