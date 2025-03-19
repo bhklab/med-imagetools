@@ -1,11 +1,66 @@
+"""
+Module for writing medical imaging data to output formats (e.g., NIFTI, HDF5).
+
+This module contains the `SampleOutput` class, which is used to write medical imaging data (e.g., Scan, PET, Dose, Segmentation) 
+to disk using different writers (NIFTI or HDF5). The class allows customization of output file structure, handling of existing files, 
+and filename sanitization.
+
+Key functionalities:
+- Write imaging data (e.g., Scan, PET, Dose, Segmentation) to output formats (NIFTI or HDF5)
+- Handle multiple ROIs in segmentation data
+- Allow customization of output file structure and handling of existing files
+- Sanitize filenames and create necessary directories
+
+Classes:
+    SampleOutput: A class for writing medical imaging data to NIFTI or HDF5 formats.
+
+Examples
+--------
+>>> from imgtools.dicom.crawl import CrawlerSettings, Crawler
+>>> from imgtools.dicom.interlacer import Interlacer
+>>> from imgtools.dicom.dicom_metadata import MODALITY_TAGS
+>>> from imgtools.io import SampleOutput, SampleInput
+>>>
+>>> dicom_dir = Path("data")
+>>> crawler_settings = CrawlerSettings(
+>>>     dicom_dir=dicom_dir,
+>>>     n_jobs=12,
+>>>     force=False
+>>> )
+>>> crawler = Crawler.from_settings(crawler_settings)
+>>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer.visualize_forest()
+>>> query = "CT,RTSTRUCT"
+>>> samples = interlacer.query(query)
+>>>
+>>> input = SampleInput(crawler.db_json)
+>>> context_keys = list(
+>>>     set.union(*[MODALITY_TAGS["ALL"], 
+>>>                 *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+>>> )
+>>> output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=context_keys)
+>>>
+>>> for sample_idx, sample in enumerate(samples, start=1):
+>>>     output(
+>>>         input(sample),
+>>>         SampleID=f"{dicom_dir.name}_{sample_idx:03d}",
+>>>     )
+"""
+
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
-from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter, HDF5Writer
+from imgtools.io.writers import (
+    AbstractBaseWriter,
+    ExistingFileMode,
+    HDF5Writer,
+    NIFTIWriter,
+)
+from imgtools.modalities import PET, Dose, Scan, Segmentation
 from imgtools.utils import sanitize_file_name
-from imgtools.modalities import Scan, Dose, Segmentation, PET 
 
 
 @dataclass
@@ -52,7 +107,8 @@ class SampleOutput(BaseOutput):
                 self.filename_format += self.file_ending
                 return HDF5Writer
             case _:
-                raise ValueError(f"Unsupported writer type: {self.writer_type}")
+                msg = f"Unsupported writer type: {self.writer_type}"
+                raise ValueError(msg)
     
     def __post_init__(self) -> None:
         self._writer = self.writer(
@@ -70,7 +126,7 @@ class SampleOutput(BaseOutput):
     def __call__(
             self, 
             sample: list[Scan | Dose | Segmentation | PET], 
-            **kwargs: Any) -> dict[str, Any]:
+            **kwargs: dict[str, Any]) -> dict[str, Any]:
         """Write output data.
 
         Parameters

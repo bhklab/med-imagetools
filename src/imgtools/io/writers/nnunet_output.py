@@ -1,12 +1,107 @@
+"""
+Module for writing Sample data in nnUNet format.
+
+This module contains the `nnUNetOutput` class, which is responsible for writing sample data
+into a format compatible with nnUNet, a widely used deep learning framework for medical image 
+segmentation. The `nnUNetOutput` class manages the creation of necessary directories, file naming 
+conventions, and how the data should be saved and processed for nnUNet training. It supports handling 
+segmentation data, raw images, and metadata, ensuring all data is formatted properly for the nnUNet pipeline.
+
+Key functionalities:
+- Write sample data to nnUNet-compatible format.
+- Handle segmentation and image data separately, including metadata.
+- Validate sample data to ensure required information (like segmentation images) is present.
+- Generate dataset JSON configuration and preprocessing scripts.
+- Handle the creation of necessary directories and datasets for nnUNet processing.
+
+Classes:
+    nnUNetOutput: A class for writing sample data in nnUNet format.
+
+Examples
+--------
+>>> import json
+>>> from pathlib import Path
+>>> from imgtools.dicom.crawl import Crawler, CrawlerSettings
+>>> from imgtools.dicom.dicom_metadata import MODALITY_TAGS
+>>> from imgtools.dicom.interlacer import Interlacer
+>>> from imgtools.io import SampleInput, nnUNetOutput
+>>>
+>>> # Set the directory containing DICOM files
+>>> dicom_dir = Path("data")
+>>>
+>>> # Set up the Crawler with DICOM directory and job settings
+>>> crawler_settings = CrawlerSettings(
+>>>     dicom_dir=dicom_dir,
+>>>     n_jobs=12,
+>>>     force=False
+>>> )
+>>>
+>>> crawler = Crawler.from_settings(crawler_settings)
+>>>
+>>> # Create an Interlacer to visualize the data structure
+>>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer.visualize_forest()
+>>>
+>>> # Query for specific modalities (e.g., CT and RTSTRUCT)
+>>> query = "CT,RTSTRUCT"
+>>> samples = interlacer.query(query)
+>>>
+>>> # Define the ROI names for segmentation
+>>> roi_names = {"GTV": "GTV.*"}
+>>> input = SampleInput(crawler.db_json, roi_names=roi_names, ignore_missing_regex=True)
+>>>
+>>> # Set the context keys by combining modality tags
+>>> context_keys = list(
+>>>     set.union(*[MODALITY_TAGS["ALL"], 
+>>>                 *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+>>> )
+>>>
+>>> # Define ROI indices (mapping of ROI names to indices)
+>>> roi_indices = {
+>>>     name: idx+1 for idx, name in enumerate(roi_names.keys())
+>>> }
+>>>
+>>> # Create an instance of nnUNetOutput for writing data
+>>> output = nnUNetOutput(
+>>>     root_directory=Path(".imgtools/data/output").resolve(), 
+>>>     roi_indices=roi_indices,
+>>>     dataset_name=dicom_dir.name, 
+>>>     writer_type="nifti", 
+>>>     context_keys=context_keys
+>>> )
+>>>
+>>> output_metadata = []
+>>> # Iterate over the samples, write output, and collect metadata
+>>> for sample_id, sample in enumerate(samples, start=1):
+>>>     metadata = output(
+>>>         input(sample),
+>>>         SampleID=f"{sample_id:03}",
+>>>         SplitType="Tr",
+>>>     )
+>>>     output_metadata.append(metadata)
+>>>
+>>> # Print the metadata in JSON format
+>>> print(json.dumps(output_metadata, indent=4))
+"""
+
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
-from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter
-from imgtools.modalities import Scan, Segmentation, PET 
-from imgtools.utils.nnunet import nnUNet_MODALITY_MAP, generate_nnunet_scripts, generate_dataset_json
+from imgtools.io.writers import (
+    AbstractBaseWriter,
+    ExistingFileMode,
+    NIFTIWriter,
+)
 from imgtools.loggers import logger
+from imgtools.modalities import PET, Scan, Segmentation
+from imgtools.utils.nnunet import (
+    generate_dataset_json,
+    generate_nnunet_scripts,
+    nnUNet_MODALITY_MAP,
+)
 
 
 @dataclass
@@ -54,7 +149,8 @@ class nnUNetOutput(BaseOutput):
                 self.filename_format += self.file_ending
                 return NIFTIWriter
             case _:
-                raise ValueError(f"Unsupported writer type: {self.writer_type}")
+                msg = f"Unsupported writer type: {self.writer_type}"
+                raise ValueError(msg)
     
     def __post_init__(self) -> None:
         """Initialize the NIFTIWriter, set up directories, and configure the writer context."""
@@ -193,12 +289,13 @@ class nnUNetOutput(BaseOutput):
 
 if __name__ == "__main__":
     import json
+
     from rich import print  # noqa
-    from imgtools.dicom.crawl import CrawlerSettings, Crawler
+
+    from imgtools.dicom.crawl import Crawler, CrawlerSettings
+    from imgtools.dicom.dicom_metadata import MODALITY_TAGS
     from imgtools.dicom.interlacer import Interlacer
     from imgtools.io.loaders import SampleInput
-    from imgtools.transforms import Transformer, Resample
-    from imgtools.dicom.dicom_metadata import MODALITY_TAGS
 
     dicom_dir = Path("data")
 
