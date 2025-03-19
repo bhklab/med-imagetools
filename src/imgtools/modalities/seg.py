@@ -33,7 +33,7 @@ class SEG:
     def from_dicom(cls, path: str, metadata: DicomInput) -> SEG:
         if len(metadata.SegmentSequence) > 1:
             seg = hd.seg.segread(path)
-            array = seg.get_volume(combine_segments=False, dtype=int).array
+            array = seg.get_volume(combine_segments=False, dtype=np.uint8).array
             array[array > 1] = 1
             mask_groups = defaultdict(list)  # Consolidate masks with the same name
 
@@ -52,9 +52,14 @@ class SEG:
 
         else:
             image_array = sitk.GetArrayFromImage(sitk.ReadImage(path))
-            image_array[image_array > 1] = 1
-            image = np.stack([image_array], axis=-1)
+            if metadata.SegmentationType == "FRACTIONAL":
+                image_array =  image_array.astype(np.float32) / metadata.MaximumFractionalValue
+            else:
+                image_array[image_array > 1] = 1
+                image_array = image_array.astype(np.uint8)
+
             roi_mapping = {metadata.SegmentSequence[0].SegmentLabel: 1}
+            image = np.stack([image_array], axis=-1)
 
         logger.info(
             "Read DICOM-SEG",
