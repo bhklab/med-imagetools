@@ -5,6 +5,7 @@ from typing import Any
 
 import yaml
 from joblib import Parallel, delayed  # type: ignore
+from tqdm import tqdm
 
 from imgtools.dicom import Crawler, Interlacer
 from imgtools.dicom.dicom_metadata import MODALITY_TAGS
@@ -21,6 +22,49 @@ class BetaPipeline():
         2. Load individual samples
         3. Apply transforms to each image
         4. Save each sample as desired directory structure
+
+    Parameters
+    ----------
+    input_directory : Path
+        Input directory containing the raw DICOM data
+    output_directory : Path
+        Output directory where the processed data will be saved
+    dcm_extension : str
+        Extension of the DICOM files, default is "dcm"
+    update_crawl : bool
+        Whether to update the crawl data if it already exists, default is False
+    query : str
+        Comma-separated string of modalities to query, default is "CT,RTSTRUCT"
+    spacing : tuple[float]
+        Spacing of the resampled image, default is (1.0, 1.0, 0.0)
+    window : float | None
+        Window level of the intensity adjustment, default is None
+    level : float | None
+        Window width of the intensity adjustment, default is None
+    nnunet : bool
+        Whether to format the output for nnU-Net, default is False
+    train_size : float
+        Proportion of samples to use for training/test for nnU-Net, default is 1.0
+        Only used if nnunet is True
+    random_state : int
+        Random seed for shuffling the samples for nnU-Net, default is 42
+    require_all_rois : bool
+        Whether all ROIs must be present in each sample for nnU-Net, default is True
+    n_jobs : int
+        Number of jobs to run in parallel, default is -1
+    dataset_name : str | None
+        Name of the dataset, default is None
+    writer_type : str
+        Type of writer to use, default is "nifti"
+    roi_yaml_path : Path | None
+        Path to the YAML file containing the ROI names, default is None
+    ignore_missing_regex : bool
+        Whether to ignore missing ROIs from roi_yaml_path, default is False
+        This is set to True for nnU-Net
+    roi_select_first : bool
+        Whether to select only the first ROI match from roi_yaml_path, default is False
+    roi_separate : bool
+        Whether to separate matches from roi_yaml_path, default is False
     """
 
     input_directory: Path
@@ -163,19 +207,17 @@ class BetaPipeline():
             # Process the samples in parallel
             self.metadata = Parallel(n_jobs=self.n_jobs)(
                 delayed(self.process_one_sample)(sample, idx) 
-                for idx, sample in enumerate(self.samples, start=1)
+                for idx, sample in enumerate(tqdm(
+                    self.samples,
+                    desc="Processing Samples",
+                    mininterval=1,
+                    leave=False,
+                ), start=1)
             )
 
         metadata_path = self.input_directory.parent / ".imgtools" / self.dataset_name / "metadata.json"
         with metadata_path.open("w") as f:
             json.dump(self.metadata, f, indent=4)
-
-        logger.info(
-            "Finished processing", 
-            input_directory=self.input_directory, 
-            output_directory=self.output_directory, 
-            metadata=self.metadata
-        )
 
         # After processing
         if self.nnunet:
