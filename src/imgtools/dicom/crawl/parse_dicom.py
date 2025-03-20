@@ -28,7 +28,7 @@ from imgtools.dicom.input import (
     seg_reference_uids,
     sr_reference_uids,
 )
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.utils import timer
 
 __all__ = [

@@ -6,7 +6,7 @@ from typing import Any, Generator
 import structlog
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from imgtools.logging.logging_config import DEFAULT_LOG_LEVEL, LoggingManager
+from imgtools.loggers.logging_config import DEFAULT_LOG_LEVEL, LoggingManager
 
 # Set the default log level from the environment variable or use the default
 DEFAULT_OR_ENV = os.environ.get("IMGTOOLS_LOG_LEVEL", DEFAULT_LOG_LEVEL)

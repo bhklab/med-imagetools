@@ -31,7 +31,7 @@ from joblib import Parallel, delayed  # type: ignore
 from pydicom import dcmread
 from tqdm import tqdm
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 
 # fmt: off

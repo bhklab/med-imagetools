@@ -10,7 +10,7 @@ from imgtools.io.writers import (
 import SimpleITK as sitk
 
 from ..ops.ops import BaseOutput
-from imgtools.logging import logger
+from imgtools.loggers import logger
 import pathlib
 from typing import List, Optional, Dict
 

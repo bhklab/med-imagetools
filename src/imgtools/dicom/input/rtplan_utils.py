@@ -1,5 +1,5 @@
 from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 __all__ = ["rtplan_reference_uids", "RTPLANRefStructSOP"]
 

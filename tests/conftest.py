@@ -13,7 +13,7 @@ from imgtools.datasets.github_helper import (
     GitHubRelease,
     MedImageTestData,
 )
-from imgtools.logging import logger  # type: ignore
+from imgtools.loggers import logger  # type: ignore
 
 # from .conf_helpers import ensure_data_dir_exists  # type: ignore
 
