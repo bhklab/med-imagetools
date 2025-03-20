@@ -170,28 +170,36 @@ class BetaPipeline():
             )
 
     def process_one_sample(self, sample: list[dict[str, str]], idx: int) -> dict[str, Any]:
-        # Load images
-        images = self.input(sample)
+        try:
+            # Load images
+            images = self.input(sample)
+                
+            # Apply transforms to all images
+            images = self.transformer(images)
+
+            # Save transformed images
+            if self.nnunet:
+                metadata = self.output(
+                    images,
+                    SampleID=f"{idx:03}",
+                    SplitType=self.train_test_mapping[idx],
+                )
+            else: 
+                metadata = self.output(
+                    images, 
+                    SampleID=f"{self.input_directory.name}_{idx:03d}"
+                ) 
             
-        # Apply transforms to all images
-        images = self.transformer(images)
+            metadata["SampleID"] = f"{idx:03d}"
 
-        # Save transformed images
-        if self.nnunet:
-            metadata = self.output(
-                images,
-                SampleID=f"{idx:03}",
-                SplitType=self.train_test_mapping[idx],
-            )
-        else: 
-            metadata = self.output(
-                images, 
-                SampleID=f"{self.input_directory.name}_{idx:03d}"
-            ) 
+            return metadata
         
-        metadata["SampleID"] = f"{idx:03d}"
-
-        return metadata
+        except Exception as e:
+            logger.warning(f"Failed to process sample {idx} with reference series {sample[0]["Series"]}: {e}")
+            return {
+                "SampleID": f"{idx:03d}",
+                "Error": str(e)
+            }
 
     def run(self) -> None:
         # Query Interlacer for samples of desired modalities
@@ -231,7 +239,7 @@ def main() -> None:
         input_directory=Path("data/ISPY2").resolve(),
         output_directory=Path("output").resolve(),
         query="MR,SEG",
-        n_jobs=4,
+        n_jobs=1,
         # nnunet=True,
         # roi_yaml_path=Path("roi.yaml"),
         update_crawl=True,
