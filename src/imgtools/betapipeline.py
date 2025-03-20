@@ -71,6 +71,10 @@ class BetaPipeline():
     input_directory: Path
     output_directory: Path
 
+    n_jobs: int = -1
+    dataset_name: str | None = None
+    writer_type: str = "nifti"
+
     # Crawl parameters
     dcm_extension: str = "dcm"
     update_crawl: bool = False
@@ -88,10 +92,6 @@ class BetaPipeline():
     train_size: float = 1.0
     random_state: int = 42
     require_all_rois: bool = True
-
-    n_jobs: int = -1
-    dataset_name: str | None = None
-    writer_type: str = "nifti"
 
     # ROI parameters
     roi_yaml_path: Path | None = None
@@ -197,6 +197,7 @@ class BetaPipeline():
     def run(self) -> None:
         # Query Interlacer for samples of desired modalities
         self.samples = self.lacer.query(self.query)
+        self.samples = [(idx, sample) for idx, sample in enumerate(self.samples, start=1)]
 
         # Before processing
         if self.nnunet:
@@ -209,12 +210,12 @@ class BetaPipeline():
             # Process the samples in parallel
             self.metadata = Parallel(n_jobs=self.n_jobs)(
                 delayed(self.process_one_sample)(sample, idx) 
-                for idx, sample in enumerate(tqdm(
+                for idx, sample in tqdm(
                     self.samples,
                     desc="Processing Samples",
                     mininterval=1,
-                    leave=False,
-                ), start=1)
+                    leave=True,
+                )
             )
 
         metadata_path = self.input_directory.parent / ".imgtools" / self.dataset_name / "metadata.json"
