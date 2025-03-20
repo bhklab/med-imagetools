@@ -5,7 +5,7 @@ on:
   push:
     branches: ["main", "development", "*"]
   pull_request:
-    branches: ["*"]
+    branches: ["develop/hackathon", "main", "development"]
 
 concurrency:
   group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
