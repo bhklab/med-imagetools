@@ -37,7 +37,7 @@ class BetaPipeline():
     query : str
         Comma-separated string of modalities to query, default is "CT,RTSTRUCT"
     spacing : tuple[float]
-        Spacing of the resampled image, default is (1.0, 1.0, 0.0)
+        Spacing to use for resampling, default is (1.0, 1.0, 0.0)
     window : float | None
         Window level of the intensity adjustment, default is None
     level : float | None
@@ -103,14 +103,14 @@ class BetaPipeline():
         self.dataset_name = self.dataset_name or self.input_directory.name
 
         ### CRAWL/CONNECT
-        self.crawl = Crawler(
+        crawl = Crawler(
             dicom_dir=self.input_directory,
             n_jobs=self.n_jobs,
             dcm_extension="dcm",
             force=self.update_crawl,
             dataset_name=self.dataset_name,
         )
-        self.lacer = Interlacer(self.crawl.db_csv) # uses CSV of crawl
+        self.lacer = Interlacer(crawl.db_csv) # uses CSV of crawl
 
         ### INPUT
         self.roi_names = None
@@ -130,7 +130,7 @@ class BetaPipeline():
                 self.ignore_missing_regex = True 
 
         self.input = SampleInput(
-            crawl_path=self.crawl.db_json, # uses JSON of crawl
+            crawl_path=crawl.db_json, # uses JSON of crawl
             root_directory=self.input_directory.parent,
             roi_names=self.roi_names,
             ignore_missing_regex=self.ignore_missing_regex,
@@ -191,7 +191,6 @@ class BetaPipeline():
         
         metadata["SampleID"] = f"{idx:03d}"
 
-        # Return metadata from each sample
         return metadata
 
     def run(self) -> None:
@@ -232,11 +231,12 @@ def main() -> None:
         input_directory=Path("data/ISPY2").resolve(),
         output_directory=Path("output").resolve(),
         query="MR,SEG",
-        n_jobs=1,
+        n_jobs=4,
         # nnunet=True,
         # roi_yaml_path=Path("roi.yaml"),
-        # update_crawl=True,
+        update_crawl=True,
     )
+
     autopipe.run()
 
 
