@@ -14,6 +14,7 @@ from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.transforms import Resample, Transformer, WindowIntensity
 from imgtools.utils.nnunet import create_train_test_mapping
 
+
 @dataclass
 class BetaPipeline():
     """
@@ -130,6 +131,7 @@ class BetaPipeline():
 
         self.input = SampleInput(
             crawl_path=self.crawl.db_json, # uses JSON of crawl
+            root_directory=self.input_directory.parent,
             roi_names=self.roi_names,
             ignore_missing_regex=self.ignore_missing_regex,
             roi_select_first=self.roi_select_first,
@@ -226,12 +228,12 @@ class BetaPipeline():
     
 def main() -> None:
     autopipe = BetaPipeline(
-        input_directory=Path("data"),
-        output_directory=Path("output"),
-        query="CT,RTSTRUCT",
+        input_directory=Path("data/ISPY2").resolve(),
+        output_directory=Path("output").resolve(),
+        query="MR,SEG",
         n_jobs=1,
-        nnunet=True,
-        roi_yaml_path=Path("roi.yaml"),
+        # nnunet=True,
+        # roi_yaml_path=Path("roi.yaml"),
         # update_crawl=True,
     )
     autopipe.run()
