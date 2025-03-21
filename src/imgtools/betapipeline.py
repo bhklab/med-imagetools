@@ -5,7 +5,7 @@ from typing import Any
 
 import yaml
 from joblib import Parallel, delayed  # type: ignore
-from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 
 from imgtools.dicom import Crawler, Interlacer
 from imgtools.dicom.dicom_metadata import MODALITY_TAGS
@@ -200,11 +200,14 @@ class BetaPipeline():
                 "SampleID": f"{idx:03d}",
                 "Error": str(e)
             }
-
+        
+    def _process_wrapper(self, args):
+            return self.process_one_sample(*args)
+    
     def run(self) -> None:
         # Query Interlacer for samples of desired modalities
         self.samples = self.lacer.query(self.query)
-        self.samples = [(idx, sample) for idx, sample in enumerate(self.samples, start=1)]
+        self.samples = [(sample, idx) for idx, sample in enumerate(self.samples, start=1)]
 
         # Before processing
         if self.nnunet:
@@ -213,16 +216,15 @@ class BetaPipeline():
                 self.train_size, self.random_state
             )
 
+        # Process samples
         with tqdm_logging_redirect():
-            # Process the samples in parallel
-            self.metadata = Parallel(n_jobs=self.n_jobs)(
-                delayed(self.process_one_sample)(sample, idx) 
-                for idx, sample in tqdm(
-                    self.samples,
-                    desc="Processing Samples",
-                    mininterval=1,
-                    leave=True,
-                )
+            self.metadata = process_map(
+                self._process_wrapper,
+                self.samples,
+                leave=True,
+                desc="Processing Samples",
+                mininterval=1,
+                max_workers=None if self.n_jobs == -1 else self.n_jobs,
             )
 
         metadata_path = self.input_directory.parent / ".imgtools" / self.dataset_name / "metadata.json"
