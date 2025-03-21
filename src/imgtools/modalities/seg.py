@@ -1,3 +1,42 @@
+"""
+SEG Module
+
+This module defines the `SEG` class, which represents a DICOM-SEG (Segmentation) object. 
+It provides functionalities for loading segmentation data from DICOM files, extracting 
+region-of-interest (ROI) masks, and aligning segmentation masks with reference images.
+
+Key Functionalities
+-------------------
+1. **Loading DICOM-SEG Data**  
+   - Reads segmentation masks from DICOM-SEG files.
+   - Supports multi-segment DICOM-SEG files and fractional segmentation masks..
+
+2. **Aligning Segmentation to Reference Scans**  
+   - Maps segmentation frames to reference images using SOPInstanceUID.
+   - Ensures spatial alignment for accurate analysis.
+
+3. **Converting SEG to Usable Mask Formats**  
+   - Transforms segmentation masks into structured mask representations.
+   - Allows filtering and renaming of ROIs using regex-based matching.
+
+Examples
+--------
+>>> from pydicom import dcmread
+>>> from pathlib import Path
+>>> from imgtools.io.loaders.utils import read_dicom_auto
+>>> from imgtools.modalities import SEG
+>>> 
+>>> path = "data/NSCLC-Radiomics/LUNG1-002/SEG_Series-5.421/00000001.dcm"
+>>> meta = dcmread(path, stop_before_pixels=True)
+>>> 
+>>> seg = SEG.from_dicom(path, meta)
+>>> 
+>>> ref = read_dicom_auto("data/NSCLC-Radiomics/LUNG1-002/CT_Series-61228")
+>>> 
+>>> res = seg.to_segmentation(ref, roi_names={"lung": "lung"})
+"""
+
+
 from __future__ import annotations
 
 import re
@@ -21,7 +60,26 @@ __all__ = ["SEG"]
 @dataclass
 class SEG:
     """
-    A class for representing a DICOM-SEG.
+    Represents a DICOM Segmentation (DICOM-SEG) object.
+
+    This class provides functionalities to load, store, and manipulate DICOM-SEG 
+    data, including extracting region-of-interest (ROI) masks, aligning segmentations 
+    with reference images, and converting segmentation masks into structured formats.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        A 4D array representing the segmentation mask(s). 
+        (depth, height, width, num_segments)
+    metadata : dict[str, str], optional
+        Metadata associated with the segmentation, stored as a dictionary.
+        Defaults to an empty dictionary.
+    roi_mapping : dict[str, int], optional
+        A mapping of ROI labels to their corresponding segmentation indices.
+        Defaults to an empty dictionary.
+    raw_dicom_meta : DicomInput, optional
+        The raw DICOM metadata from which the segmentation was extracted.
+        Defaults to None.
     """
 
     image: np.ndarray
@@ -31,13 +89,14 @@ class SEG:
     
     @classmethod
     def from_dicom(cls, path: str, metadata: DicomInput) -> SEG:
-        if len(metadata.SegmentSequence) > 1:
+        segment_sequence = metadata.SegmentSequence
+        if len(segment_sequence) > 1:
             seg = hd.seg.segread(path)
             array = seg.get_volume(combine_segments=False, dtype=np.uint8).array
             array[array > 1] = 1
             mask_groups = defaultdict(list)  # Consolidate masks with the same name
 
-            for i, segment in enumerate(metadata.SegmentSequence):
+            for i, segment in enumerate(segment_sequence):
                 label = segment.SegmentLabel
                 mask_groups[label].append(array[..., i])  # Store masks for this label
 
@@ -52,13 +111,14 @@ class SEG:
 
         else:
             image_array = sitk.GetArrayFromImage(sitk.ReadImage(path))
-            if metadata.SegmentationType == "FRACTIONAL":
-                image_array =  image_array.astype(np.float32) / metadata.MaximumFractionalValue
+            if getattr(metadata, "SegmentationType", None) == "FRACTIONAL":
+                maximum_fractional_value = metadata.MaximumFractionalValue
+                image_array =  image_array.astype(np.float32) / maximum_fractional_value
             else:
                 image_array[image_array > 1] = 1
                 image_array = image_array.astype(np.uint8)
 
-            roi_mapping = {metadata.SegmentSequence[0].SegmentLabel: 1}
+            roi_mapping = {segment_sequence[0].SegmentLabel: 1}
             image = np.stack([image_array], axis=-1)
 
         logger.info(
@@ -67,7 +127,7 @@ class SEG:
             roi_mapping=roi_mapping,
         )
 
-        return cls(image, metadata=dict(metadata), roi_mapping=roi_mapping, raw_dicom_meta=metadata)
+        return cls(image, metadata=dict(metadata), roi_mapping=roi_mapping, raw_dicom_meta=metadata) # type: ignore
 
     def __getitem__(self, idx: int | str) -> np.ndarray:
         """Get the binary mask for a given ROI index or label.
@@ -126,7 +186,8 @@ class SEG:
         if src_img_seq:
             return str(src_img_seq[idx].ReferencedSOPInstanceUID)
     
-        raise KeyError(f"Couldn't find Referenced SOPInstanceUID in metadata for index {idx}.")
+        msg = f"Couldn't find Referenced SOPInstanceUID in metadata for index {idx}."
+        raise KeyError(msg)
     
     def _align_to_reference(self, reference_image: Scan) -> None:
         """
@@ -162,7 +223,7 @@ class SEG:
         roi_select_first: bool = False,
         roi_separate: bool = False,
         ignore_missing_regex: bool = False,
-    ) -> Segmentation:
+    ) -> Segmentation | None:
         """
         Converts the segmentation into a mask based on ROI names.
 
@@ -224,7 +285,7 @@ class SEG:
         
         # Step 2: Select first match if required
         if roi_select_first:
-            matched_segments = {k: [v[0]] for k, v in matched_segments.items() if v}
+            matched_segments = {k: [v[0]] for k, v in matched_segments.items() if v} # type: ignore
 
         # Step 3: Extract and combine masks
         extracted_masks = []
@@ -235,8 +296,8 @@ class SEG:
                         extracted_masks.append(
                             (label_name, self[idx]))
                 else:
-                    mask = [self[idx] for idx in indices]
-                    mask = np.logical_or.reduce(mask).astype(np.uint8)
+                    masks = [self[idx] for idx in indices]
+                    mask: np.ndarray = np.logical_or.reduce(masks).astype(np.uint8)
                     extracted_masks.append((label, mask))
 
         # Step 4: Convert masks to sitk.Images
@@ -265,4 +326,4 @@ if __name__ == "__main__":
 
     ref = read_dicom_auto("data/NSCLC-Radiomics/LUNG1-002/CT_Series-61228")
 
-    res = seg.to_segmentation(ref, roi_names={"lung": "lung"})
+    res = seg.to_segmentation(ref, roi_names={"lung": "lung"}) # type: ignore
