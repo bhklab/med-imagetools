@@ -6,6 +6,7 @@ from . import set_log_verbosity
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
+from .autopipeline import autopipeline
 from .testdatasets import is_testdata_available
 
 
@@ -31,6 +32,7 @@ def cli(verbose: int, quiet: bool) -> None:
 cli.add_command(dicomsort)
 cli.add_command(dicomfind)
 cli.add_command(index)
+cli.add_command(autopipeline)
 
 if is_testdata_available():
     from .testdatasets import testdata

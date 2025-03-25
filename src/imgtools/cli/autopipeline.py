@@ -34,6 +34,11 @@ from imgtools import BetaPipeline
     help="Modalities to process as a comma separated string",
 )
 @click.option("--spacing", default=[1.0, 1.0, 0.0], type=tuple)
+
+@click.help_option(
+    "-h",
+    "--help",
+)
 def autopipeline(
     input_directory: Path,
     output_directory: Path,

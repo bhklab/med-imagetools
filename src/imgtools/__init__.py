@@ -4,6 +4,7 @@ from .coretypes import BoxPadMethod, Coordinate3D, RegionBox, Size3D, Spacing3D
 from .datasets import example_data, example_data_paths
 from .dicom import find_dicoms, lookup_tag, similar_tags, tag_exists
 from .loggers import logger
+from .betapipeline import BetaPipeline
 
 __all__ = [
     "find_dicoms",
@@ -20,4 +21,5 @@ __all__ = [
     ## example data
     "example_data",
     "example_data_paths",
+    "BetaPipeline"
 ]
