@@ -195,7 +195,7 @@ class BetaPipeline():
             return metadata
         
         except Exception as e:
-            logger.warning(f"Failed to process sample {idx} with reference series {sample[0]["Series"]}: {e}")
+            logger.warning(f"Failed to process sample {idx} with reference series {sample[0]['Series']}: {e}")
             return {
                 "SampleID": f"{idx:03d}",
                 "Error": str(e)
