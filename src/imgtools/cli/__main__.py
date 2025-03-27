@@ -3,10 +3,8 @@ import click
 from imgtools import __version__
 
 from . import set_log_verbosity
-from .dicomfind import find_dicoms
+from .dicomfind import dicomfind
 from .dicomsort import dicomsort
-
-# from .index import index
 from .testdatasets import is_testdata_available
 
 
@@ -30,8 +28,7 @@ def cli(verbose: int, quiet: bool) -> None:
 
 
 cli.add_command(dicomsort)
-cli.add_command(find_dicoms, "find-dicoms")
-# cli.add_command(index)
+cli.add_command(dicomfind)
 
 if is_testdata_available():
     from .testdatasets import testdata
