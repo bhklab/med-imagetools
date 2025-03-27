@@ -39,7 +39,7 @@ import SimpleITK as sitk
 from pydicom import dcmread
 from skimage.draw import polygon2mask
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.modalities.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 
@@ -517,11 +517,6 @@ class StructureSet:
                 msg = f"Invalid pattern type: {type(pattern)}, expected str or list."
                 raise ValueError(msg)
 
-        # Validate output
-        if not labels:
-            msg = f"No matching ROIs found for the provided patterns: {names}"
-            raise ValueError(msg)
-
         return labels
 
     def get_mask(
@@ -573,7 +568,7 @@ class StructureSet:
         | List[str]
         | Dict[str, Union[str, List[str]]]
         | None = None,
-        continuous: bool = True,
+        continuous: bool = False,
         existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,

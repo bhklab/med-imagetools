@@ -17,6 +17,7 @@ from .writers import (
     NiftiWriterIOError,
     NiftiWriterValidationError,
     SampleOutput,
+    nnUNetOutput
 )
 
 
@@ -39,4 +40,5 @@ __all__ = [
     "NiftiWriterIOError",
     "NiftiWriterValidationError",
     "SampleOutput",
+    "nnUNetOutput"
 ]

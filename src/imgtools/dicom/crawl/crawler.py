@@ -10,7 +10,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from imgtools.dicom.crawl import parse_dicom_dir
-from imgtools.logging import logger, tqdm_logging_redirect
+from imgtools.loggers import logger, tqdm_logging_redirect
 
 __all__ = ["CrawlerSettings", "Crawler"]
 

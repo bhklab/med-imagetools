@@ -143,6 +143,12 @@ MODALITY_TAGS = {
         "CoincidenceWindowWidth",
         "EnergyWindowLowerLimit",
         "EnergyWindowUpperLimit",
+        # Patient Information
+        "PatientWeight"
+    },
+    "RTDOSE": {
+        # Radiotracer & Injection Information
+        "DoseGridScaling",
     },
 }
 

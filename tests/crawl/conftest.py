@@ -6,7 +6,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from imgtools.logging import logger  # type: ignore
+from imgtools.loggers import logger  # type: ignore
 from rich import print as rprint
 import pytest
 def _win32_longpath(path):

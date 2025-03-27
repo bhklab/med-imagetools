@@ -4,6 +4,7 @@ examples/autotest.py
 temp_outputs
 .ruff_cache
 *built_with*
+procdata*
 
 #vscode files
 /.idea
