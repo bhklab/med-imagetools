@@ -9,6 +9,7 @@ from .imageutils import (
 from .optional_import import OptionalImportError, optional_import
 from .sanitize_file_name import sanitize_file_name
 from .timer_utils import TimerContext, timed_context, timer
+from .truncate_uid import truncate_uid
 
 __all__ = [
     # imageutils
@@ -27,4 +28,6 @@ __all__ = [
     "TimerContext",
     "timed_context",
     "timer",
+    # truncate_uid
+    "truncate_uid",
 ]

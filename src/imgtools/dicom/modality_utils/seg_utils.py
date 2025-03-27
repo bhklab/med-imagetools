@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 
 from pydicom.dataset import FileDataset
 
-from imgtools.dicom.input.dicom_reader import DicomInput, load_seg_dcm
+from imgtools.dicom.dicom_reader import DicomInput, load_seg_dcm
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset

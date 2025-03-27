@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from imgtools.dicom.input.dicom_reader import (
+from imgtools.dicom.dicom_reader import (
     DicomInput,
     load_rtstruct_dcm,
 )

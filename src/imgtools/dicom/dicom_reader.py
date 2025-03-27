@@ -1,7 +1,7 @@
 import os
 from io import BytesIO
 from pathlib import Path
-from typing import BinaryIO, TypeAlias, cast
+from typing import Any, BinaryIO, TypeAlias, cast
 
 from pydicom import dcmread
 from pydicom.dataset import FileDataset
@@ -40,6 +40,7 @@ def load_dicom(
     dicom_input: DicomInput,
     force: bool = True,
     stop_before_pixels: bool = True,
+    **kwargs: Any,  # noqa: ANN401
 ) -> FileDataset:
     """Load a DICOM file and return the parsed FileDataset object.
 
@@ -62,7 +63,9 @@ def load_dicom(
         header, by default True.
     stop_before_pixels : bool, optional
         Whether to stop reading the DICOM file before loading pixel data, by default True.
-
+    **kwargs
+        Additional keyword arguments to pass to `pydicom.dcmread`.
+        i.e `specific_tags`.
     Returns
     -------
     FileDataset
@@ -82,12 +85,14 @@ def load_dicom(
                 dicom_source,
                 force=force,
                 stop_before_pixels=stop_before_pixels,
+                **kwargs,
             )
         case bytes():
             return dcmread(
                 BytesIO(dicom_input),
                 force=force,
                 stop_before_pixels=stop_before_pixels,
+                **kwargs,
             )
         case _:
             msg = (
