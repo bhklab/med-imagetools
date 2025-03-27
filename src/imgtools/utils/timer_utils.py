@@ -79,15 +79,3 @@ def timed_context(name: str) -> TimerContext:
         # Output: `My Block took 3.1244 seconds`
     """
     return TimerContext(name)
-
-
-if __name__ == "__main__":
-
-    @timer("My Function")
-    def my_function() -> None:
-        time.sleep(1)
-
-    my_function()
-
-    with timed_context("My Block"):
-        time.sleep(1)
