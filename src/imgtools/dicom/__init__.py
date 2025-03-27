@@ -5,11 +5,13 @@ from .dicom_reader import (
     load_rtstruct_dcm,
     load_seg_dcm,
 )
+from .read_tags import read_tags
 from .utils import lookup_tag, similar_tags, tag_exists
 
 __all__ = [
-    # utils
+    # dicom_find
     "find_dicoms",
+    # utils
     "lookup_tag",
     "similar_tags",
     "tag_exists",
@@ -18,4 +20,6 @@ __all__ = [
     "load_dicom",
     "load_rtstruct_dcm",
     "load_seg_dcm",
+    # read_tags
+    "read_tags",
 ]
