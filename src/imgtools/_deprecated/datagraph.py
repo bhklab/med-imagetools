@@ -5,7 +5,7 @@ from typing import Callable, List, Tuple
 import numpy as np
 import pandas as pd
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 
 class DataGraph:

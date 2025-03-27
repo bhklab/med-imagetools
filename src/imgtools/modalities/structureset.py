@@ -39,7 +39,7 @@ import SimpleITK as sitk
 from pydicom import dcmread
 from skimage.draw import polygon2mask
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.modalities.segmentation import Segmentation
 from imgtools.utils import physical_points_to_idxs
 

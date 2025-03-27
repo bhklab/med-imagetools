@@ -5,7 +5,7 @@ from typing import ClassVar
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 from .abstract_base_writer import AbstractBaseWriter, ExistingFileMode
 

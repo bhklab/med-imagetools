@@ -7,7 +7,7 @@ import pytest
 import SimpleITK as sitk
 
 from imgtools._deprecated.autopipeline import AutoPipeline
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 
 # @pytest.mark.parametrize("modalities",["PT", "CT,RTSTRUCT", "CT,RTDOSE", "CT,PT,RTDOSE", "CT,RTSTRUCT,RTDOSE", "CT,RTSTRUCT,RTDOSE,PT"])

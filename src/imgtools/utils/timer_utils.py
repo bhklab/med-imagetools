@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from typing import Any, Callable
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 __all__ = ["timer", "timed_context", "TimerContext"]
 

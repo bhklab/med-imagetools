@@ -5,7 +5,7 @@ from typing import List
 import click
 
 from imgtools.dicom.dicom_find import find_dicoms
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 
 def natural_sort_key(s: str) -> list:
