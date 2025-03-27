@@ -109,7 +109,6 @@ class TestReadTags:
         result = read_tags(
             file=dicom_test_file,
             tags=tags,
-            truncate=True,
         )
         assert result == {}
 
@@ -121,7 +120,6 @@ class TestReadTags:
             read_tags(
                 file=dicom_test_file,
                 tags=tags,
-                truncate=True,
             )
 
     def test_read_tags_with_partial_metadata(
@@ -132,7 +130,6 @@ class TestReadTags:
             read_tags(
                 file=dicom_test_file,
                 tags=tags,
-                truncate=True,
             )
         # assert result['PatientName'] == 'Test^Firstname'
         # assert result['Modality'] == 'CT'
@@ -145,7 +142,7 @@ class TestReadTags:
         result = read_tags(
             file=dicom_test_file,
             tags=tags,
-            truncate=False,
+            truncate=0,
         )
         assert (
             result["SeriesInstanceUID"]
@@ -157,7 +154,6 @@ class TestReadTags:
             read_tags(
                 file=None,  # type: ignore
                 tags=["PatientID"],
-                truncate=True,
             )
 
     def test_invalid_dicom_file(self) -> None:
@@ -167,7 +163,6 @@ class TestReadTags:
             read_tags(
                 file=Path(inv_file),
                 tags=["PatientID"],
-                truncate=True,
             )
 
 
