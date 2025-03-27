@@ -86,7 +86,7 @@ from imgtools.dicom.sort.highlighter import TagHighlighter
 from imgtools.pattern_parser.parser import PatternParser
 from imgtools.dicom.sort.sort_method import FileAction, handle_file
 from imgtools.dicom.sort.sorter_base import SorterBase, resolve_path
-from imgtools.dicom.sort.utils import read_tags
+from imgtools.dicom.read_tags import read_tags
 from imgtools.dicom.sort.dicomsorter import DICOMSorter
 
 __all__ = [

@@ -47,7 +47,7 @@ from rich.tree import Tree
 
 from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
-from imgtools.dicom.sort.utils import read_tags
+from imgtools.dicom.read_tags import read_tags
 from imgtools.logging import logger
 
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r"%([A-Za-z]+)|\{([A-Za-z]+)\}")
@@ -57,7 +57,7 @@ def resolve_path(
     path: Path,
     keys: Set[str],
     format_str: str,
-    truncate: int,
+    truncate: int = 5,
     check_existing: bool = True,
     force: bool = True,
 ) -> Tuple[Path, Path]:

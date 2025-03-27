@@ -1,4 +1,4 @@
-from imgtools.dicom.input.dicom_reader import DicomInput, load_dicom
+from imgtools.dicom.dicom_reader import DicomInput, load_dicom
 
 __all__ = [
     "rtdose_reference_uids",

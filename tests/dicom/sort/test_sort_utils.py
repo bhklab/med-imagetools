@@ -8,7 +8,8 @@ from pydicom.dataset import Dataset, FileMetaDataset
 from pydicom.errors import InvalidDicomError
 from pydicom.uid import UID, ExplicitVRLittleEndian
 
-from imgtools.dicom.sort.utils import read_tags, truncate_uid
+from imgtools.dicom.read_tags import read_tags
+from imgtools.utils.truncate_uid import truncate_uid
 
 
 @pytest.fixture(scope="module")
