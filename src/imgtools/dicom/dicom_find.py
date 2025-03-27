@@ -44,11 +44,9 @@ def find_dicoms(
         Whether to validate files by checking for a valid DICOM header.
             - If `True`, perform DICOM header validation (slower but more accurate).
             - If `False`, skip header validation and rely on extension.
-
     extension : str, optional
         File extension to search for (e.g., "dcm"). If `None`, consider all files
         regardless of extension.
-
     limit : int, optional
         Maximum number of DICOM files to return. If `None`, return all found files.
 
