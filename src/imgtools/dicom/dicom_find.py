@@ -49,6 +49,9 @@ def find_dicoms(
         regardless of extension.
     limit : int, optional
         Maximum number of DICOM files to return. If `None`, return all found files.
+    search_input : List[str], optional
+        List of terms to filter files by. Only files containing all terms
+        in their paths will be included. If `None`, no filtering is applied.
 
     Returns
     -------
@@ -64,12 +67,8 @@ def find_dicoms(
     --------
     Setup
 
-    >>> from pathlib import (
-    ...     Path,
-    ... )
-    >>> from imgtools.dicom.utils import (
-    ...     find_dicoms,
-    ... )
+    >>> from pathlib import Path
+    >>> from imgtools.dicom.dicom_find import find_dicoms
 
     Find DICOM files recursively without header validation:
 
@@ -78,9 +77,11 @@ def find_dicoms(
     ...     recursive=True,
     ...     check_header=False,
     ... )
-    [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), PosixPath('/data/subdir/scan3.DCM')]
+    [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm'), \
+PosixPath('/data/subdir/scan3.DCM')]
 
-    Suppose that `scan3.DCM` is not a valid DICOM file. Find DICOM files with header validation:
+    Suppose that `scan3.DCM` is not a valid DICOM file. Find DICOM files with \
+header validation:
 
     >>> find_dicoms(
     ...     Path("/data"),
@@ -111,10 +112,7 @@ def find_dicoms(
     ...     Path("/data"),
     ...     recursive=True,
     ...     check_header=False,
-    ...     search_input=[
-    ...         "1",
-    ...         "n2",
-    ...     ],
+    ...     search_input=["1", "scan2"],
     ... )
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
 
