@@ -9,11 +9,10 @@ from imgtools.logging import logger
 
 def _is_valid_dicom(file: Path, check_header: bool) -> bool:
     """
-    Notes
-    -----
-    Validation includes:
-    - Ensuring the file is a valid DICOM file (if `check_header` is True).
-    - Ensuring the file exists and is not a directory (if `check_header` is False).
+    Determines if a file is valid as a DICOM.
+    
+    If `check_header` is True, the file must exist (and not be a directory) and pass a DICOM header check.
+    If `check_header` is False, only the file’s existence as a regular file is verified.
     """
     if check_header:
         return is_dicom(file) and file.is_file()

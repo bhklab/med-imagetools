@@ -51,6 +51,18 @@ class DICOMSorter(SorterBase):
         target_pattern: str,
         pattern_parser: Pattern = DEFAULT_PATTERN_PARSER,
     ) -> None:
+        """
+        Initialize a DICOMSorter instance.
+        
+        Initializes the sorter with the specified source directory and target pattern.
+        The target pattern is parsed using the provided pattern_parser (defaults to the
+        default parser), and the valid DICOM keys derived from the pattern are logged.
+            
+        Args:
+            source_directory: Directory containing DICOM files.
+            target_pattern: Format string used to extract DICOM metadata.
+            pattern_parser: Parser to interpret the target pattern.
+        """
         super().__init__(
             source_directory=source_directory,
             target_pattern=target_pattern,
@@ -107,35 +119,31 @@ class DICOMSorter(SorterBase):
         num_workers: int = 1,
         truncate_uids: int = 5,
     ) -> None:
-        """Execute the file action on DICOM files.
-
-        Users are encouraged to use FileAction.HARDLINK for
-        efficient storage and performance for large dataset, as well as
-        protection against lost data.
-
-        Using hard links can save disk space and improve performance by
-        creating multiple directory entries (links) for a single file
-        instead of duplicating the file content. This is particularly
-        useful when working with large datasets, such as DICOM files,
-        where storage efficiency is crucial.
-
-        Parameters
-        ----------
-        action : FileAction, default: FileAction.MOVE
-            The action to apply to the DICOM files (e.g., move, copy).
-        overwrite : bool, default: False
-            If True, overwrite existing files at the destination.
-        dry_run : bool, default: False
-            If True, perform a dry run without making any changes.
-        num_workers : int, default: 1
-            The number of worker threads to use for processing files.
-        truncate_uids : int, default: 5
-            The number of characters to truncate from the UID.
-
-        Raises
-        ------
-        ValueError
-                If the provided action is not a valid FileAction.
+        """
+        Execute the specified file action on DICOM files.
+        
+        This method resolves new file paths based on DICOM metadata, checks for duplicate
+        destinations, and then applies the designated file operation (move, copy, or hardlink)
+        to each file. For large datasets, using FileAction.HARDLINK is recommended for efficient
+        storage and data safety. The method supports parallel processing via the num_workers
+        parameter and offers a dry run mode to preview changes without modifying any files.
+        The truncate_uids parameter specifies how many characters to remove from the UID when
+        constructing new file paths.
+        
+        Parameters:
+            action (FileAction or str, optional): The file operation to perform.
+                Defaults to FileAction.MOVE.
+            overwrite (bool, optional): If True, overwrite existing files at the destination.
+                Defaults to False.
+            dry_run (bool, optional): If True, display proposed changes without altering files.
+                Defaults to False.
+            num_workers (int, optional): Number of workers to use for processing files in parallel.
+                Defaults to 1.
+            truncate_uids (int, optional): Number of characters to truncate from the UID when
+                resolving new paths. Defaults to 5.
+        
+        Raises:
+            ValueError: If duplicate destination paths are detected.
         """
         if not isinstance(action, FileAction):
             action = FileAction.validate(action)
@@ -201,22 +209,26 @@ class DICOMSorter(SorterBase):
         self, file_map: Dict[Path, Path]
     ) -> Dict[Path, Path]:
         """
-        Check if any of the resolved paths are duplicates.
-
+        Check for duplicate destination paths in the file map.
+        
+        This function inverts the mapping to associate each resolved path with a list of
+        source paths. If any resolved path is linked to more than one source file, a
+        warning is logged and a ValueError is raised.
+        
         Parameters
         ----------
         file_map : Dict[Path, Path]
-            A dictionary mapping source paths to resolved paths.
-
+            Mapping from source file paths to their resolved destination paths.
+        
         Returns
         -------
         Dict[Path, Path]
-            A dictionary mapping source paths to resolved paths.
-
+            The original file map if no duplicates are detected.
+        
         Raises
         ------
         ValueError
-            If any of the resolved paths are duplicates.
+            If duplicate resolved paths are found.
         """
         # opposite of the file_map
         # key: resolved path, value: list of source paths
@@ -247,21 +259,28 @@ class DICOMSorter(SorterBase):
         num_workers: int = 1,
         truncate_uids: int = 5,
     ) -> Dict[Path, Path]:
-        """Resolve the new paths for all DICOM files using parallel processing.
-
+        """
+        Resolve new file paths for all DICOM files concurrently using a process pool.
+        
+        This method leverages a ProcessPoolExecutor to determine the destination path for
+        each DICOM file based on defined formatting rules and keys. The UID for each file
+        is truncated to the specified length to form part of the destination path, and
+        progress is tracked using the given progress bar.
+        
         Parameters
         ----------
         progress_bar : progress.Progress
-                Progress bar to use for tracking the progress of the operation.
-        num_workers : int, default=1
-                Number of threads to use for parallel processing.
-        truncate_uids : int, default=5
-                Number of characters to truncate from the UID.
-
+            A progress bar instance for tracking the resolution of file paths.
+        num_workers : int, optional
+            The number of worker processes to use for parallel resolution (default is 1).
+        truncate_uids : int, optional
+            The number of characters to retain from each file's UID during path resolution
+            (default is 5).
+        
         Returns
         -------
         Dict[Path, Path]
-                A mapping of source paths to resolved paths.
+            A mapping from each original DICOM file path to its newly resolved destination path.
         """
         task = progress_bar.add_task(
             "Resolving paths", total=len(self.dicom_files)

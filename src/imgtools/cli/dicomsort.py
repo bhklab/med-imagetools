@@ -78,7 +78,25 @@ def dicomsort(
     num_workers: int,
     truncate_uids: int,
 ) -> None:
-    """Sorts DICOM files into directories based on their tags."""
+    """
+    Sorts DICOM files into directories based on metadata tags.
+    
+    Organizes DICOM files from the specified source directory into destination
+    directories according to a file action. Supports a simulation mode (dry run),
+    concurrent processing with multiple workers, and optional truncation of DICOM
+    UIDs.
+    
+    Args:
+        source_directory: Directory path containing the DICOM files.
+        target_directory: Pattern specifying how the destination directories are named.
+        action: Operation to perform on the files (e.g., move or copy).
+        dry_run: If True, simulates the sorting process without modifying files.
+        num_workers: Number of processes to use for sorting files concurrently.
+        truncate_uids: The length to which DICOM file UIDs should be truncated.
+    
+    Raises:
+        click.Abort: If initialization of the DICOM sorter fails.
+    """
     logger.info(f"Sorting DICOM files in {source_directory}.")
     logger.debug("Debug Args", args=locals())
     # TODO: eagerly validate target pattern somehow?

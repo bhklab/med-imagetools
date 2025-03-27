@@ -62,27 +62,26 @@ def resolve_path(
     force: bool = True,
 ) -> Tuple[Path, Path]:
     """
-    Worker function to resolve a single path.
-
-    Parameters
-    ----------
-    path : Path
-        The source file path.
-    keys : Set[str]
-        The DICOM keys required for resolving the path.
-    format_str : str
-        The format string for the resolved path.
-    check_existing : bool, optional
-        If True, check if the resolved path already exists (default is True).
-    truncate : int, optional
-        The number of characters to trunctae UID values (default is 5).
-    force : bool, optional
-        passed to pydicom.dcmread() to force reading the file (default is False).
-
-    Returns
-    -------
-    Tuple[Path, Path]
-        The source path and resolved path.
+    Resolves a DICOM file path using metadata tags and a format string.
+    
+    Extracts specified DICOM tags from the source file—truncating UID values to retain only the
+    given number of characters—and applies them to the provided format string to generate a new
+    file path. If check_existing is True, verifies that the resolved path does not already exist,
+    raising a FileExistsError if it does.
+    
+    Args:
+        path: The source file path.
+        keys: The set of DICOM tag keys to extract.
+        format_str: The format string used to construct the resolved path.
+        truncate: The number of characters to retain from UID values.
+        check_existing: If True, checks for the existence of the resolved path (default is True).
+        force: If True, forces reading of the file when extracting tags (default is True).
+    
+    Returns:
+        A tuple containing the original file path and the generated resolved path.
+    
+    Raises:
+        FileExistsError: If check_existing is True and the resolved path already exists.
     """
     tags: Dict[str, str] = read_tags(
         path, list(keys), truncate=truncate, force=force, default="Unknown"

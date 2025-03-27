@@ -9,7 +9,11 @@ from imgtools.logging import logger
 
 
 def natural_sort_key(s: str) -> list:
-    """Sort strings in a natural order."""
+    """Generate a natural sorting key from a string.
+    
+    Splits the input string into numeric and non-numeric segments, converting digit groups to
+    integers and non-digit parts to lowercase strings to enable natural order sorting.
+    """
     return [
         int(text) if text.isdigit() else text.lower()
         for text in re.split(r"(\d+)", str(s))
@@ -87,15 +91,23 @@ def dicomfind(
     limit: int,
     sort_results: bool,
 ) -> None:
-    """A tool to find DICOM files.
-
-    PATH is the directory to search for DICOM files.
-
-    SEARCH_INPUT is an optional list of substring(s) to search for in the DICOM files.
-    If multiple substrings are provided, all substrings must match to return a result.
-
-    i.e dicomfind /path/to/directory/ "substring1" "substring2" "substring3"
-
+    """
+    Search and display DICOM files matching specified criteria.
+    
+    This command-line utility searches for DICOM files in the given directory and filters
+    them based on file extension, header verification, and optional substring matches.
+    If multiple substrings are provided, a file must contain all of them to be selected.
+    The function can limit the number of results, sort them in natural order, or display only
+    the total count of matching files.
+      
+    Args:
+        search_input: List of substrings that must all appear in a DICOM file.
+        path: Directory in which to search for DICOM files.
+        extension: File extension used to identify DICOM files (e.g., "dcm").
+        check_header: If True, validates that a file's header contains the "DICM" signature.
+        count: When True, displays only the number of matching files.
+        limit: Maximum number of files to return.
+        sort_results: If True, sorts the found files in natural (human-friendly) order.
     """
     logger.info("Searching for DICOM files.", args=locals())
 

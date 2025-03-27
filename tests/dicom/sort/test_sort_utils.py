@@ -115,6 +115,13 @@ class TestReadTags:
     def test_read_tags_with_nonexistent_tags(
         self, dicom_test_file: Path
     ) -> None:
+        """
+        Tests that read_tags raises a ValueError when a nonexistent tag is requested.
+        
+        This test provides a DICOM file with predefined metadata and attempts to
+        retrieve a tag that does not exist. The expected behavior is for read_tags
+        to raise a ValueError when encountering the absent tag.
+        """
         tags = ["NonexistentTag"]
         with pytest.raises(ValueError):
             read_tags(

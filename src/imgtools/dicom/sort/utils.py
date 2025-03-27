@@ -89,77 +89,44 @@ def read_tags(
     force: bool = False,
 ) -> Dict[str, str]:
     """
-    Read the specified tags from a DICOM file.
-
-    Reads a set of tags from a DICOM file and applies optional sanitization
-    and truncation for UIDs. Handles cases where specific tags may be missing.
-
-    Parameters
-    ----------
-    file : Path
-        Path to the DICOM file.
-    tags : list of str
-        List of DICOM tags to read.
-    truncate : int, optional
-        Number of characters to keep at the end of UIDs (default is 5).
-        0 or negative values will keep the entire UID.
-    default : str, optional
-        Default value to use for missing tags (default is "").
-    force : bool, optional
-        If True, force reading the file even if it is not a valid DICOM file
-        (default is False).
-
-    Returns
-    -------
-    dict of str : str
-        A dictionary mapping tags to their values.
-
-    Raises
-    ------
-    TypeError
-        If there is a type error while reading the DICOM file.
-    InvalidDicomError
-        If the file is not a valid DICOM file.
-    ValueError
-        If there is a value error while reading the file.
-
-    Notes
-    -----
-    For RTSTRUCT files, missing 'InstanceNumber' tags default to '1'.
-
-    Examples
-    --------
-    Read tags from a valid DICOM file with truncation:
-    >>> from pathlib import (
-    ...     Path,
-    ... )
-    >>> read_tags(
-    ...     Path("sample.dcm"),
-    ...     [
-    ...         "PatientID",
-    ...         "StudyInstanceUID",
-    ...     ],
-    ... )
-    {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
-
-    Read tags without truncating UIDs:
-    >>> read_tags(
-    ...     Path("sample.dcm"),
-    ...     [
-    ...         "PatientID",
-    ...         "StudyInstanceUID",
-    ...     ],
-    ...     truncate=False,
-    ... )
-    {'PatientID': '12345', 'StudyInstanceUID': '1.2.840.10008.1.2.1'}
-
-    Handle missing tags:
-    >>> read_tags(
-    ...     Path("sample.dcm"),
-    ...     ["NonexistentTag"],
-    ... )
-    [warn] No value for tag: NonexistentTag in file: sample.dcm
-    {'NonexistentTag': 'UNKNOWN'}
+    Extracts specified DICOM tags from a file.
+    
+    Reads a DICOM file and returns a dictionary mapping each requested tag to its
+    value. For tags ending with "UID", the value is truncated to the last `truncate`
+    characters if `truncate` is positive; otherwise, the full UID is retained.
+    Missing tags are assigned the specified default value (with RTSTRUCT files defaulting
+    the missing 'InstanceNumber' to '1').
+    
+    Parameters:
+        file (Path): Path to the DICOM file.
+        tags (List[str]): List of DICOM tags to extract.
+        truncate (int, optional): Number of characters to keep from the end of UID strings.
+            A non-positive value disables truncation (default is 5).
+        default (Optional[str], optional): Value assigned to missing tags (default is "").
+        force (bool, optional): If True, attempts to read the file even if it is not a valid
+            DICOM file (default is False).
+    
+    Returns:
+        Dict[str, str]: A dictionary where keys are tag names and values are their extracted values.
+    
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        InvalidDicomError: If the file is not a valid DICOM file.
+        ValueError: If an error occurs while reading the file.
+    
+    Examples:
+        Extract tags with UID truncation:
+            >>> from pathlib import Path
+            >>> read_tags(Path("sample.dcm"), ["PatientID", "StudyInstanceUID"])
+            {'PatientID': '12345', 'StudyInstanceUID': '1.2.3.4.5'}
+    
+        Extract tags without UID truncation:
+            >>> read_tags(Path("sample.dcm"), ["PatientID", "StudyInstanceUID"], truncate=0)
+            {'PatientID': '12345', 'StudyInstanceUID': '1.2.840.10008.1.2.1'}
+    
+        Handle missing tags:
+            >>> read_tags(Path("sample.dcm"), ["NonexistentTag"])
+            {'NonexistentTag': 'UNKNOWN'}
     """
     assert isinstance(file, Path)
     assert (
