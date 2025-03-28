@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/tag_exists/">
       
       
-        <link rel="prev" href="../tag-helpers/">
+        <link rel="prev" href="../similar_tags/">
       
       
         <link rel="next" href="../../dicomsort/dicomsorter/">
@@ -264,7 +264,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../cli/AutoPipeline/" class="md-tabs__link">
+        <a href="../../../cli/imgtools/" class="md-tabs__link">
           
   
     
@@ -399,8 +399,6 @@
       
         
       
-        
-      
     
     
       
@@ -455,10 +453,6 @@
     
       
         
-          
-        
-      
-        
       
     
     
@@ -475,10 +469,8 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          
-          <div class="md-nav__link md-nav__container">
-            <a href="../../../usage/CoreTypes/" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
   
   <span class="md-ellipsis">
     Core Types
@@ -486,14 +478,8 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_2">
@@ -501,8 +487,6 @@
             Core Types
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
             
               
                 
@@ -545,6 +529,8 @@
       
         
       
+        
+      
     
     
       
@@ -564,7 +550,7 @@
             
   
   <span class="md-ellipsis">
-    Functional
+    Writers
     
   </span>
   
@@ -574,83 +560,6 @@
         
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_3">
-            <span class="md-nav__icon md-icon"></span>
-            Functional
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../usage/Functional/functional/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Functional Transformations
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Writers
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Writers
           </label>
@@ -726,10 +635,6 @@
       
         
       
-        
-      
-        
-      
     
     
       
@@ -763,50 +668,6 @@
             CLI Reference
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../cli/AutoPipeline/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    AutoPipeline Usage
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../cli/nnUNet/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Preparing Data for nnUNet
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -899,8 +760,6 @@
   
     
     
-      
-        
       
         
       
@@ -1027,28 +886,6 @@
   
   <span class="md-ellipsis">
     Similar Tags
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../tag-helpers/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Tag Helpers
     
   </span>
   
@@ -1432,53 +1269,53 @@
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-231">231</a></span>
-<span class="normal"><a href="#__codelineno-0-232">232</a></span>
-<span class="normal"><a href="#__codelineno-0-233">233</a></span>
-<span class="normal"><a href="#__codelineno-0-234">234</a></span>
-<span class="normal"><a href="#__codelineno-0-235">235</a></span>
-<span class="normal"><a href="#__codelineno-0-236">236</a></span>
-<span class="normal"><a href="#__codelineno-0-237">237</a></span>
-<span class="normal"><a href="#__codelineno-0-238">238</a></span>
-<span class="normal"><a href="#__codelineno-0-239">239</a></span>
-<span class="normal"><a href="#__codelineno-0-240">240</a></span>
-<span class="normal"><a href="#__codelineno-0-241">241</a></span>
-<span class="normal"><a href="#__codelineno-0-242">242</a></span>
-<span class="normal"><a href="#__codelineno-0-243">243</a></span>
-<span class="normal"><a href="#__codelineno-0-244">244</a></span>
-<span class="normal"><a href="#__codelineno-0-245">245</a></span>
-<span class="normal"><a href="#__codelineno-0-246">246</a></span>
-<span class="normal"><a href="#__codelineno-0-247">247</a></span>
-<span class="normal"><a href="#__codelineno-0-248">248</a></span>
-<span class="normal"><a href="#__codelineno-0-249">249</a></span>
-<span class="normal"><a href="#__codelineno-0-250">250</a></span>
-<span class="normal"><a href="#__codelineno-0-251">251</a></span>
-<span class="normal"><a href="#__codelineno-0-252">252</a></span>
-<span class="normal"><a href="#__codelineno-0-253">253</a></span>
-<span class="normal"><a href="#__codelineno-0-254">254</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-231" name="__codelineno-0-231"></a><span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a><span class="k">def</span><span class="w"> </span><span class="nf">tag_exists</span><span class="p">(</span><span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Boolean check if a DICOM tag exists for a given keyword.</span>
-<a id="__codelineno-0-234" name="__codelineno-0-234"></a>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-236" name="__codelineno-0-236"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="sd">    keyword : str</span>
-<a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="sd">        The DICOM keyword to check.</span>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">    bool</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">        True if the tag exists, False otherwise.</span>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">    Examples</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    --------</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;PatientID&quot;)</span>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    True</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;InvalidKeyword&quot;)</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a><span class="sd">    False</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">return</span> <span class="n">dictionary_has_tag</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span>
+<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+<span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span>
+<span class="normal"><a href="#__codelineno-0-72">72</a></span>
+<span class="normal"><a href="#__codelineno-0-73">73</a></span>
+<span class="normal"><a href="#__codelineno-0-74">74</a></span>
+<span class="normal"><a href="#__codelineno-0-75">75</a></span>
+<span class="normal"><a href="#__codelineno-0-76">76</a></span>
+<span class="normal"><a href="#__codelineno-0-77">77</a></span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span>
+<span class="normal"><a href="#__codelineno-0-79">79</a></span>
+<span class="normal"><a href="#__codelineno-0-80">80</a></span>
+<span class="normal"><a href="#__codelineno-0-81">81</a></span>
+<span class="normal"><a href="#__codelineno-0-82">82</a></span>
+<span class="normal"><a href="#__codelineno-0-83">83</a></span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span>
+<span class="normal"><a href="#__codelineno-0-85">85</a></span>
+<span class="normal"><a href="#__codelineno-0-86">86</a></span>
+<span class="normal"><a href="#__codelineno-0-87">87</a></span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="k">def</span><span class="w"> </span><span class="nf">tag_exists</span><span class="p">(</span><span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Boolean check if a DICOM tag exists for a given keyword.</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    keyword : str</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        The DICOM keyword to check.</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    bool</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">        True if the tag exists, False otherwise.</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    Examples</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">    --------</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;PatientID&quot;)</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    True</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    &gt;&gt;&gt; tag_exists(&quot;InvalidKeyword&quot;)</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    False</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="k">return</span> <span class="n">dictionary_has_tag</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1541,7 +1378,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../tag-helpers/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tag Helpers">
+          <a href="../similar_tags/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Similar Tags">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1551,7 +1388,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Tag Helpers
+                Similar Tags
               </div>
             </div>
           </a>
