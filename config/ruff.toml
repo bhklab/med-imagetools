@@ -7,17 +7,13 @@ include = [
   "src/imgtools/coretypes/**/*.py",
   "src/imgtools/dicom/**/*.py",
   "src/imgtools/io/**/*.py",
-  "src/imgtools/logging/**/*.py",
+  "src/imgtools/loggers/**/*.py",
   "src/imgtools/modules/*.py",
   "src/imgtools/__init__.py",
   "src/imgtools/utils/*.py",
 ]
 
-extend-exclude = [
-  ".pixi/**/*",
-  "tests/**/*.py",
-  "src/imgtools/pipeline.py",
-]
+extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/pipeline.py"]
 
 cache-dir = ".cache/.ruff-cache"
 
