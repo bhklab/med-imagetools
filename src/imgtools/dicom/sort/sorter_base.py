@@ -48,7 +48,7 @@ from rich.tree import Tree
 from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.dicom.read_tags import read_tags
 from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r"%([A-Za-z]+)|\{([A-Za-z]+)\}")
 

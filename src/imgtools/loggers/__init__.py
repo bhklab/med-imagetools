@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Any, Generator
 
 import structlog
-from tqdm.contrib.logging import logging_redirect_tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm as _redirect_tqdm
 
-from imgtools.logging.logging_config import DEFAULT_LOG_LEVEL, LoggingManager
+from imgtools.loggers.logging_config import DEFAULT_LOG_LEVEL, LoggingManager
 
 # Set the default log level from the environment variable or use the default
 DEFAULT_OR_ENV = os.environ.get("IMGTOOLS_LOG_LEVEL", DEFAULT_LOG_LEVEL)
@@ -48,6 +48,7 @@ def temporary_log_level(
 ) -> Generator[None, Any, None]:
     """
     Temporarily change the log level of a logger within a context.
+
     Parameters
     ----------
     logger : structlog.stdlib.BoundLogger
@@ -81,11 +82,6 @@ def tqdm_logging_redirect(
     logger_name : str, optional
         The name of the logger to redirect, by default "imgtools".
 
-    Returns
-    -------
-    logging_redirect_tqdm
-        A context manager that redirects logging output.
-
     Examples
     --------
     >>> from tqdm import tqdm
@@ -97,7 +93,7 @@ def tqdm_logging_redirect(
     """
     import logging
 
-    return logging_redirect_tqdm([logging.getLogger(logger_name)])
+    return _redirect_tqdm([logging.getLogger(logger_name)])
 
 
 logger = get_logger("imgtools", DEFAULT_OR_ENV)
