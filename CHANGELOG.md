@@ -1,6 +1,97 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.9 (2025-03-28)
+
+### Chores
+
+- Cleanup deprecated modules and tests ([#280](https://github.com/bhklab/med-imagetools/pull/280),
+  [`da8637b`](https://github.com/bhklab/med-imagetools/commit/da8637b3e36ffa88a4b1be85e0a2589dc9029d26))
+
+we will add back files as needed, including testing
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai --> ## Summary by CodeRabbit
+
+- **Refactor** - Deprecated processing workflows and legacy components have been removed to
+  streamline the image processing pipeline and improve overall stability. - Outdated API functions
+  and interfaces were retired, paving the way for a more consistent and maintainable system.
+
+- **Chores** - Configuration settings were tightened to enforce stricter quality checks. - Obsolete
+  documentation and redundant integrations were cleaned up to simplify future updates and enhance
+  reliability. <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+- Update utils ([#281](https://github.com/bhklab/med-imagetools/pull/281),
+  [`eafa6d0`](https://github.com/bhklab/med-imagetools/commit/eafa6d09f4464b002929e4c317fc1d418cdba8eb))
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
+- **Refactor** - Streamlined the module’s public interface by removing outdated elements and
+  reorganizing available functionality. - Enhanced internal structure and documentation for improved
+  clarity and maintainability.
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+### Features
+
+- Delete the modules module in favor of new modality classes in the future
+  ([#285](https://github.com/bhklab/med-imagetools/pull/285),
+  [`2495a63`](https://github.com/bhklab/med-imagetools/commit/2495a636a359d9474df2553844cb04d1f7cb3ace))
+
+Delete unused modules and refactor the timer utility functions for improved clarity and
+  maintainability. Ensure proper formatting by adding a newline at the end of the timer_utils.py
+  file.
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
+- **Refactor** - Removed legacy imaging functionalities including data processing, dose management,
+  PET scan handling, image scanning, segmentation, sparse mask generation, and structure conversion.
+
+- **Chores** - Updated test coverage settings and streamlined time-tracking utilities by removing
+  demonstration code.
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+### Refactoring
+
+- Reorganize dicom module, keep docs updated. add truncate uid to utils
+  ([#284](https://github.com/bhklab/med-imagetools/pull/284),
+  [`946c615`](https://github.com/bhklab/med-imagetools/commit/946c61513fdba759b6893f2a59a5a5c49f7b5645))
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
+- **New Features** - Enhanced DICOM reading with additional options for increased flexibility. -
+  Introduced a new UID truncation utility for simplified identifier management.
+
+- **Refactor** - Streamlined module organization by consolidating and updating public interfaces. -
+  Removed legacy utilities and outdated loading capabilities to promote maintainability.
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+- Update dicom module for sorting, utils, dicom_find. update tests.
+  ([#282](https://github.com/bhklab/med-imagetools/pull/282),
+  [`9186656`](https://github.com/bhklab/med-imagetools/commit/9186656b1974e6ba7facc37b68e5504ce307959d))
+
+Enhance DICOM processing by updating modules and CLI commands, allowing customizable UID truncation.
+  Streamline ruff configuration for better pattern management and add a new dependency for improved
+  functionality.
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai --> ## Summary by CodeRabbit
+
+- **New Features** - Updated the DICOM file search command for a more intuitive file discovery
+  process. - Added a CLI option to customize UID truncation when sorting DICOM files. - Enhanced
+  spatial calculations by enabling more flexible arithmetic operations for dimension objects.
+
+- **Refactor** - Streamlined internal configurations and API structures for improved DICOM
+  processing reliability. - Reorganized the public API of the DICOM module to focus on essential
+  functionalities. <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+
 ## v2.0.0-rc.8 (2025-03-03)
 
 ### Features
