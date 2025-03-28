@@ -57,6 +57,27 @@ Delete unused modules and refactor the timer utility functions for improved clar
 
 ### Refactoring
 
+- Rename logging module to loggers to circumvent any name conflicts
+  ([#286](https://github.com/bhklab/med-imagetools/pull/286),
+  [`34e1f56`](https://github.com/bhklab/med-imagetools/commit/34e1f566b8ce19f75b305d6ccd52cfcbffb60892))
+
+Refactor the codebase to replace logging import paths with the new loggers module. Update coverage
+  and ruff configurations accordingly.
+
+<!-- This is an auto-generated comment: release notes by coderabbit.ai -->
+
+## Summary by CodeRabbit
+
+- **Chores** - Updated configurations for testing and code quality tools to ensure consistency.
+
+- **Refactor** - Streamlined internal logging references to align with new organizational standards
+  without affecting functionality.
+
+These behind-the-scenes improvements enhance maintainability and clarity, keeping overall system
+  behavior unchanged for end-users.
+
+<!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
 - Reorganize dicom module, keep docs updated. add truncate uid to utils
   ([#284](https://github.com/bhklab/med-imagetools/pull/284),
   [`946c615`](https://github.com/bhklab/med-imagetools/commit/946c61513fdba759b6893f2a59a5a5c49f7b5645))
