@@ -1,0 +1,14 @@
+# config.yaml
+
+# Global settings
+log_level: DEBUG
+data_dir: /path/to/your/dicom/data  # Update this to your actual directory
+
+# Example of user-defined metadata (ignored by Pydantic if not defined in the model)
+project_name: med-imagetools-demo
+run_id: test-run-001
+
+
+process:
+  resample: true
+  filter_modality: "MR"

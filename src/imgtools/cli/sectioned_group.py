@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from click import Group, Command
 from typing import TYPE_CHECKING
+
+from click import Group
+
 from .command_registry import CommandRegistry
 
 if TYPE_CHECKING:

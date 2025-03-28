@@ -5,7 +5,6 @@ named groups with descriptions, which improves the organization and readability
 of CLI help output.
 """
 
-from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Optional
 
