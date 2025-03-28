@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.10 (2025-03-28)
+
+### Features
+
+- Enhance CLI organization with groups, add shell-completion
+  ([#287](https://github.com/bhklab/med-imagetools/pull/287),
+  [`6175600`](https://github.com/bhklab/med-imagetools/commit/6175600da9d9a0050ec378f1a47794a21bdb09e7))
+
+Implement a `SectionedGroup` for better organization of CLI commands and add documentation for shell
+  completion in the `imgtools` CLI.
+
+<details><summary>screenshots</summary> <p>
+
+![image](https://github.com/user-attachments/assets/589733c5-1d78-4164-a72d-a60f47da0c1c)
+
+![image](https://github.com/user-attachments/assets/aa516430-3a3d-4335-884a-f241dfaf53dc)
+
+![image](https://github.com/user-attachments/assets/8c99df8c-e204-407a-b2b7-7741d2c2f52a)
+
+</p> </details>
+
+- **New Features** - Launched an organized command-line interface for med-imagetools. - Introduced a
+  “dicom-tools” group with commands to find and sort DICOM images, along with an optional testing
+  group. - Added a hidden command to generate shell completion scripts for bash, zsh, and fish.
+
+- **Refactor** - Streamlined the command grouping and help output for a clearer and more extensible
+  user experience.
+
+
 ## v2.0.0-rc.9 (2025-03-28)
 
 ### Chores
