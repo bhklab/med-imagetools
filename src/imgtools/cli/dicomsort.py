@@ -3,7 +3,7 @@ import pathlib
 import click
 
 from imgtools.dicom.sort import DICOMSorter, FileAction
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 """ TODO: Implement overwrite option
 

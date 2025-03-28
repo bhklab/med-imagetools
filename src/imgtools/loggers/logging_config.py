@@ -7,7 +7,7 @@ import structlog
 from structlog.processors import CallsiteParameter, CallsiteParameterAdder
 from structlog.typing import Processor
 
-from imgtools.logging.processors import (
+from imgtools.loggers.processors import (
     CallPrettifier,
     ESTTimeStamper,
     PathPrettifier,

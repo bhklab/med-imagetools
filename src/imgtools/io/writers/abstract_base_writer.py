@@ -20,7 +20,7 @@ from typing import (
 from fasteners import InterProcessLock  # type: ignore
 
 from imgtools.exceptions import DirectoryNotFoundError
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.pattern_parser import (
     PatternResolver,
     MissingPlaceholderValueError,
