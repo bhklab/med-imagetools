@@ -4,6 +4,10 @@ from .nifti_writer import (
     NiftiWriterIOError,
     NiftiWriterValidationError,
 )
+from .hdf5_writer import HDF5Writer, HDF5WriterError
+
+from .sample_output import SampleOutput  # fmt isort:skip
+from .nnunet_output import nnUNetOutput  # fmt isort:skip
 
 __all__ = [
     "AbstractBaseWriter",
@@ -11,4 +15,9 @@ __all__ = [
     "NIFTIWriter",
     "NiftiWriterIOError",
     "NiftiWriterValidationError",
+    "HDF5Writer",
+    "HDF5WriterError",
+    "ImageMaskOutput",
+    "SampleOutput",
+    "nnUNetOutput"
 ]

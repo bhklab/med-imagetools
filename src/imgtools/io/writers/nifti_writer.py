@@ -10,6 +10,46 @@ from imgtools.loggers import logger
 from .abstract_base_writer import AbstractBaseWriter, ExistingFileMode
 
 
+def truncate_uid(uid: str, last_digits: int = 5) -> str:
+    """
+    Truncate the UID to the last n characters (including periods and underscores).
+
+    If the UID is shorter than `last_digits`, the entire UID is returned.
+
+    Parameters
+    ----------
+    uid : str
+        The UID string to truncate.
+    last_digits : int, optional
+        The number of characters to keep at the end of the UID (default is 5).
+
+    Returns
+    -------
+    str
+        The truncated UID string.
+
+    Examples
+    --------
+    >>> truncate_uid(
+    ...     "1.2.840.10008.1.2.1",
+    ...     last_digits=5,
+    ... )
+    '.1.2.1'
+    >>> truncate_uid(
+    ...     "12345",
+    ...     last_digits=10,
+    ... )
+    '12345'
+    """
+    assert uid is not None
+    assert isinstance(uid, str)
+    assert isinstance(last_digits, int)
+    if last_digits >= len(uid) or last_digits <= 0:
+        return uid
+
+    return uid[-last_digits:]
+
+
 class NiftiWriterError(Exception):
     """Base exception for NiftiWriter errors."""
 
@@ -39,6 +79,15 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         },
     )
 
+    truncate_uids: bool = field(
+        default=True,
+        metadata={
+            "help": (
+                "If True, truncates UIDs to 8 characters to avoid long filenames. "
+                "Useful for DICOM files with long UIDs."
+            )
+        },
+    )
     # Make extensions immutable
     VALID_EXTENSIONS: ClassVar[list[str]] = [
         ".nii",
@@ -75,6 +124,22 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
                 f"Must end with one of {self.VALID_EXTENSIONS}."
             )
             raise NiftiWriterValidationError(msg)
+
+    def resolve_path(self, **kwargs: object) -> Path:
+        """Additional step to truncate uid keys if requested."""
+        if self.truncate_uids:
+            for key, value in kwargs.items():
+                if key.lower().endswith("uid"):
+                    try:
+                        kwargs[key] = truncate_uid(str(value))
+                    except Exception as e:
+                        logger.warning(
+                            f"Error truncating UID {value}: {e}",
+                            key=key,
+                            value=value,
+                            error=e,
+                        )
+        return super().resolve_path(**kwargs)
 
     def save(self, data: sitk.Image | np.ndarray, **kwargs: object) -> Path:
         """Write the SimpleITK image to a NIFTI file.
@@ -144,7 +209,9 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
 
         self.add_to_index(
             out_path,
+            include_all_context=True,
             filepath_column="filepath",
             replace_existing=out_path.exists(),
+            **kwargs,
         )
         return out_path
