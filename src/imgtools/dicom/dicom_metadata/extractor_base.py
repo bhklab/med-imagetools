@@ -19,8 +19,17 @@ from imgtools.loggers import logger
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-ExtractedFields = dict[str, str]
-ComputedField = Callable[[pydicom.Dataset], str]
+_SingleComputedValue = str | int | float | dict[str, str]
+"""Primitive values or simple key-value mapping"""
+
+ComputedValue = _SingleComputedValue | list[_SingleComputedValue]
+"""Single value or list of values extracted from a DICOM dataset."""
+
+ComputedField = Callable[[pydicom.Dataset], ComputedValue]
+"""Function that extracts a value from a DICOM dataset"""
+
+ExtractedFields = dict[str, ComputedValue]
+"""Collection of computed values keyed by field name"""
 
 
 class classproperty(property):  # noqa: N801
@@ -45,18 +54,8 @@ class ModalityMetadataExtractor(ABC):
     they support and define additional metadata fields either as DICOM tag names
     or as custom computation functions.
 
-    Implementation Requirements
-    --------------------------
-    Subclasses MUST implement the following abstract methods/properties:
-    - `modality() -> str`: A class method that returns the DICOM modality string handled
-      (e.g., "CT", "MR", "RTDOSE").
-    - `modality_tags -> set[str]`: A class property that defines the set of DICOM attribute
-      names (tags) specific to the modality.
-    - `computed_fields -> Mapping[str, Callable[[pydicom.Dataset], str]]`: A class property
-      that defines a mapping of metadata field names to callables which compute their values.
-
-    Class Attributes
-    ----------------
+    Attributes
+    ----------
     base_tags : ClassVar[set[str]]
         Standard DICOM tags to always extract, regardless of modality.
     modality_tags : ClassVar[set[str]]
@@ -66,14 +65,24 @@ class ModalityMetadataExtractor(ABC):
         A mapping of metadata field names to callables that compute values from
         the loaded `pydicom.Dataset`.
 
-    Base Methods
-    -------------
+    Methods
+    -------
     metadata_keys() : list[str]
         Returns a predictable, sorted list of all metadata field names
         produced by this extractor.
-    extract(dicom: DicomInput) : dict[str, str]
+    extract(dicom: DicomInput) : dict[str, ComputedValue]
         Extracts metadata tags and computed fields from a DICOM dataset.
-        Returns a dictionary mapping metadata field names to stringified values.
+        Returns a dictionary mapping metadata field names to values.
+
+    Notes
+    -----
+    Subclasses MUST implement the following abstract methods/properties:
+    - `modality() -> str`: A class method that returns the DICOM modality string handled
+      (e.g., "CT", "MR", "RTDOSE").
+    - `modality_tags -> set[str]`: A class property that defines the set of DICOM attribute
+      names (tags) specific to the modality.
+    - `computed_fields -> Mapping[str, Callable[[pydicom.Dataset], ComputedValue]]`: A class property
+      that defines a mapping of metadata field names to callables which compute their values.
 
     Examples
     --------
@@ -164,11 +173,11 @@ class ModalityMetadataExtractor(ABC):
         """
         A mapping of metadata field names to callables that compute their values.
 
-        The callable should accept a pydicom Dataset and return a stringified value.
+        The callable should accept a pydicom Dataset and return a value.
 
         Returns
         -------
-        dict[str, Callable[[pydicom.Dataset], str]]
+        dict[str, Callable[[pydicom.Dataset], ComputedValue]]
             Mapping of field names to computation functions.
         """
         pass
@@ -176,7 +185,7 @@ class ModalityMetadataExtractor(ABC):
     @classmethod
     def metadata_keys(cls) -> list[str]:
         """
-        Returns a predictable, sorted list of metadata field names.
+        Return a predictable, sorted list of metadata field names.
 
         This includes both direct DICOM tag names and any computed metadata keys.
 
@@ -201,9 +210,10 @@ class ModalityMetadataExtractor(ABC):
 
         Returns
         -------
-        dict[str, str]
-            A dictionary mapping metadata field names to stringified values.
-                Missing tags or errors during computation will result in an empty string.
+        dict[str, ComputedValue]
+            A dictionary mapping metadata field names to values.
+            Values may be strings, numbers, dictionaries, or lists of these types.
+            Missing tags or errors during computation will result in an empty string.
         """
         ds = load_dicom(dicom)
         output: ExtractedFields = {}
@@ -215,7 +225,8 @@ class ModalityMetadataExtractor(ABC):
         # Compute advanced fields
         for key, fn in cls.computed_fields.items():
             try:
-                output[key] = str(fn(ds))
+                # Store computed value directly without conversion to string
+                output[key] = fn(ds)
             except Exception:
                 warnmsg = (
                     f"Failed to compute field '{key}' for modality '{cls.modality()}'. "

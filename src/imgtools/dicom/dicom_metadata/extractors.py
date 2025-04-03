@@ -70,6 +70,14 @@ class CTMetadataExtractor(ModalityMetadataExtractor):
 
     @classproperty
     def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+        """
+        CT-specific computed fields.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Mapping of field names to functions that compute values from DICOM datasets.
+        """
         return {}
 
 
@@ -117,6 +125,14 @@ class MRMetadataExtractor(ModalityMetadataExtractor):
 
     @classproperty
     def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+        """
+        MR-specific computed fields.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Mapping of field names to functions that compute values from DICOM datasets.
+        """
         return {}
 
 
@@ -167,4 +183,12 @@ class PTMetadataExtractor(ModalityMetadataExtractor):
 
     @classproperty
     def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+        """
+        PET-specific computed fields.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Mapping of field names to functions that compute values from DICOM datasets.
+        """
         return {}
