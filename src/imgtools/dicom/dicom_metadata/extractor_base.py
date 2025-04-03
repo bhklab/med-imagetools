@@ -19,10 +19,7 @@ from imgtools.loggers import logger
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-_SingleComputedValue = str | int | float | dict[str, str]
-"""Primitive values or simple key-value mapping"""
-
-ComputedValue = _SingleComputedValue | list[_SingleComputedValue]
+ComputedValue = object | list[object]
 """Single value or list of values extracted from a DICOM dataset."""
 
 ComputedField = Callable[[pydicom.Dataset], ComputedValue]
@@ -227,11 +224,12 @@ class ModalityMetadataExtractor(ABC):
             try:
                 # Store computed value directly without conversion to string
                 output[key] = fn(ds)
-            except Exception:
+            except Exception as e:
                 warnmsg = (
                     f"Failed to compute field '{key}' for modality '{cls.modality()}'. "
                     "This may be due to missing or malformed data in the DICOM file."
                 )
+                warnmsg += f" Error: {e}"
                 logger.warning(warnmsg)
                 output[key] = ""
 

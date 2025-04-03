@@ -1,5 +1,7 @@
 from typing import Mapping
 
+from pydicom import Dataset
+
 from imgtools.dicom.dicom_metadata.extractor_base import (
     ComputedField,
     ModalityMetadataExtractor,
@@ -23,7 +25,7 @@ class CTMetadataExtractor(ModalityMetadataExtractor):
         return "CT"
 
     @classproperty
-    def modality_tags(cls) -> set[str]:  # noqa: N805
+    def modality_tags(cls) -> set[str]:
         """
         CT-specific DICOM tag names.
 
@@ -69,7 +71,7 @@ class CTMetadataExtractor(ModalityMetadataExtractor):
         }
 
     @classproperty
-    def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
         """
         CT-specific computed fields.
 
@@ -88,7 +90,7 @@ class MRMetadataExtractor(ModalityMetadataExtractor):
         return "MR"
 
     @classproperty
-    def modality_tags(cls) -> set[str]:  # noqa: N805
+    def modality_tags(cls) -> set[str]:
         return {
             # Magnetic Field & RF Properties
             "MagneticFieldStrength",
@@ -124,7 +126,7 @@ class MRMetadataExtractor(ModalityMetadataExtractor):
         }
 
     @classproperty
-    def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
         """
         MR-specific computed fields.
 
@@ -143,7 +145,7 @@ class PTMetadataExtractor(ModalityMetadataExtractor):
         return "PT"
 
     @classproperty
-    def modality_tags(cls) -> set[str]:  # noqa: N805
+    def modality_tags(cls) -> set[str]:
         return {
             # Radiotracer & Injection Information
             "Radiopharmaceutical",
@@ -182,7 +184,7 @@ class PTMetadataExtractor(ModalityMetadataExtractor):
         }
 
     @classproperty
-    def computed_fields(cls) -> Mapping[str, ComputedField]:  # noqa: N805
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
         """
         PET-specific computed fields.
 
@@ -192,3 +194,120 @@ class PTMetadataExtractor(ModalityMetadataExtractor):
             Mapping of field names to functions that compute values from DICOM datasets.
         """
         return {}
+
+
+@register_extractor
+class SEGMetadataExtractor(ModalityMetadataExtractor):
+    """
+
+    See Also
+    --------
+    https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.8.20.2.html
+
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "SEG"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        return {
+            # DICOM-SEG tags
+            # BINARY, FRACTIONAL, or LABELMAP
+            # https://dicom.nema.org/medical/dicom/current/output/chtml/part03/sect_C.8.20.2.3.html
+            "SegmentationType",
+            "SegmentationFractionalType",
+            "MaximumFractionalValue",
+        }
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        """
+        SEG-specific computed fields.
+
+        Each computed field is a function that takes a pydicom.Dataset as input
+        and returns a computed value. The functions are defined to extract
+        relevant information from the DICOM dataset.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Mapping of field names to functions that compute values from DICOM datasets.
+        """
+        from imgtools.dicom.dicom_metadata.modality_utils.seg_utils import (
+            get_seg_direction,
+            get_seg_spacing,
+            seg_reference_uids,
+        )
+
+        def get_seg_ref_series(seg: Dataset) -> str:
+            """Get the reference series UID for the segmentation."""
+            return seg_reference_uids(seg)[0]
+
+        def get_seg_ref_sop_uids(seg: Dataset) -> list[str]:
+            """Get the reference SOP instance UIDs for the segmentation."""
+            return seg_reference_uids(seg)[1]
+
+        return {
+            # prefix with "Seg" to avoid collision sitk computed attrbutes
+            "SegSpacing": lambda ds: get_seg_spacing(ds) or "",
+            "SegDirection": lambda ds: get_seg_direction(ds) or "",
+            "ReferencedSeriesUID": get_seg_ref_series,
+            "ReferencedSOPUIDs": get_seg_ref_sop_uids,
+        }
+
+
+@register_extractor
+class RTSTRUCTMetadataExtractor(ModalityMetadataExtractor):
+    """
+    Metadata extractor for RTSTRUCT modality DICOM datasets.
+
+    This class uses computed fields to extract ROI metadata and reference UIDs.
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "RTSTRUCT"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        """
+        RTSTRUCT-specific direct tags (generally minimal).
+
+        Returns
+        -------
+        set[str]
+            A set of directly accessible RTSTRUCT tag names.
+        """
+        return {
+            "SeriesInstanceUID",
+            "StudyInstanceUID",
+            "StructureSetLabel",
+            "StructureSetName",
+            "StructureSetDate",
+            "StructureSetTime",
+        }
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        """
+        RTSTRUCT-specific computed fields.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Field names mapped to functions that extract computed values.
+        """
+
+        from imgtools.dicom.dicom_metadata.modality_utils.rtstruct_utils import (
+            extract_roi_names,
+            rtstruct_reference_uids,
+        )
+
+        return {
+            "ReferencedSeriesUID": lambda ds: rtstruct_reference_uids(ds)[0],
+            "ReferencedSOPUIDs": lambda ds: rtstruct_reference_uids(ds)[1],
+            "ROINames": extract_roi_names,
+            "NumROIs": lambda ds: len(extract_roi_names(ds)),
+        }

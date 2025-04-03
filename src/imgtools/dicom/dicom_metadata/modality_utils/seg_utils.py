@@ -1,11 +1,5 @@
-from typing import TYPE_CHECKING
 
-from pydicom.dataset import FileDataset
-
-from imgtools.dicom.dicom_reader import DicomInput, load_seg_dcm
-
-if TYPE_CHECKING:
-    from pydicom.dataset import FileDataset
+from pydicom.dataset import Dataset
 
 __all__ = [
     "seg_reference_uids",
@@ -20,15 +14,15 @@ class SEGRefSeries(str):
     pass
 
 
-class SEGRefSOPs(list):
+class SEGRefSOPs(list[str]):
     """A list representing all the ReferencedSOPInstanceUIDs for a SEG file"""
 
     pass
 
 
 def seg_reference_uids(
-    segdcm: DicomInput,
-) -> tuple[SEGRefSeries, SEGRefSOPs] | SEGRefSOPs | None:
+    seg: Dataset,
+) -> tuple[SEGRefSeries, SEGRefSOPs]:
     """Get the ReferencedSeriesInstanceUID or ReferencedSOPInstanceUIDs from a SEG file
 
     Modern Segmentation objects have a `ReferencedSeriesSequence` attribute
@@ -41,35 +35,36 @@ def seg_reference_uids(
 
     Parameters
     ----------
-    segdcm : FileDataset | str | Path | bytes
-        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
+    seg : `pydicom.dataset.Dataset` 
+        Input DICOM file as a `pydicom.dataset.Dataset` object.
 
     Returns
     -------
-    tuple[SEGRefSeries, SEGRefSOPs] | SEGRefSOPs | None
-        If the ReferencedSeriesSequence is present, return a tuple of
-        the ReferencedSeriesInstanceUID and ReferencedSOPInstanceUIDs.
-
-        OR if the SourceImageSequence is present, return the ReferencedSOPInstanceUIDs.
-
-        OR if neither are present, return None.
+    tuple[SEGRefSeries, SEGRefSOPs]
+        Always returns a tuple containing:
+        - ReferencedSeriesInstanceUID (empty string if not available)
+        - ReferencedSOPInstanceUIDs (empty list if not available)
 
     Examples
     --------
-    match seg_reference_uids("/path/to/SEG.dcm"):
-        case None:
-            print("No ReferencedSeriesInstanceUID or ReferencedSOPInstanceUIDs")
-        case ref_series, ref_sop:
-            print(f"ReferencedSeriesInstanceUID: {ref_series}")
-            print(f"ReferencedSOPInstanceUIDs: {ref_sop}")
-        case ref_sop:
-            print(f"ReferencedSOPInstanceUIDs: {ref_sop}")
+    ref_series, ref_sop = seg_reference_uids("/path/to/SEG.dcm")
+    if not ref_series:
+        print("No ReferencedSeriesInstanceUID available")
+    else:
+        print(f"ReferencedSeriesInstanceUID: {ref_series}")
+
+    if not ref_sop:
+        print("No ReferencedSOPInstanceUIDs available")
+    else:
+        print(f"ReferencedSOPInstanceUIDs: {ref_sop}")
     """
 
-    seg: FileDataset = load_seg_dcm(segdcm)
+    assert seg.Modality == "SEG", (
+        "Input DICOM file is not a Segmentation object"
+    )
 
     if "ReferencedSeriesSequence" in seg:
-        ref_series = [
+        ref_series: list[SEGRefSeries] = [
             SEGRefSeries(ref_series.SeriesInstanceUID)
             for ref_series in seg.ReferencedSeriesSequence
         ]
@@ -92,9 +87,40 @@ def seg_reference_uids(
             )
             raise ValueError(errmsg)
     elif "SourceImageSequence" in seg:
-        ref_sop = SEGRefSOPs(
-            [seq.ReferencedSOPInstanceUID for seq in seg.SourceImageSequence]
-        )
-        return ref_sop
+        ref_sop_list = [
+            seq.ReferencedSOPInstanceUID for seq in seg.SourceImageSequence
+        ]
 
-    return None
+        return SEGRefSeries(""), SEGRefSOPs(ref_sop_list)
+
+    # Return empty values if no reference information is found
+    return SEGRefSeries(""), SEGRefSOPs([])
+
+
+def get_seg_spacing(seg: Dataset) -> list[float] | None:
+    if not (
+        (sharedseq := seg.SharedFunctionalGroupsSequence)
+        and (pms := sharedseq[0].PixelMeasuresSequence)
+        and (pixelspacing := pms[0].PixelSpacing)
+        and (
+            spacing := pms[0].get("SpacingBetweenSlices")
+            or pms[0].get("SliceThickness")
+        )
+    ):
+        return None
+
+    return [
+        float(pixelspacing[0]),
+        float(pixelspacing[1]),
+        float(spacing),
+    ]
+
+
+def get_seg_direction(seg: Dataset) -> list[float] | None:
+    if not (
+        (sharedseq := seg.SharedFunctionalGroupsSequence)
+        and (pos := sharedseq[0].PlaneOrientationSequence)
+        and (direction := pos[0].get("ImageOrientationPatient"))
+    ):
+        return None
+    return [float(v) for v in direction]

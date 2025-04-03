@@ -13,6 +13,7 @@ from .registry import (
 
 # need to do this to register all extractors during runtime
 from . import extractors
+from .extractor_base import ComputedValue
 
 __all__ = [
     "get_extractor",
@@ -24,7 +25,7 @@ __all__ = [
 
 def extract_metadata(
     dicom: DicomInput, modality: str | None = None
-) -> dict[str, str]:
+) -> dict[str, ComputedValue]:
     ds = load_dicom(dicom)
     modality = modality or ds.get("Modality")
     if not modality:

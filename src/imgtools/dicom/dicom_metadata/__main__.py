@@ -1,4 +1,5 @@
 import click
+from rich import print  # noqa
 
 from imgtools.dicom.dicom_metadata import (
     extract_metadata,
@@ -25,9 +26,9 @@ def cli(dicom_file, output, list_modalities):
     """Extract DICOM metadata from a file."""
     if list_modalities:
         modalities = supported_modalities()
-        click.echo("Available DICOM modalities:")
+        print("Available DICOM modalities:")
         for modality in modalities:
-            click.echo(modality)
+            print(modality)
         return
 
     metadata = extract_metadata(dicom_file)
@@ -38,7 +39,7 @@ def cli(dicom_file, output, list_modalities):
         with Path(output).open("w") as f:
             f.write(str(metadata))
     else:
-        click.echo(metadata)
+        print(metadata)
 
 
 if __name__ == "__main__":
