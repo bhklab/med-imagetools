@@ -38,18 +38,26 @@ def rtdose_reference_uids(
 ) -> tuple[RTDOSERefPlanSOP, RTDOSERefStructSOP, RTDOSERefSeries]:
     """Extracts referenced SOPInstanceUIDs from an RTDOSE file.
 
+    Parameters
+    ----------
+    rtdose : Dataset
+        DICOM RTDOSE dataset as a pydicom Dataset.
+
     Returns
     -------
-    tuple
+    tuple[RTDOSERefPlanSOP, RTDOSERefStructSOP, RTDOSERefSeries]
         A tuple containing:
-        - plan: RTDOSERefPlanSOP (empty string if not found)
-        - struct: RTDOSERefStructSOP (empty string if not found)
-        - series: RTDOSERefSeries (empty string if not found)
+        - plan_uid: RTDOSERefPlanSOP - Referenced RTPLAN SOPInstanceUID (empty string if not found)
+        - struct_uid: RTDOSERefStructSOP - Referenced RTSTRUCT SOPInstanceUID (empty string if not found)
+        - series_uid: RTDOSERefSeries - Referenced Series SOPInstanceUID (empty string if not found)
     """
 
     # Extract plan UID
     plan_uid = RTDOSERefPlanSOP("")
-    if "ReferencedRTPlanSequence" in rtdose and rtdose.ReferencedRTPlanSequence:
+    if (
+        "ReferencedRTPlanSequence" in rtdose
+        and rtdose.ReferencedRTPlanSequence
+    ):
         plan_uid = RTDOSERefPlanSOP(rtdose.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
     # Extract structure set UID

@@ -81,10 +81,22 @@ def extract_roi_names(rtstruct: Dataset) -> list[str]:
 
 
 class RTSTRUCTRefSeries(str):
+    """
+    A string subclass representing the SeriesInstanceUID referenced by an RTSTRUCT file.
+
+    Used for type annotations and to distinguish this particular reference type.
+    """
+
     pass
 
 
 class RTSTRUCTRefSOP(list[str]):
+    """
+    A list subclass representing the SOPInstanceUIDs referenced by an RTSTRUCT file.
+
+    Contains the UIDs of individual DICOM instances that the structure set references.
+    """
+
     pass
 
 
@@ -95,14 +107,14 @@ def rtstruct_reference_uids(
 
     Parameters
     ----------
-    rtstruct : `pydicom.dataset.Dataset`
+    rtstruct : Dataset
+        DICOM RTSTRUCT dataset as a pydicom Dataset.
 
     Returns
     -------
     tuple[RTSTRUCTRefSeries, RTSTRUCTRefSOP]
-        - Referenced `SeriesInstanceUID` (RTSTRUCTRefSeries)
-        - Referenced SOP UIDs (RTSTRUCTRefSOP)
-        Both will be empty strings if unavailable.
+        - Referenced SeriesInstanceUID as RTSTRUCTRefSeries (empty string if unavailable)
+        - Referenced SOPInstanceUIDs as RTSTRUCTRefSOP (empty list if unavailable)
     """
     import contextlib
 

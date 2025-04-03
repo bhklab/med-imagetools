@@ -67,6 +67,20 @@ def sr_reference_uids(
 
     Since we might need to match on SOP Instance UIDs if the reference is
     a MR, we also get the SOP Instance UIDs
+    This function extracts all unique references from the
+    CurrentRequestedProcedureEvidenceSequence.
+
+    Parameters
+    ----------
+    sr : Dataset
+        DICOM Structured Report dataset as a pydicom Dataset.
+
+    Returns
+    -------
+    tuple[SR_RefSeries, SR_RefSOPs]
+        A tuple containing:
+        - series_uids: SR_RefSeries - List of unique referenced SeriesInstanceUIDs (empty list if none)
+        - sop_uids: SR_RefSOPs - List of unique referenced SOPInstanceUIDs (empty list if none)
     """
 
     series_uids = set()

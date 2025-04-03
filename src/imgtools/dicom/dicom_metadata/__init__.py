@@ -27,6 +27,27 @@ __all__ = [
 def extract_metadata(
     dicom: DicomInput, modality: str | None = None
 ) -> dict[str, ComputedValue]:
+    """
+    Extract metadata from a DICOM file based on its modality.
+
+    Parameters
+    ----------
+    dicom : DicomInput
+        DICOM input source (path, bytes, or pydicom Dataset)
+    modality : str | None, optional
+        Explicitly specify the modality to use, by default None.
+        If None, the modality is extracted from the DICOM file.
+
+    Returns
+    -------
+    dict[str, ComputedValue]
+        Dictionary of metadata fields with their values extracted from the DICOM.
+
+    Raises
+    ------
+    ValueError
+        If no modality can be determined.
+    """
     ds = load_dicom(dicom)
     modality = modality or ds.get("Modality")
     if not modality:

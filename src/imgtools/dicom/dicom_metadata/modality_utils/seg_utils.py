@@ -1,4 +1,3 @@
-
 from pydicom.dataset import Dataset
 
 __all__ = [
@@ -35,8 +34,8 @@ def seg_reference_uids(
 
     Parameters
     ----------
-    seg : `pydicom.dataset.Dataset` 
-        Input DICOM file as a `pydicom.dataset.Dataset` object.
+    seg : Dataset
+        Input DICOM segmentation object as a pydicom Dataset.
 
     Returns
     -------
@@ -44,19 +43,6 @@ def seg_reference_uids(
         Always returns a tuple containing:
         - ReferencedSeriesInstanceUID (empty string if not available)
         - ReferencedSOPInstanceUIDs (empty list if not available)
-
-    Examples
-    --------
-    ref_series, ref_sop = seg_reference_uids("/path/to/SEG.dcm")
-    if not ref_series:
-        print("No ReferencedSeriesInstanceUID available")
-    else:
-        print(f"ReferencedSeriesInstanceUID: {ref_series}")
-
-    if not ref_sop:
-        print("No ReferencedSOPInstanceUIDs available")
-    else:
-        print(f"ReferencedSOPInstanceUIDs: {ref_sop}")
     """
 
     assert seg.Modality == "SEG", (
@@ -98,6 +84,20 @@ def seg_reference_uids(
 
 
 def get_seg_spacing(seg: Dataset) -> list[float] | None:
+    """
+    Get the pixel spacing and slice spacing or thickness from a SEG file.
+
+    Parameters
+    ----------
+    seg : Dataset
+        Input DICOM segmentation object as a pydicom Dataset.
+
+    Returns
+    -------
+    list[float] | None
+        A list of three floats representing [x_spacing, y_spacing, z_spacing] if available,
+        or None if the spacing information is not found.
+    """
     if not (
         (sharedseq := seg.SharedFunctionalGroupsSequence)
         and (pms := sharedseq[0].PixelMeasuresSequence)
@@ -117,6 +117,20 @@ def get_seg_spacing(seg: Dataset) -> list[float] | None:
 
 
 def get_seg_direction(seg: Dataset) -> list[float] | None:
+    """
+    Get the direction cosines (orientation) from a SEG file.
+
+    Parameters
+    ----------
+    seg : Dataset
+        Input DICOM segmentation object as a pydicom Dataset.
+
+    Returns
+    -------
+    list[float] | None
+        A list of six floats representing the direction cosines if available,
+        or None if the orientation information is not found.
+    """
     if not (
         (sharedseq := seg.SharedFunctionalGroupsSequence)
         and (pos := sharedseq[0].PlaneOrientationSequence)

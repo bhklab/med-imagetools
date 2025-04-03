@@ -48,11 +48,7 @@ def get_extractor(modality: str) -> Type[ModalityMetadataExtractor]:
     -------
     Type[ModalityMetadataExtractor]
         The corresponding registered extractor class.
-
-    Raises
-    ------
-    KeyError
-        If no extractor is registered for the modality.
+        If no extractor is registered for the modality, returns a FallbackMetadataExtractor.
     """
     x = _EXTRACTOR_REGISTRY.get(modality.upper(), None)
     if not x:
