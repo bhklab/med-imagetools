@@ -2,38 +2,53 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+import functools
 import os
 import shutil
 import tarfile
 import zipfile
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import List, Optional, Pattern
 
 import aiohttp
+from github import Github
+from github.Repository import Repository  # type: ignore # noqa
 from rich import print  # noqa
 from rich.console import Console
+from rich.live import Live
 from rich.progress import (
     BarColumn,
     DownloadColumn,
     Progress,
+    TaskID,
     TaskProgressColumn,
     TextColumn,
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
+from rich.table import Table
+
+from imgtools.utils.optional_import import OptionalImportError, optional_import
 
 # create a single console for all progress bars, so they don't clutter the output
 console = Console()
 
-try:
-    from github import Github  # type: ignore # noqa
-    from github.Repository import Repository  # type: ignore # noqa
-except ImportError as e:
-    raise ImportError(
-        "PyGithub is required for the test data feature of med-imagetools. "
-        "Install it using 'pip install med-imagetools[test]'."
-    ) from e
+# Use optional_import instead of try/except
+github, has_github = optional_import("github")
+if not has_github:
+    raise OptionalImportError("github", "test")
+
+
+class AssetStatus(str, Enum):
+    EXISTS = "Exists"
+    DOWNLOADING = "Downloading"
+    DOWNLOADED = "Downloaded"
+    EXTRACTING = "Extracting"
+    DONE = "Done"
+    SKIPPED = "Skipped"
+    FAILED = "Failed"
 
 
 @dataclass
@@ -45,6 +60,8 @@ class GitHubReleaseAsset:
     ----------
     name : str
         Name of the asset (e.g., 'dataset.zip').
+    label : str
+        Label of the asset (e.g., '4D-Lung' if the name is '4D-Lung.tar.gz').
     url : str
         Direct download URL for the asset.
     content_type : str
@@ -56,7 +73,9 @@ class GitHubReleaseAsset:
     """
 
     name: str
+    label: str
     url: str
+    browser_download_url: str
     content_type: str
     size: int
     download_count: int
@@ -98,6 +117,7 @@ async def download_dataset(
     download_link: str,
     file_path: Path,
     progress: Progress,
+    task_id: TaskID,
     timeout_seconds: int = 3600,
 ) -> Path:
     """
@@ -111,6 +131,8 @@ async def download_dataset(
         The path where the downloaded file will be saved.
     progress : Progress
         The progress bar to use for the download.
+    task_id : TaskID
+        The task ID for the progress bar.
     timeout_seconds : int, optional
         The timeout for the download in seconds, by default 3600.
 
@@ -119,24 +141,47 @@ async def download_dataset(
     Path
         The path to the downloaded file.
     """
+    # Create a temporary file path with .tmp suffix
+    temp_file_path = file_path.with_suffix(file_path.suffix + ".tmp")
+    headers = {
+        "Accept": "application/octet-stream",
+    }
+    if token := os.environ.get("GITHUB_TOKEN", os.environ.get("GH_TOKEN")):
+        headers["Authorization"] = f"bearer {token}"
+
     timeout = aiohttp.ClientTimeout(total=timeout_seconds)
-    async with aiohttp.ClientSession(timeout=timeout) as session:
+    async with aiohttp.ClientSession(
+        timeout=timeout, raise_for_status=True
+    ) as session:
         try:
-            async with session.get(download_link) as response:
+            async with session.get(download_link, headers=headers) as response:
                 total = int(response.headers.get("content-length", 0))
-                task = progress.add_task(
-                    f"[cyan]{file_path.name}...", total=total
-                )
-                with file_path.open("wb") as f:
+                progress.update(task_id, total=total)
+                with temp_file_path.open("wb") as f:
                     async for chunk in response.content.iter_chunked(8192):
                         f.write(chunk)
-                        progress.update(task, advance=len(chunk))
+                        progress.update(task_id, advance=len(chunk))
         except asyncio.TimeoutError:
             console.print(
-                f"[bold red]Timeout while downloading "
-                f"{file_path.name}. Please try again later.[/]"
+                f"[bold red]Timeout while downloading {file_path.name}. Please try again later.[/]"
             )
+            # Clean up the temporary file if it exists
+            if temp_file_path.exists():
+                temp_file_path.unlink(missing_ok=True)
             raise
+        except Exception as e:
+            console.print(
+                f"[bold red]Error downloading {file_path.name}: {str(e)}[/]"
+            )
+            # Clean up the temporary file if it exists
+            if temp_file_path.exists():
+                temp_file_path.unlink(missing_ok=True)
+            raise
+
+    # Rename the temporary file to the final file path
+    if temp_file_path.exists():
+        temp_file_path.rename(file_path)
+
     return file_path
 
 
@@ -156,10 +201,14 @@ class MedImageTestData:
     repo_name: str = "bhklab/med-image_test-data"
     github: Github = field(init=False)
     repo: Repository = field(init=False)
-    latest_release: GitHubRelease = field(init=False)
+    _latest_release: GitHubRelease | None = field(default=None, init=False)
     downloaded_paths: List[Path] = field(default_factory=list, init=False)
     progress: Progress = field(
         default_factory=Progress, init=False, repr=False
+    )
+
+    asset_status: dict[str, AssetStatus] = field(
+        default_factory=dict, init=False
     )
 
     # github parameters
@@ -199,7 +248,10 @@ class MedImageTestData:
         assets = [
             GitHubReleaseAsset(
                 name=asset.name,
-                url=asset.browser_download_url,
+                # remove the extension from the name
+                label=asset.name.split(".")[0],
+                url=asset.url,
+                browser_download_url=asset.browser_download_url,
                 content_type=asset.content_type,
                 size=asset.size,
                 download_count=asset.download_count,
@@ -217,9 +269,14 @@ class MedImageTestData:
             assets=assets,
         )
 
+    @property
+    def latest_release(self) -> GitHubRelease:
+        if self._latest_release is None:
+            self._latest_release = self.get_release("latest")
+        return self._latest_release
+
     def get_latest_release(self) -> GitHubRelease:
         """Fetches the latest release details from the repository."""
-        self.latest_release = self.get_release("latest")
         return self.latest_release
 
     @property
@@ -228,79 +285,108 @@ class MedImageTestData:
 
     @property
     def dataset_names(self) -> List[str]:
-        return [asset.name for asset in self.datasets]
+        return [asset.label for asset in self.datasets]
 
-    async def _download_asset(
+    # Status format mapping for progress display
+    STATUS_FORMATS: dict[AssetStatus, tuple[str, str]] = field(
+        default_factory=lambda: {
+            AssetStatus.EXISTS: ("green", "✅ [EXISTS     ]"),
+            AssetStatus.DOWNLOADING: ("cyan", "⬇️ [DOWNLOADING]"),
+            AssetStatus.DOWNLOADED: ("yellow", "📦 [DOWNLOADED ]"),
+            AssetStatus.EXTRACTING: ("yellow", "📦 [EXTRACTING ]"),
+            AssetStatus.DONE: ("green", "✅ [DONE  ]"),
+            AssetStatus.SKIPPED: ("magenta", "⏭️ [SKIPPED    ]"),
+            AssetStatus.FAILED: ("red", "❌ [FAILED     ]"),
+        },
+        init=False,
+    )
+
+    def _update_progress(
         self,
-        session: aiohttp.ClientSession,
+        progress: Progress,
+        task_id: TaskID,
+        asset_name: str,
+        completed: int = 0,
+    ) -> None:
+        """Update progress bar with appropriate formatting based on asset status"""
+        status = self.asset_status.get(asset_name)
+        if status in self.STATUS_FORMATS:
+            color, emoji = self.STATUS_FORMATS[status]
+            description = f"[{color}]{asset_name} {emoji} "
+            progress.update(
+                task_id, description=description, completed=completed
+            )
+
+    async def _process_asset(
+        self,
         asset: GitHubReleaseAsset,
         dest: Path,
         progress: Progress,
-        force: bool = False,
-    ) -> Path:
-        """
-        Helper method to download a single asset asynchronously with a progress bar.
+        task_map: dict[str, TaskID],
+    ) -> Optional[Path]:
+        # this whole function can PROBABLY be cleaned up a lot lool
+        filepath: Path = dest / asset.name
+        alt_filepath: Path = filepath.with_suffix("").with_suffix("")
+        task_id: TaskID = task_map[asset.name]
 
-        Parameters
-        ----------
-        session : aiohttp.ClientSession
-            The aiohttp session to use for the request.
-        asset : GitHubReleaseAsset
-            The asset to download.
-        dest : Path
-            Destination directory where the file will be saved.
-        progress : Progress
-            The progress bar to use for the download.
-
-        Returns
-        -------
-        Path
-            Path to the downloaded file.
-        """
-        dest.mkdir(parents=True, exist_ok=True)
-        filepath = dest / asset.name
-        # also check for name without "tar.gz" extension
-        alternate_name = filepath.with_suffix("").with_suffix("")
-        if filepath.exists() or alternate_name.exists():
-            console.print(
-                f"File {asset.name} already exists. Skipping download."
-            )
+        if filepath.exists() or alt_filepath.exists():
+            self.asset_status[asset.name] = AssetStatus.EXISTS
+            self._update_progress(progress, task_id, asset.name, completed=1)
             return filepath
 
-        return await download_dataset(asset.url, filepath, progress)
+        dest.mkdir(parents=True, exist_ok=True)
+        self.asset_status[asset.name] = AssetStatus.DOWNLOADING
+        self._update_progress(progress, task_id, asset.name)
 
-    async def _download(
-        self,
-        dest: Path,
-        assets: List[GitHubReleaseAsset],
-        progress: Progress,
-        force: bool = False,
-    ) -> List[Path]:
-        """
-        Download specified assets or all assets if none are specified.
+        try:
+            await download_dataset(asset.url, filepath, progress, task_id)
+            self.asset_status[asset.name] = AssetStatus.DOWNLOADED
+            self._update_progress(progress, task_id, asset.name, completed=1)
+        except Exception:
+            self.asset_status[asset.name] = AssetStatus.FAILED
+            self._update_progress(progress, task_id, asset.name, completed=1)
+            return None
 
-        Parameters
-        ----------
-        dest : Path
-            Destination directory where the files will be saved.
-        assets : List[GitHubReleaseAsset], optional
-            List of assets to download. If None, all assets will be downloaded.
-        progress : Progress
-            The progress bar to use for the download.
+        # Extract
+        extract_path: Path = alt_filepath
+        if extract_path.exists():
+            self.asset_status[asset.name] = AssetStatus.DONE
+            self._update_progress(progress, task_id, asset.name)
+            return extract_path
+        else:
+            self.asset_status[asset.name] = AssetStatus.EXTRACTING
+            self._update_progress(progress, task_id, asset.name)
 
-        Returns
-        -------
-        List[Path]
-            List of paths to the downloaded files.
-        """
+        # extracting is a blocking operation, so we need to run it in a thread
+        # pool
+        def extract(path: Path, extract_path: Path) -> None:
+            if tarfile.is_tarfile(path):
+                with tarfile.open(path, "r:*") as archive:
+                    archive.extractall(extract_path.parent, filter="data")
+            elif zipfile.is_zipfile(path):
+                with zipfile.ZipFile(path, "r") as archive:
+                    archive.extractall(extract_path.parent)
+            else:
+                self.asset_status[asset.name] = AssetStatus.SKIPPED
+                console.log(
+                    f"{asset.label} is not a tar or zip file. Skipping extraction."
+                )
+                self._update_progress(progress, task_id, asset.name)
+                return None
 
-        async with aiohttp.ClientSession() as session:
-            tasks = [
-                self._download_asset(session, asset, dest, progress, force)
-                for asset in assets
-            ]
-            self.downloaded_paths = await asyncio.gather(*tasks)
-        return self.downloaded_paths
+        loop = asyncio.get_running_loop()
+        try:
+            await loop.run_in_executor(
+                None, functools.partial(extract, filepath, extract_path)
+            )
+        except Exception:
+            self.asset_status[asset.name] = AssetStatus.FAILED
+            self._update_progress(progress, task_id, asset.name)
+            return None
+
+        self.asset_status[asset.name] = AssetStatus.DONE
+        self._update_progress(progress, task_id, asset.name)
+        return extract_path
 
     def download(
         self,
@@ -310,142 +396,71 @@ class MedImageTestData:
         force: bool = False,
         cores: Optional[int] = None,
     ) -> List[Path]:
-        """
-        Download specified assets synchronously, extracts by default.
+        from rich.progress import SpinnerColumn
 
-        Parameters
-        ----------
-        dest : Path
-            Destination directory where the files will be saved.
-        exclude: List[str], optional
-            List of assets to exclude from download.
-            Can be patterns or exact names.
-        assets : List[GitHubReleaseAsset], optional
-            List of assets to download. If None, all assets will be downloaded
-
-        Returns
-        -------
-        List[Path]
-            List of paths to the downloaded files or extracted directories.
-        """
         if assets is None:
+            if self.latest_release is None:
+                raise ValueError(
+                    "No release found. Please call `get_latest_release` first."
+                )
             assets = self.latest_release.assets
 
         if exclude:
             import re
 
-            console.log(
-                f"Excluding assets on patterns: {', '.join([str(x) for x in exclude])}"
-            )
-            # try matching OR finding exact names
             exclude = [re.compile(f".*{name}.*") for name in exclude]
-            exclude_assets = [
+            assets = [
                 asset
                 for asset in assets
-                if any(pattern.match(asset.name) for pattern in exclude)
+                if not any(p.match(asset.name) for p in exclude)
             ]
-            console.log(
-                f"Excluding assets: {', '.join(asset.name for asset in exclude_assets)}"
-            )
-            assets = [asset for asset in assets if asset not in exclude_assets]
 
-        console.print(f"Downloading assets to {dest.absolute()}...")
+        for asset in assets:
+            self.asset_status[asset.name] = AssetStatus.SKIPPED
+
+        task_map: dict[str, TaskID] = {}
+
         with Progress(
+            SpinnerColumn(),
             TextColumn("[bold blue]{task.description}", justify="right"),
             BarColumn(),
             TaskProgressColumn(),
-            DownloadColumn(),
             TimeRemainingColumn(),
             TimeElapsedColumn(),
-            transient=True,
             console=console,
         ) as progress:
-            _ = asyncio.run(self._download(dest, assets, progress, force))
+            # Create tasks first
+            for asset in assets:
+                task_map[asset.name] = progress.add_task(
+                    description=f"[white]{asset.label}", total=1
+                )
 
-        extracted_paths = self.extract(force=force, cores=cores)
-        for tar_file in self.downloaded_paths:
-            if tar_file.exists():
-                console.log(f"Removing downloaded file: {tar_file}")
-                tar_file.unlink()
-        return extracted_paths
-
-    def extract(
-        self, force: bool = False, cores: Optional[int] = None
-    ) -> List[Path]:
-        """Extract downloaded archives to the specified directory in parallel.
-
-        Parameters
-        ----------
-        force : bool, optional
-            Whether to force extraction by removing existing directories, by default False.
-        cores : int, optional
-            Number of cores to use for parallel extraction, by default uses all available cores.
-
-        Returns
-        -------
-        List[Path]
-            List of paths to the extracted directories.
-        """
-        if not self.downloaded_paths:
-            raise ValueError(
-                "No archives have been downloaded yet. Call `download` first."
-            )
-
-        if cores is None:
-            cores = os.cpu_count()
-
-        def extract_archive(path: Path) -> List[Path]:
-            extract_path = path.with_suffix("").with_suffix("")
-            extracted_paths: List[Path] = []
-
-            if extract_path.exists():
-                if force:
-                    console.print(
-                        f"Removing existing directory {extract_path}..."
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            extracted_paths = loop.run_until_complete(
+                asyncio.gather(
+                    *(
+                        self._process_asset(asset, dest, progress, task_map)
+                        for asset in assets
                     )
-                    shutil.rmtree(extract_path)
-                else:
-                    console.print(
-                        f"Directory {extract_path} already"
-                        " exists. Skipping extraction."
-                    )
-                    extracted_paths.append(extract_path)
-                    return extracted_paths
-
-            console.log(f"Extracting {path.name}...")
-            if tarfile.is_tarfile(path):
-                with tarfile.open(path, "r:*") as archive:
-                    archive.extractall(extract_path.parent, filter="data")
-                    extracted_paths.append(extract_path)
-            elif zipfile.is_zipfile(path):
-                with zipfile.ZipFile(path, "r") as archive:
-                    archive.extractall(extract_path.parent)
-                    extracted_paths.append(extract_path)
-            else:
-                console.print(f"Unsupported archive format: {path.name}")
-            return extracted_paths
-
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=cores
-        ) as executor:
-            results = list(
-                executor.map(extract_archive, self.downloaded_paths)
+                )
             )
+            loop.close()
 
-        # Flatten the list of lists
-        return [item for sublist in results for item in sublist]
+        return [p for p in extracted_paths if p is not None]
 
 
 # Usage example
 if __name__ == "__main__":  # pragma: no cover
     manager = MedImageTestData()
-
     print(manager)
 
     old_release = manager.get_latest_release()
 
-    chosen_assets = old_release.assets[8:]
+    chosen_assets = old_release.assets
 
     dest_dir = Path("data")
     downloaded_files = manager.download(dest_dir, assets=chosen_assets)
     console.print(downloaded_files)
+
+    r = manager.latest_release

@@ -3,6 +3,8 @@ from typing import List, Pattern
 
 import click
 
+from imgtools.loggers import logger
+
 
 def is_testdata_available() -> bool:
     try:
@@ -13,15 +15,11 @@ def is_testdata_available() -> bool:
         return False
 
 
-if is_testdata_available():
-    from imgtools.datasets import MedImageTestData
-
-
 @click.command(
     no_args_is_help=True,
 )
-@click.argument(
-    "dest",
+@click.option(
+    "--dest",
     type=click.Path(
         exists=False,
         file_okay=False,
@@ -30,6 +28,8 @@ if is_testdata_available():
         path_type=pathlib.Path,
         resolve_path=True,
     ),
+    required=True,
+    help="The directory where the test data will be saved.",
 )
 @click.option(
     "-a",
@@ -42,27 +42,32 @@ if is_testdata_available():
     "-h",
     "--help",
 )
+@click.option(
+    "--list-assets",
+    is_flag=True,
+    help="List available assets and exit.",
+)
 def testdata(
-    dest: pathlib.Path, assets: List[str], no: List[Pattern[str]]
+    dest: pathlib.Path,
+    assets: List[str],
+    no: List[Pattern[str]],
+    list_assets: bool,
 ) -> None:
-    """Download test data from the latest GitHub release.
+    """Download test data from the latest GitHub release."""
+    if is_testdata_available():
+        from imgtools.datasets import MedImageTestData
 
-    DEST is the directory where the test data will be saved.
-
-    assets can be one of the following:
-
-    \b
-    - 4D-Lung.tar.gz
-    - CC-Tumor-Heterogeneity.tar.gz
-    - NSCLC-Radiomics.tar.gz
-    - NSCLC_Radiogenomics.tar.gz
-    - QIN-PROSTATE-Repeatability.tar.gz
-    - Soft-tissue-Sarcoma.tar.gz
-    - Vestibular-Schwannoma-SEG.tar.gz
-
-    """
     manager = MedImageTestData()
+
+    if list_assets:
+        click.echo("Available assets:")
+        for asset in manager.dataset_names:
+            click.echo(f"\t{asset}")
+        return
+
     selected_assets = None
+
+    logger.debug(f"Available assets: {manager.dataset_names}")
 
     if assets:
         selected_assets = [
