@@ -191,6 +191,10 @@ class ModalityMetadataExtractor(ABC):
         list[str]
             All metadata keys produced by this extractor.
         """
+        # if no modality_tags or computed_fields are defined, return base_tags
+        if not cls.modality_tags and not cls.computed_fields:
+            return sorted(cls.base_tags)
+
         all_tags = cls.base_tags.union(cls.modality_tags)
         all_keys = all_tags.union(cls.computed_fields.keys())
         return sorted(all_keys)

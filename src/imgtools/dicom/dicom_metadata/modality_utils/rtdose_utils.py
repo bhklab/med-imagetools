@@ -1,4 +1,4 @@
-from imgtools.dicom.dicom_reader import DicomInput, load_dicom
+from pydicom.dataset import Dataset
 
 __all__ = [
     "rtdose_reference_uids",
@@ -34,7 +34,7 @@ class RTDOSERefPlanSOP(str):
 
 
 def rtdose_reference_uids(
-    rtdose: DicomInput,
+    rtdose: Dataset,
 ) -> tuple[RTDOSERefPlanSOP, RTDOSERefStructSOP, RTDOSERefSeries]:
     """Extracts referenced SOPInstanceUIDs from an RTDOSE file.
 
@@ -46,22 +46,21 @@ def rtdose_reference_uids(
         - struct: RTDOSERefStructSOP (empty string if not found)
         - series: RTDOSERefSeries (empty string if not found)
     """
-    dose = load_dicom(rtdose)
 
     # Extract plan UID
     plan_uid = RTDOSERefPlanSOP("")
-    if "ReferencedRTPlanSequence" in dose and dose.ReferencedRTPlanSequence:
-        plan_uid = RTDOSERefPlanSOP(dose.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+    if "ReferencedRTPlanSequence" in rtdose and rtdose.ReferencedRTPlanSequence:
+        plan_uid = RTDOSERefPlanSOP(rtdose.ReferencedRTPlanSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
     # Extract structure set UID
     struct_uid = RTDOSERefStructSOP("")
-    if ("ReferencedStructureSetSequence" in dose and dose.ReferencedStructureSetSequence):  # fmt: skip
-        struct_uid = RTDOSERefStructSOP(dose.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+    if ("ReferencedStructureSetSequence" in rtdose and rtdose.ReferencedStructureSetSequence):  # fmt: skip
+        struct_uid = RTDOSERefStructSOP(rtdose.ReferencedStructureSetSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
     # Extract series UID
     series_uid = RTDOSERefSeries("")
-    if "ReferencedImageSequence" in dose and dose.ReferencedImageSequence:
-        series_uid = RTDOSERefSeries(dose.ReferencedImageSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
+    if "ReferencedImageSequence" in rtdose and rtdose.ReferencedImageSequence:
+        series_uid = RTDOSERefSeries(rtdose.ReferencedImageSequence[0].ReferencedSOPInstanceUID)  # fmt: skip
 
     return plan_uid, struct_uid, series_uid
 

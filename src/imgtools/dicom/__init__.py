@@ -6,11 +6,6 @@ from .dicom_reader import (
 )
 from .read_tags import read_tags
 from .utils import lookup_tag, similar_tags, tag_exists
-from .dicom_metadata.dicom_metadata import (
-    MODALITY_TAGS,
-    extract_dicom_tags,
-    modality_metadata_keys,
-)
 
 __all__ = [
     # dicom_find
@@ -24,8 +19,5 @@ __all__ = [
     "load_dicom",
     # read_tags
     "read_tags",
-    # dicom_metadata
-    "MODALITY_TAGS",
-    "extract_dicom_tags",
-    "modality_metadata_keys",
+
 ]

@@ -20,6 +20,7 @@ __all__ = [
     "register_extractor",
     "supported_modalities",
     "extract_metadata",
+    "get_keys_from_modality",
 ]
 
 
@@ -33,3 +34,11 @@ def extract_metadata(
 
     extractor_cls = get_extractor(modality)
     return extractor_cls.extract(ds)
+
+
+def get_keys_from_modality(modality: str) -> list[str]:
+    """
+    Get the keys for a given modality.
+    """
+    extractor_cls = get_extractor(modality)
+    return extractor_cls.metadata_keys()

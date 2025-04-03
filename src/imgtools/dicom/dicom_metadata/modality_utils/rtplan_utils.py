@@ -1,4 +1,5 @@
-from imgtools.dicom.dicom_reader import DicomInput, load_dicom
+from pydicom.dataset import Dataset
+
 from imgtools.loggers import logger
 
 __all__ = ["rtplan_reference_uids", "RTPLANRefStructSOP"]
@@ -16,26 +17,28 @@ class RTPLANRefStructSOP(str):
 
 
 def rtplan_reference_uids(
-    rtplan: DicomInput,
-) -> RTPLANRefStructSOP | None:
+    rtplan: Dataset,
+) -> RTPLANRefStructSOP:
     """Get the ReferencedSOPInstanceUIDs from an RTPLAN file
 
     We assume RTPLAN only references a `RTSTRUCT` file.
 
+    Parameters
+    ----------
+    rtplan : Dataset
+        The RTPLAN file to extract the reference UIDs from
+        Must be a `pydicom.Dataset` object
+
     Example
     -------
-    >>> p = "/path/to/rtplan.dcm"
-    >>> match rtplan_reference_uids(p):
+    >>> match rtplan_reference_uids(rtplan):
     ...     case RTPLANRefStructSOP(uid):
     ...         print(f"SOPInstanceUID: {uid=}")
-    ...     case None:
-    ...         print("No Reference UIDs found")
     """
-    plan = load_dicom(rtplan)
-    if "ReferencedStructureSetSequence" in plan:
+    if "ReferencedStructureSetSequence" in rtplan:
         refs = [
             RTPLANRefStructSOP(seq.ReferencedSOPInstanceUID)
-            for seq in plan.ReferencedStructureSetSequence
+            for seq in rtplan.ReferencedStructureSetSequence
         ]
         if len(refs) > 1:
             warnmsg = (
@@ -45,4 +48,4 @@ def rtplan_reference_uids(
             logger.warning(warnmsg)
         return refs[0]
 
-    return None
+    return RTPLANRefStructSOP("")

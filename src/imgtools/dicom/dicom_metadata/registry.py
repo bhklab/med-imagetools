@@ -24,7 +24,7 @@ def register_extractor(
     Type[ModalityMetadataExtractor]
         The class itself (unchanged), for use as a decorator.
     """
-    modality = cls.modality()
+    modality = cls.modality().upper()
     if modality in _EXTRACTOR_REGISTRY:
         msg = (
             f"Modality '{modality}' already"
@@ -54,7 +54,14 @@ def get_extractor(modality: str) -> Type[ModalityMetadataExtractor]:
     KeyError
         If no extractor is registered for the modality.
     """
-    return _EXTRACTOR_REGISTRY[modality]
+    x = _EXTRACTOR_REGISTRY.get(modality.upper(), None)
+    if not x:
+        from imgtools.dicom.dicom_metadata.extractors import (
+            FallbackMetadataExtractor,
+        )
+
+        x = FallbackMetadataExtractor
+    return x
 
 
 def supported_modalities() -> list[str]:

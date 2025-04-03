@@ -9,6 +9,52 @@ from imgtools.dicom.dicom_metadata.extractor_base import (
 )
 from imgtools.dicom.dicom_metadata.registry import register_extractor
 
+__all__ = [
+    "CTMetadataExtractor",
+    "MRMetadataExtractor",
+    "PTMetadataExtractor",
+    "SEGMetadataExtractor",
+    "RTSTRUCTMetadataExtractor",
+]
+
+
+class FallbackMetadataExtractor(ModalityMetadataExtractor):
+    """
+    Generic fallback extractor for unsupported or uncommon DICOM modalities.
+
+    This extractor uses only the base tags defined in the superclass and
+    defines no modality-specific tags or computed fields. It allows graceful
+    handling of modalities not yet explicitly supported.
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "UNKNOWN"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        """
+        Returns an empty set since no modality-specific tags are defined.
+
+        Returns
+        -------
+        set[str]
+            Empty set.
+        """
+        return set()
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        """
+        Returns an empty mapping since no computed fields are defined.
+
+        Returns
+        -------
+        Mapping[str, ComputedField]
+            Empty mapping.
+        """
+        return {}
+
 
 @register_extractor
 class CTMetadataExtractor(ModalityMetadataExtractor):
@@ -310,4 +356,117 @@ class RTSTRUCTMetadataExtractor(ModalityMetadataExtractor):
             "ReferencedSOPUIDs": lambda ds: rtstruct_reference_uids(ds)[1],
             "ROINames": extract_roi_names,
             "NumROIs": lambda ds: len(extract_roi_names(ds)),
+        }
+
+
+@register_extractor
+class RTDOSEMetadataExtractor(ModalityMetadataExtractor):
+    """
+    Metadata extractor for RTDOSE modality DICOM datasets.
+
+    Extracts direct and computed reference UIDs from dose DICOM files.
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "RTDOSE"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        return {
+            "DoseType",
+            "DoseUnits",
+            "DoseSummationType",
+            "DoseGridScaling",
+        }
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        from imgtools.dicom.dicom_metadata.modality_utils.rtdose_utils import (
+            rtdose_reference_uids,
+        )
+
+        def get_sop_uids(ds: Dataset) -> list[str]:
+            ref_pl, ref_struct, ref_series = rtdose_reference_uids(ds)
+            return [ref_struct or ref_pl]
+
+        return {
+            "ReferencedSeriesUID": lambda ds: rtdose_reference_uids(ds)[2],
+            "ReferencedSeriesSOPUIDs": get_sop_uids,
+        }
+
+
+@register_extractor
+class RTPLANMetadataExtractor(ModalityMetadataExtractor):
+    """
+    Metadata extractor for RTPLAN modality DICOM datasets.
+
+    Extracts basic DICOM tags and reference to an RTSTRUCT UID.
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "RTPLAN"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        return {
+            "SeriesInstanceUID",
+            "StudyInstanceUID",
+            "RTPlanLabel",
+            "RTPlanName",
+            "RTPlanDate",
+            "RTPlanTime",
+        }
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        from imgtools.dicom.dicom_metadata.modality_utils.rtplan_utils import (
+            rtplan_reference_uids,
+        )
+
+        return {"ReferencedSOPUIDs": lambda ds: [rtplan_reference_uids(ds)]}
+
+
+@register_extractor
+class SRMetadataExtractor(ModalityMetadataExtractor):
+    """
+    Metadata extractor for SR (Structured Report) modality DICOM datasets.
+
+    Extracts referenced SeriesInstanceUIDs and SOPInstanceUIDs from structured reports.
+    """
+
+    @classmethod
+    def modality(cls) -> str:
+        return "SR"
+
+    @classproperty
+    def modality_tags(cls) -> set[str]:
+        return {
+            "SeriesInstanceUID",
+            "StudyInstanceUID",
+            "Modality",
+            "Manufacturer",
+            "ContentDate",
+            "ContentTime",
+            "SeriesDescription",
+        }
+
+    @classproperty
+    def computed_fields(cls) -> Mapping[str, ComputedField]:
+        from imgtools.dicom.dicom_metadata.modality_utils.sr_utils import (
+            sr_reference_uids,
+        )
+
+        def get_series_uids(ds: Dataset) -> list[str]:
+            series, _ = sr_reference_uids(ds)
+            return list(series)
+
+        def get_sop_uids(ds: Dataset) -> list[str]:
+            _, sops = sr_reference_uids(ds)
+            return list(sops)
+
+        return {
+            "ReferencedSeriesUIDs": get_series_uids,
+            "ReferencedSOPUIDs": get_sop_uids,
         }

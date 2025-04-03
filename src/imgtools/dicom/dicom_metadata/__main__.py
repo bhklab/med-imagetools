@@ -3,6 +3,7 @@ from rich import print  # noqa
 
 from imgtools.dicom.dicom_metadata import (
     extract_metadata,
+    get_keys_from_modality,
     supported_modalities,
 )
 
@@ -22,13 +23,25 @@ from imgtools.dicom.dicom_metadata import (
     is_flag=True,
     help="List all available DICOM modalities.",
 )
-def cli(dicom_file, output, list_modalities):
+@click.option("--list-tags", "-lt", help="List tags for a given modality")
+def cli(dicom_file, output, list_modalities, list_tags):
     """Extract DICOM metadata from a file."""
+    modalities = supported_modalities()
     if list_modalities:
-        modalities = supported_modalities()
         print("Available DICOM modalities:")
         for modality in modalities:
             print(modality)
+        return
+
+    if list_tags:
+        if list_tags not in modalities:
+            print(
+                f"Modality '{list_tags}' is not supported. Returning generic"
+            )
+        tags = get_keys_from_modality(list_tags)
+        print(f"Available tags for {list_tags}:")
+        for tag in tags:
+            print(tag)
         return
 
     metadata = extract_metadata(dicom_file)
