@@ -20,6 +20,7 @@ def is_testdata_available() -> bool:
 )
 @click.option(
     "--dest",
+    "-d",
     type=click.Path(
         exists=False,
         file_okay=False,
@@ -28,7 +29,6 @@ def is_testdata_available() -> bool:
         path_type=pathlib.Path,
         resolve_path=True,
     ),
-    required=True,
     help="The directory where the test data will be saved.",
 )
 @click.option(
@@ -44,6 +44,7 @@ def is_testdata_available() -> bool:
 )
 @click.option(
     "--list-assets",
+    "-l",
     is_flag=True,
     help="List available assets and exit.",
 )
@@ -65,17 +66,21 @@ def testdata(
             click.echo(f"\t{asset}")
         return
 
-    selected_assets = None
+    if not dest:
+        click.echo("Destination directory (--dest) is required.")
+        return
 
     logger.debug(f"Available assets: {manager.dataset_names}")
 
     if assets:
         selected_assets = [
-            asset for asset in manager.datasets if asset.name in assets
+            asset for asset in manager.datasets if asset.label in assets
         ]
         if not selected_assets:
             click.echo(f"No matching assets found for: {', '.join(assets)}")
             return
+    else:
+        selected_assets = None
 
     downloaded_files = manager.download(
         dest, assets=selected_assets, exclude=no

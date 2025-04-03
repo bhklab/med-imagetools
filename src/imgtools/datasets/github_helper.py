@@ -294,7 +294,7 @@ class MedImageTestData:
             AssetStatus.DOWNLOADING: ("cyan", "⬇️ [DOWNLOADING]"),
             AssetStatus.DOWNLOADED: ("yellow", "📦 [DOWNLOADED ]"),
             AssetStatus.EXTRACTING: ("yellow", "📦 [EXTRACTING ]"),
-            AssetStatus.DONE: ("green", "✅ [DONE  ]"),
+            AssetStatus.DONE: ("green", "✅ [DONE       ]"),
             AssetStatus.SKIPPED: ("magenta", "⏭️ [SKIPPED    ]"),
             AssetStatus.FAILED: ("red", "❌ [FAILED     ]"),
         },
