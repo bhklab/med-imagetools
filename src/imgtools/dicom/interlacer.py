@@ -1,3 +1,44 @@
+"""
+Interlacer Module
+
+This module defines the `Interlacer` class, which constructs and queries a hierarchical 
+forest of DICOM series based on their metadata relationships. It enables efficient 
+grouping, querying, and visualization of medical imaging series.
+
+Classes
+-------
+SeriesNode
+    Represents an individual DICOM series and its hierarchical relationships.
+Branch
+    Represents a path within the hierarchy, maintaining ordered modality sequences.
+GroupBy
+    Enum for grouping series by `ReferencedSeriesUID`, `StudyInstanceUID`, or `PatientID`.
+    Currently only `ReferencedSeriesUID` is supported.
+Interlacer
+    Builds the hierarchy, processes queries, and visualizes the relationships.
+
+Examples
+--------
+>>> from pathlib import Path
+>>> from rich import print  # noqa
+>>> from imgtools.dicom.crawl import CrawlerSettings, Crawler
+>>> from imgtools.dicom.interlacer import Interlacer
+>>> 
+>>> dicom_dir = Path("data")
+>>> crawler_settings = CrawlerSettings(
+>>>     dicom_dir=dicom_dir,
+>>>     n_jobs=12,
+>>>     force=False
+>>> )
+>>> crawler = Crawler.from_settings(crawler_settings)
+>>> 
+>>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer.visualize_forest()
+>>> 
+>>> query = "CT,RTSTRUCT"
+>>> samples = interlacer.query(query)
+"""
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -125,7 +166,7 @@ class Branch:
         """Check if the given query is a sub-sequence and has the same order as the nodes in the branch."""
         node_mode = [node.Modality for node in self.series_nodes]
         
-        if ["CT", "RTSTRUCT"] == query: # EXCEPTION: Avoid PT in between CT and RTSTRUCT
+        if query == ["CT", "RTSTRUCT"]: # EXCEPTION: Avoid PT in between CT and RTSTRUCT
             return next((self.series_nodes[idx:idx+2] for idx in range(len(self.series_nodes) - 1) 
                                 if node_mode[idx:idx+2] == query), [])
         
@@ -560,9 +601,20 @@ class Interlacer:
 
 if __name__ == "__main__":
     from rich import print  # noqa
+    from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
-    interlacer = Interlacer(".imgtools/data/crawldb.csv")
+    dicom_dir = Path("data")
+
+    crawler_settings = CrawlerSettings(
+        dicom_dir=dicom_dir,
+        n_jobs=12,
+        force=False
+    )
+
+    crawler = Crawler.from_settings(crawler_settings)
+
+    interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    result = interlacer.query("CT,RTSTRUCT")
 
-    print(result)
+    query = "MR,SEG"
+    samples = interlacer.query(query)

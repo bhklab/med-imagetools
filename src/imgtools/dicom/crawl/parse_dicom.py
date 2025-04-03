@@ -1,5 +1,5 @@
 import json
-import os
+# import os
 import pathlib
 import typing as t
 from collections import defaultdict
@@ -9,7 +9,7 @@ from joblib import Parallel, delayed  # type: ignore
 from pydicom import FileDataset
 from tqdm import tqdm
 
-from imgtools.dicom import find_dicoms, load_dicom
+from imgtools.dicom.dicom_find import find_dicoms 
 from imgtools.dicom.input import (
     RTDOSERefPlanSOP,
     RTDOSERefSeries,
@@ -27,6 +27,7 @@ from imgtools.dicom.input import (
     rtstruct_reference_uids,
     seg_reference_uids,
     sr_reference_uids,
+    load_dicom
 )
 from imgtools.loggers import logger
 from imgtools.utils import timer
@@ -177,9 +178,16 @@ def parse_one_dicom(
     series_uid = SeriesUID(meta["SeriesInstanceUID"])
 
     # Make paths relative
-    filepath = os.path.relpath(dcm_path, top.parent)
-    meta.folder = os.path.dirname(filepath)  # noqa
-    meta.instances = {instance_uid: os.path.basename(filepath)}  # noqa
+    ## using pathlib instead of os
+    filepath = pathlib.Path(dcm_path).relative_to(top.parent)
+    meta.folder = filepath.parent.as_posix()
+    meta.instances = {instance_uid: filepath.as_posix()}  # noqa 
+
+    ## using os instead of pathlib
+    # filepath = os.path.relpath(dcm_path, top.parent)
+    # meta.folder = os.path.dirname(filepath)  # noqa
+    # meta.instances = {instance_uid: os.path.basename(filepath)}  # noqa
+
 
     # Construct return maps in a single step
     return (

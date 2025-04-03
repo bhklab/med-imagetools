@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-import SimpleITK as sitk
-
+from SimpleITK import Image
 from .base_transform import BaseTransform
 from .functional import (
     clip_intensity,
@@ -49,7 +48,7 @@ class ClipIntensity(IntensityTransform):
     lower: float
     upper: float
 
-    def __call__(self, image: sitk.Image) -> sitk.Image:
+    def __call__(self, image: Image) -> Image:
         """Clip image intensities within a specified range.
 
         This method processes the input image by resetting pixel values lower
@@ -58,12 +57,12 @@ class ClipIntensity(IntensityTransform):
 
         Parameters
         ----------
-        image : sitk.Image
+        image : Image
             A SimpleITK image to be intensity-clipped.
 
         Returns
         -------
-        sitk.Image
+        Image
             A SimpleITK image with intensities constrained to the range
             [self.lower, self.upper].
         """
@@ -97,7 +96,7 @@ class WindowIntensity(IntensityTransform):
     window: float
     level: float
 
-    def __call__(self, image: sitk.Image) -> sitk.Image:
+    def __call__(self, image: Image) -> Image:
         """Apply a windowing transform to adjust image intensities.
 
         Adjusts the input image so that intensities falling outside the range
@@ -106,12 +105,12 @@ class WindowIntensity(IntensityTransform):
 
         Parameters
         ----------
-        image : sitk.Image
+        image : Image
             The input intensity image.
 
         Returns
         -------
-        sitk.Image
+        Image
             The intensity image after applying the windowing transform.
         """
 

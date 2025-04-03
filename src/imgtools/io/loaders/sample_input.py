@@ -1,3 +1,47 @@
+"""
+Module for loading and processing medical imaging data from DICOM series.
+
+This module contains the `SampleInput` class, which is used to load and process medical imaging data
+from a provided sample(Which come from the interlacer). The data is loaded from a crawl information JSON 
+file, and various functionalities like grouping by modality, handling subseries, and loading reference images 
+are provided.
+
+Key functionalities:
+- Load DICOM series by series UID
+- Group images by modality (CT, MR, etc.)
+- Handle multiple subseries in series
+- Load imaging data (e.g., Scan, PET, Segmentation, Dose) based on series UID and modality
+- Provide a method to load and process images for reference and segmentation
+
+Classes:
+    SampleInput: A class for loading and processing medical imaging data from a sample.
+
+
+Examples
+-------
+>>> from rich import print  # noqa
+>>> from imgtools.dicom.interlacer import Interlacer
+>>> from imgtools.dicom.crawl import CrawlerSettings, Crawler
+>>> from imgtools.io.loaders import SampleInput
+>>>
+>>> crawler_settings = CrawlerSettings(
+>>>     dicom_dir=Path("data"),
+>>>     n_jobs=12,
+>>> )
+>>>
+>>> crawler = Crawler.from_settings(crawler_settings)
+>>>
+>>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer.visualize_forest()
+>>> samples = interlacer.query("CT,SEG")
+>>>
+>>> loader = SampleInput(crawler.db_json)
+>>>
+>>> for sample in samples:
+>>>     print(loader(sample))
+"""
+
+
 import json
 from collections import defaultdict
 from pathlib import Path
@@ -5,17 +49,24 @@ from typing import Dict, List
 
 from imgtools.io.loaders.utils import auto_dicom_result, read_dicom_auto
 from imgtools.loggers import logger
-from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modalities import (
+    PET,
+    SEG,
+    Dose,
+    Scan,
+    Segmentation,
+    StructureSet,
+)
 from imgtools.utils import timer
 
 
-class SampleLoader:
+class SampleInput:
     def __init__(
         self,
         crawl_path: str,
+        root_directory: Path,
         multiple_subseries_setting_toggle: bool = False,
         roi_names: Dict[str, str] | None = None,
-        existing_roi_indices: Dict[str, int] | None = None,
         ignore_missing_regex: bool = False,
         roi_select_first: bool = False,
         roi_separate: bool = False,
@@ -24,14 +75,18 @@ class SampleLoader:
             multiple_subseries_setting_toggle
         )
 
+        self.root_directory = root_directory
         self.roi_names = roi_names
-        self.existing_roi_indices = existing_roi_indices
         self.ignore_missing_regex = ignore_missing_regex
         self.roi_select_first = roi_select_first
         self.roi_separate = roi_separate
 
         with Path(crawl_path).open("r") as f:
             self.crawl_info = json.load(f)
+
+    def __call__(self, sample: List[Dict[str, str]]) -> List[Scan | PET | Dose | Segmentation]:
+        """Load medical imaging data from a given sample."""
+        return self._load(sample)
 
     def _reader(
         self, series_uid: str, load_subseries: bool = False
@@ -57,9 +112,9 @@ class SampleLoader:
         images = []
         if load_subseries:
             for subseries_uid in subseries_uids:
-                folder = series_info[subseries_uid]["folder"]
+                folder = self.root_directory / series_info[subseries_uid]["folder"]
                 file_names = [
-                    (Path(folder) / file_name).as_posix()
+                    (folder / file_name).as_posix()
                     for file_name in series_info[subseries_uid][
                         "instances"
                     ].values()
@@ -73,17 +128,17 @@ class SampleLoader:
                     "Found >1 subseries, combining them into one image"
                 )
 
-            folder = series_info[subseries_uids[0]]["folder"]
+            folder = self.root_directory / series_info[subseries_uids[0]]["folder"]
             file_names = []
             for subseries_uid in subseries_uids:
                 file_names += [
-                    (Path(folder) / file_name).as_posix()
+                    (folder / file_name).as_posix()
                     for file_name in series_info[subseries_uid][
                         "instances"
                     ].values()
                 ]
-
-            images.append(read_dicom_auto(folder, series_uid, file_names))
+            
+            images.append(read_dicom_auto(folder.as_posix(), series_uid, file_names))
 
         return images
 
@@ -106,9 +161,9 @@ class SampleLoader:
             grouped_images[modality].append(image["Series"])
 
         return grouped_images
-
+        
     @timer("Loading sample")
-    def load(
+    def _load(
         self, sample: List[Dict[str, str]]
     ) -> List[Scan | PET | Dose | Segmentation]:
         """
@@ -171,12 +226,12 @@ class SampleLoader:
         for modality, series_uids in grouped_images.items():
             for series_uid in series_uids:
                 image = self._reader(series_uid)[0]
-                if modality == "RTSTRUCT" and isinstance(image, StructureSet):
+                if (modality == "RTSTRUCT" and isinstance(image, StructureSet)) or (
+                    modality == "SEG" and isinstance(image, SEG)
+                ):
                     segmentation = image.to_segmentation(
                         reference_image=reference_image,
                         roi_names=self.roi_names,  # type: ignore
-                        continuous=False,
-                        existing_roi_indices=self.existing_roi_indices,
                         ignore_missing_regex=self.ignore_missing_regex,
                         roi_select_first=self.roi_select_first,
                         roi_separate=self.roi_separate,
@@ -200,16 +255,24 @@ class SampleLoader:
 if __name__ == "__main__":
     from rich import print  # noqa
     from imgtools.dicom.interlacer import Interlacer
+    from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
-    interlacer = Interlacer(".imgtools/data/crawldb.csv")
+    dicom_dir = Path("data").resolve()
+
+    crawler_settings = CrawlerSettings(
+        dicom_dir=dicom_dir,
+        n_jobs=12,
+    )
+
+    crawler = Crawler.from_settings(crawler_settings)
+
+    interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("MR,SEG")
+    samples = interlacer.query("CT,SEG")
 
-    print(samples)
-
-    loader = SampleLoader(".imgtools/data/crawldb.json")
+    loader = SampleInput(crawler.db_json, root_directory=dicom_dir.parent)
 
     for sample in samples:
-        print(loader.load(sample))
+        print(loader(sample))
 
 

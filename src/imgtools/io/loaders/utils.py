@@ -8,7 +8,7 @@ from pydicom import dcmread
 
 from imgtools.dicom.dicom_metadata import extract_dicom_tags
 from imgtools.dicom.dicom_metadata_old import get_modality_metadata
-from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet
+from imgtools.modalities import PET, Dose, Scan, Segmentation, StructureSet, SEG
 
 
 def read_image(path: str) -> sitk.Image:
@@ -88,7 +88,18 @@ def read_dicom_series(
     reader.MetaDataDictionaryArrayUpdateOn()
     reader.LoadPrivateTagsOn()
 
-    return reader.Execute()
+    image = reader.Execute()
+
+    # Extract SOPInstanceUIDs and map them to slice indices
+    sop_uid_mapping = {}
+    for idx, file in enumerate(file_names):
+        ds = dcmread(file, stop_before_pixels=True)
+        sop_uid_mapping[ds.SOPInstanceUID] = str(idx)
+
+    # Store mapping as metadata in the SimpleITK image
+    image.SetMetaData("SOPInstanceUIDMapping", str(sop_uid_mapping))
+
+    return image
 
 
 def read_dicom_scan(
@@ -126,14 +137,11 @@ def read_dicom_pet(path: str, series: Optional[str] = None) -> PET:
     return PET.from_dicom(path=path, series_id=series, pet_image_type="SUV")
 
 
-def read_dicom_seg(
-    path: str, meta: dict, series: Optional[str] = None
-) -> Segmentation:
-    seg_img = read_dicom_series(path, series)
-    return Segmentation.from_dicom(seg_img, meta)
+def read_dicom_seg(path: str, meta: dict) -> SEG:
+    return SEG.from_dicom(path, meta)
 
 
-auto_dicom_result = Union[Scan, PET, StructureSet, Dose, Segmentation]
+auto_dicom_result = Union[Scan, PET, StructureSet, Dose, SEG]
 
 
 def read_dicom_auto(
@@ -156,16 +164,14 @@ def read_dicom_auto(
         match modality:
             case "CT" | "MR":
                 obj = read_dicom_scan(path, series, file_names=file_names)
-                obj.metadata.update(extract_dicom_tags(meta))
             case "PT":
                 obj = read_dicom_pet(path, series)
             case "RTSTRUCT":
                 obj = read_dicom_rtstruct(dcm)
-                obj.metadata.update(extract_dicom_tags(meta))
             case "RTDOSE":
                 obj = read_dicom_rtdose(dcm)
             case "SEG":
-                obj = read_dicom_seg(path, meta, series)
+                obj = read_dicom_seg(dcm, meta)
             case _:
                 errmsg = (
                     f"Modality {modality} not supported in read_dicom_auto."
@@ -173,4 +179,5 @@ def read_dicom_auto(
                 raise NotImplementedError(errmsg)
 
         # obj.metadata.update(get_modality_metadata(meta, modality))
+        obj.metadata.update(extract_dicom_tags(meta))
         return obj

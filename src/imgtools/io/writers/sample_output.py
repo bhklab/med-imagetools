@@ -1,19 +1,73 @@
+"""
+Module for writing medical imaging data to output formats (e.g., NIFTI, HDF5).
+
+This module contains the `SampleOutput` class, which is used to write medical imaging data (e.g., Scan, PET, Dose, Segmentation) 
+to disk using different writers (NIFTI or HDF5). The class allows customization of output file structure, handling of existing files, 
+and filename sanitization.
+
+Key functionalities:
+- Write imaging data (e.g., Scan, PET, Dose, Segmentation) to output formats (NIFTI or HDF5)
+- Handle multiple ROIs in segmentation data
+- Allow customization of output file structure and handling of existing files
+- Sanitize filenames and create necessary directories
+
+Classes:
+    SampleOutput: A class for writing medical imaging data to NIFTI or HDF5 formats.
+
+Examples
+--------
+>>> from imgtools.dicom.crawl import CrawlerSettings, Crawler
+>>> from imgtools.dicom.interlacer import Interlacer
+>>> from imgtools.dicom.dicom_metadata import MODALITY_TAGS
+>>> from imgtools.io import SampleOutput, SampleInput
+>>>
+>>> dicom_dir = Path("data")
+>>> crawler_settings = CrawlerSettings(
+>>>     dicom_dir=dicom_dir,
+>>>     n_jobs=12,
+>>>     force=False
+>>> )
+>>> crawler = Crawler.from_settings(crawler_settings)
+>>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer.visualize_forest()
+>>> query = "CT,RTSTRUCT"
+>>> samples = interlacer.query(query)
+>>>
+>>> input = SampleInput(crawler.db_json)
+>>> context_keys = list(
+>>>     set.union(*[MODALITY_TAGS["ALL"], 
+>>>                 *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+>>> )
+>>> output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=context_keys)
+>>>
+>>> for sample_idx, sample in enumerate(samples, start=1):
+>>>     output(
+>>>         input(sample),
+>>>         SampleID=f"{dicom_dir.name}_{sample_idx:03d}",
+>>>     )
+"""
+
+
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from imgtools.io.base_classes import BaseOutput
-from imgtools.io.types import ImageMask
-from imgtools.io.writers import ExistingFileMode, NIFTIWriter, AbstractBaseWriter, HDF5Writer
+from imgtools.io.writers import (
+    AbstractBaseWriter,
+    ExistingFileMode,
+    HDF5Writer,
+    NIFTIWriter,
+)
+from imgtools.modalities import PET, Dose, Scan, Segmentation
 from imgtools.utils import sanitize_file_name
-from imgtools.modalities import Scan, Dose, Segmentation, PET 
+
 
 @dataclass
 class SampleOutput(BaseOutput):
-    """Class for writing ImageMask data to NIFTI files.
-    This class handles writing both image scans and their associated masks to NIFTI files.
-    The writer initializes with context keys containing all possible metadata keys
-    that could be included in the output's index file.
+    """
+    Class for writing Sample data.
+
     Attributes
     ----------
     context_keys : list[str]
@@ -28,11 +82,13 @@ class SampleOutput(BaseOutput):
         How to handle existing files.
     sanitize_filenames : bool
         Whether to sanitize filenames.
+    writer_type : str
+        Type of writer to use.
     """
-    context_keys: list[str]
     root_directory: Path
+    context_keys: list[str] = field(default_factory=list)
     filename_format: str = field(
-        default="{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}.nii.gz"
+        default="{SampleID}/{Modality}_Series-{SeriesInstanceUID}/{ImageID}"
     )
     create_dirs: bool = field(default=True)
     existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.SKIP)
@@ -43,14 +99,18 @@ class SampleOutput(BaseOutput):
     def writer(self) -> AbstractBaseWriter:
         match self.writer_type:
             case "nifti":
+                self.file_ending = ".nii.gz"
+                self.filename_format += self.file_ending
                 return NIFTIWriter
             case "hdf5":
+                self.file_ending = ".h5"
+                self.filename_format += self.file_ending
                 return HDF5Writer
             case _:
-                raise ValueError(f"Unsupported writer type: {self.writer_type}")
+                msg = f"Unsupported writer type: {self.writer_type}"
+                raise ValueError(msg)
     
     def __post_init__(self) -> None:
-        """Initialize the NIFTIWriter with the provided parameters and set up the context."""
         self._writer = self.writer(
             root_directory=self.root_directory,
             filename_format=self.filename_format,
@@ -63,58 +123,92 @@ class SampleOutput(BaseOutput):
         self._writer.set_context(**context)
         super().__init__(self._writer)
 
-    def __call__(self, data: list[Scan | Dose | Segmentation | PET], 
-                 **kwargs: Any) -> None:  # noqa: ANN401
+    def __call__(
+            self, 
+            sample: list[Scan | Dose | Segmentation | PET], 
+            **kwargs: dict[str, Any]) -> dict[str, Any]:
         """Write output data.
 
         Parameters
         ----------
-        data : ImageMaskData
-            The data to be written.
+        sample : list[Scan | Dose | Segmentation | PET]
+            The sample data to be written.
+        sample_idx : int
+            The sample idx to be used in the SampleID field.
         **kwargs : Any
             Keyword arguments for the writing process.
         """
-        for item in data:
-            if isinstance(item, Segmentation):
-                for roi in item.roi_indices:
-                        roi_seg = item.get_label(name=roi)
+        roi_names = {}
+
+        for image in sample:
+            # Only include keys that are in the writer context
+            image_metadata = {k: image.metadata[k] for k in self._writer.context if k in image.metadata}
+
+            if isinstance(image, Segmentation):
+                roi_names.update(image.roi_indices)
+                for name, label in image.roi_indices.items():
+                        roi_seg = image.get_label(label) 
                         self._writer.save(
                             roi_seg,
-                            ImageID=f"{sanitize_file_name(roi)}",
-                            **item.metadata,
+                            ImageID=f"{sanitize_file_name(name)}",
+                            **image_metadata,
                             **kwargs,
                         )      
             
             else:    
                 self._writer.save(
-                    item,
-                    ImageID=item.metadata['Modality'],
-                    **item.metadata,
+                    image,
+                    ImageID=image.metadata["Modality"],
+                    **image_metadata,
                     **kwargs,
                 )
 
+        sample_metadata = {
+            "roi_names": roi_names,
+            **kwargs
+        }
+        return sample_metadata
+
+
 if __name__ == "__main__":
     from rich import print  # noqa
+    from imgtools.dicom.crawl import CrawlerSettings, Crawler
     from imgtools.dicom.interlacer import Interlacer
-    from imgtools.io.loaders.sample_loader import SampleLoader
+    from imgtools.io.loaders import SampleInput
+    from imgtools.transforms import Transformer, Resample
+    from imgtools.dicom.dicom_metadata import MODALITY_TAGS
 
-    interlacer = Interlacer(".imgtools/data/crawldb.csv")
+    dicom_dir = Path("data")
+
+    crawler_settings = CrawlerSettings(
+        dicom_dir=dicom_dir,
+        n_jobs=12,
+        force=False
+    )
+
+    crawler = Crawler.from_settings(crawler_settings)
+
+    interlacer = Interlacer(crawler.db_csv)
     interlacer.visualize_forest()
-    samples = interlacer.query("CT,RTSTRUCT")
 
-    loader = SampleLoader(".imgtools/data/crawldb.json")
+    query = "MR,SEG"
+    samples = interlacer.query(query)
 
-    for sample_id, sample in enumerate(samples, start=1):
-        print(sample)
-        loaded_samples = loader.load(sample)
+    input = SampleInput(crawler.db_json)
+    transform = Transformer(
+        [Resample(1)]
+    )
+    context_keys = list(
+        set.union(*[MODALITY_TAGS["ALL"], 
+                    *[MODALITY_TAGS.get(modality, {}) for modality in query.split(",")]]
+                )
+    )
+    output = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=context_keys)
 
-        if sample_id == 1:
-            keys = set().union(*[set(item.metadata.keys()) for item in loaded_samples])
-            print(keys)
-            writer = SampleOutput(root_directory=".imgtools/data/output", writer_type="nifti", context_keys=keys)
-
-        case_id = f"Case-{sample_id}"
-        writer(loaded_samples)
-
+    for sample_idx, sample in enumerate(samples, start=1):
+        output(
+            input(sample),
+            SampleID=f"{dicom_dir.name}_{sample_idx:03d}",
+        )
 
 

@@ -105,22 +105,25 @@ class Resample(SpatialTransform):
         """
 
         # whether or not a reference image is provided
-        spacing = ref.GetSpacing() if ref is not None else self.spacing
-        spacing_list = (
-            list(spacing)
-            if isinstance(spacing, (tuple, Sequence))
-            else spacing
-        )
+        # spacing = ref.GetSpacing() if ref is not None else self.spacing
+        if isinstance(ref, sitk.Image):
+            return sitk.Resample(image, ref)
+        else:
+            spacing_list = (
+                list(self.spacing)
+                if isinstance(self.spacing, (tuple, Sequence))
+                else self.spacing
+            )
 
-        return resample(
-            image,
-            spacing=spacing_list,
-            interpolation=self.interpolation,
-            anti_alias=self.anti_alias,
-            anti_alias_sigma=self.anti_alias_sigma,
-            transform=self.transform,
-            output_size=self.output_size,
-        )
+            return resample(
+                image,
+                spacing=spacing_list,
+                interpolation=self.interpolation,
+                anti_alias=self.anti_alias,
+                anti_alias_sigma=self.anti_alias_sigma,
+                transform=self.transform,
+                output_size=self.output_size,
+            )
 
 
 @dataclass
