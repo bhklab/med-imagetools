@@ -9,7 +9,7 @@ import pytest
 from filelock import FileLock
 
 
-from imgtools.datasets.github_helper import (
+from imgtools.datasets.github_datasets import (
     GitHubRelease,
     MedImageTestData,
 )
