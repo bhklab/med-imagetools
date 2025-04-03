@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-import concurrent.futures
 import functools
 import os
-import shutil
 import tarfile
 import zipfile
 from dataclasses import dataclass, field
@@ -17,10 +15,8 @@ from github import Github
 from github.Repository import Repository  # type: ignore # noqa
 from rich import print  # noqa
 from rich.console import Console
-from rich.live import Live
 from rich.progress import (
     BarColumn,
-    DownloadColumn,
     Progress,
     TaskID,
     TaskProgressColumn,
@@ -28,7 +24,6 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
-from rich.table import Table
 
 from imgtools.utils.optional_import import OptionalImportError, optional_import
 
@@ -248,8 +243,8 @@ class MedImageTestData:
         assets = [
             GitHubReleaseAsset(
                 name=asset.name,
-                # remove the extension from the name
-                label=asset.name.split(".")[0],
+                # derive the label by removing all extensions
+                label=os.path.splitext(asset.name)[0],  # noqa
                 url=asset.url,
                 browser_download_url=asset.browser_download_url,
                 content_type=asset.content_type,
