@@ -327,8 +327,6 @@ class RTSTRUCTMetadataExtractor(ModalityMetadataExtractor):
             A set of directly accessible RTSTRUCT tag names.
         """
         return {
-            "SeriesInstanceUID",
-            "StudyInstanceUID",
             "StructureSetLabel",
             "StructureSetName",
             "StructureSetDate",

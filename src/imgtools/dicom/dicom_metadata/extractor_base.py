@@ -234,7 +234,7 @@ class ModalityMetadataExtractor(ABC):
                     "This may be due to missing or malformed data in the DICOM file."
                 )
                 warnmsg += f" Error: {e}"
-                logger.warning(warnmsg)
+                logger.warning(warnmsg, file=str(dicom))
                 output[key] = ""
 
         # sort all keys

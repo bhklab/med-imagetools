@@ -1,3 +1,4 @@
+# pragma: skip-file
 import click
 from rich import print  # noqa
 

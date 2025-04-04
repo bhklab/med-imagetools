@@ -71,12 +71,8 @@ def extract_roi_names(rtstruct: Dataset) -> list[str]:
         If the RTSTRUCT file does not contain the required `StructureSetROISequence`.
     """
 
-    try:
-        roi_sequence = rtstruct.StructureSetROISequence
-    except AttributeError as e:
-        errmsg = "Failed to extract ROISequence from the RTSTRUCT file."
-        raise RTSTRUCTAttributeError(errmsg) from e
-    roi_names = [roi.ROIName for roi in roi_sequence]
+    roi_metas = extract_roi_meta(rtstruct)
+    roi_names = [roi_meta["ROIName"] for roi_meta in roi_metas]
     return roi_names
 
 
@@ -119,7 +115,7 @@ def rtstruct_reference_uids(
     import contextlib
 
     series_uid = ""
-    sop_uids: list[str]
+    sop_uids: list[str] = []
 
     with contextlib.suppress(AttributeError, IndexError):
         # Direct access attempt - if any part fails, we'll catch the exception
@@ -132,6 +128,12 @@ def rtstruct_reference_uids(
         series_uid = rt_ref_series.get("SeriesInstanceUID", "")
 
         cis = rt_ref_series.ContourImageSequence[0]
-        sop_uids = [ci.ReferencedSOPInstanceUID for ci in cis]
+        sop_uids.extend(
+            [
+                ci.ReferencedSOPInstanceUID
+                for ci in cis
+                if "ReferencedSOPInstanceUID" in ci
+            ]
+        )
 
     return RTSTRUCTRefSeries(series_uid), RTSTRUCTRefSOP(sop_uids)

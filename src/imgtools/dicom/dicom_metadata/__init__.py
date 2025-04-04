@@ -9,6 +9,7 @@ from .registry import (
     get_extractor,
     register_extractor,
     supported_modalities,
+    ExistingExtractorError,
 )
 
 # need to do this to register all extractors during runtime
@@ -21,6 +22,7 @@ __all__ = [
     "supported_modalities",
     "extract_metadata",
     "get_keys_from_modality",
+    "ExistingExtractorError",
 ]
 
 

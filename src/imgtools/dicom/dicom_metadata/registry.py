@@ -8,6 +8,24 @@ from imgtools.dicom.dicom_metadata.extractor_base import (
 _EXTRACTOR_REGISTRY: dict[str, Type[ModalityMetadataExtractor]] = {}
 
 
+class ExistingExtractorError(Exception):
+    """
+    Exception raised when trying to register an extractor for
+    an already registered modality.
+    """
+
+    def __init__(
+        self,
+        modality: str,
+        existing_extractor: Type[ModalityMetadataExtractor],
+    ) -> None:
+        self.modality = modality
+        self.existing_extractor = existing_extractor
+        super().__init__(
+            f"Modality '{modality}' already registered by {existing_extractor.__name__}"
+        )
+
+
 def register_extractor(
     cls: Type[ModalityMetadataExtractor],
 ) -> Type[ModalityMetadataExtractor]:
@@ -26,11 +44,7 @@ def register_extractor(
     """
     modality = cls.modality().upper()
     if modality in _EXTRACTOR_REGISTRY:
-        msg = (
-            f"Modality '{modality}' already"
-            f"registered by {_EXTRACTOR_REGISTRY[modality].__name__}"
-        )
-        raise ValueError(msg)
+        raise ExistingExtractorError(modality, _EXTRACTOR_REGISTRY[modality])
     _EXTRACTOR_REGISTRY[modality] = cls
     return cls
 
