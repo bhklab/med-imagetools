@@ -151,6 +151,7 @@ jobs:
           echo "RUFF_FORMAT_EXIT=$?" >> $GITHUB_ENV
 
       - name: Post ruff format suggestions
+      - name: Post ruff format suggestions
         uses: reviewdog/action-suggester@v1
         with:
           tool_name: ruff-format
