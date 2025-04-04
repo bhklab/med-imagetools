@@ -61,6 +61,8 @@ pytest-cov = "*"
 pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 filelock = ">=3.17.0,<4"
+pytest-asyncio = ">=0.26.0,<0.27"
+anyio = ">=4.9.0,<5"
 
 [feature.test.tasks.test]
 cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
