@@ -206,8 +206,8 @@ class MedImageTestData:
     """
 
     repo_name: str = "bhklab/med-image_test-data"
-    github: Github = field(init=False)
-    repo: Repository = field(init=False)
+    github: Github = field(init=False, repr=False)
+    repo: Repository = field(init=False, repr=False)
     _latest_release: GitHubRelease | None = field(default=None, init=False)
     downloaded_paths: List[Path] = field(default_factory=list, init=False)
     progress: Progress = field(
