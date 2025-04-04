@@ -134,7 +134,7 @@ jobs:
         if: always()
         run: |
           set -eu pipefail
-          pixi run -e test ruff-check --fix --unsafe-fixes --output-format=github | tee ruff-lint.log
+          pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
           echo "RUFF_EXIT=$?" >> $GITHUB_ENV
 
       - name: Post ruff lint suggestions
