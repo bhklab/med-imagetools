@@ -7,9 +7,6 @@ on:
   pull_request:
     branches: ["*"]
 
-# this action needs to be able to read contents of other repos
-permissions:
-  contents: read
 
 
 concurrency:
@@ -30,6 +27,10 @@ jobs:
         env: ["py310", "py311", "py312", "py313"]
         TestAccessType: ["public", "private"]
 
+    # this action needs to be able to read contents of other repos
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +45,7 @@ jobs:
       - name: Run pytest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_DATASET_TYPE: ${{ matrix.TestAccessType }}
         run: |
           pixi run -e ${{ matrix.env }} test_ci -s -vv

@@ -208,14 +208,18 @@ class MedImageTestData:
     repo_name: str = "bhklab/med-image_test-data"
     github: Github = field(init=False, repr=False)
     repo: Repository = field(init=False, repr=False)
-    _latest_release: GitHubRelease | None = field(default=None, init=False)
-    downloaded_paths: List[Path] = field(default_factory=list, init=False)
+    _latest_release: GitHubRelease | None = field(
+        default=None, init=False, repr=False
+    )
+    downloaded_paths: List[Path] = field(
+        default_factory=list, init=False, repr=False
+    )
     progress: Progress = field(
         default_factory=Progress, init=False, repr=False
     )
 
     asset_status: dict[str, AssetStatus] = field(
-        default_factory=dict, init=False
+        default_factory=dict, init=False, repr=False
     )
 
     # github parameters
