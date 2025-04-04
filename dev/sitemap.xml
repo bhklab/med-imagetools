@@ -2,62 +2,62 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/database_report/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/cli/imgtools/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/cli/shell-completion/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/find-dicoms/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/load-dicom/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/lookup_tag/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/similar_tags/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/tag_exists/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicomsort/dicomsorter/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/reference/dicomsort/patternparser/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/usage/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/usage/CoreTypes/regionbox/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/usage/Writers/BaseWriter/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
     <url>
          <loc>https://bhklab.github.io/med-imagetools/dev/usage/Writers/ImplementingWriters/</loc>
-         <lastmod>2025-03-28</lastmod>
+         <lastmod>2025-04-04</lastmod>
     </url>
 </urlset>
