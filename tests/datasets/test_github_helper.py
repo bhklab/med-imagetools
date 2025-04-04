@@ -128,10 +128,29 @@ async def test_accessing_private(tmp_path: Path, ) -> None:
     assert path is not None
 
     # downloading again should not raise an error
-    path = await download_dataset(
-        dataset.url,
-        tmp_path / dataset.name,
-        p,
-        task_id=p.add_task("test"),
-    )
-    assert path is not None
+    # unless its on Windows
+    import sys
+    if sys.platform == "win32":
+        with pytest.raises(OSError):
+            path = await download_dataset(
+                dataset.url,
+                tmp_path / dataset.name,
+                p,
+                task_id=p.add_task("test"),
+            )
+        # delete the existing file
+        os.remove(path)
+        path = await download_dataset(
+            dataset.url,
+            tmp_path / dataset.name,
+            p,
+            task_id=p.add_task("test"),
+        )
+    else:
+        path = await download_dataset(
+            dataset.url,
+            tmp_path / dataset.name,
+            p,
+            task_id=p.add_task("test"),
+        )
+        assert path is not None
