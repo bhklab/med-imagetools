@@ -5,11 +5,9 @@ import functools
 import logging
 import os
 import tarfile
-import zipfile
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import List, Optional, Pattern
+from typing import TYPE_CHECKING, List, Optional, Pattern
 
 import aiohttp
 from aiohttp import ClientResponseError
@@ -45,6 +43,9 @@ if not has_github:
 
 from github import Github
 from github.Repository import Repository  # type: ignore # noqa
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class AssetStatus(str, Enum):
@@ -345,7 +346,7 @@ class MedImageTestData:
         self._update_progress(progress, task_id, asset.name)
 
         try:
-            path = await download_dataset(
+            _path = await download_dataset(
                 asset.url, filepath, progress, task_id
             )
             self.asset_status[asset.name] = AssetStatus.DOWNLOADED
