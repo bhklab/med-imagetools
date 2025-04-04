@@ -10144,7 +10144,7 @@ packages:
 - pypi: .
   name: med-imagetools
   version: 2.0.0rc10
-  sha256: ba4a5e4e7ac9c499e0afb2e3b9140393f10759c694adf1f980fd0433c18197c2
+  sha256: 4d706ce33d23a96223a0418a55fe784bd7345bdbd6f02962660a9498f1f4f69b
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9
@@ -10167,8 +10167,8 @@ packages:
   - pyvis>=0.3.2,<0.4 ; extra == 'pyvis'
   - h5py>=3.11.0 ; extra == 'hdf5'
   - pynrrd>=1.0.0 ; extra == 'nrrd'
-  - pygithub>=2.5.0 ; extra == 'test'
-  - aiohttp>=3.8.1 ; extra == 'test'
+  - pygithub>=2.5.0 ; extra == 'datasets'
+  - aiohttp>=3.8.1 ; extra == 'datasets'
   - pygithub>=2.5.0 ; extra == 'all'
   - aiohttp>=3.8.1 ; extra == 'all'
   - h5py>=3.11.0 ; extra == 'all'

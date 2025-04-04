@@ -11,13 +11,12 @@ from pathlib import Path
 from typing import List, Optional, Pattern
 
 import aiohttp
-from github import Github
-from github.Repository import Repository  # type: ignore # noqa
 from rich import print  # noqa
 from rich.console import Console
 from rich.progress import (
     BarColumn,
     Progress,
+    SpinnerColumn,
     TaskID,
     TaskProgressColumn,
     TextColumn,
@@ -34,6 +33,9 @@ console = Console()
 github, has_github = optional_import("github")
 if not has_github:
     raise OptionalImportError("github", "test")
+
+from github import Github
+from github.Repository import Repository  # type: ignore # noqa
 
 
 class AssetStatus(str, Enum):
@@ -388,11 +390,7 @@ class MedImageTestData:
         dest: Path,
         assets: Optional[List[GitHubReleaseAsset]] = None,
         exclude: Optional[List[Pattern[str]]] = None,
-        force: bool = False,
-        cores: Optional[int] = None,
     ) -> List[Path]:
-        from rich.progress import SpinnerColumn
-
         if assets is None:
             if self.latest_release is None:
                 raise ValueError(
@@ -443,19 +441,3 @@ class MedImageTestData:
             loop.close()
 
         return [p for p in extracted_paths if p is not None]
-
-
-# Usage example
-if __name__ == "__main__":  # pragma: no cover
-    manager = MedImageTestData()
-    print(manager)
-
-    old_release = manager.get_latest_release()
-
-    chosen_assets = old_release.assets
-
-    dest_dir = Path("data")
-    downloaded_files = manager.download(dest_dir, assets=chosen_assets)
-    console.print(downloaded_files)
-
-    r = manager.latest_release
