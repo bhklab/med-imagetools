@@ -88,18 +88,18 @@ async def test_download_timeout(tmp_path: Path, ) -> None:
                 task_id=progress.add_task("test"),
             )
 # skip if the GH_TOKEN environment variable is not set
-@pytest.mark.skipif(os.environ.get("GH_TOKEN") is None, reason="GH_TOKEN environment variable is not set")
+@pytest.mark.skipif(os.environ.get("GITHUB_TOKEN") is None, reason="GH_TOKEN environment variable is not set")
 @pytest.mark.asyncio
 async def test_accessing_private(tmp_path: Path, ) -> None:
     console.quiet = True
 
     manager = MedImageTestData(repo_name="bhklab/med-image_test-data_private")
-    original_token = os.environ.get("GH_TOKEN")
+    original_token = os.environ.get("GITHUB_TOKEN")
     assert original_token is not None
     # temporarily set the GH_TOKEN to None
     # to test the private repo access
     # without authentication
-    os.environ["GH_TOKEN"] = ""
+    os.environ["GITHUB_TOKEN"] = ""
 
     # this should not work
     with pytest.raises(GithubException) as excinfo:
@@ -116,7 +116,7 @@ async def test_accessing_private(tmp_path: Path, ) -> None:
             task_id=p.add_task("test"),
         )
 
-    os.environ["GH_TOKEN"] = original_token
+    os.environ["GITHUB_TOKEN"] = original_token
 
     path = await download_dataset(
         dataset.url,
