@@ -4,9 +4,12 @@ from rich import print  # noqa
 
 from imgtools.dicom.dicom_metadata import (
     extract_metadata,
-    get_keys_from_modality,
     supported_modalities,
+    get_keys_from_modality,
 )
+
+
+
 
 
 @click.command()
