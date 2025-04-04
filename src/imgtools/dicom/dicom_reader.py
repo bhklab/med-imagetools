@@ -33,7 +33,7 @@ def path_from_pathlike(file_object: str | Path | BinaryIO) -> str | BinaryIO:
     try:
         return os.fspath(file_object)  # type: ignore[arg-type]
     except TypeError:
-        return cast(BinaryIO, file_object)
+        return cast("BinaryIO", file_object)
 
 
 def load_dicom(
