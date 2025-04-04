@@ -106,6 +106,7 @@ ignore = [
   "EM101",
 ]
 
+
 [lint.mccabe]
 max-complexity = 10
 
@@ -117,6 +118,11 @@ known-first-party = ["imgtools", "readii"]
 force-wrap-aliases = true
 combine-as-imports = true
 relative-imports-order = "closest-to-furthest"
+
+[lint.per-file-ignores]
+"src/imgtools/dicom/dicom_metadata/*" = [
+  "N805", # First argument of a method should be named `self`, but we are using classproperty
+]
 
 [format]
 

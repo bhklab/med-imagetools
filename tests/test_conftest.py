@@ -2,13 +2,13 @@ from pathlib import Path
 from collections import Counter
 import pytest
 
-def test_meta(medimage_test_data_meta: list[dict[str, str | Path]], dataset_type: str, public_collections: list[str], private_collections: list[str]):
+def test_meta(medimage_test_data: list[dict[str, str | Path]], dataset_type: str, public_collections: list[str], private_collections: list[str]):
     """Test meta data."""
-    assert medimage_test_data_meta is not None
+    assert medimage_test_data is not None
 
     counts = {
-        key: Counter(d[key] for d in medimage_test_data_meta)
-        for key in medimage_test_data_meta[0].keys()
+        key: Counter(d[key] for d in medimage_test_data)
+        for key in medimage_test_data[0].keys()
     }
     collections : list[str] = []
     if dataset_type == "public":

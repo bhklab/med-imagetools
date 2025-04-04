@@ -38,7 +38,7 @@ IMGTOOLS_LOG_LEVEL = "DEBUG"
 clean = { cmd = [
   "bash",
   "-c",
-  "rm -rf .cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+  "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
 ], description = "Clear cache and coverage files" }
 
 ############################################## PYTHON ###############################################

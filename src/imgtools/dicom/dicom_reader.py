@@ -8,8 +8,6 @@ from pydicom.dataset import FileDataset
 
 from imgtools.exceptions import (
     InvalidDicomError,
-    NotRTSTRUCTError,
-    NotSEGError,
 )
 
 # Define a type alias for DICOM input types
@@ -100,80 +98,3 @@ def load_dicom(
                 "Must be a FileDataset, str, Path, bytes, or BinaryIO object."
             )
             raise InvalidDicomError(msg)
-
-
-def load_rtstruct_dcm(
-    rtstruct_input: DicomInput,
-    force: bool = True,
-    stop_before_pixels: bool = True,
-) -> FileDataset:
-    """Load an RTSTRUCT DICOM file and return the parsed FileDataset object.
-
-    Parameters
-    ----------
-    rtstruct_input : FileDataset | str | Path | bytes
-        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
-    force : bool, optional
-        Whether to allow reading DICOM files missing the *File Meta Information*
-        header, by default True.
-    stop_before_pixels : bool, optional
-        Whether to stop reading the DICOM file before loading pixel data, by default True.
-
-    Returns
-    -------
-    FileDataset
-        Parsed RTSTRUCT DICOM dataset.
-
-    Raises
-    ------
-    InvalidDicomError
-        If the input is of an unsupported type or cannot be read as a DICOM file.
-    NotRTSTRUCTError
-        If the input file is not an RTSTRUCT (i.e., `Modality` field is not "RTSTRUCT").
-    """
-
-    dicom = load_dicom(rtstruct_input, force, stop_before_pixels)
-
-    if dicom.Modality != "RTSTRUCT":
-        msg = f"The provided DICOM is not an RTSTRUCT file. Found Modality: {dicom.Modality}"
-        raise NotRTSTRUCTError(msg)
-
-    return dicom
-
-
-def load_seg_dcm(
-    seg_input: DicomInput,
-    force: bool = True,
-    stop_before_pixels: bool = True,
-) -> FileDataset:
-    """Load a SEG DICOM file and return the parsed FileDataset object.
-
-    Parameters
-    ----------
-    seg_input : FileDataset | str | Path | bytes
-        Input DICOM file as a `pydicom.FileDataset`, file path, or byte stream.
-    force : bool, optional
-        Whether to allow reading DICOM files missing the *File Meta Information*
-        header, by default True.
-    stop_before_pixels : bool, optional
-        Whether to stop reading the DICOM file before loading pixel data, by default True.
-
-    Returns
-    -------
-    FileDataset
-        Parsed SEG DICOM dataset.
-
-    Raises
-    ------
-    InvalidDicomError
-        If the input is of an unsupported type or cannot be read as a DICOM file.
-    NotSEGError
-        If the input file is not a SEG (i.e., `Modality` field is not "SEG").
-    """
-    dicom = load_dicom(seg_input, force, stop_before_pixels)
-
-    if dicom.Modality != "SEG":
-        msg = f"The provided DICOM is not a SEG file. Found Modality: {dicom.Modality}"
-        raise NotSEGError(msg)
-
-    return dicom
