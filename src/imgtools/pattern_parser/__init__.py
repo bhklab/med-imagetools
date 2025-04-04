@@ -4,4 +4,8 @@ from .pattern_resolver import (
     PatternResolverError,
 )
 
-__all__ = ["PatternResolver", "PatternResolverError", "MissingPlaceholderValueError"]
+__all__ = [
+    "PatternResolver",
+    "PatternResolverError",
+    "MissingPlaceholderValueError",
+]

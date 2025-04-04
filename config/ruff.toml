@@ -3,17 +3,23 @@
 # To save the headache, we are excluding everything before, and hopefully we can
 # slowly fix everything
 
-include = [
-  "src/imgtools/coretypes/**/*.py",
-  "src/imgtools/dicom/**/*.py",
-  "src/imgtools/io/**/*.py",
-  "src/imgtools/loggers/**/*.py",
-  "src/imgtools/modules/*.py",
-  "src/imgtools/__init__.py",
-  "src/imgtools/utils/*.py",
-]
+# include = [
+#   "src/imgtools/coretypes/**/*.py",
+#   "src/imgtools"
+#   "src/imgtools/dicom/**/*.py",
+#   "src/imgtools/io/**/*.py",
+#   "src/imgtools/loggers/**/*.py",
+#   "src/imgtools/modules/*.py",
+#   "src/imgtools/__init__.py",
+#   "src/imgtools/utils/*.py",
+# ]
 
-extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/pipeline.py"]
+extend-exclude = [
+  ".pixi/**/*",
+  "tests/**/*.py",
+  "src/imgtools/pipeline.py",
+  "src/imgtools/cli/**/*.py",
+]
 
 cache-dir = ".cache/.ruff-cache"
 

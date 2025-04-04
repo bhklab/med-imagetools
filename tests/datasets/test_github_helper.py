@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from imgtools.datasets.github_helper import (
+from imgtools.datasets.github_datasets import (
     GitHubRelease,
     MedImageTestData,
 )
