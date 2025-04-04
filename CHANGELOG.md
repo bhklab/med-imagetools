@@ -1,6 +1,34 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.12 (2025-04-04)
+
+### Features
+
+- Rebuild pytest configuration and dataset downloading with logging improvements
+  ([#294](https://github.com/bhklab/med-imagetools/pull/294),
+  [`9fbae4a`](https://github.com/bhklab/med-imagetools/commit/9fbae4a9854527700a531450dd8bcc59a993c6b2))
+
+Update pytest configuration to include new dependencies and improve logging during dataset
+  downloads. Enhance test cases to handle timeouts and private repository access more effectively.
+
+- **New Features** - Enhanced logging that now provides clear real-time feedback and improved error
+  reporting during dataset operations. - Upgraded asynchronous handling for more robust and
+  efficient dataset management.
+
+- **Bug Fixes** - Improved error handling during dataset downloads and metadata validation.
+
+- **Tests** - Streamlined test setup and data management to ensure a smoother testing experience. -
+  Integrated new test scenarios to simulate timeouts and secure access, improving overall
+  reliability. - Added a new test function to validate metadata associated with medical image test
+  data. - Updated minimum release version for compatibility with the latest features.
+
+### Refactoring
+
+- Delete pipeline.py ([#297](https://github.com/bhklab/med-imagetools/pull/297),
+  [`54f0a76`](https://github.com/bhklab/med-imagetools/commit/54f0a76b2bf5908623ed6f7b29f136d52e562465))
+
+
 ## v2.0.0-rc.11 (2025-04-04)
 
 ### Features

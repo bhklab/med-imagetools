@@ -23,6 +23,25 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
         env: ["py310", "py311", "py312", "py313"]
+        TestAccessType: ["public", "private"]
+      # exclude macos and windows stests for py310 and py311
+        exclude:
+          - os: macos-latest
+            env: "py310"
+          - os: macos-latest
+            env: "py311"
+          - os: macos-13
+            env: "py310"
+          - os: macos-13
+            env: "py311"
+          - os: windows-latest
+            env: "py310"
+          - os: windows-latest
+            env: "py311"
+
+    # this action needs to be able to read contents of other repos
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -37,13 +56,15 @@ jobs:
 
       - name: Run pytest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          TEST_DATASET_TYPE: ${{ matrix.TestAccessType }}
         run: |
           pixi run -e ${{ matrix.env }} test_ci -s -vv
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312'
+        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312' && matrix.TestAccessType == 'public'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
@@ -57,6 +78,30 @@ jobs:
           show: "fail,skip"
         if: always()
 
+  ################################################################################################
+  # Codecov: Run codecov to check coverage
+  ################################################################################################
+  Code-Coverage:
+    needs: Unit-Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download coverage.xml artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+
+      - name: Use Codecov to track coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage-report/coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+          name: codecov-umbrella
 
   ################################################################################################
   # Linting: Run linting using Ruff & Mypy
@@ -211,30 +256,6 @@ Linting:
         run: |
           pixi run -e ${{ matrix.env }} mike deploy --push dev devel
 
-  ################################################################################################
-  # Codecov: Run codecov to check coverage
-  ################################################################################################
-  Code-Coverage:
-    needs: Unit-Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download coverage.xml artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage-report
-
-      - name: Use Codecov to track coverage
-        uses: codecov/codecov-action@v3
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage-report/coverage.xml
-          fail_ci_if_error: true
-          verbose: true
-          name: codecov-umbrella
 
   ################################################################################################
   # CD: Continuous Deployment

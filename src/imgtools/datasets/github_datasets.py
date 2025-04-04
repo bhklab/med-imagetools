@@ -1,18 +1,21 @@
 from __future__ import annotations
 
 import asyncio
+import dis
 import functools
+import logging
 import os
+from sre_constants import IN
 import tarfile
-import zipfile
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
-from typing import List, Optional, Pattern
+from typing import TYPE_CHECKING, List, Optional, Pattern
 
 import aiohttp
+from aiohttp import ClientResponseError
 from rich import print  # noqa
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.progress import (
     BarColumn,
     Progress,
@@ -26,8 +29,14 @@ from rich.progress import (
 
 from imgtools.utils.optional_import import OptionalImportError, optional_import
 
-# create a single console for all progress bars, so they don't clutter the output
-console = Console()
+# create a single console for all progress bars and logging
+console = Console(force_terminal=True, stderr=True)
+# setup logger with rich handler
+logger = logging.getLogger("imgtools_datasets")
+logger.setLevel(logging.INFO)
+rich_handler = RichHandler(console=console, rich_tracebacks=True)
+logger.handlers = []
+logger.addHandler(rich_handler)
 
 # Use optional_import instead of try/except
 github, has_github = optional_import("github")
@@ -36,6 +45,9 @@ if not has_github:
 
 from github import Github
 from github.Repository import Repository  # type: ignore # noqa
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class AssetStatus(str, Enum):
@@ -115,7 +127,7 @@ async def download_dataset(
     file_path: Path,
     progress: Progress,
     task_id: TaskID,
-    timeout_seconds: int = 3600,
+    timeout_seconds: int = 300,
 ) -> Path:
     """
     Download a single dataset.
@@ -159,16 +171,16 @@ async def download_dataset(
                         f.write(chunk)
                         progress.update(task_id, advance=len(chunk))
         except asyncio.TimeoutError:
-            console.print(
-                f"[bold red]Timeout while downloading {file_path.name}. Please try again later.[/]"
+            logger.error(
+                f"[bold red]Timeout while downloading {file_path.name}. Please try again later."
             )
             # Clean up the temporary file if it exists
             if temp_file_path.exists():
                 temp_file_path.unlink(missing_ok=True)
             raise
-        except Exception as e:
-            console.print(
-                f"[bold red]Error downloading {file_path.name}: {str(e)}[/]"
+        except ClientResponseError as e:
+            logger.error(
+                f"[bold red]Error downloading {file_path.name}: {str(e)}"
             )
             # Clean up the temporary file if it exists
             if temp_file_path.exists():
@@ -196,16 +208,20 @@ class MedImageTestData:
     """
 
     repo_name: str = "bhklab/med-image_test-data"
-    github: Github = field(init=False)
-    repo: Repository = field(init=False)
-    _latest_release: GitHubRelease | None = field(default=None, init=False)
-    downloaded_paths: List[Path] = field(default_factory=list, init=False)
+    github: Github = field(init=False, repr=False)
+    repo: Repository = field(init=False, repr=False)
+    _latest_release: GitHubRelease | None = field(
+        default=None, init=False, repr=False
+    )
+    downloaded_paths: List[Path] = field(
+        default_factory=list, init=False, repr=False
+    )
     progress: Progress = field(
         default_factory=Progress, init=False, repr=False
     )
 
     asset_status: dict[str, AssetStatus] = field(
-        default_factory=dict, init=False
+        default_factory=dict, init=False, repr=False
     )
 
     # github parameters
@@ -214,10 +230,10 @@ class MedImageTestData:
     def __post_init__(self) -> None:
         token = os.environ.get("GITHUB_TOKEN", os.environ.get("GH_TOKEN"))
         if token:
-            console.log("Using GH token")
+            logger.info("Using GH token")
             self.github = Github(token, timeout=self.timeout)
         else:
-            console.log("No GH token found")
+            logger.info("No GH token found")
             self.github = Github(timeout=self.timeout)
 
         self.repo = self.github.get_repo(self.repo_name)
@@ -246,7 +262,7 @@ class MedImageTestData:
             GitHubReleaseAsset(
                 name=asset.name,
                 # derive the label by removing all extensions
-                label=os.path.splitext(asset.name)[0],  # noqa
+                label=asset.name.split(".")[0],  # noqa
                 url=asset.url,
                 browser_download_url=asset.browser_download_url,
                 content_type=asset.content_type,
@@ -296,6 +312,7 @@ class MedImageTestData:
             AssetStatus.FAILED: ("red", "❌ [FAILED     ]"),
         },
         init=False,
+        repr=False,
     )
 
     def _update_progress(
@@ -336,13 +353,18 @@ class MedImageTestData:
         self._update_progress(progress, task_id, asset.name)
 
         try:
-            await download_dataset(asset.url, filepath, progress, task_id)
+            _path = await download_dataset(
+                asset.url, filepath, progress, task_id
+            )
             self.asset_status[asset.name] = AssetStatus.DOWNLOADED
             self._update_progress(progress, task_id, asset.name, completed=1)
-        except Exception:
+        except ClientResponseError as e:  # pragma: no cover
             self.asset_status[asset.name] = AssetStatus.FAILED
             self._update_progress(progress, task_id, asset.name, completed=1)
-            return None
+            logger.error(
+                f"Error downloading {asset.name}. Skipping extraction. Error: {str(e)}"
+            )
+            raise e
 
         # Extract
         extract_path: Path = alt_filepath
@@ -360,12 +382,12 @@ class MedImageTestData:
             if tarfile.is_tarfile(path):
                 with tarfile.open(path, "r:*") as archive:
                     archive.extractall(extract_path.parent, filter="data")
-            elif zipfile.is_zipfile(path):
-                with zipfile.ZipFile(path, "r") as archive:
-                    archive.extractall(extract_path.parent)
+            # elif zipfile.is_zipfile(path):
+            #     with zipfile.ZipFile(path, "r") as archive:
+            #         archive.extractall(extract_path.parent)
             else:
                 self.asset_status[asset.name] = AssetStatus.SKIPPED
-                console.log(
+                logger.info(
                     f"{asset.label} is not a tar or zip file. Skipping extraction."
                 )
                 self._update_progress(progress, task_id, asset.name)
@@ -376,7 +398,7 @@ class MedImageTestData:
             await loop.run_in_executor(
                 None, functools.partial(extract, filepath, extract_path)
             )
-        except Exception:
+        except Exception:  # pragma: no cover
             self.asset_status[asset.name] = AssetStatus.FAILED
             self._update_progress(progress, task_id, asset.name)
             return None
@@ -412,7 +434,9 @@ class MedImageTestData:
             self.asset_status[asset.name] = AssetStatus.SKIPPED
 
         task_map: dict[str, TaskID] = {}
-
+        logger.info(
+            f"[bold blue]Downloading {len(assets)} assets from {self.repo_name}..."
+        )
         with Progress(
             SpinnerColumn(),
             TextColumn("[bold blue]{task.description}", justify="right"),
@@ -421,6 +445,8 @@ class MedImageTestData:
             TimeRemainingColumn(),
             TimeElapsedColumn(),
             console=console,
+            # disable progress bar in CI
+            disable=os.environ.get("CI", "").lower() == "true",
         ) as progress:
             # Create tasks first
             for asset in assets:
@@ -439,5 +465,8 @@ class MedImageTestData:
                 )
             )
             loop.close()
+        logger.info(
+            f"[bold green]Downloaded {len(extracted_paths)} assets from {self.repo_name}."
+        )
 
         return [p for p in extracted_paths if p is not None]
