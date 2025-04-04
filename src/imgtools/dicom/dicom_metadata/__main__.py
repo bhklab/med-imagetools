@@ -4,12 +4,9 @@ from rich import print  # noqa
 
 from imgtools.dicom.dicom_metadata import (
     extract_metadata,
-    supported_modalities,
     get_keys_from_modality,
+    supported_modalities,
 )
-
-
-
 
 
 @click.command()
@@ -28,11 +25,11 @@ from imgtools.dicom.dicom_metadata import (
     help="List all available DICOM modalities.",
 )
 @click.option("--list-tags", "-lt", help="List tags for a given modality")
-def cli(dicom_file, output, list_modalities, list_tags):  # noqa
+def cli(dicom_file, output, list_modalities, list_tags) -> None:  # type: ignore # noqa
     """Extract DICOM metadata from a file."""
     modalities = supported_modalities()
     if list_modalities:
-        print("Available DICOM modalities:" )
+        print("Available DICOM modalities:")
         for modality in modalities:
             print(modality)
         return
