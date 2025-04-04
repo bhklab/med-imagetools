@@ -1,6 +1,32 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.11 (2025-04-04)
+
+### Features
+
+- Enhance testdata downloader with better cli and ability to download private data
+  ([#293](https://github.com/bhklab/med-imagetools/pull/293),
+  [`2120fb4`](https://github.com/bhklab/med-imagetools/commit/2120fb4f4d690f275769ab69a803a2fdc4181b70))
+
+- Introduce a new `--list-assets` option to the testdata command for listing available assets. - Add
+  shorthand options for destination and list-assets to enhance usability. - Improve logging for
+  better tracking of available assets.
+
+- **New Features** - Enhanced the command-line experience by adding a new flag to list available
+  assets and a more intuitive destination option with clear guidance. - Upgraded asset download
+  functionality with improved progress tracking, status reporting, and user-friendly asset
+  identification, ensuring smoother operations and clearer user feedback. - Introduced a structured
+  approach for managing and downloading datasets from GitHub releases, including robust error
+  handling and user feedback.
+
+- **Bug Fixes** - Improved error handling for missing destination directories and asset download
+  failures.
+
+- **Chores** - Updated linting configuration to streamline the process by excluding certain files
+  and directories.
+
+
 ## v2.0.0-rc.10 (2025-03-28)
 
 ### Features
