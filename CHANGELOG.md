@@ -1,6 +1,33 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.13 (2025-04-04)
+
+### Continuous Integration
+
+- Mypy errors and gha for mypy ([#298](https://github.com/bhklab/med-imagetools/pull/298),
+  [`90fee16`](https://github.com/bhklab/med-imagetools/commit/90fee166d163d5e1150683e5a320d0f54b5a78ae))
+
+### Features
+
+- Introduce DICOM metadata extraction framework for dicom parsing
+  ([#299](https://github.com/bhklab/med-imagetools/pull/299),
+  [`ab4fec2`](https://github.com/bhklab/med-imagetools/commit/ab4fec2acfd0f67b2b0486f912d495dc4d4fad8f))
+
+Implement a modality-based metadata extraction framework for DICOM files, improving type handling
+  and adding utilities for CT, MR, and PT modalities. Update documentation and tests to ensure
+  robustness and clarity.
+
+- **New Features** - Introduced a new command‐line tool to extract metadata from DICOM files. -
+  Expanded support for multiple imaging modalities, including CT, MR, PT, segmentation, structured
+  reports, and radiotherapy data.
+
+- **Refactor** - Consolidated legacy metadata extraction processes into a modern, modular framework
+  for improved reliability. - Streamlined internal data handling and diagnostics.
+
+- **Tests** - Added new tests to validate enhanced metadata extraction and import functionality.
+
+
 ## v2.0.0-rc.12 (2025-04-04)
 
 ### Features
