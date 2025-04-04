@@ -133,15 +133,37 @@ jobs:
         id: ruff_check
         continue-on-error: true
         run: |
-          pixi run -e test ruff-check --output-format github | tee ruff-lint.log
+          pixi run -e test ruff-check --output-format github 
           echo "RUFF_EXIT=$?" >> $GITHUB_ENV
+          
+      - name: Post ruff lint suggestions
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: ruff-lint
+          fail_level: none
+          filter_mode: added
 
       - name: Run ruff format
         id: ruff_format
         continue-on-error: true
         run: |
-          pixi run -e test ruff-format --check | tee ruff-format.log
+          pixi run -e test ruff-format --exit-non-zero-on-format
           echo "RUFF_FORMAT_EXIT=$?" >> $GITHUB_ENV
+
+      - name: Post ruff format suggestions
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: ruff-format
+          fail_level: none
+          filter_mode: diff_context
+
+      # - name: Post mypy suggestions
+      #   uses: reviewdog/action-suggester@v1
+      #   with:
+      #     tool_name: type-check
+      #     fail_on_error: false
+      #     filter_mode: added
+      #     suggestions_file: type-check.log
 
       - name: Run mypy check
         id: mypy
@@ -150,31 +172,11 @@ jobs:
           pixi run -e test type-check | tee type-check.log
           echo "MYPY_EXIT=$?" >> $GITHUB_ENV
 
-      - name: Post ruff lint suggestions
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-lint
-          fail_on_error: false
-          filter_mode: added
-          suggestions_file: ruff-lint.log
-
-      - name: Post ruff format suggestions
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-format
-          fail_on_error: false
-          filter_mode: added
-          suggestions_file: ruff-format.log
-
-      - name: Post mypy suggestions
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: type-check
-          fail_on_error: false
-          filter_mode: added
-          suggestions_file: type-check.log
-
       - name: Fail job if any linter/type checker found issues
+        env:
+          RUFF_EXIT: ${{ env.RUFF_EXIT }}
+          RUFF_FORMAT_EXIT: ${{ env.RUFF_FORMAT_EXIT }}
+          MYPY_EXIT: ${{ env.MYPY_EXIT }}
         run: |
           if [[ "$RUFF_EXIT" != "0" ]] || [[ "$RUFF_FORMAT_EXIT" != "0" ]] || [[ "$MYPY_EXIT" != "0" ]]; then
             echo "One or more tools found issues."
@@ -182,7 +184,7 @@ jobs:
           else
             echo "All checks passed."
           fi
-        
+
   ################################################################################################
   # Build-Docs: Build documentation using mkdocs
   ################################################################################################
