@@ -63,53 +63,81 @@ jobs:
   ################################################################################################
   # Goal here is to run ruff check and mypy, and then upload the results to the PR
   # even if one fails, it should still run the other
-  Linting:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      checks: write
-      issues: write
-      pull-requests: write
-    timeout-minutes: 15 # Consider increasing timeout
+Linting:
+  runs-on: ubuntu-latest
+  if: github.event_name == 'pull_request'
+  permissions:
+    contents: read
+    checks: write
+    issues: write
+    pull-requests: write
+  timeout-minutes: 15
 
-    steps:
-      - uses: actions/checkout@v4
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Install Pixi
-        uses: prefix-dev/setup-pixi@v0.8.1
-        with:
-          environments: "test"
-          pixi-version: v0.41.1
-          cache: true
-          locked: false
+    - name: Install Pixi
+      uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        environments: "test"
+        pixi-version: v0.41.1
+        cache: true
+        locked: false
 
-      - name: Run ruff check
-        run: pixi run -e test ruff-check --output-format github | tee ruff-lint.log
+    - name: Run ruff check
+      id: ruff_check
+      continue-on-error: true
+      run: |
+        pixi run -e test ruff-check --output-format github | tee ruff-lint.log
+        echo "RUFF_EXIT=$?" >> $GITHUB_ENV
 
-      - name: Run ruff format
-        run: |
-          pixi run -e test ruff-format --check | tee ruff-format.log
-          echo "::group::Formatted output"
-          cat ruff-format.log
-          echo "::endgroup::"
+    - name: Run ruff format
+      id: ruff_format
+      continue-on-error: true
+      run: |
+        pixi run -e test ruff-format --check | tee ruff-format.log
+        echo "RUFF_FORMAT_EXIT=$?" >> $GITHUB_ENV
 
-      - name: Post lint results as PR comments
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-lint
-          fail_on_error: true
-          filter_mode: added
-          suggestions_file: ruff-lint.log
+    - name: Run mypy check
+      id: mypy
+      continue-on-error: true
+      run: |
+        pixi run -e test type-check | tee type-check.log
+        echo "MYPY_EXIT=$?" >> $GITHUB_ENV
 
-      - name: Post format results as PR comments
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-format
-          fail_on_error: true
-          filter_mode: added
-          suggestions_file: ruff-format.log
+    - name: Post ruff lint suggestions
+      uses: reviewdog/action-suggester@v1
+      with:
+        tool_name: ruff-lint
+        fail_on_error: false
+        filter_mode: added
+        suggestions_file: ruff-lint.log
 
+    - name: Post ruff format suggestions
+      uses: reviewdog/action-suggester@v1
+      with:
+        tool_name: ruff-format
+        fail_on_error: false
+        filter_mode: added
+        suggestions_file: ruff-format.log
+
+    - name: Post mypy suggestions
+      uses: reviewdog/action-suggester@v1
+      with:
+        tool_name: type-check
+        fail_on_error: false
+        filter_mode: added
+        suggestions_file: type-check.log
+
+    - name: Fail job if any linter/type checker found issues
+      run: |
+        if [[ "$RUFF_EXIT" != "0" ]] || [[ "$RUFF_FORMAT_EXIT" != "0" ]] || [[ "$MYPY_EXIT" != "0" ]]; then
+          echo "One or more tools found issues."
+          exit 1
+        else
+          echo "All checks passed."
+        fi
+        
   ################################################################################################
   # Build-Docs: Build documentation using mkdocs
   ################################################################################################
