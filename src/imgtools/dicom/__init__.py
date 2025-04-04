@@ -19,5 +19,4 @@ __all__ = [
     "load_dicom",
     # read_tags
     "read_tags",
-
 ]
