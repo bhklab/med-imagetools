@@ -71,7 +71,7 @@ description = "Run pytest (make sure to run in root directory)"
 [feature.test.tasks.test_ci]
 cmd = "pytest -c config/pytest.ini --rootdir ."
 
-[feature.test.tasks.coverage]
+[feature.test.tasks.cov]
 cmd = "coverage report --rcfile=config/coverage.toml"
 inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 description = "Run pytest and generate coverage report"
