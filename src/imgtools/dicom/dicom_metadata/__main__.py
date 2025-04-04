@@ -25,7 +25,7 @@ from imgtools.dicom.dicom_metadata import (
     help="List all available DICOM modalities.",
 )
 @click.option("--list-tags", "-lt", help="List tags for a given modality")
-def cli(dicom_file, output, list_modalities, list_tags):
+def cli(dicom_file, output, list_modalities, list_tags):  # noqa
     """Extract DICOM metadata from a file."""
     modalities = supported_modalities()
     if list_modalities:
