@@ -127,7 +127,7 @@ async def download_dataset(
     file_path: Path,
     progress: Progress,
     task_id: TaskID,
-    timeout_seconds: int = 3600,
+    timeout_seconds: int = 300,
 ) -> Path:
     """
     Download a single dataset.

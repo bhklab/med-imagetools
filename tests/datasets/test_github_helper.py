@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-
+import sys
 from imgtools.datasets.github_datasets import (
     GitHubRelease,
     MedImageTestData,
@@ -17,6 +17,12 @@ import os
 from github import GithubException
 
 MINIMUM_RELEASE_VERSION = "v0.23"
+
+PYTHON_VERSION = sys.version_info
+IS_PYTHON_GREATER_3_12 = (
+    PYTHON_VERSION.major == 3 and PYTHON_VERSION.minor >= 12
+)
+
 
 def test_get_latest_release_and_extract(
     tmp_path: Path, 
@@ -89,6 +95,8 @@ async def test_download_timeout(tmp_path: Path, ) -> None:
             )
 # skip if the GH_TOKEN environment variable is not set
 @pytest.mark.skipif(os.environ.get("GITHUB_TOKEN") is None, reason="GH_TOKEN environment variable is not set")
+@pytest.mark.skipif(not IS_PYTHON_GREATER_3_12, reason="Python version is less than 3.12")
+@pytest.mark.skipif(not sys.platform == "linux", reason="Test is only for Linux")
 @pytest.mark.asyncio
 async def test_accessing_private(tmp_path: Path, ) -> None:
     console.quiet = True
