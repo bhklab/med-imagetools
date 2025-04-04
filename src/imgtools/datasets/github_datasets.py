@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import dis
 import functools
 import logging
 import os
+from sre_constants import IN
 import tarfile
 from dataclasses import dataclass, field
 from enum import Enum
@@ -441,6 +443,8 @@ class MedImageTestData:
             TimeRemainingColumn(),
             TimeElapsedColumn(),
             console=console,
+            # disable progress bar in CI
+            disable=os.environ.get("CI", "").lower() == "true",
         ) as progress:
             # Create tasks first
             for asset in assets:
