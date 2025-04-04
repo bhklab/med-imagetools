@@ -14,12 +14,7 @@
 #   "src/imgtools/utils/*.py",
 # ]
 
-extend-exclude = [
-  ".pixi/**/*",
-  "tests/**/*.py",
-  "src/imgtools/pipeline.py",
-  "src/imgtools/cli/**/*.py",
-]
+extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/cli/**/*.py"]
 
 cache-dir = ".cache/.ruff-cache"
 
