@@ -9,9 +9,6 @@ from imgtools.dicom.dicom_metadata import (
 )
 
 
-
-
-
 @click.command()
 @click.argument("dicom_file", type=click.Path(exists=True))
 @click.option(

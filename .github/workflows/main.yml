@@ -131,11 +131,12 @@ jobs:
 
       - name: Run ruff check
         id: ruff_check
-        continue-on-error: true
+        if: always()
         run: |
-          pixi run -e test ruff-check --output-format github 
+          set -eu pipefail
+          pixi run -e test ruff-check --fix --unsafe-fixes --output-format=github | tee ruff-lint.log
           echo "RUFF_EXIT=$?" >> $GITHUB_ENV
-          
+
       - name: Post ruff lint suggestions
         uses: reviewdog/action-suggester@v1
         with:
@@ -145,7 +146,7 @@ jobs:
 
       - name: Run ruff format
         id: ruff_format
-        continue-on-error: true
+        if: always()
         run: |
           pixi run -e test ruff-format --exit-non-zero-on-format
           echo "RUFF_FORMAT_EXIT=$?" >> $GITHUB_ENV
@@ -157,19 +158,11 @@ jobs:
           fail_level: none
           filter_mode: diff_context
 
-      # - name: Post mypy suggestions
-      #   uses: reviewdog/action-suggester@v1
-      #   with:
-      #     tool_name: type-check
-      #     fail_on_error: false
-      #     filter_mode: added
-      #     suggestions_file: type-check.log
-
       - name: Run mypy check
         id: mypy
-        continue-on-error: true
+        if: always()
         run: |
-          pixi run -e test type-check | tee type-check.log
+          pixi run -e test type-check
           echo "MYPY_EXIT=$?" >> $GITHUB_ENV
 
       - name: Fail job if any linter/type checker found issues
