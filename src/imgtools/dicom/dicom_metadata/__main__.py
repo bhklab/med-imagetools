@@ -9,6 +9,9 @@ from imgtools.dicom.dicom_metadata import (
 )
 
 
+
+
+
 @click.command()
 @click.argument("dicom_file", type=click.Path(exists=True))
 @click.option(
@@ -29,7 +32,7 @@ def cli(dicom_file, output, list_modalities, list_tags):  # noqa
     """Extract DICOM metadata from a file."""
     modalities = supported_modalities()
     if list_modalities:
-        print("Available DICOM modalities:")
+        print("Available DICOM modalities:" )
         for modality in modalities:
             print(modality)
         return
