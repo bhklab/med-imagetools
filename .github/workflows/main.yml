@@ -39,7 +39,8 @@ jobs:
 
       - name: Run pytest
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
           TEST_DATASET_TYPE: ${{ matrix.TestAccessType }}
         run: |
           pixi run -e ${{ matrix.env }} test_ci -s -vv
