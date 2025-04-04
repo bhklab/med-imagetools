@@ -434,7 +434,9 @@ class MedImageTestData:
             self.asset_status[asset.name] = AssetStatus.SKIPPED
 
         task_map: dict[str, TaskID] = {}
-
+        logger.info(
+            f"[bold blue]Downloading {len(assets)} assets from {self.repo_name}..."
+        )
         with Progress(
             SpinnerColumn(),
             TextColumn("[bold blue]{task.description}", justify="right"),
@@ -463,5 +465,8 @@ class MedImageTestData:
                 )
             )
             loop.close()
+        logger.info(
+            f"[bold green]Downloaded {len(extracted_paths)} assets from {self.repo_name}."
+        )
 
         return [p for p in extracted_paths if p is not None]
