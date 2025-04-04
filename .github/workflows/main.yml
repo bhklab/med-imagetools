@@ -107,8 +107,9 @@ jobs:
           mkdir -p combined
           find coverage-artifacts -name '*.xml' -exec cp {} combined/ \;
           find combined -type f
-          pixi run -e dev coverage combine combined
-          pixi run coverage xml -o combined/coverage.xml
+          coverage combine combined
+          coverage xml -o combined/coverage.xml
+        shell: pixi run bash -e dev
 
       - name: Use Codecov to track coverage
         uses: codecov/codecov-action@v3
