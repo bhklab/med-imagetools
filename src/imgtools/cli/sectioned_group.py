@@ -44,7 +44,7 @@ class SectionedGroup(Group):
     ```
     """
 
-    def __init__(self, *args, registry: CommandRegistry | None = None, **kwargs):
+    def __init__(self, *args, registry: CommandRegistry | None = None, **kwargs): # type: ignore
         super().__init__(*args, **kwargs)
         self._registry = registry or CommandRegistry()
 
@@ -100,9 +100,10 @@ class SectionedGroup(Group):
             if not group.commands: # Skip empty groups
                 continue
             rows = []
-            limit = formatter.width - 6 - max(len(cmd.name) for cmd in group.commands)
+            limit = formatter.width - 6 - max(len(cmd.name) for cmd in group.commands if cmd.name is not None)
             for cmd in group.commands:
-                rows.append((cmd.name, cmd.get_short_help_str(limit)))
+                if cmd.name is not None:
+                    rows.append((cmd.name, cmd.get_short_help_str(limit)))
             
             # what to write in the section heading
             heading : str
