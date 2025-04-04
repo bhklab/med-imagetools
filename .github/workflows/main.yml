@@ -7,8 +7,6 @@ on:
   pull_request:
     branches: ["*"]
 
-
-
 concurrency:
   group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -29,11 +27,17 @@ jobs:
       # exclude macos and windows stests for py310 and py311
         exclude:
           - os: macos-latest
-            env: ["py310", "py311"]
+            env: "py310"
+          - os: macos-latest
+            env: "py311"
           - os: macos-13
-            env: ["py310", "py311"]
+            env: "py310"
+          - os: macos-13
+            env: "py311"
           - os: windows-latest
-            env: ["py310", "py311"]
+            env: "py310"
+          - os: windows-latest
+            env: "py311"
 
     # this action needs to be able to read contents of other repos
     permissions:
