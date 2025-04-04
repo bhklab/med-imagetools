@@ -64,10 +64,10 @@ jobs:
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312'
+        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312' && matrix.TestAccessType == 'public'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ matrix.TestAccessType}}
+          name: coverage-report
           path: coverage-report
 
       - name: JUnit Test Summary
@@ -83,39 +83,22 @@ jobs:
   ################################################################################################
   Code-Coverage:
     needs: Unit-Tests
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download all coverage artifacts
+      - name: Download coverage.xml artifact
         uses: actions/download-artifact@v4
         with:
-          path: coverage-artifacts
-
-      - name: Install Pixi
-        uses: prefix-dev/setup-pixi@v0.8.1
-        with:
-          environments: dev
-          pixi-version: v0.41.1
-          cache: true
-          locked: false
-          activate-environment: dev
-    
-      - name: Combine coverage reports
-        run: |
-          mkdir -p combined
-          find coverage-artifacts -name '*.xml' -exec cp {} combined/ \;
-          find combined -type f
-          coverage combine combined
-          coverage xml -o combined/coverage.xml
+          name: coverage-report
+          path: coverage-report
 
       - name: Use Codecov to track coverage
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./combined/coverage.xml
+          files: ./coverage-report/coverage.xml
           fail_ci_if_error: true
           verbose: true
           name: codecov-umbrella
