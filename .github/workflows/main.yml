@@ -7,6 +7,7 @@ on:
   pull_request:
     branches: ["*"]
 
+
 concurrency:
   group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -23,6 +24,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
         env: ["py310", "py311", "py312", "py313"]
+        TestAccessType: ["public", "private"]
 
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +39,8 @@ jobs:
 
       - name: Run pytest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TEST_DATASET_TYPE: ${{ matrix.TestAccessType }}
         run: |
           pixi run -e ${{ matrix.env }} test_ci -s -vv
 
