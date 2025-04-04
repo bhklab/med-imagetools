@@ -101,6 +101,7 @@ jobs:
           pixi-version: v0.41.1
           cache: true
           locked: false
+          activate-environment: dev
     
       - name: Combine coverage reports
         run: |
@@ -109,7 +110,6 @@ jobs:
           find combined -type f
           coverage combine combined
           coverage xml -o combined/coverage.xml
-        shell: pixi run bash -e dev
 
       - name: Use Codecov to track coverage
         uses: codecov/codecov-action@v3
