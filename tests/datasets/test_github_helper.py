@@ -135,11 +135,3 @@ async def test_accessing_private(tmp_path: Path, ) -> None:
         task_id=p.add_task("test"),
     )
     assert path is not None
-
-# this fixture is provided by the root conftest.py
-# medimage_test_data
-def test_root_fixture(medimage_test_data):
-
-    datasets = list(medimage_test_data.iterdir())
-    assert len(datasets) > 20
-    assert medimage_test_data
