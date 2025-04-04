@@ -26,6 +26,14 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
         env: ["py310", "py311", "py312", "py313"]
         TestAccessType: ["public", "private"]
+      # exclude macos and windows stests for py310 and py311
+        exclude:
+          - os: macos-latest
+            env: ["py310", "py311"]
+          - os: macos-13
+            env: ["py310", "py311"]
+          - os: windows-latest
+            env: ["py310", "py311"]
 
     # this action needs to be able to read contents of other repos
     permissions:
@@ -44,8 +52,8 @@ jobs:
 
       - name: Run pytest
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
           TEST_DATASET_TYPE: ${{ matrix.TestAccessType }}
         run: |
           pixi run -e ${{ matrix.env }} test_ci -s -vv

@@ -310,6 +310,7 @@ class MedImageTestData:
             AssetStatus.FAILED: ("red", "❌ [FAILED     ]"),
         },
         init=False,
+        repr=False,
     )
 
     def _update_progress(
