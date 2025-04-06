@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from functools import wraps
 from typing import Any, Callable
 
 from imgtools.loggers import logger
@@ -32,6 +33,7 @@ def timer(name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:  # noqa
             with TimerContext(name):
                 result = func(*args, **kwargs)
