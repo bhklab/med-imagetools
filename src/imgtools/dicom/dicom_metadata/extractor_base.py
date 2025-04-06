@@ -111,6 +111,7 @@ class ModalityMetadataExtractor(ABC):
         # Image Geometry & Size
         "BodyPartExamined",
         "DataCollectionDiameter",
+        "FrameOfReferenceUID",
         "NumberOfSlices",
         "SliceThickness",
         "PatientPosition",
@@ -132,6 +133,7 @@ class ModalityMetadataExtractor(ABC):
         "ScanType",
         "ScanProgressionDirection",
         "ScanOptions",
+        "AcquisitionNumber",
         "AcquisitionDateTime",
         "AcquisitionDate",
         "AcquisitionTime",
@@ -200,7 +202,9 @@ class ModalityMetadataExtractor(ABC):
         return sorted(all_keys)
 
     @classmethod
-    def extract(cls, dicom: DicomInput) -> ExtractedFields:
+    def extract(
+        cls, dicom: DicomInput, extra_tags: list[str] | None = None
+    ) -> ExtractedFields:
         """
         Extract metadata tags and computed fields from a DICOM dataset.
 
@@ -208,6 +212,8 @@ class ModalityMetadataExtractor(ABC):
         ----------
         dicom : DicomInput
             A path, byte stream, or pydicom FileDataset.
+        extra_tags : list[str] | None, optional
+            Additional DICOM tags to extract, by default None
 
         Returns
         -------
@@ -215,12 +221,24 @@ class ModalityMetadataExtractor(ABC):
             A dictionary mapping metadata field names to values.
             Values may be strings, numbers, dictionaries, or lists of these types.
             Missing tags or errors during computation will result in an empty string.
+
+        Notes
+        -----
+        Be aware that using extra_tags may lead to unexpected results if the
+        extra tags are not compatible with the modality or if they are not
+        present in the DICOM file. The extractor will not validate the extra tags
+        against the modality, so it's the user's responsibility to ensure that
+        the extra tags are relevant and valid for the given DICOM file.
         """
         ds = load_dicom(dicom)
         output: ExtractedFields = {}
 
         # Extract base and modality-specific tags
-        for tag in cls.base_tags.union(cls.modality_tags):
+        tags_to_extract = cls.base_tags.union(cls.modality_tags)
+        if extra_tags:
+            tags_to_extract = tags_to_extract.union(extra_tags)
+
+        for tag in tags_to_extract:
             output[tag] = str(ds.get(tag, ""))
 
         # Compute advanced fields
