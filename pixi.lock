@@ -10164,8 +10164,8 @@ packages:
   timestamp: 1733255681319
 - pypi: .
   name: med-imagetools
-  version: 2.0.0rc12
-  sha256: 992bd80b026f9b01bf93242f56f09f60a83842650d4ebc0270cd6dc2512f2810
+  version: 2.0.0rc13
+  sha256: 1d99a4366f78e36c6af097be9e9e14d119e204fe30d79d33e7c8e88aa4f0f9b7
   requires_dist:
   - structlog>=24.0,<25
   - click>=8.1,<9

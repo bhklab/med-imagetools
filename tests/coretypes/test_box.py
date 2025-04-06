@@ -4,6 +4,17 @@ import SimpleITK as sitk
 from imgtools.coretypes import RegionBox, Coordinate3D, Size3D, BoxPadMethod
 from imgtools.coretypes.box import BoundingBoxOutsideImageError
 from imgtools.datasets import example_data
+
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Store the current log level
+
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
 # Simple tests
 def test_regionbox_initialization():
     min_coord = Coordinate3D(0, 0, 0)
