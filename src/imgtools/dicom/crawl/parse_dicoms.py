@@ -131,6 +131,21 @@ def resolve_reference_series(
 ) -> None:
     """Process reference mapping for a single metadata entry.
 
+    The goal is to get the `ReferencedSeriesUID` for as many series as possible.
+    Whereas some series directly reference the `SeriesInstanceUID` of another series,
+    others reference one or more `SOPInstanceUID` of instances in another series.
+    This method tries to resolve the latter case by mapping the `SOPInstanceUID` to the
+    `SeriesInstanceUID` of the series it belongs to.
+
+    Side effects:
+    - as we iterate over the metadata dictionaries, we add the
+        `ReferencedSeriesUID` field to the metadata dictionaries in the crawldb.
+
+    Notes
+    -----
+    This mutates the metadata dictionaries in the crawldb in place.
+    i.e the `ReferencedSeriesUID` field is added to metadata dicts in the crawldb.
+
     Parameters
     ----------
     meta : dict
@@ -207,6 +222,10 @@ def parse_dicom_dir(
 ]:
     """Parse all DICOM files in a directory and return the metadata.
 
+    This function will look for DICOM files in the specified directory and its
+    subdirectories. It will parse the metadata of each DICOM file and return a
+    dictionary containing the metadata.
+
     Returns
     -------
     tuple[pathlib.Path, dict, pathlib.Path, dict]
@@ -264,9 +283,48 @@ def parse_dicom_dir(
     ):
         resolve_reference_series(meta, sop_map, series_meta_raw, frame_mapping)
 
+    def series2modality(seriesuid: str) -> str:
+        """Get the modality of a series."""
+        return list(series_meta_raw[seriesuid].values())[0].get("Modality", "")
+
+    barebones_dict = []
+
+    for seriesuid, subsseries_map in series_meta_raw.items():
+        for subseriesid, meta in subsseries_map.items():
+            match meta.get("ReferencedSeriesUID", None):
+                case None | "":
+                    ref_series = ""
+                    ref_modality = ""
+                case [*multiple_refs]:  # only SR can have multiple references
+                    ref_series = "|".join(multiple_refs)
+                    ref_modality = "|".join(
+                        series2modality(ref) for ref in multiple_refs
+                    )
+                case single_ref:
+                    ref_series = single_ref
+                    ref_modality = series2modality(ref_series)
+
+            barebones_dict.append(
+                {
+                    "PatientID": meta["PatientID"],
+                    "StudyInstanceUID": meta["StudyInstanceUID"],
+                    "SeriesInstanceUID": seriesuid,
+                    "SubSeries": subseriesid,
+                    "Modality": meta["Modality"],
+                    "ReferencedModality": ref_modality,
+                    "ReferencedSeriesUID": ref_series,
+                    "instances": len(meta.get("instances", [])),
+                    "folder": meta["folder"],
+                }
+            )
+
     # Save the results to JSON files
     crawl_json.parent.mkdir(parents=True, exist_ok=True)
     with crawl_json.open("w") as f:
+        # json.dump(series_meta_raw, f, indent=4)
+        json.dump(barebones_dict, f, indent=4)
+
+    with crawl_json.with_suffix(".raw.json").open("w") as f:
         json.dump(series_meta_raw, f, indent=4)
 
     with sop_map_json.open("w") as f:
@@ -290,8 +348,10 @@ if __name__ == "__main__":
 
     # Example usage
     dicom_dir = pathlib.Path("data/Head-Neck-PET-CT")
-    # dicom_dir = pathlib.Path("data")
-    raw_output_path = pathlib.Path("imgtools") / "dicom" / "raw" / "crawl.json"
+    dicom_dir = pathlib.Path("data")
+    raw_output_path = (
+        dicom_dir.parent / ".imgtools" / dicom_dir.name / "crawl_db.json"
+    )
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description="Parse DICOM files in a directory"
