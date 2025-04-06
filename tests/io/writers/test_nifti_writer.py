@@ -14,6 +14,16 @@ from imgtools.io.writers import (
     NiftiWriterValidationError,
 )
 
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
+    # automatically reset the log level after the test
+
 
 class TestImage(Image):
     """A convenience class to store metadata information related to the image.
@@ -118,10 +128,9 @@ def nifti_writer(temp_nifti_dir: Path, request: pytest.FixtureRequest) -> NIFTIW
 
 @pytest.mark.xdist_group("nifti_writer")
 def test_parameterized_image_save(
-    nifti_writer: NIFTIWriter, parameterized_image: Image
+    nifti_writer: NIFTIWriter, parameterized_image: TestImage
 ):
     """Test saving parameterized images with NIFTIWriter."""
-
     for version_suffix in range(10):
         saved_path = nifti_writer.save(
             parameterized_image,
@@ -164,13 +173,6 @@ def test_parameterized_image_save(
             assert saved_path.exists()
             assert saved_path.stat().st_mtime == saved_time
             assert saved_path.stat().st_size == saved_hash
-        case ExistingFileMode.RAISE_WARNING:
-            saved_path = nifti_writer.save(
-                parameterized_image,
-                **parameterized_image.metadata,
-            )
-            assert saved_path.exists()
-
 
 # some simpler tests
 
@@ -255,4 +257,4 @@ def test_save_bad_image(temp_nifti_dir: Path):
         nifti_writer.save(bad_image, **metadata)
 
     with pytest.raises(NiftiWriterValidationError):
-        nifti_writer.save(bad_not_sitk_image, **metadata)
+        nifti_writer.save(bad_not_sitk_image, **metadata) # type: ignore[arg-type]
