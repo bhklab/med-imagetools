@@ -1,3 +1,10 @@
+"""
+This module defines the Direction class, which stores a 3x3 orientation
+matrix as a flattened tuple of nine floats (row-major order). You can
+convert it to a 3x3 structure, normalize row vectors, or check if rows
+are normalized.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -29,16 +36,16 @@ FlattenedMatrix = Matrix3DFlat
 
 @dataclass(frozen=True, eq=True)
 class Direction:
-    """
-    Represent a directional matrix for image orientation.
+    """Represent a directional matrix for image orientation.
 
-    Supports 3D (3x3) directional matrices in row-major format.
+    Supports 3D (3x3) directional matrices in row-major format as 9 floats.
+    It's often useful when you need to keep track of orientation data
+    in a compact way.
 
     Attributes
     ----------
-    matrix : Tuple[float, ...]
-        A flattened 1D array representing the matrix,
-        with length 9 (3x3).
+    matrix : Matrix3DFlat
+        Flattened representation of a 3x3 matrix.
     """
 
     matrix: Matrix3DFlat
@@ -58,17 +65,22 @@ class Direction:
         matrix: Matrix3D,
     ) -> Direction:
         """
-        Create a Direction object from a full 3D (3x3) matrix.
+        Create a Direction instance from a nested 3x3 tuple.
 
         Parameters
         ----------
         matrix : Matrix3D
-            A nested tuple representing the 3D matrix.
+            A tuple of 3 rows, each row having 3 floats.
 
         Returns
         -------
         Direction
-            A Direction instance.
+            An instance with the flattened matrix.
+
+        Raises
+        ------
+        ValueError
+            If the input isn't a 3x3 structure.
         """
         if (size := len(matrix)) != 3:
             msg = f"Matrix must be 3x3. Got {size=}."
@@ -82,12 +94,26 @@ class Direction:
         return cls(matrix=flattened)
 
     def to_matrix(self) -> list[list[float]]:
-        """Convert the flattened row-major array back to a 3D matrix."""
+        """Convert the flattened row-major array back to a 3D matrix.
+
+        Returns
+        -------
+        list of list of float
+            The 3x3 data, row by row.
+        """
         dim = 3
         return [list(self.matrix[i * dim : (i + 1) * dim]) for i in range(dim)]
 
     def normalize(self) -> Direction:
-        """Return a new Direction with normalized row vectors."""
+        """Return a new Direction with normalized row vectors.
+
+        Zero rows remain unchanged.
+
+        Returns
+        -------
+        Direction
+            A new instance with normalized rows.
+        """
         matrix = self.to_matrix()
         normalized_matrix = [
             list(np.array(row) / np.linalg.norm(row)) for row in matrix
@@ -97,7 +123,18 @@ class Direction:
         )
 
     def is_normalized(self, tol: float = 1e-6) -> bool:
-        """Check if the row vectors of the matrix are normalized."""
+        """Check if all values are (almost) 1, given a tolerance.
+
+        Parameters
+        ----------
+        tol : float, optional
+            Acceptable deviation from 1.
+
+        Returns
+        -------
+        bool
+            True if all rows meet the norm requirement, else False.
+        """
         matrix = self.to_matrix()
         for row in matrix:
             if not np.isclose(np.linalg.norm(row), 1.0, atol=tol):
@@ -120,52 +157,3 @@ class Direction:
             + "\n".join(formatted_rows)
             + "\n)"
         )
-
-    # Create instances of each class
-    # point = Point3D(10.0, 20.0, 30.0)
-    # size = Size3D(50.0, 60.0, 70.0)
-    # direction = Direction.from_matrix(
-    #     (
-    #         (0.707, 0.707, 0.0),
-    #         (-0.707, 0.707, 0.0),
-    #         (0.0, 0.0, 1.0),
-    #     )
-    # )
-
-    # # Testing Point3D and Size3D operations
-    # new_point = point + size
-
-    # # Printing out the details
-    # print(f"Point: {point}")
-    # print(f"Size: {size}")
-    # print(f"New point after adding size: {new_point}")
-    # print(f"Direction: {direction}")
-
-    # # Unpacking the values
-    # print("Unpacked Point:", tuple(point))  # (10.0, 20.0, 30.0)
-    # print("Unpacked Size:", tuple(size))  # (50.0, 60.0, 70.0)
-
-    # example_image = np.random.rand(10, 10, 10)
-    # example_sitk_image = sitk.GetImageFromArray(example_image)
-
-    # # Create a direction vector
-    # # 3x3 Direction Matrix
-    # direction_3d = Direction.from_matrix(
-    #     (
-    #         (0.707, 0.707, 0.0),
-    #         (-0.707, 0.707, 0.0),
-    #         (0.0, 0.0, 1.0),
-    #     )
-    # )
-
-    # print(f"{direction_3d=}")
-    # example_sitk_image.SetDirection(direction_3d)
-
-    # # make another direction from a flattened
-    # direction_3d_flat = Direction(
-    #     matrix=(0.707, 0.707, 0.0, -0.707, 0.707, 0.0, 0.0, 0.0, 1.0)
-    # )
-    # print(f"{direction_3d_flat=}")
-    # print(f"{(direction_3d_flat==direction_3d)=}")
-
-    # print(f"{example_sitk_image=}")
