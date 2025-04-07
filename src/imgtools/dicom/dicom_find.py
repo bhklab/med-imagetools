@@ -170,14 +170,37 @@ def filter_valid_dicoms(
     extension: str,
     recursive: bool,
 ) -> Generator[Path, None, None]:
+    # case sensitivity is very os dependent
+    # if case sensitivity is False, we convert the extnsion to
+    # something that is case insensitive
+    if not case_sensitive:
+        extension = convert_to_case_insensitive(extension)
+
     pattern = f"*.{extension}" if extension else "*"
+
     glob_method = directory.rglob if recursive else directory.glob
     return (
         file.absolute()
-        for file in glob_method(pattern, case_sensitive=case_sensitive)  # type: ignore
+        for file in glob_method(pattern)
         if (
             not search_input  # no search input passed
             or all(term in str(file.as_posix()) for term in search_input)
         )
         and _is_valid_dicom(file, check_header)
     )
+
+
+def convert_to_case_insensitive(extension: str) -> str:
+    """
+    Convert the file extension to a case-insensitive format.
+    This is done by converting the extension to lowercase and
+    replacing it with a case-insensitive pattern.
+    """
+    if not extension:
+        return ""
+
+    # Convert the extension to lowercase
+    lower_extension = extension.lower()
+
+    # Replace the extension with a case-insensitive pattern
+    return f"[{lower_extension.upper()}{lower_extension.lower()}]*"
