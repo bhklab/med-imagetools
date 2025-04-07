@@ -174,7 +174,7 @@ def filter_valid_dicoms(
     glob_method = directory.rglob if recursive else directory.glob
     return (
         file.absolute()
-        for file in glob_method(pattern, case_sensitive=case_sensitive)
+        for file in glob_method(pattern, case_sensitive=case_sensitive)  # type: ignore
         if (
             not search_input  # no search input passed
             or all(term in str(file.as_posix()) for term in search_input)
