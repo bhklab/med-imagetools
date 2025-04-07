@@ -1,39 +1,39 @@
-from __future__ import annotations
+# from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Sequence
+# from dataclasses import dataclass
+# from typing import TYPE_CHECKING, Sequence
 
-import numpy as np
-import SimpleITK as sitk
+# import numpy as np
+# import SimpleITK as sitk
 
-if TYPE_CHECKING:
-    from .direction import Direction
-    from .spatial_types import Coordinate3D, Size3D, Spacing3D
-
-
-@dataclass(frozen=True)
-class ImageGeometry:
-    """Represents the geometry of a 3D image."""
-
-    size: Size3D
-    origin: Coordinate3D
-    direction: Direction
-    spacing: Spacing3D
+# if TYPE_CHECKING:
+#     from .direction import Direction
+#     from .spatial_types import Coordinate3D, Size3D, Spacing3D
 
 
-# Type alias for Image or Array
-ImageOrArray = sitk.Image | np.ndarray
+# @dataclass(frozen=True)
+# class ImageGeometry:
+#     """Represents the geometry of a 3D image."""
+
+#     size: Size3D
+#     origin: Coordinate3D
+#     direction: Direction
+#     spacing: Spacing3D
 
 
-class MedImage:
-    def __init__(
-        self,
-        image: ImageOrArray,
-        origin: Sequence[float] | None = None,
-        direction: Sequence[float] | None = None,
-        spacing: Sequence[float] | None = None,
-    ) -> None:
-        pass
+# # Type alias for Image or Array
+# ImageOrArray = sitk.Image | np.ndarray
+
+
+# class MedImage:
+#     def __init__(
+#         self,
+#         image: ImageOrArray,
+#         origin: Sequence[float] | None = None,
+#         direction: Sequence[float] | None = None,
+#         spacing: Sequence[float] | None = None,
+#     ) -> None:
+#         pass
 
 
 # The following goals and code was written by

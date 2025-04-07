@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Type
+from typing import Any, Type
 
 import numpy as np
 import SimpleITK as sitk
@@ -65,6 +65,19 @@ class MedImage(sitk.Image):
     @property
     def dtype_str(self) -> str:
         return self.GetPixelIDTypeAsString()
+
+    @property
+    def img_stats(self) -> dict[str, Any]:  # noqa: ANN001
+        """Get image statistics."""
+        img_stats = {
+            "dtype": self.dtype_str,
+            "dtype_numpy": self.dtype_np,
+            "size": self.size,
+            "spacing": self.spacing,
+            "origin": self.origin,
+            "direction": self.direction,
+        }
+        return img_stats
 
     def __rich_repr__(self):  # noqa: ANN204
         yield "ndim", self.ndim
