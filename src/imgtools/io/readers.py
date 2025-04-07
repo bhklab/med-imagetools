@@ -3,7 +3,7 @@ import SimpleITK as sitk
 
 def read_dicom_series(
     path: str,
-    series_id: list[str] | None = None,
+    series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
 ) -> sitk.Image:
@@ -55,5 +55,3 @@ def read_dicom_series(
     reader.SetFileNames(file_names)
 
     return reader.Execute()
-
-

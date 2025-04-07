@@ -134,7 +134,7 @@ class MedImage(sitk.Image):
         }
         return img_stats
 
-    def __rich_repr__(self):  # noqa: ANN204
+    def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield "ndim", self.ndim
         yield "dtype_numpy", self.dtype_np
         yield "dtype", self.dtype_str
