@@ -1,6 +1,54 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.15 (2025-04-07)
+
+### Chores
+
+- Update lockfile
+  ([`6efe08d`](https://github.com/bhklab/med-imagetools/commit/6efe08d2c1b2f16f1236d366a958b28a61fec777))
+
+### Features
+
+- **dicom_metadata**: Add additional date and time fields to ModalityMetadataExtractor
+  ([#304](https://github.com/bhklab/med-imagetools/pull/304),
+  [`5ba35c1`](https://github.com/bhklab/med-imagetools/commit/5ba35c1550ebef168cfaba639481b72a98de7a43))
+
+Enhance the ModalityMetadataExtractor by including extra date and time fields for improved metadata
+  extraction.
+
+``` # Date Time Information "StudyDate", "StudyTime", "SeriesDate", "SeriesTime", "ContentDate",
+  "ContentTime", "AcquisitionDateTime", "AcquisitionDate", "AcquisitionTime",
+  "InstanceCreationDate", "InstanceCreationTime", ```
+
+- **New Features** - Enhanced DICOM metadata extraction to include additional date and time details
+  for studies, series, and image content. - Updated the extraction process to now capture instance
+  creation information, offering more precise metadata over previous protocol details.
+
+### Refactoring
+
+- **dicom_find**: Improve logging and enhance case-insensitive extension handling
+  ([`8f06d24`](https://github.com/bhklab/med-imagetools/commit/8f06d2413efc45c7e435d42da89a33897cdd4121))
+
+### Testing
+
+- **coretypes**: Add more tests for coretypes and direction
+  ([#302](https://github.com/bhklab/med-imagetools/pull/302),
+  [`01df60c`](https://github.com/bhklab/med-imagetools/commit/01df60c031de3344a387dba1078fde3e5dba9dc3))
+
+Enhance tests for the Direction class and ensure proper initialization and error handling. Update
+  the lockfile to reflect dependency changes.
+
+- **Documentation** - Enhanced user guidance by clarifying how to work with orientation matrices and
+  spatial data.
+
+- **Bug Fixes** - Improved input validations with descriptive error messages for 3D configuration to
+  help prevent misconfiguration.
+
+- **Tests** - Expanded automated checks to verify correct matrix conversions, normalization
+  behaviors, and error handling in spatial data utilities.
+
+
 ## v2.0.0-rc.14 (2025-04-07)
 
 ### Features
