@@ -141,15 +141,6 @@ header validation:
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
     """
 
-    logger.debug(
-        "Looking for DICOM files",
-        directory=directory,
-        recursive=recursive,
-        check_header=check_header,
-        limit=limit,
-        search_input=search_input,
-    )
-
     files = filter_valid_dicoms(
         directory,
         check_header,
@@ -175,8 +166,17 @@ def filter_valid_dicoms(
     # something that is case insensitive
     if not case_sensitive:
         extension = convert_to_case_insensitive(extension)
-
     pattern = f"*.{extension}" if extension else "*"
+
+    logger.debug(
+        "Searching for DICOM files",
+        directory=directory,
+        pattern=pattern,
+        check_header=check_header,
+        case_sensitive=case_sensitive,
+        search_input=search_input,
+        extension=extension,
+    )
 
     glob_method = directory.rglob if recursive else directory.glob
     return (
@@ -191,10 +191,11 @@ def filter_valid_dicoms(
 
 
 def convert_to_case_insensitive(extension: str) -> str:
-    """
-    Convert the file extension to a case-insensitive format.
-    This is done by converting the extension to lowercase and
-    replacing it with a case-insensitive pattern.
+    """Convert the file extension to a case-insensitive format.
+
+    This is done by converting each character in the extension to a
+    case-insensitive pattern using character sets. For example, 'dcm'
+    becomes '[dD][cC][mM]'.
     """
     if not extension:
         return ""
@@ -202,5 +203,9 @@ def convert_to_case_insensitive(extension: str) -> str:
     # Convert the extension to lowercase
     lower_extension = extension.lower()
 
-    # Replace the extension with a case-insensitive pattern
-    return f"[{lower_extension.upper()}{lower_extension.lower()}]*"
+    # permutate combinations of each letter in the extension
+    # to create a case-insensitive pattern
+    case_insensitive_extension = "".join(
+        f"[{char.lower()}{char.upper()}]" for char in lower_extension
+    )
+    return case_insensitive_extension
