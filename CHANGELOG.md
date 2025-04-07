@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.14 (2025-04-07)
+
+### Features
+
+- **cli**: Add index command and update DICOM crawling and parsing
+  ([#301](https://github.com/bhklab/med-imagetools/pull/301),
+  [`5a179ae`](https://github.com/bhklab/med-imagetools/commit/5a179aebe047a6446f5595343f1819c015b7a2b9))
+
+- Implemented `Crawler` and `CrawlerSettings`
+
+extra: - fixed some things across the testing suite for better output and logging
+
+- **New Features** - Introduced a new CLI indexing command with enhanced options for processing
+  DICOM files, including configurable output and parallel processing. - Expanded metadata extraction
+  to support additional DICOM tags for richer data capture. - Improved file discovery with smarter
+  default extensions and customizable case sensitivity.
+
+- **Refactor** - Streamlined CLI command registration and parameter naming for consistency. -
+  Upgraded logging controls to reduce debug noise during operations.
+
+- **Tests** - Added fixtures to suppress debug logging for cleaner test outputs. - Updated test
+  parameters for improved validation of image processing and file writing functionalities.
+
+
 ## v2.0.0-rc.13 (2025-04-04)
 
 ### Continuous Integration
