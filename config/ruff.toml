@@ -3,17 +3,18 @@
 # To save the headache, we are excluding everything before, and hopefully we can
 # slowly fix everything
 
-include = [
-  "src/imgtools/coretypes/**/*.py",
-  "src/imgtools/dicom/**/*.py",
-  "src/imgtools/io/**/*.py",
-  "src/imgtools/loggers/**/*.py",
-  "src/imgtools/modules/*.py",
-  "src/imgtools/__init__.py",
-  "src/imgtools/utils/*.py",
-]
+# include = [
+#   "src/imgtools/coretypes/**/*.py",
+#   "src/imgtools"
+#   "src/imgtools/dicom/**/*.py",
+#   "src/imgtools/io/**/*.py",
+#   "src/imgtools/loggers/**/*.py",
+#   "src/imgtools/modules/*.py",
+#   "src/imgtools/__init__.py",
+#   "src/imgtools/utils/*.py",
+# ]
 
-extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/pipeline.py"]
+extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/cli/**/*.py"]
 
 cache-dir = ".cache/.ruff-cache"
 
@@ -105,6 +106,7 @@ ignore = [
   "EM101",
 ]
 
+
 [lint.mccabe]
 max-complexity = 10
 
@@ -116,6 +118,11 @@ known-first-party = ["imgtools", "readii"]
 force-wrap-aliases = true
 combine-as-imports = true
 relative-imports-order = "closest-to-furthest"
+
+[lint.per-file-ignores]
+"src/imgtools/dicom/dicom_metadata/*" = [
+  "N805", # First argument of a method should be named `self`, but we are using classproperty
+]
 
 [format]
 

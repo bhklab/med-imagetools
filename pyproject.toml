@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "2.0.0-rc.9"
+version = "2.0.0-rc.14"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
   { name = "Sejin Kim" },
@@ -61,16 +61,13 @@ torch = ["torch", "torchio"] # dont think these are even used anymore
 pyvis = ["pyvis>=0.3.2,<0.4"]
 hdf5 = ["h5py>=3.11.0"]
 nrrd = ["pynrrd>=1.0.0"]
-test = [
-  "pygithub>=2.5.0",
-  "aiohttp>=3.8.1",
-]
+datasets = ["pygithub>=2.5.0", "aiohttp>=3.8.1"]
 all = [
   "pygithub>=2.5.0",
   "aiohttp>=3.8.1",
   "h5py>=3.11.0",
   "pynrrd>=1.0.0",
-  "pyvis>=0.3.2,<0.4"
+  "pyvis>=0.3.2,<0.4",
 ]
 
 # Entry points for CLI commands
@@ -88,12 +85,7 @@ directory = "dist"
 [tool.hatch.build.targets.wheel]
 # Automatically discovers packages in `src/`
 packages = ["src/imgtools"]
-include = [
-    "pyproject.toml",
-    "README.md",
-    "src/imgtools/py.typed",
-    "src/**"
-]
+include = ["pyproject.toml", "README.md", "src/imgtools/py.typed", "src/**"]
 
 [tool.semantic_release]
 version_variables = ["src/imgtools/__init__.py:__version__"]

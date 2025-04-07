@@ -1,6 +1,140 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.14 (2025-04-07)
+
+### Features
+
+- **cli**: Add index command and update DICOM crawling and parsing
+  ([#301](https://github.com/bhklab/med-imagetools/pull/301),
+  [`5a179ae`](https://github.com/bhklab/med-imagetools/commit/5a179aebe047a6446f5595343f1819c015b7a2b9))
+
+- Implemented `Crawler` and `CrawlerSettings`
+
+extra: - fixed some things across the testing suite for better output and logging
+
+- **New Features** - Introduced a new CLI indexing command with enhanced options for processing
+  DICOM files, including configurable output and parallel processing. - Expanded metadata extraction
+  to support additional DICOM tags for richer data capture. - Improved file discovery with smarter
+  default extensions and customizable case sensitivity.
+
+- **Refactor** - Streamlined CLI command registration and parameter naming for consistency. -
+  Upgraded logging controls to reduce debug noise during operations.
+
+- **Tests** - Added fixtures to suppress debug logging for cleaner test outputs. - Updated test
+  parameters for improved validation of image processing and file writing functionalities.
+
+
+## v2.0.0-rc.13 (2025-04-04)
+
+### Continuous Integration
+
+- Mypy errors and gha for mypy ([#298](https://github.com/bhklab/med-imagetools/pull/298),
+  [`90fee16`](https://github.com/bhklab/med-imagetools/commit/90fee166d163d5e1150683e5a320d0f54b5a78ae))
+
+### Features
+
+- Introduce DICOM metadata extraction framework for dicom parsing
+  ([#299](https://github.com/bhklab/med-imagetools/pull/299),
+  [`ab4fec2`](https://github.com/bhklab/med-imagetools/commit/ab4fec2acfd0f67b2b0486f912d495dc4d4fad8f))
+
+Implement a modality-based metadata extraction framework for DICOM files, improving type handling
+  and adding utilities for CT, MR, and PT modalities. Update documentation and tests to ensure
+  robustness and clarity.
+
+- **New Features** - Introduced a new command‐line tool to extract metadata from DICOM files. -
+  Expanded support for multiple imaging modalities, including CT, MR, PT, segmentation, structured
+  reports, and radiotherapy data.
+
+- **Refactor** - Consolidated legacy metadata extraction processes into a modern, modular framework
+  for improved reliability. - Streamlined internal data handling and diagnostics.
+
+- **Tests** - Added new tests to validate enhanced metadata extraction and import functionality.
+
+
+## v2.0.0-rc.12 (2025-04-04)
+
+### Features
+
+- Rebuild pytest configuration and dataset downloading with logging improvements
+  ([#294](https://github.com/bhklab/med-imagetools/pull/294),
+  [`9fbae4a`](https://github.com/bhklab/med-imagetools/commit/9fbae4a9854527700a531450dd8bcc59a993c6b2))
+
+Update pytest configuration to include new dependencies and improve logging during dataset
+  downloads. Enhance test cases to handle timeouts and private repository access more effectively.
+
+- **New Features** - Enhanced logging that now provides clear real-time feedback and improved error
+  reporting during dataset operations. - Upgraded asynchronous handling for more robust and
+  efficient dataset management.
+
+- **Bug Fixes** - Improved error handling during dataset downloads and metadata validation.
+
+- **Tests** - Streamlined test setup and data management to ensure a smoother testing experience. -
+  Integrated new test scenarios to simulate timeouts and secure access, improving overall
+  reliability. - Added a new test function to validate metadata associated with medical image test
+  data. - Updated minimum release version for compatibility with the latest features.
+
+### Refactoring
+
+- Delete pipeline.py ([#297](https://github.com/bhklab/med-imagetools/pull/297),
+  [`54f0a76`](https://github.com/bhklab/med-imagetools/commit/54f0a76b2bf5908623ed6f7b29f136d52e562465))
+
+
+## v2.0.0-rc.11 (2025-04-04)
+
+### Features
+
+- Enhance testdata downloader with better cli and ability to download private data
+  ([#293](https://github.com/bhklab/med-imagetools/pull/293),
+  [`2120fb4`](https://github.com/bhklab/med-imagetools/commit/2120fb4f4d690f275769ab69a803a2fdc4181b70))
+
+- Introduce a new `--list-assets` option to the testdata command for listing available assets. - Add
+  shorthand options for destination and list-assets to enhance usability. - Improve logging for
+  better tracking of available assets.
+
+- **New Features** - Enhanced the command-line experience by adding a new flag to list available
+  assets and a more intuitive destination option with clear guidance. - Upgraded asset download
+  functionality with improved progress tracking, status reporting, and user-friendly asset
+  identification, ensuring smoother operations and clearer user feedback. - Introduced a structured
+  approach for managing and downloading datasets from GitHub releases, including robust error
+  handling and user feedback.
+
+- **Bug Fixes** - Improved error handling for missing destination directories and asset download
+  failures.
+
+- **Chores** - Updated linting configuration to streamline the process by excluding certain files
+  and directories.
+
+
+## v2.0.0-rc.10 (2025-03-28)
+
+### Features
+
+- Enhance CLI organization with groups, add shell-completion
+  ([#287](https://github.com/bhklab/med-imagetools/pull/287),
+  [`6175600`](https://github.com/bhklab/med-imagetools/commit/6175600da9d9a0050ec378f1a47794a21bdb09e7))
+
+Implement a `SectionedGroup` for better organization of CLI commands and add documentation for shell
+  completion in the `imgtools` CLI.
+
+<details><summary>screenshots</summary> <p>
+
+![image](https://github.com/user-attachments/assets/589733c5-1d78-4164-a72d-a60f47da0c1c)
+
+![image](https://github.com/user-attachments/assets/aa516430-3a3d-4335-884a-f241dfaf53dc)
+
+![image](https://github.com/user-attachments/assets/8c99df8c-e204-407a-b2b7-7741d2c2f52a)
+
+</p> </details>
+
+- **New Features** - Launched an organized command-line interface for med-imagetools. - Introduced a
+  “dicom-tools” group with commands to find and sort DICOM images, along with an optional testing
+  group. - Added a hidden command to generate shell completion scripts for bash, zsh, and fish.
+
+- **Refactor** - Streamlined the command grouping and help output for a clearer and more extensible
+  user experience.
+
+
 ## v2.0.0-rc.9 (2025-03-28)
 
 ### Chores

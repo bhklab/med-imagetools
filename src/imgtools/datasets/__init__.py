@@ -20,7 +20,7 @@ def is_testdata_available() -> bool:
 
 
 if is_testdata_available():
-    from .github_helper import (
+    from .github_datasets import (
         GitHubRelease,
         GitHubReleaseAsset,
         MedImageTestData,
