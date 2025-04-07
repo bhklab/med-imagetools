@@ -158,7 +158,6 @@ class MedImage(sitk.Image):
         -------
         tuple[np.ndarray, ImageGeometry]
             A tuple containing the NumPy array and the image geometry.
-            If `return_geometry` is False, only the NumPy array is returned.
 
         Notes
         -----
