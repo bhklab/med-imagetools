@@ -607,14 +607,16 @@ if __name__ == "__main__":
 
     crawler_settings = CrawlerSettings(
         dicom_dir=dicom_dir,
-        n_jobs=12,
-        force=False
+        n_jobs=5,
+        force=False,
     )
 
-    crawler = Crawler.from_settings(crawler_settings)
+    crawler = Crawler(crawler_settings)
 
-    interlacer = Interlacer(crawler.db_csv)
+    interlacer = Interlacer(crawler.crawl_results.index_csv_path)
     interlacer.visualize_forest()
 
-    query = "MR,SEG"
+    query = "CT,RTSTRUCT"
     samples = interlacer.query(query)
+
+    print(len(samples))
