@@ -1,10 +1,12 @@
 import json
 
 # import os
+from os import path
 import pathlib
 import typing as t
 from collections import defaultdict
 
+import pandas as pd
 from dpath import (
     search as dpath_search,
 )
@@ -16,27 +18,31 @@ from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.loggers import logger
 from imgtools.utils import timed_context, timer
 
+# __all__ export
+__all__ = [
+    "parse_dicom_dir",
+    "SopSeriesMap",
+    "SeriesMetaMap",
+    "SopUID",
+    "SeriesUID",
+    "SubSeriesID",
+]
+
 ###################################################################################################
 # Helper types
 ###################################################################################################
 
 
-class SeriesUID(str):
-    """Represent the `SeriesInstanceUID` of a DICOM file."""
-
-    pass
+SeriesUID: t.TypeAlias = str
+"""Represent the `SeriesInstanceUID` of a DICOM file."""
 
 
-class SubSeriesID(str):
-    """Represent the `AcquisitionNumber` of a DICOM file."""
-
-    pass
+SubSeriesID: t.TypeAlias = str
+"""Represent the `AcquisitionNumber` of a DICOM file."""
 
 
-class SopUID(str):
-    """Represent the `SOPInstanceUID` of a DICOM file."""
-
-    pass
+SopUID: t.TypeAlias = str
+"""Represent the `SOPInstanceUID` of a DICOM file."""
 
 
 SeriesMetaMap: t.TypeAlias = dict[SeriesUID, dict[SubSeriesID, dict]]
@@ -54,9 +60,32 @@ def parse_all_dicoms(
 ) -> tuple[SeriesMetaMap, SopSeriesMap]:
     """Parse a list of DICOM files in parallel and return the metadata.
 
-    After running parse_one_dicom on all DICOM files, the results are aggregated by
-    SeriesUID and SopUID.
+    Given a list of dicom files, this function will parse the metadata of each file
+    in parallel and return two dictionaries:
+    1. `series_meta_raw`: A dictionary mapping `SeriesInstanceUID` to
+        1 or more `SubSeriesID` and the metadata of each SubSeries.
+        where `SubSeriesID` is the `AcquisitionNumber` of the DICOM file.
+    2. `sop_map`: A dictionary mapping `SOPInstanceUID` to `SeriesInstanceUID`.
 
+    ```
+    {
+        <SeriesInstanceUID>: {
+            <SubSeriesID>: {
+                'Modality': <Modality>,
+                ...
+                'folder': <folder>,
+                'instances': {
+                        <SOPInstanceUID>: <filename>,
+                        ...
+                    },
+                }
+            }
+    }
+
+    {
+        <SOPInstanceUID>: <SeriesInstanceUID>,
+    }
+    ```
     Parameters
     ----------
     dicom_files : list[str]
@@ -65,13 +94,6 @@ def parse_all_dicoms(
         Top directory path (used for relative path calculation)
     n_jobs : int, default=-1
         Number of parallel jobs to run
-
-
-    Returns
-    -------
-    tuple
-        series_meta_raw: Dictionary mapping SeriesUID to lists of metadata dictionaries
-        sop_map: Dictionary mapping SopUID to SeriesUID
     """
 
     series_meta_raw: SeriesMetaMap = defaultdict(lambda: defaultdict(dict))
@@ -93,7 +115,11 @@ def parse_all_dicoms(
     ):
         series_uid = result["SeriesInstanceUID"]
         sop_uid = result["SOPInstanceUID"]
+
+        # we cant let the subseries id be None or "None"
         subseries_id = SubSeriesID(result.get("AcquisitionNumber") or "1")
+        if subseries_id == "None":
+            subseries_id = "1"
 
         series_entry = series_meta_raw[series_uid][subseries_id]
         filepath: pathlib.Path = pathlib.Path(dcm).relative_to(top.parent)
@@ -123,6 +149,13 @@ def parse_all_dicoms(
     return series_meta_raw, sop_map
 
 
+def series2modality(
+    seriesuid: SeriesUID, series_meta_raw: SeriesMetaMap
+) -> str:
+    """Get the modality of a series."""
+    return list(series_meta_raw[seriesuid].values())[0].get("Modality", "")
+
+
 def resolve_reference_series(
     meta: dict,
     sop_map: SopSeriesMap,
@@ -136,6 +169,8 @@ def resolve_reference_series(
     others reference one or more `SOPInstanceUID` of instances in another series.
     This method tries to resolve the latter case by mapping the `SOPInstanceUID` to the
     `SeriesInstanceUID` of the series it belongs to.
+
+    Additionally, the `PT` modalities might reference a `CT`.
 
     Side effects:
     - as we iterate over the metadata dictionaries, we add the
@@ -157,6 +192,7 @@ def resolve_reference_series(
     frame_mapping : dict
         Frame of reference mapping
     """
+
     if (ref := meta.get("ReferencedSeriesUID")) and ref in series_meta_raw:
         return
     else:
@@ -196,62 +232,125 @@ def resolve_reference_series(
                     modality=meta["Modality"],
                     series=meta["SeriesInstanceUID"],
                 )
-            meta["ReferencedSeriesUID"] = _all_seg_refs.pop()
+            ref_series = _all_seg_refs.pop()
+            meta["ReferencedSeriesUID"] = ref_series
         case "PT":
-            if not (ref_frame := meta.get("FrameOfReferenceUID")):
+            if (
+                not (ref_frame := meta.get("FrameOfReferenceUID"))
+                or not isinstance(ref_frame, str)
+                or ref_frame not in frame_mapping
+            ) or not (ref_series_set := frame_mapping.get(ref_frame)):
                 return
-            if ref_series := frame_mapping.get(ref_frame):
-                for series_uid in ref_series:
-                    if series_uid in series_meta_raw:
-                        meta["ReferencedSeriesUID"] = series_uid
-                        break
+            for series_uid in ref_series_set:
+                if series_uid in series_meta_raw and (
+                    series2modality(series_uid, series_meta_raw) == "CT"
+                ):
+                    meta["ReferencedSeriesUID"] = series_uid
+                    break
     return
+
+
+ParseDicomDirResult = t.NamedTuple(
+    "ParseDicomDirResult",
+    [
+        ("crawl_db", list[dict[str, str]]),
+        ("index", pd.DataFrame),
+        ("crawl_db_path", pathlib.Path),
+        ("index_csv_path", pathlib.Path),
+        ("crawl_cache_path", pathlib.Path),
+        ("sop_map_path", pathlib.Path),
+    ],
+)
 
 
 def parse_dicom_dir(
     dicom_dir: str | pathlib.Path,
-    raw_output_path: pathlib.Path,
+    output_dir: str | pathlib.Path,
+    dataset_name: str | None = None,
     extension: str = "dcm",
     n_jobs: int = -1,
     force: bool = True,
-) -> tuple[
-    pathlib.Path,
-    dict[SeriesUID, dict[SubSeriesID, dict]],
-    pathlib.Path,
-    dict[SopUID, SeriesUID],
-]:
+) -> ParseDicomDirResult:
     """Parse all DICOM files in a directory and return the metadata.
 
-    This function will look for DICOM files in the specified directory and its
-    subdirectories. It will parse the metadata of each DICOM file and return a
-    dictionary containing the metadata.
+    This function searches for DICOM files within the specified directory
+    (including subdirectories), extracts metadata from each file, and
+    organizes the metadata into structured dictionaries.  The results,
+    including a simplified crawl database, the raw series metadata,
+    a SOP map, and their corresponding JSON file paths, are returned
+    as a `ParseDicomDirResult` namedtuple.
+
+    Parameters
+    ----------
+    dicom_dir : str | pathlib.Path
+        The directory to search for DICOM files.
+    output_dir : str | pathlib.Path
+        The directory to save crawl outputs.
+        See Notes for details.
+    dataset_name : str | None, default=None
+        The name of the dataset. If None, the name of the top directory
+        will be used. This is used to create a subdirectory in the
+        `output_dir` to store the crawl database and SOP map JSON files.
+    extension : str, default="dcm"
+        The file extension to look for when searching for DICOM files.
+    n_jobs : int, default=-1
+        The number of parallel jobs to use for parsing DICOM files.  If -1,
+        all available cores will be used.
+    force : bool, default=True
+        If True, overwrite existing crawl database and SOP map JSON files.
+        If False, load existing files if they exist.
 
     Returns
     -------
-    tuple[pathlib.Path, dict, pathlib.Path, dict]
-        A tuple containing the:
-        1) paths to the crawl JSON file
-        2) the series metadata dictionary
-        3) the SOP map JSON file
-        4) and the SOP Map dictionary.
+    ParseDicomDirResult
+        A namedtuple containing the following fields:
+            - crawl_db_path (pathlib.Path):
+                Path to the simplified crawl database JSON file.
+            - crawl_db (list[dict[str, str]]):
+                A list of dictionaries containing the simplified crawl database.
+
+    Notes
+    -----
+    This function will create a directory structure for the crawl database
+    ```
+    output_dir
+        ├── <dataset_name>
+        │   ├── crawl_db.json
+        │   ├── crawl-cache.json
+        │   ├── sop_map.json
+        │   └── index.csv
+        └── ...
+    ```
+    The `crawl_db.json` file contains the simplified crawl database, while
+
     """
+
     top = pathlib.Path(dicom_dir).absolute()
+    output_dir = pathlib.Path(output_dir)
+    ds_name = dataset_name or top.name
 
-    # we consider the `dataset name` as the top directory name
-    crawl_json = pathlib.Path(raw_output_path)
+    pathlib.Path(output_dir / ds_name).mkdir(
+        parents=True, exist_ok=True
+    )  # create the output directory if it doesn't exist
 
-    # sop_map file is the same as the crawl file, named sop_map.json
-    sop_map_json = crawl_json.with_name(crawl_json.stem + "-sop_map.json")
+    # determine the output directory paths
+    crawl_db_path: pathlib.Path = output_dir / ds_name / "crawl_db.json"
+    crawl_cache: pathlib.Path = output_dir / ds_name / "crawl-cache.json"
+    sop_map_json: pathlib.Path = output_dir / ds_name / "sop_map.json"
+    index_csv: pathlib.Path = output_dir / ds_name / "index.csv"
 
-    if (crawl_json.exists() and sop_map_json.exists()) and not force:
-        logger.info(f"{crawl_json} exists and {force=}. Loading from file.")
-        with crawl_json.open("r") as f:
+    if (crawl_cache.exists() and sop_map_json.exists()) and not force:
+        logger.info(f"{crawl_cache} exists and {force=}. Loading from file.")
+        with crawl_cache.open("r") as f:
             series_meta_raw = json.load(f)
         logger.info(f"{sop_map_json} exists and {force=}. Loading from file.")
         with sop_map_json.open("r") as f:
             sop_map = json.load(f)
     else:
         dicom_files = find_dicoms(top, extension=extension)
+        if not dicom_files:
+            msg = f"No DICOM files found in {top} with extension {extension}"
+            raise FileNotFoundError(msg)
 
         logger.info(f"Found {len(dicom_files)} DICOM files in {dicom_dir}")
 
@@ -259,6 +358,17 @@ def parse_dicom_dir(
             dicom_files, top, n_jobs=n_jobs
         )
 
+        with crawl_cache.open("w") as f:
+            json.dump(series_meta_raw, f, indent=4)
+        logger.debug("Saved cache.", crawl_cache=crawl_cache)
+        with sop_map_json.open("w") as f:
+            json.dump(sop_map, f, indent=4)
+        logger.debug("Saved SOP map.", sop_map_json=sop_map_json)
+
+    # we have to resolve the reference series mapping
+    # for the `FrameOfReferenceUID` to `SeriesInstanceUID` mapping
+    # this is a bit tricky, because the `FrameOfReferenceUID` will
+    # be the same for many series
     with timed_context("Mapping FrameOfReferenceUID to SeriesInstanceUID"):
         frame_mapping = defaultdict(set)
         for series_uid, subsseries_map in dpath_search(
@@ -269,6 +379,9 @@ def parse_dicom_dir(
                 if frame := meta.get("FrameOfReferenceUID"):
                     frame_mapping[frame].add(series_uid)
 
+    # we have to extract all the nested metadata dictionaries
+    # within each subseries
+    # to resolve the reference series mapping
     _meta_gen = (
         meta
         for seriesuid in series_meta_raw
@@ -283,140 +396,65 @@ def parse_dicom_dir(
     ):
         resolve_reference_series(meta, sop_map, series_meta_raw, frame_mapping)
 
-    def series2modality(seriesuid: str) -> str:
-        """Get the modality of a series."""
-        return list(series_meta_raw[seriesuid].values())[0].get("Modality", "")
+    # add "ReferencedModality" to the metadata
+    # and extract the relevant fields for barebones_dict
+    slim_db = construct_barebones_dict(series_meta_raw)
 
+    # convert slimb_db to a pandas dataframe
+    index_df = pd.DataFrame.from_records(slim_db)
+    index_df.to_csv(index_csv, index=False)
+    logger.debug("Saved index CSV.", index_csv=index_csv)
+
+    # save the crawl_db
+    with crawl_db_path.open("w") as f:
+        json.dump(series_meta_raw, f, indent=4)
+    logger.debug("Saved crawl_db.", crawl_db_path=crawl_db_path)
+
+    return ParseDicomDirResult(
+        crawl_db=slim_db,
+        index=index_df,
+        crawl_db_path=crawl_db_path,
+        index_csv_path=index_csv,
+        crawl_cache_path=crawl_cache,
+        sop_map_path=sop_map_json,
+    )
+
+
+def construct_barebones_dict(
+    series_meta_raw: SeriesMetaMap,
+) -> list[dict[str, str]]:
+    """Construct a simplified dictionary from the series metadata."""
     barebones_dict = []
-
     for seriesuid, subsseries_map in series_meta_raw.items():
         for subseriesid, meta in subsseries_map.items():
             match meta.get("ReferencedSeriesUID", None):
                 case None | "":
                     ref_series = ""
-                    ref_modality = ""
+                    meta["ReferencedModality"] = ""
                 case [*multiple_refs]:  # only SR can have multiple references
                     ref_series = "|".join(multiple_refs)
-                    ref_modality = "|".join(
-                        series2modality(ref) for ref in multiple_refs
+                    meta["ReferencedModality"] = "|".join(
+                        series2modality(ref, series_meta_raw)
+                        for ref in multiple_refs
                     )
                 case single_ref:
                     ref_series = single_ref
-                    ref_modality = series2modality(ref_series)
+                    meta["ReferencedModality"] = series2modality(
+                        ref_series, series_meta_raw
+                    )
 
             barebones_dict.append(
                 {
                     "PatientID": meta["PatientID"],
                     "StudyInstanceUID": meta["StudyInstanceUID"],
                     "SeriesInstanceUID": seriesuid,
-                    "SubSeries": subseriesid,
+                    "SubSeries": subseriesid or "1",
                     "Modality": meta["Modality"],
-                    "ReferencedModality": ref_modality,
-                    "ReferencedSeriesUID": ref_series,
+                    "ReferencedModality": meta["ReferencedModality"],
+                    "ReferencedSeriesUID": meta["ReferencedSeriesUID"],
                     "instances": len(meta.get("instances", [])),
                     "folder": meta["folder"],
                 }
             )
 
-    # Save the results to JSON files
-    crawl_json.parent.mkdir(parents=True, exist_ok=True)
-    with crawl_json.open("w") as f:
-        # json.dump(series_meta_raw, f, indent=4)
-        json.dump(barebones_dict, f, indent=4)
-
-    with crawl_json.with_suffix(".raw.json").open("w") as f:
-        json.dump(series_meta_raw, f, indent=4)
-
-    with sop_map_json.open("w") as f:
-        json.dump(sop_map, f, indent=4)
-
-    # log saved paths:
-    logger.info(f"Saved crawl JSON to {crawl_json}")
-    logger.info(f"Saved SOP map JSON to {sop_map_json}")
-
-    return (
-        crawl_json,
-        series_meta_raw,
-        sop_map_json,
-        sop_map,
-    )
-
-
-if __name__ == "__main__":
-    import argparse
-    import time
-
-    # Example usage
-    dicom_dir = pathlib.Path("data/Head-Neck-PET-CT")
-    dicom_dir = pathlib.Path("data")
-    raw_output_path = (
-        dicom_dir.parent / ".imgtools" / dicom_dir.name / "crawl_db.json"
-    )
-    # Parse command line arguments
-    parser = argparse.ArgumentParser(
-        description="Parse DICOM files in a directory"
-    )
-    parser.add_argument(
-        "--dicom_dir",
-        "-d",
-        type=str,
-        default=dicom_dir,
-        help="Directory containing DICOM files",
-    )
-    parser.add_argument(
-        "--output",
-        "-o",
-        type=str,
-        default=raw_output_path,
-        help="Path for the output JSON file",
-    )
-    parser.add_argument(
-        "--extension",
-        "-e",
-        type=str,
-        default="dcm",
-        help="File extension to look for (default: dcm)",
-    )
-    parser.add_argument(
-        "--jobs",
-        "-j",
-        type=int,
-        default=-1,
-        help="Number of parallel jobs (default: -1, use all cores)",
-    )
-    parser.add_argument(
-        "--force", "-f", action="store_true", help="Overwrite existing files"
-    )
-
-    args = parser.parse_args()
-
-    # Convert string paths to pathlib.Path objects
-    dicom_dir = pathlib.Path(args.dicom_dir)
-    raw_output_path = pathlib.Path(args.output)
-    # Benchmark parse_dicom_dir 10 times
-
-    times = []
-
-    start_time = time.perf_counter()
-    parse_dicom_dir(
-        dicom_dir,
-        raw_output_path,
-        extension=args.extension,
-        n_jobs=args.jobs,
-        force=args.force,
-    )
-    end_time = time.perf_counter()
-    elapsed = end_time - start_time
-    times.append(elapsed)
-    # print(f"Run {i + 1}: {elapsed:.4f} seconds")
-
-    # # Print statistics
-    # print("\nBenchmark results:")
-    # print(f"First run time(warm-up): {times[0]:.4f} seconds")
-    # times = times[1:]  # Ignore the first run for warm-up
-    # avg_time = sum(times) / len(times)
-    # print(f"Average time: {avg_time:.4f} seconds")
-    # print(f"Min time: {min(times):.4f} seconds")
-    # print(f"Max time: {max(times):.4f} seconds")
-
-# names_generator = itk.GDCMSeriesFileNames.New(); names_generator.SetUseSeriesDetails(True); names_generator.AddSeriesRestriction('0008|0032'); names_generator.SetDirectory("data/QIN-HEADNECK/QIN-HEADNECK-01-0003/PT_Series24225617"); names_generator.GetSeriesUIDs()
+    return barebones_dict
