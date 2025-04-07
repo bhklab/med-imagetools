@@ -39,6 +39,8 @@ from . import set_log_verbosity
 from .command_registry import CommandRegistry
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
+from .index import index
+
 from .sectioned_group import SectionedGroup
 from .testdatasets import is_testdata_available, testdata
 
@@ -49,6 +51,7 @@ registry = CommandRegistry()
 registry.create_group("dicom-tools", "Tools for working with DICOM files.")
 registry.add("dicom-tools", dicomfind)
 registry.add("dicom-tools", dicomsort)
+registry.add('dicom-tools', index)
 
 if is_testdata_available():
     from .testdatasets import testdata
