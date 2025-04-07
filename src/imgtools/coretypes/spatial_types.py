@@ -172,6 +172,12 @@ class Spacing3D:
             case [x, y, z]:
                 self.x, self.y, self.z = x, y, z
             case [tuple_points] if isinstance(tuple_points, tuple):
+                if len(tuple_points) != 3:
+                    errmsg = (
+                        f"{self.__class__.__name__} expects 3 values for x, y, z."
+                        f" Got {len(tuple_points)} values for {tuple_points}."
+                    )
+                    raise ValueError(errmsg)
                 self.x, self.y, self.z = tuple_points
             case _:
                 errmsg = (

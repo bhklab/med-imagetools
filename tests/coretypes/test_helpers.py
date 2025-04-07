@@ -50,6 +50,41 @@ class TestSize3D:
         s = Size3D(1, 2, 3)
         assert repr(s) == "Size3D(w=1, h=2, d=3)"
 
+    def test_truediv(self) -> None:
+        """Test Spacing3D division with a scalar.
+        
+        ALWAYS divides as floor division.
+        """
+        s = Size3D(10, 20, 30)
+        scalar = 2
+        result = s / scalar
+        assert result == Size3D(5, 10, 15)
+        assert isinstance(result, Size3D)
+        assert result.volume == 750
+
+        # test that floordivision is used
+        result2 = s // scalar
+        assert result2 == Size3D(5, 10, 15)
+        assert isinstance(result2, Size3D)
+
+        nonuniformscalar = 3
+        result3 = s / nonuniformscalar
+        assert result3 == Size3D(3, 6, 10)
+
+        # divide by another Size3D
+        s2 = Size3D(2, 4, 6)
+        result4 = s / s2
+        assert result4 == Size3D(5, 5, 5)
+        assert isinstance(result4, Size3D)
+        assert result4.volume == 125
+
+        # divide by a tuple
+        tuple_s = (2, 4, 6)
+        result5 = s / tuple_s
+        assert result5 == Size3D(5, 5, 5)
+        assert isinstance(result5, Size3D)
+
+
 
 class TestCoordinate3D:
     """Test suite for Coordinate3D class."""
@@ -71,6 +106,11 @@ class TestCoordinate3D:
         """Test Coordinate3D initialization."""
         c = Coordinate3D(*args)
         assert (c.x, c.y, c.z) == expected
+
+    def test_invalid_initialization(self) -> None:
+        """Ensure Coordinate3D raises errors for invalid inputs."""
+        with pytest.raises(ValueError):
+            Coordinate3D(1, 2)
 
     def test_addition(self) -> None:
         """Test Coordinate3D addition with Size3D."""
@@ -170,6 +210,11 @@ class TestSpacing3D:
         """Test Spacing3D initialization."""
         sp = Spacing3D(*args)
         assert (sp.x, sp.y, sp.z) == expected
+
+    def test_invalid_initialization(self) -> None:
+        """Ensure Spacing3D raises errors for invalid inputs."""
+        with pytest.raises(ValueError):
+            Spacing3D(1.0, 2.0)
 
     def test_iteration(self) -> None:
         """Ensure Spacing3D is iterable."""
