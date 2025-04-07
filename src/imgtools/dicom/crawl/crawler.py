@@ -46,7 +46,6 @@ class Crawler:
     settings: CrawlerSettings
 
     crawl_results: ParseDicomDirResult = field(init=False)
-    index: pd.DataFrame = field(init=False)
 
     def __post_init__(self) -> None:
         """Crawl the DICOM directory and extract metadata."""
@@ -74,3 +73,8 @@ class Crawler:
                 force=self.settings.force,
             )
         self.crawl_results = crawldb
+
+    @property
+    def index(self) -> pd.DataFrame:
+        """Return the index of the crawl results."""
+        return self.crawl_results.index
