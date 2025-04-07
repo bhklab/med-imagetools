@@ -134,10 +134,19 @@ class ModalityMetadataExtractor(ABC):
         "ScanProgressionDirection",
         "ScanOptions",
         "AcquisitionNumber",
+        "ProtocolName",
+        # Date Time Information
+        "StudyDate",
+        "StudyTime",
+        "SeriesDate",
+        "SeriesTime",
+        "ContentDate",
+        "ContentTime",
         "AcquisitionDateTime",
         "AcquisitionDate",
         "AcquisitionTime",
-        "ProtocolName",
+        "InstanceCreationDate",
+        "InstanceCreationTime",
     }
 
     @classmethod
