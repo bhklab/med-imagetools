@@ -29,24 +29,65 @@ ImageOrArray = sitk.Image | np.ndarray
 
 
 class MedImage(sitk.Image):
+    """A class for handling medical images with geometric properties.
+
+    Extends SimpleITK.Image with additional properties and methods for
+    medical image processing and analysis.
+    """
+
     @property
     def size(self) -> Size3D:
+        """Get the size of the image in voxels.
+
+        Returns
+        -------
+        Size3D
+            The dimensions of the image (width, height, depth).
+        """
         return Size3D(*self.GetSize())
 
     @property
     def origin(self) -> Coordinate3D:
+        """Get the physical coordinates of the first voxel.
+
+        Returns
+        -------
+        Coordinate3D
+            The physical coordinates (x, y, z) of the origin.
+        """
         return Coordinate3D(*self.GetOrigin())
 
     @property
     def spacing(self) -> Spacing3D:
+        """Get the physical size of each voxel.
+
+        Returns
+        -------
+        Spacing3D
+            The spacing between voxels in physical units.
+        """
         return Spacing3D(*self.GetSpacing())
 
     @property
     def direction(self) -> Direction:
+        """Get the direction cosine matrix for image orientation.
+
+        Returns
+        -------
+        Direction
+            The 3x3 direction matrix representing image orientation.
+        """
         return Direction(tuple(self.GetDirection()))
 
     @property
     def geometry(self) -> ImageGeometry:
+        """Get a complete representation of the image geometry.
+
+        Returns
+        -------
+        ImageGeometry
+            A dataclass containing size, origin, direction, and spacing.
+        """
         return ImageGeometry(
             size=self.size,
             origin=self.origin,
@@ -56,10 +97,24 @@ class MedImage(sitk.Image):
 
     @property
     def ndim(self) -> int:
+        """Get the number of dimensions of the image.
+
+        Returns
+        -------
+        int
+            The dimensionality of the image (typically 3 for medical images).
+        """
         return self.GetDimension()
 
     @property
     def dtype_np(self) -> Type["np.number"]:
+        """Get the NumPy data type corresponding to the image's pixel type.
+
+        Returns
+        -------
+        Type[np.number]
+            The NumPy data type of the image pixels.
+        """
         return sitk.extra._get_numpy_dtype(self)
 
     @property
@@ -89,15 +144,32 @@ class MedImage(sitk.Image):
         yield "direction", self.direction
 
     def to_numpy(
-        self, return_geometry: bool = False, view: bool = False
+        self, view: bool = False
     ) -> np.ndarray | tuple[np.ndarray, ImageGeometry]:
+        """Convert the image to a NumPy array.
+
+        Parameters
+        ----------
+        view : bool, optional
+            Whether to return a view instead of a copy of the array, by default False.
+            Using a view can save memory but modifications to the array may affect the original image.
+
+        Returns
+        -------
+        tuple[np.ndarray, ImageGeometry]
+            A tuple containing the NumPy array and the image geometry.
+            If `return_geometry` is False, only the NumPy array is returned.
+
+        Notes
+        -----
+        The returned NumPy array has axes ordered as (z, y, x), which is different
+        from the SimpleITK convention of (x, y, z).
+        """
         if view:
             array = sitk.GetArrayViewFromImage(self)
         else:
             array = sitk.GetArrayFromImage(self)
-        if return_geometry:
-            return array, self.geometry
-        return array
+        return array, self.geometry
 
 
 if __name__ == "__main__":
