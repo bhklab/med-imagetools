@@ -6,6 +6,17 @@ import pytest
 from imgtools.dicom.sort.exceptions import InvalidPatternError
 from imgtools.pattern_parser.parser import PatternParser
 
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Store the current log level
+
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
+    # automatically reset the log level after the test
 # Disable warnings for the purpose of this test
 warnings.filterwarnings('ignore', category=pytest.PytestWarning)
 

@@ -11,7 +11,17 @@ from pydicom.uid import UID, ExplicitVRLittleEndian
 from imgtools.dicom.read_tags import read_tags
 from imgtools.utils.truncate_uid import truncate_uid
 
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Store the current log level
 
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
+    # automatically reset the log level after the test
 @pytest.fixture(scope="module")
 def dicom_test_file() -> Generator[Path, Any, None]:  # type: ignore
     """Pytest fixture to create a DICOM file for testing."""
