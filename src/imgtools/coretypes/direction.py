@@ -109,17 +109,12 @@ class Direction:
         yield from self.matrix
 
     def __repr__(self) -> str:
-        dim = 3
         rows = self.to_matrix()
         formatted_rows = [
-            "  [" + ", ".join(f"{value:>7.3f}" for value in row) + "]"
+            "[" + ",".join(f"{value:>4.2f}" for value in row) + "]"
             for row in rows
         ]
-        return (
-            f"Direction(  {dim}x{dim} matrix\n"
-            + "\n".join(formatted_rows)
-            + "\n)"
-        )
+        return f"Direction({', '.join(formatted_rows)})"
 
     # Create instances of each class
     # point = Point3D(10.0, 20.0, 30.0)
