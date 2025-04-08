@@ -669,9 +669,7 @@ class Interlacer:
         return save_path
 
     def print_tree(self, input_directory: Path | None) -> None:
-        """Return a string representation of the forest."""
-        print_interlacer_tree(self.root_nodes, input_directory)
-
+        """Print a representation of the forest."""
 
 class ModalityHighlighter(RegexHighlighter):
     """Highlights DICOM modality tags using custom styles."""
