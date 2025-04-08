@@ -4,6 +4,39 @@ from typing import Tuple, Union
 
 # duration fields → parse as float
 def parse_datetime(key: str, value: str) -> date | time | float:
+    """
+    Parse date/time or duration values from keyword/value pairs.
+
+    Parameters
+    ----------
+    key : str
+        The name of the DICOM field (e.g., "AcquisitionTime", "EchoTime").
+    value : str
+        The associated value to be parsed.
+
+    Returns
+    -------
+    date or time or float
+        Depending on the field type, returns either a Python date, time,
+        or a float representing a duration.
+
+    Raises
+    ------
+    ValueError
+        If the value cannot be parsed correctly for the given field type.
+    TypeError
+        If the parsed result is not a date or time object, when such an
+        object is expected.
+
+    Examples
+    --------
+    >>> parse_datetime("EchoTime", "45.0")
+    45.0
+    >>> parse_datetime("AcquisitionDate", "20240101")
+    datetime.date(2024, 1, 1)
+    >>> parse_datetime("AcquisitionTime", "230000")
+    datetime.time(23, 0)
+    """
     # duration fields → parse as float
     DURATION_FIELDS = {  # noqa: N806
         "EchoTime",
