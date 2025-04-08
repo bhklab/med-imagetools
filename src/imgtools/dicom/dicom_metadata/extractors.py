@@ -352,7 +352,10 @@ class RTSTRUCTMetadataExtractor(ModalityMetadataExtractor):
         return {
             "ReferencedSeriesUID": lambda ds: rtstruct_reference_uids(ds)[0],
             "ReferencedSOPUIDs": lambda ds: rtstruct_reference_uids(ds)[1],
-            "ROINames": extract_roi_names,
+            # extract roi names and sort them
+            "ROINames": lambda ds: sorted(
+                extract_roi_names(ds), key=lambda s: s.lower()
+            ),
             "NumROIs": lambda ds: len(extract_roi_names(ds)),
         }
 
