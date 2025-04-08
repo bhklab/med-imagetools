@@ -48,6 +48,10 @@ from pathlib import Path
 from typing import Iterator
 
 import pandas as pd
+from rich.console import Console
+from rich.highlighter import RegexHighlighter
+from rich.theme import Theme
+from rich.tree import Tree as RichTree
 
 from imgtools.loggers import logger
 from imgtools.utils import OptionalImportError, optional_import, timer
@@ -80,6 +84,7 @@ class SeriesNode:
     Modality: str
     PatientID: str
     StudyInstanceUID: str
+    folder: str
     children: list[SeriesNode] = field(default_factory=list)
 
     def add_child(self, child_node: SeriesNode) -> None:
@@ -129,6 +134,7 @@ class SeriesNode:
             node.Modality,
             node.PatientID,
             node.StudyInstanceUID,
+            node.folder,
         )
 
 
@@ -325,6 +331,7 @@ class Interlacer:
                 row.Modality,
                 row.PatientID,
                 row.StudyInstanceUID,
+                row.folder,
             )
 
     @timer("Building forest based on references")
@@ -661,25 +668,112 @@ class Interlacer:
 
         return save_path
 
+    def print_tree(self, input_directory: Path | None) -> None:
+        """Return a string representation of the forest."""
+        print_interlacer_tree(self.root_nodes, input_directory)
+
+
+class ModalityHighlighter(RegexHighlighter):
+    """Highlights DICOM modality tags using custom styles."""
+
+    base_style = "modality."
+    highlights = [
+        r"(?P<CT>\bCT\b)",
+        r"(?P<MR>\bMR\b)",
+        r"(?P<PT>\bPT\b)",
+        r"(?P<SEG>\bSEG\b)",
+        r"(?P<RTSTRUCT>\bRTSTRUCT\b)",
+        r"(?P<RTPLAN>\bRTPLAN\b)",
+        r"(?P<RTDOSE>\bRTDOSE\b)",
+    ]
+
+    modality_theme = Theme(
+        {
+            "modality.CT": "bold blue",
+            "modality.MR": "bold dark_orange",
+            "modality.PT": "bold green3",
+            "modality.SEG": "bold red",
+            "modality.RTSTRUCT": "bold medium_purple",
+            "modality.RTPLAN": "bold tan",
+            "modality.RTDOSE": "bold pink1",
+        }
+    )
+
+
+def print_interlacer_tree(
+    root_nodes: list[SeriesNode], input_directory: Path | None
+) -> None:
+    from collections import defaultdict
+
+    from imgtools.utils import truncate_uid
+
+    console = Console(
+        highlighter=ModalityHighlighter(),
+        theme=ModalityHighlighter.modality_theme,
+    )
+    root_tree = RichTree(
+        "[bold underline]Patients[/bold underline]", highlight=True
+    )
+
+    def add_series_node(node: SeriesNode, branch: RichTree) -> None:
+        left_part = f"{node.Modality} (Series-{truncate_uid(node.SeriesInstanceUID, last_digits=8)})"
+        if input_directory:
+            folder = Path(input_directory).parent / node.folder
+            folder = folder.resolve()
+        else:
+            folder = Path(node.folder).resolve()
+
+        if folder.exists():
+            folder_str = f"\t\t[dim]{str(folder.relative_to(Path().cwd()))}[/]"
+            left_part += folder_str
+
+        child_branch = branch.add(left_part, highlight=True)
+        for child in node.children:
+            add_series_node(child, child_branch)
+
+    patient_groups: dict[str, list[SeriesNode]] = defaultdict(list)
+    for root in root_nodes:
+        patient_groups[root.PatientID].append(root)
+
+    # sort the patient groups by PatientID
+    patient_groups = dict(
+        sorted(patient_groups.items(), key=lambda item: item[0])
+    )
+
+    for patient_id, roots in patient_groups.items():
+        patient_branch = root_tree.add(f"[blue bold]{patient_id}[/]")
+        for root in roots:
+            add_series_node(root, patient_branch)
+
+    console.print(root_tree, highlight=True)
+
 
 if __name__ == "__main__":
     from rich import print  # noqa
     from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
-    dicom_dir = Path("data")
+    dicom_dirs = [
+        Path("data/Vestibular-Schwannoma-SEG"),
+        Path("data/NSCLC_Radiogenomics"),
+        Path("data/Head-Neck-PET-CT"),
+    ]
+    interlacers = []
+    for directory in dicom_dirs:
+        crawler_settings = CrawlerSettings(
+            dicom_dir=directory,
+            n_jobs=5,
+            force=False,
+        )
 
-    crawler_settings = CrawlerSettings(
-        dicom_dir=dicom_dir,
-        n_jobs=5,
-        force=False,
-    )
+        crawler = Crawler(crawler_settings)
+        interlacer = Interlacer(crawler.index)
+        interlacers.append(interlacer)
 
-    crawler = Crawler(crawler_settings)
+    for interlacer, input_dir in zip(interlacers, dicom_dirs):
+        interlacer.print_tree(input_dir)
+    # query = "CT,PT,SEG"
+    # samples = interlacer.query(query)
 
-    interlacer = Interlacer(crawler.crawl_results.index_csv_path)
-    interlacer.visualize_forest()
+    # print(len(samples))
 
-    query = "CT,RTSTRUCT"
-    samples = interlacer.query(query)
-
-    print(len(samples))
+    # print(samples)
