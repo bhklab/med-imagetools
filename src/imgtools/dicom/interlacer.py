@@ -547,7 +547,13 @@ class Interlacer:
         sidebar_html += """
             </ul>
         </div>
+
         <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
             #sidebar {
                 position: fixed;
                 left: 0;
@@ -558,30 +564,54 @@ class Interlacer:
                 padding: 20px;
                 overflow-y: auto;
                 box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+                z-index: 1000;
             }
+
             #sidebar h2 {
                 text-align: center;
+                font-family: Arial, sans-serif;
             }
+
             #sidebar ul {
                 list-style: none;
                 padding: 0;
             }
+
             #sidebar li {
                 margin: 10px 0;
             }
+
             #sidebar a {
                 text-decoration: none;
                 color: #007bff;
                 font-weight: bold;
+                font-family: Arial, sans-serif;
             }
+
             #sidebar a:hover {
                 text-decoration: underline;
             }
+
+            #mynetwork {
+                margin-left: 270px; /* Room for sidebar */
+                height: 100vh;
+            }
         </style>
-        <script>
+
+        <script type="text/javascript">
             function focusNode(nodeId) {
-                network.selectNodes([nodeId]); 
-                network.focus(nodeId, { scale: 3.5, animation: true });
+                if (typeof network !== 'undefined') {
+                    network.selectNodes([nodeId]);
+                    network.focus(nodeId, {
+                        scale: 3.5,
+                        animation: {
+                            duration: 500,
+                            easingFunction: "easeInOutQuad"
+                        }
+                    });
+                } else {
+                    alert("Network graph not loaded yet.");
+                }
             }
         </script>
         """
