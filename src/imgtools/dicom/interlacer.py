@@ -232,7 +232,7 @@ class Interlacer:
 
     def __init__(
         self,
-        crawl_path: str | Path,
+        crawl_index: str | Path | pd.DataFrame,
         group_field: GroupBy = GroupBy.ReferencedSeriesUID,
     ) -> None:
         """
@@ -240,16 +240,26 @@ class Interlacer:
 
         Parameters
         ----------
-        crawl_path : str or Path
-            Path to the CSV file containing the data.
+        crawl_index : str or Path or pd.DataFrame
+            The CSV file path or the DataFrame itself containing the data.
         group_field : GroupBy, optional
             Field to group by, by default GroupBy.ReferencedSeriesUID.
         """
-        # Load and drop duplicate SeriesInstanceUID
-        self.crawl_path = Path(crawl_path)
-        self.crawl_df = pd.read_csv(
-            self.crawl_path, index_col="SeriesInstanceUID"
-        )
+        if isinstance(crawl_index, (str, Path)):
+            self.crawl_path = Path(crawl_index)
+            self.crawl_df = pd.read_csv(
+                self.crawl_path, index_col="SeriesInstanceUID"
+            )
+        elif isinstance(crawl_index, pd.DataFrame):
+            self.crawl_df = crawl_index.copy()
+            self.crawl_df.set_index(
+                "SeriesInstanceUID",
+                inplace=True,
+            )
+        else:
+            errmsg = f"Invalid type for crawl_index: {type(crawl_index)}"
+            raise TypeError(errmsg)
+
         self.crawl_df = self.crawl_df[
             ~self.crawl_df.index.duplicated(keep="first")
         ]
