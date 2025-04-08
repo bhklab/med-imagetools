@@ -211,21 +211,22 @@ class GroupBy(Enum):
     PatientID = "PatientID"
 
 
+@dataclass
 class Interlacer:
     """
     Builds and queries a forest of SeriesNode objects from DICOM series data.
 
     Parameters
     ----------
-    crawl_path : str | Path
-        Path to the CSV file containing the series data
+    crawl_index : str | Path | pd.DataFrame
+        Path to the CSV file or DataFrame containing the series data
     group_field : GroupBy, optional
         Field to group series by, by default GroupBy.ReferencedSeriesUID
 
     Attributes
     ----------
     crawl_df : pd.DataFrame
-        DataFrame containing the data loaded from the CSV file
+        DataFrame containing the data loaded from the CSV file or passed in `crawl_index`
     group_field : GroupBy
         Field used for grouping series
     series_nodes : dict[str, SeriesNode]
@@ -236,48 +237,40 @@ class Interlacer:
         List of root nodes in the forest
     """
 
-    def __init__(
-        self,
-        crawl_index: str | Path | pd.DataFrame,
-        group_field: GroupBy = GroupBy.ReferencedSeriesUID,
-    ) -> None:
-        """
-        Initializes the Interlacer object.
+    crawl_index: str | Path | pd.DataFrame
+    group_field: GroupBy = GroupBy.ReferencedSeriesUID
+    crawl_df: pd.DataFrame = field(init=False)
+    series_nodes: dict[str, SeriesNode] = field(
+        default_factory=dict, init=False
+    )
+    trees: list[Branch] | list[list[SeriesNode]] = field(
+        default_factory=list, init=False
+    )
+    root_nodes: list[SeriesNode] = field(default_factory=list, init=False)
 
-        Parameters
-        ----------
-        crawl_index : str or Path or pd.DataFrame
-            The CSV file path or the DataFrame itself containing the data.
-        group_field : GroupBy, optional
-            Field to group by, by default GroupBy.ReferencedSeriesUID.
-        """
-        if isinstance(crawl_index, (str, Path)):
-            self.crawl_path = Path(crawl_index)
+    def __post_init__(self) -> None:
+        """Initialize the Interlacer after dataclass initialization."""
+        if isinstance(self.crawl_index, (str, Path)):
             self.crawl_df = pd.read_csv(
-                self.crawl_path, index_col="SeriesInstanceUID"
+                self.crawl_index, index_col="SeriesInstanceUID"
             )
-        elif isinstance(crawl_index, pd.DataFrame):
-            self.crawl_df = crawl_index.copy()
+        elif isinstance(self.crawl_index, pd.DataFrame):
+            self.crawl_df = self.crawl_index.copy()
             self.crawl_df.set_index(
                 "SeriesInstanceUID",
                 inplace=True,
             )
         else:
-            errmsg = f"Invalid type for crawl_index: {type(crawl_index)}"
+            errmsg = f"Invalid type for crawl_index: {type(self.crawl_index)}"
             raise TypeError(errmsg)
 
         self.crawl_df = self.crawl_df[
             ~self.crawl_df.index.duplicated(keep="first")
         ]
-        self.group_field = group_field
 
-        self.series_nodes: dict[str, SeriesNode] = {}
         self._create_series_nodes()
 
-        self.trees: list[Branch] | list[list[SeriesNode]]
-        self.root_nodes: list[SeriesNode] = []
-
-        match group_field:
+        match self.group_field:
             case GroupBy.ReferencedSeriesUID:
                 self._build_forest()
                 self.trees = self._find_branches()
@@ -296,7 +289,7 @@ class Interlacer:
                     list(self.series_nodes.values()), "PatientID"
                 )
             case _:
-                msg = f"Grouping by {group_field} is not supported."
+                msg = f"Grouping by {self.group_field} is not supported."
                 raise NotImplementedError(msg)
 
     def _group_by_attribute(
@@ -490,7 +483,7 @@ class Interlacer:
 
         return data
 
-    def visualize_forest(self, save_path: str | Path | None = None) -> Path:
+    def visualize_forest(self, save_path: str | Path) -> Path:
         """
         Visualize the forest as an interactive network graph.
 
@@ -499,9 +492,8 @@ class Interlacer:
 
         Parameters
         ----------
-        save_path : str | Path | None, optional
-            Path to save the HTML visualization. If None, saves to
-            'forest_visualization.html' in crawl file directory.
+        save_path : str | Path
+            Path to save the HTML visualization.
 
         Returns
         -------
@@ -523,11 +515,6 @@ class Interlacer:
                 "Visualization is only supported when grouping by ReferencedSeriesUID."
             )
 
-        save_path = (
-            self.crawl_path.parent / "forest_visualization.html"
-            if save_path is None
-            else save_path
-        )
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -776,6 +763,9 @@ if __name__ == "__main__":
         crawler = Crawler(crawler_settings)
         interlacer = Interlacer(crawler.index)
         interlacers.append(interlacer)
+        interlacer.visualize_forest(
+            directory.parent.parent / directory.name / "interlacer.html"
+        )
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
@@ -785,4 +775,4 @@ if __name__ == "__main__":
         crawler.index, group_field=GroupBy.StudyInstanceUID
     )
     interlacer.print_tree(crawler.settings.dicom_dir)
-    print(interlacer.query("CT,RTSTRUCT"))  # fails
+    # print(interlacer.query("CT,RTSTRUCT"))  # fails
