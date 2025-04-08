@@ -19,28 +19,41 @@ from pydicom.dataset import FileDataset
 
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
-from imgtools.exceptions import ROIContourError
+from imgtools.exceptions import MissingROIError, ROIContourError
 from imgtools.loggers import logger
 
 # from imgtools.utils import physical_points_to_idxs
-
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
 # Define type aliases
+SelectionPattern: TypeAlias = str | List[str]
 """Alias for a string or a list of strings used to represent selection patterns."""
-SelectionPattern: TypeAlias = str | List[str] | List[List[str]]
 
+ROINamePatterns: TypeAlias = (
+    SelectionPattern | Mapping[str, SelectionPattern] | None
+)
 """Alias for ROI names, which can be:
 - SelectionPattern:
     - A single string pattern.
     - A list of string patterns.
 - A dictionary mapping strings to patterns or lists of patterns.
 - None, to represent the absence of any selection.
+
+    Examples
+    --------
+    >>> ROI_NAMES = ["GTVp", "GTV1", "GTV 2", "CTV1", "CTVV"]
+    >>> "GTVp" # A single string roi
+    >>> "GTV.*" # A single string pattern
+    >>> [
+        "GTV.*", 
+        "CTV.*"
+    ] # A list of string patterns
+    >>> {
+        "GTV": ["GTV.*", "CTV.*"],
+        "CTV": "CTV.*",
+    } # A dictionary mapping strings to patterns
 """
-ROINamePatterns: TypeAlias = (
-    SelectionPattern | Mapping[str, SelectionPattern] | None
-)
 
 
 class ROIExtractionErrorMsg(str):
@@ -197,7 +210,30 @@ class ContourPointsAcrossSlicesError(Exception):
 
 @dataclass
 class RTStructureSet:
-    """Represents the entire structure set, containing multiple ROIs."""
+    """Represents the entire structure set, containing multiple ROIs.
+
+    Attributes
+    ----------
+    roi_names : List[str]
+        List of ROI names extracted from the RTSTRUCT.
+    metadata : dict[str, Any]
+        Metadata extracted from the RTSTRUCT DICOM file.
+    roi_map : dict[str, ROI]
+        Dictionary mapping ROI names to their corresponding `ROI` objects.
+    roi_map_errors : dict[str, ROIExtractionErrorMsg]
+        Dictionary mapping ROI names to any extraction errors encountered.
+
+    Methods
+    -------
+    from_dicom(dicom: DicomInput) -> RTStructureSet
+        Create a `RTStructureSet` object from a DICOM file.
+    match_roi(pattern: str, ignore_case: bool = True) -> List[str] | None
+        Search for ROI names matching a given pattern.
+    __getitem__(idx: str | int | slice) -> ROI | List[ROI]
+        Access ROI objects by name, index, or slice.
+    summary() -> dict
+        Return a comprehensive summary of the RTStructureSet.
+    """
 
     # these are the EXTRACTED ROI names, not the original ones in the RTSTRUCT
     # since some will fail to extract
@@ -343,57 +379,119 @@ class RTStructureSet:
             raise ROIContourError(
                 "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
             )
-        # Check if ROI index exists in the sequence
-        elif roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
-            msg = (
-                f"ROI index {roi_index} is out of bounds for the "
-                f" 'ROIContourSequence' with length {len(rtstruct.ROIContourSequence)}."
-            )
-            raise ROIContourError(msg)
-
-        roi_contour = rtstruct.ROIContourSequence[roi_index]
 
         # Check for ContourSequence in the specified ROI
-        if not hasattr(roi_contour, "ContourSequence"):
+        if not hasattr(
+            roi_contour := rtstruct.ROIContourSequence[roi_index],
+            "ContourSequence",
+        ):
             msg = (
                 f"ROI at index {roi_index}, (ReferencedROINumber={roi_index + 1}) "
                 "is missing 'ContourSequence';"
             )
             raise ROIContourError(msg)
 
+        # Check for ContourData in each contour
         contour_sequence = roi_contour.ContourSequence
 
-        # Check for ContourData in each contour
-        contour_points = []
+        contour_slices = []
         total_num_points = 0
-        contourgeometric_types = set()
         for i, slc in enumerate(contour_sequence):
             if not hasattr(slc, "ContourData"):
                 msg = f"Contour {i} in ROI at index {roi_index} is missing 'ContourData'. "
                 raise ROIContourError(msg)
             roi_points = np.array(slc.ContourData).reshape(-1, 3)
-            contour_slice = ContourSlice(roi_points)
-            contour_points.append(contour_slice)
+            contour_slices.append(ContourSlice(roi_points))
             total_num_points += slc.get("NumberOfContourPoints", 0)
-            contourgeometric_types.add(slc.get("ContourGeometricType", None))
-
-        if len(contourgeometric_types) > 1:
-            warnmsg = (
-                f"Multiple ContourGeometricTypes found for ROI '{roi_name}': "
-                f"{contourgeometric_types}."
-            )
-            logger.warning(warnmsg)
-            cgt = ",".join(contourgeometric_types)
-        else:
-            cgt = contourgeometric_types.pop()
+            cgt = slc.get("ContourGeometricType", None)
 
         return ROI(
             name=roi_name,
             ReferencedROINumber=int(roi_contour.ReferencedROINumber),
             contour_geometric_type=ContourGeometricType(cgt),
             num_points=total_num_points,
-            slices=contour_points,
+            slices=contour_slices,
         )
+
+    def match_roi(
+        self, pattern: str, ignore_case: bool = True
+    ) -> List[str] | None:
+        """Search for ROI names in self.roi_names based on a regular expression pattern.
+        Parameters
+        ----------
+        pattern : str
+            The regular expression pattern to search for.
+        ignore_case : bool, optional
+            Whether to ignore case in the regular expression matching. Default is False.
+        Returns
+        -------
+        List[str] | None
+            A list of matching ROI names if any match, None otherwise.
+        Examples
+        --------
+        Assume the following rt has the roi names: ['GTV1', 'GTV2', 'PTV', 'CTV_0', 'CTV_1']
+        >>> structure_set = RTStructureSet.from_dicom(
+        ...     "path/to/rtstruct.dcm"
+        ... )
+        >>> structure_set.match_roi("GTV.*")
+        ['GTV1', 'GTV2']
+        >>> structure_set.match_roi(
+        ...     "ctv.*", ignore_case=True
+        ... )
+        ['CTV_0', 'CTV_1']
+        """
+        _flags = re.IGNORECASE if ignore_case else 0
+        matches = [
+            name
+            for name in self.roi_names
+            if re.fullmatch(pattern=pattern, string=name, flags=_flags)
+        ]
+        return matches if matches else None
+
+    def __getitem__(self, idx: str | int | slice) -> ROI | List[ROI]:
+        """Extend slice based access to the data in the RTStructureSet
+        rtss = RTStructureSet.from_dicom(...)
+        1. rtss['GTV'] -> ROI instance
+            if key exists EXACTLY as 'GTV' in the self.rois dict, return the `ROI` instance
+            representing the contour points (sinlge ROI element)
+            (maybe we should be returning as a LIST of only 1 element?)
+        2. rtss['gtv.*'] -> List[ROI] instance
+            when trying to index using a key that is a regex pattern,
+            match the roi names to a pattern that starts with 'gtv' (case-insensitive),
+            and if there exists any matched rois, return a `LIST` of `ROI` instances reprensenting
+            their contour points.
+        3. rtss[0] -> ROI instance
+            if key is an integer, return the `ROI` instance at that index
+        4. rtss[0:2] -> List[ROI] instance
+        """
+        match idx:
+            case int():
+                # Return the ROI at the specified index
+                return self.roi_map[self.roi_names[idx]]
+            case slice():
+                # Return a list of ROIs for the specified slice
+                return [self.roi_map[name] for name in self.roi_names[idx]]
+            case str():
+                # Check if the name exists in the roi_names
+                if idx in self.roi_names:
+                    return self.roi_map[idx]
+                # Check if the name is a regex pattern and match against ROI names
+                elif matched_rois := self.match_roi(idx):
+                    return [self.roi_map[name] for name in matched_rois]
+                else:
+                    errmsg = (
+                        f"Key `{idx}` not found in structure set's ROI names"
+                    )
+            case _:
+                errmsg = (
+                    f"Key `{idx}` of type {type(idx)} not supported. "
+                    "Expected int, slice, or str."
+                )
+        raise MissingROIError(errmsg)
+
+    def _ipython_key_completions_(self) -> list[str]:
+        """IPython/Jupyter tab completion when indexing rtstruct[...]"""
+        return self.roi_names
 
     def summary(self) -> dict:
         """Return a comprehensive summary of the RTStructureSet."""
@@ -413,20 +511,25 @@ class RTStructureSet:
             "ROIErrors": roi_errors_info,
         }
 
+    def __len__(self) -> int:
+        return len(self.roi_names)
+
+    def __iter__(self) -> Iterator[tuple[str, ROI]]:
+        # iterate through self.rois.items if key is in self.roi_names
+        for name in self.roi_names:
+            yield name, self.roi_map[name]
+
+    def items(self) -> List[tuple[str, ROI]]:
+        return list(iter(self))
+
 
 if __name__ == "__main__":
     from rich import print
 
-    p = Path(
-        "/home/gpudual/bhklab/radiomics/Projects/med-imagetools/data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm"
-    )
+    p = Path("data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm")
 
     # Read entire file
     rtstruct = RTStructureSet.from_dicom(p)
     print(rtstruct.summary())
 
-    # only match *TV.*
-    rtstruct = RTStructureSet.from_dicom(
-        p, roi_name_pattern=".*TV.*", ignore_case=True
-    )
-    print(rtstruct.summary())
+    print(f"{rtstruct.match_roi(".*TV.*", ignore_case=True)=}")
