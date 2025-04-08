@@ -32,7 +32,6 @@ __all__ = [
     "expand_dictionary",
     "retrieve_nested_value",
     "cleanse_metadata",
-    "datetime_to_iso_string",
 ]
 
 
@@ -63,12 +62,18 @@ class AttrDict(dict):
             return
 
         super().__init__(
-            {k: make_dotaccess(v) for k, v in dict(*args, **kwargs).items()}
+            {k: attrify(v) for k, v in dict(*args, **kwargs).items()}
         )
 
     @classmethod
     def from_flat_dict(cls, *args: Any, **kwargs: Any) -> AttrDict:
-        """Inflate a flat dict into a nested AttrDict."""
+        """Inflate a flat dict into a nested AttrDict.
+
+        Example
+        -------
+        >>> AttrDict.from_flat_dict({"a.b": 1})
+        {'a': {'b': 1}}
+        """
         return cls(expand_dictionary(dict(*args, **kwargs)))
 
     def to_flat_dict(self) -> dict[str, Any]:
@@ -92,12 +97,12 @@ class AttrDict(dict):
         return f"{self.__class__.__name__}({pformat(dict(self))})"
 
 
-def make_dotaccess(data: Any) -> Any:
+def attrify(data: Any) -> Any:
     """Recursively convert dicts to AttrDict and handle lists of dicts as well."""
     if isinstance(data, dict):
         return AttrDict(data)
     if isinstance(data, list):
-        return [make_dotaccess(elem) for elem in data]
+        return [attrify(elem) for elem in data]
     return data
 
 
@@ -214,9 +219,8 @@ def cleanse_metadata(metadata: Any) -> Any:
     """Recursively cleanse metadata dictionaries for serialization.
 
     Fixes applied:
-        1. Converts datetime objects to ISO 8601 with second precision.
-        2. Converts NaN values to None.
-        3. Cleans nested dictionaries and iterables.
+        1. Converts NaN values to None.
+        2. Cleans nested dictionaries and iterables.
 
     Parameters
     ----------
@@ -238,43 +242,7 @@ def cleanse_metadata(metadata: Any) -> Any:
         return [cleanse_metadata(v) for v in metadata]
     if isinstance(metadata, float) and math.isnan(metadata):
         return None
-    if isinstance(metadata, (datetime.datetime, datetime.date)):
-        return datetime_to_iso_string(metadata)
     return metadata
-
-
-def datetime_to_iso_string(
-    datetime_obj: datetime.datetime | datetime.date,
-) -> str:
-    """Convert datetime/date to an ISO 8601 string with second precision.
-
-    Parameters
-    ----------
-    datetime_obj : datetime.datetime or datetime.date
-        The datetime or date object to convert.
-
-    Returns
-    -------
-    str
-        Formatted ISO 8601 string.
-
-    Raises
-    ------
-    TypeError
-        If 'datetime_obj' is not a datetime or date.
-
-    Examples
-    --------
-    >>> datetime_to_iso_string(
-    ...     datetime.datetime(2024, 1, 1, 12, 0, 0)
-    ... )
-    '2024-01-01T12:00:00'
-    """
-    if isinstance(datetime_obj, datetime.datetime):
-        return datetime_obj.isoformat(timespec="seconds")
-    if isinstance(datetime_obj, datetime.date):
-        return datetime_obj.isoformat()
-    raise TypeError("Expected a datetime or date object.")
 
 
 # disable ruff
@@ -308,9 +276,11 @@ if __name__ == "__main__":  # pragma: no cover
     flat_dict = flatten_dictionary(nested_dict)
     print("Flattened Dictionary:")
     pprint(flat_dict)
+
     expanded_dict = expand_dictionary(flat_dict)
     print("\nExpanded Dictionary:")
     pprint(expanded_dict)
+
     attr_dict = AttrDict(nested_dict)
     print("\nAttrDict:")
     pprint(attr_dict)
