@@ -123,7 +123,7 @@ class PET(MedImage):
                 "Scale factor not available in DICOMs. Calculating based on metadata, may contain errors"
             )
             # factor = cls.calc_factor(dcm, pet_type)
-            factor = 1.0  # fallback to 1.0 or re-enable the calc_factor logic 
+            factor = 1.0  # fallback to 1.0 or re-enable the calc_factor logic
 
         # SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
