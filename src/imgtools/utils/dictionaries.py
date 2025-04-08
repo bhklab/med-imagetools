@@ -26,6 +26,8 @@ import datetime
 import math
 from typing import Any
 
+from .date_time import datetime_to_iso_string
+
 __all__ = [
     "AttrDict",
     "flatten_dictionary",
@@ -221,6 +223,7 @@ def cleanse_metadata(metadata: Any) -> Any:
     Fixes applied:
         1. Converts NaN values to None.
         2. Cleans nested dictionaries and iterables.
+        3. Converts datetime.{datetime,date,time} to ISO format strings.
 
     Parameters
     ----------
@@ -232,16 +235,21 @@ def cleanse_metadata(metadata: Any) -> Any:
     Any
         The cleansed version of the input.
     """
-    if isinstance(metadata, dict):
-        return {k: cleanse_metadata(v) for k, v in metadata.items()}
-    if isinstance(metadata, str):
-        return metadata
-    if isinstance(metadata, collections.abc.Iterable) and not isinstance(
-        metadata, (str, bytes)
-    ):
-        return [cleanse_metadata(v) for v in metadata]
-    if isinstance(metadata, float) and math.isnan(metadata):
-        return None
+
+    match metadata:
+        case dict():
+            return {k: cleanse_metadata(v) for k, v in metadata.items()}
+        case collections.abc.Iterable() if not isinstance(
+            metadata, (str, bytes)
+        ):
+            return [cleanse_metadata(v) for v in metadata]
+        case float() if math.isnan(metadata):
+            return None
+        case datetime.datetime() | datetime.date() | datetime.time():
+            return datetime_to_iso_string(metadata)
+        case _:
+            return metadata
+
     return metadata
 
 
