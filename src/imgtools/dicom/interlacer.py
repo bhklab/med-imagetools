@@ -670,7 +670,15 @@ class Interlacer:
 
     def print_tree(self, input_directory: Path | None) -> None:
         """Print a representation of the forest."""
-        print_interlacer_tree(self.root_nodes, input_directory)
+        match self.group_field:
+            case GroupBy.ReferencedSeriesUID:
+                print_interlacer_tree(self.root_nodes, input_directory)
+            case GroupBy.StudyInstanceUID | GroupBy.PatientID:
+                warnmsg = (
+                    "Printing tree is not supported for "
+                    f"{self.group_field}. Use visualize_forest() instead."
+                )
+                logger.error(warnmsg)
 
 
 class ModalityHighlighter(RegexHighlighter):
@@ -771,9 +779,10 @@ if __name__ == "__main__":
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
-    # query = "CT,PT,SEG"
-    # samples = interlacer.query(query)
 
-    # print(len(samples))
-
-    # print(samples)
+    # test groupby
+    interlacer = Interlacer(
+        crawler.index, group_field=GroupBy.StudyInstanceUID
+    )
+    interlacer.print_tree(crawler.settings.dicom_dir)
+    print(interlacer.query("CT,RTSTRUCT"))  # fails
