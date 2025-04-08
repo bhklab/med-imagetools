@@ -142,7 +142,6 @@ class ModalityMetadataExtractor(ABC):
         "SeriesTime",
         "ContentDate",
         "ContentTime",
-        "AcquisitionDateTime",
         "AcquisitionDate",
         "AcquisitionTime",
         "InstanceCreationDate",
