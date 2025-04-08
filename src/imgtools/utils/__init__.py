@@ -1,3 +1,12 @@
+from .date_time import datetime_to_iso_string, parse_datetime
+from .dictionaries import (
+    AttrDict,
+    attrify,
+    cleanse_metadata,
+    expand_dictionary,
+    flatten_dictionary,
+    retrieve_nested_value,
+)
 from .imageutils import (
     Array3D,
     ImageArrayMetadata,
@@ -30,4 +39,14 @@ __all__ = [
     "timer",
     # truncate_uid
     "truncate_uid",
+    # dictionaries
+    "AttrDict",
+    "attrify",
+    "flatten_dictionary",
+    "expand_dictionary",
+    "retrieve_nested_value",
+    "cleanse_metadata",
+    # date_time
+    "datetime_to_iso_string",
+    "parse_datetime",
 ]

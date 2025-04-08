@@ -33,7 +33,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
 @click.option(
     "--n-jobs",
     type=int,
-    default=1,
+    default=DEFAULT_WORKERS,
     help="Number of jobs to use for parallel processing.",
 )
 @click.option(
