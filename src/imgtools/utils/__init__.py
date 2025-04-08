@@ -47,5 +47,5 @@ __all__ = [
     "retrieve_nested_value",
     "cleanse_metadata",
     # datetime_to_iso_string
-    "date_time",
+    "datetime_to_iso_string",
 ]
