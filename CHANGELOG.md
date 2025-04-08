@@ -1,6 +1,32 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.17 (2025-04-08)
+
+### Features
+
+- Implement MedImage and Scan classes with geometry handling
+  ([#303](https://github.com/bhklab/med-imagetools/pull/303),
+  [`1888c8a`](https://github.com/bhklab/med-imagetools/commit/1888c8a95a603da685ce13c6c1774f4443a9a888))
+
+Introduce the MedImage class to manage 3D image geometry properties and methods, along with the Scan
+  class for metadata handling. This enhances the framework's capability to work with medical images
+  effectively.
+
+#277
+
+- **New Features** - Introduced new imaging capabilities, including enhanced support for medical
+  scans, dose images, and PET imaging from DICOM data. - Added utilities to extract image metadata
+  and convert images to numerical arrays.
+
+- **Refactor** - Streamlined the display format for directional data to a more compact, two-decimal
+  representation for improved clarity.
+
+- **Tests** - Updated tests to align with the new directional formatting.
+
+- **Chores** - Deprecated legacy imaging definitions to simplify the codebase.
+
+
 ## v2.0.0-rc.16 (2025-04-08)
 
 ### Features
