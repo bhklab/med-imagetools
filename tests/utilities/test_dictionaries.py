@@ -20,14 +20,14 @@ def test_nested_attrdict_behavior():
 
 
 def test_missing_attr_raises_attributeerror():
-	empty = dicts.make_dotaccess({})
+	empty = dicts.attrify({})
 	with pytest.raises(AttributeError):
 		_ = empty.nonexistent
 
 
 def test_recursive_attrify_conversion():
 	structure = {"level": [{"deep": "value"}]}
-	converted = dicts.make_dotaccess(structure)
+	converted = dicts.attrify(structure)
 	assert converted.level[0].deep == "value"
 
 
