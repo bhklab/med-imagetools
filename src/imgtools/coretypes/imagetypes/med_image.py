@@ -29,7 +29,7 @@ ImageOrArray = sitk.Image | np.ndarray
 
 
 class MedImage(sitk.Image):
-    """A class for handling medical images with geometric properties.
+    """A more convenient wrapper around SimpleITK.Image.
 
     Extends SimpleITK.Image with additional properties and methods for
     medical image processing and analysis.
