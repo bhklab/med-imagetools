@@ -1,3 +1,12 @@
+from .dictionaries import (
+    AttrDict,
+    cleanse_metadata,
+    datetime_to_iso_string,
+    expand_dictionary,
+    flatten_dictionary,
+    make_dotaccess,
+    retrieve_nested_value,
+)
 from .imageutils import (
     Array3D,
     ImageArrayMetadata,
@@ -30,4 +39,12 @@ __all__ = [
     "timer",
     # truncate_uid
     "truncate_uid",
+    # dictionaries
+    "AttrDict",
+    "make_dotaccess",
+    "flatten_dictionary",
+    "expand_dictionary",
+    "retrieve_nested_value",
+    "cleanse_metadata",
+    "datetime_to_iso_string",
 ]
