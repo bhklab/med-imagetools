@@ -1,10 +1,10 @@
+from .date_time import datetime_to_iso_string
 from .dictionaries import (
     AttrDict,
+    attrify,
     cleanse_metadata,
-    datetime_to_iso_string,
     expand_dictionary,
     flatten_dictionary,
-    make_dotaccess,
     retrieve_nested_value,
 )
 from .imageutils import (
@@ -41,10 +41,11 @@ __all__ = [
     "truncate_uid",
     # dictionaries
     "AttrDict",
-    "make_dotaccess",
+    "attrify",
     "flatten_dictionary",
     "expand_dictionary",
     "retrieve_nested_value",
     "cleanse_metadata",
-    "datetime_to_iso_string",
+    # datetime_to_iso_string
+    "date_time",
 ]
