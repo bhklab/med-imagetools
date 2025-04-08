@@ -105,6 +105,6 @@ def test_repr():
     dir_obj = Direction(matrix=flat)
     out = repr(dir_obj)
     assert isinstance(out, str)
-    assert "Direction(  3x3 matrix" in out
+    assert "Direction(" in out
     # Quick check that some part of the data is in there
-    assert "[  1.000,   2.000,   3.000]" in out
+    assert "[1.00,2.00,3.00]" in out

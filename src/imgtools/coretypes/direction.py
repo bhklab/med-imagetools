@@ -146,14 +146,58 @@ class Direction:
         yield from self.matrix
 
     def __repr__(self) -> str:
-        dim = 3
         rows = self.to_matrix()
         formatted_rows = [
-            "  [" + ", ".join(f"{value:>7.3f}" for value in row) + "]"
+            "[" + ",".join(f"{value:>4.2f}" for value in row) + "]"
             for row in rows
         ]
-        return (
-            f"Direction(  {dim}x{dim} matrix\n"
-            + "\n".join(formatted_rows)
-            + "\n)"
-        )
+        return f"Direction({', '.join(formatted_rows)})"
+
+    # Create instances of each class
+    # point = Point3D(10.0, 20.0, 30.0)
+    # size = Size3D(50.0, 60.0, 70.0)
+    # direction = Direction.from_matrix(
+    #     (
+    #         (0.707, 0.707, 0.0),
+    #         (-0.707, 0.707, 0.0),
+    #         (0.0, 0.0, 1.0),
+    #     )
+    # )
+
+    # # Testing Point3D and Size3D operations
+    # new_point = point + size
+
+    # # Printing out the details
+    # print(f"Point: {point}")
+    # print(f"Size: {size}")
+    # print(f"New point after adding size: {new_point}")
+    # print(f"Direction: {direction}")
+
+    # # Unpacking the values
+    # print("Unpacked Point:", tuple(point))  # (10.0, 20.0, 30.0)
+    # print("Unpacked Size:", tuple(size))  # (50.0, 60.0, 70.0)
+
+    # example_image = np.random.rand(10, 10, 10)
+    # example_sitk_image = sitk.GetImageFromArray(example_image)
+
+    # # Create a direction vector
+    # # 3x3 Direction Matrix
+    # direction_3d = Direction.from_matrix(
+    #     (
+    #         (0.707, 0.707, 0.0),
+    #         (-0.707, 0.707, 0.0),
+    #         (0.0, 0.0, 1.0),
+    #     )
+    # )
+
+    # print(f"{direction_3d=}")
+    # example_sitk_image.SetDirection(direction_3d)
+
+    # # make another direction from a flattened
+    # direction_3d_flat = Direction(
+    #     matrix=(0.707, 0.707, 0.0, -0.707, 0.707, 0.0, 0.0, 0.0, 1.0)
+    # )
+    # print(f"{direction_3d_flat=}")
+    # print(f"{(direction_3d_flat==direction_3d)=}")
+
+    # print(f"{example_sitk_image=}")
