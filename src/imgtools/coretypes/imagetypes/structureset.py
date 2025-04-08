@@ -343,9 +343,8 @@ class RTStructureSet:
             raise ROIContourError(
                 "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
             )
-
         # Check if ROI index exists in the sequence
-        if roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
+        elif roi_index >= len(rtstruct.ROIContourSequence) or roi_index < 0:
             msg = (
                 f"ROI index {roi_index} is out of bounds for the "
                 f" 'ROIContourSequence' with length {len(rtstruct.ROIContourSequence)}."
