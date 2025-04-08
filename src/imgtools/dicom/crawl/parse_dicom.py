@@ -181,7 +181,7 @@ def parse_one_dicom(
     ## using pathlib instead of os
     filepath = pathlib.Path(dcm_path).relative_to(top.parent)
     meta.folder = filepath.parent.as_posix()
-    meta.instances = {instance_uid: filepath.as_posix()}  # noqa 
+    meta.instances = {instance_uid: filepath.name.as_posix()}  # noqa 
 
     ## using os instead of pathlib
     # filepath = os.path.relpath(dcm_path, top.parent)
