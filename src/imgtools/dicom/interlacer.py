@@ -1,8 +1,8 @@
 """
 Interlacer Module
 
-This module defines the `Interlacer` class, which constructs and queries a hierarchical 
-forest of DICOM series based on their metadata relationships. It enables efficient 
+This module defines the `Interlacer` class, which constructs and queries a hierarchical
+forest of DICOM series based on their metadata relationships. It enables efficient
 grouping, querying, and visualization of medical imaging series.
 
 Classes
@@ -21,9 +21,11 @@ Examples
 --------
 >>> from pathlib import Path
 >>> from rich import print  # noqa
->>> from imgtools.dicom.crawl import CrawlerSettings, Crawler
+>>> from imgtools.dicom.crawl import (
+...     CrawlerSettings,
+...     Crawler,
+... )
 >>> from imgtools.dicom.interlacer import Interlacer
->>> 
 >>> dicom_dir = Path("data")
 >>> crawler_settings = CrawlerSettings(
 >>>     dicom_dir=dicom_dir,
@@ -31,10 +33,8 @@ Examples
 >>>     force=False
 >>> )
 >>> crawler = Crawler.from_settings(crawler_settings)
->>> 
 >>> interlacer = Interlacer(crawler.db_csv)
 >>> interlacer.visualize_forest()
->>> 
 >>> query = "CT,RTSTRUCT"
 >>> samples = interlacer.query(query)
 """
@@ -42,6 +42,7 @@ Examples
 from __future__ import annotations
 
 from collections import defaultdict
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Iterator
@@ -56,21 +57,15 @@ pyvis, _pyvis_available = optional_import("pyvis")
 __all__ = ["Interlacer", "GroupBy"]
 
 
+@dataclass
 class SeriesNode:
     """
     A node in the series tree representing a DICOM series.
 
     Parameters
     ----------
-    series : str
+    SeriesInstanceUID : str
         The SeriesInstanceUID of this node
-    row : pd.Series
-        A pandas Series containing metadata for this series
-
-    Attributes
-    ----------
-    Series : str
-        The SeriesInstanceUID
     Modality : str
         The DICOM modality type
     PatientID : str
@@ -81,19 +76,11 @@ class SeriesNode:
         Child nodes representing referenced series
     """
 
-    def __init__(
-            self, 
-            series: str, 
-            modality: str,
-            patient_id: str,
-            study: str
-        ) -> None:
-        self.Series = series
-        self.Modality = modality
-        self.PatientID = patient_id
-        self.StudyInstanceUID = study
-
-        self.children: list[SeriesNode] = []
+    SeriesInstanceUID: str
+    Modality: str
+    PatientID: str
+    StudyInstanceUID: str
+    children: list[SeriesNode] = field(default_factory=list)
 
     def add_child(self, child_node: SeriesNode) -> None:
         """Add SeriesNode to children"""
@@ -111,11 +98,14 @@ class SeriesNode:
     def __eq__(self, other: object) -> bool:
         """Equality check based on index"""
         if isinstance(other, str):  # Direct index check
-            return self.Series == other
-        return isinstance(other, SeriesNode) and self.Series == other.Series
-    
+            return self.SeriesInstanceUID == other
+        return (
+            isinstance(other, SeriesNode)
+            and self.SeriesInstanceUID == other.SeriesInstanceUID
+        )
+
     def __hash__(self) -> int:
-        return hash(self.Series)
+        return hash(self.SeriesInstanceUID)
 
     def __iter__(self) -> Iterator[SeriesNode]:
         """Yield all nodes in the tree"""
@@ -125,29 +115,32 @@ class SeriesNode:
     def __repr__(self, level: int = 0) -> str:
         """Recursive representation of the tree structure"""
         indent = "  " * level
-        result = f"{indent}- {self.Modality}, (SERIES: {self.Series})\n"
+        result = (
+            f"{indent}- {self.Modality}, (SERIES: {self.SeriesInstanceUID})\n"
+        )
         for child in self.children:
             result += child.__repr__(level + 1)
         return result
-    
+
     @classmethod
     def copy_node(cls, node: SeriesNode) -> SeriesNode:
         return cls(
-            node.Series,
+            node.SeriesInstanceUID,
             node.Modality,
             node.PatientID,
-            node.StudyInstanceUID
+            node.StudyInstanceUID,
         )
 
 
+@dataclass
 class Branch:
     """
     Represents a unique path (branch) in the forest.
 
     Parameters
     ----------
-    series_nodes : list[SeriesNode] | None, optional
-        List of SeriesNode objects in this branch, by default None
+    series_nodes : list[SeriesNode]
+        List of SeriesNode objects in this branch
 
     Attributes
     ----------
@@ -155,8 +148,7 @@ class Branch:
         The nodes making up this branch
     """
 
-    def __init__(self, series_nodes: list[SeriesNode] | None = None) -> None:
-        self.series_nodes = [] if series_nodes is None else series_nodes
+    series_nodes: list[SeriesNode] = field(default_factory=list)
 
     def add_node(self, node: SeriesNode) -> None:
         """Add a SeriesNode to the branch."""
@@ -165,17 +157,28 @@ class Branch:
     def check_branch(self, query: list[str]) -> list[SeriesNode]:
         """Check if the given query is a sub-sequence and has the same order as the nodes in the branch."""
         node_mode = [node.Modality for node in self.series_nodes]
-        
-        if query == ["CT", "RTSTRUCT"]: # EXCEPTION: Avoid PT in between CT and RTSTRUCT
-            return next((self.series_nodes[idx:idx+2] for idx in range(len(self.series_nodes) - 1) 
-                                if node_mode[idx:idx+2] == query), [])
-        
+
+        if query == [
+            "CT",
+            "RTSTRUCT",
+        ]:  # EXCEPTION: Avoid PT in between CT and RTSTRUCT
+            return next(
+                (
+                    self.series_nodes[idx : idx + 2]
+                    for idx in range(len(self.series_nodes) - 1)
+                    if node_mode[idx : idx + 2] == query
+                ),
+                [],
+            )
+
         elif all(item in node_mode for item in query):
-            return [node for node in self.series_nodes if node.Modality in query]
-        
+            return [
+                node for node in self.series_nodes if node.Modality in query
+            ]
+
         else:
             return []
-        
+
     def __iter__(self) -> Iterator[SeriesNode]:
         """Yield the node from each SeriesNode in the branch."""
         for node in self.series_nodes:
@@ -308,10 +311,10 @@ class Interlacer:
         for index, row in self.crawl_df.iterrows():
             series_instance_uid = str(index)
             self.series_nodes[series_instance_uid] = SeriesNode(
-                series_instance_uid, 
+                series_instance_uid,
                 row.Modality,
                 row.PatientID,
-                row.StudyInstanceUID
+                row.StudyInstanceUID,
             )
 
     @timer("Building forest based on references")
@@ -359,27 +362,42 @@ class Interlacer:
             traverse_tree(root, [])
 
         return branches
-    
+
     def _get_valid_query(self, query: list[str]) -> list[str]:
         """
         Validates the query based on the following rules:
 
-        Rules
+        Notes
         -----
+        Rules:
             1. RTSTRUCT and RTDOSE require CT, MR, or PT.
             2. SEG requires CT or MR.
+        Example:
+            "CT,RTDOSE" is valid.
+            "CT,MR,RTSTRUCT" is valid.
+            "CT,PT,RTSTRUCT" is valid.
+            "PT,SEG" is invalid.
+            "RTSTRUCT,RTDOSE" is invalid.
         """
+
+        MODALITY_DEPENDENCIES: dict[str, set[str]] = {  # noqa: N806
+            "RTSTRUCT": {"CT", "MR", "PT"},
+            "RTDOSE": {"CT", "MR", "PT"},
+            "SEG": {"CT", "MR"},
+        }
+
         valid_order = ["CT", "MR", "PT", "SEG", "RTSTRUCT", "RTDOSE"]
         query_set = set(query)
 
-        if ("RTSTRUCT" in query_set or "RTDOSE" in query_set) and not query_set.intersection({"CT", "MR", "PT"}):
-            raise ValueError("RTSTRUCT and RTDOSE require CT, MR, or PT")
-        
-        if "SEG" in query_set and not query_set.intersection({"CT", "MR"}):
-            raise ValueError("SEG requires CT or MR")
+        for modality in query:
+            if modality in MODALITY_DEPENDENCIES:
+                required = MODALITY_DEPENDENCIES[modality]
+                if not query_set.intersection(required):
+                    msg = f"{modality} requires one of {', '.join(required)}"
+                    raise ValueError(msg)
 
         return [modality for modality in valid_order if modality in query_set]
-        
+
     def _query(self, queried_modalities: list[str]) -> list[list[SeriesNode]]:
         """Returns samples that contain *all* specified modalities."""
         results = []
@@ -387,7 +405,9 @@ class Interlacer:
 
         # Step 1: Query each tree(Branch)
         for tree in self.trees:
-            assert isinstance(tree, Branch) # To be updated, when supporting other grouping
+            assert isinstance(
+                tree, Branch
+            )  # To be updated, when supporting other grouping
             query_result = tree.check_branch(queried_modalities)
             if query_result and not tuple(query_result) in seen_result:
                 results.append(query_result)
@@ -399,13 +419,13 @@ class Interlacer:
             root_node = result[0]
             if not grouped_results[root_node]:
                 grouped_results[root_node].append(root_node)
-            
+
             for node in result[1:]:
                 if node not in grouped_results[root_node]:
                     grouped_results[root_node].append(node)
 
         return list(grouped_results.values())
-        
+
     @timer("Querying forest")
     def query(self, query_string: str) -> list[list[dict[str, str]]]:
         """
@@ -435,7 +455,7 @@ class Interlacer:
         if self.group_field != GroupBy.ReferencedSeriesUID:
             msg = f"Querying currently not supported for {self.group_field}"
             raise NotImplementedError(msg)
-        
+
         queried_modalities = self._get_valid_query(query_string.split(","))
         if not queried_modalities:
             msg = f"Invalid query, {query_string}"
@@ -445,7 +465,7 @@ class Interlacer:
 
         data = [
             [
-                {"Series": node.Series, "Modality": node.Modality}
+                {"Series": node.SeriesInstanceUID, "Modality": node.Modality}
                 for node in result
             ]
             for result in query_results
@@ -516,12 +536,15 @@ class Interlacer:
             color = modality_colors.get(
                 node.Modality, "#7f7f7f"
             )  # Default gray if unknown
-            title = f"PatientID: {node.PatientID}\nSeries: {node.Series}"
+            title = f"PatientID: {node.PatientID}\nSeries: {node.SeriesInstanceUID}"
             net.add_node(
-                node.Series, label=node.Modality, title=title, color=color
+                node.SeriesInstanceUID,
+                label=node.Modality,
+                title=title,
+                color=color,
             )
             if parent:
-                net.add_edge(node.Series, parent.Series)
+                net.add_edge(node.SeriesInstanceUID, parent.SeriesInstanceUID)
 
             for child in node.children:
                 add_node_and_edges(child, node)
@@ -530,7 +553,7 @@ class Interlacer:
         for root in self.root_nodes:
             add_node_and_edges(root)
             patient_trees[root.PatientID] = (
-                root.Series
+                root.SeriesInstanceUID
             )  # Store the root Series as entry point for the patient
 
         net.force_atlas_2based()
