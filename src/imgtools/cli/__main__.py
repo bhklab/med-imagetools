@@ -36,13 +36,12 @@ import click
 from imgtools import __version__
 
 from . import set_log_verbosity
-from .command_registry import CommandRegistry
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
 
-from .sectioned_group import SectionedGroup
-from .testdatasets import is_testdata_available, testdata
+from .sectioned_group import SectionedGroup, CommandRegistry
+from .testdatasets import testdata
 
 # Create a shared registry
 registry = CommandRegistry()
@@ -53,8 +52,7 @@ registry.add("dicom-tools", dicomfind)
 registry.add("dicom-tools", dicomsort)
 registry.add('dicom-tools', index)
 
-if is_testdata_available():
-    from .testdatasets import testdata
+if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")
     registry.add("testing", testdata)
 

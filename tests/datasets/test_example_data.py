@@ -1,6 +1,6 @@
 import SimpleITK as sitk
 
-from imgtools import example_data
+from imgtools.datasets import example_data
 
 
 def test_data_images() -> None:

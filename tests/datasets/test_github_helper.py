@@ -8,11 +8,11 @@ from imgtools.datasets.github_datasets import (
     console,
     download_dataset,
     Progress,
-    ClientResponseError,
     AssetStatus
 )
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
+from aiohttp import ClientResponseError
 import os
 from github import GithubException
 
