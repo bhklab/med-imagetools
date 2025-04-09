@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.18 (2025-04-09)
+
+### Features
+
+- Implement lazy loading in cli click commands
+  ([#313](https://github.com/bhklab/med-imagetools/pull/313),
+  [`804b407`](https://github.com/bhklab/med-imagetools/commit/804b40736a982fb6d7a9609d2a94a68cb2021481))
+
+- **New Features** - Enhanced CLI experience with organized command groups, making the help output
+  clearer and easier to navigate. - Updated DICOM sorting command now provides explicit action
+  options (move, copy, symlink, hardlink), improving usability.
+
+- **Bug Fixes** - Improved handling of test datasets with dynamic visibility based on availability.
+
+- **Refactor** - Streamlined handling of test datasets with improved messaging when dependencies are
+  missing. - Optimized dependency management and import scoping to ensure a more robust operational
+  flow.
+
+
 ## v2.0.0-rc.17 (2025-04-08)
 
 ### Features
