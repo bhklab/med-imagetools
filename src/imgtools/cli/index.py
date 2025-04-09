@@ -3,8 +3,6 @@ import os
 import click
 from pathlib import Path
 
-from numpy import add
-from imgtools.dicom.crawl import Crawler, CrawlerSettings
 from imgtools.loggers import logger
 
 cpu_count: int | None = os.cpu_count()
@@ -74,6 +72,7 @@ def index(
     - By default, it saves the results in a “.imgtools” folder right next to 
         your DICOM directory, but you can pick your own place to store them.
     """
+    from imgtools.dicom.crawl import Crawler, CrawlerSettings
     settings = CrawlerSettings(
         dicom_dir=dicom_dir,
         output_dir=output_dir,

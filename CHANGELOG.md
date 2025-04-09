@@ -1,6 +1,52 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.17 (2025-04-08)
+
+### Features
+
+- Implement MedImage and Scan classes with geometry handling
+  ([#303](https://github.com/bhklab/med-imagetools/pull/303),
+  [`1888c8a`](https://github.com/bhklab/med-imagetools/commit/1888c8a95a603da685ce13c6c1774f4443a9a888))
+
+Introduce the MedImage class to manage 3D image geometry properties and methods, along with the Scan
+  class for metadata handling. This enhances the framework's capability to work with medical images
+  effectively.
+
+#277
+
+- **New Features** - Introduced new imaging capabilities, including enhanced support for medical
+  scans, dose images, and PET imaging from DICOM data. - Added utilities to extract image metadata
+  and convert images to numerical arrays.
+
+- **Refactor** - Streamlined the display format for directional data to a more compact, two-decimal
+  representation for improved clarity.
+
+- **Tests** - Updated tests to align with the new directional formatting.
+
+- **Chores** - Deprecated legacy imaging definitions to simplify the codebase.
+
+
+## v2.0.0-rc.16 (2025-04-08)
+
+### Features
+
+- New AttrDict class in utils, DICOM datetime parsers
+  ([#307](https://github.com/bhklab/med-imagetools/pull/307),
+  [`8b83b9e`](https://github.com/bhklab/med-imagetools/commit/8b83b9eb157c65a0621ebbf25339bd106a96c6c3))
+
+- **New Features** - Improved the CLI's concurrency option by dynamically setting the default based
+  on system capabilities. - Added advanced date & time parsing with ISO formatting for more robust
+  handling of imaging data. - Introduced versatile dictionary utilities that enable intuitive nested
+  data management. - Streamlined imaging metadata extraction to deliver more relevant outputs.
+
+- **Chores** - Standardized configuration formatting and updated ignore rules for enhanced
+  consistency.
+
+- **Tests** - Expanded test coverage to validate the new date/time parsing and dictionary utility
+  features.
+
+
 ## v2.0.0-rc.15 (2025-04-07)
 
 ### Chores
