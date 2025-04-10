@@ -31,7 +31,7 @@ from rich import print
 )
 def test_parse_matcher_dict(roi_matching):
     """Test parsing a dictionary matcher."""
-    roimatcher = ROIMatcher.from_raw(roi_matching)
+    roimatcher = ROIMatcher(roi_map=roi_matching)
     result = roimatcher.roi_map
     # Check that the result is a dictionary
     assert isinstance(result, dict)

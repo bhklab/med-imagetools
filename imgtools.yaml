@@ -1,0 +1,11 @@
+rois:
+  handling_strategy: "separate"
+  ignore_case: true
+  roi_map:
+    GTV:
+      - "gtv.*"
+      - "GTV.*"
+    CTV:
+      - "ctv.*"
+      - "CTV.*"
+  
