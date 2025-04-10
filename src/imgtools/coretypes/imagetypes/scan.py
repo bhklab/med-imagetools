@@ -72,13 +72,25 @@ class Scan(MedImage):
         spacing_between_slices = float(
             self.metadata.get("SpacingBetweenSlices") or 0
         )
-        if (not spacing_between_slices) or (not spacing_between_slices < 0):
+        if (not spacing_between_slices) or (spacing_between_slices >= 0):
             return
+
+        # just because metadata says that the spacing is negative, still
+        # check if the image is flipped
+        # in case  Scan was created from another (correct) Scan's transform
+        if self.direction.to_matrix()[2][2] > 0:
+            return
+
         warnmsg = (
             f"Scan has negative SpacingBetweenSlices: {spacing_between_slices}. "
             "Manually correcting the direction."
         )
-        logger.warning(warnmsg, spacing=self.spacing, direction=self.direction)
+        logger.debug(
+            warnmsg,
+            spacing_between_slices=spacing_between_slices,
+            spacing=self.spacing,
+            direction=self.direction,
+        )
 
         direction = list(self.GetDirection())
         direction[8] = -direction[8]
