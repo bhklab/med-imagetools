@@ -1,4 +1,8 @@
+from typing import Any
+
 import SimpleITK as sitk
+
+from imgtools.dicom.dicom_metadata import extract_metadata
 
 
 def read_dicom_series(
@@ -6,7 +10,8 @@ def read_dicom_series(
     series_id: str | None = None,
     recursive: bool = False,
     file_names: list[str] | None = None,
-) -> sitk.Image:
+    **kwargs: Any,  # noqa
+) -> tuple[sitk.Image, dict]:
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -29,7 +34,10 @@ def read_dicom_series(
 
     Returns
     -------
-    The loaded image.
+    image
+        SimpleITK Image object containing the DICOM series.
+    metadata
+        Dictionary containing metadata extracted from one file in the series.
     """
     reader = sitk.ImageSeriesReader()
     sitk_file_names = reader.GetGDCMSeriesFileNames(
@@ -54,4 +62,10 @@ def read_dicom_series(
 
     reader.SetFileNames(file_names)
 
-    return reader.Execute()
+    metadata = kwargs.pop("metadata", None)
+
+    if not metadata:
+        # Extract metadata from the first file
+        metadata = extract_metadata(file_names[0])
+
+    return reader.Execute(), metadata

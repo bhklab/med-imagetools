@@ -18,13 +18,14 @@ def read_dicom_scan(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> Scan:
-    image = read_dicom_series(
+    image, metadata = read_dicom_series(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
+        **kwargs,
     )
-    return Scan(image, {})
+    return Scan(image, metadata)
 
 
 class Scan(MedImage):
@@ -56,6 +57,7 @@ class Scan(MedImage):
             The read scan.
         """
         image = read_dicom_scan(path, **kwargs)
+
         return cls(image, {})
 
     def __repr__(self) -> str:  # type: ignore
@@ -68,6 +70,10 @@ class Scan(MedImage):
             retr_str += f"\n\t{k}={v}"
         retr_str += "\n>"
         return retr_str
+
+    def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
+        yield "modality", self.metadata.get("Modality", "Unknown")
+        yield from super().__rich_repr__()
 
 
 if __name__ == "__main__":  # pragma: no cover
