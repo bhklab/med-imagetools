@@ -6,6 +6,11 @@ import os
 import logging
 import pandas as pd
 import json
+from collections import defaultdict
+import pytest
+from typing import TypedDict
+from pathlib import Path
+
 pytest_logger = logging.getLogger("tests.fixtures")
 pytest_logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter(
@@ -30,19 +35,40 @@ TEST_DATASET_TYPE = TestAccessType(
     os.environ.get("TEST_DATASET_TYPE", "public").lower()
 )
 
+class MedImageDataEntry(TypedDict):
+	Collection: str
+	PatientID: str
+	Modality: str
+	SeriesInstanceUID: str
+	Path: Path
+	NumInstances: int
+
 @pytest.fixture(scope="session")
-def medimage_test_data() -> list[dict[str, str | Path]]:
+def medimage_test_data() -> list[MedImageDataEntry]:
+    """Provides access to medical imaging test data files.
+    
+    Downloads and caches standardized medical imaging test data from GitHub.
+    The data is downloaded only once per session and cached for subsequent 
+    access. Supports both public and private datasets based on the 
+    TEST_DATASET_TYPE environment variable.
+
+    Returns
+    -------
+    list[MedImageDataEntry]
+        List of dictionaries containing metadata for each test data entry.
+        See `MedImageDataEntry` for the structure of each entry.
+
+    """
     pytest_logger.info(f"Cache directory: {DATA_DIR}")
-    from imgtools.datasets.github_datasets import (
-        MedImageTestData,
-        logger as dataset_logger,
-    )
-    # prevent multiple workers from downloading simultaneously
+    from imgtools.datasets.github_datasets import MedImageTestData
+
+    # configure which test data type
     repo = "bhklab/med-image_test-data"
     if TEST_DATASET_TYPE == TestAccessType.PRIVATE:
         repo += "_private"
 
     dataset_dicts = []
+    # prevent multiple workers from downloading simultaneously
     with FileLock(LOCKFILE):
         # if the metadata cache file exists, read it
         if METADATA_CACHE_FILE.exists():
@@ -116,12 +142,44 @@ def medimage_test_data() -> list[dict[str, str | Path]]:
     return dataset_dicts
 
 @pytest.fixture(scope="session")
+def medimage_by_modality(
+	medimage_test_data: list[MedImageDataEntry],
+) -> dict[str, list[MedImageDataEntry]]:
+	"""Groups test data by imaging modality.
+
+	organizes `medimage_test_data` into a dictionary where the keys are 
+    modality type (e.g., CT, MRI, PET) for easier access when testing 
+    modality-specific functionality.
+
+	Parameters
+	----------
+	medimage_test_data : list of MedImageDataEntry
+	    Test dataset metadata entries.
+
+	Returns
+	-------
+	DefaultDict[str, list[MedImageDataEntry]]
+	    Dictionary mapping modality to list of entries.
+	"""
+	grouped: dict[str, list[MedImageDataEntry]] = defaultdict(list)
+	for entry in medimage_test_data:
+		grouped[entry["Modality"]].append(entry)
+	return grouped
+
+@pytest.fixture(scope="session")
 def dataset_type() -> str:
-    """Fixture to return the dataset type."""
+    """Returns the current test dataset type (public or private).
+    
+    Provides access to the configured dataset type for tests that need
+    to behave differently based on the available test data. The value
+    comes from the TEST_DATASET_TYPE environment variable.
+    """
     return TEST_DATASET_TYPE.value
 
 @pytest.fixture(scope="session")
 def public_collections() -> list[str]:
+    """Public collections available 
+    """
     return  [
         "4D-Lung",
         "Adrenal-ACC-Ki67-Seg",
@@ -139,6 +197,12 @@ def public_collections() -> list[str]:
 
 @pytest.fixture(scope="session")
 def private_collections() -> list[str]:
+    """Returns the list of private test data collections.
+    
+    Provides a standardized list of all available private medical imaging 
+    collections that can be used in tests when working with private test data.
+    Access to these collections may require special permissions.
+    """
     return [
         "HNSCC",
         "HNSCC-3DCT-RT",
@@ -148,6 +212,20 @@ def private_collections() -> list[str]:
         "TCGA-HNSC",
         "HEAD-NECK-RADIOMICS-HN1"
     ]
+
+@pytest.fixture(scope="session")
+def available_collections(dataset_type: str, public_collections: list[str], private_collections: list[str]) -> list[str]:
+    """Returns the list of available collections based on the dataset type.
+    
+    Combines public and private collections based on the TEST_DATASET_TYPE
+    environment variable.
+    """
+    if dataset_type == TestAccessType.PUBLIC.value:
+        return public_collections
+    elif dataset_type == TestAccessType.PRIVATE.value:
+        return private_collections
+    else:
+        raise ValueError(f"Unknown dataset type: {dataset_type}")
 
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run completes, right before returning the exit status."""
