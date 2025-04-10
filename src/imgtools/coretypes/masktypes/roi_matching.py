@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from collections import defaultdict
 from enum import Enum
+from functools import lru_cache
 from itertools import product
 from typing import Annotated, ClassVar
 
@@ -101,6 +102,7 @@ def handle_roi_matching(
     """
     flags = re.IGNORECASE if ignore_case else 0
 
+    @lru_cache(maxsize=128)
     def _match_pattern(roi_name: str, pattern: PatternString) -> bool:
         return re.fullmatch(pattern, roi_name, flags=flags) is not None
 
