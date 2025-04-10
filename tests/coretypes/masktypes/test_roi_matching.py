@@ -77,8 +77,8 @@ def roi_matching():
             # expected output case insensitive
             [
                 ("GTV", "GTV 0"), ("GTV", "GTVp"), ("GTV", "gtv 0"),
-                ("PTV", "PTV"), ("PTV", "ptv x"),
-                ("TV", "GTV 0"), ("TV", "GTVp"), ("TV", "gtv 0"), ("TV", "PTV"), ("TV", "ptv x"), ("TV", "CTV_0"), ("TV", "CTV_1"), ("TV", "CTV_2"),
+                ("PTV", "PTV main"), ("PTV", "ptv x"),
+                ("TV", "GTV 0"), ("TV", "GTVp"), ("TV", "gtv 0"), ("TV", "PTV main"), ("TV", "ptv x"), ("TV", "CTV_0"), ("TV", "CTV_1"), ("TV", "CTV_2"),
                 ("extra", "ExtraROI"), ("extra", "ExtraROI2"), ("extra", "extraROI")
             ]
         ),
@@ -127,44 +127,48 @@ def test_handle_roi_matching_strategies(
 ):
     roi_names = sorted(roi_names)
 
-    # Case-sensitive matching
-    results_case_sens = handle_roi_matching(
+    # Test case-sensitive matching
+    results = handle_roi_matching(
         roi_names=roi_names,
         roi_matching=roi_matching,
         strategy=strategy,
         ignore_case=False,
     )
 
+    expected = expected_output
     if strategy == ROI_HANDLING.MERGE:
-        for key, expected_matches in expected_output:
-            assert key in results_case_sens 
-            assert results_case_sens[key] == expected_matches
+        result_dict = dict(results)
+        for key, expected_matches in expected:
+            assert key in result_dict
+            assert result_dict[key] == expected_matches
+
     elif strategy == ROI_HANDLING.KEEP_FIRST:
-        actual_pairs = [(key, values[0]) for key, values in results_case_sens.items()]
-        assert sorted(actual_pairs) == sorted(expected_output)
+        actual_pairs = [(key, values[0]) for key, values in results]
+        assert sorted(actual_pairs) == sorted(expected)
+
     elif strategy == ROI_HANDLING.SEPARATE:
-        actual_pairs = []
-        for key, values in results_case_sens.items():
-            actual_pairs.extend([(key, value) for value in values])
+        actual_pairs = [(key, values[0]) for key, values in results]
+        assert sorted(actual_pairs) == sorted(expected)
 
-        assert sorted(actual_pairs) == sorted(expected_output)
-
-    # Case-insensitive matching
-    results_case_insens = handle_roi_matching(
+    # Test case-insensitive matching
+    results = handle_roi_matching(
         roi_names=roi_names,
         roi_matching=roi_matching,
         strategy=strategy,
         ignore_case=True,
     )
 
+    expected = expected_output_ignorecase
     if strategy == ROI_HANDLING.MERGE:
-        for key, expected_matches in expected_output_ignorecase:
-            assert key in results_case_insens 
-            assert results_case_insens[key] == expected_matches
+        result_dict = dict(results)
+        for key, expected_matches in expected:
+            assert key in result_dict
+            assert result_dict[key] == expected_matches
+
     elif strategy == ROI_HANDLING.KEEP_FIRST:
-        actual_pairs = [(key, values[0]) for key, values in results_case_insens.items()]
-        assert sorted(actual_pairs) == sorted(expected_output_ignorecase)
+        actual_pairs = [(key, values[0]) for key, values in results]
+        assert sorted(actual_pairs) == sorted(expected)
+
     elif strategy == ROI_HANDLING.SEPARATE:
-        actual_pairs = []
-        for key, values in results_case_insens.items():
-            actual_pairs.extend([(key, value) for value in values])
+        actual_pairs = [(key, values[0]) for key, values in results]
+        assert sorted(actual_pairs) == sorted(expected)

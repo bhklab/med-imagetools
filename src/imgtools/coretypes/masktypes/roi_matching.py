@@ -74,13 +74,39 @@ class ROIMatcher(BaseModel):
                 msg = f"Unrecognized ROI matching input type: {type(v)}"
                 raise TypeError(msg)
 
+    def match_rois(self, roi_names: list[str]) -> list[tuple[str, list[str]]]:
+        """
+        Match ROI names against the provided patterns.
+
+        Parameters
+        ----------
+        roi_names : list[str]
+            List of ROI names to match.
+
+        Returns
+        -------
+        list[tuple[str, list[str]]]
+            List of tuples containing the key and matched ROI names.
+            See `handle_roi_matching` for notes on the handling strategies.
+
+        See Also
+        --------
+        handle_roi_matching : Function to handle the matching logic.
+        """
+        return handle_roi_matching(
+            roi_names,
+            self.roi_map,
+            self.handling_strategy,
+            ignore_case=self.ignore_case,
+        )
+
 
 def handle_roi_matching(
     roi_names: list[str],
     roi_matching: ROIGroupPatterns,
     strategy: ROI_HANDLING,
     ignore_case: bool = True,
-) -> dict[str, list[str]]:
+) -> list[tuple[str, list[str]]]:
     """
     Match ROI names against regex patterns and apply a handling strategy.
 
@@ -97,8 +123,19 @@ def handle_roi_matching(
 
     Returns
     -------
-    dict[str, list[str]]
-        Dictionary mapping keys to matched ROI names.
+    list[tuple[str, list[str]]]
+        List of tuples containing the key and matched ROI names.
+        See Notes for details on the handling strategies.
+
+    Notes
+    -----
+    - MERGE: Merge all ROIs with the same key. Returns a single tuple for each key,
+        but the value is a list of all the matched ROIs.
+    - KEEP_FIRST: For each key, keep the first ROI found based on the pattern.
+        Returns a single tuple for each key, but the value is a list of size ONE with
+        the first matched ROI.
+    - SEPARATE: Separate all ROIs. Returns possibly multiple tuples for each key,
+        because a key may have multiple ROIs matching the pattern.
     """
     flags = re.IGNORECASE if ignore_case else 0
 
@@ -123,14 +160,24 @@ def handle_roi_matching(
 
     match strategy:
         case ROI_HANDLING.MERGE:
-            return {k: v for k, v in results.items() if v}
+            # Merge all ROIs with the same key
+            # this means that we return a single tuple for each key
+            # but the value is a list of all the matched ROIs
+            return [(key, v) for key, v in results.items() if v]
         case ROI_HANDLING.KEEP_FIRST:
-            return {k: [v[0]] for k, v in results.items() if v}
+            #     # For each key, keep the first ROI found based on the pattern
+            #     # this means that we return a single tuple for each key
+            #     # but the value is a list of size ONE with the first matched ROI
+            return [(key, [v[0]]) for key, v in results.items() if v]
         case ROI_HANDLING.SEPARATE:
-            separate = defaultdict(list)
-            for key, matches in results.items():
-                separate[key].extend(matches)
-            return dict(separate)
+            # Separate all ROIs
+            # this means that we possibly return a MULTIPLE tuples for each key
+            # because a key may have multiple ROIs matching the pattern
+            tuples = []
+            for key, v in results.items():
+                for roi in v:
+                    tuples.append((key, [roi]))
+            return tuples
         case _:  # pragma: no cover
             errmsg = (
                 f"Unrecognized strategy: {strategy}. Something went wrong."
