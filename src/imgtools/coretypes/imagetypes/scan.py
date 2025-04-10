@@ -19,14 +19,32 @@ def read_dicom_scan(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> Scan:
-    image, metadata = read_dicom_series(
+    """Read a DICOM scan from a directory.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing the DICOM files.
+    series_id : str | None, optional
+        Series ID to read, by default None
+    recursive : bool, optional
+        Whether to read the files recursively, by default False
+    file_names : list[str] | None, optional
+        List of file names to read, by default None
+    **kwargs : Any
+        Unused keyword arguments.
+    Returns
+    -------
+    Scan
+        The read scan.
+    """
+    return Scan.from_dicom(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
         **kwargs,
     )
-    return Scan(image, metadata)
 
 
 class Scan(MedImage):
@@ -72,7 +90,14 @@ class Scan(MedImage):
         )
 
     @classmethod
-    def from_dicom(cls, path: str, **kwargs: Any) -> Scan:  # noqa
+    def from_dicom(
+        cls,
+        path: str,
+        series_id: str | None = None,
+        recursive: bool = False,
+        file_names: list[str] | None = None,
+        **kwargs: Any,  # noqa
+    ) -> Scan:
         """Read a DICOM scan from a directory.
 
         Parameters
@@ -92,7 +117,14 @@ class Scan(MedImage):
         Scan
             The read scan.
         """
-        return read_dicom_scan(path, **kwargs)
+        image, metadata = read_dicom_series(
+            path,
+            series_id=series_id,
+            recursive=recursive,
+            file_names=file_names,
+            **kwargs,
+        )
+        return cls(image, metadata)
 
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string
