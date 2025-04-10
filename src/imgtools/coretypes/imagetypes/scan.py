@@ -92,9 +92,7 @@ class Scan(MedImage):
         Scan
             The read scan.
         """
-        image = read_dicom_scan(path, **kwargs)
-
-        return cls(image, {})
+        return read_dicom_scan(path, **kwargs)
 
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string
