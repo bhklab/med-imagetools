@@ -16,7 +16,11 @@ from pydicom.sequence import Sequence
 
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
-from imgtools.exceptions import MissingROIError, ROIContourError
+from imgtools.exceptions import (
+    ContourPointsAcrossSlicesError,
+    MissingROIError,
+    ROIContourError,
+)
 from imgtools.loggers import logger
 
 # from .roi_matching import (
@@ -33,29 +37,6 @@ if TYPE_CHECKING:
 
 class ROIExtractionErrorMsg(str):
     pass
-
-
-class ContourPointsAcrossSlicesError(Exception):
-    """Exception raised when contour points span across multiple slices."""
-
-    def __init__(
-        self,
-        roi_name: str,
-        contour_num: int,
-        slice_points_shape: tuple,
-        z_values: list,
-    ) -> None:
-        self.roi_name = roi_name
-        self.contour_num = contour_num
-        self.slice_points_shape = slice_points_shape
-        self.z_values = z_values
-        super().__init__(self._generate_message())
-
-    def _generate_message(self) -> str:
-        return (
-            f"Contour points for ROI '{self.roi_name}' and contour {self.contour_num} "
-            f"(shape: {self.slice_points_shape}) span across multiple slices: {self.z_values}."
-        )
 
 
 @dataclass
@@ -109,7 +90,7 @@ class RTStructureSet:
         """Create a RTStructureSet object from an RTSTRUCT DICOM file.
 
         Lazy loads by default, by giving access to ROI Names and metadata
-        and then loads the ROIs on demand.
+        and then loads the ROIs on demand. See Notes.
 
         Parameters
         ----------
@@ -122,6 +103,16 @@ class RTStructureSet:
         -------
         RTStructureSet
             The structure set data extracted from the RTSTRUCT.
+
+        Notes
+        -----
+        Compared to the old implementation, we dont extract the numpy arrays
+        for the ROIs immediately. Instead, we just extract the metadata and
+        then store the weak-refs to the `ROIContourSequence` objects.
+        This allows us to avoid the computation of the numpy arrays until we
+        actually ask for them (i.e converting to `sitk.Image`) which might
+        use some regex pattern matching to only process the ROIs that
+        we want.
         """
         logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
         dicom_rt: FileDataset = load_dicom(dicom)
