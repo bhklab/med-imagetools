@@ -218,6 +218,13 @@ class RTStructureSet:
             )
             raise ROIContourError(msg)
 
+        # Sometimes the contour could be a POINT or just broken
+        # and not have a ContourData
+        # Check for ContourData in the first contour
+        if not hasattr(roi_contour.ContourSequence[0], "ContourData"):
+            msg = f"ContourSequence in ROI at index {roi_index} is missing 'ContourData'. "
+            raise ROIContourError(msg)
+
         return roi_contour.ContourSequence
 
         # # Check for ContourData in each contour
