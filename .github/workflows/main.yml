@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
-        env: ["py310", "py311", "py312"] # , "py313" commented out until we unfreeze sitk
+        env: ["py310", "py311", "py312", "py313"]
         TestAccessType: ["public", "private"]
       # exclude macos and windows stests for py310 and py311
         exclude:
