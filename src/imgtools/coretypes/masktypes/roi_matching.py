@@ -1,125 +1,3 @@
-"""
-ROIMatcher
-----------
-users MUST define a dictionary mapping a key (general roi identifier i.e GTV)
-to a list of [exact names OR regex patterns]
-if they ONLY provide a list WITHOUT a key, the default key is "ROI" (or whatever is passed)
-
-Valid examples:
-```
-roi_matcher = "GTV.*"
-roi_matcher = ["GTVp", "CTV.*"]
-roi_matcher = {"GTV": ["GTVp", "CTV.*"]}
-roi_matcher = {
-    "GTV": ["GTV.*"],
-    "CTV": ["CTV.*"],
-}
-```
-
-Invalid examples:
-```
-roi_matcher = 123  # invalid because it's an int
-roi_matcher = [
-    ["GTV.*", "CTV.*"]
-]  # invalid because it's a list of lists
-roi_matcher = {
-    "GTV": {"GTVp": "GTVp.*"},
-    "CTV": "CTV.*",
-}  # invalid because it's a dict of dicts}
-```
-
-Handling
---------
-
-Given a valid ROI_Matching input, combined with a ROI_HANDLING strategy,
-we choose to build a roi_map using our roi names from the RTSTRUCT or SEG.
-
-The roi_map is a dictionary where the keys are the names of the ROIs
-and the values are lists of the names of the ROIs that match the patterns
-in the ROI_Matching input.
-
-So given
-these rois (extracted names will be sorted alphabetically like this too)):
-```
-[
-    "CTV_0",
-    "CTV_1",
-    "CTV_2",
-    "ExtraROI",
-    "ExtraROI2",
-    "GTV 0",
-    "GTVp",
-    "PTV",
-    "ptv x",
-]
-```
-
-and this roi_matching input:
-```
-{
-    "GTV": ["GTV*"],
-    "PTV": ["PTV.*"],
-    "TV": ["GTV.*", "PTV.*", "CTV.*"],
-    "extra": [
-        "ExtraROI",
-        "ExtraROI2",
-    ],  # can use regex or exact names
-}
-```
-
-Here are the resulting extractions based on the handling strategy:
-NOTE: regardless of handling strategy, the matches will be stored in some
-metadata, so the user knows what was matched
-
-`ROI_HANDLING.SEPARATE`
-```
-[
-    "[GTV]__GTVp",
-    "[GTV]__GTV_0",
-    "[PTV]__PTV",
-    "[PTV]__ptv_x",
-    "[TV]__GTVp",
-    "[TV]__GTV_0",
-    "[TV]__PTV",
-    "[TV]__ptv_x",
-    "[TV]__CTV_0",
-    "[TV]__CTV_1",
-    "[TV]__CTV_2",
-    "[extra]__ExtraROI",
-    "[extra]__ExtraROI2",
-]
-```
-
-`ROI_HANDLING.MERGE`
-```
-[
-    "GTV",  # ["GTVp", "GTV 0"] are merged
-    "PTV",  # ["PTV", "ptv x"] are merged
-    "TV",   # ["GTV", "GTV 0", "PTV", "ptv x", "CTV_0", "CTV_1", "CTV_2"] are merged
-    "extra" # ["ExtraROI", "ExtraROI2"] are merged
-]
-
-NOTE: `ROI_HANDLING.KEEP_FIRST` is strongly discouraged, as the first roi found is never
-guaranteed to be the most relevant one.
-Nonetheless, exact ROI pattern names are preferred to generalized regex matching
-i.e ("CTV_0" is preferred to "CTV.*") to ensure some level of
-confidence in the matching.
-`ROI_HANDLING.KEEP_FIRST`
-```
-[
-    "[GTV]__GTV_0",  # `GTV 0` comes first before `GTVp`
-    "[PTV]__PTV",   # `PTV` comes first before `ptv x`
-
-    # `CTV_0` comes first before all other matches in the sorted list
-    # BUT we specifically had 'GTV.*' first in the list
-    "[TV]__GTV_0",
-
-    # `ExtraROI` got matched because it was an exact pattern
-    "[extra]__ExtraROI",
-]
-```
-"""
-
 from __future__ import annotations
 
 import re
@@ -147,11 +25,10 @@ class ROI_HANDLING(str, Enum):  # noqa: N801
 
 
 PatternString = str
-ROI_MatchingType = dict[str, list[PatternString]]
-
+ROIGroupPatterns = dict[str, list[PatternString]]
 
 Valid_Inputs = (
-    ROI_MatchingType
+    ROIGroupPatterns
     | dict[str, PatternString]
     | list[PatternString]
     | PatternString
@@ -161,7 +38,7 @@ Valid_Inputs = (
 
 class ROIMatcher(BaseModel):
     roi_map: Annotated[
-        ROI_MatchingType,
+        ROIGroupPatterns,
         Field(description="Flexible input for ROI matcher"),
     ]
     handling_strategy: ROI_HANDLING = ROI_HANDLING.MERGE
@@ -170,7 +47,7 @@ class ROIMatcher(BaseModel):
 
     @field_validator("roi_map", mode="before")
     @classmethod
-    def validate_roi_map(cls, v: Valid_Inputs) -> ROI_MatchingType:
+    def validate_roi_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
         match v:
             case dict():
                 if not v:
@@ -196,16 +73,9 @@ class ROIMatcher(BaseModel):
                 raise TypeError(msg)
 
 
-@dataclass
-class ROIMatchResult:
-    key: str
-    matches: list[str]  # can be many if MERGE
-    strategy: ROI_HANDLING
-
-
 def match_roi(
     roi_names: list[str],  # assumes already sorted
-    roi_matching: ROI_MatchingType,
+    roi_matching: ROIGroupPatterns,
     ignore_case: bool,
 ) -> dict[str, list[str]]:
     results = defaultdict(list)
@@ -227,9 +97,16 @@ def match_roi(
     return {k: v for k, v in results.items() if v}
 
 
+@dataclass
+class ROIMatchResult:
+    key: str
+    matches: list[str]  # can be many if MERGE
+    strategy: ROI_HANDLING
+
+
 def handle_roi_matching(
     roi_names: list[str],
-    roi_matching: ROI_MatchingType,
+    roi_matching: ROIGroupPatterns,
     strategy: ROI_HANDLING,
     ignore_case: bool = True,
 ) -> list[ROIMatchResult]:
@@ -251,31 +128,27 @@ def handle_roi_matching(
     matched = match_roi(roi_names, roi_matching, ignore_case=ignore_case)
     output: list[ROIMatchResult] = []
 
-    for key, matches in matched.items():
-        if strategy == ROI_HANDLING.SEPARATE:
+    if strategy == ROI_HANDLING.SEPARATE:
+        for key, matches in matched.items():
             for match in matches:
                 output.append(
                     ROIMatchResult(key=key, matches=[match], strategy=strategy)
                 )
-
-        elif strategy == ROI_HANDLING.MERGE:
+    elif strategy == ROI_HANDLING.MERGE:
+        for key, matches in matched.items():
             output.append(
                 ROIMatchResult(key=key, matches=matches, strategy=strategy)
             )
-
-        elif strategy == ROI_HANDLING.KEEP_FIRST:
-            # find the first match for each key
-            first_match = matches[0]
+    elif strategy == ROI_HANDLING.KEEP_FIRST:
+        for key, matches in matched.items():
             output.append(
                 ROIMatchResult(
-                    key=key, matches=[first_match], strategy=strategy
+                    key=key, matches=[matches[0]], strategy=strategy
                 )
             )
-        else:  # pragma: no cover
-            errmsg = (
-                f"Unrecognized strategy: {strategy}. Something went wrong."
-            )
-            raise ValueError(errmsg)
+    else:  # pragma: no cover
+        errmsg = f"Unrecognized strategy: {strategy}. Something went wrong."
+        raise ValueError(errmsg)
 
     return output
 
@@ -329,6 +202,13 @@ if __name__ == "__main__":
             """Return the JSON schema for the settings."""
             return self.model_json_schema()
 
+        @classmethod
+        def from_user_yaml(cls, path: Path) -> Settings:
+            """Load settings from a YAML file."""
+            source = YamlConfigSettingsSource(cls, yaml_file=path)
+            settings = source()
+            return cls(**settings)
+
         def to_yaml(self, path: Path) -> None:
             """Return the YAML representation of the settings."""
             import yaml  # type: ignore
@@ -350,3 +230,5 @@ if __name__ == "__main__":
     print(matcher)
 
     settings.to_yaml(Path("imgtools_settings.yaml"))
+
+    print(Settings.from_user_yaml(Path("imgtools_settings3.yaml")))

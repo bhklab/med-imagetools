@@ -1,0 +1,10 @@
+rois:
+  roi_map:
+    GTsdfsfV:
+    - gtv.*
+    - GTV.*
+    CTV:
+    - ctv.*
+    - CTV.*
+  handling_strategy: separate
+  ignore_case: true
