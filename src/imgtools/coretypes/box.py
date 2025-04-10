@@ -348,7 +348,11 @@ class RegionBox:
         """
         try:
             self.check_out_of_bounds_coordinates(image)
-            cropped_image = sitk.RegionOfInterest(image, self.size, self.min)
+            cropped_image = image[
+                self.min.x : self.max.x,
+                self.min.y : self.max.y,
+                self.min.z : self.max.z,
+            ]
         except Exception as e:
             msg = f"Error cropping image to the box: {e}"
             logger.exception(msg)
