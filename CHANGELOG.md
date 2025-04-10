@@ -1,6 +1,25 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.19 (2025-04-10)
+
+### Features
+
+- Add ROI matching strategies ([#315](https://github.com/bhklab/med-imagetools/pull/315),
+  [`ab9ab3f`](https://github.com/bhklab/med-imagetools/commit/ab9ab3f94012795c26d6157dd319346dbb16ce99))
+
+Update the ruff configuration to ignore specific notebook files and introduce new ROI matching
+  strategies with the ROIMatcher class, enhancing the handling of ROI patterns.
+
+- **New Features** - Enhanced support for Jupyter Notebook files by adjusting code analysis checks.
+  - Introduced the `ROIMatcher` class for flexible handling of Regions of Interest, allowing various
+  input formats and matching strategies. - Defined new ROI handling strategies: `MERGE`,
+  `KEEP_FIRST`, and `SEPARATE`.
+
+- **Tests** - Added comprehensive tests to ensure the robust performance of the new Regions of
+  Interest matching strategies.
+
+
 ## v2.0.0-rc.18 (2025-04-09)
 
 ### Features
