@@ -23,6 +23,8 @@ from imgtools.exceptions import (
 )
 from imgtools.loggers import logger
 
+# from imgtools.utils import physical_points_to_idxs
+
 # from .roi_matching import (
 #     ROI_MatchingType,
 #     ROIMatcher,
@@ -30,7 +32,6 @@ from imgtools.loggers import logger
 #     match_roi,
 # )
 
-# from imgtools.utils import physical_points_to_idxs
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
 
@@ -114,7 +115,18 @@ class RTStructureSet:
         use some regex pattern matching to only process the ROIs that
         we want.
         """
-        logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
+        if isinstance(dicom, (str, Path)):
+            dicom = Path(dicom)
+            if dicom.is_dir():
+                if len(list(dicom.glob("*.dcm"))) == 1:
+                    dicom = list(dicom.glob("*.dcm"))[0]
+                else:
+                    errmsg = (
+                        f"Directory `{dicom}` contains multiple DICOM files. "
+                    )
+                    raise ValueError(errmsg)
+
+        # logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
         dicom_rt: FileDataset = load_dicom(dicom)
         metadata: Dict[str, Any] = extract_metadata(
             dicom_rt, "RTSTRUCT", extra_tags=None
@@ -164,6 +176,12 @@ class RTStructureSet:
             The loaded DICOM RTSTRUCT file.
         roi_index : int
             The index of the ROI in the ROIContourSequence.
+
+        Returns
+        -------
+        Sequence
+            The contour points as the
+            `rtstruct.ROIContourSequence[roi_index].ContourSequence`
 
         Raises
         ------
@@ -260,7 +278,7 @@ class RTStructureSet:
                 )
         raise MissingROIError(errmsg)
 
-    def _ipython_key_completions_(self) -> list[str]:
+    def _ipython_key_completions_(self) -> list[str]:  # pragma: no cover
         """IPython/Jupyter tab completion when indexing rtstruct[...]"""
         return self.roi_names
 
