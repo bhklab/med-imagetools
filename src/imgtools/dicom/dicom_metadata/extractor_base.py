@@ -118,6 +118,7 @@ class ModalityMetadataExtractor(ABC):
         "PixelSpacing",
         "ImageOrientationPatient",
         "ImagePositionPatient",
+        "SpacingBetweenSlices",
         # Image Processing & Rescaling
         "RescaleType",
         "RescaleSlope",

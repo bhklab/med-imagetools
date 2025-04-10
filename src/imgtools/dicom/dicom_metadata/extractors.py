@@ -157,7 +157,6 @@ class MRMetadataExtractor(ModalityMetadataExtractor):
             "PercentSampling",
             "PercentPhaseFieldOfView",
             "PixelBandwidth",
-            "SpacingBetweenSlices",
             # Diffusion Imaging
             "DiffusionGradientDirectionSequence",
             "DiffusionBMatrixSequence",
