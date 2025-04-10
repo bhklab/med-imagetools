@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from dataclasses import dataclass
 from enum import Enum
+from functools import lru_cache
 from itertools import product
 from typing import Annotated, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
+
+from imgtools.loggers import logger
 
 
 # we should rename this to be intuitive
@@ -58,7 +60,7 @@ class ROIMatcher(BaseModel):
                         cleaned[k] = [val]
                     elif isinstance(val, list):
                         cleaned[k] = val
-                    else:
+                    else:  # pragma: no cover
                         msg = f"Invalid type for key '{k}': {type(val)}"
                         raise TypeError(msg)
                 return cleaned
@@ -73,87 +75,70 @@ class ROIMatcher(BaseModel):
                 raise TypeError(msg)
 
 
-def match_roi(
-    roi_names: list[str],  # assumes already sorted
-    roi_matching: ROIGroupPatterns,
-    ignore_case: bool,
-) -> dict[str, list[str]]:
-    results = defaultdict(list)
-    key: str
-    patterns: list[PatternString]
-    flags = re.IGNORECASE if ignore_case else 0
-
-    def _match_pattern(roi_name: str, pattern: PatternString) -> bool:
-        return re.fullmatch(pattern, roi_name, flags=flags) is not None
-
-    # this unfortunately not really efficient, can use lru_cache
-    # but we don't need to optimize this for now
-    for key, patterns in roi_matching.items():
-        for pattern, roi_name in product(patterns, roi_names):
-            if _match_pattern(roi_name, pattern):
-                results[key].append(roi_name)
-
-    # filter out any potential empty lists
-    return {k: v for k, v in results.items() if v}
-
-
-@dataclass
-class ROIMatchResult:
-    key: str
-    matches: list[str]  # can be many if MERGE
-    strategy: ROI_HANDLING
-
-
 def handle_roi_matching(
     roi_names: list[str],
     roi_matching: ROIGroupPatterns,
     strategy: ROI_HANDLING,
     ignore_case: bool = True,
-) -> list[ROIMatchResult]:
+) -> dict[str, list[str]]:
     """
-    Apply a matching strategy to ROI names using regex-based matching rules.
+    Match ROI names against regex patterns and apply a handling strategy.
 
     Parameters
     ----------
     roi_names : list[str]
         List of ROI names to match.
-    roi_matching : dict[str, list[str]]
-        Mapping of label key to regex patterns or exact names.
+    roi_matching : ROIGroupPatterns
+        Mapping of keys to regex patterns.
     strategy : ROI_HANDLING
-        Strategy for combining matches (MERGE, KEEP_FIRST, SEPARATE).
+        Strategy to use: MERGE, KEEP_FIRST, or SEPARATE.
     ignore_case : bool
-        Whether to ignore case when matching (default: True)
+        Whether to ignore case during matching.
 
+    Returns
+    -------
+    dict[str, list[str]]
+        Dictionary mapping keys to matched ROI names.
     """
-    matched = match_roi(roi_names, roi_matching, ignore_case=ignore_case)
-    output: list[ROIMatchResult] = []
+    flags = re.IGNORECASE if ignore_case else 0
 
-    if strategy == ROI_HANDLING.SEPARATE:
-        for key, matches in matched.items():
-            for match in matches:
-                output.append(
-                    ROIMatchResult(key=key, matches=[match], strategy=strategy)
-                )
-    elif strategy == ROI_HANDLING.MERGE:
-        for key, matches in matched.items():
-            output.append(
-                ROIMatchResult(key=key, matches=matches, strategy=strategy)
+    @lru_cache(maxsize=128)
+    def _match_pattern(roi_name: str, pattern: PatternString) -> bool:
+        return re.fullmatch(pattern, roi_name, flags=flags) is not None
+
+    results = defaultdict(list)
+
+    for key, patterns in roi_matching.items():
+        for pattern, roi_name in product(patterns, roi_names):
+            if _match_pattern(roi_name, pattern):
+                results[key].append(roi_name)
+
+    logger.debug(
+        "ROI matched patterns",
+        matcher=roi_matching,
+        roi_names=roi_names,
+        strategy=strategy,
+        results=results,
+    )
+
+    match strategy:
+        case ROI_HANDLING.MERGE:
+            return {k: v for k, v in results.items() if v}
+        case ROI_HANDLING.KEEP_FIRST:
+            return {k: [v[0]] for k, v in results.items() if v}
+        case ROI_HANDLING.SEPARATE:
+            separate = defaultdict(list)
+            for key, matches in results.items():
+                separate[key].extend(matches)
+            return dict(separate)
+        case _:  # pragma: no cover
+            errmsg = (
+                f"Unrecognized strategy: {strategy}. Something went wrong."
             )
-    elif strategy == ROI_HANDLING.KEEP_FIRST:
-        for key, matches in matched.items():
-            output.append(
-                ROIMatchResult(
-                    key=key, matches=[matches[0]], strategy=strategy
-                )
-            )
-    else:  # pragma: no cover
-        errmsg = f"Unrecognized strategy: {strategy}. Something went wrong."
-        raise ValueError(errmsg)
-
-    return output
+            raise ValueError(errmsg)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from pathlib import Path
     from typing import (
         Type,
