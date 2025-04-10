@@ -6,18 +6,14 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
-    Iterator,
     List,
 )
 
-import numpy as np
-from pydicom.dataset import Dataset, FileDataset
-from pydicom.sequence import Sequence
+from pydicom.dataset import FileDataset
 
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.exceptions import (
-    ContourPointsAcrossSlicesError,
     MissingROIError,
     ROIContourError,
 )
@@ -34,6 +30,7 @@ from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
+    from pydicom.sequence import Sequence
 
 
 class ROIExtractionErrorMsg(str):
@@ -304,16 +301,16 @@ class RTStructureSet:
         return len(self.roi_names)
 
 
-if __name__ == "__main__":
-    from rich import print
+# if __name__ == "__main__":
+#     from rich import print
 
-    p = Path("data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm")
+#     p = Path("data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm")
 
-    # Read entire file
-    rtstruct = RTStructureSet.from_dicom(p)
-    print(rtstruct.summary())
+#     # Read entire file
+#     rtstruct = RTStructureSet.from_dicom(p)
+#     print(rtstruct.summary())
 
-    # print(f"{rtstruct.match_roi(".*TV.*", ignore_case=True)=}")
+# print(f"{rtstruct.match_roi(".*TV.*", ignore_case=True)=}")
 
 
 # class ContourGeometricType(str, Enum):
