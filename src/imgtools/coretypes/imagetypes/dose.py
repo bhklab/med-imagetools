@@ -28,7 +28,7 @@ class Dose(sitk.Image):
         path: str,
         series_id: str | None = None,
         file_names: list[str] | None = None,
-        **kwargs,  # noqa
+        **kwargs: Any,  # type: ignore # noqa
     ) -> Dose:
         """
         Reads the data and returns the data frame and the image dosage in SITK format
