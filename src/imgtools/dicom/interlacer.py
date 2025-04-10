@@ -399,11 +399,15 @@ class Interlacer:
         valid_order = ["CT", "MR", "PT", "SEG", "RTSTRUCT", "RTDOSE"]
         query_set = set(query)
 
+        if not query_set.issubset(set(valid_order)):
+            msg = f"Invalid query: ({', '.join(query)}), supported modalities: {', '.join(valid_order)}"
+            raise ValueError(msg)
+
         for modality in query:
             if modality in MODALITY_DEPENDENCIES:
                 required = MODALITY_DEPENDENCIES[modality]
                 if not query_set.intersection(required):
-                    msg = f"{modality} requires one of {', '.join(required)}"
+                    msg = f"Invalid query: ({', '.join(query)}), {modality} requires one of {', '.join(required)}"
                     raise ValueError(msg)
 
         return [modality for modality in valid_order if modality in query_set]
@@ -467,10 +471,6 @@ class Interlacer:
             raise NotImplementedError(msg)
 
         queried_modalities = self._get_valid_query(query_string.split(","))
-        if not queried_modalities:
-            msg = f"Invalid query, {query_string}"
-            raise ValueError(msg)
-
         query_results = self._query(queried_modalities)
 
         data = [
@@ -749,8 +749,8 @@ if __name__ == "__main__":
 
     dicom_dirs = [
         Path("data/Vestibular-Schwannoma-SEG"),
-        Path("data/NSCLC_Radiogenomics"),
-        Path("data/Head-Neck-PET-CT"),
+        # Path("data/NSCLC_Radiogenomics"),
+        # Path("data/Head-Neck-PET-CT"),
     ]
     interlacers = []
     for directory in dicom_dirs:
