@@ -59,13 +59,14 @@ def read_dicom_pet(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> PET:
-    image = read_dicom_series(
+    image, metadata = read_dicom_series(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
+        **kwargs,
     )
-    return PET(image, {})
+    return PET(image, metadata)
 
 
 @dataclass
