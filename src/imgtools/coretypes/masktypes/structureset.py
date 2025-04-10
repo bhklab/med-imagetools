@@ -15,7 +15,6 @@ import SimpleITK as sitk
 from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
-from imgtools.coretypes.imagetypes import MedImage
 from imgtools.coretypes.masktypes.roi_matching import (
     ROI_HANDLING,
     ROIMatcher,
@@ -33,6 +32,8 @@ from imgtools.utils import physical_points_to_idxs
 if TYPE_CHECKING:
     from pydicom.dataset import FileDataset
     from pydicom.sequence import Sequence
+
+    from imgtools.coretypes.imagetypes import MedImage
 
 
 class ROIExtractionErrorMsg(str):
@@ -480,24 +481,12 @@ if __name__ == "__main__":  # pragma: no cover
 
     results = []
     failures = []
-    failed = [
-        "1.3.6.1.4.1.14519.5.2.1.262731039041525300359366945100409730057",
-        "1.3.6.1.4.1.14519.5.2.1.145604855576133072144485190249196760430",
-        "1.3.6.1.4.1.14519.5.2.1.161876574066675833575211443252309034265",
-        "1.3.6.1.4.1.14519.5.2.1.303606626100058921970651747217776792853",
-        "1.3.6.1.4.1.14519.5.2.1.239064923357616718786196407609276882856",
-        "1.3.6.1.4.1.14519.5.2.1.75164064738538288645257513911612519591",
-        "1.3.6.1.4.1.14519.5.2.1.100364245183930759730290495595573094436",
-    ]
     with tqdm_logging_redirect():
         for _, row in tqdm(
             rtstructs.iterrows(),
             total=len(rtstructs),
             desc="Processing RTSTRUCTs",
         ):
-            if row["SeriesInstanceUID"] not in failed:
-                continue
-
             refrow = index_df.loc[str(row.loc["ReferencedSeriesUID"])]
             if refrow is None:
                 continue
@@ -530,8 +519,8 @@ if __name__ == "__main__":  # pragma: no cover
                         "Liver": [r"liver.*"],
                         "Kidney": [r"kidney.*"],
                         "Cochlea": [r"cochlea.*"],
-                        # ??? ['Ut-MRT2-Sag-1', 'Ut-MRT2-Sag-1'] 
-                        "Uterus": [r"uterus.*", "ut.*"], 
+                        # ??? ['Ut-MRT2-Sag-1', 'Ut-MRT2-Sag-1']
+                        "Uterus": [r"uterus.*", "ut.*"],
                     },
                     handling_strategy=strategy,
                     ignore_case=True,  # important for matching lowercase labels

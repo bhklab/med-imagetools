@@ -9,8 +9,6 @@ from typing import Annotated, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
 
-from imgtools.loggers import logger
-
 
 # we should rename this to be intuitive
 class ROI_HANDLING(str, Enum):  # noqa: N801
