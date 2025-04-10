@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict
 
 from imgtools.coretypes.imagetypes import MedImage
 from imgtools.io.readers import read_dicom_series
+from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     import SimpleITK as sitk
@@ -34,6 +35,41 @@ class Scan(MedImage):
     def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:
         super().__init__(image)
         self.metadata = metadata
+        self._fix_direction()
+
+    def _fix_direction(self) -> None:
+        """Validation of the image.
+        sitk 2.4.0 now considers the `SpacingBetweenSlices` when determining
+        the direction of the image. Sometimes, this is negative, which
+        causes the z-axis to be flipped:
+        - Direction([1.00,0.00,0.00], [0.00,1.00,0.00], [0.00,0.00,-1.00])
+
+        So we need to check if the image is flipped and correct it.
+        See https://github.com/SimpleITK/SimpleITK/issues/2214
+
+        Note: if this is undesired behaviorm, we can have a config option to
+        disable this manual fixing
+        """
+
+        spacing_between_slices = float(
+            self.metadata.get("SpacingBetweenSlices") or 0
+        )
+        if (not spacing_between_slices) or (not spacing_between_slices < 0):
+            return
+        warnmsg = (
+            f"Scan has negative SpacingBetweenSlices: {spacing_between_slices}. "
+            "Manually correcting the direction."
+        )
+        logger.warning(warnmsg, spacing=self.spacing, direction=self.direction)
+
+        direction = list(self.GetDirection())
+        direction[8] = -direction[8]
+        self.SetDirection(direction)
+        logger.debug(
+            f"Scan direction corrected: {self.GetDirection()}",
+            spacing=self.spacing,
+            direction=self.direction,
+        )
 
     @classmethod
     def from_dicom(cls, path: str, **kwargs: Any) -> Scan:  # noqa
