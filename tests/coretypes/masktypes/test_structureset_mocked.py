@@ -90,10 +90,13 @@ class TestRTStructureSet:
         
         # Check structure set initialization
         assert rt.metadata == mock_metadata
-        assert set(rt.roi_names) == set(["GTV", "PTV", "Bladder", "GTV", "PTV"])  # Names are duplicated due to extend and append
-        
         # Check error handling for Bladder (should be in roi_map_errors)
         assert "Bladder" in rt.roi_map_errors
+
+        assert set(rt.roi_names) == set(["GTV", "PTV"])  # Names are duplicated due to extend and append
+        assert set(rt.metadata['ROINames']) == set(["GTV", "PTV", "Bladder"])
+
+        
     
     @patch('imgtools.coretypes.masktypes.structureset.load_dicom')
     @patch('imgtools.coretypes.masktypes.structureset.extract_metadata')
