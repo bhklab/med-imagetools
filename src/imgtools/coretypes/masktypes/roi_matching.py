@@ -150,14 +150,6 @@ def handle_roi_matching(
             if _match_pattern(roi_name, pattern):
                 results[key].append(roi_name)
 
-    logger.debug(
-        "ROI matched patterns",
-        matcher=roi_matching,
-        roi_names=roi_names,
-        strategy=strategy,
-        results=results,
-    )
-
     match strategy:
         case ROI_HANDLING.MERGE:
             # Merge all ROIs with the same key
