@@ -97,7 +97,7 @@ class RTStructureSet:
     def from_dicom(
         cls,
         dicom: DicomInput,
-        suppress_warnings: bool = False,
+        suppress_warnings: bool = True,
     ) -> RTStructureSet:
         """Create a RTStructureSet object from an RTSTRUCT DICOM file.
 
