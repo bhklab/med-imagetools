@@ -21,7 +21,7 @@ test = ["test", "quality"]
 py310 = { features = ["py310", "test"], no-default-feature = true }
 py311 = { features = ["py311", "test"], no-default-feature = true }
 py312 = { features = ["py312", "test"], no-default-feature = true }
-py313 = { features = ["py313", "test"], no-default-feature = true }
+# py313 = { features = ["py313", "test"], no-default-feature = true }
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"] }
@@ -36,9 +36,9 @@ IMGTOOLS_LOG_LEVEL = "DEBUG"
 
 [feature.dev.tasks]
 clean = { cmd = [
-  "bash",
-  "-c",
-  "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+    "bash",
+    "-c",
+    "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
 ], description = "Clear cache and coverage files" }
 
 ############################################## PYTHON ###############################################
@@ -49,8 +49,8 @@ python = "3.10.*"
 python = "3.11.*"
 [feature.py312.dependencies]
 python = "3.12.*"
-[feature.py313.dependencies]
-python = "3.13.*"
+# [feature.py313.dependencies]
+# python = "3.13.*"
 ############################################## TEST ################################################
 [feature.test.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"] }
@@ -140,12 +140,12 @@ hatch = ">=1.13"
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
 
 build = { cmd = [
-  "hatch",
-  "build",
-  "--clean",
+    "hatch",
+    "build",
+    "--clean",
 ], inputs = [
-  "src",
-  "pyproject.toml",
+    "src",
+    "pyproject.toml",
 ], outputs = [
-  "dist/*",
+    "dist/*",
 ], description = "🛠️ Builds the packages" }
