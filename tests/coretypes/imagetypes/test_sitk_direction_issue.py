@@ -21,9 +21,11 @@ that we handle in `Scan.__init__` by flipping the direction cosines.
 -3.0
 1.3.6.1.4.1.14519.5.2.1.5168.2407.208685212796869587939403105195
 """
+from re import A
 import pytest
 from imgtools.coretypes.imagetypes.scan import read_dicom_scan
 import os
+import logging
 
 
 @pytest.mark.skipif(
@@ -41,20 +43,25 @@ import os
         "1.3.6.1.4.1.14519.5.2.1.5168.2407.208685212796869587939403105195"
     ]
 )
-def test_sitk_direction_issue(SeriesInstanceUID,medimage_by_seriesUID) -> None:
+def test_sitk_direction_issue(SeriesInstanceUID, medimage_by_seriesUID, caplog) -> None:
     """
     Test that the direction cosines are flipped when the 'SpacingBetweenSlices' tag is negative.
+    Also verify that the correction is properly logged.
     """
+    
     # Read the DICOM series
-    try:
-        series = medimage_by_seriesUID[SeriesInstanceUID]
-    except KeyError:
-        from rich import print
-        print(medimage_by_seriesUID)
-        raise
+    series = medimage_by_seriesUID[SeriesInstanceUID]
+    imgtools_logger = logging.getLogger("imgtools")
+    imgtools_logger.setLevel(logging.DEBUG)
+    imgtools_logger.propagate = True
+    caplog.set_level(logging.DEBUG, logger="imgtools")
+    # Read the scan
     scan = read_dicom_scan(series['Path'], series_id=SeriesInstanceUID)
 
     assert float(scan.metadata['SpacingBetweenSlices']) < 0, "SpacingBetweenSlices was not negative."
 
     # Check that the direction cosines are flipped
     assert scan.direction.to_matrix()[2][2] > 0, "Direction cosines were not flipped correctly."
+
+    assert any('Manually correcting the direction' in message for message in caplog.messages), "Correction was not logged."
+    assert any('Scan direction corrected' in message for message in caplog.messages), "Correction was not logged."

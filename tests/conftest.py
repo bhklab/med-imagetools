@@ -13,9 +13,6 @@ from pathlib import Path
 
 pytest_logger = logging.getLogger("tests.fixtures")
 pytest_logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    "[%(asctime)s] [%(name)s] %(levelname)s - %(message)s"
-)
 
 pytest_logger.propagate = True  # Let pytest capture it
 
@@ -32,7 +29,7 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 if not DATA_DIR.exists():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE}-medimage_testdata.lock"
+LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
 
 METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
 
