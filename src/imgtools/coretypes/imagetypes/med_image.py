@@ -143,9 +143,7 @@ class MedImage(sitk.Image):
         yield "spacing", self.spacing
         yield "direction", self.direction
 
-    def to_numpy(
-        self, view: bool = False
-    ) -> np.ndarray | tuple[np.ndarray, ImageGeometry]:
+    def to_numpy(self, view: bool = False) -> tuple[np.ndarray, ImageGeometry]:
         """Convert the image to a NumPy array.
 
         Parameters
