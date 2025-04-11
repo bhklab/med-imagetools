@@ -462,10 +462,38 @@ class RTStructureSet:
         return mask_image, mapping
 
 
+def has_mask_overlap(vector_image: sitk.Image) -> bool:
+    """
+    Check if a vector mask image has overlapping binary masks.
+
+    Each voxel is assumed to have a vector of binary values (0 or 1), where each
+    channel represents membership in a specific mask. This function returns True
+    if there exists any voxel that is assigned to more than one mask.
+
+    Parameters
+    ----------
+    vector_image : sitk.Image
+        A 3D image with `sitkVectorUInt8` pixel type, where each component
+        corresponds to a binary mask.
+
+    Returns
+    -------
+    bool
+        True if any voxel belongs to more than one mask (i.e., overlaps exist),
+        False if all masks are mutually exclusive.
+    """
+    arr: np.ndarray = sitk.GetArrayFromImage(
+        vector_image
+    )  # shape: (Z, Y, X, C)
+    mask_sum: np.ndarray = np.sum(arr, axis=-1)  # shape: (Z, Y, X)
+    return np.any(mask_sum > 1)
+
+
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
     import pandas as pd  # noqa
     from imgtools.coretypes.imagetypes.scan import read_dicom_scan
+    from imgtools.io.writers import NIFTIWriter, ExistingFileMode
     from tqdm import tqdm  # noqa
     from imgtools.loggers import tqdm_logging_redirect
 
@@ -475,12 +503,29 @@ if __name__ == "__main__":  # pragma: no cover
 
     # remove dupicate rows
     index_df = index_df.drop_duplicates(subset=["SeriesInstanceUID"])
-
+    # sort by PatientID and StudyInstanceUID
+    # index_df = index_df.sort_values(
+    #     by=["PatientID", "StudyInstanceUID"],
+    #     ascending=[True, True],
+    # )
     index_df = index_df.set_index("SeriesInstanceUID", drop=False)
     rtstructs = index_df.query("Modality == 'RTSTRUCT'")
 
     results = []
     failures = []
+    mask_writer = NIFTIWriter(
+        root_directory=Path("temp_outputs"),
+        filename_format="Case_{case_id}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{roi_key}.nii.gz",
+        existing_file_mode=ExistingFileMode.OVERWRITE,
+        compression_level=5,
+    )
+    ref_image_writer = NIFTIWriter(
+        root_directory=Path("temp_outputs"),
+        filename_format="Case_{case_id}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/reference.nii.gz",
+        existing_file_mode=ExistingFileMode.SKIP,
+        compression_level=5,
+    )
+    case_id = 0
     with tqdm_logging_redirect():
         for _, row in tqdm(
             rtstructs.iterrows(),
@@ -489,6 +534,8 @@ if __name__ == "__main__":  # pragma: no cover
         ):
             refrow = index_df.loc[str(row.loc["ReferencedSeriesUID"])]
             if refrow is None:
+                continue
+            if row['PatientID'] != 'TCGA-CV-A6K2':
                 continue
 
             ref_image = read_dicom_scan(
@@ -505,7 +552,7 @@ if __name__ == "__main__":  # pragma: no cover
                 matcher = ROIMatcher(
                     # https://www.aapm.org/pubs/reports/RPT_263.pdf align later
                     roi_map={
-                        "GTV": [r"gtv.*", r"g.*tv.*"],
+                        "GTV": [r"gtv.*"],
                         "CTV": [r"ctv.*"],
                         "PTV": [r"PTV.*", r"total PTV", r"uni.*"],
                         "Tumor": [r"tumor.*", "gtv.*", "oar.*"],
@@ -556,17 +603,48 @@ if __name__ == "__main__":  # pragma: no cover
                             rtstruct.roi_names,
                         )
                     )
-                    raise
                     continue
+
+                num_labels = mask_image.GetNumberOfComponentsPerPixel()
+                ref_image_writer.save(
+                    ref_image,
+                    PatientID=refrow["PatientID"],
+                    case_id=f"{case_id:03d}",
+                    Modality=refrow["Modality"],
+                    SeriesInstanceUID=f"{refrow['SeriesInstanceUID'][-8:]}",
+                    roi_key="reference",
+                    roi_names="",
+                )
+                for i in range(num_labels):
+                    mask_image_i = sitk.VectorIndexSelectionCast(
+                        mask_image, i, sitk.sitkUInt8
+                    )
+
+                    # Save the mask image
+                    mask_writer.save(
+                        mask_image_i,
+                        PatientID=row["PatientID"],
+                        case_id=f"{case_id:03d}",
+                        Modality=row["Modality"],
+                        SeriesInstanceUID=f"{row['SeriesInstanceUID'][-8:]}",
+                        roi_key=mapping[i].roi_key,
+                        roi_names="|".join(mapping[i].roi_names),
+                    )
 
                 results.append(
                     (
                         mask_image,
-                        mapping,
-                        strategy,
                         ref_image,
+                        row["SeriesInstanceUID"],
+                        refrow["SeriesInstanceUID"],
+                        strategy,
+                        num_labels,
+                        mapping,
+                        f"{has_mask_overlap(mask_image)=}",
                     )
                 )
+                case_id += 1
+
 
 # p = Path("data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm")
 #     p = Path("data/HNSCC/HNSCC-01-0176/RTSTRUCT_Series72843515/00000001.dcm")
