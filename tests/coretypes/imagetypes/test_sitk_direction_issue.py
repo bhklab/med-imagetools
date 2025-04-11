@@ -3,6 +3,9 @@ The following series were identified as having the 'SpacingBetweenSlices'
 tag that was negative. This would result in the issue https://github.com/SimpleITK/SimpleITK/issues/2214
 that we handle in `Scan.__init__` by flipping the direction cosines.
 
+
+Note: These test datasets are only available in the private test data!
+
 -2.5
 1.3.6.1.4.1.14519.5.2.1.1706.4009.694806727342184691498467273614
 
@@ -21,7 +24,6 @@ that we handle in `Scan.__init__` by flipping the direction cosines.
 -3.0
 1.3.6.1.4.1.14519.5.2.1.5168.2407.208685212796869587939403105195
 """
-from re import A
 import pytest
 from imgtools.coretypes.imagetypes.scan import read_dicom_scan
 import os
