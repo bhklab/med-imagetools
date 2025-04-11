@@ -87,15 +87,6 @@ class SeriesNode:
         """Add SeriesNode to children"""
         self.children.append(child_node)
 
-    def _get_all_nodes(self) -> list[SeriesNode]:
-        """Recursively return all nodes in the tree, including root node and all descendants"""
-        all_nodes = [self]  # Start with the current node
-        for child in self.children:
-            all_nodes.extend(
-                child._get_all_nodes()
-            )  # Recursively add all nodes from children
-        return all_nodes
-
     def __eq__(self, other: object) -> bool:
         """Equality check based on index"""
         if isinstance(other, str):  # Direct index check
@@ -107,11 +98,6 @@ class SeriesNode:
 
     def __hash__(self) -> int:
         return hash(self.SeriesInstanceUID)
-
-    def __iter__(self) -> Iterator[SeriesNode]:
-        """Yield all nodes in the tree"""
-        for node in self._get_all_nodes():
-            yield node
 
     def __repr__(self, level: int = 0) -> str:
         """Recursive representation of the tree structure"""
@@ -218,9 +204,7 @@ class Interlacer:
     series_nodes: dict[str, SeriesNode] = field(
         default_factory=dict, init=False
     )
-    trees: list[Branch] = field(
-        default_factory=list, init=False
-    )
+    trees: list[Branch] = field(default_factory=list, init=False)
     root_nodes: list[SeriesNode] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
