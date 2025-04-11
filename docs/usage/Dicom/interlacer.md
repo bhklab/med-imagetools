@@ -1,36 +1,53 @@
 # Interlacer Module
 
-The **Interlacer** module constructs and queries a hierarchical forest of DICOM series using metadata relationships. This enables efficient grouping, querying, and visualization of medical imaging data. This module is a replacement for the old `DataGraph` module in `med-imgtools 1.0`
+The **Interlacer** module builds and searches a tree-like structure made from DICOM series using metadata links. This makes it easier to group, explore, and work with medical imaging data. It replaces the old `DataGraph` module from `med-imagetools 1.0`.
 
 ---
 
 ## Overview
 
-The module defines a tree-based representation of DICOM series, using their metadata to build a hierarchy. This structure allows users to easily traverse relationships between series (e.g., CT → RTSTRUCT), enabling advanced queries and grouping.
+This module turns DICOM series into a set of trees (a forest), using metadata to connect related series. This helps users follow the relationships between series — for example, linking a CT scan to its RTSTRUCT and RTDOSE — and makes it easier to run queries or group series by type.
 
 ---
 
-## Classes
+## Main Classes
 
 ### `SeriesNode`
-Represents an individual DICOM series and its hierarchical relationships. Acts as a node in the forest structure.
+
+Represents one DICOM series and its connections to other related series. Each node holds:
+
+- Basic metadata like `SeriesInstanceUID` and `Modality`
+- Links to parent and child series
+
+---
 
 ### `Branch`
-Represents a single path through the hierarchy, preserving an ordered sequence of modalities. Useful for identifying complete imaging workflows (e.g., CT → RTSTRUCT → RTDOSE).
+
+Represents a single path through the tree, showing an ordered set of modalities. This is useful for queries.
+
+---
 
 ### `GroupBy` *(Enum)*
-Used to specify how DICOM series should be grouped. Options include:
-- `ReferencedSeriesUID`
-- `StudyInstanceUID`
-- `PatientID`
 
-> **Note:** Currently, only `ReferencedSeriesUID` is supported.
+Used to pick how series should be grouped when building the forest. Options are:
+
+- `ReferencedSeriesUID` – Link series using metadata references  
+- `StudyInstanceUID` – Group everything in the same study  
+- `PatientID` – Group all series from the same patient
+
+!!! note  
+
+    Right now, only `ReferencedSeriesUID` is supported.
+
+---
 
 ### `Interlacer`
-The main class of the module. Responsible for:
-- Building the hierarchical forest
-- Processing modality-based queries (e.g., "CT,RTSTRUCT")
-- Visualizing the forest structure
+
+This is the main class. It handles:
+
+- **Building the forest** from a list of DICOM series  
+- **Running queries** to find certain modality paths (like "CT,RTSTRUCT")  
+- **Visualizing the forest** to see how series are connected
 
 ---
 
