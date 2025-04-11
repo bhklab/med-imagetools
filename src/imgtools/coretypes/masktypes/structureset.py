@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import namedtuple
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import (
@@ -17,6 +16,7 @@ from skimage.draw import polygon2mask
 
 from imgtools.coretypes.masktypes.roi_matching import (
     ROI_HANDLING,
+    ROIMaskMapping,
     ROIMatcher,
 )
 from imgtools.dicom import DicomInput, load_dicom
@@ -38,9 +38,6 @@ if TYPE_CHECKING:
 
 class ROIExtractionErrorMsg(str):
     pass
-
-
-ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
 
 
 @dataclass
@@ -535,7 +532,7 @@ if __name__ == "__main__":  # pragma: no cover
             refrow = index_df.loc[str(row.loc["ReferencedSeriesUID"])]
             if refrow is None:
                 continue
-            if row['PatientID'] != 'TCGA-CV-A6K2':
+            if row["PatientID"] != "TCGA-CV-A6K2":
                 continue
 
             ref_image = read_dicom_scan(

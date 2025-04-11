@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from enum import Enum
 from functools import lru_cache
 from itertools import product
 from typing import Annotated, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
+
+__all__ = [
+    "ROIMatcher",
+    "ROI_HANDLING",
+    "ROIMaskMapping",
+    "handle_roi_matching",
+]
+
+ROIMaskMapping= namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
 
 
 # we should rename this to be intuitive
