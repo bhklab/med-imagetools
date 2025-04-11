@@ -61,9 +61,13 @@ If we use `ROIMatchStrategy.MERGE`, and multiple, disconnected ROIs are found,
 we **MIGHT** end up with multiple objects with the same label for a given
 key:
 
+> [!NOTE]
+> I just realized this can **definitely** still happen even if we were to use `ROIMatchStrategy.SEPARATE` if the annotater annotated two disconnected
+> structures like in the example below, where only `['GTV-2', 'GTV-1']`
+> were matched but there are 4 objects.
+
 ```python
 
-# Dataset HEAD-NECK-RADIOMICS-HN1 
 matcher = ROIMatcher(
     match_map={"GTV": ["GTV.*"]},
     handling_strategy=ROIMatchStrategy.MERGE,
@@ -90,10 +94,6 @@ bounding box of the mask, we get this:
 Personally, I have 0 idea what the repercussions here are, but
 wanted to present this as a potential thought
 
-> [!NOTE]
-> I just realized this can **definitely** still happen even if we were to use `ROIMatchStrategy.SEPARATE` if the annotater annotated two disconnected
-> structures like in the example above, where only `['GTV-2', 'GTV-1']`
-> were matched but there are 4??? objects.
 
 I have functions to convert the binary mask of multiple objects and one label
 to an image with mutiple labels, but we should up for discussion on whether
@@ -130,92 +130,104 @@ saved masks, without having to open the image and mask in a viewer.
 Similar to how we [calculate stats from the new base `MedImage` class](base_medimage.py#L113-123)
 we can build these into the new mask classes for easy access.
 
-
 ## Proposed data structure
+
+Prototyped out the interface for this
 
 ```python
 class Mask(MedImage):
-	"""A scalar label mask image with sitk.LabelUInt8 pixel type."""
+    """A scalar label mask image with sitk.LabelUInt8 pixel type.
+    
+    Valid voxel types: `sitk.sitkUInt8`, `sitk.sitkLabelUInt8`
+    """
 
-	@property
-	def unique_labels(self) -> np.ndarray:
-		"""Return all unique label values present in the image."""
-		...
+    @property
+    def unique_labels(self) -> np.ndarray:
+        """Return all unique label values present in the image."""
+        ...
 
-	def to_vector_mask(self) -> VectorMask:
-		"""Convert label image to a one-hot binary vector mask."""
-		...
+    def to_labeled_image(self) -> Mask:
+        """Convert to a labeled image with unique labels."""
+        # this is a sitk.Image with type sitk.sitkLabelUInt8
 
-	@classmethod
-	def from_array(
-		cls, array: np.ndarray, reference: sitk.Image | MedImage
-	) -> Mask:
-		"""Create Mask from numpy array with copied spatial metadata."""
-		...
+    def to_vector_mask(self) -> VectorMask:
+        """Convert label image to a one-hot binary vector mask.
+        
+        One-hot as in if there is more than 1 label, we will have a vector
+        with the number of labels as the number of channels.
+        """
+        ...
+
+    @classmethod
+    def from_array(
+        cls, array: np.ndarray, reference: sitk.Image | MedImage
+    ) -> Mask:
+        """Create Mask from numpy array with copied spatial metadata."""
+        ...
 
 
 class VectorMask(MedImage):
-	"""A multi-label binary mask image with vector pixels (sitkVectorUInt8)."""
+    """A multi-label binary mask image with vector pixels (sitkVectorUInt8)."""
 
     # roi_mapping is a dict of roi_key to (roi_name, [matched roi_names from rtstruct/seg])
-	roi_mapping: dict[int, tuple[str, list[str]]]
+    roi_mapping: dict[int, tuple[str, list[str]]]
 
-	@property
-	def n_masks(self) -> int:
-		"""Number of binary mask channels (components per voxel)."""
-		...
+    @property
+    def n_masks(self) -> int:
+        """Number of binary mask channels (components per voxel)."""
+        ...
 
-	@property
-	def roi_keys(self) -> list[str]:
-		"""List of ROI keys from mapping"""
-		...
+    @property
+    def roi_keys(self) -> list[str]:
+        """List of ROI keys from mapping"""
+        ...
 
 
-	def iter_masks(self) -> Iterator[tuple[int, str, Mask]]:
-		"""Yield (index, roi_key, Mask) for each mask channel."""
-		...
+    def iter_masks(self) -> Iterator[tuple[int, str, Mask]]:
+        """Yield (index, roi_key, Mask) for each mask channel."""
+        ...
 
-	def has_overlap(self) -> bool:
-		"""Return True if any voxel has >1 mask"""
-		...
+    def has_overlap(self) -> bool:
+        """Return True if any voxel has >1 mask"""
+        ...
 
     def to_sparsemask(self) -> Mask:
         """Convert to a single binary mask with the argmax of the vector mask."""
         ...
 
-	def to_label_image(self) -> Mask:
-		"""Convert to scalar Mask image (fails if overlap exists).
+    def to_label_image(self) -> Mask:
+        """Convert to scalar Mask image (fails if overlap exists).
         
         By only working if no overlaps, this would not be lossy, 
         as we would have a unique label for each mask.
         """
-		...
+        ...
 
-	def extract_mask(self, key_or_index: str | int) -> Mask:
-		"""Extract a single binary mask by index or ROI key.
+    def extract_mask(self, key_or_index: str | int) -> Mask:
+        """Extract a single binary mask by index or ROI key.
         
         Result would only have 1 label, output type is `sitk.sitkUInt8`
         """
-		...
+        ...
 
-	@classmethod
-	def from_rtstruct(
-		cls,
-		reference_image: MedImage,
-		rtstruct: ??,
-		roi_matcher: ROIMatcher,
-		continuous: bool = True,
+    @classmethod
+    def from_rtstruct(
+        cls,
+        reference_image: MedImage,
+        rtstruct: StructureSet,
+        roi_matcher: ROIMatcher,
+        continuous: bool = True,
         ignore_case: bool = True,
-	) -> VectorMask:
-		"""Create VectorMask from RTSTRUCT using ROI matching."""
+    ) -> VectorMask:
+        """Create VectorMask from RTSTRUCT using ROI matching."""
         # can also just use the `to_vectormask` from the specific class
-		...
+        ...
 
     @classmethod
     def from_seg(
         cls,
         reference_image: MedImage,
-        seg: ??, 
+        seg: DicomSeg, 
         roi_matcher: ROIMatcher,
         continuous: bool = True,
         ignore_case: bool = True,
@@ -225,3 +237,18 @@ class VectorMask(MedImage):
         ...
     )
 ```
+
+## Bonus: Saving the `VectorMask`
+
+We can also choose to save the vector mask itself, and now once I implement
+the ability to embed metadata (`json`, raw `pydicom.Dataset` elements, maybe
+even the picklable object itself) into the NIFTI header via the new
+extensions standard, we can save the `roi_mapping` into the NIFTI,
+and provide the tooling to convert it back to the `VectorMask` object
+from the NIFTI.
+
+I personally fancy this idea, of saving all possible rois separately as 
+a single vector structure, maintaining as **raw as possible** if we were to 
+then serve the data via Med-ImageNet. All downstream workflows can then
+work off the interlaced, aligned, raw data, including possibly ROI matching
+from the `VectorMask` itself.
