@@ -9,6 +9,7 @@ from imgtools.loggers import logger
 def is_testdata_available() -> bool:
     try:
         from github import Github  # type: ignore # noqa
+        import aiohttp  # noqa
 
         return True
     except ImportError:
@@ -17,6 +18,7 @@ def is_testdata_available() -> bool:
 
 @click.command(
     no_args_is_help=True,
+    hidden=not is_testdata_available(),
 )
 @click.option(
     "--dest",
@@ -55,9 +57,15 @@ def testdata(
     list_assets: bool,
 ) -> None:
     """Download test data from the latest GitHub release."""
-    if is_testdata_available():
-        from imgtools.datasets import MedImageTestData
 
+    try:
+        from imgtools.datasets import MedImageTestData
+    except ImportError:
+        click.echo(
+            "The test datasets are not available. "
+            "Please install the required dependencies using: `pip install imgtools[datasets]`."
+        )
+        return
     manager = MedImageTestData()
 
     if list_assets:

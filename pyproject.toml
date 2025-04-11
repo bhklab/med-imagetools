@@ -1,17 +1,17 @@
 [project]
 name = "med-imagetools"
-version = "2.0.0-rc.17"
+version = "2.0.0-rc.19"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
-  { name = "Sejin Kim" },
-  { name = "Michal Kazmierski" },
-  { name = "Kevin Qu" },
-  { name = "Vishwesh Ramanathan" },
-  { name = "Jermiah Joseph" },
-  { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
+    { name = "Sejin Kim" },
+    { name = "Michal Kazmierski" },
+    { name = "Kevin Qu" },
+    { name = "Vishwesh Ramanathan" },
+    { name = "Jermiah Joseph" },
+    { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
 ]
 maintainers = [
-  { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
+    { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
 ]
 license = "MIT"
 readme = "README.md"
@@ -19,36 +19,38 @@ requires-python = ">=3.10,<4"
 
 # Standard dependencies
 dependencies = [
-  # logging, CLI, and progress bars
-  "structlog>=24.0,<25",
-  "click>=8.1,<9",
-  "tqdm>=4.66.4,<5",
-  "rich>=13.9.4",
-  "joblib>=1.4.2,<2",
-  # data manipulation
-  "matplotlib>=3.8.4,<4",
-  "numpy<3",
-  "pandas<3",
-  "dpath>=2.2.0",
-  # image processing
-  "pydicom>=2.4.4",
-  "scikit-image>=0.23.2,<1",
-  "scikit-learn>=1.4.2,<2",
-  "simpleitk>=2.3.1,<3",
-  # lockfile
-  "fasteners==0.19",
-  "pyyaml>=6.0.1,<7",
-  "dill>=0.3.8,<1",
+    # logging, CLI, and progress bars
+    "structlog>=24.0,<25",
+    "click>=8.1,<9",
+    "tqdm>=4.66.4,<5",
+    "rich>=13.9.4",
+    "joblib>=1.4.2,<2",
+    # data manipulation
+    "matplotlib>=3.8.4,<4",
+    "numpy<3",
+    "pandas<3",
+    "dpath>=2.2.0",
+    # data handling
+    "pydantic-settings>=2.8.1,<3",
+    # image processing
+    "pydicom>=2.4.4",
+    "scikit-image>=0.23.2,<1",
+    "scikit-learn>=1.4.2,<2",
+    "simpleitk>=2.3.1,<3",
+    # lockfile
+    "fasteners==0.19",
+    "pyyaml>=6.0.1,<7",
+    "dill>=0.3.8,<1",
 ]
 
 classifiers = [
-  "License :: OSI Approved :: MIT License",
-  "Natural Language :: English",
-  "Operating System :: OS Independent",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 [project.urls]
 homepage = "https://github.com/bhklab/med-imagetools"
@@ -63,11 +65,11 @@ hdf5 = ["h5py>=3.11.0"]
 nrrd = ["pynrrd>=1.0.0"]
 datasets = ["pygithub>=2.5.0", "aiohttp>=3.8.1"]
 all = [
-  "pygithub>=2.5.0",
-  "aiohttp>=3.8.1",
-  "h5py>=3.11.0",
-  "pynrrd>=1.0.0",
-  "pyvis>=0.3.2,<0.4",
+    "pygithub>=2.5.0",
+    "aiohttp>=3.8.1",
+    "h5py>=3.11.0",
+    "pynrrd>=1.0.0",
+    "pyvis>=0.3.2,<0.4",
 ]
 
 # Entry points for CLI commands

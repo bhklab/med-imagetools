@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pytest
 
-from imgtools import (
+from imgtools.coretypes import (
     Coordinate3D,
     Size3D,
     Spacing3D,

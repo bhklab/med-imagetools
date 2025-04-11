@@ -120,6 +120,7 @@ combine-as-imports = true
 relative-imports-order = "closest-to-furthest"
 
 [lint.per-file-ignores]
+"**/*.ipynb" = ["I", "F", "T20"]
 "src/imgtools/dicom/dicom_metadata/*" = [
     "N805", # First argument of a method should be named `self`, but we are using classproperty
 ]

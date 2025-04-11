@@ -9,8 +9,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import TYPE_CHECKING, List, Optional, Pattern
 
-import aiohttp
-from aiohttp import ClientResponseError
 from rich import print  # noqa
 from rich.console import Console
 from rich.logging import RichHandler
@@ -25,7 +23,12 @@ from rich.progress import (
     TimeRemainingColumn,
 )
 
-from imgtools.utils.optional_import import OptionalImportError, optional_import
+from imgtools.utils.optional_import import (  # noqa
+    OptionalImportError,
+    optional_import,
+)
+
+aiohttp, has_aiohttp = optional_import("aiohttp")
 
 # create a single console for all progress bars and logging
 console = Console(force_terminal=True, stderr=True)
@@ -38,8 +41,6 @@ logger.addHandler(rich_handler)
 
 # Use optional_import instead of try/except
 github, has_github = optional_import("github")
-if not has_github:
-    raise OptionalImportError("github", "test")
 
 from github import Github
 from github.Repository import Repository  # type: ignore # noqa
@@ -176,7 +177,7 @@ async def download_dataset(
             if temp_file_path.exists():
                 temp_file_path.unlink(missing_ok=True)
             raise
-        except ClientResponseError as e:
+        except aiohttp.ClientResponseError as e:
             logger.error(
                 f"[bold red]Error downloading {file_path.name}: {str(e)}"
             )
@@ -356,7 +357,7 @@ class MedImageTestData:
             )
             self.asset_status[asset.name] = AssetStatus.DOWNLOADED
             self._update_progress(progress, task_id, asset.name, completed=1)
-        except ClientResponseError as e:  # pragma: no cover
+        except aiohttp.ClientResponseError as e:  # pragma: no cover
             self.asset_status[asset.name] = AssetStatus.FAILED
             self._update_progress(progress, task_id, asset.name, completed=1)
             logger.error(

@@ -1,6 +1,44 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.19 (2025-04-10)
+
+### Features
+
+- Add ROI matching strategies ([#315](https://github.com/bhklab/med-imagetools/pull/315),
+  [`ab9ab3f`](https://github.com/bhklab/med-imagetools/commit/ab9ab3f94012795c26d6157dd319346dbb16ce99))
+
+Update the ruff configuration to ignore specific notebook files and introduce new ROI matching
+  strategies with the ROIMatcher class, enhancing the handling of ROI patterns.
+
+- **New Features** - Enhanced support for Jupyter Notebook files by adjusting code analysis checks.
+  - Introduced the `ROIMatcher` class for flexible handling of Regions of Interest, allowing various
+  input formats and matching strategies. - Defined new ROI handling strategies: `MERGE`,
+  `KEEP_FIRST`, and `SEPARATE`.
+
+- **Tests** - Added comprehensive tests to ensure the robust performance of the new Regions of
+  Interest matching strategies.
+
+
+## v2.0.0-rc.18 (2025-04-09)
+
+### Features
+
+- Implement lazy loading in cli click commands
+  ([#313](https://github.com/bhklab/med-imagetools/pull/313),
+  [`804b407`](https://github.com/bhklab/med-imagetools/commit/804b40736a982fb6d7a9609d2a94a68cb2021481))
+
+- **New Features** - Enhanced CLI experience with organized command groups, making the help output
+  clearer and easier to navigate. - Updated DICOM sorting command now provides explicit action
+  options (move, copy, symlink, hardlink), improving usability.
+
+- **Bug Fixes** - Improved handling of test datasets with dynamic visibility based on availability.
+
+- **Refactor** - Streamlined handling of test datasets with improved messaging when dependencies are
+  missing. - Optimized dependency management and import scoping to ensure a more robust operational
+  flow.
+
+
 ## v2.0.0-rc.17 (2025-04-08)
 
 ### Features
