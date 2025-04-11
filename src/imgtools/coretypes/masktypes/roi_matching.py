@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from enum import Enum
 from functools import lru_cache
 from itertools import product
@@ -13,16 +13,13 @@ from imgtools.loggers import logger
 
 __all__ = [
     "ROIMatcher",
-    "ROI_HANDLING",
-    "ROIMaskMapping",
+    "ROIMatchStrategy",
     "handle_roi_matching",
 ]
 
-ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
-
 
 # we should rename this to be intuitive
-class ROI_HANDLING(str, Enum):  # noqa: N801
+class ROIMatchStrategy(str, Enum):  # noqa: N801
     """Enum for ROI handling strategies."""
 
     # merge all ROIs with the same key
@@ -54,17 +51,17 @@ Valid_Inputs = (
 
 
 class ROIMatcher(BaseModel):
-    roi_map: Annotated[
+    match_map: Annotated[
         ROIGroupPatterns,
         Field(description="Flexible input for ROI matcher"),
     ]
-    handling_strategy: ROI_HANDLING = ROI_HANDLING.MERGE
+    handling_strategy: ROIMatchStrategy = ROIMatchStrategy.MERGE
     ignore_case: bool = True
     default_key: ClassVar[str] = "ROI"
 
-    @field_validator("roi_map", mode="before")
+    @field_validator("match_map", mode="before")
     @classmethod
-    def validate_roi_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
+    def match_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
         if not v:
             logger.debug(f"Empty ROI map provided {v=} . Defaulting to .*")
             return {cls.default_key: [".*"]}
@@ -110,7 +107,7 @@ class ROIMatcher(BaseModel):
         """
         return handle_roi_matching(
             roi_names,
-            self.roi_map,
+            self.match_map,
             self.handling_strategy,
             ignore_case=self.ignore_case,
         )
@@ -119,7 +116,7 @@ class ROIMatcher(BaseModel):
 def handle_roi_matching(
     roi_names: list[str],
     roi_matching: ROIGroupPatterns,
-    strategy: ROI_HANDLING,
+    strategy: ROIMatchStrategy,
     ignore_case: bool = True,
 ) -> list[tuple[str, list[str]]]:
     """
@@ -131,7 +128,7 @@ def handle_roi_matching(
         List of ROI names to match.
     roi_matching : ROIGroupPatterns
         Mapping of keys to list of regex patterns.
-    strategy : ROI_HANDLING
+    strategy :ROIMatchStrategy
         Strategy to use: MERGE, KEEP_FIRST, or SEPARATE.
     ignore_case : bool
         Whether to ignore case during matching.
@@ -169,17 +166,17 @@ def handle_roi_matching(
                 results[key].append(roi_name)
 
     match strategy:
-        case ROI_HANDLING.MERGE:
+        case ROIMatchStrategy.MERGE:
             # Merge all ROIs with the same key
             # this means that we return a single tuple for each key
             # but the value is a list of all the matched ROIs
             return [(key, v) for key, v in results.items() if v]
-        case ROI_HANDLING.KEEP_FIRST:
+        case ROIMatchStrategy.KEEP_FIRST:
             # For each key, keep the first ROI found based on the pattern
             # this means that we return a single tuple for each key
             # but the value is a list of size ONE with the first matched ROI
             return [(key, [v[0]]) for key, v in results.items() if v]
-        case ROI_HANDLING.SEPARATE:
+        case ROIMatchStrategy.SEPARATE:
             # Separate all ROIs
             # this means that we possibly return a MULTIPLE tuples for each key
             # because a key may have multiple ROIs matching the pattern
@@ -211,7 +208,7 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
     class Settings(BaseSettings):
-        rois: ROIMatcher = ROIMatcher(roi_map={"ROI": [".*"]})
+        rois: ROIMatcher = ROIMatcher(match_map={"ROI": [".*"]})
 
         model_config = SettingsConfigDict(
             # to instantiate the Login class, the variable name would be login.nbia_username in the environment
@@ -263,7 +260,7 @@ if __name__ == "__main__":  # pragma: no cover
     print(settings)
 
     matcher = ROIMatcher(
-        roi_map={
+        match_map={
             "GTV": ["GTV.*"],
             "PTV": ["PTV.*"],
             "CTV": ["CTV.*"],

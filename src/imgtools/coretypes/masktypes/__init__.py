@@ -1,11 +1,11 @@
 from .roi_matching import (
-    ROI_HANDLING,
     ROIMatcher,
+    ROIMatchStrategy,
     handle_roi_matching,
 )
 
 __all__ = [
-    "ROI_HANDLING",
+    "ROIMatchStrategy",
     "ROIMatcher",
     "handle_roi_matching",
 ]

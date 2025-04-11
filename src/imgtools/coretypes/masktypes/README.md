@@ -1,11 +1,11 @@
 This is a formalized definition of the roiname extraction to redesign the mess of how we used to handle it during the old `RTSTRUCT.to_segmentation`. 
 
-`ROI_HANDLING`
+`ROIMatchStrategy`
 --------------
 - these options are now mutually exclusive via an enum
 
 ```python
-class ROI_HANDLING(Enum):
+class ROIMatchStrategy(Enum):
     """Enum for ROI handling strategies."""
     MERGE =  "merge"       # merge all ROIs with the same key
     KEEP_FIRST =  "keep_first"  # keep the first matching ROI per key
@@ -41,8 +41,8 @@ roi_matcher = {"GTV": {"GTVp": "GTVp.*"}}       # invalid (nested dict)
 
 Matching Behavior
 -----------------
-Given a valid `ROI_Matching` input, combined with a `ROI_HANDLING` strategy,
-we choose to build a roi_map using our roi names from the RTSTRUCT or SEG.
+Given a valid `ROI_Matching` input, combined with a `ROIMatchStrategy` strategy,
+we choose to build a match_map using our roi names from the RTSTRUCT or SEG.
 
 > [!NOTE]
 > Matching is **case-insensitive** by default.
@@ -73,7 +73,7 @@ Here are the resulting extractions based on the handling strategy:
 > regardless of handling strategy, the matches will be stored in some
 > metadata, so the user knows what was matched
 
-## `ROI_HANDLING.SEPARATE`
+## `ROIMatchStrategy.SEPARATE`
 
 **case-sensitive**
 ```python
@@ -95,7 +95,7 @@ Here are the resulting extractions based on the handling strategy:
 ]
 ```
 
-`ROI_HANDLING.MERGE`
+`ROIMatchStrategy.MERGE`
 > [!NOTE]
 > merging still means a binary mask, no argmax nonsense here
 **case-sensitive**
@@ -119,11 +119,11 @@ Here are the resulting extractions based on the handling strategy:
 ```
 
 > [!WARNING]
-> `ROI_HANDLING.KEEP_FIRST` is strongly discouraged, as the first roi found is never guaranteed to be the most relevant one.
+> `ROIMatchStrategy.KEEP_FIRST` is strongly discouraged, as the first roi found is never guaranteed to be the most relevant one.
 > Nonetheless, exact ROI pattern names are preferred to generalized regex matching
 > i.e ("CTV_0" is preferred to "CTV.*") to ensure some level of confidence in the matching.
 
-`ROI_HANDLING.KEEP_FIRST`
+`ROIMatchStrategy.KEEP_FIRST`
 **case-sensitive**
 ```python
 [
