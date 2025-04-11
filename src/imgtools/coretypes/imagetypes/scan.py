@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict
 
 from imgtools.coretypes.imagetypes import MedImage
 from imgtools.io.readers import read_dicom_series
+from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     import SimpleITK as sitk
@@ -18,13 +19,32 @@ def read_dicom_scan(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> Scan:
-    image = read_dicom_series(
+    """Read a DICOM scan from a directory.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing the DICOM files.
+    series_id : str | None, optional
+        Series ID to read, by default None
+    recursive : bool, optional
+        Whether to read the files recursively, by default False
+    file_names : list[str] | None, optional
+        List of file names to read, by default None
+    **kwargs : Any
+        Unused keyword arguments.
+    Returns
+    -------
+    Scan
+        The read scan.
+    """
+    return Scan.from_dicom(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
+        **kwargs,
     )
-    return Scan(image, {})
 
 
 class Scan(MedImage):
@@ -33,9 +53,63 @@ class Scan(MedImage):
     def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:
         super().__init__(image)
         self.metadata = metadata
+        self._fix_direction()
+
+    def _fix_direction(self) -> None:
+        """Validation of the image.
+        sitk 2.4.0 now considers the `SpacingBetweenSlices` when determining
+        the direction of the image. Sometimes, this is negative, which
+        causes the z-axis to be flipped:
+        - Direction([1.00,0.00,0.00], [0.00,1.00,0.00], [0.00,0.00,-1.00])
+
+        So we need to check if the image is flipped and correct it.
+        See https://github.com/SimpleITK/SimpleITK/issues/2214
+
+        Note: if this is undesired behaviorm, we can have a config option to
+        disable this manual fixing
+        """
+
+        spacing_between_slices = float(
+            self.metadata.get("SpacingBetweenSlices") or 0
+        )
+        if (not spacing_between_slices) or (spacing_between_slices >= 0):
+            return
+
+        # just because metadata says that the spacing is negative, still
+        # check if the image is flipped
+        # in case  Scan was created from another (correct) Scan's transform
+        if self.direction.to_matrix()[2][2] > 0:
+            return
+
+        warnmsg = (
+            f"Scan has negative SpacingBetweenSlices: {spacing_between_slices}. "
+            "Manually correcting the direction."
+        )
+        logger.debug(
+            warnmsg,
+            spacing_between_slices=spacing_between_slices,
+            spacing=self.spacing,
+            direction=self.direction,
+        )
+
+        direction = list(self.GetDirection())
+        direction[8] = -direction[8]
+        self.SetDirection(direction)
+        logger.debug(
+            f"Scan direction corrected: {self.GetDirection()}",
+            spacing=self.spacing,
+            direction=self.direction,
+        )
 
     @classmethod
-    def from_dicom(cls, path: str, **kwargs: Any) -> Scan:  # noqa
+    def from_dicom(
+        cls,
+        path: str,
+        series_id: str | None = None,
+        recursive: bool = False,
+        file_names: list[str] | None = None,
+        **kwargs: Any,  # noqa
+    ) -> Scan:
         """Read a DICOM scan from a directory.
 
         Parameters
@@ -55,8 +129,14 @@ class Scan(MedImage):
         Scan
             The read scan.
         """
-        image = read_dicom_scan(path, **kwargs)
-        return cls(image, {})
+        image, metadata = read_dicom_series(
+            path,
+            series_id=series_id,
+            recursive=recursive,
+            file_names=file_names,
+            **kwargs,
+        )
+        return cls(image, metadata)
 
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string
@@ -68,6 +148,10 @@ class Scan(MedImage):
             retr_str += f"\n\t{k}={v}"
         retr_str += "\n>"
         return retr_str
+
+    def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
+        yield "modality", self.metadata.get("Modality", "Unknown")
+        yield from super().__rich_repr__()
 
 
 if __name__ == "__main__":  # pragma: no cover

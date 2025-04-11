@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Any, Dict
 
 import SimpleITK as sitk
 from pydicom import dcmread
@@ -12,6 +12,22 @@ from imgtools.io.readers import read_dicom_series
 TODO:: Move metadata extraction to on load
 """
 __all__ = ["Dose"]
+
+
+def read_dicom_dose(
+    path: str,
+    series_id: str | None = None,
+    recursive: bool = False,
+    file_names: list[str] | None = None,
+    **kwargs: Any,  # noqa
+) -> Dose:
+    return Dose.from_dicom(
+        path,
+        series_id=series_id,
+        recursive=recursive,
+        file_names=file_names,
+        **kwargs,
+    )
 
 
 @dataclass
@@ -28,14 +44,16 @@ class Dose(sitk.Image):
         path: str,
         series_id: str | None = None,
         file_names: list[str] | None = None,
+        **kwargs: Any,  # type: ignore # noqa
     ) -> Dose:
         """
         Reads the data and returns the data frame and the image dosage in SITK format
         """
-        dose = read_dicom_series(
+        dose, metadata = read_dicom_series(
             path,
             series_id=series_id,
             file_names=file_names,
+            **kwargs,
         )
 
         # if 4D, make 3D
@@ -50,7 +68,13 @@ class Dose(sitk.Image):
         img_dose = sitk.Cast(dose, sitk.sitkFloat32)
         img_dose = img_dose * factor
 
-        metadata: Dict[str, str] = {"DoseGridScaling": str(factor)}
+        metadata.update(
+            {
+                "DoseGridScaling": str(factor),
+                "DoseUnits": str(df.DoseUnits),
+                "DoseType": str(df.DoseType),
+            }
+        )
 
         return cls(img_dose, metadata)
 

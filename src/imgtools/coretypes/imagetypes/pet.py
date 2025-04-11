@@ -59,13 +59,14 @@ def read_dicom_pet(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> PET:
-    image = read_dicom_series(
+    return PET.from_dicom(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
+        pet_image_type=PETImageType.SUV,
+        **kwargs,
     )
-    return PET(image, {})
 
 
 @dataclass
@@ -81,8 +82,10 @@ class PET(MedImage):
         cls,
         path: str,
         series_id: Optional[str] = None,
+        recursive: bool = False,
         file_names: Optional[list[str]] = None,
         pet_image_type: PETImageType = PETImageType.SUV,
+        **kwargs: Any,  # noqa
     ) -> PET:
         """Read the PET scan and returns the data frame and the image dosage in SITK format
 
@@ -96,9 +99,16 @@ class PET(MedImage):
         If there is no data on SUV/ACT then backup calculation is done based on the formula in the documentation, although, it may
         have some error.
         """
-        pet: sitk.Image = read_dicom_pet(
-            path, series_id, file_names=file_names
+        # TODO: this logic might repetitive... idk how pet is supposed to be used
+        image, metadata = read_dicom_series(
+            path,
+            series_id=series_id,
+            recursive=recursive,
+            file_names=file_names,
+            **kwargs,
         )
+        pet = cls(image, metadata=metadata)
+
         img_pet: sitk.Image = sitk.Cast(pet, sitk.sitkFloat32)
         directory_path = pathlib.Path(path)
 
@@ -127,7 +137,7 @@ class PET(MedImage):
 
         # SimpleITK reads some pixel values as negative but with correct value
         img_pet = sitk.Abs(img_pet * factor)
-        metadata: dict[str, str] = {}
+
         # metadata: Dict[str, Union[str, float, bool]] = cls.get_metadata(dcm)
         # metadata["factor"] = factor
 
