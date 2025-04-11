@@ -61,7 +61,7 @@ class ROIMatcher(BaseModel):
 
     @field_validator("match_map", mode="before")
     @classmethod
-    def match_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
+    def validate_match_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
         if not v:
             logger.debug(f"Empty ROI map provided {v=} . Defaulting to .*")
             return {cls.default_key: [".*"]}
