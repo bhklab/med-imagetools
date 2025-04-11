@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from functools import total_ordering
 
 from typing import Iterator
-import numpy as np
 
 
 @dataclass

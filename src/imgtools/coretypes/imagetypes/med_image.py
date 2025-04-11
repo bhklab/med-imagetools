@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Type
 
 import SimpleITK as sitk
 
-from imgtools.coretypes.direction import Direction
 from imgtools.coretypes.spatial_types import (
     Coordinate3D,
+    Direction,
+    ImageGeometry,
     Size3D,
     Spacing3D,
 )
@@ -15,15 +15,6 @@ from imgtools.coretypes.spatial_types import (
 if TYPE_CHECKING:
     import numpy as np
 
-
-@dataclass(frozen=True)
-class ImageGeometry:
-    """Represents the geometry of a 3D image."""
-
-    size: Size3D
-    origin: Coordinate3D
-    direction: Direction
-    spacing: Spacing3D
 
 class MedImage(sitk.Image):
     """A more convenient wrapper around SimpleITK.Image.
