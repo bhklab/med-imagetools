@@ -1,6 +1,37 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.20 (2025-04-11)
+
+### Bug Fixes
+
+- Sitk 2.4 DICOM reading issue direction handling
+  ([#317](https://github.com/bhklab/med-imagetools/pull/317),
+  [`519c8d0`](https://github.com/bhklab/med-imagetools/commit/519c8d03443aa929097c8d1becd0a79134530eaf))
+
+Address issues with negative 'SpacingBetweenSlices' in DICOM files by correcting direction cosines.
+  Include tests to validate the fix.
+
+Fixes #296
+
+Caused by [Change in GDCM's
+  MediaStorageAndFileFormat/gdcmImageHelper.cxx](https://github.com/InsightSoftwareConsortium/ITK/blob/72f509f357570d0e650029b855fb5dee3ded42ee/Modules/ThirdParty/GDCM/src/gdcm/Source/MediaStorageAndFileFormat/gdcmImageHelper.cxx#L1377-L1384)
+
+Reference Issues: https://github.com/SimpleITK/SimpleITK/issues/2214
+  https://github.com/InsightSoftwareConsortium/ITK/issues/4794
+
+- update reading classes to also add the metadata
+
+- **New Features** - Enhanced reading capabilities for dose, PET, and scan data with support for
+  additional parameters and richer metadata extraction. - Introduced automatic correction of scan
+  image direction for improved data accuracy.
+
+- **Documentation** - Updated parameter descriptions and inline guidance to clarify functionality.
+
+- **Tests** - Added new test cases to validate scan direction correction and metadata extraction. -
+  Refined test fixtures for improved organization and type safety.
+
+
 ## v2.0.0-rc.19 (2025-04-10)
 
 ### Features
