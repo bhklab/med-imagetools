@@ -66,7 +66,7 @@ def roi_matching():
     "strategy,expected_output,expected_output_ignorecase",
     [
         (   # strategy
-            ROIMatchStrategy().SEPARATE,
+            ROIMatchStrategy.SEPARATE,
             # expected output case sensitive
             [
                 ("GTV", "GTV 0"), ("GTV", "GTVp"),
@@ -83,7 +83,7 @@ def roi_matching():
             ]
         ),
         (   # strategy
-            ROIMatchStrategy().MERGE,
+            ROIMatchStrategy.MERGE,
             # expected output case sensitive
             [
                 ("GTV", ["GTV 0", "GTVp"]),
@@ -100,7 +100,7 @@ def roi_matching():
             ]
         ),
         (   # strategy
-            ROIMatchStrategy().KEEP_FIRST,
+            ROIMatchStrategy.KEEP_FIRST,
             # expected output case sensitive
             [
                 ("GTV", "GTV 0"),
@@ -136,17 +136,17 @@ def test_handle_roi_matching_strategies(
     )
 
     expected = expected_output
-    if strategy == ROIMatchStrategy().MERGE:
+    if strategy == ROIMatchStrategy.MERGE:
         result_dict = dict(results)
         for key, expected_matches in expected:
             assert key in result_dict
             assert result_dict[key] == expected_matches
 
-    elif strategy == ROIMatchStrategy().KEEP_FIRST:
+    elif strategy == ROIMatchStrategy.KEEP_FIRST:
         actual_pairs = [(key, values[0]) for key, values in results]
         assert sorted(actual_pairs) == sorted(expected)
 
-    elif strategy == ROIMatchStrategy().SEPARATE:
+    elif strategy == ROIMatchStrategy.SEPARATE:
         actual_pairs = [(key, values[0]) for key, values in results]
         assert sorted(actual_pairs) == sorted(expected)
 
@@ -159,16 +159,16 @@ def test_handle_roi_matching_strategies(
     )
 
     expected = expected_output_ignorecase
-    if strategy == ROIMatchStrategy().MERGE:
+    if strategy == ROIMatchStrategy.MERGE:
         result_dict = dict(results)
         for key, expected_matches in expected:
             assert key in result_dict
             assert result_dict[key] == expected_matches
 
-    elif strategy == ROIMatchStrategy().KEEP_FIRST:
+    elif strategy == ROIMatchStrategy.KEEP_FIRST:
         actual_pairs = [(key, values[0]) for key, values in results]
         assert sorted(actual_pairs) == sorted(expected)
 
-    elif strategy == ROIMatchStrategy().SEPARATE:
+    elif strategy == ROIMatchStrategy.SEPARATE:
         actual_pairs = [(key, values[0]) for key, values in results]
         assert sorted(actual_pairs) == sorted(expected)
