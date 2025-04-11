@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional
 import SimpleITK as sitk
 from pydicom import dcmread
 
-from imgtools.coretypes.imagetypes import MedImage
+from imgtools.coretypes import MedImage
 from imgtools.io.readers import read_dicom_series
 from imgtools.loggers import logger
 
