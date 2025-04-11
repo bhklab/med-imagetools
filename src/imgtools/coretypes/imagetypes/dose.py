@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
+from typing import Any, Dict
 
 import SimpleITK as sitk
 from pydicom import dcmread
@@ -12,6 +12,22 @@ from imgtools.io.readers import read_dicom_series
 TODO:: Move metadata extraction to on load
 """
 __all__ = ["Dose"]
+
+
+def read_dicom_dose(
+    path: str,
+    series_id: str | None = None,
+    recursive: bool = False,
+    file_names: list[str] | None = None,
+    **kwargs: Any,  # noqa
+) -> Dose:
+    return Dose.from_dicom(
+        path,
+        series_id=series_id,
+        recursive=recursive,
+        file_names=file_names,
+        **kwargs,
+    )
 
 
 @dataclass

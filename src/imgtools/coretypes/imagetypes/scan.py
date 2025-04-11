@@ -19,14 +19,32 @@ def read_dicom_scan(
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
 ) -> Scan:
-    image, metadata = read_dicom_series(
+    """Read a DICOM scan from a directory.
+
+    Parameters
+    ----------
+    path : str
+        Path to the directory containing the DICOM files.
+    series_id : str | None, optional
+        Series ID to read, by default None
+    recursive : bool, optional
+        Whether to read the files recursively, by default False
+    file_names : list[str] | None, optional
+        List of file names to read, by default None
+    **kwargs : Any
+        Unused keyword arguments.
+    Returns
+    -------
+    Scan
+        The read scan.
+    """
+    return Scan.from_dicom(
         path,
         series_id=series_id,
         recursive=recursive,
         file_names=file_names,
         **kwargs,
     )
-    return Scan(image, metadata)
 
 
 class Scan(MedImage):
@@ -54,13 +72,25 @@ class Scan(MedImage):
         spacing_between_slices = float(
             self.metadata.get("SpacingBetweenSlices") or 0
         )
-        if (not spacing_between_slices) or (not spacing_between_slices < 0):
+        if (not spacing_between_slices) or (spacing_between_slices >= 0):
             return
+
+        # just because metadata says that the spacing is negative, still
+        # check if the image is flipped
+        # in case  Scan was created from another (correct) Scan's transform
+        if self.direction.to_matrix()[2][2] > 0:
+            return
+
         warnmsg = (
             f"Scan has negative SpacingBetweenSlices: {spacing_between_slices}. "
             "Manually correcting the direction."
         )
-        logger.warning(warnmsg, spacing=self.spacing, direction=self.direction)
+        logger.debug(
+            warnmsg,
+            spacing_between_slices=spacing_between_slices,
+            spacing=self.spacing,
+            direction=self.direction,
+        )
 
         direction = list(self.GetDirection())
         direction[8] = -direction[8]
@@ -72,7 +102,14 @@ class Scan(MedImage):
         )
 
     @classmethod
-    def from_dicom(cls, path: str, **kwargs: Any) -> Scan:  # noqa
+    def from_dicom(
+        cls,
+        path: str,
+        series_id: str | None = None,
+        recursive: bool = False,
+        file_names: list[str] | None = None,
+        **kwargs: Any,  # noqa
+    ) -> Scan:
         """Read a DICOM scan from a directory.
 
         Parameters
@@ -92,9 +129,14 @@ class Scan(MedImage):
         Scan
             The read scan.
         """
-        image = read_dicom_scan(path, **kwargs)
-
-        return cls(image, {})
+        image, metadata = read_dicom_series(
+            path,
+            series_id=series_id,
+            recursive=recursive,
+            file_names=file_names,
+            **kwargs,
+        )
+        return cls(image, metadata)
 
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string

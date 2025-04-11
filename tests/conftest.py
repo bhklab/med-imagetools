@@ -11,21 +11,16 @@ import pytest
 from typing import TypedDict
 from pathlib import Path
 
+from collections import defaultdict
+import pytest
+from typing import TypedDict
+from pathlib import Path
+
 pytest_logger = logging.getLogger("tests.fixtures")
 pytest_logger.setLevel(logging.DEBUG)
-formatter = logging.Formatter(
-    "[%(asctime)s] [%(name)s] %(levelname)s - %(message)s"
-)
 
 pytest_logger.propagate = True  # Let pytest capture it
 
-
-DATA_DIR = Path(__file__).parent.parent / "data"
-if not DATA_DIR.exists():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-LOCKFILE = DATA_DIR / ".medimage_testdata.lock"
-
-METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
 # TEST_ACCESS_TYPE
 class TestAccessType(str, Enum):
     PUBLIC = "public"
@@ -34,6 +29,14 @@ class TestAccessType(str, Enum):
 TEST_DATASET_TYPE = TestAccessType(
     os.environ.get("TEST_DATASET_TYPE", "public").lower()
 )
+
+DATA_DIR = Path(__file__).parent.parent / "data"
+if not DATA_DIR.exists():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+
+METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
 
 class MedImageDataEntry(TypedDict):
 	Collection: str
@@ -165,6 +168,23 @@ def medimage_by_modality(
 	for entry in medimage_test_data:
 		grouped[entry["Modality"]].append(entry)
 	return grouped
+
+@pytest.fixture(scope="session")
+def medimage_by_seriesUID(
+    medimage_test_data: list[MedImageDataEntry],
+) -> dict[str, MedImageDataEntry]:
+    """Groups test data by SeriesInstanceUID.
+
+    organizes `medimage_test_data` into a dictionary where the keys are
+    SeriesInstanceUID for easier access when testing series-specific
+    functionality.
+    """
+    return {
+        entry["SeriesInstanceUID"]: entry
+        for entry in medimage_test_data
+    }
+
+
 
 @pytest.fixture(scope="session")
 def dataset_type() -> str:
