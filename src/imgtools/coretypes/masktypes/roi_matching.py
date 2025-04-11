@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from enum import Enum
 from functools import lru_cache
 from itertools import product
@@ -10,6 +10,15 @@ from typing import Annotated, ClassVar
 from pydantic import BaseModel, Field, field_validator
 
 from imgtools.loggers import logger
+
+__all__ = [
+    "ROIMatcher",
+    "ROI_HANDLING",
+    "ROIMaskMapping",
+    "handle_roi_matching",
+]
+
+ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
 
 
 # we should rename this to be intuitive
@@ -36,6 +45,12 @@ Valid_Inputs = (
     | PatternString
     | None
 )
+"""These are the valid inputs for the ROI matcher.
+1) A dictionary with keys as strings and values as lists of regex patterns.
+2) A dictionary with keys as strings and value as a single (str) regex pattern.
+2) A list of regex patterns.
+3) A single regex pattern as a string.
+"""
 
 
 class ROIMatcher(BaseModel):
@@ -50,10 +65,12 @@ class ROIMatcher(BaseModel):
     @field_validator("roi_map", mode="before")
     @classmethod
     def validate_roi_map(cls, v: Valid_Inputs) -> ROIGroupPatterns:
+        if not v:
+            logger.debug(f"Empty ROI map provided {v=} . Defaulting to .*")
+            return {cls.default_key: [".*"]}
+
         match v:
             case dict():
-                if not v:
-                    return {cls.default_key: [".*"]}
                 cleaned = {}
                 for k, val in v.items():
                     if isinstance(val, str):
@@ -68,11 +85,35 @@ class ROIMatcher(BaseModel):
                 return {cls.default_key: v}
             case str():
                 return {cls.default_key: [v]}
-            case None:
-                return {cls.default_key: [".*"]}
             case _:  # pragma: no cover
                 msg = f"Unrecognized ROI matching input type: {type(v)}"
                 raise TypeError(msg)
+
+    def match_rois(self, roi_names: list[str]) -> list[tuple[str, list[str]]]:
+        """
+        Match ROI names against the provided patterns.
+
+        Parameters
+        ----------
+        roi_names : list[str]
+            List of ROI names to match.
+
+        Returns
+        -------
+        list[tuple[str, list[str]]]
+            List of tuples containing the key and matched ROI names.
+            See `handle_roi_matching` for notes on the handling strategies.
+
+        See Also
+        --------
+        handle_roi_matching : Function to handle the matching logic.
+        """
+        return handle_roi_matching(
+            roi_names,
+            self.roi_map,
+            self.handling_strategy,
+            ignore_case=self.ignore_case,
+        )
 
 
 def handle_roi_matching(
@@ -80,7 +121,7 @@ def handle_roi_matching(
     roi_matching: ROIGroupPatterns,
     strategy: ROI_HANDLING,
     ignore_case: bool = True,
-) -> dict[str, list[str]]:
+) -> list[tuple[str, list[str]]]:
     """
     Match ROI names against regex patterns and apply a handling strategy.
 
@@ -89,7 +130,7 @@ def handle_roi_matching(
     roi_names : list[str]
         List of ROI names to match.
     roi_matching : ROIGroupPatterns
-        Mapping of keys to regex patterns.
+        Mapping of keys to list of regex patterns.
     strategy : ROI_HANDLING
         Strategy to use: MERGE, KEEP_FIRST, or SEPARATE.
     ignore_case : bool
@@ -97,8 +138,22 @@ def handle_roi_matching(
 
     Returns
     -------
-    dict[str, list[str]]
-        Dictionary mapping keys to matched ROI names.
+    list[tuple[str, list[str]]]
+        List of tuples containing the key and matched ROI names.
+        See Notes for details on the handling strategies.
+
+    Notes
+    -----
+    - MERGE: Merge all ROIs with the same key. Returns a single tuple for each key,
+        but the value is a list of all the matched ROIs.
+        i.e [('GTV', ['GTV1', 'GTV2']), ('PTV', ['PTV1', 'ptv x'])]
+    - KEEP_FIRST: For each key, keep the first ROI found based on the pattern.
+        Returns a single tuple for each key, but the value is a list of size ONE with
+        the first matched ROI.
+        i.e [('GTV', ['GTV1']), ('PTV', ['PTV1'])]
+    - SEPARATE: Separate all ROIs. Returns possibly multiple tuples for each key,
+        because a key may have multiple ROIs matching the pattern.
+        i.e [('GTV', ['GTV1']), ('GTV', ['GTV2']), ('PTV', ['PTV1'])]
     """
     flags = re.IGNORECASE if ignore_case else 0
 
@@ -113,24 +168,26 @@ def handle_roi_matching(
             if _match_pattern(roi_name, pattern):
                 results[key].append(roi_name)
 
-    logger.debug(
-        "ROI matched patterns",
-        matcher=roi_matching,
-        roi_names=roi_names,
-        strategy=strategy,
-        results=results,
-    )
-
     match strategy:
         case ROI_HANDLING.MERGE:
-            return {k: v for k, v in results.items() if v}
+            # Merge all ROIs with the same key
+            # this means that we return a single tuple for each key
+            # but the value is a list of all the matched ROIs
+            return [(key, v) for key, v in results.items() if v]
         case ROI_HANDLING.KEEP_FIRST:
-            return {k: [v[0]] for k, v in results.items() if v}
+            # For each key, keep the first ROI found based on the pattern
+            # this means that we return a single tuple for each key
+            # but the value is a list of size ONE with the first matched ROI
+            return [(key, [v[0]]) for key, v in results.items() if v]
         case ROI_HANDLING.SEPARATE:
-            separate = defaultdict(list)
-            for key, matches in results.items():
-                separate[key].extend(matches)
-            return dict(separate)
+            # Separate all ROIs
+            # this means that we possibly return a MULTIPLE tuples for each key
+            # because a key may have multiple ROIs matching the pattern
+            tuples = []
+            for key, v in results.items():
+                for roi in v:
+                    tuples.append((key, [roi]))
+            return tuples
         case _:  # pragma: no cover
             errmsg = (
                 f"Unrecognized strategy: {strategy}. Something went wrong."
