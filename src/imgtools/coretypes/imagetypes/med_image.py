@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Type
+from typing import TYPE_CHECKING, Any, Type
 
-import numpy as np
 import SimpleITK as sitk
 
 from imgtools.coretypes.direction import Direction
@@ -12,6 +11,9 @@ from imgtools.coretypes.spatial_types import (
     Size3D,
     Spacing3D,
 )
+
+if TYPE_CHECKING:
+    import numpy as np
 
 
 @dataclass(frozen=True)
@@ -22,11 +24,6 @@ class ImageGeometry:
     origin: Coordinate3D
     direction: Direction
     spacing: Spacing3D
-
-
-# Type alias for Image or Array
-ImageOrArray = sitk.Image | np.ndarray
-
 
 class MedImage(sitk.Image):
     """A more convenient wrapper around SimpleITK.Image.
@@ -143,21 +140,20 @@ class MedImage(sitk.Image):
         yield "spacing", self.spacing
         yield "direction", self.direction
 
-    def to_numpy(
-        self, view: bool = False
-    ) -> np.ndarray | tuple[np.ndarray, ImageGeometry]:
+    def to_numpy(self, view: bool = False) -> tuple[np.ndarray, ImageGeometry]:
         """Convert the image to a NumPy array.
 
         Parameters
         ----------
         view : bool, optional
             Whether to return a view instead of a copy of the array, by default False.
-            Using a view can save memory but modifications to the array may affect the original image.
+            Views are more memory efficient but dont allow for modification of the array.
 
         Returns
         -------
         tuple[np.ndarray, ImageGeometry]
-            A tuple containing the NumPy array and the image geometry.
+            A tuple containing the NumPy array and the image geometry with
+            size, origin, direction, and spacing.
 
         Notes
         -----
