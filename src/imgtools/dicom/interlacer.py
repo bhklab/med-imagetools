@@ -339,7 +339,12 @@ class Interlacer:
         query_set = set(query)
 
         if not query_set.issubset(set(valid_order)):
-            msg = f"Invalid query: ({', '.join(query)}), supported modalities: {', '.join(valid_order)}"
+            msg = (
+                f"Invalid query: ({', '.join(query)}), "
+                f"provided modalities: [{', '.join(query_set - set(valid_order))}] "
+                f"are not supported, "
+                f"supported modalities: {', '.join(valid_order)}"
+            )
             raise ValueError(msg)
 
         for modality in query:
@@ -669,8 +674,8 @@ if __name__ == "__main__":
 
     dicom_dirs = [
         Path("data/Vestibular-Schwannoma-SEG"),
-        Path("data/NSCLC_Radiogenomics"),
-        Path("data/Head-Neck-PET-CT"),
+        # Path("data/NSCLC_Radiogenomics"),
+        # Path("data/Head-Neck-PET-CT"),
     ]
     interlacers = []
     for directory in dicom_dirs:
@@ -686,6 +691,7 @@ if __name__ == "__main__":
         # interlacer.visualize_forest(
         #     directory.parent.parent / directory.name / "interlacer.html"
         # )
+        print(f"Query Result {interlacer.query('MR,RTSTRUCT')}")
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
