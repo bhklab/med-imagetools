@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 
-from imgtools.coretypes.direction import Direction, Matrix3D, Matrix3DFlat
+from imgtools.coretypes.spatial_types.direction import Direction, Matrix3D, Matrix3DFlat
 
 def test_direction_init_valid():
     """Ensure a valid 9-element tuple creates a Direction."""

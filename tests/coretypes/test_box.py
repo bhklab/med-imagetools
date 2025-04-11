@@ -81,7 +81,11 @@ def test_regionbox_crop_image_and_mask():
     assert cropped_image.GetSize() == (10, 10, 10)
     assert cropped_mask.GetSize() == (10, 10, 10)
 
-# Edge cases
+    # check actual pixel physical indices
+    origin = image.GetOrigin()
+    assert origin == (0.0, 0.0, 0.0)
+    cropped_origin = cropped_image.GetOrigin()
+    assert cropped_origin == (10.0, 10.0, 10.0)
 
 def test_regionbox_from_centroid_odd_cube():
 
