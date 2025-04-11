@@ -1,12 +1,18 @@
 # Interlacer Module
 
-The **Interlacer** module builds and searches a tree-like structure made from DICOM series using metadata links. This makes it easier to group, explore, and work with medical imaging data. It replaces the old `DataGraph` module from `med-imagetools 1.0`.
+The **Interlacer** module builds and searches a tree-like structure made from DICOM series using metadata links. This makes it easier to group, explore, and work with medical imaging data. 
+
+
+!!! note 
+
+    This module is available in `med-imagetools 2.0` and later versions.
+    It replaces the now deprecated `DataGraph` module from `med-imagetools 1.0`.
 
 ---
 
 ## Overview
 
-This module turns DICOM series into a set of trees (a forest), using metadata to connect related series. This helps users follow the relationships between series — for example, linking a CT scan to its RTSTRUCT and RTDOSE — and makes it easier to run queries or group series by type.
+This module turns DICOM series into a set of trees (a forest), using metadata to connect related series. This helps users follow the relationships between series — for example, linking a `CT` scan to its `RTSTRUCT` and `RTDOSE` — and makes it easier to run queries or group series by type.
 
 ---
 
@@ -17,7 +23,8 @@ This module turns DICOM series into a set of trees (a forest), using metadata to
 Represents one DICOM series and its connections to other related series. Each node holds:
 
 - Basic metadata like `SeriesInstanceUID` and `Modality`
-- Links to parent and child series
+- Links to child nodes 
+   - i.e a `CT` series might have 1 or more links to `RTSTRUCT` and/or  `PT` series
 
 ---
 
@@ -27,17 +34,18 @@ Represents a single path through the tree, showing an ordered set of modalities.
 
 ---
 
-### `GroupBy` *(Enum)*
+### Grouping Series
 
-Used to pick how series should be grouped when building the forest. Options are:
+The Interlacer currently groups series using **Referenced Series UID**, which links series based on their metadata references (i.e the `ReferencedSeriesInstanceUID` tag in `RTSTRUCT`s). This creates a hierarchical structure showing the relationships between different series.
 
-- `ReferencedSeriesUID` – Link series using metadata references  
-- `StudyInstanceUID` – Group everything in the same study  
-- `PatientID` – Group all series from the same patient
-
-!!! note  
-
-    Right now, only `ReferencedSeriesUID` is supported.
+!!! note "Future Development"
+    
+    In a future release, the Interlacer will support additional grouping methods:
+    
+    - **Study Instance UID** – Group everything in the same study
+    - **Patient ID** – Group all series from the same patient
+    
+    This enhancement is being tracked in [GitHub issue #318](https://github.com/bhklab/med-imagetools/issues/318).
 
 ---
 
@@ -86,6 +94,10 @@ samples = interlacer.query(query)
 
 ## Example Output
 
-![Unstructured Data](../../images/unstructured.png){: style="height:125%;"}
+**The raw graph of all series in the DICOM directory:**
 
-![Structured Data](../../images/structured.png){: style="height:125%;"}
+![Unstructured Data](../../images/unstructured.png){: style="background: white; height:125%;"}
+
+**The interlaced connections between series:**
+
+![Structured Data](../../images/structured.png){: style="background: white; height:125%;"}

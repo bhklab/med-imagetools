@@ -11,9 +11,6 @@ SeriesNode
     Represents an individual DICOM series and its hierarchical relationships.
 Branch
     Represents a path within the hierarchy, maintaining ordered modality sequences.
-GroupBy
-    Enum for grouping series by `ReferencedSeriesUID`, `StudyInstanceUID`, or `PatientID`.
-    Currently only `ReferencedSeriesUID` is supported.
 Interlacer
     Builds the hierarchy, processes queries, and visualizes the relationships.
 
@@ -43,7 +40,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from enum import Enum
 from pathlib import Path
 from typing import Iterator
 
@@ -58,7 +54,7 @@ from imgtools.utils import OptionalImportError, optional_import, timer
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
-__all__ = ["Interlacer", "GroupBy"]
+__all__ = ["Interlacer"]
 
 
 @dataclass
@@ -91,15 +87,6 @@ class SeriesNode:
         """Add SeriesNode to children"""
         self.children.append(child_node)
 
-    def _get_all_nodes(self) -> list[SeriesNode]:
-        """Recursively return all nodes in the tree, including root node and all descendants"""
-        all_nodes = [self]  # Start with the current node
-        for child in self.children:
-            all_nodes.extend(
-                child._get_all_nodes()
-            )  # Recursively add all nodes from children
-        return all_nodes
-
     def __eq__(self, other: object) -> bool:
         """Equality check based on index"""
         if isinstance(other, str):  # Direct index check
@@ -111,11 +98,6 @@ class SeriesNode:
 
     def __hash__(self) -> int:
         return hash(self.SeriesInstanceUID)
-
-    def __iter__(self) -> Iterator[SeriesNode]:
-        """Yield all nodes in the tree"""
-        for node in self._get_all_nodes():
-            yield node
 
     def __repr__(self, level: int = 0) -> str:
         """Recursive representation of the tree structure"""
@@ -195,22 +177,6 @@ class Branch:
         return " -> ".join(node.Modality for node in self.series_nodes)
 
 
-class GroupBy(Enum):
-    """
-    Enum for fields that reference other fields in the DataFrame.
-
-    ReferencedSeriesUID is the default grouping field,
-    which groups series based on their references by building a forest of trees.
-
-    StudyInstanceUID and PatientID are alternatives that can be used when the references are broken or not applicable.
-    Here the forest is built by grouping series based on the StudyInstanceUID or PatientID.
-    """
-
-    ReferencedSeriesUID = "ReferencedSeriesUID"
-    StudyInstanceUID = "StudyInstanceUID"
-    PatientID = "PatientID"
-
-
 @dataclass
 class Interlacer:
     """
@@ -220,32 +186,25 @@ class Interlacer:
     ----------
     crawl_index : str | Path | pd.DataFrame
         Path to the CSV file or DataFrame containing the series data
-    group_field : GroupBy, optional
-        Field to group series by, by default GroupBy.ReferencedSeriesUID
 
     Attributes
     ----------
     crawl_df : pd.DataFrame
         DataFrame containing the data loaded from the CSV file or passed in `crawl_index`
-    group_field : GroupBy
-        Field used for grouping series
     series_nodes : dict[str, SeriesNode]
         Maps SeriesInstanceUID to SeriesNode objects
-    trees : list[list[SeriesNode]] | list[SeriesNode]
-        Forest structure containing all series relationships
+    trees : list[Branch]
+        Forest structure containing all series relationships as branches
     root_nodes : list[SeriesNode]
         List of root nodes in the forest
     """
 
     crawl_index: str | Path | pd.DataFrame
-    group_field: GroupBy = GroupBy.ReferencedSeriesUID
     crawl_df: pd.DataFrame = field(init=False)
     series_nodes: dict[str, SeriesNode] = field(
         default_factory=dict, init=False
     )
-    trees: list[Branch] | list[list[SeriesNode]] = field(
-        default_factory=list, init=False
-    )
+    trees: list[Branch] = field(default_factory=list, init=False)
     root_nodes: list[SeriesNode] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
@@ -269,28 +228,8 @@ class Interlacer:
         ]
 
         self._create_series_nodes()
-
-        match self.group_field:
-            case GroupBy.ReferencedSeriesUID:
-                self._build_forest()
-                self.trees = self._find_branches()
-            case GroupBy.StudyInstanceUID:
-                logger.warning(
-                    "Grouping by StudyInstanceUID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED."
-                )
-                self.trees = self._group_by_attribute(
-                    list(self.series_nodes.values()), "StudyInstanceUID"
-                )
-            case GroupBy.PatientID:
-                logger.warning(
-                    "Grouping by PatientID. THIS IS IN DEVELOPMENT AND MAY NOT WORK AS EXPECTED."
-                )
-                self.trees = self._group_by_attribute(
-                    list(self.series_nodes.values()), "PatientID"
-                )
-            case _:
-                msg = f"Grouping by {self.group_field} is not supported."
-                raise NotImplementedError(msg)
+        self._build_forest()
+        self.trees = self._find_branches()
 
     def _group_by_attribute(
         self, items: list[SeriesNode], attribute: str
@@ -400,7 +339,12 @@ class Interlacer:
         query_set = set(query)
 
         if not query_set.issubset(set(valid_order)):
-            msg = f"Invalid query: ({', '.join(query)}), supported modalities: {', '.join(valid_order)}"
+            msg = (
+                f"Invalid query: ({', '.join(query)}), "
+                f"provided modalities: [{', '.join(query_set - set(valid_order))}] "
+                f"are not supported, "
+                f"supported modalities: {', '.join(valid_order)}"
+            )
             raise ValueError(msg)
 
         for modality in query:
@@ -466,10 +410,6 @@ class Interlacer:
         - RTSTRUCT: Radiotherapy Structure
         - RTDOSE: Radiotherapy Dose
         """
-        if self.group_field != GroupBy.ReferencedSeriesUID:
-            msg = f"Querying currently not supported for {self.group_field}"
-            raise NotImplementedError(msg)
-
         queried_modalities = self._get_valid_query(query_string.split(","))
         query_results = self._query(queried_modalities)
 
@@ -504,16 +444,9 @@ class Interlacer:
         ------
         OptionalImportError
             If pyvis package is not installed
-        NotImplementedError
-            If group_field is not GroupBy.ReferencedSeriesUID
         """
         if not _pyvis_available:
             raise OptionalImportError("pyvis")
-
-        if self.group_field != GroupBy.ReferencedSeriesUID:
-            raise NotImplementedError(
-                "Visualization is only supported when grouping by ReferencedSeriesUID."
-            )
 
         save_path = Path(save_path)
         save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -657,15 +590,7 @@ class Interlacer:
 
     def print_tree(self, input_directory: Path | None) -> None:
         """Print a representation of the forest."""
-        match self.group_field:
-            case GroupBy.ReferencedSeriesUID:
-                print_interlacer_tree(self.root_nodes, input_directory)
-            case GroupBy.StudyInstanceUID | GroupBy.PatientID:
-                warnmsg = (
-                    "Printing tree is not supported for "
-                    f"{self.group_field}. Use visualize_forest() instead."
-                )
-                logger.error(warnmsg)
+        print_interlacer_tree(self.root_nodes, input_directory)
 
 
 class ModalityHighlighter(RegexHighlighter):
@@ -763,16 +688,10 @@ if __name__ == "__main__":
         crawler = Crawler(crawler_settings)
         interlacer = Interlacer(crawler.index)
         interlacers.append(interlacer)
-        interlacer.visualize_forest(
-            directory.parent.parent / directory.name / "interlacer.html"
-        )
+        # interlacer.visualize_forest(
+        #     directory.parent.parent / directory.name / "interlacer.html"
+        # )
+        print(f"Query Result {interlacer.query('MR,RTSTRUCT')}")
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
-
-    # test groupby
-    interlacer = Interlacer(
-        crawler.index, group_field=GroupBy.StudyInstanceUID
-    )
-    interlacer.print_tree(crawler.settings.dicom_dir)
-    # print(interlacer.query("CT,RTSTRUCT"))  # fails
