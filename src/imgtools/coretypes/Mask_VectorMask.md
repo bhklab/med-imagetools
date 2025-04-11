@@ -213,7 +213,7 @@ class VectorMask(MedImage):
     @classmethod
     def from_rtstruct(
         cls,
-        reference_image: MedImage,
+        reference_image: imgtools.coretypes.Scan,
         rtstruct: StructureSet,
         roi_matcher: ROIMatcher,
         continuous: bool = True,
@@ -226,7 +226,7 @@ class VectorMask(MedImage):
     @classmethod
     def from_seg(
         cls,
-        reference_image: MedImage,
+        reference_image: imgtools.coretypes.Scan,
         seg: DicomSeg, 
         roi_matcher: ROIMatcher,
         continuous: bool = True,
