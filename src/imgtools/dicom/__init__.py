@@ -4,6 +4,7 @@ from .dicom_reader import (
     DicomInput,
     load_dicom,
 )
+from .interlacer import Interlacer
 from .read_tags import read_tags
 from .utils import lookup_tag, similar_tags, tag_exists
 
@@ -19,4 +20,5 @@ __all__ = [
     "load_dicom",
     # read_tags
     "read_tags",
+    "Interlacer",
 ]

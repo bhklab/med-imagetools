@@ -231,3 +231,5 @@ test_data
 notebooks
 .imgtools
 imgtools*.yaml
+
+*.html

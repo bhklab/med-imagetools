@@ -11,11 +11,6 @@ import pytest
 from typing import TypedDict
 from pathlib import Path
 
-from collections import defaultdict
-import pytest
-from typing import TypedDict
-from pathlib import Path
-
 pytest_logger = logging.getLogger("tests.fixtures")
 pytest_logger.setLevel(logging.DEBUG)
 
