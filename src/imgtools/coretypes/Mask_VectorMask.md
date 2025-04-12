@@ -235,7 +235,6 @@ class VectorMask(MedImage):
         """Create VectorMask from DICOM-SEG using ROI matching."""
         # can also just use the `to_vectormask` from the specific class
         ...
-    )
 ```
 
 ## Bonus: Saving the `VectorMask`
