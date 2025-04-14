@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Iterator, Type
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, Type
 
 import numpy as np
 import SimpleITK as sitk
@@ -12,7 +12,6 @@ from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     from imgtools.coretypes.masktypes.structureset import (
-        ROIExtractionErrorMsg,
         ROIMatcher,
         RTStructureSet,
     )
@@ -52,7 +51,7 @@ class VectorMask(MedImage):
         Mapping from integer indices to ROIMaskMapping objects
     metadata : dict[str, str]
         Dictionary containing metadata about the mask
-    errors : dict[str, ROIExtractionErrorMsg] | None
+    errors : dict[str, Exception] | None
         Dictionary with error messages from ROI extraction, if any
 
     Methods
@@ -73,7 +72,7 @@ class VectorMask(MedImage):
 
     roi_mapping: dict[int, ROIMaskMapping]
     metadata: dict[str, str]
-    errors: dict[str, ROIExtractionErrorMsg] | None
+    errors: Mapping[str, Exception] | None
 
     _mask_cache: dict[str | int, Mask]
 
@@ -82,7 +81,7 @@ class VectorMask(MedImage):
         image: sitk.Image,
         roi_mapping: dict[int, ROIMaskMapping],
         metadata: dict[str, str],
-        errors: dict[str, ROIExtractionErrorMsg] | None = None,
+        errors: Mapping[str, Exception] | None = None,
     ) -> None:
         """
         Parameters
@@ -94,7 +93,7 @@ class VectorMask(MedImage):
             containing roi_key and roi_names
         metadata : dict[str, str]
             Dictionary containing metadata about the mask
-        errors : dict[str, ROIExtractionErrorMsg] | None, optional
+        errors : dict[str, Exception] | None, optional
             Optional dictionary with error messages from ROI extraction, by default None
         """
         super().__init__(image)
@@ -338,7 +337,7 @@ class Mask(MedImage):
             containing roi_key and roi_names
         metadata : dict[str, str]
             Dictionary containing metadata about the mask
-        errors : dict[str, ROIExtractionErrorMsg] | None, optional
+        errors : dict[str, Exception] | None, optional
             Optional dictionary with error messages from ROI extraction, by default None
         """
         super().__init__(image)

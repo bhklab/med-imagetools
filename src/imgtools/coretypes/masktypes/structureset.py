@@ -35,11 +35,12 @@ if TYPE_CHECKING:
 
 __all__ = [
     "RTStructureSet",
-     "ContourPointsAcrossSlicesError",
+    "ContourPointsAcrossSlicesError",
     "MaskArrayOutOfBoundsError",
     "UnexpectedContourPointsError",
     "NonIntegerZSliceIndexError",
 ]
+
 
 class ContourPointsAcrossSlicesError(Exception):
     """Exception raised when contour points span across multiple slices."""
