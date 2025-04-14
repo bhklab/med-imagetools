@@ -1,6 +1,6 @@
 # `Mask` and `VectorMask` data structure design proposal
 
-## Context
+## General context for reference
 
 The previous `Segmentation` class was designed to be a `sitk.Image` with each
 voxel representing a vector.
@@ -25,7 +25,7 @@ or more (multiple squashed if `ROIMatchStrategy.MERGE` is used) matched ROIs.
 
 
 ```python
-class ROIMatchStrategy(str, Enum):  # noqa: N801
+class ROIMatchStrategy(str, Enum):
     """Enum for ROI handling strategies."""
 
     # merge all ROIs with the same key
@@ -36,6 +36,17 @@ class ROIMatchStrategy(str, Enum):  # noqa: N801
 
     # separate all ROIs
     SEPARATE = "separate"
+
+class ROIMatcher:
+    match_map: dict[str, list[str]]
+    handling_strategy: ROIMatchStrategy
+    ignore_case: bool
+
+    def match_rois(self, roi_names: list[str]) -> list[tuple[str, list[str]]]:
+        """Match ROIs names against the provided patterns."""
+        # returns a list of tuples (roi_key, [matched roi_names])
+        # based on the strategy
+        ...
 ```
 
 ## Thoughts
@@ -62,7 +73,8 @@ we **MIGHT** end up with multiple objects with the same label for a given
 key:
 
 > [!NOTE]
-> I just realized this can **definitely** still happen even if we were to use `ROIMatchStrategy.SEPARATE` if the annotater annotated two disconnected
+> I just realized this can **definitely** still happen even if we were to 
+> use `ROIMatchStrategy.SEPARATE` if the annotater annotated two disconnected
 > structures like in the example below, where only `['GTV-2', 'GTV-1']`
 > were matched but there are 4 objects.
 
@@ -104,8 +116,8 @@ this is a problem at all
 After discussing with @skim2257, I am interested in defining two 
 data structures for the two types of masks we will be using:
 
-`Mask` is a 3D `sitk.Image` of scalar type `sitk.sitkLabelUInt8` while
-`VectorMask` is a 3D `sitk.Image` of vector type `sitk.sitkVectorUInt8`.
+1. `Mask` is a 3D `sitk.Image` of scalar type `sitk.sitkLabelUInt8` while
+2. `VectorMask` is a 3D `sitk.Image` of vector type `sitk.sitkVectorUInt8`.
 
 `DICOM-SEG` and `RTStructureSet` will produce `VectorMask` images still,
 based on the `ROIMatcher`
@@ -165,12 +177,15 @@ class Mask(MedImage):
         """Create Mask from numpy array with copied spatial metadata."""
         ...
 
+ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
 
 class VectorMask(MedImage):
     """A multi-label binary mask image with vector pixels (sitkVectorUInt8)."""
 
     # roi_mapping is a dict of roi_key to (roi_name, [matched roi_names from rtstruct/seg])
-    roi_mapping: dict[int, tuple[str, list[str]]]
+    roi_mapping: dict[int, ROIMaskMapping]
+    metadata: dict[str, str]
+    errors: dict[str, ROIExtractionErrorMsg] | None
 
     @property
     def n_masks(self) -> int:
@@ -216,8 +231,6 @@ class VectorMask(MedImage):
         reference_image: imgtools.coretypes.Scan,
         rtstruct: StructureSet,
         roi_matcher: ROIMatcher,
-        continuous: bool = True,
-        ignore_case: bool = True,
     ) -> VectorMask:
         """Create VectorMask from RTSTRUCT using ROI matching."""
         # can also just use the `to_vectormask` from the specific class
@@ -229,8 +242,6 @@ class VectorMask(MedImage):
         reference_image: imgtools.coretypes.Scan,
         seg: DicomSeg, 
         roi_matcher: ROIMatcher,
-        continuous: bool = True,
-        ignore_case: bool = True,
     ) -> VectorMask:
         """Create VectorMask from DICOM-SEG using ROI matching."""
         # can also just use the `to_vectormask` from the specific class
