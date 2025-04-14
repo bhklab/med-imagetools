@@ -33,14 +33,13 @@ if TYPE_CHECKING:
         ROIMatcher,
     )
 
-"""
-PROTOTYPE of the RTSTRUCT class that will interact with the VectorMask class
-"""
-
-
-class ROIExtractionErrorMsg(str):
-    pass
-
+__all__ = [
+    "RTStructureSet",
+     "ContourPointsAcrossSlicesError",
+    "MaskArrayOutOfBoundsError",
+    "UnexpectedContourPointsError",
+    "NonIntegerZSliceIndexError",
+]
 
 class ContourPointsAcrossSlicesError(Exception):
     """Exception raised when contour points span across multiple slices."""
@@ -175,7 +174,7 @@ class RTStructureSet:
         repr=False,
         default_factory=dict,
     )
-    roi_map_errors: dict[str, ROIExtractionErrorMsg] = field(
+    roi_map_errors: dict[str, ROIContourError] = field(
         repr=False, default_factory=dict, init=False
     )
 
@@ -249,8 +248,7 @@ class RTStructureSet:
                     dicom_rt, roi_index=roi_index
                 )
             except ROIContourError as ae:
-                err = f"Error extracting ROI '{roi_name}': {ae}"
-                rt.roi_map_errors[roi_name] = ROIExtractionErrorMsg(err)
+                rt.roi_map_errors[roi_name] = ae
             else:
                 rt.roi_map[roi_name] = extracted_roi
                 rt.roi_names.append(roi_name)
