@@ -135,7 +135,7 @@ class NonIntegerZSliceIndexError(Exception):
         return (
             f"Z-slice index {self.z_idx} is not an integer for ROI "
             f"'{self.roi_name}' and contour {self.contour_num} "
-            "this could be because continuous physicalpts_to_idxs was set to True."
+            "this could be because continuous in get_mask_ndarray() was set to True."
         )
 
 
@@ -264,7 +264,7 @@ class RTStructureSet:
         whereas the roi_name is mainly used for debugging purposes.
 
 
-        This method assumes that the order of the rois in dcm.StructureSetROISequence is
+        This method assumes that the order of the ROIs in dcm.StructureSetROISequence is
         the same order that you will find their corresponding contour data in
         dcm.ROIContourSequence.
 
