@@ -22,7 +22,54 @@ ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
 
 
 class VectorMask(MedImage):
-    """A multi-label binary mask image with vector pixels (sitkVectorUInt8)."""
+    """A multi-label binary mask image with vector pixels (sitkVectorUInt8).
+
+    This class represents 3D multi-label mask images stored as SimpleITK vector images.
+    Each voxel in the image contains a vector of values, where each component in the
+    vector represents a binary indicator (0 or 1) for a specific label/ROI.
+
+    The VectorMask design supports non-overlapping and overlapping segmentations,
+    preserving metadata from the RTSTRUCT/SEG DICOM file.
+    The dimensionality (3D) is inherited from the reference image which the
+    RTSTR/SEG was constructed from.
+
+    Background is handled automatically:
+    - Index 0 is always reserved for the background, calculated as the
+        absence of any ROI across all components of the vectors.
+    - When extracting an ROI from the mask, the background is handled implicitly
+
+    Properties
+    ----------
+    n_masks : int
+        Number of binary mask channels (components per voxel)
+        Does *not* include the background channel
+    roi_keys : list[str]
+        List of ROI keys from mapping, excluding the background
+
+    Attributes
+    ----------
+    roi_mapping : dict[int, ROIMaskMapping]
+        Mapping from integer indices to ROIMaskMapping objects
+    metadata : dict[str, str]
+        Dictionary containing metadata about the mask
+    errors : dict[str, ROIExtractionErrorMsg] | None
+        Dictionary with error messages from ROI extraction, if any
+
+    Methods
+    -------
+    iter_masks(include_background: bool = False) -> Iterator[tuple[int, str, list[str], Mask]]
+        Yield (index, roi_key, roi_names, Mask) for each mask channel
+    has_overlap() -> bool
+        Return True if any voxel has >1 mask. Determined by summing
+        each voxel's vector components and checking if >1
+    extract_mask(key: str | int) -> Mask
+        Extract a single binary mask by index or ROI key
+        Output will have a single label == 1, output type is `sitk.sitkUInt8`
+    __getitem__(key)
+        Allow accessing masks via indexing
+        First tries to `extract_mask(key)` using the given key
+        If that fails, falls back to the standard sitk.Image behavior
+    """
 
     roi_mapping: dict[int, ROIMaskMapping]
     metadata: dict[str, str]
@@ -37,6 +84,19 @@ class VectorMask(MedImage):
         metadata: dict[str, str],
         errors: dict[str, ROIExtractionErrorMsg] | None = None,
     ) -> None:
+        """
+        Parameters
+        ----------
+        image : sitk.Image
+            A SimpleITK image with pixel type sitk.sitkVectorUInt8
+        roi_mapping : dict[int, ROIMaskMapping]
+            Mapping from integer indices to ROIMaskMapping objects
+            containing roi_key and roi_names
+        metadata : dict[str, str]
+            Dictionary containing metadata about the mask
+        errors : dict[str, ROIExtractionErrorMsg] | None, optional
+            Optional dictionary with error messages from ROI extraction, by default None
+        """
         super().__init__(image)
         # Shift index to start from 1 for user-facing keys
         self.roi_mapping = {0: ROIMaskMapping("Background", ["Background"])}
@@ -53,6 +113,21 @@ class VectorMask(MedImage):
             msg = f"Expected sitkVectorUInt8, got {self.dtype=} instead."
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
+
+    @property
+    def n_masks(self) -> int:
+        """Number of binary mask channels (components per voxel).
+        Notes
+        -----
+        This does *not* include the background channel.
+        The background channel is always the first channel (index 0).
+        """
+        return self.GetNumberOfComponentsPerPixel()
+
+    @property
+    def roi_keys(self) -> list[str]:
+        """List of ROI keys from mapping"""
+        return [mapping.roi_key for mapping in self.roi_mapping.values()]
 
     def __getitem__(self, key):  # type: ignore # noqa
         """Allow accessing masks via indexing.
@@ -77,21 +152,6 @@ class VectorMask(MedImage):
             # If extract_mask fails, fall back to standard behavior
             return super().__getitem__(key)
 
-    @property
-    def n_masks(self) -> int:
-        """Number of binary mask channels (components per voxel).
-        Notes
-        -----
-        This does *not* include the background channel.
-        The background channel is always the first channel (index 0).
-        """
-        return self.GetNumberOfComponentsPerPixel()
-
-    @property
-    def roi_keys(self) -> list[str]:
-        """List of ROI keys from mapping"""
-        return [mapping.roi_key for mapping in self.roi_mapping.values()]
-
     def iter_masks(
         self, include_background: bool = False
     ) -> Iterator[tuple[int, str, list[str], Mask]]:
@@ -108,11 +168,8 @@ class VectorMask(MedImage):
 
     def to_sparsemask(self) -> Mask:
         """Convert to a single binary mask with the argmax of the vector mask."""
-        arr = sitk.GetArrayFromImage(self)
-        mask_arr = np.argmax(arr, axis=-1).astype(np.uint8)
-        mask_img = sitk.GetImageFromArray(mask_arr)
-        mask_img.CopyInformation(self)
-        return Mask(sitk.Cast(mask_img, sitk.sitkUInt8))
+        msg = "Converting to a sparse mask is not implemented yet."
+        raise NotImplementedError(msg)
 
     def to_label_image(self) -> Mask:
         """Convert to scalar Mask image (fails if overlap exists).
@@ -126,7 +183,7 @@ class VectorMask(MedImage):
     def extract_mask(self, key: str | int) -> Mask:
         """Extract a single binary mask by index or ROI key.
 
-        Result would only have 1 label, output type is `sitk.sitkUInt8`.
+        Result would have a single label == 1 , output type is `sitk.sitkUInt8`.
         The mask is cached after first extraction for improved performance.
 
         Examples
@@ -230,9 +287,34 @@ class VectorMask(MedImage):
 
 @dataclass
 class Mask(MedImage):
-    """A scalar label mask image with sitk.LabelUInt8 pixel type.
+    """A scalar label mask image with sitk.sitkUInt8 or sitk.sitkLabelUInt8 pixel type.
 
-    Valid voxel types: `sitk.sitkUInt8`, `sitk.sitkLabelUInt8`
+    This class represents 2D or 3D labeled mask images stored as SimpleITK scalar images.
+    Each voxel contains a single integer label value, where:
+        - 0 is conventionally reserved for background
+        - Positive integers (1-255) represent different labels/segments
+
+    The dimensionality (2D or 3D) is inherited from the source image data.
+
+    Background handling:
+        - Value 0 is always interpreted as background
+
+    This class provides operations for handling labeled/segmentation data and converting
+    between different representations.
+
+    Attributes
+    ----------
+    metadata : dict[str, str]
+        Dictionary containing metadata about the mask
+
+    Notes
+    -----
+    - Multiple disjoint objects with the same label value are considered part
+        of the same segment
+    - To separate disjoint objects with the same label, where each has
+        its own unique value use `to_labeled_image()`
+    - When converting from label images to vector masks, each unique label
+        becomes a separate channel
     """
 
     metadata: dict[str, str] = field(default_factory=dict)
@@ -240,10 +322,27 @@ class Mask(MedImage):
     def __init__(
         self,
         image: sitk.Image,
-        metadata: dict[str, str] | None = None,
+        metadata: dict[str, str],
     ) -> None:
+        """
+        Parameters
+        ----------
+        image : sitk.Image
+            A SimpleITK image with pixel type sitk.sitkVectorUInt8
+        roi_mapping : dict[int, ROIMaskMapping]
+            Mapping from integer indices to ROIMaskMapping objects
+            containing roi_key and roi_names
+        metadata : dict[str, str]
+            Dictionary containing metadata about the mask
+        errors : dict[str, ROIExtractionErrorMsg] | None, optional
+            Optional dictionary with error messages from ROI extraction, by default None
+        """
         super().__init__(image)
-        self.metadata = metadata or {}
+        self.metadata = metadata
+        if self.dtype not in (sitk.sitkUInt8, sitk.sitkLabelUInt8):
+            msg = f"Expected sitkUInt8 or sitkLabelUInt8, got {self.dtype=} instead."
+            msg += f" {self.dtype_str=}"
+            raise TypeError(msg)
 
     @property
     def unique_labels(self) -> np.ndarray:
@@ -255,7 +354,9 @@ class Mask(MedImage):
         """Convert to a labeled image with unique labels."""
         label_img = sitk.ConnectedComponent(self)
         label_img = sitk.Cast(label_img, sitk.sitkLabelUInt8)
-        return Mask(label_img)
+        # TODO:: need to update metadata to reflect separation of ROI Names
+        # and add a mapping to the new labels
+        return Mask(label_img, metadata=self.metadata)
 
     def to_vector_mask(self) -> VectorMask:
         """Convert label image to a one-hot binary vector mask.
@@ -294,8 +395,11 @@ class Mask(MedImage):
         cls: Type[Mask],
         array: np.ndarray,
         reference: sitk.Image | MedImage,
+        metadata: dict[str, str] | None = None,
     ) -> Mask:
         """Create Mask from numpy array with copied spatial metadata."""
         img = sitk.GetImageFromArray(array)
         img.CopyInformation(reference)
-        return cls(sitk.Cast(img, sitk.sitkLabelUInt8))
+        return cls(
+            sitk.Cast(img, sitk.sitkLabelUInt8), metadata=metadata or {}
+        )
