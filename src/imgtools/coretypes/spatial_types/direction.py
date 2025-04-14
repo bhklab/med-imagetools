@@ -93,6 +93,27 @@ class Direction:
         )  # type: ignore
         return cls(matrix=flattened)
 
+    def flip_axis(self, axis: int) -> Direction:
+        """Flip the matrix along a specified axis.
+
+        Parameters
+        ----------
+        axis : int
+            The axis to flip (0, 1, or 2).
+
+        Returns
+        -------
+        Direction
+            A new instance with the flipped matrix.
+        """
+        if axis not in (0, 1, 2):
+            raise ValueError("Axis must be 0 (x), 1 (y), or 2 (z).")
+        matrix = self.to_matrix()
+        matrix[axis] = [-v for v in matrix[axis]]
+        return Direction.from_matrix(
+            tuple(tuple(row) for row in matrix)  # type: ignore
+        )
+
     def to_matrix(self) -> list[list[float]]:
         """Convert the flattened row-major array back to a 3D matrix.
 
