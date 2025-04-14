@@ -15,10 +15,6 @@ from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
 from imgtools.coretypes.base_masks import ROIMaskMapping
-from imgtools.coretypes.masktypes.roi_matching import (
-    ROIMatcher,
-    ROIMatchStrategy,
-)
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.exceptions import (
@@ -33,6 +29,9 @@ if TYPE_CHECKING:
     from pydicom.sequence import Sequence
 
     from imgtools.coretypes import MedImage
+    from imgtools.coretypes.masktypes.roi_matching import (
+        ROIMatcher,
+    )
 
 """
 PROTOTYPE of the RTSTRUCT class that will interact with the VectorMask class
