@@ -4,6 +4,17 @@ import SimpleITK as sitk
 from imgtools.coretypes import RegionBox, Coordinate3D, Size3D, BoxPadMethod
 from imgtools.coretypes.box import BoundingBoxOutsideImageError
 from imgtools.datasets import example_data
+
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Store the current log level
+
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
 # Simple tests
 def test_regionbox_initialization():
     min_coord = Coordinate3D(0, 0, 0)
@@ -70,7 +81,11 @@ def test_regionbox_crop_image_and_mask():
     assert cropped_image.GetSize() == (10, 10, 10)
     assert cropped_mask.GetSize() == (10, 10, 10)
 
-# Edge cases
+    # check actual pixel physical indices
+    origin = image.GetOrigin()
+    assert origin == (0.0, 0.0, 0.0)
+    cropped_origin = cropped_image.GetOrigin()
+    assert cropped_origin == (10.0, 10.0, 10.0)
 
 def test_regionbox_from_centroid_odd_cube():
 

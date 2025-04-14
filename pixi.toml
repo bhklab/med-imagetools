@@ -38,7 +38,7 @@ IMGTOOLS_LOG_LEVEL = "DEBUG"
 clean = { cmd = [
   "bash",
   "-c",
-  "rm -rf .cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+  "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
 ], description = "Clear cache and coverage files" }
 
 ############################################## PYTHON ###############################################
@@ -61,15 +61,17 @@ pytest-cov = "*"
 pytest-xdist = "*"
 pytest-mock = ">=3.14.0,<4"
 filelock = ">=3.17.0,<4"
+pytest-asyncio = ">=0.26.0,<0.27"
+anyio = ">=4.9.0,<5"
 
 [feature.test.tasks.test]
-cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp'"
+cmd = "pytest -c config/pytest.ini --rootdir . --basetemp='./tests/temp' -s"
 description = "Run pytest (make sure to run in root directory)"
 
 [feature.test.tasks.test_ci]
 cmd = "pytest -c config/pytest.ini --rootdir ."
 
-[feature.test.tasks.coverage]
+[feature.test.tasks.cov]
 cmd = "coverage report --rcfile=config/coverage.toml"
 inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 description = "Run pytest and generate coverage report"

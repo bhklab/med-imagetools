@@ -1,183 +1,255 @@
-import os
-import pathlib
 from pathlib import Path
-from typing import Generator, Tuple
-from urllib import request
-from zipfile import ZipFile
-import json
 import pytest
 from filelock import FileLock
+from enum import Enum
+import os
+import logging
+import pandas as pd
+import json
+from collections import defaultdict
+import pytest
+from typing import TypedDict
+from pathlib import Path
 
+pytest_logger = logging.getLogger("tests.fixtures")
+pytest_logger.setLevel(logging.DEBUG)
 
-from imgtools.datasets.github_helper import (
-    GitHubRelease,
-    MedImageTestData,
+pytest_logger.propagate = True  # Let pytest capture it
+
+# TEST_ACCESS_TYPE
+class TestAccessType(str, Enum):
+    PUBLIC = "public"
+    PRIVATE = "private"
+
+TEST_DATASET_TYPE = TestAccessType(
+    os.environ.get("TEST_DATASET_TYPE", "public").lower()
 )
-from imgtools.loggers import logger  # type: ignore
 
-# from .conf_helpers import ensure_data_dir_exists  # type: ignore
+DATA_DIR = Path(__file__).parent.parent / "data"
+if not DATA_DIR.exists():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+
+METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
+
+class MedImageDataEntry(TypedDict):
+	Collection: str
+	PatientID: str
+	Modality: str
+	SeriesInstanceUID: str
+	Path: Path
+	NumInstances: int
 
 @pytest.fixture(scope="session")
-def data_dir() -> pathlib.Path:
-    data_dir = Path(__file__).parent.parent / "data"
-    if not data_dir.exists():
-        data_dir.mkdir(parents=True, exist_ok=True)
-    return data_dir
+def medimage_test_data() -> list[MedImageDataEntry]:
+    """Provides access to medical imaging test data files.
+    
+    Downloads and caches standardized medical imaging test data from GitHub.
+    The data is downloaded only once per session and cached for subsequent 
+    access. Supports both public and private datasets based on the 
+    TEST_DATASET_TYPE environment variable.
 
+    Returns
+    -------
+    list[MedImageDataEntry]
+        List of dictionaries containing metadata for each test data entry.
+        See `MedImageDataEntry` for the structure of each entry.
 
-@pytest.fixture(scope="session")
-def download_all_test_data(data_dir: pathlib.Path, worker_id: str | None) -> dict[str, Path]:  
+    """
+    pytest_logger.info(f"Cache directory: {DATA_DIR}")
+    from imgtools.datasets.github_datasets import MedImageTestData
 
-    # idk how this works like in the pytest-xdist docs
-    # leaving in case we need to use it later
-    # if worker_id == "master":
-    #     # following the pytest-xdist docs, we only want to download the data once
+    # configure which test data type
+    repo = "bhklab/med-image_test-data"
+    if TEST_DATASET_TYPE == TestAccessType.PRIVATE:
+        repo += "_private"
 
-    #     manager = MedImageTestData()
-    #     latest_release: GitHubRelease = manager.get_latest_release()
-    #     # banned = ["4D-Lungs", "CC-Tumor-Heterogeneisty.tar"]
-    #     banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
-    #     selected_tests = list(
-    #         filter(
-    #             lambda asset: not any(
-    #                 asset.name.startswith(nope) for nope in banned
-    #             ),
-    #             latest_release.assets,
-    #         )
-    #     )
-    #     extracted_paths = manager.download(data_dir, assets=selected_tests)
-    #     dataset_path_mapping = {
-    #         unzip_path.name: unzip_path for unzip_path in extracted_paths
-    #     }
-    #     return dataset_path_mapping
-
-    lock_path = data_dir / "download_all_test_data"
-
-    with FileLock(str(lock_path) + ".lock"):
-        if lock_path.with_suffix(".json").exists():
-            # Load existing dataset mapping if already downloaded
-            logger.info("Loading pre-downloaded test dataset metadata...")
-            loaded_json =  json.loads(lock_path.with_suffix(".json").read_text())
-            dataset_path_mapping = {k: Path(v) for k, v in loaded_json.items()}
-            return dataset_path_mapping
-        # Download QC dataset
-        logger.info("Downloading the test dataset...")
-        manager = MedImageTestData()
-        latest_release: GitHubRelease = manager.get_latest_release()
-        banned = ["4D-Lung", "CC-Tumor-Heterogeneity.tar"]
-        selected_tests = list(
-            filter(
-                lambda asset: not any(
-                    asset.name.startswith(nope) for nope in banned
-                ),
-                latest_release.assets,
+    dataset_dicts = []
+    # prevent multiple workers from downloading simultaneously
+    with FileLock(LOCKFILE):
+        # if the metadata cache file exists, read it
+        if METADATA_CACHE_FILE.exists():
+            pytest_logger.info(
+                f"✅ Metadata cache file exists: {METADATA_CACHE_FILE}"
             )
-        )
-        extracted_paths = manager.download(data_dir, assets=selected_tests)
-        dataset_path_mapping = {
-            unzip_path.name: unzip_path for unzip_path in extracted_paths
-        }
-        # Save dataset mapping to avoid re-downloading in future runs
-        lock_path.with_suffix(".json").write_text(
-            json.dumps({k: str(v) for k, v in dataset_path_mapping.items()})
-        )
-        return dataset_path_mapping
+            with open(METADATA_CACHE_FILE, "r") as f:
+                dataset_dicts = json.load(f)
+            
+            # convert the Path
+            for d in dataset_dicts:
+                d["Path"] = Path(d["Path"])
+            return dataset_dicts
+
+        manager = MedImageTestData(repo_name=repo)
+        manager.download(dest=DATA_DIR)
+
+        # try looking for a *-combined_metadata.csv file
+        # in the data directory
+        meta = DATA_DIR / f"{TEST_DATASET_TYPE.upper()}-combined_metadata.csv"
+        metadf = pd.read_csv(meta)
+        missingpaths = []
+        existingpaths = []
+        for row in metadf.itertuples():
+            collection = str(row.Collection).replace(" ", "_")
+            patient_id = str(row.PatientID)
+            modality = str(row.Modality)
+            series_uid = str(row.SeriesInstanceUID)
+            path = DATA_DIR / collection / patient_id / f"{modality}_Series{series_uid[-8:]}"
+            if not path.exists():
+                missingpaths.append(path)
+            else:
+                existingpaths.append(path)
+                dataset_dicts.append({
+                    "Collection": collection,
+                    "PatientID": patient_id,
+                    "Modality": modality,
+                    "SeriesInstanceUID": series_uid,
+                    "Path": path,
+                    "NumInstances": row.ImageCount,
+                })
+        
+        missing_file = DATA_DIR / "missing_paths.txt"
+        if len(missingpaths) > 0:
+            pytest_logger.warning(
+                f"⚠️ The following paths are missing:\n{missingpaths}"
+            )
+            with open(missing_file, "w") as f:
+                for path in missingpaths:
+                    f.write(f"{path}\n")
+            pytest_logger.info(
+                f"✅ The following paths exist:\n{existingpaths}"
+            )
+            raise FileNotFoundError(
+                f"Some paths are missing. Please check {missing_file} "
+                " for more details."
+            )
+        else:
+            if missing_file.exists():
+                missing_file.unlink()
+                pytest_logger.info(f"✅ Deleted file: {missing_file}")
+        # dump file
+        with open(METADATA_CACHE_FILE, "w") as f:
+            # serialize the Path object to string
+            for d in dataset_dicts:
+                d["Path"] = str(d["Path"])
+            json.dump(dataset_dicts, f, indent=4)
+            pytest_logger.info(
+            f"✅ Metadata cache file created: {METADATA_CACHE_FILE}"
+            )
+    return dataset_dicts
 
 @pytest.fixture(scope="session")
-def download_old_test_data(data_dir: pathlib.Path) -> dict[str, Path]:
+def medimage_by_modality(
+	medimage_test_data: list[MedImageDataEntry],
+) -> dict[str, list[MedImageDataEntry]]:
+	"""Groups test data by imaging modality.
+
+	organizes `medimage_test_data` into a dictionary where the keys are 
+    modality type (e.g., CT, MRI, PET) for easier access when testing 
+    modality-specific functionality.
+
+	Parameters
+	----------
+	medimage_test_data : list of MedImageDataEntry
+	    Test dataset metadata entries.
+
+	Returns
+	-------
+	DefaultDict[str, list[MedImageDataEntry]]
+	    Dictionary mapping modality to list of entries.
+	"""
+	grouped: dict[str, list[MedImageDataEntry]] = defaultdict(list)
+	for entry in medimage_test_data:
+		grouped[entry["Modality"]].append(entry)
+	return grouped
+
+@pytest.fixture(scope="session")
+def medimage_by_seriesUID(
+    medimage_test_data: list[MedImageDataEntry],
+) -> dict[str, MedImageDataEntry]:
+    """Groups test data by SeriesInstanceUID.
+
+    organizes `medimage_test_data` into a dictionary where the keys are
+    SeriesInstanceUID for easier access when testing series-specific
+    functionality.
     """
-    We have a few old tests that we want to keep around for now.
-    this is mainly the quebec dataset
+    return {
+        entry["SeriesInstanceUID"]: entry
+        for entry in medimage_test_data
+    }
+
+
+
+@pytest.fixture(scope="session")
+def dataset_type() -> str:
+    """Returns the current test dataset type (public or private).
+    
+    Provides access to the configured dataset type for tests that need
+    to behave differently based on the available test data. The value
+    comes from the TEST_DATASET_TYPE environment variable.
     """
-
-    lock_path = data_dir / "download_old_test_data"
-
-    with FileLock(str(lock_path) + ".lock"):
-        if lock_path.with_suffix(".json").exists():
-            # Load existing dataset mapping if already downloaded
-            logger.info("Loading pre-downloaded old test dataset metadata...")
-            loaded_json = json.loads(lock_path.with_suffix(".json").read_text())
-            dataset_path_mapping = {k: Path(v) for k, v in loaded_json.items()}
-            return dataset_path_mapping
-
-        # Download QC dataset
-        logger.info("Downloading the old test dataset...")
-        quebec_data_path = data_dir / "Head-Neck-PET-CT"
-
-        if not quebec_data_path.exists():
-            quebec_data_url = "https://github.com/bhklab/tcia_samples/blob/main/Head-Neck-PET-CT.zip?raw=true"
-            quebec_zip_path = quebec_data_path.with_suffix(".zip")
-
-            quebec_data_path.mkdir(parents=True, exist_ok=True)
-            request.urlretrieve(quebec_data_url, quebec_zip_path)
-            with ZipFile(quebec_zip_path, "r") as zipfile:
-                zipfile.extractall(quebec_data_path)
-            quebec_zip_path.unlink()
-
-        assert quebec_data_path.exists(), f"Quebec data not found at {quebec_data_path}"
-        dataset_path_mapping = {
-            "Head-Neck-PET-CT": quebec_data_path,
-        }
-
-        # Save dataset mapping to avoid re-downloading in future runs
-        lock_path.with_suffix(".json").write_text(
-            json.dumps({k: str(v) for k, v in dataset_path_mapping.items()})
-        )
-        return dataset_path_mapping
-
+    return TEST_DATASET_TYPE.value
 
 @pytest.fixture(scope="session")
-def data_paths(
-    download_all_test_data: dict[str, Path], download_old_test_data: dict[str, Path]
-) -> dict[str, Path]:
-    return {**download_all_test_data, **download_old_test_data}
-
-####################################################################################################
-# these ones are all OLD
-# hopefully we can replace them with the new ones
-@pytest.fixture(scope="session")
-def curr_path() -> str:
-    return pathlib.Path(__file__).parent.parent.resolve().as_posix()
-
-
-@pytest.fixture(scope="session")
-def quebec_paths(
-    data_paths: dict[str, Path],  data_dir: pathlib.Path
-) -> Tuple[str, str, str, str]:
-    quebec_path = data_paths["Head-Neck-PET-CT"]
-    assert quebec_path.exists(), "Dataset not found"
-
-    output_path = pathlib.Path(data_dir.parent, "tests", "temp")
-    quebec_path_str = quebec_path.as_posix()
-    crawl_path = data_dir / ".imgtools" / "imgtools_Head-Neck-PET-CT.csv"
-    edge_path = data_dir / ".imgtools" / "imgtools_Head-Neck-PET-CT_edges.csv"
-
-    return quebec_path_str, output_path.as_posix(), crawl_path.as_posix(), edge_path.as_posix()
-
+def public_collections() -> list[str]:
+    """Public collections available 
+    """
+    return  [
+        "4D-Lung",
+        "Adrenal-ACC-Ki67-Seg",
+        "CC-Tumor-Heterogeneity",
+        "ISPY2",
+        "LIDC-IDRI",
+        "Mediastinal-Lymph-Node-SEG",
+        "NSCLC-Radiomics",
+        "NSCLC_Radiogenomics",
+        "Prostate-Anatomical-Edge-Cases",
+        "QIN-PROSTATE-Repeatability",
+        "Soft-tissue-Sarcoma",
+        "Vestibular-Schwannoma-SEG"
+    ]
 
 @pytest.fixture(scope="session")
-def modalities_path(
-    data_paths: dict[str, Path], 
-) -> dict[str, str]:
-    quebec_patientd_path = data_paths["Head-Neck-PET-CT"] / "HN-CHUS-052"
+def private_collections() -> list[str]:
+    """Returns the list of private test data collections.
+    
+    Provides a standardized list of all available private medical imaging 
+    collections that can be used in tests when working with private test data.
+    Access to these collections may require special permissions.
+    """
+    return [
+        "HNSCC",
+        "HNSCC-3DCT-RT",
+        "Head-Neck-PET-CT",
+        "QIN-HEADNECK",
+        "RADCURE",
+        "TCGA-HNSC",
+        "HEAD-NECK-RADIOMICS-HN1"
+    ]
 
-    assert quebec_patientd_path.exists(), "Dataset not found"
+@pytest.fixture(scope="session")
+def available_collections(dataset_type: str, public_collections: list[str], private_collections: list[str]) -> list[str]:
+    """Returns the list of available collections based on the dataset type.
+    
+    Combines public and private collections based on the TEST_DATASET_TYPE
+    environment variable.
+    """
+    if dataset_type == TestAccessType.PUBLIC.value:
+        return public_collections
+    elif dataset_type == TestAccessType.PRIVATE.value:
+        return private_collections
+    else:
+        raise ValueError(f"Unknown dataset type: {dataset_type}")
 
-    path = {}
-    path["CT"] = pathlib.Path(
-        quebec_patientd_path, "08-27-1885-CA ORL FDG TEP POS TX-94629/3.000000-Merged-06362"
-    ).as_posix()
-    path["RTSTRUCT"] = pathlib.Path(
-        quebec_patientd_path,
-        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/Pinnacle POI-41418",
-    ).as_posix()
-    path["RTDOSE"] = pathlib.Path(
-        quebec_patientd_path,
-        "08-27-1885-OrophCB.0OrophCBTRTID derived StudyInstanceUID.-94629/11376",
-    ).as_posix()
-    path["PT"] = pathlib.Path(
-        quebec_patientd_path,
-        "08-27-1885-CA ORL FDG TEP POS TX-94629/532790.000000-LOR-RAMLA-44600",
-    ).as_posix()
-    return path
+def pytest_sessionfinish(session, exitstatus):
+    """Called after whole test run completes, right before returning the exit status."""
+    pytest_logger.info("✅ Pytest session finished.")
+    
+    # Clean up the lockfile
+    if Path(LOCKFILE).exists():
+        try:
+            LOCKFILE.unlink()
+            pytest_logger.info(f"✅ Deleted lockfile: {LOCKFILE}")
+        except Exception as e:
+            pytest_logger.warning(f"⚠️ Could not delete lockfile: {e}")

@@ -1,6 +1,303 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.20 (2025-04-11)
+
+### Bug Fixes
+
+- Sitk 2.4 DICOM reading issue direction handling
+  ([#317](https://github.com/bhklab/med-imagetools/pull/317),
+  [`519c8d0`](https://github.com/bhklab/med-imagetools/commit/519c8d03443aa929097c8d1becd0a79134530eaf))
+
+Address issues with negative 'SpacingBetweenSlices' in DICOM files by correcting direction cosines.
+  Include tests to validate the fix.
+
+Fixes #296
+
+Caused by [Change in GDCM's
+  MediaStorageAndFileFormat/gdcmImageHelper.cxx](https://github.com/InsightSoftwareConsortium/ITK/blob/72f509f357570d0e650029b855fb5dee3ded42ee/Modules/ThirdParty/GDCM/src/gdcm/Source/MediaStorageAndFileFormat/gdcmImageHelper.cxx#L1377-L1384)
+
+Reference Issues: https://github.com/SimpleITK/SimpleITK/issues/2214
+  https://github.com/InsightSoftwareConsortium/ITK/issues/4794
+
+- update reading classes to also add the metadata
+
+- **New Features** - Enhanced reading capabilities for dose, PET, and scan data with support for
+  additional parameters and richer metadata extraction. - Introduced automatic correction of scan
+  image direction for improved data accuracy.
+
+- **Documentation** - Updated parameter descriptions and inline guidance to clarify functionality.
+
+- **Tests** - Added new test cases to validate scan direction correction and metadata extraction. -
+  Refined test fixtures for improved organization and type safety.
+
+
+## v2.0.0-rc.19 (2025-04-10)
+
+### Features
+
+- Add ROI matching strategies ([#315](https://github.com/bhklab/med-imagetools/pull/315),
+  [`ab9ab3f`](https://github.com/bhklab/med-imagetools/commit/ab9ab3f94012795c26d6157dd319346dbb16ce99))
+
+Update the ruff configuration to ignore specific notebook files and introduce new ROI matching
+  strategies with the ROIMatcher class, enhancing the handling of ROI patterns.
+
+- **New Features** - Enhanced support for Jupyter Notebook files by adjusting code analysis checks.
+  - Introduced the `ROIMatcher` class for flexible handling of Regions of Interest, allowing various
+  input formats and matching strategies. - Defined new ROI handling strategies: `MERGE`,
+  `KEEP_FIRST`, and `SEPARATE`.
+
+- **Tests** - Added comprehensive tests to ensure the robust performance of the new Regions of
+  Interest matching strategies.
+
+
+## v2.0.0-rc.18 (2025-04-09)
+
+### Features
+
+- Implement lazy loading in cli click commands
+  ([#313](https://github.com/bhklab/med-imagetools/pull/313),
+  [`804b407`](https://github.com/bhklab/med-imagetools/commit/804b40736a982fb6d7a9609d2a94a68cb2021481))
+
+- **New Features** - Enhanced CLI experience with organized command groups, making the help output
+  clearer and easier to navigate. - Updated DICOM sorting command now provides explicit action
+  options (move, copy, symlink, hardlink), improving usability.
+
+- **Bug Fixes** - Improved handling of test datasets with dynamic visibility based on availability.
+
+- **Refactor** - Streamlined handling of test datasets with improved messaging when dependencies are
+  missing. - Optimized dependency management and import scoping to ensure a more robust operational
+  flow.
+
+
+## v2.0.0-rc.17 (2025-04-08)
+
+### Features
+
+- Implement MedImage and Scan classes with geometry handling
+  ([#303](https://github.com/bhklab/med-imagetools/pull/303),
+  [`1888c8a`](https://github.com/bhklab/med-imagetools/commit/1888c8a95a603da685ce13c6c1774f4443a9a888))
+
+Introduce the MedImage class to manage 3D image geometry properties and methods, along with the Scan
+  class for metadata handling. This enhances the framework's capability to work with medical images
+  effectively.
+
+#277
+
+- **New Features** - Introduced new imaging capabilities, including enhanced support for medical
+  scans, dose images, and PET imaging from DICOM data. - Added utilities to extract image metadata
+  and convert images to numerical arrays.
+
+- **Refactor** - Streamlined the display format for directional data to a more compact, two-decimal
+  representation for improved clarity.
+
+- **Tests** - Updated tests to align with the new directional formatting.
+
+- **Chores** - Deprecated legacy imaging definitions to simplify the codebase.
+
+
+## v2.0.0-rc.16 (2025-04-08)
+
+### Features
+
+- New AttrDict class in utils, DICOM datetime parsers
+  ([#307](https://github.com/bhklab/med-imagetools/pull/307),
+  [`8b83b9e`](https://github.com/bhklab/med-imagetools/commit/8b83b9eb157c65a0621ebbf25339bd106a96c6c3))
+
+- **New Features** - Improved the CLI's concurrency option by dynamically setting the default based
+  on system capabilities. - Added advanced date & time parsing with ISO formatting for more robust
+  handling of imaging data. - Introduced versatile dictionary utilities that enable intuitive nested
+  data management. - Streamlined imaging metadata extraction to deliver more relevant outputs.
+
+- **Chores** - Standardized configuration formatting and updated ignore rules for enhanced
+  consistency.
+
+- **Tests** - Expanded test coverage to validate the new date/time parsing and dictionary utility
+  features.
+
+
+## v2.0.0-rc.15 (2025-04-07)
+
+### Chores
+
+- Update lockfile
+  ([`6efe08d`](https://github.com/bhklab/med-imagetools/commit/6efe08d2c1b2f16f1236d366a958b28a61fec777))
+
+### Features
+
+- **dicom_metadata**: Add additional date and time fields to ModalityMetadataExtractor
+  ([#304](https://github.com/bhklab/med-imagetools/pull/304),
+  [`5ba35c1`](https://github.com/bhklab/med-imagetools/commit/5ba35c1550ebef168cfaba639481b72a98de7a43))
+
+Enhance the ModalityMetadataExtractor by including extra date and time fields for improved metadata
+  extraction.
+
+``` # Date Time Information "StudyDate", "StudyTime", "SeriesDate", "SeriesTime", "ContentDate",
+  "ContentTime", "AcquisitionDateTime", "AcquisitionDate", "AcquisitionTime",
+  "InstanceCreationDate", "InstanceCreationTime", ```
+
+- **New Features** - Enhanced DICOM metadata extraction to include additional date and time details
+  for studies, series, and image content. - Updated the extraction process to now capture instance
+  creation information, offering more precise metadata over previous protocol details.
+
+### Refactoring
+
+- **dicom_find**: Improve logging and enhance case-insensitive extension handling
+  ([`8f06d24`](https://github.com/bhklab/med-imagetools/commit/8f06d2413efc45c7e435d42da89a33897cdd4121))
+
+### Testing
+
+- **coretypes**: Add more tests for coretypes and direction
+  ([#302](https://github.com/bhklab/med-imagetools/pull/302),
+  [`01df60c`](https://github.com/bhklab/med-imagetools/commit/01df60c031de3344a387dba1078fde3e5dba9dc3))
+
+Enhance tests for the Direction class and ensure proper initialization and error handling. Update
+  the lockfile to reflect dependency changes.
+
+- **Documentation** - Enhanced user guidance by clarifying how to work with orientation matrices and
+  spatial data.
+
+- **Bug Fixes** - Improved input validations with descriptive error messages for 3D configuration to
+  help prevent misconfiguration.
+
+- **Tests** - Expanded automated checks to verify correct matrix conversions, normalization
+  behaviors, and error handling in spatial data utilities.
+
+
+## v2.0.0-rc.14 (2025-04-07)
+
+### Features
+
+- **cli**: Add index command and update DICOM crawling and parsing
+  ([#301](https://github.com/bhklab/med-imagetools/pull/301),
+  [`5a179ae`](https://github.com/bhklab/med-imagetools/commit/5a179aebe047a6446f5595343f1819c015b7a2b9))
+
+- Implemented `Crawler` and `CrawlerSettings`
+
+extra: - fixed some things across the testing suite for better output and logging
+
+- **New Features** - Introduced a new CLI indexing command with enhanced options for processing
+  DICOM files, including configurable output and parallel processing. - Expanded metadata extraction
+  to support additional DICOM tags for richer data capture. - Improved file discovery with smarter
+  default extensions and customizable case sensitivity.
+
+- **Refactor** - Streamlined CLI command registration and parameter naming for consistency. -
+  Upgraded logging controls to reduce debug noise during operations.
+
+- **Tests** - Added fixtures to suppress debug logging for cleaner test outputs. - Updated test
+  parameters for improved validation of image processing and file writing functionalities.
+
+
+## v2.0.0-rc.13 (2025-04-04)
+
+### Continuous Integration
+
+- Mypy errors and gha for mypy ([#298](https://github.com/bhklab/med-imagetools/pull/298),
+  [`90fee16`](https://github.com/bhklab/med-imagetools/commit/90fee166d163d5e1150683e5a320d0f54b5a78ae))
+
+### Features
+
+- Introduce DICOM metadata extraction framework for dicom parsing
+  ([#299](https://github.com/bhklab/med-imagetools/pull/299),
+  [`ab4fec2`](https://github.com/bhklab/med-imagetools/commit/ab4fec2acfd0f67b2b0486f912d495dc4d4fad8f))
+
+Implement a modality-based metadata extraction framework for DICOM files, improving type handling
+  and adding utilities for CT, MR, and PT modalities. Update documentation and tests to ensure
+  robustness and clarity.
+
+- **New Features** - Introduced a new command‐line tool to extract metadata from DICOM files. -
+  Expanded support for multiple imaging modalities, including CT, MR, PT, segmentation, structured
+  reports, and radiotherapy data.
+
+- **Refactor** - Consolidated legacy metadata extraction processes into a modern, modular framework
+  for improved reliability. - Streamlined internal data handling and diagnostics.
+
+- **Tests** - Added new tests to validate enhanced metadata extraction and import functionality.
+
+
+## v2.0.0-rc.12 (2025-04-04)
+
+### Features
+
+- Rebuild pytest configuration and dataset downloading with logging improvements
+  ([#294](https://github.com/bhklab/med-imagetools/pull/294),
+  [`9fbae4a`](https://github.com/bhklab/med-imagetools/commit/9fbae4a9854527700a531450dd8bcc59a993c6b2))
+
+Update pytest configuration to include new dependencies and improve logging during dataset
+  downloads. Enhance test cases to handle timeouts and private repository access more effectively.
+
+- **New Features** - Enhanced logging that now provides clear real-time feedback and improved error
+  reporting during dataset operations. - Upgraded asynchronous handling for more robust and
+  efficient dataset management.
+
+- **Bug Fixes** - Improved error handling during dataset downloads and metadata validation.
+
+- **Tests** - Streamlined test setup and data management to ensure a smoother testing experience. -
+  Integrated new test scenarios to simulate timeouts and secure access, improving overall
+  reliability. - Added a new test function to validate metadata associated with medical image test
+  data. - Updated minimum release version for compatibility with the latest features.
+
+### Refactoring
+
+- Delete pipeline.py ([#297](https://github.com/bhklab/med-imagetools/pull/297),
+  [`54f0a76`](https://github.com/bhklab/med-imagetools/commit/54f0a76b2bf5908623ed6f7b29f136d52e562465))
+
+
+## v2.0.0-rc.11 (2025-04-04)
+
+### Features
+
+- Enhance testdata downloader with better cli and ability to download private data
+  ([#293](https://github.com/bhklab/med-imagetools/pull/293),
+  [`2120fb4`](https://github.com/bhklab/med-imagetools/commit/2120fb4f4d690f275769ab69a803a2fdc4181b70))
+
+- Introduce a new `--list-assets` option to the testdata command for listing available assets. - Add
+  shorthand options for destination and list-assets to enhance usability. - Improve logging for
+  better tracking of available assets.
+
+- **New Features** - Enhanced the command-line experience by adding a new flag to list available
+  assets and a more intuitive destination option with clear guidance. - Upgraded asset download
+  functionality with improved progress tracking, status reporting, and user-friendly asset
+  identification, ensuring smoother operations and clearer user feedback. - Introduced a structured
+  approach for managing and downloading datasets from GitHub releases, including robust error
+  handling and user feedback.
+
+- **Bug Fixes** - Improved error handling for missing destination directories and asset download
+  failures.
+
+- **Chores** - Updated linting configuration to streamline the process by excluding certain files
+  and directories.
+
+
+## v2.0.0-rc.10 (2025-03-28)
+
+### Features
+
+- Enhance CLI organization with groups, add shell-completion
+  ([#287](https://github.com/bhklab/med-imagetools/pull/287),
+  [`6175600`](https://github.com/bhklab/med-imagetools/commit/6175600da9d9a0050ec378f1a47794a21bdb09e7))
+
+Implement a `SectionedGroup` for better organization of CLI commands and add documentation for shell
+  completion in the `imgtools` CLI.
+
+<details><summary>screenshots</summary> <p>
+
+![image](https://github.com/user-attachments/assets/589733c5-1d78-4164-a72d-a60f47da0c1c)
+
+![image](https://github.com/user-attachments/assets/aa516430-3a3d-4335-884a-f241dfaf53dc)
+
+![image](https://github.com/user-attachments/assets/8c99df8c-e204-407a-b2b7-7741d2c2f52a)
+
+</p> </details>
+
+- **New Features** - Launched an organized command-line interface for med-imagetools. - Introduced a
+  “dicom-tools” group with commands to find and sort DICOM images, along with an optional testing
+  group. - Added a hidden command to generate shell completion scripts for bash, zsh, and fish.
+
+- **Refactor** - Streamlined the command grouping and help output for a clearer and more extensible
+  user experience.
+
+
 ## v2.0.0-rc.9 (2025-03-28)
 
 ### Chores

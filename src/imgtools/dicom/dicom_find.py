@@ -1,6 +1,6 @@
 from itertools import islice
 from pathlib import Path
-from typing import List
+from typing import Generator, List
 
 from pydicom.misc import is_dicom
 
@@ -24,7 +24,8 @@ def find_dicoms(
     directory: Path,
     recursive: bool = True,
     check_header: bool = False,
-    extension: str | None = None,
+    extension: str = "dcm",
+    case_sensitive: bool = False,
     limit: int | None = None,
     search_input: List[str] | None = None,
 ) -> List[Path]:
@@ -44,9 +45,12 @@ def find_dicoms(
         Whether to validate files by checking for a valid DICOM header.
             - If `True`, perform DICOM header validation (slower but more accurate).
             - If `False`, skip header validation and rely on extension.
-    extension : str, optional
+    extension : str, default="dcm"
         File extension to search for (e.g., "dcm"). If `None`, consider all files
         regardless of extension.
+    case_sensitive : bool, default=False
+        Whether to perform a case-sensitive search for the file extension.
+        If `False`, the search is case-insensitive.
     limit : int, optional
         Maximum number of DICOM files to return. If `None`, return all found files.
     search_input : List[str], optional
@@ -136,21 +140,46 @@ header validation:
     ... )
     [PosixPath('/data/scan1.dcm'), PosixPath('/data/subdir/scan2.dcm')]
     """
-    pattern = f"*.{extension}" if extension else "*"
 
-    glob_method = directory.rglob if recursive else directory.glob
-
-    logger.debug(
-        "Looking for DICOM files",
-        directory=directory,
-        recursive=recursive,
-        search_pattern=pattern,
-        check_header=check_header,
-        limit=limit,
-        search_input=search_input,
+    files = filter_valid_dicoms(
+        directory,
+        check_header,
+        case_sensitive,
+        search_input,
+        extension or "",
+        recursive,
     )
 
-    files = (
+    return list(islice(files, limit)) if limit else list(files)
+
+
+def filter_valid_dicoms(
+    directory: Path,
+    check_header: bool,
+    case_sensitive: bool,
+    search_input: List[str] | None,
+    extension: str,
+    recursive: bool,
+) -> Generator[Path, None, None]:
+    # case sensitivity is very os dependent
+    # if case sensitivity is False, we convert the extnsion to
+    # something that is case insensitive
+    if not case_sensitive:
+        extension = convert_to_case_insensitive(extension)
+    pattern = f"*.{extension}" if extension else "*"
+
+    logger.debug(
+        "Searching for DICOM files",
+        directory=directory,
+        pattern=pattern,
+        check_header=check_header,
+        case_sensitive=case_sensitive,
+        search_input=search_input,
+        extension=extension,
+    )
+
+    glob_method = directory.rglob if recursive else directory.glob
+    return (
         file.absolute()
         for file in glob_method(pattern)
         if (
@@ -160,4 +189,23 @@ header validation:
         and _is_valid_dicom(file, check_header)
     )
 
-    return list(islice(files, limit)) if limit else list(files)
+
+def convert_to_case_insensitive(extension: str) -> str:
+    """Convert the file extension to a case-insensitive format.
+
+    This is done by converting each character in the extension to a
+    case-insensitive pattern using character sets. For example, 'dcm'
+    becomes '[dD][cC][mM]'.
+    """
+    if not extension:
+        return ""
+
+    # Convert the extension to lowercase
+    lower_extension = extension.lower()
+
+    # permutate combinations of each letter in the extension
+    # to create a case-insensitive pattern
+    case_insensitive_extension = "".join(
+        f"[{char.lower()}{char.upper()}]" for char in lower_extension
+    )
+    return case_insensitive_extension

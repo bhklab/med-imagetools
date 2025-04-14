@@ -5,9 +5,20 @@ import pytest
 from imgtools.exceptions import DirectoryNotFoundError
 from imgtools.io.writers import AbstractBaseWriter, ExistingFileMode
 
+@pytest.fixture(autouse=True, scope="module")
+def suppress_debug_logging():
+    # Store the current log level
 
-class SimpleWriter(AbstractBaseWriter):
-    def save(self, content: str) -> Path:
+    # Suppress DEBUG and lower
+    from imgtools.loggers import temporary_log_level, logger
+
+    with temporary_log_level(logger, "WARNING"):
+        yield
+
+    # automatically reset the log level after the test
+
+class SimpleWriter(AbstractBaseWriter[str]):
+    def save(self, data: str) -> Path:
         """
         Save the provided content to a file at the resolved path.
 
@@ -26,12 +37,12 @@ class SimpleWriter(AbstractBaseWriter):
         """
         file_path = self.resolve_path()
         with open(file_path, "w") as f:
-            f.write(content)
+            f.write(data)
         return file_path
 
 
-class MediumWriter(AbstractBaseWriter):
-    def save(self, content: str, suffix: str = "") -> Path:
+class MediumWriter(AbstractBaseWriter[str]):
+    def save(self, data: str, suffix: str = "") -> Path:
         """
         Save content to a file with an optional filename suffix.
 
@@ -47,12 +58,12 @@ class MediumWriter(AbstractBaseWriter):
         """
         file_path = self.resolve_path(suffix=suffix)
         with open(file_path, "w") as f:
-            f.write(content)
+            f.write(data)
         return file_path
 
 
-class ComplexWriter(AbstractBaseWriter):
-    def save(self, content: str, metadata: dict) -> Path:
+class ComplexWriter(AbstractBaseWriter[str]):
+    def save(self, data: str, metadata: dict) -> Path:
         """
         Save content to a file using metadata to resolve the file path.
 
@@ -68,7 +79,7 @@ class ComplexWriter(AbstractBaseWriter):
         """
         file_path = self.resolve_path(**metadata)
         with open(file_path, "w") as f:
-            f.write(content)
+            f.write(data)
         return file_path
 
 

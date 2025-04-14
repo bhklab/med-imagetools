@@ -10,18 +10,6 @@ class InvalidDicomError(Exception):
     pass
 
 
-class NotRTSTRUCTError(InvalidDicomError):
-    """Exception raised when loading a non-RTSTRUCT DICOM file."""
-
-    pass
-
-
-class NotSEGError(InvalidDicomError):
-    """Exception raised when loading a non-SEG DICOM file."""
-
-    pass
-
-
 class RTSTRUCTAttributeError(InvalidDicomError):
     """Exception raised for attribute errors in the RTSTRUCT DICOM file."""
 

@@ -4,7 +4,6 @@ from typing import List
 
 import click
 
-from imgtools.dicom.dicom_find import find_dicoms
 from imgtools.loggers import logger
 
 
@@ -98,7 +97,7 @@ def dicomfind(
 
     """
     logger.info("Searching for DICOM files.", args=locals())
-
+    from imgtools.dicom.dicom_find import find_dicoms
     dicom_files = find_dicoms(
         directory=path,
         check_header=check_header,

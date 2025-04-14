@@ -1,3 +1,10 @@
+"""
+This module defines the Direction class, which stores a 3x3 orientation
+matrix as a flattened tuple of nine floats (row-major order). You can
+convert it to a 3x3 structure, normalize row vectors, or check if rows
+are normalized.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -29,16 +36,16 @@ FlattenedMatrix = Matrix3DFlat
 
 @dataclass(frozen=True, eq=True)
 class Direction:
-    """
-    Represent a directional matrix for image orientation.
+    """Represent a directional matrix for image orientation.
 
-    Supports 3D (3x3) directional matrices in row-major format.
+    Supports 3D (3x3) directional matrices in row-major format as 9 floats.
+    It's often useful when you need to keep track of orientation data
+    in a compact way.
 
     Attributes
     ----------
-    matrix : Tuple[float, ...]
-        A flattened 1D array representing the matrix,
-        with length 9 (3x3).
+    matrix : Matrix3DFlat
+        Flattened representation of a 3x3 matrix.
     """
 
     matrix: Matrix3DFlat
@@ -58,17 +65,22 @@ class Direction:
         matrix: Matrix3D,
     ) -> Direction:
         """
-        Create a Direction object from a full 3D (3x3) matrix.
+        Create a Direction instance from a nested 3x3 tuple.
 
         Parameters
         ----------
         matrix : Matrix3D
-            A nested tuple representing the 3D matrix.
+            A tuple of 3 rows, each row having 3 floats.
 
         Returns
         -------
         Direction
-            A Direction instance.
+            An instance with the flattened matrix.
+
+        Raises
+        ------
+        ValueError
+            If the input isn't a 3x3 structure.
         """
         if (size := len(matrix)) != 3:
             msg = f"Matrix must be 3x3. Got {size=}."
@@ -81,13 +93,48 @@ class Direction:
         )  # type: ignore
         return cls(matrix=flattened)
 
+    def flip_axis(self, axis: int) -> Direction:
+        """Flip the matrix along a specified axis.
+
+        Parameters
+        ----------
+        axis : int
+            The axis to flip (0, 1, or 2).
+
+        Returns
+        -------
+        Direction
+            A new instance with the flipped matrix.
+        """
+        if axis not in (0, 1, 2):
+            raise ValueError("Axis must be 0 (x), 1 (y), or 2 (z).")
+        matrix = self.to_matrix()
+        matrix[axis] = [-v for v in matrix[axis]]
+        return Direction.from_matrix(
+            tuple(tuple(row) for row in matrix)  # type: ignore
+        )
+
     def to_matrix(self) -> list[list[float]]:
-        """Convert the flattened row-major array back to a 3D matrix."""
+        """Convert the flattened row-major array back to a 3D matrix.
+
+        Returns
+        -------
+        list of list of float
+            The 3x3 data, row by row.
+        """
         dim = 3
         return [list(self.matrix[i * dim : (i + 1) * dim]) for i in range(dim)]
 
     def normalize(self) -> Direction:
-        """Return a new Direction with normalized row vectors."""
+        """Return a new Direction with normalized row vectors.
+
+        Zero rows remain unchanged.
+
+        Returns
+        -------
+        Direction
+            A new instance with normalized rows.
+        """
         matrix = self.to_matrix()
         normalized_matrix = [
             list(np.array(row) / np.linalg.norm(row)) for row in matrix
@@ -97,7 +144,18 @@ class Direction:
         )
 
     def is_normalized(self, tol: float = 1e-6) -> bool:
-        """Check if the row vectors of the matrix are normalized."""
+        """Check if all values are (almost) 1, given a tolerance.
+
+        Parameters
+        ----------
+        tol : float, optional
+            Acceptable deviation from 1.
+
+        Returns
+        -------
+        bool
+            True if all rows meet the norm requirement, else False.
+        """
         matrix = self.to_matrix()
         for row in matrix:
             if not np.isclose(np.linalg.norm(row), 1.0, atol=tol):
@@ -109,17 +167,12 @@ class Direction:
         yield from self.matrix
 
     def __repr__(self) -> str:
-        dim = 3
         rows = self.to_matrix()
         formatted_rows = [
-            "  [" + ", ".join(f"{value:>7.3f}" for value in row) + "]"
+            "[" + ",".join(f"{value:>4.2f}" for value in row) + "]"
             for row in rows
         ]
-        return (
-            f"Direction(  {dim}x{dim} matrix\n"
-            + "\n".join(formatted_rows)
-            + "\n)"
-        )
+        return f"Direction({', '.join(formatted_rows)})"
 
     # Create instances of each class
     # point = Point3D(10.0, 20.0, 30.0)

@@ -2,7 +2,6 @@ import pathlib
 
 import click
 
-from imgtools.dicom.sort import DICOMSorter, FileAction
 from imgtools.loggers import logger
 
 """ TODO: Implement overwrite option
@@ -16,7 +15,8 @@ Log all overwritten files for audit purposes
 
 """
 DEFAULT_OVERWRITE_BEHAVIOR = False
-
+# NOTE: THIS MUST BE THE SAME AS THE CHOICES IN imgtools.dicom.sort
+action_choices = ['move', 'copy', 'symlink', 'hardlink']
 
 @click.command()
 @click.argument(
@@ -41,7 +41,7 @@ DEFAULT_OVERWRITE_BEHAVIOR = False
 @click.option(
     "--action",
     "-a",
-    type=click.Choice(FileAction.choices(), case_sensitive=False),
+    type=click.Choice(action_choices, case_sensitive=False),
     required=True,
     help="Action to perform on the files.",
 )
@@ -73,7 +73,7 @@ DEFAULT_OVERWRITE_BEHAVIOR = False
 def dicomsort(
     source_directory: pathlib.Path,
     target_directory: str,
-    action: FileAction,
+    action: str,
     dry_run: bool,
     num_workers: int,
     truncate_uids: int,
@@ -81,7 +81,10 @@ def dicomsort(
     """Sorts DICOM files into directories based on their tags."""
     logger.info(f"Sorting DICOM files in {source_directory}.")
     logger.debug("Debug Args", args=locals())
+    from imgtools.dicom.sort import DICOMSorter, FileAction
     # TODO: eagerly validate target pattern somehow?
+
+    action_choice = FileAction(action.lower())
 
     try:
         sorter = DICOMSorter(
@@ -93,7 +96,7 @@ def dicomsort(
         raise click.Abort() from e
 
     sorter.execute(
-        action=action,
+        action=action_choice,
         overwrite=DEFAULT_OVERWRITE_BEHAVIOR,
         dry_run=dry_run,
         num_workers=num_workers,
