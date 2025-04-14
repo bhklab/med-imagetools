@@ -34,7 +34,7 @@ class VectorMask(MedImage):
         self,
         image: sitk.Image,
         roi_mapping: dict[int, ROIMaskMapping],
-        metadata: dict[str, str] | None = None,
+        metadata: dict[str, str],
         errors: dict[str, ROIExtractionErrorMsg] | None = None,
     ) -> None:
         super().__init__(image)
@@ -44,7 +44,7 @@ class VectorMask(MedImage):
         for old_idx, roi_mask_mapping in roi_mapping.items():
             self.roi_mapping[old_idx + 1] = roi_mask_mapping
 
-        self.metadata = metadata or {}
+        self.metadata = metadata
         self.errors = errors
         self._mask_cache = {}
 
@@ -162,9 +162,7 @@ class VectorMask(MedImage):
                 arr = sitk.GetArrayViewFromImage(self)
                 # create binary image where background is 1 and all others are 0
                 mask = Mask(
-                    sitk.GetImageFromArray(
-                        np.where(arr == 0, 1, 0).astype(np.uint8)
-                    )
+                    sitk.GetImageFromArray((arr.sum(-1) == 0).astype(np.uint8))
                 )
                 # Update metadata with ROINames
                 mask_metadata["ROINames"] = "Background"

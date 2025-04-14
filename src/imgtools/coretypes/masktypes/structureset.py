@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 PROTOTYPE of the RTSTRUCT class that will interact with the VectorMask class
 """
 
+
 class ROIExtractionErrorMsg(str):
     pass
 
@@ -119,6 +120,23 @@ class UnexpectedContourPointsError(Exception):
         return (
             f"Unexpected contour point structure for ROI '{self.roi_name}', "
             f"contour {self.contour_num}. Z-values: {self.z_values}"
+        )
+
+
+class NonIntegerZSliceIndexError(Exception):
+    """Exception raised when the Z-slice index is not an integer."""
+
+    def __init__(self, roi_name: str, contour_num: int, z_idx: float) -> None:
+        self.roi_name = roi_name
+        self.contour_num = contour_num
+        self.z_idx = z_idx
+        super().__init__(self._generate_message())
+
+    def _generate_message(self) -> str:
+        return (
+            f"Z-slice index {self.z_idx} is not an integer for ROI "
+            f"'{self.roi_name}' and contour {self.contour_num} "
+            "this could be because continuous physicalpts_to_idxs was set to True."
         )
 
 
@@ -404,6 +422,12 @@ class RTStructureSet:
                         z_values=uniq_z_vals,
                         reference_image=reference_image,
                     )
+                case [z] if not float(z).is_integer():
+                    raise NonIntegerZSliceIndexError(
+                        roi_name,
+                        contour_num,
+                        z_idx=z,
+                    )
                 case [z] if len(uniq_z_vals) == 1:
                     z_idx = z
                 case [*z_values]:
@@ -514,90 +538,3 @@ class RTStructureSet:
         assert mask_image.GetNumberOfComponentsPerPixel() == len(matched_rois)
 
         return mask_image, mapping
-
-
-if __name__ == "__main__":
-    from rich import print  # noqa
-    import shutil
-    from imgtools.dicom import Interlacer
-    from imgtools.dicom.crawl import Crawler, CrawlerSettings
-    from imgtools.coretypes.imagetypes.scan import read_dicom_scan
-    from imgtools.io.writers import NIFTIWriter, ExistingFileMode
-    from imgtools.coretypes.base_masks import VectorMask
-    # from imgtools.coretypes.tg_263_standard import *  # noqa
-
-    directory = Path("data/Head-Neck-PET-CT")
-
-    shutil.rmtree(
-        Path("temp_outputs"),
-        ignore_errors=True,
-    )
-    mask_writer = NIFTIWriter(
-        root_directory=Path("temp_outputs"),
-        # filename_format="Case-{case_id}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{roi_key}__[{matched_names}].nii.gz",
-        filename_format="Case-{case_id}_{PatientID}/{Modality}__{roi_key}__[{matched_names}].nii.gz",
-        existing_file_mode=ExistingFileMode.OVERWRITE,
-        compression_level=5,
-    )
-    ref_image_writer = NIFTIWriter(
-        root_directory=Path("temp_outputs"),
-        filename_format="Case-{case_id}_{PatientID}/{Modality}_reference.nii.gz",
-        existing_file_mode=ExistingFileMode.SKIP,
-        compression_level=5,
-    )
-
-    crawler_settings = CrawlerSettings(
-        dicom_dir=directory,
-        n_jobs=5,
-        force=False,
-    )
-
-    crawler = Crawler(crawler_settings)
-    interlacer = Interlacer(crawler.index)
-
-    rrr = interlacer.query("CT,RTSTRUCT")
-    for _i, (_ct, *_rt_list) in enumerate(rrr):
-        ct_node = interlacer.series_nodes[_ct["Series"]]
-        ct_folder = Path(directory.parent / ct_node.folder)
-        ref_image = read_dicom_scan(
-            path=str(ct_folder),
-            series_id=ct_node.SeriesInstanceUID,
-        )
-
-        for i, _rt_i in enumerate(_rt_list, start=1):
-            rt_node = interlacer.series_nodes[_rt_i["Series"]]
-            rt_file = list(Path(directory.parent / rt_node.folder).iterdir())[
-                0
-            ]
-
-            match_map = {
-                "GTV": ["GTV.*"],
-            }
-            matcher = ROIMatcher(
-                # https://www.aapm.org/pubs/reports/RPT_263.pdf align later
-                match_map=match_map,
-                handling_strategy=ROIMatchStrategy.MERGE,
-                ignore_case=True,  # important for matching lowercase labels
-            )
-
-            rtstruct = RTStructureSet.from_dicom(rt_file)
-            matched = matcher.match_rois(
-                rtstruct.roi_names,
-            )
-            vm = VectorMask.from_rtstruct(ref_image, rtstruct, matcher)
-
-            ref_image_writer.save(
-                ref_image,
-                case_id=f"{_i:03}",
-                roi_key="reference",
-                **ref_image.metadata,
-            )
-
-            for _, key, roi_names, mask in vm.iter_masks():
-                mask_writer.save(
-                    mask,
-                    case_id=f"{_i:03}",
-                    roi_key=f"{key}[{i}]",
-                    matched_names="|".join(roi_names),
-                    **vm.metadata,
-                )
