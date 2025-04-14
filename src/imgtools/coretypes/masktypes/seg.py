@@ -79,7 +79,7 @@ class Segment:
 
     number: int
     label: str
-    description: str
+    description: str | None = None
 
     def __repr__(self) -> str:
         return f"Segment(number={self.number}, label='{self.label}', description='{self.description}')"
@@ -153,7 +153,7 @@ class SEG:
             segments[segnum] = Segment(
                 number=segnum,
                 label=segdesc.SegmentLabel,
-                description=segdesc.SegmentDescription,
+                description=segdesc.get("SegmentDescription", None),
             )
 
         return cls(
@@ -174,7 +174,11 @@ class SEG:
         """
         Returns a list of unique descriptions for the segments in the DICOM-SEG object.
         """
-        return [seg.description for seg in self.segments.values()]
+        return [
+            seg.description
+            for seg in self.segments.values()
+            if seg.description
+        ]
 
     def extract_roi_identifiers(self) -> dict[str, int]:
         """
@@ -209,7 +213,7 @@ class SEG:
         self,
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
-    ) -> sitk.Image:
+    ) -> tuple[sitk.Image, dict[int, ROIMaskMapping]]:
         roi_identifier_mapping = self.extract_roi_identifiers()
 
         matched_rois: list[tuple[str, list[Segment]]] = []
@@ -250,7 +254,7 @@ class SEG:
         logger.debug(
             f"Extracting {len(matched_rois)} ROIs from DICOM-SEG file",
             mask_array_4d=mask_array_4d.shape,
-            raw_seg_mask_array=raw_seg_mask_array.shape,
+            raw_seg_mask_array=volume.spatial_shape,
         )
 
         plane_positions = [
@@ -261,6 +265,11 @@ class SEG:
             reference_image.TransformPhysicalPointToIndex(p)
             for p in plane_positions
         ]
+
+        # we need something to store the mapping
+        # so that we can keep track of what the 3D mask matches to
+        # the original roi name(s)
+        mapping: dict[int, ROIMaskMapping] = {}
 
         for iroi, res in enumerate(matched_rois):
             segment_matches: list[Segment]
@@ -298,11 +307,14 @@ class SEG:
                             f"Z-index {z} out of bounds for reference image shape. "
                             f"Skipping slice for ROI '{roi_key}'"
                         )
+                mapping[iroi] = ROIMaskMapping(
+                    roi_key=roi_key, roi_names=[*segment_matches]
+                )
         mask_image = sitk.GetImageFromArray(mask_array_4d, isVector=True)
         mask_image.CopyInformation(reference_image)
 
-        return mask_image
-    
+        return mask_image, mapping
+
     def __rich_repr__(self):
         yield "segments", self.segments
         # yield "metadata", len(self.metadata)
@@ -335,4 +347,4 @@ if __name__ == "__main__":
         ignore_case=True,
     )
 
-    vm = seg.get_vector_mask(ref, matcher)
+    vm, mapping = seg.get_vector_mask(ref, matcher)
