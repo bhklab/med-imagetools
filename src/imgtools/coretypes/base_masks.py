@@ -54,7 +54,7 @@ class VectorMask(MedImage):
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
 
-    def __getitem__(self, key):  # noqa # type: ignore
+    def __getitem__(self, key):  # type: ignore # noqa
         """Allow accessing masks via indexing.
 
         This method first tries to extract a mask using the given key.
