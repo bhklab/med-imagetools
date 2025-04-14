@@ -218,13 +218,14 @@ class VectorMask(MedImage):
             case int(0) | str("Background"):
                 arr = sitk.GetArrayViewFromImage(self)
                 # create binary image where background is 1 and all others are 0
-                mask = Mask(
-                    sitk.GetImageFromArray((arr.sum(-1) == 0).astype(np.uint8))
+                mask_image = sitk.GetImageFromArray(
+                    (arr.sum(-1) == 0).astype(np.uint8)
                 )
+
                 # Update metadata with ROINames
                 mask_metadata["ROINames"] = "Background"
             case int(idx):
-                mask = Mask(sitk.VectorIndexSelectionCast(self, idx - 1))
+                mask_image = sitk.VectorIndexSelectionCast(self, idx - 1)
                 # Update metadata with ROINames if mapping exists
                 mask_metadata["ROINames"] = "|".join(
                     self.roi_mapping[idx].roi_names
@@ -237,7 +238,7 @@ class VectorMask(MedImage):
 
                 # note: background is bypassed here automatically!
                 idx = self.roi_keys.index(key_str)
-                mask = Mask(sitk.VectorIndexSelectionCast(self, idx))
+                mask_image = sitk.VectorIndexSelectionCast(self, idx)
 
                 # Get the corresponding mapping entry and update ROINames
                 mask_metadata["ROINames"] = "|".join(
@@ -247,7 +248,10 @@ class VectorMask(MedImage):
                 msg = f"Invalid key type {type(key)}. Expected int or str."
                 raise TypeError(msg)
 
-        mask.metadata = mask_metadata
+        mask = Mask(
+            mask_image,
+            metadata=mask_metadata,
+        )
         self._mask_cache[key] = mask
         return mask
 
@@ -357,33 +361,6 @@ class Mask(MedImage):
         # TODO:: need to update metadata to reflect separation of ROI Names
         # and add a mapping to the new labels
         return Mask(label_img, metadata=self.metadata)
-
-    def to_vector_mask(self) -> VectorMask:
-        """Convert label image to a one-hot binary vector mask.
-
-        One-hot as in if there is more than 1 label, we will have a vector
-        with the number of labels as the number of channels.
-        """
-        arr, _ = self.to_numpy()
-        labels = np.unique(arr)
-        labels = labels[labels > 0]  # Exclude background
-        n_masks = 1 if len(labels) == 0 else len(labels)
-
-        one_hot = np.zeros((*arr.shape, n_masks), dtype=np.uint8)
-        for i, label in enumerate(labels):
-            one_hot[..., i] = (arr == label).astype(np.uint8)
-
-        vector_img = sitk.GetImageFromArray(one_hot, isVector=True)
-        vector_img.CopyInformation(self)
-
-        roi_mapping = {
-            i: ROIMaskMapping(str(label), [str(label)])
-            for i, label in enumerate(labels)
-        }
-
-        return VectorMask(
-            vector_img, roi_mapping=roi_mapping, metadata=self.metadata
-        )
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield from super().__rich_repr__()
