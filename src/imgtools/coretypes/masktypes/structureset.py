@@ -385,6 +385,53 @@ class RTStructureSet:
         mask_img_size: tuple[int, int, int, int],
         continuous: bool = False,
     ) -> np.ndarray:
+        """Get the mask as a numpy array for the specified ROI.
+
+        Extracts & rasterizes the contour points for the specified ROI from
+        the RTSTRUCT into a 3D binary, numpy array aligned with the reference
+        image geometry.
+
+        Internally, we convert the physical coordinates of each ROI's contours
+        (stored in the `ROIContourSequence[roi_index].ContourSequence.ContourData`
+        attribute) into pixel indices representing the boundaries of the
+        contour using `physical_points_to_idxs` and then fill the mask
+        using `skimage.draw.polygon2mask`.
+
+        One key assumption here is that each 2D contour lies on a single axial slice.
+        We raise explicit errors if we detect contours that span multiple slices or
+        odd Z-index behavior, to be aligned with our assumptions.
+
+        Parameters
+        ----------
+        reference_image : MedImage
+            The reference image that defines the spatial geometry and metadata
+            (e.g., direction, spacing, origin).
+        roi_name : str
+            Name of the ROI to extract.
+        mask_img_size : tuple[int, int, int, int]
+            Target shape of the binary mask, including depth (z), height (y), width (x),
+            and number of channels (usually 1 here).
+        continuous : bool, optional
+            If True, use continuous interpolation for index conversion. This can lead to
+            non-integer Z-slice indices, which will raise errors. Set to False (default)
+            for safety.
+
+        Returns
+        -------
+        np.ndarray
+            3D binary mask with shape (Z, Y, X), where the ROI has value 1 and background 0.
+
+        Raises
+        ------
+        ContourPointsAcrossSlicesError
+            If a single contour spans multiple Z slices.
+        MaskArrayOutOfBoundsError
+            If a Z-index falls outside of expected image bounds.
+        UnexpectedContourPointsError
+            If Z-values are malformed or structurally unexpected.
+        NonIntegerZSliceIndexError
+            If continuous=True and Z-index is not an integer.
+        """
         if roi_name in self._roi_cache:
             return self._roi_cache[roi_name]
 
@@ -462,6 +509,53 @@ class RTStructureSet:
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
     ) -> tuple[sitk.Image, dict[int, ROIMaskMapping]]:
+        """Contruct multi-channel (vector) mask using ROI matching.
+
+        This function applies the given `ROIMatcher` to select ROIs and stack
+        the resulting binary masks into a single 4D array (Z, Y, X, C), where C is
+        the number of matched ROI keys. The logic is designed to be interpretable
+        and efficient, avoiding full extraction until needed.
+
+        Each ROI group is resolved according to the matching strategy in `ROIMatcher`.
+        - MERGE: all matching ROIs are squashed into a single mask
+        - KEEP_FIRST: only the first match is used
+        - SEPARATE: each match becomes its own label (preferred for downstream tasks)
+
+        We ensure that each voxel in the output mask belongs to at most one
+        structure per channel.
+        However, **we do not check for inter-channel overlap
+        at this stage**—that responsibility is left to the caller.
+
+        The returned image is a `sitk.Image` with vector pixel type (`sitk.sitkVectorUInt8`)
+        and can be converted to our `VectorMask` class for further manipulation.
+
+        Parameters
+        ----------
+        reference_image : MedImage
+            The image whose geometry defines the spatial alignment of the masks.
+        roi_matcher : ROIMatcher
+            Matcher used to resolve user-defined keys to actual ROI names.
+
+        Returns
+        -------
+        tuple[sitk.Image, dict[int, ROIMaskMapping]]
+            A SimpleITK vector image containing all extracted ROIs in separate channels,
+            and a dictionary mapping channel indices to `ROIMaskMapping`,
+            a named tuple containing the roi_key and roi_names.
+
+        Raises
+        ------
+        MissingROIError
+            If no ROIs matched the specified patterns.
+
+        Notes
+        -----
+        This method is designed to be the bridge between raw RTSTRUCT metadata
+        and a usable segmentation mask, encoded in a vector-friendly format. 
+        Its companion class `VectorMask` offers high-level access to 
+        individual ROIs, label conversion, and overlap inspection.
+        """
+
         matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
             self.roi_names
         )
