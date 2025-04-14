@@ -85,35 +85,29 @@ class MedImage(sitk.Image):
 
     @property
     def ndim(self) -> int:
-        """Get the number of dimensions of the image.
-
-        Returns
-        -------
-        int
-            The dimensionality of the image (typically 3 for medical images).
-        """
+        """Wrapper around GetDimension."""
         return self.GetDimension()
 
     @property
-    def dtype_np(self) -> Type["np.number"]:
-        """Get the NumPy data type corresponding to the image's pixel type.
-
-        Returns
-        -------
-        Type[np.number]
-            The NumPy data type of the image pixels.
-        """
-        return sitk.extra._get_numpy_dtype(self)
+    def dtype(self) -> int:
+        """Wrapper around GetPixelID."""
+        return self.GetPixelID()
 
     @property
     def dtype_str(self) -> str:
+        """Wrapper around GetPixelIDTypeAsString."""
         return self.GetPixelIDTypeAsString()
+
+    @property
+    def dtype_np(self) -> Type["np.number"]:
+        """Get the NumPy data type corresponding to the image's pixel type."""
+        return sitk.extra._get_numpy_dtype(self)
 
     @property
     def img_stats(self) -> dict[str, Any]:  # noqa: ANN001
         """Get image statistics."""
         img_stats = {
-            "dtype": self.dtype_str,
+            "dtype_str": self.dtype_str,
             "dtype_numpy": self.dtype_np,
             "size": self.size,
             "spacing": self.spacing,
@@ -124,8 +118,8 @@ class MedImage(sitk.Image):
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield "ndim", self.ndim
+        yield "dtype_str", self.dtype_str
         yield "dtype_numpy", self.dtype_np
-        yield "dtype", self.dtype_str
         yield "size", self.size
         yield "origin", self.origin
         yield "spacing", self.spacing
