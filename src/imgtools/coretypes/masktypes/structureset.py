@@ -551,8 +551,8 @@ class RTStructureSet:
         Notes
         -----
         This method is designed to be the bridge between raw RTSTRUCT metadata
-        and a usable segmentation mask, encoded in a vector-friendly format. 
-        Its companion class `VectorMask` offers high-level access to 
+        and a usable segmentation mask, encoded in a vector-friendly format.
+        Its companion class `VectorMask` offers high-level access to
         individual ROIs, label conversion, and overlap inspection.
         """
 
