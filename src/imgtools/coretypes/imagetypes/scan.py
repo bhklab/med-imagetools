@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict
 
-from imgtools.coretypes.imagetypes import MedImage
+from imgtools.coretypes import MedImage
 from imgtools.io.readers import read_dicom_series
 from imgtools.loggers import logger
 
@@ -69,10 +69,8 @@ class Scan(MedImage):
         disable this manual fixing
         """
 
-        spacing_between_slices = float(
-            self.metadata.get("SpacingBetweenSlices") or 0
-        )
-        if (not spacing_between_slices) or (spacing_between_slices >= 0):
+        slice_spacing = float(self.metadata.get("SpacingBetweenSlices") or 0)
+        if (not slice_spacing) or (slice_spacing >= 0):
             return
 
         # just because metadata says that the spacing is negative, still
@@ -82,21 +80,18 @@ class Scan(MedImage):
             return
 
         warnmsg = (
-            f"Scan has negative SpacingBetweenSlices: {spacing_between_slices}. "
+            f"Scan has negative SpacingBetweenSlices: {slice_spacing}. "
             "Manually correcting the direction."
         )
         logger.debug(
             warnmsg,
-            spacing_between_slices=spacing_between_slices,
             spacing=self.spacing,
             direction=self.direction,
         )
 
-        direction = list(self.GetDirection())
-        direction[8] = -direction[8]
-        self.SetDirection(direction)
+        self.SetDirection(self.direction.flip_axis(2))
         logger.debug(
-            f"Scan direction corrected: {self.GetDirection()}",
+            "Scan direction corrected.",
             spacing=self.spacing,
             direction=self.direction,
         )

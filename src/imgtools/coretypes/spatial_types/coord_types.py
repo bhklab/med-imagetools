@@ -70,6 +70,16 @@ class Coordinate3D:
                 )
                 raise ValueError(errmsg)
 
+    def to_tuple(self) -> tuple[int, int, int]:
+        """Return the (x, y, z) tuple representation.
+
+        Returns
+        -------
+        tuple of int
+            The coordinate as (x, y, z).
+        """
+        return (self.x, self.y, self.z)
+
     def __iter__(self) -> Iterator[int]:
         """Allow iteration over the components."""
         return iter((self.x, self.y, self.z))
@@ -193,6 +203,16 @@ class Spacing3D:
         """Allow iteration over the components."""
         return iter((self.x, self.y, self.z))
 
+    def to_tuple(self) -> tuple[float, float, float]:
+        """Return the (x, y, z) spacing as a tuple.
+
+        Returns
+        -------
+        tuple of float
+            The spacing as (x, y, z).
+        """
+        return (self.x, self.y, self.z)
+
 
 @dataclass
 class Size3D:
@@ -236,6 +256,16 @@ class Size3D:
         """Calculate the volume of the 3D object."""
         return self.width * self.height * self.depth
 
+    def to_tuple(self) -> tuple[int, int, int]:
+        """Return the (width, height, depth) tuple representation.
+
+        Returns
+        -------
+        tuple of int
+            The size as (width, height, depth).
+        """
+        return (self.width, self.height, self.depth)
+
     def __iter__(self) -> Iterator[int]:
         """Allow iteration over the dimensions."""
         return iter((self.width, self.height, self.depth))
@@ -265,6 +295,14 @@ class Size3D:
         Raises
         ------
             TypeError: If the divisor is not an int, Size3D, or a 3-tuple.
+
+        Examples
+        --------
+            >>> size = Size3D(10, 20, 30)
+            >>> size / 3
+            Size3D(w=3, h=6, d=10)
+            >>> size / Size3D(2, 4, 6)
+            Size3D(w=5, h=5, d=5)
         """
         match other:
             case int() as value:
