@@ -26,9 +26,34 @@ from imgtools.pattern_parser import (
     PatternResolver,
     MissingPlaceholderValueError,
 )
+from imgtools.io.writers.index_writer import (
+    IndexWriter,
+    IndexSchemaMismatchError,
+    IndexReadError,
+    IndexWriteError,
+    IndexWriterError,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType
+
+
+class WriterIndexError(Exception):
+    """
+    Exception raised when a writer encounters an error while interacting with its index.
+
+    This exception wraps the underlying IndexWriter exceptions to provide a clearer
+    context about the writer that encountered the error.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        writer: AbstractBaseWriter,
+    ) -> None:
+        self.writer = writer
+        self.message = message
+        super().__init__(message)
 
 
 class ExistingFileMode(str, Enum):
@@ -66,90 +91,73 @@ ContentType = TypeVar("ContentType")
 @dataclass
 class AbstractBaseWriter(ABC, Generic[ContentType]):
     """
-    Abstract base class for managing file writing with customizable paths and
-    filenames.
+    Abstract base class for managing file writing with customizable paths and filenames.
 
-    This class provides a template for writing files with a flexible directory
-    structure.
+    This class provides a template for writing files with a flexible directory structure
+    and consistent file naming patterns. It handles common operations such as directory
+    creation, file path resolution, and maintaining an index of saved files.
+
+    The class supports various file existence handling modes, filename sanitization,
+    and easy context management for generating dynamic paths with placeholder variables.
+
+    Attributes
+    ----------
+    root_directory : Path
+        Root directory where files will be saved. This directory will be created
+        if it doesn't exist and `create_dirs` is True.
+    filename_format : str
+        Format string defining the directory and filename structure.
+        Supports placeholders for context variables enclosed in curly braces.
+        Example: '{subject_id}_{date}/{disease}.txt'
+    create_dirs : bool, default=True
+        Creates necessary directories if they don't exist.
+    existing_file_mode : ExistingFileMode, default=ExistingFileMode.FAIL
+        Behavior when a file already exists.
+        Options: OVERWRITE, SKIP, FAIL
+    sanitize_filenames : bool, default=True
+        Replaces illegal characters from filenames with underscores.
+    context : Dict[str, Any], default={}
+        Internal context storage for pre-checking.
+    index_filename : Optional[str], default=None
+        Name of the index file to track saved files.
+        If an absolute path is provided, it will be used as is.
+        If not provided, it will be saved in the root directory with the format
+        of {root_directory.name}_index.csv.
+    overwrite_index : bool, default=False
+        Overwrites the index file if it already exists.
+    absolute_paths_in_index : bool, default=False
+        If True, saves absolute paths in the index file.
+        If False, saves paths relative to the root directory.
+    pattern_resolver : PatternResolver
+        Instance used to handle filename formatting with placeholders.
+
+    Properties
+    ----------
+    index_file : Path
+        Returns the path to the index CSV file.
+
+    Notes
+    -----
+    When using this class, consider the following best practices:
+    1. Implement the abstract `save` method in subclasses to handle the actual file writing.
+    2. Use the `preview_path` method to check if a file exists before performing expensive operations.
+    3. Use the class as a context manager when appropriate to ensure proper resource cleanup.
+    4. Set appropriate file existence handling mode based on your application's needs.
     """
 
-    # Any subclass has to be initialized with a root directory and a filename format
-    # Gets converted to a Path object in __post_init__
-    root_directory: Path = field(
-        metadata={"help": "Root directory where files will be saved."}
-    )
-
-    # The filename format string with placeholders for context variables
-    # e.g. "{subject_id}_{date}/{disease}.txt"
-    filename_format: str = field(
-        metadata={
-            "help": (
-                "Format string defining the directory and filename structure. "
-                "Supports placeholders for context variables. "
-                "e.g. '{subject_id}_{date}/{disease}.txt'"
-            )
-        }
-    )
-
-    # optionally, you can set create_dirs to False if you want to handle the directory creation yourself
-    create_dirs: bool = field(
-        default=True,
-        metadata={
-            "help": "If True, creates necessary directories if they don't exist."
-        },
-    )
-
-    existing_file_mode: ExistingFileMode = field(
-        default=ExistingFileMode.FAIL,
-        metadata={
-            "help": "Behavior when a file already exists. Options: OVERWRITE, SKIP, FAIL"
-        },
-    )
-
-    sanitize_filenames: bool = field(
-        default=True,
-        metadata={
-            "help": "If True, replaces illegal characters from filenames with underscores."
-        },
-    )
-
-    # Internal context storage for pre-checking
+    root_directory: Path = field()
+    filename_format: str = field()
+    create_dirs: bool = field(default=True)
+    existing_file_mode: ExistingFileMode = field(default=ExistingFileMode.FAIL)
+    sanitize_filenames: bool = field(default=True)
     context: Dict[str, Any] = field(default_factory=dict)
-
-    # PatternResolver to handle filename formatting
-    # class-level pattern resolver instance shared across all instances
     pattern_resolver: PatternResolver = field(init=False)
+    overwrite_index: bool = field(default=False)
+    absolute_paths_in_index: bool = field(default=False)
 
-    index_filename: Optional[str] = field(
-        default=None,
-        metadata={
-            "help": (
-                "Name of the index file to track saved files. If an absolute path "
-                "is provided, it will be used as is. If not provided, it will be saved "
-                f"in the root directory with the format of {root_directory.name}_index.csv."
-            )
-        },
-    )
-
-    overwrite_index: bool = field(
-        default=False,
-        metadata={
-            "help": "If True, overwrites the index file if it already exists."
-        },
-    )
-
-    absolute_paths_in_index: bool = field(
-        default=False,
-        metadata={
-            "help": (
-                "If True, saves absolute paths in the index file. "
-                "If False, saves paths relative to the root directory."
-            )
-        },
-    )
-
-    # Cache for directories to avoid redundant checks
+    index_filename: Optional[str] = field(default=None)
     _checked_directories: set[str] = field(default_factory=set, init=False)
+    _index_writer: IndexWriter = field(init=False)
 
     def __post_init__(self) -> None:
         """
@@ -173,6 +181,12 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             # copy to .backup just in case
             self.index_file.rename(f"{self.index_file}.backup")
         self.pattern_resolver = PatternResolver(self.filename_format)
+
+        # Initialize the IndexWriter instance
+        self._index_writer = IndexWriter(
+            index_path=self.index_file,
+            lock_path=self._get_index_lock(),
+        )
 
         # if the existing_file_mode is a string, convert it to the Enum
         match self.existing_file_mode:
@@ -248,9 +262,11 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         Helper for resolving paths with the given context.
         """
         save_context = {
-            **self._generate_datetime_strings(),
             **self.context,
             **kwargs,
+            "saved_time": datetime.now(timezone.utc).strftime(
+                "%Y-%m-%d:%H-%M-%S"
+            ),
         }
         self.set_context(**save_context)
         try:
@@ -265,10 +281,10 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         if self.sanitize_filenames:
             filename = self._sanitize_filename(filename)
         out_path = self.root_directory / filename
-        logger.debug(
-            f"Resolved path: {out_path} and {out_path.exists()=}",
-            handling=self.existing_file_mode,
-        )
+        # logger.debug(
+        #     f"Resolved path: {out_path} and {out_path.exists()=}",
+        #     handling=self.existing_file_mode,
+        # )
         return out_path
 
     def resolve_path(self, **kwargs: object) -> Path:
@@ -493,6 +509,9 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         # Replace bad characters with underscores
         sanitized = re.sub(r'[<>:"\\?*]', "_", filename)
 
+        # replace spaces with underscores
+        sanitized = re.sub(r"\s+", "_", sanitized)
+
         # Optionally trim leading/trailing spaces or periods
         sanitized = sanitized.strip(" .")
 
@@ -507,56 +526,22 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             directory.mkdir(parents=True, exist_ok=True)
             self._checked_directories.add(str(directory))
 
-    def put(self, *args, **kwargs) -> NoReturn:  # type: ignore # noqa
-        """
-        Accdidentally using put() instead of save() will raise a fatal error.
-        """
-        msg = (
-            "Method put() is deprecated and will be removed in future versions. "
-            "Please use AbstractBaseWriter.save() instead of the old BaseWriter.put()."
-        )
-        logger.fatal(msg)
-        import sys
-
-        sys.exit(1)
-
-    def _generate_datetime_strings(self) -> dict[str, str]:
-        """
-        Free to use date-time context values.
-        """
-        now = datetime.now(timezone.utc)
-        return {
-            "date": now.strftime("%Y-%m-%d"),
-            "time": now.strftime("%H%M%S"),
-            "date_time": now.strftime("%Y-%m-%d_%H%M%S"),
-        }
-
-    def __del__(self) -> None:
-        """
-        Ensure the lock file is removed when the writer is deleted.
-        """
-        if (lock := self._get_index_lock()).exists():
-            lock.unlink()
-
     def add_to_index(
         self,
         path: Path,
         include_all_context: bool = True,
         filepath_column: str = "path",
         replace_existing: bool = False,
-        **additional_context: object,
+        merge_columns: bool = True,
     ) -> None:
         """
-        Add or update an entry in the shared CSV index file.
-
+        Add or update an entry in the shared CSV index file using IndexWriter.
 
         **What It Does**:
 
         - Logs the file's path and associated context variables to a
             shared CSV index file.
-        - Uses inter-process locking to avoid conflicts when
-            multiple writers are active.
-        - Handles new context fields by adding them as new columns in the CSV.
+        - Uses IndexWriter to safely handle concurrent writes and schema evolution.
 
         **When to Use It**:
 
@@ -583,162 +568,66 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         ----------
         path : Path
             The file path being saved.
-        include_all_context : bool
+        include_all_context : bool, default=True
             If True, write existing context variables passed into writer and
             the additional context to the CSV.
             If False, determines only the context keys parsed from the
             `filename_format` (excludes all other context variables, and
             unused context keys).
-        filepath_column : str
+        filepath_column : str, default="path"
             The name of the column to store the file path. Defaults to "path".
-        replace_existing : bool
+        replace_existing : bool, default=False
             If True, checks if the file path already exists in the index and
             replaces it.
-        **additional_context : Any
-            Additional context information to include in the CSV passed in as
-            keyword arguments.
-
-        Notes
-        -----
-        When `replace_existing` is set to True, the method will check if the
-        file path already exists in the index file using `csv.Sniffer` and
-        replace the row if it does. If the file path does not exist in the
-        index file, it will add a new row with the file path and context
-        information.
-
-        If new context keys are provided that weren't in the original CSV,
-        the method will add these as new columns and preserve existing data.
+        merge_columns : bool, default=True
+            If True, allows schema evolution by merging new columns with existing ones.
+            Set to False for strict schema enforcement (will raise an error if schemas don't match).
         """
+        # Prepare context data
+        context = {}
 
-        lock_file = self._get_index_lock()
-        self._ensure_directory_exists(self.index_file.parent)
+        # Determine which context to include
+        if include_all_context:
+            context = self.context
+        else:
+            # Only include keys from the pattern resolver
+            context = {
+                k: v
+                for k, v in self.context.items()
+                if k in self.pattern_resolver.keys
+            }
 
-        # Prepare context and resolve the file path
-        context = {**self.context, **additional_context}
+        # Resolve the path according to configuration
         resolved_path = (
             path.resolve().absolute()
             if self.absolute_paths_in_index
             else path.relative_to(self.root_directory)
         )
 
-        # Determine the fields to include based on include_all_context
-        context_fields = (
-            context.keys()
-            if include_all_context
-            else self.pattern_resolver.keys
-        )
-
-        # Start with filepath_column as the first field
-        fieldnames = [filepath_column]
-        rows = []
-        existing_fieldnames = []
-
-        # Check if the index file exists and has content
-        if self.index_file.exists() and self.index_file.stat().st_size > 0:
-            # Read the existing index file to get current rows and fieldnames
-            try:
-                with (
-                    InterProcessLock(lock_file),
-                    self.index_file.open(mode="r", encoding="utf-8") as f,
-                ):
-                    content = f.read(1024)
-                    f.seek(0)
-
-                    # Check if the file has enough content for the sniffer
-                    if content.strip():
-                        try:
-                            # Try to determine if the file has a header
-                            sniffer = csv.Sniffer()
-                            has_header = sniffer.has_header(content)
-
-                            # Try to determine the dialect/delimiter
-                            try:
-                                dialect = sniffer.sniff(content)
-                                # Read existing rows and fieldnames
-                                reader = csv.DictReader(f, dialect=dialect)
-                            except csv.Error:
-                                # If sniffing fails, use default dialect
-                                logger.warning(
-                                    f"Could not determine delimiter in {self.index_file}, using default comma delimiter"
-                                )
-                                reader = csv.DictReader(f)
-
-                            if not has_header:
-                                logger.warning(
-                                    f"Index {self.index_file} appears to be missing a header row, initializing with default headers"
-                                )
-                        except csv.Error:
-                            # If sniffer fails, assume it's an empty or malformed file and use default reader
-                            logger.warning(
-                                f"Error determining CSV format in {self.index_file}, using default CSV format"
-                            )
-                            reader = csv.DictReader(f)
-                    else:
-                        # Empty file, use default reader which will have None fieldnames
-                        reader = csv.DictReader(f)
-
-                    # Extract fieldnames and rows from the reader
-                    if reader.fieldnames:
-                        existing_fieldnames = reader.fieldnames
-
-                        # If replacing existing entries, filter out the entry with matching path
-                        if replace_existing:
-                            rows = [
-                                row
-                                for row in reader
-                                if filepath_column in row
-                                and row[filepath_column] != str(resolved_path)
-                            ]
-                        else:
-                            rows = list(reader)
-                    else:
-                        # No fieldnames found, use just the filepath_column
-                        logger.warning(
-                            f"No fieldnames found in {self.index_file}, initializing with default fields"
-                        )
-            except Exception as e:
-                # Log and continue with initialization rather than failing
-                logger.exception(
-                    f"Error reading index file {self.index_file}, initializing with default fields",
-                    error=e,
-                )
-
-            # Update fieldnames to include all existing fields plus any new ones from context
-            for field in existing_fieldnames:
-                if field not in fieldnames:
-                    fieldnames.append(field)
-
-        # Add any new context fields that aren't already in fieldnames
-        for field in context_fields:
-            if field not in fieldnames:
-                fieldnames.append(field)
-
-        # Create the new row with the resolved path and context
-        new_row = {filepath_column: str(resolved_path)}
-        # Add only the context fields that should be included
-        for key in context_fields:
-            if key in context:
-                new_row[key] = context[key]
-
-        # Add the new row to the list of rows
-        rows.append(new_row)
-
-        # Write the updated rows back to the index file
+        # Write the entry to the index file
         try:
-            with (
-                InterProcessLock(lock_file),
-                self.index_file.open(
-                    mode="w", newline="", encoding="utf-8"
-                ) as f,
-            ):
-                writer = csv.DictWriter(f, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(rows)
-        except Exception as e:
+            self._index_writer.write_entry(
+                path=resolved_path,
+                context=context,
+                filepath_column=filepath_column,
+                replace_existing=replace_existing,
+                merge_columns=merge_columns,
+            )
+        except (
+            IndexSchemaMismatchError,
+            IndexReadError,
+            IndexWriteError,
+            IndexWriterError,
+        ) as e:
             logger.exception(
                 f"Error writing to index file {self.index_file}.", error=e
             )
-            raise
+            raise WriterIndexError(
+                f"Error writing to index file {self.index_file}.",
+                writer=self,
+            ) from e
+        except Exception as general_e:
+            raise general_e
 
 
 class ExampleWriter(AbstractBaseWriter[str]):
@@ -768,9 +657,6 @@ class ExampleWriter(AbstractBaseWriter[str]):
         # Write content to the file
         with output_path.open(mode="w", encoding="utf-8") as f:
             f.write(data)
-
-        # Log the save operation
-        logger.debug(f"File saved: {output_path}")
 
         self.add_to_index(output_path, replace_existing=output_path.exists())
 

@@ -3,6 +3,11 @@ from typing import Any
 import SimpleITK as sitk
 
 from imgtools.dicom.dicom_metadata import extract_metadata
+from imgtools.utils import (
+    attrify,
+    cleanse_metadata,
+    convert_dictionary_datetime_values,
+)
 
 
 def read_dicom_series(
@@ -19,16 +24,16 @@ def read_dicom_series(
     path
        Path to directory containing the DICOM series.
 
-    recursive, optional
+    recursive, default=False
        Whether to recursively parse the input directory when searching for
        DICOM series,
 
-    series_id, optional
+    series_id, default=None
        Specifies the DICOM series to load if multiple series are present in
        the directory. If None and multiple series are present, loads the first
        series found.
 
-    file_names, optional
+    file_names, default=None
         If there are multiple acquisitions/"subseries" for an individual series,
         use the provided list of file_names to set the ImageSeriesReader.
 
@@ -67,5 +72,11 @@ def read_dicom_series(
     if not metadata:
         # Extract metadata from the first file
         metadata = extract_metadata(file_names[0])
+    # make sure its a dictionary
+    elif not isinstance(metadata, dict):
+        raise ValueError("metadata must be a dictionary")
 
+    metadata = cleanse_metadata(metadata)
+    metadata = convert_dictionary_datetime_values(metadata)
+    metadata = attrify(metadata)
     return reader.Execute(), metadata

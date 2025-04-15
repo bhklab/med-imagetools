@@ -124,7 +124,6 @@ class NumPyWriter(
             include_all_context=True,
             filepath_column="path",
             replace_existing=True,
-            **kwargs,
         )
         return out_path
 

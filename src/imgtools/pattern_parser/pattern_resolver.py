@@ -99,9 +99,9 @@ class PatternResolver:
             msg = f"Invalid filename format: {e}"
             raise PatternResolverError(msg) from e
         else:
-            logger.debug("All keys are valid.", keys=self.keys)
             logger.debug(
-                "Formatted Pattern valid.",
+                "Pattern validation successful.",
+                keys=self.keys,
                 formatted_pattern=self.formatted_pattern,
             )
 
