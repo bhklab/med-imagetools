@@ -139,6 +139,25 @@ def medimage_test_data() -> list[MedImageDataEntry]:
             )
     return dataset_dicts
 
+###############################################################################
+# Fixtures to group test data by various metadata
+###############################################################################
+
+@pytest.fixture(scope="session")
+def medimage_by_collection(
+    medimage_test_data: list[MedImageDataEntry],
+) -> dict[str, list[MedImageDataEntry]]:
+    """Groups test data by collection name.
+
+    organizes `medimage_test_data` into a dictionary where the keys are
+    collection names for easier access when testing collection-specific
+    functionality.
+    """
+    grouped: dict[str, list[MedImageDataEntry]] = defaultdict(list)
+    for entry in medimage_test_data:
+        grouped[entry["Collection"]].append(entry)
+    return grouped
+
 @pytest.fixture(scope="session")
 def medimage_by_modality(
 	medimage_test_data: list[MedImageDataEntry],
