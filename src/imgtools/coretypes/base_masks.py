@@ -419,14 +419,9 @@ class Mask(MedImage):
         Parameters
         ----------
         image : sitk.Image
-            A SimpleITK image with pixel type sitk.sitkVectorUInt8
-        roi_mapping : dict[int, ROIMaskMapping]
-            Mapping from integer indices to ROIMaskMapping objects
-            containing roi_key and roi_names
+            A SimpleITK image with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8
         metadata : dict[str, str]
             Dictionary containing metadata about the mask
-        errors : dict[str, Exception] | None, optional
-            Optional dictionary with error messages from ROI extraction, by default None
         """
         super().__init__(image)
         self.metadata = metadata
