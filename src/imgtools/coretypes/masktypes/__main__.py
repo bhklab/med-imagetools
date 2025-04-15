@@ -9,8 +9,8 @@ from imgtools.coretypes.imagetypes import Scan
 from imgtools.coretypes.masktypes import (
     SEG,
     ROIMatcher,
-    RTStructureSet,
     ROIMatchStrategy,
+    RTStructureSet,
 )
 from imgtools.dicom.crawl import Crawler, CrawlerSettings
 from imgtools.dicom.interlacer import Interlacer

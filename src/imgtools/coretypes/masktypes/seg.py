@@ -49,9 +49,6 @@ import numpy as np
 import SimpleITK as sitk
 
 from imgtools.coretypes.base_masks import ROIMaskMapping
-from imgtools.coretypes.masktypes.roi_matching import (
-    ROIMatcher,
-)
 
 # from imgtools.modalities import Scan, Segmentation
 from imgtools.dicom import DicomInput, load_dicom
@@ -60,6 +57,9 @@ from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     from imgtools.coretypes import MedImage
+    from imgtools.coretypes.masktypes.roi_matching import (
+        ROIMatcher,
+    )
 
 __all__ = ["SEG"]
 
@@ -143,7 +143,7 @@ class SEG:
     metadata: dict[str, Any] = field(default_factory=dict)  # noqa
 
     @classmethod
-    def from_dicom(cls, dicom: DicomInput) -> SEG:
+    def from_dicom(cls, dicom: DicomInput) -> SEG:  # noqa: PLR0912
         """
         Loads a DICOM-SEG object from a DICOM file.
         """
@@ -364,6 +364,3 @@ class SEG:
         yield "labels", self.labels
         yield "descriptions", self.descriptions
         yield "roi_mapping", self.extract_roi_identifiers()
-
-
-
