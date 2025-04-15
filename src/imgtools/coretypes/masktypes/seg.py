@@ -42,13 +42,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import highdicom as hd
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.coretypes import MedImage
 from imgtools.coretypes.base_masks import ROIMaskMapping
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatcher,
@@ -58,6 +57,9 @@ from imgtools.coretypes.masktypes.roi_matching import (
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.loggers import logger
+
+if TYPE_CHECKING:
+    from imgtools.coretypes import MedImage
 
 __all__ = ["SEG"]
 
@@ -92,35 +94,11 @@ class Segment:
 
 @dataclass
 class SEG:
-    """
-    Represents a DICOM Segmentation (DICOM-SEG) object.
-
-    This class provides functionalities to load, store, and manipulate DICOM-SEG
-    data, including extracting region-of-interest (ROI) masks, aligning segmentations
-    with reference images, and converting segmentation masks into structured formats.
-
-    Parameters
-    ----------
-    image : np.ndarray
-        A 4D array representing the segmentation mask(s).
-        (depth, height, width, num_segments)
-    metadata : dict[str, str], optional
-        Metadata associated with the segmentation, stored as a dictionary.
-        Defaults to an empty dictionary.
-    roi_mapping : dict[str, int], optional
-        A mapping of ROI labels to their corresponding segmentation indices.
-        Defaults to an empty dictionary.
-    raw_dicom_meta : DicomInput, optional
-        The raw DICOM metadata from which the segmentation was extracted.
-        Defaults to None.
-    """
+    """Represents a DICOM Segmentation (DICOM-SEG) object."""
 
     seg_volume: hd.seg.Segmentation = field(repr=False)
     segments: dict[int, Segment] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)  # noqa
-
-    # image: np.ndarray
-    # roi_mapping: dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def from_dicom(cls, dicom: DicomInput) -> SEG:
@@ -203,12 +181,6 @@ class SEG:
                 names_map[f"{seg.label}::{seg.description}"] = idx
         return names_map
 
-    @property
-    def volume(self) -> hd.Volume:
-        return self.seg_volume.get_volume(
-            combine_segments=False, dtype=np.uint8
-        )
-
     def get_vector_mask(
         self,
         reference_image: MedImage,
@@ -228,19 +200,14 @@ class SEG:
             ]
             matched_rois.append((key, segs))
 
-        ref_size = reference_image.size
-        mask_img_size: tuple[int, int, int, int] = (
-            ref_size.depth,
-            ref_size.height,
-            ref_size.width,
-            len(matched_rois),
-        )
-
-        # this is what will be returned!
-        mask_array_4d = np.zeros(
-            mask_img_size,
-            dtype=np.uint8,
-        )
+        if not matched_rois:
+            logger.warning(
+                "No matching ROIs found. Returning empty mask.",
+                roi_matcher=roi_matcher,
+            )
+            raise ValueError(
+                "No matching ROIs found. Returning empty mask.",
+            )
 
         volume = self.seg_volume.get_volume(
             combine_segments=False,
@@ -249,45 +216,42 @@ class SEG:
             segment_numbers=None,
         )
 
-        raw_seg_mask_array = volume.array
-
-        logger.debug(
-            f"Extracting {len(matched_rois)} ROIs from DICOM-SEG file",
-            mask_array_4d=mask_array_4d.shape,
-            raw_seg_mask_array=volume.spatial_shape,
+        assert volume.shape == 4, (
+            f"Expected 4D array, got {volume.shape}D array"
         )
 
-        plane_positions = [
-            p[0].ImagePositionPatient for p in volume.get_plane_positions()
-        ]
-
         ref_indices = [
-            reference_image.TransformPhysicalPointToIndex(p)
-            for p in plane_positions
+            reference_image.TransformPhysicalPointToIndex(
+                p[0].ImagePositionPatient
+            )
+            for p in volume.get_plane_positions()
         ]
 
         # we need something to store the mapping
         # so that we can keep track of what the 3D mask matches to
         # the original roi name(s)
         mapping: dict[int, ROIMaskMapping] = {}
-
-        for iroi, res in enumerate(matched_rois):
-            segment_matches: list[Segment]
-            roi_key, segment_matches = res
-            assert isinstance(segment_matches, list), (
-                f"Expected list of segments, got {type(segment_matches)}"
+        mask_images = []
+        for iroi, (roi_key, segment_matches) in enumerate(matched_rois):
+            mask_array_3d = np.zeros(
+                (
+                    reference_image.size.depth,
+                    reference_image.size.height,
+                    reference_image.size.width,
+                ),
+                dtype=np.uint8,
             )
             # we use the list of segments to extract the 3D array
-            # from the raw_seg_mask_array
+            # from the volume.array
             # then for each z slice, we need to determine which index
             # in the mask mask_array_4d, which is not trivial.
 
             # we use the ref_indices we calculated above,
             # which should be (0,0,z) for each slice
             # and then we can use the z index to get the correct
-            # slice from the raw_seg_mask_array
+            # slice from the volume.array
             for segment_of_interest in segment_matches:
-                arr = raw_seg_mask_array[..., segment_of_interest.number - 1]
+                arr = volume.array[..., segment_of_interest.number - 1]
 
                 # now we insert each slice into the correct index
                 # in the mask_array_4d
@@ -296,11 +260,9 @@ class SEG:
                 ):
                     # we need to check if the z index is in bounds
                     # of the mask_array_4d
-                    # mask_array_4d[:, ]
-                    # mask_array_4d[ :, y, z, iroi] = seg_slice
-                    if 0 <= z < mask_array_4d.shape[0]:
-                        mask_array_4d[z, :, :, iroi] = np.logical_or(
-                            mask_array_4d[z, :, :, iroi], seg_slice
+                    if 0 <= z < reference_image.size.depth:
+                        mask_array_3d[z, :, :] = np.logical_or(
+                            mask_array_3d[z, :, :], seg_slice
                         )
                     else:
                         logger.warning(
@@ -310,12 +272,14 @@ class SEG:
                 mapping[iroi] = ROIMaskMapping(
                     roi_key=roi_key, roi_names=[*segment_matches]
                 )
-        mask_image = sitk.GetImageFromArray(mask_array_4d, isVector=True)
+            mask_images.append(sitk.GetImageFromArray(mask_array_3d))
+
+        mask_image = sitk.Compose(*mask_images)
         mask_image.CopyInformation(reference_image)
 
         return mask_image, mapping
 
-    def __rich_repr__(self):
+    def __rich_repr__(self):  # noqa: ANN204
         yield "segments", self.segments
         # yield "metadata", len(self.metadata)
         yield "labels", self.labels

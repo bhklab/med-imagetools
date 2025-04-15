@@ -11,6 +11,7 @@ from imgtools.coretypes import MedImage
 from imgtools.loggers import logger
 
 if TYPE_CHECKING:
+    from imgtools.coretypes.masktypes.seg import SEG
     from imgtools.coretypes.masktypes.structureset import (
         ROIMatcher,
         RTStructureSet,
@@ -173,11 +174,47 @@ class VectorMask(MedImage):
     def to_label_image(self) -> Mask:
         """Convert to scalar Mask image (fails if overlap exists).
 
-        By only working if no overlaps, this would not be lossy,
-        as we would have a unique label for each mask.
+        This converts the multi-channel (vector) mask into a single-channel label image.
+        Each channel index becomes its own unique label in the scalar output image,
+        assigned to voxels where that channel has value 1.
+
+        This operation assumes there is no overlap across channels. If any voxel
+        has more than one active channel (i.e., multiple 1s), a ValueError is raised.
+
+        Returns
+        -------
+        Mask
+            A scalar label mask image (each voxel value is a label index).
+
+        Raises
+        ------
+        ValueError
+            If any voxel has more than one label (i.e., overlap).
         """
-        msg = "Converting to a label image is not implemented yet."
-        raise NotImplementedError(msg)
+        arr = sitk.GetArrayFromImage(self)
+
+        # Check for overlaps before proceeding
+        overlap_mask = np.sum(arr, axis=-1) > 1
+        if np.any(overlap_mask):
+            raise ValueError(
+                "Cannot convert to label image: overlap detected. "
+                "Use `to_sparsemask()` instead if you want lossy argmax conversion."
+            )
+
+        # Assign label index (1-based, since 0 = background)
+        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
+
+        for i in range(arr.shape[-1]):
+            label_arr[arr[..., i] == 1] = i + 1
+
+        label_img = sitk.GetImageFromArray(label_arr)
+        label_img.CopyInformation(self)
+
+        # Attach merged metadata
+        return Mask(
+            sitk.Cast(label_img, sitk.sitkUInt8),
+            metadata=self.metadata.copy(),
+        )
 
     def extract_mask(self, key: str | int) -> Mask:
         """Extract a single binary mask by index or ROI key.
@@ -272,6 +309,34 @@ class VectorMask(MedImage):
             roi_mapping=mapping,
             metadata=rtstruct.metadata,
             errors=rtstruct.roi_map_errors,
+        )
+
+    @classmethod
+    def from_seg(
+        cls,
+        reference_image: MedImage,
+        seg: SEG,
+        roi_matcher: ROIMatcher,
+    ) -> VectorMask:
+        """Create VectorMask from SEG using ROI matching."""
+        img, mapping = seg.get_vector_mask(
+            reference_image=reference_image,
+            roi_matcher=roi_matcher,
+        )
+        for idx, m in mapping.items():
+            # Update the mapping to use the new key
+            mapping[idx] = ROIMaskMapping(
+                roi_key=m.roi_key,
+                roi_names=[
+                    f"{segment.label}::{segment.description}"
+                    for segment in m.roi_names
+                ],
+            )
+        return cls(
+            image=img,
+            roi_mapping=mapping,
+            metadata=seg.metadata,
+            errors=None,
         )
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204

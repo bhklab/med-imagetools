@@ -13,6 +13,7 @@ from typing import (
     Dict,
     NoReturn,
     Optional,
+    Sequence,
     TypeVar,
     Generic,
 )
@@ -490,7 +491,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         """
 
         # Replace bad characters with underscores
-        sanitized = re.sub(r'[<>:"\\|?*]', "_", filename)
+        sanitized = re.sub(r'[<>:"\\?*]', "_", filename)
 
         # Optionally trim leading/trailing spaces or periods
         sanitized = sanitized.strip(" .")
@@ -551,10 +552,11 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
 
         **What It Does**:
 
-        - Logs the file’s path and associated context variables to a
+        - Logs the file's path and associated context variables to a
             shared CSV index file.
         - Uses inter-process locking to avoid conflicts when
             multiple writers are active.
+        - Handles new context fields by adding them as new columns in the CSV.
 
         **When to Use It**:
 
@@ -603,6 +605,9 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         replace the row if it does. If the file path does not exist in the
         index file, it will add a new row with the file path and context
         information.
+
+        If new context keys are provided that weren't in the original CSV,
+        the method will add these as new columns and preserve existing data.
         """
 
         lock_file = self._get_index_lock()
@@ -615,60 +620,108 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             if self.absolute_paths_in_index
             else path.relative_to(self.root_directory)
         )
-        fieldnames = [
-            filepath_column,
-            *(
-                context.keys()
-                if include_all_context
-                else self.pattern_resolver.keys
-            ),
-        ]
 
+        # Determine the fields to include based on include_all_context
+        context_fields = (
+            context.keys()
+            if include_all_context
+            else self.pattern_resolver.keys
+        )
+
+        # Start with filepath_column as the first field
+        fieldnames = [filepath_column]
         rows = []
-        # Check if replacing existing entries and if the index file exists
-        if replace_existing and self.index_file.exists():
-            # Read and validate the index file format
+        existing_fieldnames = []
+
+        # Check if the index file exists and has content
+        if self.index_file.exists() and self.index_file.stat().st_size > 0:
+            # Read the existing index file to get current rows and fieldnames
             try:
                 with (
                     InterProcessLock(lock_file),
                     self.index_file.open(mode="r", encoding="utf-8") as f,
                 ):
-                    # Use csv.Sniffer to check if the file has a header
-                    sniffer = csv.Sniffer()
-                    if not sniffer.has_header(f.readline()):
-                        msg = (
-                            f"Index {self.index_file} is missing a header row."
-                        )
-                        raise ValueError(msg)
-
-                    # Reset the file pointer after sampling
+                    content = f.read(1024)
                     f.seek(0)
-                    reader = csv.DictReader(f)
-                    # Check if the required column is present in the index file
-                    if (
-                        reader.fieldnames is None
-                        or filepath_column not in reader.fieldnames
-                    ):
-                        msg = (
-                            f"Index file {self.index_file} does "
-                            f"not contain the column '{filepath_column}'."
-                        )
-                        raise ValueError(msg)
-                    # Filter out the existing entry for the resolved path
-                    rows = [
-                        row
-                        for row in reader
-                        if row[filepath_column] != str(resolved_path)
-                    ]
-            except Exception as e:
-                # Log and raise any exceptions encountered during validation
-                logger.exception(
-                    f"Error validating index file {self.index_file}.", error=e
-                )
-                raise
 
-        # Add the new or updated row
-        rows.append({filepath_column: str(resolved_path), **context})
+                    # Check if the file has enough content for the sniffer
+                    if content.strip():
+                        try:
+                            # Try to determine if the file has a header
+                            sniffer = csv.Sniffer()
+                            has_header = sniffer.has_header(content)
+
+                            # Try to determine the dialect/delimiter
+                            try:
+                                dialect = sniffer.sniff(content)
+                                # Read existing rows and fieldnames
+                                reader = csv.DictReader(f, dialect=dialect)
+                            except csv.Error:
+                                # If sniffing fails, use default dialect
+                                logger.warning(
+                                    f"Could not determine delimiter in {self.index_file}, using default comma delimiter"
+                                )
+                                reader = csv.DictReader(f)
+
+                            if not has_header:
+                                logger.warning(
+                                    f"Index {self.index_file} appears to be missing a header row, initializing with default headers"
+                                )
+                        except csv.Error:
+                            # If sniffer fails, assume it's an empty or malformed file and use default reader
+                            logger.warning(
+                                f"Error determining CSV format in {self.index_file}, using default CSV format"
+                            )
+                            reader = csv.DictReader(f)
+                    else:
+                        # Empty file, use default reader which will have None fieldnames
+                        reader = csv.DictReader(f)
+
+                    # Extract fieldnames and rows from the reader
+                    if reader.fieldnames:
+                        existing_fieldnames = reader.fieldnames
+
+                        # If replacing existing entries, filter out the entry with matching path
+                        if replace_existing:
+                            rows = [
+                                row
+                                for row in reader
+                                if filepath_column in row
+                                and row[filepath_column] != str(resolved_path)
+                            ]
+                        else:
+                            rows = list(reader)
+                    else:
+                        # No fieldnames found, use just the filepath_column
+                        logger.warning(
+                            f"No fieldnames found in {self.index_file}, initializing with default fields"
+                        )
+            except Exception as e:
+                # Log and continue with initialization rather than failing
+                logger.exception(
+                    f"Error reading index file {self.index_file}, initializing with default fields",
+                    error=e,
+                )
+
+            # Update fieldnames to include all existing fields plus any new ones from context
+            for field in existing_fieldnames:
+                if field not in fieldnames:
+                    fieldnames.append(field)
+
+        # Add any new context fields that aren't already in fieldnames
+        for field in context_fields:
+            if field not in fieldnames:
+                fieldnames.append(field)
+
+        # Create the new row with the resolved path and context
+        new_row = {filepath_column: str(resolved_path)}
+        # Add only the context fields that should be included
+        for key in context_fields:
+            if key in context:
+                new_row[key] = context[key]
+
+        # Add the new row to the list of rows
+        rows.append(new_row)
 
         # Write the updated rows back to the index file
         try:
