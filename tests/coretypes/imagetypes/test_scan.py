@@ -21,5 +21,5 @@ def test_read_scan(medimage_by_collection, caplog) -> None:
         scan = read_dicom_scan(series_object['Path'], series_id=series_object['SeriesInstanceUID'])
         #
         # should be attrified, allowing dot access
-        scan.metadata.ContentTime == '22:10:10' # type: ignore
+        assert scan.metadata.ContentTime == '22:10:10', "ContentTime metadata value doesn't match expected value"
         break
