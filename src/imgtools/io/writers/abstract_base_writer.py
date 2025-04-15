@@ -254,10 +254,11 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         Helper for resolving paths with the given context.
         """
         save_context = {
-            # TODO:: implement
-            # **self._generate_datetime_strings(),
             **self.context,
             **kwargs,
+            "saved_time": datetime.now(timezone.utc).strftime(
+                "%Y-%m-%d:%H-%M-%S"
+            ),
         }
         self.set_context(**save_context)
         try:
@@ -654,7 +655,6 @@ class ExampleWriter(AbstractBaseWriter[str]):
         self.add_to_index(output_path, replace_existing=output_path.exists())
 
         return output_path
-
 
 
 # ruff: noqa

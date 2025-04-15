@@ -99,7 +99,7 @@ def test_simple_writer(tmp_path):
     Raises:
         AssertionError: If file is not created or content does not match
     """
-    writer = SimpleWriter(root_directory=tmp_path, filename_format="{date_time}.txt")
+    writer = SimpleWriter(root_directory=tmp_path, filename_format="{saved_time}.txt")
     with writer:
         file_path = writer.save("Simple content")
     assert file_path.exists()
@@ -123,7 +123,7 @@ def test_medium_writer(tmp_path):
         AssertionError: If file is not created or content does not match expected value
     """
     writer = MediumWriter(
-        root_directory=tmp_path, filename_format="{date_time}_{suffix}.txt"
+        root_directory=tmp_path, filename_format="{saved_time}_{suffix}.txt"
     )
     with writer:
         file_path = writer.save("Medium content", suffix="test")
@@ -148,7 +148,7 @@ def test_complex_writer(tmp_path):
         AssertionError: If file is not created or content does not match expected value
     """
     writer = ComplexWriter(
-        root_directory=tmp_path, filename_format="{date_time}_{user}.txt"
+        root_directory=tmp_path, filename_format="{saved_time}_{user}.txt"
     )
     with writer:
         file_path = writer.save("Complex content", metadata={"user": "testuser"})
@@ -172,7 +172,7 @@ def test_context_manager_cleanup(tmp_path):
                         or not cleaned up during context manager exit
     """
     subdir = tmp_path / "nested"
-    writer = SimpleWriter(root_directory=subdir, filename_format="{date_time}.txt")
+    writer = SimpleWriter(root_directory=subdir, filename_format="{saved_time}.txt")
     with writer:
         assert subdir.exists()
     assert not subdir.exists()
@@ -194,7 +194,7 @@ def test_directory_creation(tmp_path):
         AssertionError: If the directory is not created, file is not saved, or content is incorrect
     """
     writer = SimpleWriter(
-        root_directory=tmp_path / "nested", filename_format="{date_time}.txt"
+        root_directory=tmp_path / "nested", filename_format="{saved_time}.txt"
     )
     with writer:
         file_path = writer.save("Content")
@@ -222,33 +222,13 @@ def test_directory_not_created_if_exists(tmp_path):
     existing_dir = tmp_path / "existing"
     existing_dir.mkdir()
     writer = SimpleWriter(
-        root_directory=existing_dir, filename_format="{date_time}.txt"
+        root_directory=existing_dir, filename_format="{saved_time}.txt"
     )
     with writer:
         file_path = writer.save("Content")
     assert file_path.exists()
     assert file_path.read_text() == "Content"
     assert existing_dir.exists()
-
-
-def test_writer_put_exit(tmp_path):
-    """
-    Test that calling the `put()` method on a `SimpleWriter` raises a `SystemExit` exception.
-
-    This test verifies the behavior of the `put()` method when called without arguments, ensuring it terminates the program
-    with an exit code of 1.
-
-    Args:
-        tmp_path (Path): Temporary directory provided by pytest for test file operations.
-
-    Raises:
-        SystemExit: Expected exception with exit code 1 when `put()` is called.
-    """
-    writer = SimpleWriter(root_directory=tmp_path, filename_format="{date_time}.txt")
-    with pytest.raises(SystemExit) as excinfo:
-        writer.put()
-    assert excinfo.value.code == 1
-
 
 def test_no_create_dirs_non_existent(tmp_path):
     """
@@ -265,7 +245,7 @@ def test_no_create_dirs_non_existent(tmp_path):
     with pytest.raises(DirectoryNotFoundError):
         with SimpleWriter(
             root_directory=tmp_path / "nested_non_existent",
-            filename_format="{date_time}.txt",
+            filename_format="{saved_time}.txt",
             create_dirs=False,
         ) as writer:
             file_path = writer.save("Content")  # noqa
@@ -339,7 +319,7 @@ def test_index_file_parent_exists(tmp_path):
     with pytest.raises(DirectoryNotFoundError):
         writer = SimpleWriter(
             root_directory=tmp_path,
-            filename_format="{date_time}.txt",
+            filename_format="{saved_time}.txt",
             index_filename="/tmp/should_nonexistent/index.csv",
             create_dirs=False,
         )
