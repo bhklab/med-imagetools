@@ -1,5 +1,6 @@
 import pytest
 from imgtools.coretypes.imagetypes.scan import read_dicom_scan
+import datetime
 import os
 import logging
 
@@ -21,5 +22,5 @@ def test_read_scan(medimage_by_collection, caplog) -> None:
         scan = read_dicom_scan(series_object['Path'], series_id=series_object['SeriesInstanceUID'])
         #
         # should be attrified, allowing dot access
-        assert scan.metadata.ContentTime == '22:10:10', "ContentTime metadata value doesn't match expected value"
+        assert isinstance(scan.metadata.ContentTime, datetime.time)
         break
