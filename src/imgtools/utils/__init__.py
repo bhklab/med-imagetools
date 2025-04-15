@@ -1,4 +1,8 @@
-from .date_time import datetime_to_iso_string, parse_datetime
+from .date_time import (
+    convert_dictionary_datetime_values,
+    datetime_to_iso_string,
+    parse_datetime,
+)
 from .dictionaries import (
     AttrDict,
     attrify,
@@ -49,4 +53,5 @@ __all__ = [
     # date_time
     "datetime_to_iso_string",
     "parse_datetime",
+    "convert_dictionary_datetime_values",
 ]

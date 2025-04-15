@@ -2,6 +2,66 @@ from datetime import date, datetime, time
 from typing import Tuple, Union
 
 
+# Given a dictionary with all sorts of key values,
+# go through all the keys, and if the key is a date or time,
+# parse it into a datetime object.
+def convert_dictionary_datetime_values(
+    dicom_dict: dict[str, str],
+) -> dict[str, date | time | float | str]:
+    """
+    Convert date/time/duration strings in a DICOM metadata dictionary.
+
+    This function iterates over all key-value pairs in a dictionary and attempts
+    to convert strings that appear to represent date, time, or duration fields into
+    corresponding Python types (`date`, `time`, or `float`). Keys that do not match
+    temporal patterns are returned unchanged with their original string values.
+
+    Parameters
+    ----------
+    dicom_dict : dict[str, str]
+            A dictionary containing DICOM metadata with string values.
+
+    Returns
+    -------
+    dict[str, date | time | float | str]
+            A new dictionary where values for date/time/duration fields are parsed
+            into native Python types when possible. All keys are retained.
+
+    Examples
+    --------
+    >>> dicom_dict = {
+    ...     "AcquisitionDate": "20240101",
+    ...     "EchoTime": "45.0",
+    ...     "InstanceNumber": "5",
+    ... }
+    >>> convert_dictionary_datetime_values(dicom_dict)
+    {
+        'AcquisitionDate': datetime.date(2024, 1, 1),
+        'EchoTime': 45.0,
+        'InstanceNumber': '5'
+    }
+    """
+    result: dict[str, date | time | float | str] = {}
+
+    for key, value in dicom_dict.items():
+        if value and value.lower() != "none":
+            key_lower = key.lower()
+            if (
+                "date" in key_lower
+                or "time" in key_lower
+                or "duration" in key_lower
+            ):
+                try:
+                    result[key] = parse_datetime(key, value)
+                    continue
+                except Exception:
+                    pass  # fall through to keep raw value
+
+        result[key] = value
+
+    return result
+
+
 # duration fields → parse as float
 def parse_datetime(key: str, value: str) -> date | time | float:
     """

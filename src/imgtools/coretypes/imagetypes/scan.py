@@ -48,9 +48,9 @@ def read_dicom_scan(
 
 
 class Scan(MedImage):
-    metadata: Dict[str, str]
+    metadata: Dict[str, Any]
 
-    def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:
+    def __init__(self, image: sitk.Image, metadata: Dict[str, Any]) -> None:
         super().__init__(image)
         self.metadata = metadata
         self._fix_direction()
@@ -131,6 +131,7 @@ class Scan(MedImage):
             file_names=file_names,
             **kwargs,
         )
+
         return cls(image, metadata)
 
     def __repr__(self) -> str:  # type: ignore
