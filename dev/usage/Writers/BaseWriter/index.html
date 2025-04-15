@@ -1594,7 +1594,7 @@
 <p>The <code>AbstractBaseWriter</code> class is the foundation for all writers in this library.</p>
 <p>It provides a standard interface, reusable methods, and tools that writers can extend
 to handle file writing tasks efficiently and consistently.</p>
-<p>If you’re building a writer to manage file outputs with custom paths, filenames, or formats,
+<p>If you're building a writer to manage file outputs with custom paths, filenames, or formats,
 this is where you start!</p>
 <p>For details on implementing the <code>AbstractBaseWriter</code> in your custom writer, see the
 <a href="../ImplementingWriters/">Implementing Writers</a> guide.</p>
@@ -1905,16 +1905,52 @@ file already exists, allowing you to skip the computation.</p>
 </ul>
 <p><strong>How It Works</strong>:</p>
 <ul>
-<li>By default, it is named <code>{root_directory.name}_index.csv</code>.</li>
-<li>You can customize the filename or provide an absolute path for more control.  </li>
-<li>This is something that the <code>save()</code> method in the <code>AbstractBaseWriter</code> should <strong>optionally</strong>
-  implement, or let users decide to include the index by calling <code>add_to_index(path)</code> after <code>save()</code>.</li>
+<li>The AbstractBaseWriter now uses the powerful <code>IndexWriter</code> class to handle all index operations</li>
+<li>By default, the index file is named <code>{root_directory.name}_index.csv</code></li>
+<li>You can customize the filename or provide an absolute path for more control</li>
+<li>When implementing a writer class, call <code>add_to_index(path)</code> in your <code>save()</code> method to record saved files</li>
 </ul>
 <p><strong>Key Features</strong>:</p>
 <ul>
 <li><strong>Customizable Filename</strong>: Use <code>index_filename</code> to set a custom name or absolute path.</li>
-<li><strong>Absolute/Relative Paths</strong>: Control file paths in the index with <code>absolute_paths_in_index</code>.</li>
-<li><strong>Inter-process Locking</strong>: Prevents conflicts in concurrent writing environments.</li>
+<li><strong>Absolute/Relative Paths</strong>: Control file paths in the index with <code>absolute_paths_in_index</code> (defaults to relative).</li>
+<li><strong>Schema Evolution</strong>: Control schema evolution with the <code>merge_columns</code> parameter when calling <code>add_to_index()</code>.</li>
+<li><strong>Safe Concurrent Access</strong>: Uses inter-process locking for thread-safe operations in multi-process environments.</li>
+<li><strong>Robust Error Handling</strong>: Specific exceptions for index-related errors to help troubleshoot issues.</li>
+</ul>
+<p><strong>Using the add_to_index Method</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># In your writer&#39;s save method:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve_path</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="c1"># Write your content to the file...</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="c1"># Record this file in the index, with optional parameters:</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">add_to_index</span><span class="p">(</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>        <span class="n">path</span><span class="o">=</span><span class="n">output_path</span><span class="p">,</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>        <span class="n">include_all_context</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># Include all context variables, not just those used in the filename</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="n">filepath_column</span><span class="o">=</span><span class="s2">&quot;path&quot;</span><span class="p">,</span>     <span class="c1"># Name of the column to store file paths</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>        <span class="n">replace_existing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>     <span class="c1"># Whether to replace existing entries for the same file</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>        <span class="n">merge_columns</span><span class="o">=</span><span class="kc">True</span>          <span class="c1"># Whether to allow schema evolution</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>    <span class="p">)</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>    <span class="k">return</span> <span class="n">output_path</span>
+</code></pre></div>
+<p><strong>Schema Evolution with merge_columns</strong>:</p>
+<p>The <code>merge_columns</code> parameter (defaults to <code>True</code>) controls how the IndexWriter handles changes to your data schema:</p>
+<ul>
+<li><strong>When <code>True</code></strong>: If your context has new fields that didn't exist in previous CSV entries, they'll be added as new columns. This is great for:</li>
+<li>Iterative development when you're adding new metadata fields</li>
+<li>Different processes writing files with slightly different context variables</li>
+<li>
+<p>Ensuring backward compatibility with existing index files</p>
+</li>
+<li>
+<p><strong>When <code>False</code></strong>: Strict schema enforcement is applied. The IndexWriter will raise an error if the columns don't match exactly what's already in the index file. This is useful when:</p>
+</li>
+<li>You want to enforce a consistent schema across all entries</li>
+<li>You're concerned about typos or unintended fields creeping into your index</li>
+<li>Data consistency is critical for downstream processing</li>
 </ul>
 <h3 id="sanitizing-filenames">Sanitizing Filenames</h3>
 <p><strong>Why Sanitize Filenames?</strong>:</p>
