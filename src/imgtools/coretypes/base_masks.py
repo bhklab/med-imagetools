@@ -166,15 +166,52 @@ class VectorMask(MedImage):
         return bool(np.any(np.sum(arr, axis=-1) > 1))
 
     def to_sparsemask(self) -> Mask:
-        """Convert to a single binary mask with the argmax of the vector mask."""
+        """Convert the vector mask to a single-channel binary mask via argmax operation.
+
+        Creates a sparse representation where each voxel is assigned to exactly one class,
+        even if there are overlaps in the original vector mask. In case of overlaps,
+        the mask with the lowest index (highest priority) is chosen.
+
+        Returns
+        -------
+        Mask
+            A single-channel binary mask where each voxel belongs to at most one class.
+            The output is a standard Mask with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8.
+
+        Notes
+        -----
+        This is a lossy conversion when overlaps exist, as only one label can be
+        preserved per voxel. If preserving all overlapping labels is important,
+        keep working with the original VectorMask.
+        """
         msg = "Converting to a sparse mask is not implemented yet."
         raise NotImplementedError(msg)
 
     def to_label_image(self) -> Mask:
-        """Convert to scalar Mask image (fails if overlap exists).
+        """Convert the vector mask to a scalar label image with unique labels for each ROI.
 
-        By only working if no overlaps, this would not be lossy,
-        as we would have a unique label for each mask.
+        Generates a single multi-label mask where each voxel contains one integer value
+        representing its class. This conversion only works if there are no overlapping
+        ROIs in the vector mask.
+
+        Returns
+        -------
+        Mask
+            A multi-label mask where each original ROI is represented by a unique integer.
+            The background is represented by 0, and each ROI gets a value from 1 to N.
+            The output is a standard Mask with pixel type sitk.sitkLabelUInt8.
+
+        Raises
+        ------
+        ValueError
+            If the vector mask contains any overlapping regions (has_overlap() returns True).
+            In this case, a lossless conversion to a label image is not possible.
+
+        Notes
+        -----
+        This conversion preserves all information from the original vector mask only
+        if there are no overlaps. The mapping between label values and original ROI names
+        is preserved in the metadata.
         """
         msg = "Converting to a label image is not implemented yet."
         raise NotImplementedError(msg)
