@@ -156,6 +156,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
 
     index_filename: Optional[str] = field(default=None)
     _checked_directories: set[str] = field(default_factory=set, init=False)
+    _index_writer: IndexWriter = field(init=False)
 
     def __post_init__(self) -> None:
         """
@@ -179,6 +180,12 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             # copy to .backup just in case
             self.index_file.rename(f"{self.index_file}.backup")
         self.pattern_resolver = PatternResolver(self.filename_format)
+
+        # Initialize the IndexWriter instance
+        self._index_writer = IndexWriter(
+            index_path=self.index_file,
+            lock_path=self._get_index_lock(),
+        )
 
         # if the existing_file_mode is a string, convert it to the Enum
         match self.existing_file_mode:
@@ -524,6 +531,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         include_all_context: bool = True,
         filepath_column: str = "path",
         replace_existing: bool = False,
+        merge_columns: bool = True,
     ) -> None:
         """
         Add or update an entry in the shared CSV index file using IndexWriter.
@@ -570,6 +578,9 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         replace_existing : bool, default=False
             If True, checks if the file path already exists in the index and
             replaces it.
+        merge_columns : bool, default=True
+            If True, allows schema evolution by merging new columns with existing ones.
+            Set to False for strict schema enforcement (will raise an error if schemas don't match).
         """
         # Prepare context data
         context = {}
@@ -592,20 +603,14 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             else path.relative_to(self.root_directory)
         )
 
-        # Create an IndexWriter instance for this operation
-        index_writer = IndexWriter(
-            index_path=self.index_file,
-            lock_path=self._get_index_lock(),
-        )
-
         # Write the entry to the index file
         try:
-            index_writer.write_entry(
+            self._index_writer.write_entry(
                 path=resolved_path,
                 context=context,
                 filepath_column=filepath_column,
                 replace_existing=replace_existing,
-                merge_columns=True,  # Allow schema evolution by default
+                merge_columns=merge_columns,
             )
         except (
             IndexSchemaMismatchError,
