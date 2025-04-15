@@ -12,9 +12,14 @@ def test_read_scan(medimage_by_collection, caplog) -> None:
 
     # Get the first collection
     for collection, series_list in medimage_by_collection.items():
-        print(f'First Series in collection {collection}: {series_list[0]}')
-        scan = read_dicom_scan(series_list[0]['Path'], series_id=series_list[0]['SeriesInstanceUID'])
+        try:
+            series_object = next(series for series in series_list if series.get('Modality') in ['CT', 'MR'])
+        except StopIteration:
+            pytest.skip(f"No CT or MR series found in collection {collection}")
 
+        print(f'First Series in collection {collection}: {series_object}')
+        scan = read_dicom_scan(series_object['Path'], series_id=series_object['SeriesInstanceUID'])
+        #
         # should be attrified, allowing dot access
         scan.metadata.ContentTime == '22:10:10' # type: ignore
         break
