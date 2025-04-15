@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 import csv
-from turtle import st
 from typing import TYPE_CHECKING, Any
 
 from fasteners import InterProcessLock  # type: ignore
-
-from imgtools.loggers import logger
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -324,6 +321,3 @@ if __name__ == "__main__":
     end_time = timer()
     elapsed_time = end_time - start_time
     print(f"✔ Total time taken: {elapsed_time:.2f} seconds")  # noqa
-    print(
-        f"✔ Index file created with {len(INDEX_PATH.read_text().splitlines())} entries."
-    )  # noqa
