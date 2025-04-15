@@ -56,6 +56,8 @@ from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.loggers import logger
 
 if TYPE_CHECKING:
+    import rich.repr
+
     from imgtools.coretypes import MedImage
     from imgtools.coretypes.masktypes.roi_matching import (
         ROIMatcher,
@@ -89,7 +91,7 @@ class Segment:
     def __repr__(self) -> str:
         return f"Segment(number={self.number}, label='{self.label}', description='{self.description}')"
 
-    def __rich_repr__(self):  # noqa: ANN204
+    def __rich_repr__(self) -> rich.repr.Result:
         yield "number", self.number
         yield "label", self.label
         yield "description", self.description
@@ -358,7 +360,7 @@ class SEG:
 
         return mask_image, mapping
 
-    def __rich_repr__(self):  # noqa: ANN204
+    def __rich_repr__(self) -> rich.repr.Result:
         yield "segments", self.segments
         # yield "metadata", len(self.metadata)
         yield "labels", self.labels
