@@ -30,14 +30,62 @@ class NiftiWriterIOError(NiftiWriterError):
 
 @dataclass
 class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
-    """Class for managing file writing with customizable paths and filenames for NIFTI files."""
+    """Class for managing file writing with customizable paths and filenames for NIFTI files.
 
-    compression_level: int = field(
-        default=9,
-        metadata={
-            "help": "Compression level (0-9). Higher mean better compression but slower writing."
-        },
-    )
+    This class extends the AbstractBaseWriter to provide specialized functionality
+    for writing NIFTI image files. It supports both SimpleITK Image objects and numpy arrays
+    as input data types.
+
+    Attributes
+    ----------
+    compression_level : int, default=9
+        Compression level (0-9). Higher means better compression but slower writing.
+        Value must be between MIN_COMPRESSION_LEVEL (0) and MAX_COMPRESSION_LEVEL (9).
+    VALID_EXTENSIONS : ClassVar[list[str]]
+        List of valid file extensions for NIFTI files (".nii", ".nii.gz").
+    MAX_COMPRESSION_LEVEL : ClassVar[int]
+        Maximum allowed compression level (9).
+    MIN_COMPRESSION_LEVEL : ClassVar[int]
+        Minimum allowed compression level (0).
+
+    Inherited Attributes
+    -------------------
+    root_directory : Path
+        Root directory where files will be saved. This directory will be created
+        if it doesn't exist and `create_dirs` is True.
+    filename_format : str
+        Format string defining the directory and filename structure.
+        Supports placeholders for context variables enclosed in curly braces.
+        Example: '{subject_id}_{date}/{disease}.nii.gz'
+    create_dirs : bool, default=True
+        Creates necessary directories if they don't exist.
+    existing_file_mode : ExistingFileMode, default=ExistingFileMode.FAIL
+        Behavior when a file already exists.
+        Options: OVERWRITE, SKIP, FAIL
+    sanitize_filenames : bool, default=True
+        Replaces illegal characters from filenames with underscores.
+    context : Dict[str, Any], default={}
+        Internal context storage for pre-checking.
+    index_filename : Optional[str], default=None
+        Name of the index file to track saved files.
+        If an absolute path is provided, it will be used as is.
+        If not provided, it will be saved in the root directory with the format
+        of {root_directory.name}_index.csv.
+    overwrite_index : bool, default=False
+        Overwrites the index file if it already exists.
+    absolute_paths_in_index : bool, default=False
+        If True, saves absolute paths in the index file.
+        If False, saves paths relative to the root directory.
+    pattern_resolver : PatternResolver
+        Instance used to handle filename formatting with placeholders.
+
+    Notes
+    -----
+    When using this class, ensure your filename_format ends with one of the VALID_EXTENSIONS.
+    The class validates the compression level and filename format during initialization.
+    """
+
+    compression_level: int = field(default=9)
 
     # Make extensions immutable
     VALID_EXTENSIONS: ClassVar[list[str]] = [
