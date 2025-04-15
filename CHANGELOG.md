@@ -1,6 +1,73 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.21 (2025-04-15)
+
+### Features
+
+- Implement IndexWriter to support schema evolution
+  ([#327](https://github.com/bhklab/med-imagetools/pull/327),
+  [`5fcffeb`](https://github.com/bhklab/med-imagetools/commit/5fcffeb79291601b00599ca3bd418ffb305caf09))
+
+Enhance indexing and error handling in AbstractBaseWriter by integrating IndexWriter. Update
+  filename formatting to use saved_time, ensure consistency in shared_writer paths, and add a main
+  script for ExampleWriter with multiprocessing support. Remove the HDF5Writer class and update
+  documentation for clarity.
+
+should address #324
+
+- **New Features** - Introduced a standalone script demonstrating concurrent file writing with
+  progress tracking and structured output organization. - Added a robust, concurrent-safe CSV index
+  writer with schema evolution support and detailed error handling.
+
+- **Bug Fixes** - Improved filename sanitization to handle whitespace and special characters.
+
+- **Documentation** - Expanded and clarified docstrings for several classes and methods, including
+  detailed usage notes and attribute descriptions.
+
+- **Refactor** - Centralized index file management and error handling for file writers. 	- Updated
+  logging messages for improved clarity. 	- Simplified field declarations and removed deprecated
+  methods.
+
+- **Chores** 	- Removed unimplemented HDF5 writer. 	- Updated test filename format placeholders and
+  removed obsolete tests.
+
+### Refactoring
+
+- Handling of metadata, convert datetime where possible
+  ([#326](https://github.com/bhklab/med-imagetools/pull/326),
+  [`9c212b8`](https://github.com/bhklab/med-imagetools/commit/9c212b8985fda9a57050b675919b2d5d5e95d39a))
+
+- **New Features** - Added support for broader metadata types in scans, allowing metadata values of
+  any type. - Introduced automatic conversion of DICOM metadata date, time, and duration fields to
+  native Python types. - Added a new test fixture to group medical image test data by collection. 	-
+  Implemented new tests to validate scan reading and metadata handling.
+
+- **Bug Fixes** - Improved validation and normalization of DICOM metadata to ensure consistent data
+  formats.
+
+- **Documentation** - Enhanced docstrings for new utility functions, including usage examples.
+
+- Refactor + rearrange coretypes module, clean up tests
+  ([#321](https://github.com/bhklab/med-imagetools/pull/321),
+  [`1f46a55`](https://github.com/bhklab/med-imagetools/commit/1f46a550a4f00a1133f8f933de3700c93192b4e0))
+
+Optimize the import structure, update method signatures, and rename key components for clarity.
+  Introduce tests for the ROIMatcher and ensure proper handling of ROI matching strategies.
+  Deprecate outdated elements and improve the organization of core types.
+
+- **New Features** - Introduced a structured ROI matching method that returns results in a clear,
+  consistent format. - Added an immutable 3D image geometry representation to enhance image
+  conversion outputs.
+
+- **Refactor** - Streamlined the image conversion process to always return both image data and
+  geometry details. - Standardized naming conventions for ROI matching strategies to improve overall
+  clarity.
+
+- **Documentation** - Revised documentation to reflect the updated ROI strategy terminology and
+  usage.
+
+
 ## v2.0.0-rc.20 (2025-04-11)
 
 ### Bug Fixes
