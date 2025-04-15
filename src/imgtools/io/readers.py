@@ -3,6 +3,11 @@ from typing import Any
 import SimpleITK as sitk
 
 from imgtools.dicom.dicom_metadata import extract_metadata
+from imgtools.utils import (
+    attrify,
+    cleanse_metadata,
+    convert_dictionary_datetime_values,
+)
 
 
 def read_dicom_series(
@@ -67,5 +72,11 @@ def read_dicom_series(
     if not metadata:
         # Extract metadata from the first file
         metadata = extract_metadata(file_names[0])
+    # make sure its a dictionary
+    elif not isinstance(metadata, dict):
+        raise ValueError("metadata must be a dictionary")
 
+    metadata = cleanse_metadata(metadata)
+    metadata = convert_dictionary_datetime_values(metadata)
+    metadata = attrify(metadata)
     return reader.Execute(), metadata
