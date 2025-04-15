@@ -19,16 +19,16 @@ def read_dicom_series(
     path
        Path to directory containing the DICOM series.
 
-    recursive, optional
+    recursive, default=False
        Whether to recursively parse the input directory when searching for
        DICOM series,
 
-    series_id, optional
+    series_id, default=None
        Specifies the DICOM series to load if multiple series are present in
        the directory. If None and multiple series are present, loads the first
        series found.
 
-    file_names, optional
+    file_names, default=None
         If there are multiple acquisitions/"subseries" for an individual series,
         use the provided list of file_names to set the ImageSeriesReader.
 

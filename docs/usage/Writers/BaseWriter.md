@@ -5,7 +5,7 @@ The `AbstractBaseWriter` class is the foundation for all writers in this library
 It provides a standard interface, reusable methods, and tools that writers can extend
 to handle file writing tasks efficiently and consistently.
 
-If you’re building a writer to manage file outputs with custom paths, filenames, or formats,
+If you're building a writer to manage file outputs with custom paths, filenames, or formats,
 this is where you start!
 
 For details on implementing the `AbstractBaseWriter` in your custom writer, see the
@@ -268,16 +268,53 @@ else:
 
 **How It Works**:
 
-- By default, it is named `{root_directory.name}_index.csv`.
-- You can customize the filename or provide an absolute path for more control.  
-- This is something that the `save()` method in the `AbstractBaseWriter` should **optionally**
-  implement, or let users decide to include the index by calling `add_to_index(path)` after `save()`.
+- The AbstractBaseWriter now uses the powerful `IndexWriter` class to handle all index operations
+- By default, the index file is named `{root_directory.name}_index.csv`
+- You can customize the filename or provide an absolute path for more control
+- When implementing a writer class, call `add_to_index(path)` in your `save()` method to record saved files
 
 **Key Features**:
 
 - **Customizable Filename**: Use `index_filename` to set a custom name or absolute path.
-- **Absolute/Relative Paths**: Control file paths in the index with `absolute_paths_in_index`.
-- **Inter-process Locking**: Prevents conflicts in concurrent writing environments.
+- **Absolute/Relative Paths**: Control file paths in the index with `absolute_paths_in_index` (defaults to relative).
+- **Schema Evolution**: Control schema evolution with the `merge_columns` parameter when calling `add_to_index()`.
+- **Safe Concurrent Access**: Uses inter-process locking for thread-safe operations in multi-process environments.
+- **Robust Error Handling**: Specific exceptions for index-related errors to help troubleshoot issues.
+
+**Using the add_to_index Method**:
+
+```python
+# In your writer's save method:
+def save(self, content, **kwargs):
+    output_path = self.resolve_path(**kwargs)
+    
+    # Write your content to the file...
+    
+    # Record this file in the index, with optional parameters:
+    self.add_to_index(
+        path=output_path,
+        include_all_context=True,   # Include all context variables, not just those used in the filename
+        filepath_column="path",     # Name of the column to store file paths
+        replace_existing=False,     # Whether to replace existing entries for the same file
+        merge_columns=True          # Whether to allow schema evolution
+    )
+    
+    return output_path
+```
+
+**Schema Evolution with merge_columns**:
+
+The `merge_columns` parameter (defaults to `True`) controls how the IndexWriter handles changes to your data schema:
+
+- **When `True`**: If your context has new fields that didn't exist in previous CSV entries, they'll be added as new columns. This is great for:
+  - Iterative development when you're adding new metadata fields
+  - Different processes writing files with slightly different context variables
+  - Ensuring backward compatibility with existing index files
+
+- **When `False`**: Strict schema enforcement is applied. The IndexWriter will raise an error if the columns don't match exactly what's already in the index file. This is useful when:
+  - You want to enforce a consistent schema across all entries
+  - You're concerned about typos or unintended fields creeping into your index
+  - Data consistency is critical for downstream processing
 
 ### Sanitizing Filenames
 
