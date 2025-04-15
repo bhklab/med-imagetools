@@ -43,10 +43,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+from xml.sax import parseString
 
 import highdicom as hd
 import numpy as np
 import SimpleITK as sitk
+from pydicom import pixel_array
 
 from imgtools.coretypes.base_masks import ROIMaskMapping
 from imgtools.coretypes.masktypes.roi_matching import (
@@ -69,7 +71,7 @@ class Segment:
     """
     Represents a segment in a DICOM Segmentation object.
 
-    Parameters
+    Attributes
     ----------
     number : int
         The segment number.
@@ -77,11 +79,14 @@ class Segment:
         The label of the segment.
     description : str
         A description of the segment.
+    data_array : np.ndarray | None
+        The data array representing the segment. Defaults to None.
     """
 
     number: int
     label: str
     description: str | None = None
+    data_array: np.ndarray | None = None
 
     def __repr__(self) -> str:
         return f"Segment(number={self.number}, label='{self.label}', description='{self.description}')"
@@ -90,13 +95,52 @@ class Segment:
         yield "number", self.number
         yield "label", self.label
         yield "description", self.description
+        yield (
+            "data_array",
+            self.data_array.shape if self.data_array is not None else None,
+        )
+
+
+def get_ref_indices(
+    seg: hd.seg.Segmentation,
+) -> np.ndarray:
+    """
+    Returns the reference indices for a given segmentation object.
+    This function attempts to extract the reference indices from the segmentation
+    object. If the segmentation is fractional, it uses the volume geometry to
+    calculate the reference indices.
+    If the segmentation is not fractional, it extracts the reference indices
+    directly from the segmentation object.
+    """
+    try:
+        ref_indices = np.array(
+            [
+                p[0].ImagePositionPatient
+                for p in seg.get_volume().get_plane_positions()
+            ]
+        )
+    except Exception as e:
+        # probably fractional
+        svg = seg.get_volume_geometry()
+
+        if svg is None:
+            raise ValueError(
+                "Unable to get volume geometry from segmentation."
+            ) from e
+
+        ref_indices = svg.map_indices_to_reference(
+            np.array([[p, 0, 0] for p in range(int(seg.NumberOfFrames))])
+        )
+
+    return ref_indices
 
 
 @dataclass
 class SEG:
     """Represents a DICOM Segmentation (DICOM-SEG) object."""
 
-    seg_volume: hd.seg.Segmentation = field(repr=False)
+    raw_seg: hd.seg.Segmentation = field(repr=False)
+    ref_indices: np.ndarray = field(repr=False)
     segments: dict[int, Segment] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)  # noqa
 
@@ -116,7 +160,6 @@ class SEG:
                         f"Cannot determine which one to load."
                     )
                     raise ValueError(errmsg)
-
         ds_seg = load_dicom(dicom, stop_before_pixels=False)
         seg = hd.seg.Segmentation.from_dataset(ds_seg)
 
@@ -134,8 +177,55 @@ class SEG:
                 description=segdesc.get("SegmentDescription", None),
             )
 
+        ref_indices = get_ref_indices(seg)
+
+        match hd.seg.SegmentationTypeValues(seg.SegmentationType):
+            case hd.seg.SegmentationTypeValues.BINARY:
+                # Binary segmentation
+                for segment_number, segment in segments.items():
+                    segment.data_array = (
+                        seg.get_volume(
+                            combine_segments=False,
+                            rescale_fractional=False,
+                            skip_overlap_checks=False,
+                            segment_numbers=[segment_number],
+                        )
+                        .squeeze_channel()
+                        .array
+                    )
+
+            case hd.seg.SegmentationTypeValues.FRACTIONAL:
+                # should only be 1 segment
+                assert len(seg.segment_numbers) == 1, (
+                    f"Fractional DICOM-SEG has {len(seg.segment_numbers)} "
+                    f"segments, but expected 1."
+                )
+                # assume that the pixel array is just for one segment
+                # add to the segment
+                segments[seg.segment_numbers[0]].data_array = seg.pixel_array
+            case _:
+                msg = f"Unsupported SegmentationType: {seg.SegmentationType}"
+                raise ValueError(msg)
+
+        # sanity check
+        for segment in segments.values():
+            if segment.data_array is None:
+                errmsg = (
+                    f"Segment {segment.number} has no data array. "
+                    f"Check the DICOM-SEG file."
+                )
+                raise ValueError(errmsg)
+            # length of ref_indices should be the same as 0th dimension of data_array
+            if segment.data_array.shape[0] != len(ref_indices):
+                errmsg = (
+                    f"Segment {segment.number} has a data array with shape "
+                    f"{segment.data_array.shape}, but expected {len(ref_indices)}."
+                )
+                raise ValueError(errmsg)
+
         return cls(
-            seg_volume=seg,
+            raw_seg=seg,
+            ref_indices=ref_indices,
             segments=segments,
             metadata=metadata,
         )
@@ -209,29 +299,21 @@ class SEG:
                 "No matching ROIs found. Returning empty mask.",
             )
 
-        volume = self.seg_volume.get_volume(
-            combine_segments=False,
-            rescale_fractional=False,
-            skip_overlap_checks=False,
-            segment_numbers=None,
-        )
-
-        assert volume.shape == 4, (
-            f"Expected 4D array, got {volume.shape}D array"
-        )
-
-        ref_indices = [
-            reference_image.TransformPhysicalPointToIndex(
-                p[0].ImagePositionPatient
-            )
-            for p in volume.get_plane_positions()
+        ref_image_indices = [
+            reference_image.TransformPhysicalPointToIndex(pos)
+            for pos in self.ref_indices
         ]
+        print(ref_image_indices)
 
         # we need something to store the mapping
         # so that we can keep track of what the 3D mask matches to
         # the original roi name(s)
         mapping: dict[int, ROIMaskMapping] = {}
         mask_images = []
+        import ipdb
+
+        ipdb.set_trace()
+
         for iroi, (roi_key, segment_matches) in enumerate(matched_rois):
             mask_array_3d = np.zeros(
                 (
@@ -241,25 +323,25 @@ class SEG:
                 ),
                 dtype=np.uint8,
             )
-            # we use the list of segments to extract the 3D array
-            # from the volume.array
-            # then for each z slice, we need to determine which index
-            # in the mask mask_array_4d, which is not trivial.
+            # we use the pre-stored data in each segment
+            # then for each z slice, we need to determine which index in the output mask
 
-            # we use the ref_indices we calculated above,
-            # which should be (0,0,z) for each slice
-            # and then we can use the z index to get the correct
-            # slice from the volume.array
             for segment_of_interest in segment_matches:
-                arr = volume.array[..., segment_of_interest.number - 1]
+                # Use the pre-stored data_array from the segment
+                arr = segment_of_interest.data_array
+                if arr is None:
+                    logger.warning(
+                        f"Segment {segment_of_interest.number} ({segment_of_interest.label}) "
+                        f"has no data array. Skipping."
+                    )
+                    continue
 
-                # now we insert each slice into the correct index
-                # in the mask_array_4d
-                for (_x, _y, z), seg_slice in zip(
-                    ref_indices, arr, strict=True
+                # now we insert each slice into the correct index in the 3D mask array
+                for index, seg_slice in zip(
+                    ref_image_indices, arr, strict=True
                 ):
-                    # we need to check if the z index is in bounds
-                    # of the mask_array_4d
+                    # we need to check if the z index is in bounds of the mask_array
+                    (_x, _y, z) = index
                     if 0 <= z < reference_image.size.depth:
                         mask_array_3d[z, :, :] = np.logical_or(
                             mask_array_3d[z, :, :], seg_slice
@@ -270,7 +352,8 @@ class SEG:
                             f"Skipping slice for ROI '{roi_key}'"
                         )
                 mapping[iroi] = ROIMaskMapping(
-                    roi_key=roi_key, roi_names=[*segment_matches]
+                    roi_key=roi_key,
+                    roi_names=segment_matches,
                 )
             mask_images.append(sitk.GetImageFromArray(mask_array_3d))
 
@@ -288,27 +371,112 @@ class SEG:
 
 
 if __name__ == "__main__":
+    from pathlib import Path
+
     from rich import print
+    from tqdm import tqdm
 
-    from imgtools.coretypes.imagetypes import Scan
+    from imgtools.io.writers import ExistingFileMode, NIFTIWriter
 
-    ref = Scan.from_dicom("data/NSCLC-Radiomics/LUNG1-002/CT_Series23261228")
-
-    path = Path(
-        "data/NSCLC-Radiomics/LUNG1-002/SEG_Series0515.421/00000001.dcm"
+    mask_writer = NIFTIWriter(
+        root_directory=Path("temp_outputs"),
+        filename_format="Case_{case_id}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/{roi_key}__[{roi_names}].nii.gz",
+        existing_file_mode=ExistingFileMode.OVERWRITE,
+        compression_level=5,
+    )
+    ref_image_writer = NIFTIWriter(
+        root_directory=Path("temp_outputs"),
+        filename_format="Case_{case_id}_{PatientID}/{Modality}_Series-{SeriesInstanceUID}/reference.nii.gz",
+        existing_file_mode=ExistingFileMode.OVERWRITE,
+        compression_level=5,
     )
 
-    seg = SEG.from_dicom(path)
-    print(seg)
+    from imgtools.dicom.crawl import Crawler, CrawlerSettings
+    from imgtools.dicom.interlacer import Interlacer
+
+    directory = Path(
+        "/home/gpudual/bhklab/radiomics/Projects/med-imagetools/data/ISPY2"
+    )
+    crawler = Crawler(
+        CrawlerSettings(
+            directory,
+        )
+    )
+    interlacer = Interlacer(crawl_index=crawler.index)
+
+    from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
+    from imgtools.coretypes.imagetypes import Scan
 
     matcher = ROIMatcher(
         match_map={
             "lung": [".*lung.*"],
-            "gtv": [".*gtv.*"],
+            "gtv": [".*gtv.*", ".*tumor.*"],
+            "Brain": [r"brain.*"],
             "spinalcord": [".*cord.*"],
             "esophagus": [".*esophagus.*"],
+            "Prostate": [r"prostate.*"],
+            "Femur": [r"femur.*"],
+            "Bladder": [r"bladder.*"],
+            "Rectum": [r"rectum.*"],
+            "Heart": [r"heart.*"],
+            "Liver": [r"liver.*"],
+            "Kidney": [r"kidney.*"],
+            "Cochlea": [r"cochlea.*"],
+            "Uterus": [r"uterus.*", "ut.*"],
+            "Nodules": [r".*nodule.*"],
+            "lymph": [r".*lymph.*"],
+            "ispy": [r".*VOLSER.*"],
+            "reference": [r".*reference.*"],
         },
         ignore_case=True,
     )
+    branches = [*interlacer.query("CT,SEG"), *interlacer.query("MR,SEG")]
+    fails = []
+    for i, (ct, *segs) in enumerate(
+        tqdm(branches, desc="Processing CT and SEG files")
+    ):
+        ct_node = interlacer.series_nodes[ct["Series"]]
+        ct_folder = directory.parent / ct_node.folder
+        # seg_node = interlacer.series_nodes[segs[0]['Series']]
+        scan = Scan.from_dicom(
+            str(ct_folder),
+            series_id=ct["Series"],
+        )
+        ref_image_writer.save(
+            scan,
+            case_id=f"{i:>04d}",
+            **scan.metadata,
+            roi_key="reference",
+            roi_names="",
+        )
+        seg = None
+        for seg_id in segs:
+            seg_node = interlacer.series_nodes[seg_id["Series"]]
+            seg_folder = directory.parent / seg_node.folder
+            seg_file = list(seg_folder.glob("*.dcm"))[0]
 
-    vm, mapping = seg.get_vector_mask(ref, matcher)
+            try:
+                seg = SEG.from_dicom(
+                    seg_file,
+                )
+                vm = VectorMask.from_seg(
+                    scan,
+                    seg,
+                    matcher,
+                )
+            except Exception as e:
+                logger.exception(f"{seg_file} {e} {seg}")
+                fails.append((i, seg_file, e, seg))
+                raise e
+
+            for _index, roi_key, roi_names, mask in vm.iter_masks():
+                mask_writer.save(
+                    mask,
+                    case_id=f"{i:>04d}",
+                    roi_key=roi_key,
+                    roi_names="|".join(roi_names),
+                    **mask.metadata,
+                )
+                break
+            break
+        break
