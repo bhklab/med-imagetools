@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     # Single shared writer (dill-serializable)
     shared_writer = ExampleWriter(
-        root_directory=Path("temp_outputs/example_writer_outputs_pathos"),
+        root_directory=Path("temp_outputs/example_writer"),
         filename_format="{subject_id}/{modality}/{filename}",
         existing_file_mode=ExistingFileMode.OVERWRITE,
         create_dirs=True,
