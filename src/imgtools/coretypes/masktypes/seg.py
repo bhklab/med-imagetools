@@ -43,12 +43,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from xml.sax import parseString
 
 import highdicom as hd
 import numpy as np
 import SimpleITK as sitk
-from pydicom import pixel_array
 
 from imgtools.coretypes.base_masks import ROIMaskMapping
 from imgtools.coretypes.masktypes.roi_matching import (
@@ -303,16 +301,12 @@ class SEG:
             reference_image.TransformPhysicalPointToIndex(pos)
             for pos in self.ref_indices
         ]
-        print(ref_image_indices)
 
         # we need something to store the mapping
         # so that we can keep track of what the 3D mask matches to
         # the original roi name(s)
         mapping: dict[int, ROIMaskMapping] = {}
         mask_images = []
-        import ipdb
-
-        ipdb.set_trace()
 
         for iroi, (roi_key, segment_matches) in enumerate(matched_rois):
             mask_array_3d = np.zeros(
@@ -360,6 +354,8 @@ class SEG:
         mask_image = sitk.Compose(*mask_images)
         mask_image.CopyInformation(reference_image)
 
+        assert mask_image.GetNumberOfComponentsPerPixel() == len(mapping)
+
         return mask_image, mapping
 
     def __rich_repr__(self):  # noqa: ANN204
@@ -395,7 +391,7 @@ if __name__ == "__main__":
     from imgtools.dicom.interlacer import Interlacer
 
     directory = Path(
-        "/home/gpudual/bhklab/radiomics/Projects/med-imagetools/data/ISPY2"
+        "/home/gpudual/bhklab/radiomics/Projects/med-imagetools/data"
     )
     crawler = Crawler(
         CrawlerSettings(
@@ -442,13 +438,13 @@ if __name__ == "__main__":
             str(ct_folder),
             series_id=ct["Series"],
         )
-        ref_image_writer.save(
-            scan,
-            case_id=f"{i:>04d}",
-            **scan.metadata,
-            roi_key="reference",
-            roi_names="",
-        )
+        # ref_image_writer.save(
+        #     scan,
+        #     case_id=f"{i:>04d}",
+        #     **scan.metadata,
+        #     roi_key="reference",
+        #     roi_names="",
+        # )
         seg = None
         for seg_id in segs:
             seg_node = interlacer.series_nodes[seg_id["Series"]]
@@ -469,14 +465,14 @@ if __name__ == "__main__":
                 fails.append((i, seg_file, e, seg))
                 raise e
 
-            for _index, roi_key, roi_names, mask in vm.iter_masks():
-                mask_writer.save(
-                    mask,
-                    case_id=f"{i:>04d}",
-                    roi_key=roi_key,
-                    roi_names="|".join(roi_names),
-                    **mask.metadata,
-                )
-                break
-            break
-        break
+        #     for _index, roi_key, roi_names, mask in vm.iter_masks():
+        #         mask_writer.save(
+        #             mask,
+        #             case_id=f"{i:>04d}",
+        #             roi_key=roi_key,
+        #             roi_names="|".join(roi_names),
+        #             **mask.metadata,
+        #         )
+        #         break
+        #     break
+        # break
