@@ -13,6 +13,7 @@ from typing import (
     Dict,
     NoReturn,
     Optional,
+    Sequence,
     TypeVar,
     Generic,
 )

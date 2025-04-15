@@ -295,10 +295,26 @@ class SEGMetadataExtractor(ModalityMetadataExtractor):
             """Get the reference SOP instance UIDs for the segmentation."""
             return seg_reference_uids(seg)[1]
 
+        def get_seg_segmentlabels(seg: Dataset) -> list[str]:
+            """Get the segment labels from the segmentation."""
+            return [
+                desc.get("SegmentLabel", "")
+                for desc in seg.get("SegmentSequence", [])
+            ]
+
+        def get_seg_descriptions(seg: Dataset) -> list[str]:
+            """Get the segment descriptions from the segmentation."""
+            return [
+                desc.get("SegmentDescription", "")
+                for desc in seg.get("SegmentSequence", [])
+            ]
+
         return {
             # prefix with "Seg" to avoid collision sitk computed attrbutes
             "SegSpacing": lambda ds: get_seg_spacing(ds) or "",
             "SegDirection": lambda ds: get_seg_direction(ds) or "",
+            "ROINames": get_seg_segmentlabels,
+            "ROIDescriptions": get_seg_descriptions,
             "ReferencedSeriesUID": get_seg_ref_series,
             "ReferencedSOPUIDs": get_seg_ref_sop_uids,
         }

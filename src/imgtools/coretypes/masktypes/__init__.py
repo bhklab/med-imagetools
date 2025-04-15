@@ -3,6 +3,7 @@ from .roi_matching import (
     ROIMatchStrategy,
     handle_roi_matching,
 )
+from .seg import SEG, Segment
 from .structureset import (
     ContourPointsAcrossSlicesError,
     MaskArrayOutOfBoundsError,
@@ -21,4 +22,7 @@ __all__ = [
     "MaskArrayOutOfBoundsError",
     "UnexpectedContourPointsError",
     "NonIntegerZSliceIndexError",
+    # seg
+    "SEG",
+    "Segment",
 ]
