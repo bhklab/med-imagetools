@@ -101,9 +101,11 @@ class SeriesNode:
 
     def __repr__(self, level: int = 0) -> str:
         """Recursive representation of the tree structure"""
+        from imgtools.utils import truncate_uid
+
         indent = "  " * level
         result = (
-            f"{indent}- {self.Modality}, (SERIES: {self.SeriesInstanceUID})\n"
+            f"{indent}{self.Modality} (Series-{truncate_uid(self.SeriesInstanceUID, last_digits=8)})\n"
         )
         for child in self.children:
             result += child.__repr__(level + 1)
@@ -174,7 +176,12 @@ class Branch:
 
     def __repr__(self) -> str:
         """Return a string representation of the branch."""
-        return " -> ".join(node.Modality for node in self.series_nodes)
+        from imgtools.utils import truncate_uid
+
+        return " -> ".join(
+            f"{node.Modality} (Series-{truncate_uid(node.SeriesInstanceUID, last_digits=8)})"
+            for node in self.series_nodes
+        )
 
 
 @dataclass
@@ -229,7 +236,7 @@ class Interlacer:
 
         self._create_series_nodes()
         self._build_forest()
-        self.trees = self._find_branches()
+        self.branches = self._find_branches()
 
     def _group_by_attribute(
         self, items: list[SeriesNode], attribute: str
@@ -361,12 +368,9 @@ class Interlacer:
         results = []
         seen_result = set()
 
-        # Step 1: Query each tree(Branch)
-        for tree in self.trees:
-            assert isinstance(
-                tree, Branch
-            )  # To be updated, when supporting other grouping
-            query_result = tree.check_branch(queried_modalities)
+        # Step 1: Query each Branch
+        for branch in self.branches:
+            query_result = branch.check_branch(queried_modalities)
             if query_result and not tuple(query_result) in seen_result:
                 results.append(query_result)
                 seen_result.add(tuple(query_result))
@@ -413,15 +417,7 @@ class Interlacer:
         queried_modalities = self._get_valid_query(query_string.split(","))
         query_results = self._query(queried_modalities)
 
-        data = [
-            [
-                {"Series": node.SeriesInstanceUID, "Modality": node.Modality}
-                for node in result
-            ]
-            for result in query_results
-        ]
-
-        return data
+        return query_results
 
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
@@ -691,7 +687,7 @@ if __name__ == "__main__":
         # interlacer.visualize_forest(
         #     directory.parent.parent / directory.name / "interlacer.html"
         # )
-        print(f"Query Result {interlacer.query('MR,RTSTRUCT')}")
+        print(f"Query Result: {interlacer.query('MR,RTSTRUCT')}")
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
