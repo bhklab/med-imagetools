@@ -271,6 +271,8 @@ class SampleInput(BaseModel):
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
 
+    from imgtools.io.readers import read_dicom_auto
+
     # Example usage
     medinput = SampleInput.build(
         input_directory="data/NSCLC-Radiomics",
@@ -290,3 +292,4 @@ if __name__ == "__main__":  # pragma: no cover
 
     # print the query
     print(medinput.query("CT,RTSTRUCT"))
+    # can only read dicom auto after josh's fix...

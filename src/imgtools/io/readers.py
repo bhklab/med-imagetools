@@ -1,4 +1,7 @@
-from typing import Any
+from pathlib import Path
+
+# Import needed for type hints
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import SimpleITK as sitk
 
@@ -8,6 +11,17 @@ from imgtools.utils import (
     cleanse_metadata,
     convert_dictionary_datetime_values,
 )
+
+if TYPE_CHECKING:
+    from imgtools.coretypes import MedImage
+    from imgtools.coretypes.imagetypes.dose import Dose
+    from imgtools.coretypes.imagetypes.pet import PET
+    from imgtools.coretypes.imagetypes.scan import Scan
+    from imgtools.coretypes.masktypes.seg import SEG
+    from imgtools.coretypes.masktypes.structureset import RTStructureSet
+
+# Type for dispatch functions return values
+MedImageT = Union["MedImage", "Scan", "Dose", "PET", "RTStructureSet", "SEG"]
 
 
 def read_dicom_series(
@@ -80,3 +94,109 @@ def read_dicom_series(
     metadata = convert_dictionary_datetime_values(metadata)
     metadata = attrify(metadata)
     return reader.Execute(), metadata
+
+
+def read_dicom_auto(
+    path: str,
+    modality: Optional[str] = None,
+    **kwargs: Any,  # noqa
+) -> MedImageT:
+    """General DICOM reader that dispatches to the correct class based on modality.
+
+    This function automatically determines the appropriate class based on the
+    modality and calls its from_dicom method with the provided arguments.
+
+    Parameters
+    ----------
+    path : str
+        Path to the DICOM file or directory containing DICOM files.
+    modality : str, optional
+        Explicitly specify the modality. If None, the function will try to determine
+        the modality from the DICOM metadata.
+    **kwargs : Any
+        Additional keyword arguments to pass to the specific from_dicom method.
+        Common parameters include:
+            - series_id: str | None - Series ID for DICOM series
+            - recursive: bool - Whether to search recursively for DICOM files
+            - file_names: list[str] | None - Specific file names to read
+            - pet_image_type: For PET images, specify SUV or ACT
+
+    Returns
+    -------
+    MedImageT
+        The loaded image or mask object of the appropriate type.
+
+    Raises
+    ------
+    ValueError
+        If the modality is unknown or cannot be determined.
+    ImportError
+        If the required class for a modality cannot be imported.
+    """
+    from pydicom import dcmread
+
+    # Try to determine modality if not provided
+    if not modality:
+        # If it's a directory with DICOM files, read the first file
+        path_obj = Path(path)
+        if path_obj.is_dir():
+            dicom_files = (
+                list(path_obj.glob("**/*.dcm"))
+                if kwargs.get("recursive", False)
+                else list(path_obj.glob("*.dcm"))
+            )
+            if not dicom_files:
+                error_msg = f"No DICOM files found in {path}"
+                raise ValueError(error_msg)
+            first_file = dicom_files[0]
+            dcm = dcmread(first_file, stop_before_pixels=True)
+        else:
+            # It's a file
+            dcm = dcmread(path, stop_before_pixels=True)
+
+        # Extract modality from the DICOM header
+        modality = getattr(dcm, "Modality", None)
+        if not modality:
+            raise ValueError(
+                "Could not determine modality from DICOM file. Please specify modality parameter."
+            )
+            # Dispatch based on modality
+
+    match modality:
+        case "CT" | "MR":
+            from imgtools.coretypes.imagetypes.scan import Scan
+
+            return Scan.from_dicom(path, **kwargs)
+        case "PT":
+            from imgtools.coretypes.imagetypes.pet import PET
+
+            return PET.from_dicom(path, **kwargs)
+        case "RTDOSE":
+            from imgtools.coretypes.imagetypes.dose import Dose
+
+            return Dose.from_dicom(path, **kwargs)
+        case "RTSTRUCT":
+            from imgtools.coretypes.masktypes.structureset import (
+                RTStructureSet,
+            )
+
+            return RTStructureSet.from_dicom(path)
+        case "SEG":
+            from imgtools.coretypes.masktypes.seg import SEG
+
+            return SEG.from_dicom(path)
+        case _:
+            error_msg = f"Unknown or unsupported modality: {modality}"
+            raise ValueError(error_msg)
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Read DICOM files.")
+    parser.add_argument("path", type=str, help="Path to DICOM file or directory")
+    parser.add_argument(
+        "--modality", type=str, help="Modality to use for reading DICOM files"
+    )
+    args = parser.parse_args()
+    from rich import print  # noqa: A004
+    print(read_dicom_auto(args.path, args.modality))
