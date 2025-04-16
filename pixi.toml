@@ -30,6 +30,7 @@ med-imagetools = { path = ".", editable = true, extras = ["all"] }
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+ipdb = ">=0.13.13,<0.14"
 ipympl = ">=0.9.6,<0.10"
 ipdb = ">=0.13.13,<0.14"
 
