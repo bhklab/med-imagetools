@@ -3,7 +3,7 @@ from __future__ import annotations
 import multiprocessing
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 from pydantic import (
     BaseModel,
@@ -95,7 +95,7 @@ class SampleInput(BaseModel):
     )
     _crawler: Crawler | None = PrivateAttr(default=None, init=False)
 
-    def model_post_init(self, __context) -> None:
+    def model_post_init(self, __context) -> None:  # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
         self._crawler = Crawler(
             dicom_dir=self.input_directory,
@@ -256,7 +256,7 @@ class SampleInput(BaseModel):
         self.crawler.crawl()
 
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
 
     # Example usage

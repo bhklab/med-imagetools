@@ -1,5 +1,5 @@
-from .configuration import Config
+from .configuration import MedImageToolsSettings
 
 __all__ = [
-    "Config",
+    "MedImageToolsSettings",
 ]

@@ -1,0 +1,15 @@
+# this file is a example config and will be removed from 
+# the repo upon release
+
+input:
+  input_directory: data/RADCURE
+  dataset_name: RADCURE
+  update_crawl: false
+  n_jobs: 10
+  modalities: []
+  roi_matcher:
+    match_map:
+      ROI:
+      - .*
+    handling_strategy: merge
+    ignore_case: true

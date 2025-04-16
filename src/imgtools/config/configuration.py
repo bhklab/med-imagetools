@@ -15,7 +15,7 @@ from pydantic_settings import (
 from imgtools.io.loaders.sample_input import SampleInput
 
 
-class Config(BaseSettings):
+class MedImageToolsSettings(BaseSettings):
     # use default() classmethod to set default values
     input: SampleInput = Field(default_factory=SampleInput.default)
 
@@ -51,7 +51,7 @@ class Config(BaseSettings):
         return self.model_json_schema()
 
     @classmethod
-    def from_user_yaml(cls, path: Path) -> Config:
+    def from_user_yaml(cls, path: Path) -> MedImageToolsSettings:
         """Load settings from a YAML file."""
         source = YamlConfigSettingsSource(cls, yaml_file=path)
         settings = source()
@@ -69,5 +69,5 @@ class Config(BaseSettings):
 if __name__ == "__main__":
     from rich import print  # noqa
 
-    config = Config()
+    config = MedImageToolsSettings()
     print(config)
