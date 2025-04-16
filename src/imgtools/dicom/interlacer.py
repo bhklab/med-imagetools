@@ -48,6 +48,10 @@ class SeriesNode:
         The patient identifier
     StudyInstanceUID : str
         The study instance identifier
+    folder : str
+        Path to the folder containing the DICOM files
+    ReferencedSeriesUID : str | None
+        Series that this one references, if any
     children : list[SeriesNode]
         Child nodes representing referenced series
     """
@@ -57,6 +61,7 @@ class SeriesNode:
     PatientID: str
     StudyInstanceUID: str
     folder: str
+    ReferencedSeriesUID: str | None = None
     children: list[SeriesNode] = field(default_factory=list, repr=False)
 
     def add_child(self, child_node: SeriesNode) -> None:
@@ -83,6 +88,7 @@ class SeriesNode:
             node.PatientID,
             node.StudyInstanceUID,
             node.folder,
+            node.ReferencedSeriesUID,
         )
 
 
@@ -116,62 +122,61 @@ class Interlacer:
     def __post_init__(self) -> None:
         """Initialize the Interlacer after dataclass initialization."""
         if isinstance(self.crawl_index, (str, Path)):
-            self.crawl_df = pd.read_csv(
-                self.crawl_index, index_col="SeriesInstanceUID"
-            )
+            self.crawl_df = pd.read_csv(self.crawl_index)
         elif isinstance(self.crawl_index, pd.DataFrame):
             self.crawl_df = self.crawl_index.copy()
-            self.crawl_df.set_index(
-                "SeriesInstanceUID",
-                inplace=True,
-                drop=False,
-            )
         else:
             errmsg = f"Invalid type for crawl_index: {type(self.crawl_index)}"
             raise TypeError(errmsg)
 
+        self.crawl_df.set_index("SeriesInstanceUID", inplace=True, drop=False)
         self.crawl_df = self.crawl_df[
             ~self.crawl_df.index.duplicated(keep="first")
         ]
+        self._build_series_forest()
 
-        self._create_series_nodes()
-        self._build_forest()
+    @timer("Building forest based on references")
+    def _build_series_forest(self) -> None:
+        """
+        Creates SeriesNode objects for each row in the DataFrame and
+        constructs a forest of trees by defining parent-child relationships
+        using ReferenceSeriesUID.
+        """
+        # Dictionary to track referenced UIDs that need to be connected later
 
-    def _create_series_nodes(self) -> None:
-        """Creates a SeriesNode object for each row in the DataFrame."""
+        # Create SeriesNode objects and establish relationships in one pass
         for index, row in self.crawl_df.iterrows():
             series_instance_uid = str(index)
-            self.series_nodes[series_instance_uid] = SeriesNode(
+            reference_series_uid = (
+                row.ReferencedSeriesUID
+                if "ReferencedSeriesUID" in row
+                else None
+            )
+
+            # Create the SeriesNode
+            node = SeriesNode(
                 series_instance_uid,
                 row.Modality,
                 row.PatientID,
                 row.StudyInstanceUID,
                 row.folder,
+                reference_series_uid,
             )
+            self.series_nodes[series_instance_uid] = node
 
-    @timer("Building forest based on references")
-    def _build_forest(self) -> None:
-        """
-        Constructs a forest of trees from the DataFrame by
-        defining parent-child relationships using ReferenceSeriesUID.
-        """
-        for index, row in self.crawl_df.iterrows():
-            series_instance_uid = str(index)
-            modality = row.Modality
-            reference_series_uid = row.ReferencedSeriesUID
-
-            node = self.series_nodes[series_instance_uid]
-
-            if modality in ["CT", "MR"] or (
-                modality == "PT" and pd.isna(reference_series_uid)
+        for _, node in self.series_nodes.items():
+            # Identify root nodes
+            if node.Modality in ["CT", "MR"] or (
+                node.Modality == "PT" and pd.isna(node.ReferencedSeriesUID)
             ):
                 self.root_nodes.append(node)
 
+            # Establish parent-child relationships if parent already exists
             if (
-                pd.notna(reference_series_uid)
-                and reference_series_uid in self.series_nodes
+                pd.notna(node.ReferencedSeriesUID)
+                and node.ReferencedSeriesUID in self.series_nodes
             ):
-                parent_node = self.series_nodes[reference_series_uid]
+                parent_node = self.series_nodes[node.ReferencedSeriesUID]
                 parent_node.add_child(node)
 
     def _get_valid_query(self, query: list[str]) -> list[str]:
@@ -230,7 +235,9 @@ class Interlacer:
             path_modalities = [n.Modality for n in path]
 
             if all(m in path_modalities for m in queried_modalities):
-                modality_nodes = [n for n in path if n.Modality in queried_modalities]
+                modality_nodes = [
+                    n for n in path if n.Modality in queried_modalities
+                ]
                 if modality_nodes not in results:
                     results.append(modality_nodes)
 
@@ -599,4 +606,10 @@ if __name__ == "__main__":
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
 
-    query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
+        query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
+
+        # get another interlacer with only the query results
+        interlacer_query = interlacer.query_interlacer(
+            "CT,RTSTRUCT", group_by_root=True
+        )
+        interlacer_query.print_tree(input_dir)
