@@ -50,6 +50,18 @@ Valid_Inputs = (
 """
 
 
+def create_roi_matcher(
+    nonvalidated_input: Valid_Inputs,
+    handling_strategy: ROIMatchStrategy = ROIMatchStrategy.MERGE,
+    ignore_case: bool = True,
+) -> ROIMatcher:
+    return ROIMatcher(
+        match_map=ROIMatcher.validate_match_map(nonvalidated_input),
+        handling_strategy=handling_strategy,
+        ignore_case=ignore_case,
+    )
+
+
 class ROIMatcher(BaseModel):
     match_map: Annotated[
         ROIGroupPatterns,
@@ -190,84 +202,3 @@ def handle_roi_matching(
                 f"Unrecognized strategy: {strategy}. Something went wrong."
             )
             raise ValueError(errmsg)
-
-
-if __name__ == "__main__":  # pragma: no cover
-    from pathlib import Path
-    from typing import (
-        Type,
-    )
-
-    from pydantic_settings import (
-        BaseSettings,
-        PydanticBaseSettingsSource,
-        SettingsConfigDict,
-        # TomlConfigSettingsSource,
-        YamlConfigSettingsSource,
-    )
-    from rich import print  # noqa
-
-    class Settings(BaseSettings):
-        rois: ROIMatcher = ROIMatcher(match_map={"ROI": [".*"]})
-
-        model_config = SettingsConfigDict(
-            # to instantiate the Login class, the variable name would be login.nbia_username in the environment
-            # env_nested_delimiter="__",
-            # env_file=".env",
-            # env_file_encoding="utf-8",
-            yaml_file=(Path().cwd() / "imgtools.yaml",),
-            # allow for other fields to be present in the config file
-            # this allows for the config file to be used for other purposes
-            # but also for users to define anything else they might want
-            extra="ignore",
-        )
-
-        @classmethod
-        def settings_customise_sources(
-            cls,
-            settings_cls: Type[BaseSettings],
-            init_settings: PydanticBaseSettingsSource,
-            env_settings: PydanticBaseSettingsSource,
-            dotenv_settings: PydanticBaseSettingsSource,
-            file_secret_settings: PydanticBaseSettingsSource,
-        ) -> tuple[PydanticBaseSettingsSource, ...]:
-            return (
-                init_settings,
-                YamlConfigSettingsSource(settings_cls),
-            )
-
-        @property
-        def json_schema(self) -> dict:
-            """Return the JSON schema for the settings."""
-            return self.model_json_schema()
-
-        @classmethod
-        def from_user_yaml(cls, path: Path) -> Settings:
-            """Load settings from a YAML file."""
-            source = YamlConfigSettingsSource(cls, yaml_file=path)
-            settings = source()
-            return cls(**settings)
-
-        def to_yaml(self, path: Path) -> None:
-            """Return the YAML representation of the settings."""
-            import yaml  # type: ignore
-
-            model = self.model_dump(mode="json")
-            with path.open("w") as f:
-                yaml.dump(model, f, sort_keys=False)
-
-    settings = Settings()
-    print(settings)
-
-    matcher = ROIMatcher(
-        match_map={
-            "GTV": ["GTV.*"],
-            "PTV": ["PTV.*"],
-            "CTV": ["CTV.*"],
-        }
-    )
-    print(matcher)
-
-    settings.to_yaml(Path("imgtools_settings.yaml"))
-
-    print(Settings.from_user_yaml(Path("imgtools_settings3.yaml")))
