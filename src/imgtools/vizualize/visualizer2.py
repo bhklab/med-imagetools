@@ -1,4 +1,3 @@
-# %%
 from __future__ import annotations
 
 import math
@@ -171,35 +170,3 @@ class ImageVisualizer:
             axes[idx].axis("off")
 
         return fig
-
-
-# %%
-if __name__ == "__main__":  # pragma: no cover
-    from rich import print, progress  # type: ignore # noqa
-    from imgtools.coretypes.box import RegionBox, Size3D
-    from imgtools.datasets.examples import data_images
-
-    # from imgtools.ops.functional import resize
-
-    # logger.setLevel("DEBUG")  # type: ignore
-
-    setting = 2
-    dim = 0
-    every = 5
-
-    # Load example images
-    ct_image = data_images()["duck"]
-
-    new_size = 512
-    if dim == 0:
-        sz = Size3D(new_size, new_size, 0)
-    elif dim == 1:
-        sz = Size3D(new_size, 0, new_size)
-
-    sz = Size3D(new_size, new_size, new_size)
-
-    viz = ImageVisualizer.from_image(ct_image)
-
-    viz.view_slices()
-
-# %%

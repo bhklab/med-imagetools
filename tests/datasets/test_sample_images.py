@@ -380,7 +380,7 @@ class TestCheckerboardImage:
         assert image[0, 0, 8] == 1.0
         assert image[0, 8, 0] == 1.0
         assert image[8, 0, 0] == 1.0
-        assert image[8, 8, 8] == 0.0
+        assert image[8, 8, 8] == 1.0
 
     def test_custom_checker_size(self):
         """Test creating a checkerboard with custom checker size."""
@@ -392,7 +392,7 @@ class TestCheckerboardImage:
         assert image[0, 0, 4] == 1.0
         assert image[0, 4, 0] == 1.0
         assert image[4, 0, 0] == 1.0
-        assert image[4, 4, 4] == 0.0
+        assert image[4, 4, 4] == 1.0
 
     def test_custom_values(self):
         """Test creating a checkerboard with custom values."""
