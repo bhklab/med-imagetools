@@ -260,9 +260,12 @@ class SampleInput(BaseModel):
     def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.input_directory)
 
-    def query(self, modalities: str) -> list:
+    def query(self, modalities: str) -> list[list[dict[str, str]]]:
         """Query the interlacer for a specific modality."""
-        return self.interlacer.query(modalities)
+        query_result: list[list[dict[str, str]]] = self.interlacer.query(
+            modalities
+        )
+        return query_result
 
 
 if __name__ == "__main__":  # pragma: no cover
