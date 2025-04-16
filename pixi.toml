@@ -30,15 +30,16 @@ med-imagetools = { path = ".", editable = true, extras = ["all"] }
 ipython = "*"
 ipykernel = "*"
 jupyterlab = "*"
+ipympl = ">=0.9.6,<0.10"
 
 [feature.dev.activation.env]
 IMGTOOLS_LOG_LEVEL = "DEBUG"
 
 [feature.dev.tasks]
 clean = { cmd = [
-  "bash",
-  "-c",
-  "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+    "bash",
+    "-c",
+    "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
 ], description = "Clear cache and coverage files" }
 
 ############################################## PYTHON ###############################################
@@ -140,12 +141,12 @@ hatch = ">=1.13"
 semver = 'echo "Next Version is: $(semantic-release version --print)"'
 
 build = { cmd = [
-  "hatch",
-  "build",
-  "--clean",
+    "hatch",
+    "build",
+    "--clean",
 ], inputs = [
-  "src",
-  "pyproject.toml",
+    "src",
+    "pyproject.toml",
 ], outputs = [
-  "dist/*",
+    "dist/*",
 ], description = "🛠️ Builds the packages" }
