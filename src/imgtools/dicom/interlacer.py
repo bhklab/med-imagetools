@@ -9,31 +9,8 @@ Classes
 -------
 SeriesNode
     Represents an individual DICOM series and its hierarchical relationships.
-Branch
-    Represents a path within the hierarchy, maintaining ordered modality sequences.
 Interlacer
     Builds the hierarchy, processes queries, and visualizes the relationships.
-
-Examples
---------
->>> from pathlib import Path
->>> from rich import print  # noqa
->>> from imgtools.dicom.crawl import (
-...     CrawlerSettings,
-...     Crawler,
-... )
->>> from imgtools.dicom.interlacer import Interlacer
->>> dicom_dir = Path("data")
->>> crawler_settings = CrawlerSettings(
->>>     dicom_dir=dicom_dir,
->>>     n_jobs=12,
->>>     force=False
->>> )
->>> crawler = Crawler.from_settings(crawler_settings)
->>> interlacer = Interlacer(crawler.db_csv)
->>> interlacer.visualize_forest()
->>> query = "CT,RTSTRUCT"
->>> samples = interlacer.query(query)
 """
 
 from __future__ import annotations
@@ -41,7 +18,6 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 import pandas as pd
 from rich.console import Console
@@ -81,7 +57,7 @@ class SeriesNode:
     PatientID: str
     StudyInstanceUID: str
     folder: str
-    children: list[SeriesNode] = field(default_factory=list)
+    children: list[SeriesNode] = field(default_factory=list, repr=False)
 
     def add_child(self, child_node: SeriesNode) -> None:
         """Add SeriesNode to children"""
@@ -99,18 +75,6 @@ class SeriesNode:
     def __hash__(self) -> int:
         return hash(self.SeriesInstanceUID)
 
-    def __repr__(self, level: int = 0) -> str:
-        """Recursive representation of the tree structure"""
-        from imgtools.utils import truncate_uid
-
-        indent = "  " * level
-        result = (
-            f"{indent}{self.Modality} (Series-{truncate_uid(self.SeriesInstanceUID, last_digits=8)})\n"
-        )
-        for child in self.children:
-            result += child.__repr__(level + 1)
-        return result
-
     @classmethod
     def copy_node(cls, node: SeriesNode) -> SeriesNode:
         return cls(
@@ -119,68 +83,6 @@ class SeriesNode:
             node.PatientID,
             node.StudyInstanceUID,
             node.folder,
-        )
-
-
-@dataclass
-class Branch:
-    """
-    Represents a unique path (branch) in the forest.
-
-    Parameters
-    ----------
-    series_nodes : list[SeriesNode]
-        List of SeriesNode objects in this branch
-
-    Attributes
-    ----------
-    series_nodes : list[SeriesNode]
-        The nodes making up this branch
-    """
-
-    series_nodes: list[SeriesNode] = field(default_factory=list)
-
-    def add_node(self, node: SeriesNode) -> None:
-        """Add a SeriesNode to the branch."""
-        self.series_nodes.append(node)
-
-    def check_branch(self, query: list[str]) -> list[SeriesNode]:
-        """Check if the given query is a sub-sequence and has the same order as the nodes in the branch."""
-        node_mode = [node.Modality for node in self.series_nodes]
-
-        if query == [
-            "CT",
-            "RTSTRUCT",
-        ]:  # EXCEPTION: Avoid PT in between CT and RTSTRUCT
-            return next(
-                (
-                    self.series_nodes[idx : idx + 2]
-                    for idx in range(len(self.series_nodes) - 1)
-                    if node_mode[idx : idx + 2] == query
-                ),
-                [],
-            )
-
-        elif all(item in node_mode for item in query):
-            return [
-                node for node in self.series_nodes if node.Modality in query
-            ]
-
-        else:
-            return []
-
-    def __iter__(self) -> Iterator[SeriesNode]:
-        """Yield the node from each SeriesNode in the branch."""
-        for node in self.series_nodes:
-            yield node
-
-    def __repr__(self) -> str:
-        """Return a string representation of the branch."""
-        from imgtools.utils import truncate_uid
-
-        return " -> ".join(
-            f"{node.Modality} (Series-{truncate_uid(node.SeriesInstanceUID, last_digits=8)})"
-            for node in self.series_nodes
         )
 
 
@@ -200,8 +102,6 @@ class Interlacer:
         DataFrame containing the data loaded from the CSV file or passed in `crawl_index`
     series_nodes : dict[str, SeriesNode]
         Maps SeriesInstanceUID to SeriesNode objects
-    trees : list[Branch]
-        Forest structure containing all series relationships as branches
     root_nodes : list[SeriesNode]
         List of root nodes in the forest
     """
@@ -211,7 +111,6 @@ class Interlacer:
     series_nodes: dict[str, SeriesNode] = field(
         default_factory=dict, init=False
     )
-    trees: list[Branch] = field(default_factory=list, init=False)
     root_nodes: list[SeriesNode] = field(default_factory=list, init=False)
 
     def __post_init__(self) -> None:
@@ -225,6 +124,7 @@ class Interlacer:
             self.crawl_df.set_index(
                 "SeriesInstanceUID",
                 inplace=True,
+                drop=False,
             )
         else:
             errmsg = f"Invalid type for crawl_index: {type(self.crawl_index)}"
@@ -236,30 +136,6 @@ class Interlacer:
 
         self._create_series_nodes()
         self._build_forest()
-        self.branches = self._find_branches()
-
-    def _group_by_attribute(
-        self, items: list[SeriesNode], attribute: str
-    ) -> list[list[SeriesNode]]:
-        """
-        Groups SeriesNode items by a specific attribute.
-
-        Parameters
-        ----------
-        items : list[SeriesNode]
-            List of SeriesNode objects to group
-        attribute : str
-            Name of the attribute to group by
-
-        Returns
-        -------
-        list[list[SeriesNode]]
-            Lists of SeriesNodes grouped by the attribute
-        """
-        grouped_dict = defaultdict(list)
-        for item in items:
-            grouped_dict[getattr(item, attribute)].append(item)
-        return list(grouped_dict.values())
 
     def _create_series_nodes(self) -> None:
         """Creates a SeriesNode object for each row in the DataFrame."""
@@ -297,27 +173,6 @@ class Interlacer:
             ):
                 parent_node = self.series_nodes[reference_series_uid]
                 parent_node.add_child(node)
-
-    @timer("Finding individual branches of tree")
-    def _find_branches(self) -> list[Branch]:
-        """
-        Finds and records all branches in the forest
-        using depth-first search (DFS).
-        """
-        branches: list[Branch] = []
-
-        def traverse_tree(node: SeriesNode, branch: list[SeriesNode]) -> None:
-            branch.append(SeriesNode.copy_node(node))
-            if node.children:
-                for child in node.children:
-                    traverse_tree(child, branch.copy())
-            else:
-                branches.append(Branch(branch))
-
-        for root in self.root_nodes:
-            traverse_tree(root, [])
-
-        return branches
 
     def _get_valid_query(self, query: list[str]) -> list[str]:
         """
@@ -363,33 +218,36 @@ class Interlacer:
 
         return [modality for modality in valid_order if modality in query_set]
 
-    def _query(self, queried_modalities: list[str]) -> list[list[SeriesNode]]:
-        """Returns samples that contain *all* specified modalities."""
-        results = []
-        seen_result = set()
+    def _query(
+        self,
+        queried_modalities: list[str],
+    ) -> list[list[SeriesNode]]:
+        """Find sequences containing queried modalities in order, optionally grouped by root."""
+        results: list[list[SeriesNode]] = []
 
-        # Step 1: Query each Branch
-        for branch in self.branches:
-            query_result = branch.check_branch(queried_modalities)
-            if query_result and not tuple(query_result) in seen_result:
-                results.append(query_result)
-                seen_result.add(tuple(query_result))
+        def dfs(node: SeriesNode, path: list[SeriesNode]) -> None:
+            path.append(node)
+            path_modalities = [n.Modality for n in path]
 
-        # Step 2: Group results by root node
-        grouped_results: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
-        for result in results:
-            root_node = result[0]
-            if not grouped_results[root_node]:
-                grouped_results[root_node].append(root_node)
+            if all(m in path_modalities for m in queried_modalities):
+                modality_nodes = [n for n in path if n.Modality in queried_modalities]
+                if modality_nodes not in results:
+                    results.append(modality_nodes)
 
-            for node in result[1:]:
-                if node not in grouped_results[root_node]:
-                    grouped_results[root_node].append(node)
+            for child in node.children:
+                dfs(child, path.copy())
 
-        return list(grouped_results.values())
+        for root in self.root_nodes:
+            dfs(root, [])
+
+        return results
 
     @timer("Querying forest")
-    def query(self, query_string: str) -> list[list[dict[str, str]]]:
+    def query(
+        self,
+        query_string: str,
+        group_by_root: bool = True,
+    ) -> list[list[SeriesNode]]:
         """
         Query the forest for specific modalities.
 
@@ -397,6 +255,10 @@ class Interlacer:
         ----------
         query_string : str
             Comma-separated string of modalities to query (e.g., 'CT,MR')
+
+        group_by_root : bool, default=True
+            If True, group the returned SeriesNodes by their root CT/MR/PT
+            node (i.e., avoid duplicate root nodes across results).
 
         Returns
         -------
@@ -417,7 +279,50 @@ class Interlacer:
         queried_modalities = self._get_valid_query(query_string.split(","))
         query_results = self._query(queried_modalities)
 
-        return query_results
+        if not group_by_root:
+            return query_results
+
+        grouped: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
+        # pretty much start with the root node, then add all branches
+        for path in query_results:
+            root = path[0]
+            grouped[root].extend(path[1:])
+
+        # break each item into a list starting with key, then all the values
+        return [[key] + value for key, value in grouped.items()]
+
+    def query_interlacer(
+        self,
+        query_string: str,
+        group_by_root: bool = True,
+    ) -> Interlacer:
+        """Return a new Interlacer with only the nodes matching the query.
+
+        Useful for cli tools who want to see the interlacer tree
+        after querying.
+        """
+
+        # make a dataframe where the root node is the ReferencedSeriesUID
+        data = []
+        for path in self.query(query_string, group_by_root):
+            root = path[0]
+            for node in path:
+                data.append(
+                    {
+                        "SeriesInstanceUID": node.SeriesInstanceUID,
+                        "Modality": node.Modality,
+                        "PatientID": node.PatientID,
+                        "StudyInstanceUID": node.StudyInstanceUID,
+                        "ReferencedSeriesUID": root.SeriesInstanceUID
+                        if node != root
+                        else None,
+                        "folder": node.folder,
+                    }
+                )
+        sub_df = pd.DataFrame(data)
+
+        # Construct a new Interlacer instance
+        return Interlacer(sub_df)
 
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
@@ -669,9 +574,11 @@ if __name__ == "__main__":
     from imgtools.dicom.crawl import CrawlerSettings, Crawler
 
     dicom_dirs = [
-        Path("data/Vestibular-Schwannoma-SEG"),
+        # Path("data/Vestibular-Schwannoma-SEG"),
         # Path("data/NSCLC_Radiogenomics"),
-        # Path("data/Head-Neck-PET-CT"),
+        Path("data/Head-Neck-PET-CT"),
+        # Path("data/4D-Lung"),
+        # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
     ]
     interlacers = []
     for directory in dicom_dirs:
@@ -687,7 +594,9 @@ if __name__ == "__main__":
         # interlacer.visualize_forest(
         #     directory.parent.parent / directory.name / "interlacer.html"
         # )
-        print(f"Query Result: {interlacer.query('MR,RTSTRUCT')}")
+        # print(f"Query Result: {interlacer.query('MR,RTSTRUCT')}")
 
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
+
+    query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
