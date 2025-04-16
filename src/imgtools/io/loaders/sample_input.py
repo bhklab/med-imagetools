@@ -20,6 +20,7 @@ from imgtools.coretypes.masktypes.roi_matching import (
     create_roi_matcher,
 )
 from imgtools.dicom.crawl import Crawler
+from imgtools.dicom.interlacer import Interlacer
 from imgtools.loggers import logger
 
 __all__ = ["SampleInput"]
@@ -94,6 +95,8 @@ class SampleInput(BaseModel):
         description="Configuration for ROI matching",
     )
     _crawler: Crawler | None = PrivateAttr(default=None, init=False)
+    _crawled: bool = PrivateAttr(default=False, init=False)
+    _interlacer: Interlacer | None = PrivateAttr(default=None, init=False)
 
     def model_post_init(self, __context) -> None:  # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
@@ -245,7 +248,7 @@ class SampleInput(BaseModel):
             raise ValueError("Crawler has not been initialized.")
         return self._crawler
 
-    def crawl(self) -> None:
+    def crawl(self) -> SampleInput:
         """Run the processing with the current configuration.
 
         This method is a placeholder for the actual processing logic.
@@ -254,13 +257,28 @@ class SampleInput(BaseModel):
         logger.info("Running processing with current configuration...")
 
         self.crawler.crawl()
+        self._crawled = True
+        return self
+
+    @property
+    def interlacer(self) -> Interlacer:
+        """Get the Interlacer instance."""
+        if not self._crawled:
+            raise ValueError("Crawl must be run before querying.")
+        if not self._interlacer:
+            self._interlacer = Interlacer(crawl_index=self.crawler.index)
+
+        return self._interlacer
+
+    def query(self) -> None:
+        self.interlacer.print_tree(input_directory=self.input_directory)
 
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
 
     # Example usage
-    config = SampleInput.build(
+    medinput = SampleInput.build(
         input_directory="data/NSCLC-Radiomics",
         roi_match_map={
             "GTV": ["GTV.*"],
@@ -269,8 +287,8 @@ if __name__ == "__main__":  # pragma: no cover
         roi_ignore_case=True,
         roi_handling_strategy="merge",
     )
-    print(config)
+    print(medinput)
 
-    print(f"{config.crawler!r}")
+    print(f"{medinput.crawler!r}")
 
     # config.run()
