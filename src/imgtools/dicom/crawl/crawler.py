@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from imgtools.dicom.crawl.parse_dicoms import (
     ParseDicomDirResult,
+    SeriesMetaMap,
     parse_dicom_dir,
 )
 from imgtools.loggers import logger, tqdm_logging_redirect
@@ -15,6 +16,19 @@ if TYPE_CHECKING:
     import pandas as pd
 
 __all__ = ["Crawler"]
+
+# ParseDicomDirResult = t.NamedTuple(
+#     "ParseDicomDirResult",
+#     [
+#         ("crawl_db", list[dict[str, str]]),
+#         ("index", pd.DataFrame),
+#         ("crawl_db_raw", SeriesMetaMap),
+#         ("crawl_db_path", pathlib.Path),
+#         ("index_csv_path", pathlib.Path),
+#         ("crawl_cache_path", pathlib.Path),
+#         ("sop_map_path", pathlib.Path),
+#     ],
+# )
 
 
 @dataclass
@@ -57,6 +71,16 @@ class Crawler:
     def index(self) -> pd.DataFrame:
         """Return the index of the crawl results."""
         return self.crawl_results.index
+
+    @property
+    def crawl_db(self) -> list[dict[str, str]]:
+        """Return the crawl database."""
+        return self.crawl_results.crawl_db
+
+    @property
+    def crawl_db_raw(self) -> SeriesMetaMap:
+        """Return the crawl database raw."""
+        return self.crawl_results.crawl_db_raw
 
     def __str__(self) -> str:
         """Return a string representation of the crawler."""
