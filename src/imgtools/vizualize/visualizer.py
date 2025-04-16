@@ -145,7 +145,9 @@ class SliceImage3D:
         mask_slices: list[np.ndarray] | None = self.mask_slices(dim, every_n)
 
         if mask_slices is None:
-            mask_slices = [np.zeros_like(slices[0])] * len(slices)
+            mask_slices = [
+                np.zeros_like(slices[0]) for _ in range(len(slices))
+            ]
         logger.warning("Generating slices...")
         tasks = [
             (

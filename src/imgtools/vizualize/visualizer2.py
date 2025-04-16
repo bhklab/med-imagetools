@@ -14,29 +14,48 @@ from imgtools.coretypes import RegionBox
 
 
 class MaskColor(Enum):
+    """Predefined color values for mask overlays.
+
+    Each color is represented as an RGB list with values from 0-255.
+    The RGB value specifically contains concatenated R, G, B channels for sitk colormap.
+    """
+
     RED = [255, 0, 0]
     GREEN = [0, 255, 0]
     BLUE = [0, 0, 255]
     YELLOW = [255, 255, 0]
     CYAN = [0, 255, 255]
     MAGENTA = [255, 0, 255]
-    WHITE = [255, 255, 255]
-    BLACK = [0, 0, 0]
-    RGB = [255, 0, 0, 0, 255, 0, 0, 0, 255]
 
 
 def display_slices(
     array: np.ndarray, x_index: int, y_index: int, z_index: int
 ) -> None:
+    """Display orthogonal slices of a 3D array.
+
+    Parameters
+    ----------
+    array : np.ndarray
+        3D numpy array representing the image volume
+    x_index : int
+        Index for slice in the x dimension
+    y_index : int
+        Index for slice in the y dimension
+    z_index : int
+        Index for slice in the z dimension
+    """
+    if not isinstance(array, np.ndarray):
+        raise TypeError("Input must be a numpy array")
+
     fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    # plt.imshow
     axes[0].imshow(array[x_index, :, :], aspect="auto")
-
     axes[1].imshow(array[:, y_index, :], aspect="auto")
-
     axes[2].imshow(array[:, :, z_index], aspect="auto")
+    # turn off axes
+    for ax in axes:
+        ax.axis("off")
 
-    # turn off axies
+    plt.show()
     for ax in axes:
         ax.axis("off")
 
@@ -72,6 +91,8 @@ def create_interactive(
 
 @dataclass
 class ImageVisualizer:
+    """Simple visualizer for sitk based images."""
+
     main_image: sitk.Image
 
     @classmethod
@@ -79,6 +100,8 @@ class ImageVisualizer:
         cls,
         image: sitk.Image,
     ) -> ImageVisualizer:
+        """Create an ImageVisualizer from a SimpleITK image."""
+
         return cls(main_image=image)
 
     @classmethod
@@ -87,7 +110,7 @@ class ImageVisualizer:
         image: sitk.Image,
         mask: sitk.Image,
         label: int = 1,
-        as_countour: bool = False,
+        as_contour: bool = False,
         # overlay settings
         mask_color: MaskColor = MaskColor.GREEN,
         opacity: float = 0.5,
@@ -96,7 +119,34 @@ class ImageVisualizer:
         crop_to_bbox: bool = True,
         croppad: int = 2,
     ) -> ImageVisualizer:
-        """Thiis should overlay the mask on the image"""
+        """Create an ImageVisualizer with a mask overlay on the image.
+
+        Parameters
+        ----------
+        image : sitk.Image
+            Base image for visualization
+        mask : sitk.Image
+            Mask image to overlay on the base image
+        label : int, default=1
+            Label value in the mask to use for overlay
+        as_contour : bool, default=False
+            If True, convert the mask to a contour before overlay
+        mask_color : MaskColor, default=MaskColor.GREEN
+            Color to use for the mask overlay
+        opacity : float, default=0.5
+            Opacity of the mask overlay (0.0-1.0)
+        background_label : int, default=0
+            Label value in the mask to treat as background
+        crop_to_bbox : bool, default=True
+            If True, crop the image to the bounding box of the mask
+        croppad : int, default=2
+            Padding to add around the crop region
+
+        Returns
+        -------
+        ImageVisualizer
+            Instance with the mask overlaid on the image
+        """
 
         region = (
             RegionBox.from_mask_bbox(mask, label=label)
@@ -104,7 +154,7 @@ class ImageVisualizer:
             .pad(croppad)
         )
 
-        if as_countour:
+        if as_contour:
             f_mask = sitk.BinaryContour(mask, fullyConnected=True)
         else:
             f_mask = mask
@@ -134,6 +184,21 @@ class ImageVisualizer:
         every: int = 1,
         fig: plt.Figure | None = None,
     ) -> plt.Figure:
+        """Visualize slices in a grid.
+
+        Parameters
+        ----------
+        every : int
+            Step size for slice selection
+        fig : plt.Figure, optional
+            Existing figure to use for visualization
+            If None, a new figure will be created
+
+        Returns
+        -------
+        plt.Figure
+            Figure containing the grid of slices
+        """
         dimension = 2
         plot_size = 3
 
@@ -170,3 +235,14 @@ class ImageVisualizer:
             axes[idx].axis("off")
 
         return fig
+
+
+if __name__ == "__main__":  # pragma: no cover
+    from imgtools.datasets.examples import data_images
+
+    # Load example images
+    ct_image = data_images()["duck"]
+
+    viz = ImageVisualizer.from_image(ct_image)
+
+    viz.view_slices()
