@@ -5,9 +5,13 @@ from SimpleITK import Image
 
 
 class BaseTransform(ABC):
-    """Abstract base class for operations.
+    """Abstract base class for image transforms.
 
-    Classes inheriting from this must implement the `__call__` method.
+    Classes inheriting from this must implement the `__call__` method that
+    applies a transformation to an image and returns the result.
+
+    This class provides a common interface for all transforms in the package,
+    allowing them to be used interchangeably and composed together.
     """
 
     @property
@@ -23,8 +27,7 @@ class BaseTransform(ABC):
 
     @abstractmethod
     def __call__(self, image: Image, *args: Any, **kwargs: Any) -> Image:  # noqa
-        """
-        Apply the transformation operation to the given image.
+        """Apply the transformation operation to the given image.
 
         This abstract method must be implemented by subclasses to apply a specific
         transformation. It takes an image along with optional positional and keyword
@@ -32,12 +35,16 @@ class BaseTransform(ABC):
 
         Parameters
         ----------
-            image: The input image to be transformed.
-            *args: Additional positional arguments for the transformation.
-            **kwargs: Additional keyword arguments for the transformation.
+        image : Image
+            The input image to be transformed.
+        *args : Any
+            Additional positional arguments for the transformation.
+        **kwargs : Any
+            Additional keyword arguments for the transformation.
 
         Returns
         -------
+        Image
             The transformed image.
         """
         pass

@@ -9,29 +9,53 @@ __all__ = ["SimpleITKFilter", "ImageFunction"]
 
 # Lambda transforms
 class SimpleITKFilter(BaseTransform):
-    """SimpleITKFilter operation class.
+    """Apply a SimpleITK image filter to an image.
 
-    A callable class that accepts an sitk.ImageFilter object to add a filter
-    to an image.
-
-    To instantiate:
-        obj = SimpleITKFilter(sitk_filter, *execute_args)
-    To call:
-        result = obj(image)
+    This class wraps a SimpleITK image filter and allows it to be used like any
+    other transform in the library. It provides a consistent interface for
+    applying SimpleITK filters within the transform framework.
 
     Parameters
     ----------
     sitk_filter : sitk.ImageFilter
-        An ImageFilter object in sitk library.
-    execute_args : Optional[Any], optional
-        Any arguments to be passed to the Execute() function of the selected
-        ImageFilter object.
+        A SimpleITK image filter instance to process images.
+    *execute_args : Any, optional
+        Optional positional arguments to pass to the filter's Execute method.
+        These arguments come after the input image in the Execute call.
+
+    Examples
+    --------
+    >>> import SimpleITK as sitk
+    >>> from imgtools.datasets.sample_images import (
+    ...     create_noisy_sphere_image,
+    ... )
+    >>> from imgtools.transforms import SimpleITKFilter
+    >>> # Create a sample image with noise
+    >>> image = create_noisy_sphere_image(
+    ...     noise_level=0.3
+    ... )
+    >>> # Create a median filter to remove noise
+    >>> median_filter = sitk.MedianImageFilter()
+    >>> median_filter.SetRadius(2)
+    >>> # Use SimpleITKFilter to apply the filter
+    >>> median_transform = SimpleITKFilter(median_filter)
+    >>> filtered_image = median_transform(image)
+    >>> # Use SimpleITKFilter with a different filter that takes parameters
+    >>> gradient_magnitude = sitk.GradientMagnitudeRecursiveGaussianImageFilter()
+    >>> gradient_transform = SimpleITKFilter(
+    ...     gradient_magnitude, 1.5
+    ... )  # sigma=1.5
+    >>> gradient_image = gradient_transform(image)
+    >>> print(
+    ...     "Applied median filter and gradient magnitude filter"
+    ... )
+    Applied median filter and gradient magnitude filter
     """
 
     def __init__(
         self,
         sitk_filter: sitk.ImageFilter,
-        *execute_args: Any | None,  # noqa: ANN401
+        *execute_args: Any,  # noqa: ANN401
     ) -> None:
         """Initialize a SimpleITKFilter with a filter and execution args.
 
@@ -39,7 +63,7 @@ class SimpleITKFilter(BaseTransform):
         ----------
         sitk_filter : sitk.ImageFilter
             A SimpleITK image filter instance to process images.
-        execute_args : Optional[Any], optional
+        *execute_args : Any, optional
             Optional positional arguments to pass to the filter's Execute
             method.
         """
@@ -66,36 +90,64 @@ class SimpleITKFilter(BaseTransform):
 
 
 class ImageFunction(BaseTransform):
-    """ImageFunction operation class.
+    """Apply a custom function to process an image.
 
-    A callable class that takens in a function to be used to process an image,
-    and executes it.
-
-    To instantiate:
-        obj = ImageFunction(function, copy_geometry, **kwargs)
-    To call:
-        result = obj(image)
+    This class wraps a user-defined function and allows it to be used like
+    any other transform in the library. The function must accept a SimpleITK
+    image as its first parameter and return a SimpleITK image.
 
     Parameters
     ----------
     function : Callable[..., sitk.Image]
-        A function to be used for image processing.
-        This function needs to have the following signature:
-        - function(image: sitk.Image, **args)
-        - The first argument needs to be an sitkImage, followed by optional
-          arguments.
+        A callable that processes a SimpleITK image and returns a
+        processed image.
     copy_geometry : bool, optional
-        An optional argument to specify whether information about the image
-        should be copied to the resulting image. Set to be true as a default.
-    kwargs : Optional[Any], optional
-        Any number of arguments used in the given function.
+        If True, copies the input image's geometry to the result.
+    **kwargs : Any, optional
+        Optional keyword arguments to be passed to the processing function.
+
+    Examples
+    --------
+    >>> import SimpleITK as sitk
+    >>> import numpy as np
+    >>> from imgtools.datasets.sample_images import (
+    ...     create_sphere_image,
+    ... )
+    >>> from imgtools.transforms import ImageFunction
+    >>> # Create a sample sphere image
+    >>> image = create_sphere_image()
+    >>> # Define a custom function to invert intensities
+    >>> def invert_intensity(image, max_value=1.0):
+    ...     return sitk.Subtract(max_value, image)
+    >>> # Create a transform using this function
+    >>> inverter = ImageFunction(
+    ...     invert_intensity, max_value=1.0
+    ... )
+    >>> inverted = inverter(image)
+    >>> # Define a function that operates on the NumPy array
+    >>> def add_random_noise(image, noise_level=0.1):
+    ...     array = sitk.GetArrayFromImage(image)
+    ...     noise = np.random.normal(
+    ...         0, noise_level, array.shape
+    ...     )
+    ...     array = array + noise
+    ...     result = sitk.GetImageFromArray(array)
+    ...     result.CopyInformation(image)
+    ...     return result
+    >>> # Create and apply a noise transform
+    >>> noiser = ImageFunction(
+    ...     add_random_noise, noise_level=0.2
+    ... )
+    >>> noisy = noiser(image)
+    >>> print("Applied custom image transforms")
+    Applied custom image transforms
     """
 
     def __init__(
         self,
         function: Callable[..., sitk.Image],
         copy_geometry: bool = True,
-        **kwargs: Any | None,  # noqa: ANN401
+        **kwargs: Any,  # noqa: ANN401
     ) -> None:
         """Initialize an ImageFunction transform.
 
@@ -111,7 +163,7 @@ class ImageFunction(BaseTransform):
             processed image.
         copy_geometry : bool, optional
             If True, copies the input image's geometry to the result.
-        kwargs : Optional[Any], optional
+        **kwargs : Any, optional
             Optional keyword arguments to be passed to the processing function.
         """
         self.function = function
