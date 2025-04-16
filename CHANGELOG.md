@@ -1,6 +1,52 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.22 (2025-04-16)
+
+### Features
+
+- Add Mask and VectorMask data structure design proposal with examples and context
+  ([#322](https://github.com/bhklab/med-imagetools/pull/322),
+  [`2586bce`](https://github.com/bhklab/med-imagetools/commit/2586bcec0c330cbd651af4fbd791559e046f61cc))
+
+- **New Features** - Enhanced segmentation management with new frameworks for both scalar and
+  multi-label imaging. - Introduced flexible, strategy-based extraction and mapping of regions of
+  interest. - Added robust support for radiological structure set and DICOM segmentation data
+  integration, improving ROI extraction and processing. - Implemented comprehensive error handling
+  and performance optimizations for smoother operations. - Added methods for creating and managing
+  masks from DICOM and numpy data, including vector masks with embedded metadata. - Introduced new
+  classes for managing masks and regions of interest, enhancing data structure capabilities. - Added
+  a testing framework to validate the initialization and functionality of the new classes. -
+  Provided a standalone script to convert and save segmentation and RT structure data as NIFTI files
+  with metadata.
+
+Co-authored-by: Joshua Siraj <joshua.siraj@ryerson.ca>
+
+- Add Transform Classes and 3D Visualization tools
+  ([#330](https://github.com/bhklab/med-imagetools/pull/330),
+  [`366e108`](https://github.com/bhklab/med-imagetools/commit/366e1084284da0c36397bf40340dfefa87d5dfcb))
+
+New Tranform classes introduced, with interfaces to allow for chained tranformations
+
+Added prototypes for vizualizing images during development
+
+- **New Features** - Introduced comprehensive visualization modules for 3D medical images, including
+  interactive slice viewers, synchronized multi-image displays, and customizable mask overlays. -
+  Added utilities for exporting image slices as GIF and PNG files. - Enabled automatic detection of
+  Python runtime environments to enhance user experience. - Provided a suite of synthetic 3D image
+  generators for testing and demonstration purposes. - Implemented a unified image transformation
+  framework with spatial, intensity, and lambda-based transforms supporting resampling, resizing,
+  rotation, cropping, and intensity windowing. - Added a Transformer class to apply sequences of
+  image transforms consistently across imaging data types.
+
+- **Bug Fixes** - Ensured robust error handling and validation in transformation pipelines and image
+  generation utilities.
+
+- **Documentation** - Included detailed usage examples and comprehensive docstrings across new
+  modules. - Added extensive tests validating synthetic image generation and transformation
+  correctness.
+
+
 ## v2.0.0-rc.21 (2025-04-15)
 
 ### Features
