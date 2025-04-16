@@ -95,17 +95,19 @@ class SampleInput(BaseModel):
         description="Configuration for ROI matching",
     )
     _crawler: Crawler | None = PrivateAttr(default=None, init=False)
-    _crawled: bool = PrivateAttr(default=False, init=False)
     _interlacer: Interlacer | None = PrivateAttr(default=None, init=False)
 
     def model_post_init(self, __context) -> None:  # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
-        self._crawler = Crawler(
+        crawler = Crawler(
             dicom_dir=self.input_directory,
             dataset_name=self.dataset_name,
             force=self.update_crawl,
             n_jobs=self.n_jobs,
         )
+        crawler.crawl()
+        self._crawler = crawler
+        self._interlacer = Interlacer(crawl_index=crawler.index)
 
     @field_validator("input_directory")
     @classmethod
@@ -248,30 +250,19 @@ class SampleInput(BaseModel):
             raise ValueError("Crawler has not been initialized.")
         return self._crawler
 
-    def crawl(self) -> SampleInput:
-        """Run the processing with the current configuration.
-
-        This method is a placeholder for the actual processing logic.
-        """
-        # Placeholder for processing logic
-        logger.info("Running processing with current configuration...")
-
-        self.crawler.crawl()
-        self._crawled = True
-        return self
-
     @property
     def interlacer(self) -> Interlacer:
         """Get the Interlacer instance."""
-        if not self._crawled:
-            raise ValueError("Crawl must be run before querying.")
-        if not self._interlacer:
-            self._interlacer = Interlacer(crawl_index=self.crawler.index)
-
+        if self._interlacer is None:
+            raise ValueError("Interlacer has not been initialized.")
         return self._interlacer
 
-    def query(self) -> None:
+    def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.input_directory)
+
+    def query(self, modalities: str) -> list:
+        """Query the interlacer for a specific modality."""
+        return self.interlacer.query(modalities)
 
 
 if __name__ == "__main__":  # pragma: no cover
@@ -291,4 +282,8 @@ if __name__ == "__main__":  # pragma: no cover
 
     print(f"{medinput.crawler!r}")
 
-    # config.run()
+    # print the tree
+    medinput.print_tree()
+
+    # print the query
+    print(medinput.query("CT,RTSTRUCT"))
