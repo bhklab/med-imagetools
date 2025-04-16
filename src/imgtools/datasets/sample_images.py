@@ -547,12 +547,16 @@ def create_noisy_sphere_image(
         noise = sitk.GetImageFromArray(arr)
         noise.CopyInformation(image)
 
+        # Ensure noise has the same pixel type as the image
+        noise = sitk.Cast(noise, image.GetPixelID())
+
         # Only add noise to the foreground
         mask = (
             sitk.Equal(image, foreground_value)
             if background_value != foreground_value
             else sitk.Image(image.GetSize(), sitk.sitkUInt8) + 1
         )
+        mask = sitk.Cast(mask, image.GetPixelID())
         noisy_image = sitk.Add(image, sitk.Multiply(noise, mask))
         noisy_image.CopyInformation(image)
         return noisy_image
@@ -734,3 +738,12 @@ def create_ct_hounsfield_image(
                 image[x, y, z] = int(value)
 
     return image
+
+
+if __name__ == "__main__":
+    noisy_sphere = create_noisy_sphere_image(
+        size=(100, 100, 100),
+        spacing=(1.0, 1.0, 1.0),
+        radius=20,
+        noise_level=0.3,
+    )
