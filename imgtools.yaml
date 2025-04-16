@@ -1,6 +1,4 @@
-# this file is a example config and will be removed from 
-# the repo upon release
-
+#$schema=imgtools.json
 input:
   input_directory: data/RADCURE
   dataset_name: RADCURE
