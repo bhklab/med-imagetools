@@ -12,7 +12,7 @@ from imgtools.coretypes.masktypes import (
     ROIMatchStrategy,
     RTStructureSet,
 )
-from imgtools.dicom.crawl import Crawler, CrawlerSettings
+from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer
 from imgtools.io.writers import ExistingFileMode, NIFTIWriter
 from imgtools.loggers import logger, tqdm_logging_redirect
@@ -40,10 +40,8 @@ if __name__ == "__main__":
         compression_level=5,
     )
     crawler = Crawler(
-        CrawlerSettings(
-            input_directory,
-            n_jobs=12,
-        )
+        dicom_dir=input_directory,
+        n_jobs=12,
     )
     interlacer = Interlacer(crawl_index=crawler.index)
 
