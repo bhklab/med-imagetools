@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 
 from imgtools.dicom import Interlacer
-from imgtools.dicom.crawl import CrawlerSettings, Crawler
+from imgtools.dicom.crawl import Crawler
 
 @pytest.mark.skipif(
     os.getenv("TEST_DATASET_TYPE", "public").lower() == 'public',
@@ -15,10 +15,6 @@ def test_interlacer_private(medimage_by_collection, caplog) -> None:
     """
     test interlacer on private test data
     """
-    print(os.getenv("TEST_DATASET_TYPE"))
-    print(medimage_by_collection.keys())
-
-    print(f'There are {len(medimage_by_collection)} collections in the test data.')
 
     test_collections = [
         "Head-Neck-PET-CT",
@@ -28,13 +24,12 @@ def test_interlacer_private(medimage_by_collection, caplog) -> None:
     # Get the first collection
     for collection, series_list in medimage_by_collection.items():
         if collection in test_collections:
-            crawler_settings = CrawlerSettings(
+            crawler = Crawler(
                 dicom_dir=Path(series_list[0].get('Path')).parent.parent,
                 n_jobs=5,
                 force=False,
             )
-
-            crawler = Crawler(crawler_settings)
+            crawler.crawl()
             interlacer = Interlacer(crawler.index)
 
             match collection:
@@ -58,8 +53,6 @@ def test_interlacer_public(medimage_by_collection, caplog) -> None:
     test interlacer on public test data
     """
 
-    print(f'There are {len(medimage_by_collection)} collections in the test data.')
-
     test_collections = [
         "Vestibular-Schwannoma-SEG",
         "LIDC-IDRI",
@@ -68,13 +61,12 @@ def test_interlacer_public(medimage_by_collection, caplog) -> None:
     # Get the first collection
     for collection, series_list in medimage_by_collection.items():
         if collection in test_collections:
-            crawler_settings = CrawlerSettings(
+            crawler = Crawler(
                 dicom_dir=Path(series_list[0].get('Path')).parent.parent,
                 n_jobs=5,
                 force=False,
             )
-
-            crawler = Crawler(crawler_settings)
+            crawler.crawl()
             interlacer = Interlacer(crawler.index)
 
             match collection:
@@ -95,13 +87,12 @@ def test_interlacer_visualize(medimage_by_collection, caplog) -> None:
     """    
 
     for collection, series_list in medimage_by_collection.items():
-        crawler_settings = CrawlerSettings(
-            dicom_dir=Path(series_list[0].get('Path')).parent.parent,
-            n_jobs=5,
-            force=False,
+        crawler = Crawler(
+                dicom_dir=Path(series_list[0].get('Path')).parent.parent,
+                n_jobs=5,
+                force=False,
         )
-
-        crawler = Crawler(crawler_settings)
+        crawler.crawl()
         interlacer = Interlacer(crawler.index)
 
         viz_path = Path(series_list[0].get('Path')).parent.parent / collection / "interlacer.html"
