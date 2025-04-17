@@ -18,19 +18,15 @@ Examples
 --------
 >>> from pathlib import Path
 >>> from rich import print  # noqa
->>> from imgtools.dicom.crawl import (
-...     CrawlerSettings,
-...     Crawler,
-... )
+>>> from imgtools.dicom.crawl import Crawler
 >>> from imgtools.dicom.interlacer import Interlacer
 >>> dicom_dir = Path("data")
->>> crawler_settings = CrawlerSettings(
+>>> crawler = Crawler(
 >>>     dicom_dir=dicom_dir,
 >>>     n_jobs=12,
 >>>     force=False
 >>> )
->>> crawler = Crawler.from_settings(crawler_settings)
->>> interlacer = Interlacer(crawler.db_csv)
+>>> interlacer = Interlacer(crawler.index)
 >>> interlacer.visualize_forest()
 >>> query = "CT,RTSTRUCT"
 >>> samples = interlacer.query(query)
@@ -666,7 +662,7 @@ def print_interlacer_tree(
 
 if __name__ == "__main__":
     from rich import print  # noqa
-    from imgtools.dicom.crawl import CrawlerSettings, Crawler
+    from imgtools.dicom.crawl import Crawler
 
     dicom_dirs = [
         Path("data/Vestibular-Schwannoma-SEG"),
@@ -675,13 +671,12 @@ if __name__ == "__main__":
     ]
     interlacers = []
     for directory in dicom_dirs:
-        crawler_settings = CrawlerSettings(
+        crawler = Crawler(
             dicom_dir=directory,
             n_jobs=5,
             force=False,
         )
 
-        crawler = Crawler(crawler_settings)
         interlacer = Interlacer(crawler.index)
         interlacers.append(interlacer)
         # interlacer.visualize_forest(

@@ -252,6 +252,7 @@ ParseDicomDirResult = t.NamedTuple(
     [
         ("crawl_db", list[dict[str, str]]),
         ("index", pd.DataFrame),
+        ("crawl_db_raw", SeriesMetaMap),
         ("crawl_db_path", pathlib.Path),
         ("index_csv_path", pathlib.Path),
         ("crawl_cache_path", pathlib.Path),
@@ -410,6 +411,7 @@ def parse_dicom_dir(
     return ParseDicomDirResult(
         crawl_db=slim_db,
         index=index_df,
+        crawl_db_raw=series_meta_raw,
         crawl_db_path=crawl_db_path,
         index_csv_path=index_csv,
         crawl_cache_path=crawl_cache,

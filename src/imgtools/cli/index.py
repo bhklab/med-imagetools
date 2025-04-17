@@ -40,12 +40,6 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     default=False,
     help="Force overwrite existing files.",
 )
-@click.option(
-    "--dcm-extension",
-    type=str,
-    default="dcm",
-    help="DICOM file extension.",
-)
 @click.help_option(
     "-h",
     "--help",
@@ -56,7 +50,6 @@ def index(
     dataset_name: str | None,
     n_jobs: int,
     force: bool,
-    dcm_extension: str,
 ) -> None:
     """Crawl DICOM directory and create a database index.
 
@@ -69,22 +62,20 @@ def index(
     - The output is saved in a structured format, including JSON and CSV files,
         which can be used for further processing or analysis.
     
-    - By default, it saves the results in a “.imgtools” folder right next to 
+    - By default, it saves the results in a ".imgtools" folder right next to 
         your DICOM directory, but you can pick your own place to store them.
     """
-    from imgtools.dicom.crawl import Crawler, CrawlerSettings
-    settings = CrawlerSettings(
+    from imgtools.dicom.crawl import Crawler
+    crawler = Crawler(
         dicom_dir=dicom_dir,
         output_dir=output_dir,
         dataset_name=dataset_name,
         n_jobs=n_jobs,
         force=force,
-        dcm_extension=dcm_extension,
     )
-    crawler = Crawler(settings=settings)
 
     logger.info("Crawling completed.")
-    logger.info("Crawl results saved to %s", crawler.settings.output_dir)
+    logger.info("Crawl results saved to %s", crawler.output_dir)
 
 if __name__ == "__main__":
     index()
