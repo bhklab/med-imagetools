@@ -161,7 +161,15 @@ class SEG:
                     )
                     raise ValueError(errmsg)
         ds_seg = load_dicom(dicom, stop_before_pixels=False)
-        seg = hd.seg.Segmentation.from_dataset(ds_seg)
+        try:
+            seg = hd.seg.Segmentation.from_dataset(ds_seg)
+        except KeyError as e:
+            #  check if KeyError: (0062,000A)
+            msg = (
+                f"Segmentation object {dicom!r} does not contain "
+                f"SegmentationType. Skipping."
+            )
+            raise ValueError(msg) from e
 
         metadata = extract_metadata(ds_seg, "SEG", extra_tags=None)  # type: ignore
         segments: dict[int, Segment] = {}
@@ -275,7 +283,7 @@ class SEG:
         self,
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
-    ) -> tuple[sitk.Image, dict[int, ROIMaskMapping]]:
+    ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
         roi_identifier_mapping = self.extract_roi_identifiers()
 
         matched_rois: list[tuple[str, list[Segment]]] = []
@@ -290,14 +298,10 @@ class SEG:
             ]
             matched_rois.append((key, segs))
 
-        if not matched_rois:
-            logger.warning(
-                "No matching ROIs found. Returning empty mask.",
-                roi_matcher=roi_matcher,
-            )
-            raise ValueError(
-                "No matching ROIs found. Returning empty mask.",
-            )
+        # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
+        # is either 'ignore' or 'warn'
+        if len(matched_rois) == 0:
+            return None, {}
 
         ref_image_indices = [
             reference_image.TransformPhysicalPointToIndex(pos)

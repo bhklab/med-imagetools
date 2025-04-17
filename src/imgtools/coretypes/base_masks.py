@@ -320,12 +320,14 @@ class VectorMask(MedImage):
         reference_image: MedImage,
         rtstruct: RTStructureSet,  # StructureSet
         roi_matcher: ROIMatcher,
-    ) -> VectorMask:
+    ) -> VectorMask | None:
         """Create VectorMask from RTSTRUCT using ROI matching."""
         img, mapping = rtstruct.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
         )
+        if img is None:
+            return None
 
         return cls(
             image=img,
@@ -340,12 +342,14 @@ class VectorMask(MedImage):
         reference_image: MedImage,
         seg: SEG,
         roi_matcher: ROIMatcher,
-    ) -> VectorMask:
+    ) -> VectorMask | None:
         """Create VectorMask from SEG using ROI matching."""
         img, mapping = seg.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
         )
+        if img is None:
+            return None
         for idx, m in mapping.items():
             # Update the mapping to use the new key
             mapping[idx] = ROIMaskMapping(

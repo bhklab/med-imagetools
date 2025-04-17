@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import multiprocessing
 import os
+from collections import defaultdict
 from pathlib import Path
+from typing import TYPE_CHECKING, cast
 
 from pydantic import (
     BaseModel,
@@ -12,15 +14,27 @@ from pydantic import (
     model_validator,
 )
 
+from imgtools.coretypes import MedImage
+from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatcher,
+    ROIMatchFailurePolicy,
     ROIMatchStrategy,
     Valid_Inputs as ROIMatcherInputs,
     create_roi_matcher,
 )
+from imgtools.coretypes.masktypes.seg import SEG
+from imgtools.coretypes.masktypes.structureset import RTStructureSet
 from imgtools.dicom.crawl import Crawler
-from imgtools.dicom.interlacer import Interlacer
+from imgtools.dicom.interlacer import Interlacer, SeriesNode
+from imgtools.io.readers import MedImageT, read_dicom_auto
 from imgtools.loggers import logger
+
+if TYPE_CHECKING:
+    # from imgtools.coretypes.imagetypes.dose import Dose
+    # from imgtools.coretypes.imagetypes.pet import PET
+    # from imgtools.coretypes.imagetypes.scan import Scan
+    pass
 
 __all__ = ["SampleInput"]
 
@@ -46,8 +60,7 @@ class SampleInput(BaseModel):
         List of modalities to include. None means include all modalities.
     roi_matcher : ROIMatcher
         Configuration for matching regions of interest in the images.
-    crawler : Optional[Crawler]
-        DICOM crawler instance for processing the input directory.
+
 
     Examples
     --------
@@ -181,6 +194,10 @@ class SampleInput(BaseModel):
         roi_match_map: ROIMatcherInputs = None,
         roi_ignore_case: bool = True,
         roi_handling_strategy: str | ROIMatchStrategy = ROIMatchStrategy.MERGE,
+        roi_allow_multi_key_matches: bool = True,
+        roi_on_missing_regex: str | ROIMatchFailurePolicy = (
+            ROIMatchFailurePolicy.IGNORE
+        ),
     ) -> "SampleInput":
         """Create a SampleInput with separate parameters for ROIMatcher.
 
@@ -205,6 +222,10 @@ class SampleInput(BaseModel):
             Whether to ignore case in ROI matching, by default True
         roi_handling_strategy : str | ROIMatchStrategy, optional
             Strategy for handling ROI matches, by default ROIMatchStrategy.MERGE
+        roi_allow_multi_key_matches : bool, default=True
+            Whether to allow one ROI to match multiple keys in the match_map.
+        roi_on_missing_regex : str | ROIMatchFailurePolicy, optional
+            How to handle when no ROI matches any pattern in match_map.
 
         Returns
         -------
@@ -217,11 +238,18 @@ class SampleInput(BaseModel):
                 roi_handling_strategy.lower()
             )
 
+        if isinstance(roi_on_missing_regex, str):
+            roi_on_missing_regex = ROIMatchFailurePolicy(
+                roi_on_missing_regex.lower()
+            )
+
         # Create the ROIMatcher
         roi_matcher = create_roi_matcher(
             roi_match_map,
-            ignore_case=roi_ignore_case,
             handling_strategy=roi_handling_strategy,
+            ignore_case=roi_ignore_case,
+            allow_multi_key_matches=roi_allow_multi_key_matches,
+            on_missing_regex=roi_on_missing_regex,
         )
         num_jobs = n_jobs or max(1, multiprocessing.cpu_count() - 2)
 
@@ -273,29 +301,234 @@ class SampleInput(BaseModel):
 
         return self.interlacer.query(modalities)
 
+    ###################################################################
+    # Loading methods
+    ###################################################################
+
+    def _read_series(
+        self,
+        series_uid: str,
+        modality: str,
+        folder: str,
+        load_subseries: bool = False,
+    ) -> list[MedImageT]:
+        # we assume that all subseries are in the same directory
+        root_dir = self.input_directory.parent / folder
+
+        if not root_dir.exists():
+            msg = f"Directory does not exist: {root_dir}"
+            raise FileNotFoundError(msg)
+
+        file_name_sets = []
+        series_info = self.crawler.crawl_db_raw[series_uid]
+        if load_subseries:
+            for subseries in series_info:
+                file_name_sets.append(
+                    [
+                        (root_dir / file_name).as_posix()
+                        for file_name in series_info[subseries][
+                            "instances"
+                        ].values()
+                    ]
+                )
+        else:
+            if len(series_info) > 1:
+                msg = (
+                    f"Series {series_uid} contains multiple subseries, but "
+                    "load_subseries is set to False. Combining into one image."
+                )
+                logger.warning(msg, folder=folder, modality=modality)
+            file_name_sets.append(
+                [
+                    (root_dir / file_name).as_posix()
+                    for subseries in series_info
+                    for file_name in series_info[subseries][
+                        "instances"
+                    ].values()
+                ]
+            )
+
+        # load the series
+        return [
+            read_dicom_auto(
+                path=root_dir.as_posix(),
+                modality=modality,
+                file_names=file_name_set,
+                series_id=series_uid,
+            )
+            for file_name_set in file_name_sets
+        ]
+
+    def _load_series(  # noqa: PLR0912
+        self,
+        sample: list[SeriesNode],
+        load_subseries: bool = False,
+    ) -> list[MedImage | VectorMask]:
+        # group list by modality
+        by_mod: defaultdict[str, list[SeriesNode]] = defaultdict(list)
+        for series in sample:
+            by_mod[series.Modality].append(series)
+
+        reference_modality = (
+            "CT"
+            if "CT" in by_mod
+            else "MR"
+            if "MR" in by_mod
+            else "PT"
+            if "PT" in by_mod
+            else None
+        )
+        if not reference_modality:
+            raise ValueError(
+                "No CT, MR, or PT series found to use as reference."
+            )
+        if len(by_mod[reference_modality]) > 1:
+            msg = (
+                f"Found {len(by_mod[reference_modality])}"
+                f"{reference_modality} series,"
+                " using the first one as reference."
+            )
+            logger.warning(msg, reference_list=by_mod[reference_modality])
+
+        # Load the first found reference series
+        reference_series = by_mod[reference_modality].pop(0)
+        reference_images = self._read_series(
+            series_uid=reference_series.SeriesInstanceUID,
+            modality=reference_modality,
+            folder=reference_series.folder,
+            load_subseries=load_subseries,
+        )
+        if len(reference_images) > 1:
+            msg = (
+                f"Found multiple {reference_modality} sub"
+                "series, using the first one as reference."
+            )
+            logger.warning(msg, numsubseries=len(reference_images))
+
+        images: list[MedImage | VectorMask] = []
+
+        images.extend(
+            cast("list[MedImage]", reference_images)
+        )  # hack to satisfy mypy
+        reference_image = images[0]
+        images = images[1:]
+        # Load the rest of the series
+        for modality, series_nodes in by_mod.items():
+            if modality == reference_modality:
+                # TODO:: maybe implement some check here in case we loading
+                # another of same reference modality?
+                continue
+            for series in series_nodes:
+                match modality:
+                    case "RTSTRUCT":
+                        rt = RTStructureSet.from_dicom(
+                            dicom=self.input_directory.parent / series.folder
+                        )
+                        vm = VectorMask.from_rtstruct(
+                            reference_image=reference_image,
+                            rtstruct=rt,
+                            roi_matcher=self.roi_matcher,
+                        )
+                        if vm is None:
+                            continue
+                        images.append(vm)
+                    case "SEG":
+                        seg = SEG.from_dicom(
+                            dicom=self.input_directory.parent / series.folder
+                        )
+                        vm = VectorMask.from_seg(
+                            reference_image=reference_image,
+                            seg=seg,
+                            roi_matcher=self.roi_matcher,
+                        )
+                        if vm is None:
+                            continue
+                        images.append(vm)
+                    case "PT" | "CT" | "MR" | "RTDOSE":
+                        misc = self._read_series(
+                            series_uid=series.SeriesInstanceUID,
+                            modality=modality,
+                            folder=series.folder,
+                            load_subseries=load_subseries,
+                        )
+                        assert isinstance(misc[0], MedImage) and len(misc) == 1
+                        images.append(misc[0])
+                    case _:
+                        msg = f"Unsupported modality: {modality}"
+                        raise ValueError(msg)
+
+        return [reference_image] + images
+
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
+    from tqdm import tqdm  # noqa: A003
 
     # from imgtools.io.readers import read_dicom_auto
 
     # Example usage
     medinput = SampleInput.build(
-        input_directory="data/NSCLC-Radiomics",
+        input_directory="data",
         roi_match_map={
             "GTV": ["GTV.*"],
+            "Lung": ["Lung.*"],
+            "Heart": ["Heart.*"],
+            "Esophagus": ["Esophagus.*"],
+            "Spinal Cord": ["Spinal Cord.*"],
             "PTV": ["PTV.*"],
         },
         roi_ignore_case=True,
         roi_handling_strategy="merge",
+        roi_allow_multi_key_matches=False,
+        roi_on_missing_regex=ROIMatchFailurePolicy.WARN,
     )
     print(medinput)
 
-    print(f"{medinput.crawler!r}")
+    # print(f"{medinput.crawler!r}")
 
     # print the tree
-    medinput.print_tree()
+    # medinput.print_tree()
 
-    # print the query
-    print(medinput.query("CT,RTSTRUCT"))
-    # can only read dicom auto after josh's fix...
+    # query_string = "CT,RTSTRUCT"
+
+    # sample_sets = medinput.interlacer.query(
+    #     query_string=query_string,
+    #     group_by_root=True,
+    # )
+
+    # for series in tqdm(
+    #     sample_sets,
+    #     desc="Loading series",
+    #     unit="series",
+    #     leave=False,
+    #     total=len(sample_sets),
+    # ):
+    #     series = medinput._load_series(
+    #         sample=series,
+    #         load_subseries=False,
+    #     )
+    #     print(series)
+
+    # query_string = "CT,SEG"
+
+    # sample_sets = medinput.interlacer.query(
+    #     query_string=query_string,
+    #     group_by_root=True,
+    # )
+
+    # for series in tqdm(
+    #     sample_sets,
+    #     desc="Loading series",
+    #     unit="series",
+    #     leave=False,
+    #     total=len(sample_sets),
+    # ):
+    #     try:
+    #         series = medinput._load_series(
+    #             sample=series,
+    #             load_subseries=False,
+    #         )
+    #         print(series)
+    #     except ValueError as e:
+    #         print(f"Error loading series: {e}")
+    #         continue

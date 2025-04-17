@@ -17,18 +17,15 @@ if TYPE_CHECKING:
 
 __all__ = ["Crawler"]
 
-# ParseDicomDirResult = t.NamedTuple(
-#     "ParseDicomDirResult",
-#     [
-#         ("crawl_db", list[dict[str, str]]),
-#         ("index", pd.DataFrame),
-#         ("crawl_db_raw", SeriesMetaMap),
-#         ("crawl_db_path", pathlib.Path),
-#         ("index_csv_path", pathlib.Path),
-#         ("crawl_cache_path", pathlib.Path),
-#         ("sop_map_path", pathlib.Path),
-#     ],
-# )
+
+class CrawlResultsNotAvailableError(Exception):
+    """Exception raised when crawler results are accessed before crawling."""
+
+    def __init__(self, method_name: str = "") -> None:
+        message = "Crawl results not available. Please run crawl() first."
+        if method_name:
+            message = f"{message} (Called from: {method_name})"
+        super().__init__(message)
 
 
 @dataclass
@@ -41,7 +38,9 @@ class Crawler:
     n_jobs: int = 1
     force: bool = False
 
-    crawl_results: ParseDicomDirResult = field(init=False, repr=False)
+    _crawl_results: ParseDicomDirResult | None = field(
+        init=False, repr=False, default=None
+    )
 
     def crawl(self) -> None:
         """Crawl the DICOM directory and extract metadata."""
@@ -65,7 +64,34 @@ class Crawler:
                 n_jobs=self.n_jobs,
                 force=self.force,
             )
-        self.crawl_results = crawldb
+        self._crawl_results = crawldb
+
+    @property
+    def crawl_results(self) -> ParseDicomDirResult:
+        """Get the crawl results, validating they're available first."""
+        if self._crawl_results is None:
+            raise CrawlResultsNotAvailableError("crawl_results")
+        return self._crawl_results
+
+    def get_folder(self, series_uid: str) -> str:
+        """Get the folder for a given series UID."""
+        if series_uid not in self.crawl_results.crawl_db_raw:
+            msg = f"Series UID {series_uid} not found in crawl results."
+            raise ValueError(msg)
+
+        data = self.crawl_results.crawl_db_raw[series_uid]
+        first_subseries = next(iter(data.values()))
+        return first_subseries["folder"]
+
+    def get_modality(self, series_uid: str) -> str:
+        """Get the modality for a given series UID."""
+        if series_uid not in self.crawl_results.crawl_db_raw:
+            msg = f"Series UID {series_uid} not found in crawl results."
+            raise ValueError(msg)
+
+        data = self.crawl_results.crawl_db_raw[series_uid]
+        first_subseries = next(iter(data.values()))
+        return first_subseries["modality"]
 
     @property
     def index(self) -> pd.DataFrame:

@@ -337,6 +337,8 @@ def handle_roi_matching(  # noqa: PLR0912
                 raise ROIMatchingError(message, roi_names, roi_matching)
 
     # Apply the selected strategy to the filtered results
+    # TODO:: this is a ugly mess, apologies if youre about to read this
+    # TODO:: refactor!!!
     match strategy:
         case ROIMatchStrategy.MERGE:
             # Merge all ROIs with the same key
