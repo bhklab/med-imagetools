@@ -271,16 +271,33 @@ class Interlacer:
         """Find sequences containing queried modalities in order, optionally grouped by root."""
         results: list[list[SeriesNode]] = []
 
+        # Special modalities that require direct connections to their dependencies
+        SPECIAL_MODALITIES = {"SEG", "RTSTRUCT"}  # noqa: N806
+
         def dfs(node: SeriesNode, path: list[SeriesNode]) -> None:
             path.append(node)
             path_modalities = [n.Modality for n in path]
 
             if all(m in path_modalities for m in queried_modalities):
-                modality_nodes = [
-                    n for n in path if n.Modality in queried_modalities
-                ]
-                if modality_nodes not in results:
-                    results.append(modality_nodes)
+                # Check for special modality direct connection requirements
+                valid_path = True
+                for i, special_node in enumerate(path):
+                    if (
+                        special_node.Modality in SPECIAL_MODALITIES
+                        and special_node.Modality in queried_modalities
+                    ):
+                        # The parent node must be in the query
+                        parent = path[i - 1]
+                        if parent.Modality not in queried_modalities:
+                            valid_path = False
+                            break
+
+                if valid_path:
+                    modality_nodes = [
+                        n for n in path if n.Modality in queried_modalities
+                    ]
+                    if modality_nodes not in results:
+                        results.append(modality_nodes)
 
             for child in node.children:
                 dfs(child, path.copy())
@@ -624,9 +641,9 @@ if __name__ == "__main__":
     dicom_dirs = [
         # Path("data/Vestibular-Schwannoma-SEG"),
         # Path("data/NSCLC_Radiogenomics"),
-        Path("data/Head-Neck-PET-CT"),
+        # Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
-        # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
+        Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
     ]
     interlacers = []
     for directory in dicom_dirs:
