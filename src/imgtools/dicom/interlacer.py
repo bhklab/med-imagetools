@@ -80,53 +80,6 @@ class MissingDependencyModalityError(InterlacerQueryError):
         return message
 
 
-class InterlacerQueryError(Exception):
-    """Base exception for Interlacer query errors."""
-
-    pass
-
-
-class UnsupportedModalityError(InterlacerQueryError):
-    """Raised when an unsupported modality is specified in the query."""
-
-    def __init__(self, query_set: set[str], valid_order: list[str]) -> None:
-        self.unsupported_modalities = query_set - set(valid_order)
-        self.valid_order = valid_order
-        msg = (
-            f"Invalid query: [{', '.join(query_set)}]. "
-            f"The provided modalities [{', '.join(self.unsupported_modalities)}] "
-            f"are not supported. "
-            f"Supported modalities are: {', '.join(valid_order)}"
-        )
-        super().__init__(msg)
-
-
-class MissingDependencyModalityError(InterlacerQueryError):
-    """Raised when modalities are missing their required dependencies."""
-
-    def __init__(
-        self, missing_dependencies: dict[str, set[str]], query_set: set[str]
-    ) -> None:
-        self.missing_dependencies = missing_dependencies
-        self.query_set = query_set
-        message = self._build_error_message()
-        super().__init__(message)
-
-    def _build_error_message(self) -> str:
-        """Build a detailed error message showing all missing dependencies."""
-        message = f"Invalid query: ({', '.join(self.query_set)})\n"
-        message += (
-            "The following modalities are missing required dependencies:\n"
-        )
-
-        for modality, required in self.missing_dependencies.items():
-            message += (
-                f"- {modality} requires one of: [{', '.join(required)}]\n"
-            )
-
-        return message
-
-
 @dataclass
 class SeriesNode:
     """
@@ -416,50 +369,6 @@ class Interlacer:
             queried_modalities = self._get_valid_query(query_string.split(","))
             query_results = self._query(queried_modalities)
 
-        if not group_by_root:
-            return query_results
-
-        grouped: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
-        # pretty much start with the root node, then add all branches
-        for path in query_results:
-            root = path[0]
-            grouped[root].extend(path[1:])
-
-        # break each item into a list starting with key, then all the values
-        return [[key] + value for key, value in grouped.items()]
-
-    def query_interlacer(
-        self,
-        query_string: str,
-        group_by_root: bool = True,
-    ) -> Interlacer:
-        """Return a new Interlacer with only the nodes matching the query.
-
-        Useful for cli tools who want to see the interlacer tree
-        after querying.
-        """
-
-        # make a dataframe where the root node is the ReferencedSeriesUID
-        data = []
-        for path in self.query(query_string, group_by_root):
-            root = path[0]
-            for node in path:
-                data.append(
-                    {
-                        "SeriesInstanceUID": node.SeriesInstanceUID,
-                        "Modality": node.Modality,
-                        "PatientID": node.PatientID,
-                        "StudyInstanceUID": node.StudyInstanceUID,
-                        "ReferencedSeriesUID": root.SeriesInstanceUID
-                        if node != root
-                        else None,
-                        "folder": node.folder,
-                    }
-                )
-        sub_df = pd.DataFrame(data)
-
-        # Construct a new Interlacer instance
-        return Interlacer(sub_df)
         if not group_by_root:
             return query_results
 

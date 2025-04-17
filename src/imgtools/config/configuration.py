@@ -99,11 +99,13 @@ if __name__ == "__main__":
     config = MedImageToolsSettings()
     print(config)
 
-    config.input.print_tree()
+    # config.input.print_tree()
 
-    print(config.input.query("CT,RTSTRUCT"))
+    # print(config.input.query("CT,RTSTRUCT"))
 
-    import json
+    # import json
 
-    with open("imgtools.json", "w") as f:  # noqa: PTH123
-        json.dump(config.json_schema, f, indent=4)
+    # with open("imgtools.json", "w") as f:  # noqa: PTH123
+    #     json.dump(config.json_schema, f, indent=4)
+
+    # config.to_yaml(Path("imgtools.yaml"))
