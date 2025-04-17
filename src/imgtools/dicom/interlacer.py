@@ -632,9 +632,3 @@ if __name__ == "__main__":
         interlacer.print_tree(input_dir)
 
         query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
-
-        # get another interlacer with only the query results
-        interlacer_query = interlacer.query_interlacer(
-            "CT,RTSTRUCT", group_by_root=True
-        )
-        interlacer_query.print_tree(input_dir)
