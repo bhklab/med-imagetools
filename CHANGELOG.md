@@ -1,6 +1,29 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.23 (2025-04-17)
+
+### Features
+
+- Simplify and update crawler instantiation
+  ([#335](https://github.com/bhklab/med-imagetools/pull/335),
+  [`f30ec6c`](https://github.com/bhklab/med-imagetools/commit/f30ec6c2159cdec59afd1016198b60d3e2d19280))
+
+Simplify the Crawler class by removing unused settings and references. Update coverage configuration
+  to exclude a specific file that causes delays in CI. Clean up references to crawler settings
+  throughout the codebase.
+
+- **New Features** - Added access to raw series metadata in DICOM directory parsing results. -
+  Expanded the interface of the DICOM crawler to expose additional crawl result components.
+
+- **Refactor** - Simplified the DICOM crawler by consolidating configuration into a single class and
+  removing the separate settings object. - Streamlined command-line and internal usage by removing
+  support for custom DICOM file extensions and updating initialization patterns.
+
+- **Chores** - Updated test coverage configuration to exclude slow-running sample image generation
+  files. - Commented out time-consuming sample image tests to improve CI performance.
+
+
 ## v2.0.0-rc.22 (2025-04-16)
 
 ### Features
