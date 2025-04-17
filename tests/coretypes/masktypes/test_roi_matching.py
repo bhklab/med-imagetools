@@ -2,9 +2,11 @@ from imgtools.coretypes.masktypes import (
     ROIMatcher,
     ROIMatchStrategy,
     handle_roi_matching,
+    MatchFailurePolicy,
 )
 import pytest
 from rich import print
+import logging
 ###############################################################################
 # Tests
 ###############################################################################
@@ -172,3 +174,191 @@ def test_handle_roi_matching_strategies(
     elif strategy == ROIMatchStrategy.SEPARATE:
         actual_pairs = [(key, values[0]) for key, values in results]
         assert sorted(actual_pairs) == sorted(expected)
+
+
+def test_multi_key_matches(roi_names, roi_matching):
+    """Test the allow_multi_key_matches parameter."""
+    roi_names = ["GTVp", "CTV_1"]
+    roi_matching = {
+        "gtv": ["GTV.*"],
+        "tumor": ["GTVp.*"],
+        "clinical": ["CTV.*"],
+    }
+    
+    # Test with allow_multi_key_matches=True (default)
+    results = handle_roi_matching(
+        roi_names=roi_names,
+        roi_matching=roi_matching,
+        strategy=ROIMatchStrategy.MERGE,
+        ignore_case=True,
+        allow_multi_key_matches=True,
+    )
+    result_dict = dict(results)
+    
+    # GTVp should match both "gtv" and "tumor" keys
+    assert "gtv" in result_dict
+    assert "tumor" in result_dict
+    assert "GTVp" in result_dict["gtv"]
+    assert "GTVp" in result_dict["tumor"]
+    
+    # Test with allow_multi_key_matches=False
+    results = handle_roi_matching(
+        roi_names=roi_names,
+        roi_matching=roi_matching,
+        strategy=ROIMatchStrategy.MERGE,
+        ignore_case=True,
+        allow_multi_key_matches=False,
+    )
+    result_dict = dict(results)
+    
+    # GTVp should only match the first key "gtv" since allow_multi_key_matches=False
+    assert "gtv" in result_dict
+    assert "GTVp" in result_dict["gtv"]
+    
+    # It should not match "tumor" even though the pattern would match
+    if "tumor" in result_dict:
+        assert "GTVp" not in result_dict["tumor"]
+
+
+def test_missing_regex_policy(roi_names, caplog):
+    """Test the on_missing_regex parameter."""
+    # No ROIs that would match these patterns
+    roi_names = ["JUNK1", "JUNK2"]
+    roi_matching = {
+        "gtv": ["GTV.*"],
+        "ptv": ["PTV.*"],
+    }
+    
+    # Test with IGNORE policy
+    results = handle_roi_matching(
+        roi_names=roi_names,
+        roi_matching=roi_matching,
+        strategy=ROIMatchStrategy.MERGE,
+        on_missing_regex=MatchFailurePolicy.IGNORE,
+    )
+    assert len(results) == 0  # No matches
+
+    # need to propagate the logger to capture the logs
+    imgtools_logger = logging.getLogger("imgtools")
+    imgtools_logger.setLevel(logging.DEBUG)
+    imgtools_logger.propagate = True
+    # Test with WARN policy
+    with caplog.at_level(logging.WARNING):
+        results = handle_roi_matching(
+            roi_names=roi_names,
+            roi_matching=roi_matching,
+            strategy=ROIMatchStrategy.MERGE,
+            on_missing_regex=MatchFailurePolicy.WARN,
+        )
+        assert len(results) == 0  # No matches
+        # Check that a warning was logged
+        assert "No ROIs matched any patterns" in caplog.text
+    
+    # Test with ERROR policy
+    with pytest.raises(ValueError, match="No ROIs matched any patterns"):
+        handle_roi_matching(
+            roi_names=roi_names,
+            roi_matching=roi_matching,
+            strategy=ROIMatchStrategy.MERGE,
+            on_missing_regex=MatchFailurePolicy.ERROR,
+        )
+
+
+def test_roi_matcher_class_with_new_params():
+    """Test the ROIMatcher class with the new parameters."""
+    matcher = ROIMatcher(
+        match_map={"gtv": ["GTV.*"], "tumor": ["GTVp.*"]},
+        allow_multi_key_matches=False,
+        on_missing_regex=MatchFailurePolicy.ERROR,
+    )
+    
+    assert matcher.allow_multi_key_matches is False
+    assert matcher.on_missing_regex == MatchFailurePolicy.ERROR
+    
+    # Test that the parameters are passed correctly to handle_roi_matching
+    # when calling match_rois (we can't easily test this directly, so we'll
+    # use a test case where we know the behavior differs)
+    
+    # This should not raise an error even with on_missing_regex=ERROR
+    # because there are matches
+    results = matcher.match_rois(["GTVp"])
+    result_dict = dict(results)
+    
+    # GTVp should only match "gtv" since allow_multi_key_matches=False
+    assert "gtv" in result_dict
+    assert "GTVp" in result_dict["gtv"]
+    
+    # It should not be in "tumor" even though the pattern matches
+    if "tumor" in result_dict:
+        assert "GTVp" not in result_dict["tumor"]
+    
+    # This should raise an error with on_missing_regex=ERROR
+    with pytest.raises(ValueError, match="No ROIs matched any patterns"):
+        matcher.match_rois(["JUNK1", "JUNK2"])
+
+
+def test_keep_first_with_no_multi_key_matches():
+    """Test the interaction between KEEP_FIRST and allow_multi_key_matches=False.
+    
+    This test addresses the edge case where an ROI could be missed entirely
+    if it was the second match for the first key, but could have been the
+    first match for the second key.
+    """
+    # These ROIs demonstrate the potential issue
+    roi_names = ["GTVp", "GTVp_2", "CTV"]
+    
+    # In this matching setup:
+    # - GTVp matches both "gtv" and "tumor" 
+    # - GTV_primary only matches "gtv"
+    # - CTV only matches "clinical"
+    roi_matching = {
+        "gtv": ["GTV.*"],      # Matches both "GTVp" and "GTV_primary"
+        "tumor": ["GTVp.*"],   # Only matches "GTVp"
+        "clinical": ["CTV.*"], # Only matches "CTV"
+    }
+    
+    # With allow_multi_key_matches=True, GTVp could match both keys
+    results = handle_roi_matching(
+        roi_names=roi_names,
+        roi_matching=roi_matching,
+        strategy=ROIMatchStrategy.KEEP_FIRST,
+        ignore_case=True,
+        allow_multi_key_matches=True,
+    )
+    result_dict = dict(results)
+        # GTVp should be the match for "gtv" (first ROI matching the pattern)
+    assert "gtv" in result_dict
+    assert result_dict["gtv"] == ["GTVp"]
+    
+    # GTVp should also be the match for "tumor"
+    assert "tumor" in result_dict
+    assert result_dict["tumor"] == ["GTVp"]
+    
+    # And CTV should match "clinical"
+    assert "clinical" in result_dict
+    assert result_dict["clinical"] == ["CTV"]
+    
+    # With allow_multi_key_matches=False and the FIXED implementation:
+    results = handle_roi_matching(
+        roi_names=roi_names,
+        roi_matching=roi_matching,
+        strategy=ROIMatchStrategy.KEEP_FIRST,
+        ignore_case=True,
+        allow_multi_key_matches=False,
+    )
+    result_dict = dict(results)
+    
+    # We should have optimal assignment:
+    # - "gtv" should get GTV_primary (since GTVp is better used elsewhere)
+    # - "tumor" should get GTVp (since it can ONLY match GTVp)
+    # - "clinical" should get CTV
+    
+    # This ensures we don't miss any ROIs that could have been matched
+    assert "gtv" in result_dict
+    assert result_dict["gtv"] == ["GTVp"]
+    
+    assert "tumor" in result_dict
+    assert result_dict["tumor"] == ["GTVp_2"]
+    
+    assert "clinical" in result_dict
+    assert result_dict["clinical"] == ["CTV"]
