@@ -104,5 +104,6 @@ if __name__ == "__main__":
     print(config.input.query("CT,RTSTRUCT"))
 
     import json
-    with open("imgtools.json", "w") as f:
+
+    with open("imgtools.json", "w") as f:  # noqa: PTH123
         json.dump(config.json_schema, f, indent=4)

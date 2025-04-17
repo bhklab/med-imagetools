@@ -3,7 +3,6 @@ from __future__ import annotations
 import multiprocessing
 import os
 from pathlib import Path
-from typing import Union
 
 from pydantic import (
     BaseModel,
@@ -148,6 +147,18 @@ class SampleInput(BaseModel):
 
         return v
 
+    @field_validator("modalities")
+    @classmethod
+    def validate_modalities(cls, v: list[str] | None) -> list[str] | None:
+        """Validate that modalities are a list of strings."""
+        if v is None:
+            return v
+
+        if not all(isinstance(m, str) for m in v):
+            raise ValueError("Modalities must be a list of strings")
+
+        return v
+
     @model_validator(mode="after")
     def set_default_dataset_name(self) -> "SampleInput":
         """Set default dataset name if not provided."""
@@ -159,18 +170,6 @@ class SampleInput(BaseModel):
 
         return self
 
-    @field_validator("modalities")
-    @classmethod
-    def validate_modalities(cls, v: list[str] | None) -> list[str]:
-        """Validate that modalities are a list of strings."""
-        if v is None:
-            return []
-
-        if not all(isinstance(m, str) for m in v):
-            raise ValueError("Modalities must be a list of strings")
-
-        return v
-
     @classmethod
     def build(
         cls,
@@ -181,9 +180,7 @@ class SampleInput(BaseModel):
         modalities: list[str] | None = None,
         roi_match_map: ROIMatcherInputs = None,
         roi_ignore_case: bool = True,
-        roi_handling_strategy: Union[
-            str, ROIMatchStrategy
-        ] = ROIMatchStrategy.MERGE,
+        roi_handling_strategy: str | ROIMatchStrategy = ROIMatchStrategy.MERGE,
     ) -> "SampleInput":
         """Create a SampleInput with separate parameters for ROIMatcher.
 
@@ -250,6 +247,10 @@ class SampleInput(BaseModel):
             raise ValueError("Crawler has not been initialized.")
         return self._crawler
 
+    ###################################################################
+    # Interlacer methods
+    ###################################################################
+
     @property
     def interlacer(self) -> Interlacer:
         """Get the Interlacer instance."""
@@ -260,18 +261,23 @@ class SampleInput(BaseModel):
     def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.input_directory)
 
-    def query(self, modalities: str) -> list[list[dict[str, str]]]:
+    def query(
+        self, modalities: str, print_tree: bool = False
+    ) -> list[list[dict[str, str]]] | None:
         """Query the interlacer for a specific modality."""
-        query_result: list[list[dict[str, str]]] = self.interlacer.query(
-            modalities
-        )
-        return query_result
+        if print_tree:
+            self.interlacer.query_interlacer(
+                query_string=modalities
+            ).print_tree(input_directory=self.input_directory)
+            return None
+
+        return self.interlacer.query(modalities)
 
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
 
-    from imgtools.io.readers import read_dicom_auto
+    # from imgtools.io.readers import read_dicom_auto
 
     # Example usage
     medinput = SampleInput.build(

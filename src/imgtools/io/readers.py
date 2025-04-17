@@ -189,14 +189,18 @@ def read_dicom_auto(
             error_msg = f"Unknown or unsupported modality: {modality}"
             raise ValueError(error_msg)
 
+
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Read DICOM files.")
-    parser.add_argument("path", type=str, help="Path to DICOM file or directory")
+    parser.add_argument(
+        "path", type=str, help="Path to DICOM file or directory"
+    )
     parser.add_argument(
         "--modality", type=str, help="Modality to use for reading DICOM files"
     )
     args = parser.parse_args()
     from rich import print  # noqa: A004
+
     print(read_dicom_auto(args.path, args.modality))
