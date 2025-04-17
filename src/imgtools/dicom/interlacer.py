@@ -33,6 +33,53 @@ pyvis, _pyvis_available = optional_import("pyvis")
 __all__ = ["Interlacer"]
 
 
+class InterlacerQueryError(Exception):
+    """Base exception for Interlacer query errors."""
+
+    pass
+
+
+class UnsupportedModalityError(InterlacerQueryError):
+    """Raised when an unsupported modality is specified in the query."""
+
+    def __init__(self, query_set: set[str], valid_order: list[str]) -> None:
+        self.unsupported_modalities = query_set - set(valid_order)
+        self.valid_order = valid_order
+        msg = (
+            f"Invalid query: [{', '.join(query_set)}]. "
+            f"The provided modalities [{', '.join(self.unsupported_modalities)}] "
+            f"are not supported. "
+            f"Supported modalities are: {', '.join(valid_order)}"
+        )
+        super().__init__(msg)
+
+
+class MissingDependencyModalityError(InterlacerQueryError):
+    """Raised when modalities are missing their required dependencies."""
+
+    def __init__(
+        self, missing_dependencies: dict[str, set[str]], query_set: set[str]
+    ) -> None:
+        self.missing_dependencies = missing_dependencies
+        self.query_set = query_set
+        message = self._build_error_message()
+        super().__init__(message)
+
+    def _build_error_message(self) -> str:
+        """Build a detailed error message showing all missing dependencies."""
+        message = f"Invalid query: ({', '.join(self.query_set)})\n"
+        message += (
+            "The following modalities are missing required dependencies:\n"
+        )
+
+        for modality, required in self.missing_dependencies.items():
+            message += (
+                f"- {modality} requires one of: [{', '.join(required)}]\n"
+            )
+
+        return message
+
+
 @dataclass
 class SeriesNode:
     """
@@ -79,17 +126,6 @@ class SeriesNode:
 
     def __hash__(self) -> int:
         return hash(self.SeriesInstanceUID)
-
-    @classmethod
-    def copy_node(cls, node: SeriesNode) -> SeriesNode:
-        return cls(
-            node.SeriesInstanceUID,
-            node.Modality,
-            node.PatientID,
-            node.StudyInstanceUID,
-            node.folder,
-            node.ReferencedSeriesUID,
-        )
 
 
 @dataclass
@@ -143,10 +179,7 @@ class Interlacer:
         using ReferenceSeriesUID.
         """
         # Dictionary to track referenced UIDs that need to be connected later
-
-        # Create SeriesNode objects and establish relationships in one pass
         for index, row in self.crawl_df.iterrows():
-            series_instance_uid = str(index)
             reference_series_uid = (
                 row.ReferencedSeriesUID
                 if "ReferencedSeriesUID" in row
@@ -154,17 +187,16 @@ class Interlacer:
             )
 
             # Create the SeriesNode
-            node = SeriesNode(
-                series_instance_uid,
+            self.series_nodes[str(index)] = SeriesNode(
+                str(index),
                 row.Modality,
                 row.PatientID,
                 row.StudyInstanceUID,
                 row.folder,
                 reference_series_uid,
             )
-            self.series_nodes[series_instance_uid] = node
 
-        for _, node in self.series_nodes.items():
+        for node in self.series_nodes.values():
             # Identify root nodes
             if node.Modality in ["CT", "MR"] or (
                 node.Modality == "PT" and pd.isna(node.ReferencedSeriesUID)
@@ -194,6 +226,13 @@ class Interlacer:
             "CT,PT,RTSTRUCT" is valid.
             "PT,SEG" is invalid.
             "RTSTRUCT,RTDOSE" is invalid.
+
+        Raises
+        ------
+        UnsupportedModalityError
+            When the query contains modalities not in the valid_order list
+        MissingDependencyModalityError
+            When modalities in the query are missing their required dependencies
         """
 
         MODALITY_DEPENDENCIES: dict[str, set[str]] = {  # noqa: N806
@@ -205,21 +244,23 @@ class Interlacer:
         valid_order = ["CT", "MR", "PT", "SEG", "RTSTRUCT", "RTDOSE"]
         query_set = set(query)
 
+        # Check for unsupported modalities
         if not query_set.issubset(set(valid_order)):
-            msg = (
-                f"Invalid query: ({', '.join(query)}), "
-                f"provided modalities: [{', '.join(query_set - set(valid_order))}] "
-                f"are not supported, "
-                f"supported modalities: {', '.join(valid_order)}"
-            )
-            raise ValueError(msg)
+            raise UnsupportedModalityError(query_set, valid_order)
 
+        # Collect all missing dependencies
+        missing_dependencies = {}
         for modality in query:
             if modality in MODALITY_DEPENDENCIES:
                 required = MODALITY_DEPENDENCIES[modality]
                 if not query_set.intersection(required):
-                    msg = f"Invalid query: ({', '.join(query)}), {modality} requires one of {', '.join(required)}"
-                    raise ValueError(msg)
+                    missing_dependencies[modality] = required
+
+        # If any dependencies are missing, raise a comprehensive error
+        if missing_dependencies:
+            raise MissingDependencyModalityError(
+                missing_dependencies, query_set
+            )
 
         return [modality for modality in valid_order if modality in query_set]
 
@@ -594,6 +635,7 @@ if __name__ == "__main__":
             n_jobs=5,
             force=False,
         )
+        crawler.crawl()
 
         interlacer = Interlacer(crawler.index)
         interlacers.append(interlacer)
