@@ -554,15 +554,15 @@ class RTStructureSet:
         Its companion class `VectorMask` offers high-level access to
         individual ROIs, label conversion, and overlap inspection.
         """
-
-        matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
-            self.roi_names
-        )
-        if not matched_rois:
+        try:
+            matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
+                self.roi_names
+            )
+        except ValueError as e:
             errmsg = (
                 f"No matching ROIs found. Available ROIs: {self.roi_names}, "
             )
-            raise MissingROIError(errmsg)
+            raise MissingROIError(errmsg) from e
 
         logger.debug("Matched ROIs", matched_rois=matched_rois)
 
