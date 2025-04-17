@@ -464,6 +464,7 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
     from tqdm import tqdm  # noqa: A003
 
+    from imgtools.loggers import tqdm_logging_redirect
     # from imgtools.io.readers import read_dicom_auto
 
     # Example usage
@@ -489,25 +490,28 @@ if __name__ == "__main__":  # pragma: no cover
     # print the tree
     # medinput.print_tree()
 
-    # query_string = "CT,RTSTRUCT"
+    query_string = "*"
 
-    # sample_sets = medinput.interlacer.query(
-    #     query_string=query_string,
-    #     group_by_root=True,
-    # )
-
-    # for series in tqdm(
-    #     sample_sets,
-    #     desc="Loading series",
-    #     unit="series",
-    #     leave=False,
-    #     total=len(sample_sets),
-    # ):
-    #     series = medinput._load_series(
-    #         sample=series,
-    #         load_subseries=False,
-    #     )
-    #     print(series)
+    sample_sets = medinput.interlacer.query(
+        query_string=query_string,
+        group_by_root=True,
+    )
+    with tqdm_logging_redirect():
+        for series in tqdm(
+            sample_sets,
+            desc="Loading series",
+            unit="series",
+            leave=False,
+            total=len(sample_sets),
+        ):
+            try:
+                result = medinput._load_series(
+                    sample=series,
+                    load_subseries=False,
+                )
+            except ValueError as e:
+                logger.error(f"Error loading series: {e}")
+                continue
 
     # query_string = "CT,SEG"
 
