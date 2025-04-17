@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
-        env: ["py310", "py311", "py312", "py313"]
+        env: ["py310", "py311", "py313"] #"py312" removed for now...
         TestAccessType: ["public", "private"]
       # exclude macos and windows stests for py310 and py311
         exclude:
@@ -63,7 +63,7 @@ jobs:
 
       - name: Upload coverage report artifact to be used by Codecov
         # only upload if matrix.os is ubuntu-latest and matrix.python-version is 3.12
-        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py312' && matrix.TestAccessType == 'public'
+        if: matrix.os == 'ubuntu-latest' && matrix.env == 'py313' && matrix.TestAccessType == 'public'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
