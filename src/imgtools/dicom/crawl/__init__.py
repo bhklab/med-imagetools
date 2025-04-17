@@ -1,7 +1,7 @@
-from .crawler import Crawler, CrawlerSettings
+from .crawler import Crawler
+from .parse_dicoms import parse_dicom_dir
 
 __all__ = [
-    # crawl
     "Crawler",
-    "CrawlerSettings",
+    "parse_dicom_dir",
 ]
