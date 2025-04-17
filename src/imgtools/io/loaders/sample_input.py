@@ -4,7 +4,7 @@ import multiprocessing
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 from pydantic import (
     BaseModel,
@@ -15,7 +15,7 @@ from pydantic import (
 )
 
 from imgtools.coretypes import MedImage
-from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
+from imgtools.coretypes.base_masks import VectorMask
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatcher,
     ROIMatchFailurePolicy,
@@ -29,12 +29,6 @@ from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer, SeriesNode
 from imgtools.io.readers import MedImageT, read_dicom_auto
 from imgtools.loggers import logger
-
-if TYPE_CHECKING:
-    # from imgtools.coretypes.imagetypes.dose import Dose
-    # from imgtools.coretypes.imagetypes.pet import PET
-    # from imgtools.coretypes.imagetypes.scan import Scan
-    pass
 
 __all__ = ["SampleInput"]
 
@@ -109,7 +103,7 @@ class SampleInput(BaseModel):
     _crawler: Crawler | None = PrivateAttr(default=None, init=False)
     _interlacer: Interlacer | None = PrivateAttr(default=None, init=False)
 
-    def model_post_init(self, __context) -> None:  # noqa: ANN001
+    def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
         crawler = Crawler(
             dicom_dir=self.input_directory,
@@ -289,16 +283,8 @@ class SampleInput(BaseModel):
     def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.input_directory)
 
-    def query(
-        self, modalities: str, print_tree: bool = False
-    ) -> list[list[dict[str, str]]] | None:
+    def query(self, modalities: str) -> list[list[dict[str, str]]] | None:
         """Query the interlacer for a specific modality."""
-        if print_tree:
-            self.interlacer.query_interlacer(
-                query_string=modalities
-            ).print_tree(input_directory=self.input_directory)
-            return None
-
         return self.interlacer.query(modalities)
 
     ###################################################################

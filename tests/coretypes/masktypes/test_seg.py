@@ -26,6 +26,8 @@ def test_get_segs(medimage_by_modality):
             failures[seg['Path']] = str(e)
         except KeyError as e:
             failures[seg['Path']] = str(e)
+        except ValueError as e:
+            failures[seg['Path']] = str(e)
         else:
             successes[seg['Path']] = seg_obj
 
