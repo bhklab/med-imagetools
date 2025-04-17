@@ -15,7 +15,7 @@ __all__ = [
     "ROIMatcher",
     "ROIMatchStrategy",
     "handle_roi_matching",
-    "MatchFailurePolicy",
+    "ROIMatchFailurePolicy",
     "ROIMatchingError",
 ]
 
@@ -77,7 +77,7 @@ class ROIMatchStrategy(str, Enum):  # noqa: N801
     SEPARATE = "separate"
 
 
-class MatchFailurePolicy(str, Enum):
+class ROIMatchFailurePolicy(str, Enum):
     """Policy for how to handle total match failure (when no ROIs match any patterns)."""
 
     # Ignore the issue and continue silently
@@ -113,7 +113,7 @@ def create_roi_matcher(
     handling_strategy: ROIMatchStrategy = ROIMatchStrategy.MERGE,
     ignore_case: bool = True,
     allow_multi_key_matches: bool = True,
-    on_missing_regex: MatchFailurePolicy = MatchFailurePolicy.WARN,
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN,
 ) -> ROIMatcher:
     return ROIMatcher(
         match_map=ROIMatcher.validate_match_map(nonvalidated_input),
@@ -145,7 +145,7 @@ class ROIMatcher(BaseModel):
         If allow_multi_key_matches=False: "GTVp" only appears in 'gtv' results
     """
 
-    on_missing_regex: MatchFailurePolicy = MatchFailurePolicy.WARN
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN
     """How to handle when no ROI matches any pattern in match_map.
     
     - IGNORE: Silently continue execution
@@ -220,7 +220,7 @@ def handle_roi_matching(  # noqa: PLR0912
     strategy: ROIMatchStrategy,
     ignore_case: bool = True,
     allow_multi_key_matches: bool = True,
-    on_missing_regex: MatchFailurePolicy = MatchFailurePolicy.WARN,
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN,
 ) -> list[tuple[str, list[str]]]:
     """
     Match ROI names against regex patterns and apply a handling strategy.
@@ -239,7 +239,7 @@ def handle_roi_matching(  # noqa: PLR0912
         Whether to allow an ROI to match multiple keys in the match_map.
         If False, an ROI will only be associated with the first key it matches,
         based on the order of keys in the roi_matching dictionary.
-    on_missing_regex : MatchFailurePolicy
+    on_missing_regex :ROIMatchFailurePolicy
         How to handle when no ROI matches any pattern in roi_matching.
         IGNORE: Silently continue execution
         WARN: Log a warning but continue execution
@@ -327,13 +327,13 @@ def handle_roi_matching(  # noqa: PLR0912
     if not any_matches_found:
         message = "No ROIs matched any patterns in the match_map."
         match on_missing_regex:
-            case MatchFailurePolicy.IGNORE:
+            case ROIMatchFailurePolicy.IGNORE:
                 pass
-            case MatchFailurePolicy.WARN:
+            case ROIMatchFailurePolicy.WARN:
                 logger.warning(
                     message, roi_names=roi_names, roi_matching=roi_matching
                 )
-            case MatchFailurePolicy.ERROR:
+            case ROIMatchFailurePolicy.ERROR:
                 raise ROIMatchingError(message, roi_names, roi_matching)
 
     # Apply the selected strategy to the filtered results

@@ -2,7 +2,7 @@ from imgtools.coretypes.masktypes import (
     ROIMatcher,
     ROIMatchStrategy,
     handle_roi_matching,
-    MatchFailurePolicy,
+    ROIMatchFailurePolicy,
 )
 import pytest
 from rich import print
@@ -234,7 +234,7 @@ def test_missing_regex_policy(roi_names, caplog):
         roi_names=roi_names,
         roi_matching=roi_matching,
         strategy=ROIMatchStrategy.MERGE,
-        on_missing_regex=MatchFailurePolicy.IGNORE,
+        on_missing_regex=ROIMatchFailurePolicy.IGNORE,
     )
     assert len(results) == 0  # No matches
 
@@ -248,7 +248,7 @@ def test_missing_regex_policy(roi_names, caplog):
             roi_names=roi_names,
             roi_matching=roi_matching,
             strategy=ROIMatchStrategy.MERGE,
-            on_missing_regex=MatchFailurePolicy.WARN,
+            on_missing_regex=ROIMatchFailurePolicy.WARN,
         )
         assert len(results) == 0  # No matches
         # Check that a warning was logged
@@ -260,7 +260,7 @@ def test_missing_regex_policy(roi_names, caplog):
             roi_names=roi_names,
             roi_matching=roi_matching,
             strategy=ROIMatchStrategy.MERGE,
-            on_missing_regex=MatchFailurePolicy.ERROR,
+            on_missing_regex=ROIMatchFailurePolicy.ERROR,
         )
 
 
@@ -269,11 +269,11 @@ def test_roi_matcher_class_with_new_params():
     matcher = ROIMatcher(
         match_map={"gtv": ["GTV.*"], "tumor": ["GTVp.*"]},
         allow_multi_key_matches=False,
-        on_missing_regex=MatchFailurePolicy.ERROR,
+        on_missing_regex=ROIMatchFailurePolicy.ERROR,
     )
     
     assert matcher.allow_multi_key_matches is False
-    assert matcher.on_missing_regex == MatchFailurePolicy.ERROR
+    assert matcher.on_missing_regex == ROIMatchFailurePolicy.ERROR
     
     # Test that the parameters are passed correctly to handle_roi_matching
     # when calling match_rois (we can't easily test this directly, so we'll
