@@ -286,7 +286,7 @@ class Interlacer:
                         special_node.Modality in SPECIAL_MODALITIES
                         and special_node.Modality in queried_modalities
                     ):
-                        # The parent node must be in the query
+                        # The parent node must ADJACENT in the query
                         parent = path[i - 1]
                         if parent.Modality not in queried_modalities:
                             valid_path = False
@@ -355,39 +355,6 @@ class Interlacer:
 
         # break each item into a list starting with key, then all the values
         return [[key] + value for key, value in grouped.items()]
-
-    def query_interlacer(
-        self,
-        query_string: str,
-        group_by_root: bool = True,
-    ) -> Interlacer:
-        """Return a new Interlacer with only the nodes matching the query.
-
-        Useful for cli tools who want to see the interlacer tree
-        after querying.
-        """
-
-        # make a dataframe where the root node is the ReferencedSeriesUID
-        data = []
-        for path in self.query(query_string, group_by_root):
-            root = path[0]
-            for node in path:
-                data.append(
-                    {
-                        "SeriesInstanceUID": node.SeriesInstanceUID,
-                        "Modality": node.Modality,
-                        "PatientID": node.PatientID,
-                        "StudyInstanceUID": node.StudyInstanceUID,
-                        "ReferencedSeriesUID": root.SeriesInstanceUID
-                        if node != root
-                        else None,
-                        "folder": node.folder,
-                    }
-                )
-        sub_df = pd.DataFrame(data)
-
-        # Construct a new Interlacer instance
-        return Interlacer(sub_df)
 
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
