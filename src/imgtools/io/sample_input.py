@@ -80,7 +80,8 @@ class SampleInput(BaseModel):
     """
 
     input_directory: Path = Field(
-        description="Directory containing the input files"
+        description="Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
+        title="Input Directory",
     )
     dataset_name: str | None = Field(
         None,
@@ -454,16 +455,16 @@ if __name__ == "__main__":  # pragma: no cover
     from imgtools.loggers import tqdm_logging_redirect
 
     output = SampleOutput(
-        directory=Path("temp_outputs/output"),
+        directory=Path("temp_outputs/RADCURE_PROCESSED"),
     )
+
     # from imgtools.io.readers import read_dicom_auto
-    # GTVp	NODES	BrachialPlex_L	BrachialPlex_R	Brainstem	Cochlea_L	Cochlea_R	Esophagus	Eye_L	Eye_R	Larynx	Lens_L	Lens_R	Lips	Mandible_Bone	Nrv_Optic_L	Nrv_Optic_R	OpticChiasm	Parotid_L	Parotid_R	SpinalCord
     # Example usage
     medinput = SampleInput.build(
         n_jobs=12,
         input_directory="data/RADCURE",
         roi_match_map={
-            "GTV": ["GTV.*"],
+            "GTV": ["GTVp"],
             "NODES": ["GTVn_.*"],
             "LPLEXUS": ["BrachialPlex_L"],
             "RPLEXUS": ["BrachialPlex_R"],
@@ -486,7 +487,7 @@ if __name__ == "__main__":  # pragma: no cover
             "CORD": ["SpinalCord"],
         },
         roi_ignore_case=True,
-        roi_handling_strategy="merge",
+        roi_handling_strategy="separate",
         roi_allow_multi_key_matches=False,
         roi_on_missing_regex=ROIMatchFailurePolicy.WARN,
     )
@@ -497,6 +498,7 @@ if __name__ == "__main__":  # pragma: no cover
         query_string=query_string,
         group_by_root=True,
     )
+    count = 0
     with tqdm_logging_redirect():
         for series in tqdm(
             sample_sets,
@@ -514,6 +516,9 @@ if __name__ == "__main__":  # pragma: no cover
                 logger.error(f"Error loading series: {e}")
                 continue
             output(result)
+            count += 1
+            if count > 5:
+                break
 
     # query_string = "CT,SEG"
 

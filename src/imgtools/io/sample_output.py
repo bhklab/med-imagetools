@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from matplotlib.cbook import sanitize_sequence
 from rich import print
 
 from imgtools.coretypes.base_masks import VectorMask
@@ -15,7 +16,7 @@ from imgtools.io.writers import (
 from imgtools.utils import sanitize_file_name
 
 DEFAULT_FILENAME_FORMAT = (
-    "{PatientID}/{Modality}_Series-{trunc_SeriesInstanceUID}/{ImageID}.nii.gz"
+    "{PatientID}/{Modality}_{trunc_SeriesInstanceUID}/{ImageID}.nii.gz"
 )
 
 
@@ -54,7 +55,8 @@ class SampleOutput:
                         if label == 0:
                             continue  # Skip background
                         roi_mask = image.extract_mask(label)
-                        image_id = f"{label:02}-{roi_key}"
+                        matched_rois_str = "|".join(matched_rois)
+                        image_id = f"{roi_key}_[{matched_rois_str}]"
                         self.writer.save(
                             roi_mask,
                             roi_key=roi_key,
