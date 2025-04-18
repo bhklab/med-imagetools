@@ -12,7 +12,7 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
-from imgtools.io.loaders.sample_input import SampleInput
+from imgtools.io.sample_input import SampleInput
 
 
 class MedImageToolsSettings(BaseSettings):

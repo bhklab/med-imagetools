@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=imgtools.json
 input:
     input_directory: data/RADCURE
     dataset_name: RADCURE
@@ -7,13 +8,13 @@ input:
     update_crawl: false
 
     modalities:
-    - CT
-    - RTSTRUCT
+        - CT
+        - RTSTRUCT
 
     roi_matcher:
         match_map:
             GTV:
-                - .*gtv.* 
+                - .*gtv.*
                 - .*tumor.*
             Lung:
                 - .*lung.*

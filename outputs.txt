@@ -1,0 +1,1486 @@
+temp_outputs/output
+├── RADCURE-0009
+│   ├── CT_Series-65481242
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-40075180
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-ESOPHAGUS.nii.gz
+│       ├── 04-LEYE.nii.gz
+│       ├── 05-REYE.nii.gz
+│       ├── 06-LARYNX.nii.gz
+│       ├── 07-LLENS.nii.gz
+│       ├── 08-RLENS.nii.gz
+│       ├── 09-LIPS.nii.gz
+│       ├── 10-MANDIBLE.nii.gz
+│       ├── 11-LOPTIC.nii.gz
+│       ├── 12-ROPTIC.nii.gz
+│       ├── 13-CHIASM.nii.gz
+│       ├── 14-LPAROTID.nii.gz
+│       └── 15-CORD.nii.gz
+├── RADCURE-0012
+│   ├── CT_Series-36680706
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-51300315
+│       ├── 01-BRAINSTEM.nii.gz
+│       ├── 02-LARYNX.nii.gz
+│       ├── 03-LPAROTID.nii.gz
+│       ├── 04-RPAROTID.nii.gz
+│       └── 05-CORD.nii.gz
+├── RADCURE-0300
+│   ├── CT_Series-03149281
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-60186823
+│       └── 01-GTV.nii.gz
+├── RADCURE-0301
+│   ├── CT_Series-42319455
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-93074376
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0315
+│   ├── CT_Series-95644592
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-81688007
+│       └── 01-GTV.nii.gz
+├── RADCURE-0320
+│   ├── CT_Series-39489873
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-96528001
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LLENS.nii.gz
+│       ├── 10-RLENS.nii.gz
+│       ├── 11-LIPS.nii.gz
+│       ├── 12-MANDIBLE.nii.gz
+│       ├── 13-LOPTIC.nii.gz
+│       ├── 14-ROPTIC.nii.gz
+│       ├── 15-CHIASM.nii.gz
+│       ├── 16-LPAROTID.nii.gz
+│       ├── 17-RPAROTID.nii.gz
+│       └── 18-CORD.nii.gz
+├── RADCURE-0323
+│   ├── CT_Series-47675489
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-47317505
+│       └── 01-GTV.nii.gz
+├── RADCURE-0327
+│   ├── CT_Series-56220445
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-34896644
+│       └── 01-GTV.nii.gz
+├── RADCURE-0330
+│   ├── CT_Series-60462360
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-11190664
+│       └── 01-GTV.nii.gz
+├── RADCURE-0331
+│   ├── CT_Series-68286859
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-93774066
+│       └── 01-GTV.nii.gz
+├── RADCURE-0342
+│   ├── CT_Series-71986182
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-29981347
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0343
+│   ├── CT_Series-87102501
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-17707866
+│       └── 01-GTV.nii.gz
+├── RADCURE-0359
+│   ├── CT_Series-25331810
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-34738543
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-LARYNX.nii.gz
+│       ├── 08-LIPS.nii.gz
+│       ├── 09-MANDIBLE.nii.gz
+│       ├── 10-LPAROTID.nii.gz
+│       ├── 11-RPAROTID.nii.gz
+│       └── 12-CORD.nii.gz
+├── RADCURE-0361
+│   ├── CT_Series-10639969
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-83504491
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0369
+│   ├── CT_Series-97197391
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-84439891
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0370
+│   ├── CT_Series-52820517
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-59853894
+│       └── 01-GTV.nii.gz
+├── RADCURE-0373
+│   ├── CT_Series-00990428
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-98346325
+│       ├── 01-GTV.nii.gz
+│       ├── 02-ESOPHAGUS.nii.gz
+│       ├── 03-LARYNX.nii.gz
+│       ├── 04-MANDIBLE.nii.gz
+│       └── 05-CORD.nii.gz
+├── RADCURE-0391
+│   ├── CT_Series-17372636
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-68166936
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-BRAINSTEM.nii.gz
+│       ├── 04-LACOUSTIC.nii.gz
+│       ├── 05-RACOUSTIC.nii.gz
+│       ├── 06-ESOPHAGUS.nii.gz
+│       ├── 07-LEYE.nii.gz
+│       ├── 08-REYE.nii.gz
+│       ├── 09-LARYNX.nii.gz
+│       ├── 10-LLENS.nii.gz
+│       ├── 11-RLENS.nii.gz
+│       ├── 12-LIPS.nii.gz
+│       ├── 13-MANDIBLE.nii.gz
+│       ├── 14-LOPTIC.nii.gz
+│       ├── 15-ROPTIC.nii.gz
+│       ├── 16-CHIASM.nii.gz
+│       ├── 17-LPAROTID.nii.gz
+│       ├── 18-RPAROTID.nii.gz
+│       └── 19-CORD.nii.gz
+├── RADCURE-0392
+│   ├── CT_Series-48888207
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-79666161
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0393
+│   ├── CT_Series-86974611
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-99044747
+│       └── 01-GTV.nii.gz
+├── RADCURE-0397
+│   ├── CT_Series-88246930
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-13120200
+│       └── 01-GTV.nii.gz
+├── RADCURE-0409
+│   ├── CT_Series-12869061
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-86411837
+│       └── 01-GTV.nii.gz
+├── RADCURE-0412
+│   ├── CT_Series-23977324
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-92858147
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0438
+│   ├── CT_Series-67480870
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-46887638
+│       └── 01-GTV.nii.gz
+├── RADCURE-0440
+│   ├── CT_Series-50119588
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-07655106
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0450
+│   ├── CT_Series-00725646
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-27361452
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LIPS.nii.gz
+│       ├── 07-MANDIBLE.nii.gz
+│       ├── 08-LPAROTID.nii.gz
+│       ├── 09-RPAROTID.nii.gz
+│       └── 10-CORD.nii.gz
+├── RADCURE-0453
+│   ├── CT_Series-16831646
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-43012692
+│       └── 01-GTV.nii.gz
+├── RADCURE-0459
+│   ├── CT_Series-84621135
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-30975830
+│       └── 01-GTV.nii.gz
+├── RADCURE-0465
+│   ├── CT_Series-83702124
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-89272825
+│       └── 01-GTV.nii.gz
+├── RADCURE-0473
+│   ├── CT_Series-10871782
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-18839192
+│       └── 01-GTV.nii.gz
+├── RADCURE-0494
+│   ├── CT_Series-93986492
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-38591451
+│       └── 01-GTV.nii.gz
+├── RADCURE-0497
+│   ├── CT_Series-54688139
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-57258919
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LIPS.nii.gz
+│       ├── 10-MANDIBLE.nii.gz
+│       ├── 11-LPAROTID.nii.gz
+│       ├── 12-RPAROTID.nii.gz
+│       └── 13-CORD.nii.gz
+├── RADCURE-0502
+│   ├── CT_Series-87027925
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-08367126
+│       └── 01-GTV.nii.gz
+├── RADCURE-0509
+│   ├── CT_Series-53118180
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-89576389
+│       ├── 01-GTV.nii.gz
+│       ├── 02-ESOPHAGUS.nii.gz
+│       ├── 03-MANDIBLE.nii.gz
+│       └── 04-CORD.nii.gz
+├── RADCURE-0510
+│   ├── CT_Series-49696625
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-63738725
+│       └── 01-GTV.nii.gz
+├── RADCURE-0513
+│   ├── CT_Series-52815121
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-13035439
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LPAROTID.nii.gz
+│       ├── 16-RPAROTID.nii.gz
+│       └── 17-CORD.nii.gz
+├── RADCURE-0521
+│   ├── CT_Series-46753369
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-25908749
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LLENS.nii.gz
+│       ├── 10-RLENS.nii.gz
+│       ├── 11-LIPS.nii.gz
+│       ├── 12-MANDIBLE.nii.gz
+│       ├── 13-LOPTIC.nii.gz
+│       ├── 14-ROPTIC.nii.gz
+│       ├── 15-CHIASM.nii.gz
+│       ├── 16-LPAROTID.nii.gz
+│       ├── 17-RPAROTID.nii.gz
+│       └── 18-CORD.nii.gz
+├── RADCURE-0524
+│   ├── CT_Series-76367354
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-02898207
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0527
+│   ├── CT_Series-98214566
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-42992735
+│       └── 01-GTV.nii.gz
+├── RADCURE-0536
+│   ├── CT_Series-35906879
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-96911584
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0540
+│   ├── CT_Series-36158884
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-17702319
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LLENS.nii.gz
+│       ├── 10-RLENS.nii.gz
+│       ├── 11-LIPS.nii.gz
+│       ├── 12-MANDIBLE.nii.gz
+│       ├── 13-LOPTIC.nii.gz
+│       ├── 14-ROPTIC.nii.gz
+│       ├── 15-CHIASM.nii.gz
+│       ├── 16-LPAROTID.nii.gz
+│       ├── 17-RPAROTID.nii.gz
+│       └── 18-CORD.nii.gz
+├── RADCURE-0548
+│   ├── CT_Series-42383493
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-31177042
+│       └── 01-GTV.nii.gz
+├── RADCURE-0553
+│   ├── CT_Series-02588608
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-47997166
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0562
+│   ├── CT_Series-48886610
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-96859445
+│       └── 01-GTV.nii.gz
+├── RADCURE-0564
+│   ├── CT_Series-57666327
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-04775444
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0565
+│   ├── CT_Series-40502385
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-70196352
+│       └── 01-GTV.nii.gz
+├── RADCURE-0568
+│   ├── CT_Series-03643686
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-12392692
+│       └── 01-GTV.nii.gz
+├── RADCURE-0586
+│   ├── CT_Series-69167701
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-27215137
+│       └── 01-GTV.nii.gz
+├── RADCURE-0588
+│   ├── CT_Series-99052793
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-21312798
+│       ├── 01-GTV.nii.gz
+│       ├── 02-ESOPHAGUS.nii.gz
+│       └── 03-CORD.nii.gz
+├── RADCURE-0621
+│   ├── CT_Series-29506169
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-61820237
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LLENS.nii.gz
+│       ├── 10-RLENS.nii.gz
+│       ├── 11-LIPS.nii.gz
+│       ├── 12-MANDIBLE.nii.gz
+│       ├── 13-LOPTIC.nii.gz
+│       ├── 14-ROPTIC.nii.gz
+│       ├── 15-CHIASM.nii.gz
+│       ├── 16-LPAROTID.nii.gz
+│       ├── 17-RPAROTID.nii.gz
+│       └── 18-CORD.nii.gz
+├── RADCURE-0648
+│   ├── CT_Series-46170114
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-17258747
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0664
+│   ├── CT_Series-56345546
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-42206428
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LLENS.nii.gz
+│       ├── 09-RLENS.nii.gz
+│       ├── 10-LIPS.nii.gz
+│       ├── 11-MANDIBLE.nii.gz
+│       ├── 12-LOPTIC.nii.gz
+│       ├── 13-ROPTIC.nii.gz
+│       ├── 14-CHIASM.nii.gz
+│       ├── 15-LPAROTID.nii.gz
+│       ├── 16-RPAROTID.nii.gz
+│       └── 17-CORD.nii.gz
+├── RADCURE-0665
+│   ├── CT_Series-55313394
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-55389886
+│       └── 01-GTV.nii.gz
+├── RADCURE-0677
+│   ├── CT_Series-39967046
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-20337287
+│       └── 01-GTV.nii.gz
+├── RADCURE-0688
+│   ├── CT_Series-31891201
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-05790560
+│       ├── 01-GTV.nii.gz
+│       ├── 02-ESOPHAGUS.nii.gz
+│       └── 03-CORD.nii.gz
+├── RADCURE-0689
+│   ├── CT_Series-31860181
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-64615128
+│       └── 01-GTV.nii.gz
+├── RADCURE-0691
+│   ├── CT_Series-93789475
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-10965959
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0697
+│   ├── CT_Series-34087872
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-81168447
+│       └── 01-GTV.nii.gz
+├── RADCURE-0709
+│   ├── CT_Series-97769485
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-88742240
+│       └── 01-GTV.nii.gz
+├── RADCURE-0718
+│   ├── CT_Series-50014012
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-14994958
+│       └── 01-GTV.nii.gz
+├── RADCURE-0719
+│   ├── CT_Series-75606843
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-30060936
+│       └── 01-GTV.nii.gz
+├── RADCURE-0729
+│   ├── CT_Series-24813957
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-76564985
+│       └── 01-GTV.nii.gz
+├── RADCURE-0743
+│   ├── CT_Series-40634706
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-30021943
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LIPS.nii.gz
+│       ├── 10-MANDIBLE.nii.gz
+│       ├── 11-LPAROTID.nii.gz
+│       ├── 12-RPAROTID.nii.gz
+│       └── 13-CORD.nii.gz
+├── RADCURE-0744
+│   ├── CT_Series-28375214
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-48399815
+│       └── 01-GTV.nii.gz
+├── RADCURE-0750
+│   ├── CT_Series-93509408
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-92104940
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0751
+│   ├── CT_Series-78088268
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-36793426
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0763
+│   ├── CT_Series-63097217
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-04202563
+│       └── 01-GTV.nii.gz
+├── RADCURE-0765
+│   ├── CT_Series-55665248
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-01697187
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-ESOPHAGUS.nii.gz
+│       ├── 05-LARYNX.nii.gz
+│       ├── 06-LIPS.nii.gz
+│       ├── 07-MANDIBLE.nii.gz
+│       ├── 08-LPAROTID.nii.gz
+│       ├── 09-RPAROTID.nii.gz
+│       └── 10-CORD.nii.gz
+├── RADCURE-0766
+│   ├── CT_Series-04706911
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-87361954
+│       └── 01-GTV.nii.gz
+├── RADCURE-0768
+│   ├── CT_Series-76632648
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-61877687
+│       └── 01-GTV.nii.gz
+├── RADCURE-0769
+│   ├── CT_Series-21676321
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-65390635
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0783
+│   ├── CT_Series-29116757
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-16849585
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0786
+│   ├── CT_Series-87630189
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-27657116
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-ESOPHAGUS.nii.gz
+│       ├── 04-LARYNX.nii.gz
+│       ├── 05-LIPS.nii.gz
+│       ├── 06-MANDIBLE.nii.gz
+│       ├── 07-LPAROTID.nii.gz
+│       ├── 08-RPAROTID.nii.gz
+│       └── 09-CORD.nii.gz
+├── RADCURE-0787
+│   ├── CT_Series-42562703
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-12447699
+│       └── 01-GTV.nii.gz
+├── RADCURE-0790
+│   ├── CT_Series-71794733
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-69394490
+│       └── 01-GTV.nii.gz
+├── RADCURE-0796
+│   ├── CT_Series-14908053
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-36801062
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0800
+│   ├── CT_Series-66834671
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-52507110
+│       └── 01-GTV.nii.gz
+├── RADCURE-0804
+│   ├── CT_Series-84886914
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-35805526
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0807
+│   ├── CT_Series-34807652
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-21817716
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0809
+│   ├── CT_Series-29453470
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-45750984
+│       └── 01-GTV.nii.gz
+├── RADCURE-0810
+│   ├── CT_Series-47124727
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-26059856
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LLENS.nii.gz
+│       ├── 11-RLENS.nii.gz
+│       ├── 12-LIPS.nii.gz
+│       ├── 13-MANDIBLE.nii.gz
+│       ├── 14-LOPTIC.nii.gz
+│       ├── 15-ROPTIC.nii.gz
+│       ├── 16-CHIASM.nii.gz
+│       ├── 17-LPAROTID.nii.gz
+│       ├── 18-RPAROTID.nii.gz
+│       └── 19-CORD.nii.gz
+├── RADCURE-0827
+│   ├── CT_Series-03468779
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-52578551
+│       └── 01-GTV.nii.gz
+├── RADCURE-0832
+│   ├── CT_Series-98612552
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-46274308
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0837
+│   ├── CT_Series-50478310
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-90878971
+│       └── 01-GTV.nii.gz
+├── RADCURE-0838
+│   ├── CT_Series-23880065
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-89589117
+│       ├── 01-GTV.nii.gz
+│       ├── 02-ESOPHAGUS.nii.gz
+│       ├── 03-MANDIBLE.nii.gz
+│       └── 04-CORD.nii.gz
+├── RADCURE-0840
+│   ├── CT_Series-23680937
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-04741342
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LIPS.nii.gz
+│       ├── 09-MANDIBLE.nii.gz
+│       ├── 10-LPAROTID.nii.gz
+│       ├── 11-RPAROTID.nii.gz
+│       └── 12-CORD.nii.gz
+├── RADCURE-0843
+│   ├── CT_Series-49786450
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-71135263
+│       └── 01-GTV.nii.gz
+├── RADCURE-0848
+│   ├── CT_Series-21454897
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-83119025
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0851
+│   ├── CT_Series-36227476
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-61746367
+│       └── 01-GTV.nii.gz
+├── RADCURE-0852
+│   ├── CT_Series-24746738
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-97019891
+│       └── 01-GTV.nii.gz
+├── RADCURE-0854
+│   ├── CT_Series-01085423
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-09767284
+│       └── 01-GTV.nii.gz
+├── RADCURE-0857
+│   ├── CT_Series-88242285
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-32144205
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0858
+│   ├── CT_Series-12704523
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-53375257
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0862
+│   ├── CT_Series-16044803
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-55421975
+│       └── 01-GTV.nii.gz
+├── RADCURE-0875
+│   ├── CT_Series-85739617
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-13612578
+│       └── 01-GTV.nii.gz
+├── RADCURE-0879
+│   ├── CT_Series-02584897
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-90056578
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LPAROTID.nii.gz
+│       ├── 16-RPAROTID.nii.gz
+│       └── 17-CORD.nii.gz
+├── RADCURE-0894
+│   ├── CT_Series-73462249
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-05724508
+│       └── 01-GTV.nii.gz
+├── RADCURE-0901
+│   ├── CT_Series-06206352
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-55944733
+│       └── 01-GTV.nii.gz
+├── RADCURE-0908
+│   ├── CT_Series-22725373
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-80536692
+│       └── 01-GTV.nii.gz
+├── RADCURE-0911
+│   ├── CT_Series-71462285
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-79000182
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0915
+│   ├── CT_Series-01988590
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-33493067
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-LEYE.nii.gz
+│       ├── 06-REYE.nii.gz
+│       ├── 07-LLENS.nii.gz
+│       ├── 08-RLENS.nii.gz
+│       ├── 09-LIPS.nii.gz
+│       ├── 10-MANDIBLE.nii.gz
+│       ├── 11-LOPTIC.nii.gz
+│       ├── 12-ROPTIC.nii.gz
+│       ├── 13-CHIASM.nii.gz
+│       ├── 14-LPAROTID.nii.gz
+│       ├── 15-RPAROTID.nii.gz
+│       └── 16-CORD.nii.gz
+├── RADCURE-0916
+│   ├── CT_Series-81121015
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-42451290
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-RPAROTID.nii.gz
+│       └── 19-CORD.nii.gz
+├── RADCURE-0920
+│   ├── CT_Series-34545791
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-93953745
+│       └── 01-GTV.nii.gz
+├── RADCURE-0927
+│   ├── CT_Series-40551759
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-08850724
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0928
+│   ├── CT_Series-67685265
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-16472752
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-LACOUSTIC.nii.gz
+│       ├── 04-RACOUSTIC.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LARYNX.nii.gz
+│       ├── 09-LLENS.nii.gz
+│       ├── 10-RLENS.nii.gz
+│       ├── 11-LIPS.nii.gz
+│       ├── 12-MANDIBLE.nii.gz
+│       ├── 13-LOPTIC.nii.gz
+│       ├── 14-ROPTIC.nii.gz
+│       ├── 15-CHIASM.nii.gz
+│       ├── 16-LPAROTID.nii.gz
+│       ├── 17-RPAROTID.nii.gz
+│       └── 18-CORD.nii.gz
+├── RADCURE-0929
+│   ├── CT_Series-37302683
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-18129845
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-ESOPHAGUS.nii.gz
+│       ├── 06-LEYE.nii.gz
+│       ├── 07-REYE.nii.gz
+│       ├── 08-LLENS.nii.gz
+│       ├── 09-RLENS.nii.gz
+│       ├── 10-LIPS.nii.gz
+│       ├── 11-MANDIBLE.nii.gz
+│       ├── 12-LOPTIC.nii.gz
+│       ├── 13-ROPTIC.nii.gz
+│       ├── 14-CHIASM.nii.gz
+│       ├── 15-LPAROTID.nii.gz
+│       ├── 16-RPAROTID.nii.gz
+│       └── 17-CORD.nii.gz
+├── RADCURE-0930
+│   ├── CT_Series-23389465
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-24367486
+│       └── 01-GTV.nii.gz
+├── RADCURE-0938
+│   ├── CT_Series-35889716
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-03120192
+│       └── 01-GTV.nii.gz
+├── RADCURE-0940
+│   ├── CT_Series-68802826
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-90232086
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-ESOPHAGUS.nii.gz
+│       ├── 05-LEYE.nii.gz
+│       ├── 06-REYE.nii.gz
+│       ├── 07-LARYNX.nii.gz
+│       ├── 08-LLENS.nii.gz
+│       ├── 09-RLENS.nii.gz
+│       ├── 10-LIPS.nii.gz
+│       ├── 11-MANDIBLE.nii.gz
+│       ├── 12-LPAROTID.nii.gz
+│       ├── 13-RPAROTID.nii.gz
+│       └── 14-CORD.nii.gz
+├── RADCURE-0943
+│   ├── CT_Series-07730029
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-98420761
+│       └── 01-GTV.nii.gz
+├── RADCURE-0949
+│   ├── CT_Series-16894586
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-17602696
+│       └── 01-GTV.nii.gz
+├── RADCURE-0954
+│   ├── CT_Series-22800168
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-42147317
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LLENS.nii.gz
+│       ├── 11-RLENS.nii.gz
+│       ├── 12-LIPS.nii.gz
+│       ├── 13-MANDIBLE.nii.gz
+│       ├── 14-LOPTIC.nii.gz
+│       ├── 15-ROPTIC.nii.gz
+│       ├── 16-CHIASM.nii.gz
+│       ├── 17-LPAROTID.nii.gz
+│       ├── 18-RPAROTID.nii.gz
+│       └── 19-CORD.nii.gz
+├── RADCURE-0955
+│   ├── CT_Series-21012478
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-81220855
+│       └── 01-GTV.nii.gz
+├── RADCURE-0961
+│   ├── CT_Series-34658748
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-61422755
+│       ├── 01-GTV.nii.gz
+│       └── 02-CORD.nii.gz
+├── RADCURE-0971
+│   ├── CT_Series-26647125
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-31048613
+│       └── 01-GTV.nii.gz
+├── RADCURE-0972
+│   ├── CT_Series-23178878
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-06270484
+│       ├── 01-GTV.nii.gz
+│       ├── 02-BRAINSTEM.nii.gz
+│       ├── 03-ESOPHAGUS.nii.gz
+│       ├── 04-LEYE.nii.gz
+│       ├── 05-REYE.nii.gz
+│       ├── 06-LARYNX.nii.gz
+│       ├── 07-LLENS.nii.gz
+│       ├── 08-RLENS.nii.gz
+│       ├── 09-MANDIBLE.nii.gz
+│       ├── 10-LOPTIC.nii.gz
+│       ├── 11-ROPTIC.nii.gz
+│       ├── 12-CHIASM.nii.gz
+│       ├── 13-LPAROTID.nii.gz
+│       ├── 14-RPAROTID.nii.gz
+│       └── 15-CORD.nii.gz
+├── RADCURE-0973
+│   ├── CT_Series-28033401
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-15787657
+│       └── 01-GTV.nii.gz
+├── RADCURE-0979
+│   ├── CT_Series-01832407
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-72846345
+│       ├── 01-GTV.nii.gz
+│       ├── 02-LPLEXUS.nii.gz
+│       ├── 03-RPLEXUS.nii.gz
+│       ├── 04-BRAINSTEM.nii.gz
+│       ├── 05-LACOUSTIC.nii.gz
+│       ├── 06-RACOUSTIC.nii.gz
+│       ├── 07-ESOPHAGUS.nii.gz
+│       ├── 08-LEYE.nii.gz
+│       ├── 09-REYE.nii.gz
+│       ├── 10-LARYNX.nii.gz
+│       ├── 11-LLENS.nii.gz
+│       ├── 12-RLENS.nii.gz
+│       ├── 13-LIPS.nii.gz
+│       ├── 14-MANDIBLE.nii.gz
+│       ├── 15-LOPTIC.nii.gz
+│       ├── 16-ROPTIC.nii.gz
+│       ├── 17-CHIASM.nii.gz
+│       ├── 18-LPAROTID.nii.gz
+│       ├── 19-RPAROTID.nii.gz
+│       └── 20-CORD.nii.gz
+├── RADCURE-0983
+│   ├── CT_Series-24422037
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-26680338
+│       └── 01-GTV.nii.gz
+├── RADCURE-0986
+│   ├── CT_Series-98185602
+│   │   └── CT.nii.gz
+│   └── RTSTRUCT_Series-90201485
+│       └── 01-GTV.nii.gz
+├── output_index.csv
+└── output_index.csv.lock
+
+361 directories, 1123 files

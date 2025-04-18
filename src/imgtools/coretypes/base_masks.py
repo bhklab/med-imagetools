@@ -114,6 +114,8 @@ class VectorMask(MedImage):
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
 
+    __match_args__ = ("roi_mapping", "metadata")
+
     @property
     def n_masks(self) -> int:
         """Number of binary mask channels (components per voxel).

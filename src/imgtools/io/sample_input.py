@@ -450,33 +450,48 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004
     from tqdm import tqdm  # noqa: A003
 
+    from imgtools.io.sample_output import SampleOutput
     from imgtools.loggers import tqdm_logging_redirect
-    # from imgtools.io.readers import read_dicom_auto
 
+    output = SampleOutput(
+        directory=Path("temp_outputs/output"),
+    )
+    # from imgtools.io.readers import read_dicom_auto
+    # GTVp	NODES	BrachialPlex_L	BrachialPlex_R	Brainstem	Cochlea_L	Cochlea_R	Esophagus	Eye_L	Eye_R	Larynx	Lens_L	Lens_R	Lips	Mandible_Bone	Nrv_Optic_L	Nrv_Optic_R	OpticChiasm	Parotid_L	Parotid_R	SpinalCord
     # Example usage
     medinput = SampleInput.build(
-        input_directory="data",
+        n_jobs=12,
+        input_directory="data/RADCURE",
         roi_match_map={
             "GTV": ["GTV.*"],
-            "Lung": ["Lung.*"],
-            "Heart": ["Heart.*"],
-            "Esophagus": ["Esophagus.*"],
-            "Spinal Cord": ["Spinal Cord.*"],
-            "PTV": ["PTV.*"],
+            "NODES": ["GTVn_.*"],
+            "LPLEXUS": ["BrachialPlex_L"],
+            "RPLEXUS": ["BrachialPlex_R"],
+            "BRAINSTEM": ["Brainstem"],
+            "LACOUSTIC": ["Cochlea_L"],
+            "RACOUSTIC": ["Cochlea_R"],
+            "ESOPHAGUS": ["Esophagus"],
+            "LEYE": ["Eye_L"],
+            "REYE": ["Eye_R"],
+            "LARYNX": ["Larynx"],
+            "LLENS": ["Lens_L"],
+            "RLENS": ["Lens_R"],
+            "LIPS": ["Lips"],
+            "MANDIBLE": ["Mandible_Bone"],
+            "LOPTIC": ["Nrv_Optic_L"],
+            "ROPTIC": ["Nrv_Optic_R"],
+            "CHIASM": ["OpticChiasm"],
+            "LPAROTID": ["Parotid_L"],
+            "RPAROTID": ["Parotid_R"],
+            "CORD": ["SpinalCord"],
         },
         roi_ignore_case=True,
         roi_handling_strategy="merge",
         roi_allow_multi_key_matches=False,
         roi_on_missing_regex=ROIMatchFailurePolicy.WARN,
     )
-    print(medinput)
 
-    # print(f"{medinput.crawler!r}")
-
-    # print the tree
-    # medinput.print_tree()
-
-    query_string = "*"
+    query_string = "CT,RTSTRUCT"
 
     sample_sets = medinput.interlacer.query(
         query_string=query_string,
@@ -498,6 +513,7 @@ if __name__ == "__main__":  # pragma: no cover
             except ValueError as e:
                 logger.error(f"Error loading series: {e}")
                 continue
+            output(result)
 
     # query_string = "CT,SEG"
 
