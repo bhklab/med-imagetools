@@ -22,19 +22,20 @@ class MedImageToolsSettings(BaseSettings):
     This class provides a standardized way to manage settings for medical image processing,
     supporting YAML configuration files and programmatic configuration.
 
-    Attributes
-    ----------
-    input : SampleInput
-        Configuration for sample input handling and processing
-
-    Examples
-    --------
-    >>> from imgtools.config.configuration import (
-    ...     MedImageToolsSettings,
-    ... )
-    >>> config = MedImageToolsSettings()
-    >>> config.input.dataset_name
     """
+
+    # Attributes
+    # ----------
+    # input : SampleInput
+    #     Configuration for sample input handling and processing
+
+    # Examples
+    # --------
+    # >>> from imgtools.config.configuration import (
+    # ...     MedImageToolsSettings,
+    # ... )
+    # >>> config = MedImageToolsSettings()
+    # >>> config.input.dataset_name
 
     # use default() classmethod to set default values
     input: SampleInput = Field(
@@ -51,6 +52,8 @@ class MedImageToolsSettings(BaseSettings):
         # this allows for the config file to be used for other purposes
         # but also for users to define anything else they might want
         extra="ignore",
+        cli_parse_args=True,
+        # cli_use_class_docs_for_groups=True,  # optional: show nested class docstrings as CLI headings
     )
 
     @classmethod
@@ -99,13 +102,13 @@ if __name__ == "__main__":
     config = MedImageToolsSettings()
     print(config)
 
-    # config.input.print_tree()
+    # # config.input.print_tree()
 
-    # print(config.input.query("CT,RTSTRUCT"))
+    # # print(config.input.query("CT,RTSTRUCT"))
 
-    import json
+    # import json
 
-    with open("imgtools.json", "w") as f:  # noqa: PTH123
-        json.dump(config.json_schema, f, indent=4)
+    # with open("imgtools.json", "w") as f:  # noqa: PTH123
+    #     json.dump(config.json_schema, f, indent=4)
 
-    # config.to_yaml(Path("imgtools.yaml"))
+    # # config.to_yaml(Path("imgtools.yaml"))
