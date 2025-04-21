@@ -9,6 +9,7 @@ from pathlib import Path
 from imgtools.loggers import logger  # type: ignore
 from rich import print as rprint
 import pytest
+
 def _win32_longpath(path):
     """
     Helper function to add the long path prefix for Windows, so that shutil.copytree

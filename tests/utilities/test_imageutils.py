@@ -79,7 +79,7 @@ def test_image_to_array(image: sitk.Image) -> None:
 )
 def test_physical_points_to_idxs(
     image: sitk.Image,
-    points: list[np.array],
+    points: list[np.ndarray],
     continuous: bool,
 ) -> None:
     idxs = physical_points_to_idxs(image, points, continuous)
