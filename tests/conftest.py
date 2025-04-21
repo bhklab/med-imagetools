@@ -95,7 +95,14 @@ def medimage_test_data() -> list[MedImageDataEntry]:
             patient_id = str(row.PatientID)
             modality = str(row.Modality)
             series_uid = str(row.SeriesInstanceUID)
-            path = DATA_DIR / collection / patient_id / f"{modality}_Series-{series_uid[-8:]}"
+
+            match TEST_DATASET_TYPE:
+                case TestAccessType.PUBLIC:
+                    # public data
+                    path = DATA_DIR / collection / patient_id / f"{modality}_Series-{series_uid[-8:]}"
+                case TestAccessType.PRIVATE:
+                    # private data
+                    path = DATA_DIR / collection / patient_id / f"{modality}_Series{series_uid[-8:]}"
             if not path.exists():
                 missingpaths.append(path)
             else:
