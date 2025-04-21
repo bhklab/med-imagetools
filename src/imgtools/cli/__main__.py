@@ -39,6 +39,7 @@ from . import set_log_verbosity
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
+from .characterizedata import characterizedata
 
 from .sectioned_group import SectionedGroup, CommandRegistry
 from .testdatasets import testdata
@@ -51,6 +52,7 @@ registry.create_group("dicom-tools", "Tools for working with DICOM files.")
 registry.add("dicom-tools", dicomfind)
 registry.add("dicom-tools", dicomsort)
 registry.add('dicom-tools', index)
+registry.add('dicom-tools', characterizedata)
 
 if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")
