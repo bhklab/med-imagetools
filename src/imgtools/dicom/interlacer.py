@@ -636,7 +636,7 @@ if __name__ == "__main__":
         # Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
         # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
-        Path('data'),
+        Path("data"),
     ]
     interlacers = []
     for directory in dicom_dirs:

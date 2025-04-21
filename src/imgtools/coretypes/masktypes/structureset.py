@@ -506,7 +506,7 @@ class RTStructureSet:
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
-    # ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
+        # ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
         """Contruct multi-channel (vector) mask using ROI matching.
 
         This function applies the given `ROIMatcher` to select ROIs and stack
