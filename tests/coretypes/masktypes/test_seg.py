@@ -1,6 +1,7 @@
 from imgtools.coretypes.masktypes.seg import (
     Segment,
-    SEG
+    SEG,
+    SegmentationError
 )
 from pathlib import Path
 import pytest
@@ -27,6 +28,8 @@ def test_get_segs(medimage_by_modality):
         except KeyError as e:
             failures[seg['Path']] = str(e)
         except ValueError as e:
+            failures[seg['Path']] = str(e)
+        except SegmentationError as e:
             failures[seg['Path']] = str(e)
         else:
             successes[seg['Path']] = seg_obj

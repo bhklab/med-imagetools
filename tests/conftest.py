@@ -95,7 +95,7 @@ def medimage_test_data() -> list[MedImageDataEntry]:
             patient_id = str(row.PatientID)
             modality = str(row.Modality)
             series_uid = str(row.SeriesInstanceUID)
-            path = DATA_DIR / collection / patient_id / f"{modality}_Series{series_uid[-8:]}"
+            path = DATA_DIR / collection / patient_id / f"{modality}_Series-{series_uid[-8:]}"
             if not path.exists():
                 missingpaths.append(path)
             else:
@@ -218,7 +218,17 @@ def public_collections() -> list[str]:
         "4D-Lung",
         "Adrenal-ACC-Ki67-Seg",
         "CC-Tumor-Heterogeneity",
-        "ISPY2",
+        'CPTAC-CCRCC',
+        'Pancreatic-CT-CBCT-SEG',
+        'Colorectal-Liver-Metastases',
+        'NSCLC-Radiomics-Interobserver1',
+        'Pediatric-CT-SEG',
+        'CT_Lymph_Nodes',
+        'ReMIND',
+        'Spine-Mets-CT-SEG',
+        'CPTAC-PDA',
+        'C4KC-KiTS',
+        'CPTAC-UCEC',
         "LIDC-IDRI",
         "Mediastinal-Lymph-Node-SEG",
         "NSCLC-Radiomics",
