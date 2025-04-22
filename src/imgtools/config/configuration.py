@@ -38,13 +38,13 @@ class MedImageToolsSettings(BaseSettings):
     # >>> config = MedImageToolsSettings()
     # >>> config.input.dataset_name
 
-    # use default() classmethod to set default values
+    # Use a complete default instance rather than default_factory
     input: SampleInput = Field(
-        default_factory=SampleInput.default,
+        default=SampleInput.default(),
         description="Configuration for sample input handling and processing",
     )
     output: SampleOutput = Field(
-        default_factory=SampleOutput.default,
+        default=SampleOutput.default(),
         description="Configuration for sample output handling and processing",
     )
     model_config = SettingsConfigDict(

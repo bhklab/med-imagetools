@@ -328,7 +328,7 @@ class SampleInput(BaseModel):
     @classmethod
     def default(cls) -> "SampleInput":
         """Create a default SampleInput instance."""
-        return cls.build(directory=Path.cwd())
+        return cls.build(directory="./data")
 
     ###################################################################
     # Interlacer methods
