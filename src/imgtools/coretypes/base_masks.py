@@ -116,6 +116,8 @@ class VectorMask(MedImage):
 
     __match_args__ = ("roi_mapping", "metadata")
 
+    __match_args__ = ("roi_mapping", "metadata")
+
     @property
     def n_masks(self) -> int:
         """Number of binary mask channels (components per voxel).
@@ -324,18 +326,9 @@ class VectorMask(MedImage):
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
         """Create VectorMask from RTSTRUCT using ROI matching."""
-        img, mapping = rtstruct.get_vector_mask(
+        return rtstruct.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
-        )
-        if img is None:
-            return None
-
-        return cls(
-            image=img,
-            roi_mapping=mapping,
-            metadata=rtstruct.metadata,
-            errors=rtstruct.roi_map_errors,
         )
 
     @classmethod
@@ -346,26 +339,9 @@ class VectorMask(MedImage):
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
         """Create VectorMask from SEG using ROI matching."""
-        img, mapping = seg.get_vector_mask(
+        return seg.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
-        )
-        if img is None:
-            return None
-        for idx, m in mapping.items():
-            # Update the mapping to use the new key
-            mapping[idx] = ROIMaskMapping(
-                roi_key=m.roi_key,
-                roi_names=[
-                    f"{segment.label}::{segment.description}"
-                    for segment in m.roi_names
-                ],
-            )
-        return cls(
-            image=img,
-            roi_mapping=mapping,
-            metadata=seg.metadata,
-            errors=None,
         )
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204

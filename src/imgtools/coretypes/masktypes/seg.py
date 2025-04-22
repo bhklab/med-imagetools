@@ -1,43 +1,3 @@
-"""
-SEG Module
-
-This module defines the `SEG` class, which represents a DICOM-SEG (Segmentation) object.
-It provides functionalities for loading segmentation data from DICOM files, extracting
-region-of-interest (ROI) masks, and aligning segmentation masks with reference images.
-
-Key Functionalities
--------------------
-1. **Loading DICOM-SEG Data**
-   - Reads segmentation masks from DICOM-SEG files.
-   - Supports multi-segment DICOM-SEG files and fractional segmentation masks..
-
-2. **Aligning Segmentation to Reference Scans**
-   - Maps segmentation frames to reference images using SOPInstanceUID.
-   - Ensures spatial alignment for accurate analysis.
-
-3. **Converting SEG to Usable Mask Formats**
-   - Transforms segmentation masks into structured mask representations.
-   - Allows filtering and renaming of ROIs using regex-based matching.
-
-Examples
---------
->>> from pydicom import dcmread
->>> from pathlib import Path
->>> from imgtools.io.loaders.utils import (
-...     read_dicom_auto,
-... )
->>> from imgtools.modalities import SEG
->>> path = "data/NSCLC-Radiomics/LUNG1-002/SEG_Series-5.421/00000001.dcm"
->>> meta = dcmread(path, stop_before_pixels=True)
->>> seg = SEG.from_dicom(path, meta)
->>> ref = read_dicom_auto(
-...     "data/NSCLC-Radiomics/LUNG1-002/CT_Series-61228"
-... )
->>> res = seg.to_segmentation(
-...     ref, roi_names={"lung": "lung"}
-... )
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -48,7 +8,7 @@ import highdicom as hd
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.coretypes.base_masks import ROIMaskMapping
+from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
 
 # from imgtools.modalities import Scan, Segmentation
 from imgtools.dicom import DicomInput, load_dicom
@@ -63,7 +23,78 @@ if TYPE_CHECKING:
         ROIMatcher,
     )
 
-__all__ = ["SEG"]
+__all__ = [
+    "SEG",
+    "SegmentationTypeUnsupportedError",
+    "SegmentDuplicateError",
+    "SegmentDataMissingError",
+    "SegmentReferenceIndicesError",
+    "SegmentationValidationError",
+]
+
+
+class SegmentationError(Exception):
+    """Base exception for DICOM SEG errors."""
+
+    pass
+
+
+class SegmentationTypeUnsupportedError(SegmentationError):
+    """Raised when the segmentation type is unsupported."""
+
+    def __init__(self, seg_type: str) -> None:
+        self.seg_type = seg_type
+        message = f"Unsupported SegmentationType: {seg_type}"
+        super().__init__(message)
+
+
+class SegmentDuplicateError(SegmentationError):
+    """Raised when a segment is duplicated in the DICOM-SEG file."""
+
+    def __init__(self, segment_label: str, segment_number: int) -> None:
+        self.segment_label = segment_label
+        self.segment_number = segment_number
+        message = f"Segment {segment_label} (number: {segment_number}) is duplicated in the DICOM-SEG file."
+        super().__init__(message)
+
+
+class SegmentDataMissingError(SegmentationError):
+    """Raised when a segment has no data array."""
+
+    def __init__(self, segment_number: int, segment_label: str) -> None:
+        self.segment_number = segment_number
+        self.segment_label = segment_label
+        message = f"Segment {segment_number} ({segment_label}) has no data array. Check the DICOM-SEG file."
+        super().__init__(message)
+
+
+class SegmentReferenceIndicesError(SegmentationError):
+    """Raised when there's an error with reference indices in the segmentation."""
+
+    def __init__(self, error_message: str) -> None:
+        message = f"Unable to get reference indices from segmentation: {error_message}"
+        super().__init__(message)
+
+
+class SegmentationValidationError(SegmentationError):
+    """Raised when a segmentation validation check fails."""
+
+    def __init__(
+        self,
+        segment_number: int,
+        segment_label: str,
+        data_array_shape: tuple,
+        ref_indices_length: int,
+    ) -> None:
+        self.segment_number = segment_number
+        self.segment_label = segment_label
+        self.data_array_shape = data_array_shape
+        self.ref_indices_length = ref_indices_length
+        message = (
+            f"Segment {segment_number} ({segment_label}) has a data array with shape "
+            f"{data_array_shape}, but expected first dimension to be {ref_indices_length}."
+        )
+        super().__init__(message)
 
 
 @dataclass
@@ -124,7 +155,7 @@ def get_ref_indices(
         svg = seg.get_volume_geometry()
 
         if svg is None:
-            raise ValueError(
+            raise SegmentReferenceIndicesError(
                 "Unable to get volume geometry from segmentation."
             ) from e
 
@@ -155,11 +186,11 @@ class SEG:
                 if len(list(dicom.glob("*.dcm"))) == 1:
                     dicom = list(dicom.glob("*.dcm"))[0]
                 else:
-                    errmsg = (
+                    msg = (
                         f"Directory `{dicom}` contains multiple DICOM files. "
                         f"Cannot determine which one to load."
                     )
-                    raise ValueError(errmsg)
+                    raise SegmentationError(msg)
         ds_seg = load_dicom(dicom, stop_before_pixels=False)
         try:
             seg = hd.seg.Segmentation.from_dataset(ds_seg)
@@ -169,7 +200,7 @@ class SEG:
                 f"Segmentation object {dicom!r} does not contain "
                 f"SegmentationType. Skipping."
             )
-            raise ValueError(msg) from e
+            raise SegmentationError(msg) from e
 
         metadata = extract_metadata(ds_seg, "SEG", extra_tags=None)  # type: ignore
         segments: dict[int, Segment] = {}
@@ -177,8 +208,7 @@ class SEG:
             segdesc = seg.get_segment_description(segnum)
 
             if segnum in segments:
-                errmsg = f"Segment {segdesc.SegmentLabel} is duplicated in the DICOM-SEG file."
-                raise ValueError(errmsg)
+                raise SegmentDuplicateError(segdesc.SegmentLabel, segnum)
             segments[segnum] = Segment(
                 number=segnum,
                 label=segdesc.SegmentLabel,
@@ -212,24 +242,20 @@ class SEG:
                 # add to the segment
                 segments[seg.segment_numbers[0]].data_array = seg.pixel_array
             case _:
-                msg = f"Unsupported SegmentationType: {seg.SegmentationType}"
-                raise ValueError(msg)
+                raise SegmentationTypeUnsupportedError(seg.SegmentationType)
 
         # sanity check
         for segment in segments.values():
             if segment.data_array is None:
-                errmsg = (
-                    f"Segment {segment.number} has no data array. "
-                    f"Check the DICOM-SEG file."
-                )
-                raise ValueError(errmsg)
+                raise SegmentDataMissingError(segment.number, segment.label)
             # length of ref_indices should be the same as 0th dimension of data_array
             if segment.data_array.shape[0] != len(ref_indices):
-                errmsg = (
-                    f"Segment {segment.number} has a data array with shape "
-                    f"{segment.data_array.shape}, but expected {len(ref_indices)}."
+                raise SegmentationValidationError(
+                    segment.number,
+                    segment.label,
+                    segment.data_array.shape,
+                    len(ref_indices),
                 )
-                raise ValueError(errmsg)
 
         return cls(
             raw_seg=seg,
@@ -283,7 +309,7 @@ class SEG:
         self,
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
-    ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
+    ) -> VectorMask | None:
         roi_identifier_mapping = self.extract_roi_identifiers()
 
         matched_rois: list[tuple[str, list[Segment]]] = []
@@ -301,7 +327,7 @@ class SEG:
         # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
         # is either 'ignore' or 'warn'
         if len(matched_rois) == 0:
-            return None, {}
+            return None
 
         ref_image_indices = [
             reference_image.TransformPhysicalPointToIndex(pos)
@@ -362,7 +388,22 @@ class SEG:
 
         assert mask_image.GetNumberOfComponentsPerPixel() == len(mapping)
 
-        return mask_image, mapping
+        # Update the map to be to strings, not segments
+        for idx, m in mapping.items():
+            mapping[idx] = ROIMaskMapping(
+                roi_key=m.roi_key,
+                roi_names=[
+                    f"{segment.label}::{segment.description}"
+                    for segment in m.roi_names
+                ],
+            )
+
+        return VectorMask(
+            image=mask_image,
+            roi_mapping=mapping,
+            metadata=self.metadata,
+            errors=None,
+        )
 
     def __rich_repr__(self) -> rich.repr.Result:
         yield "segments", self.segments

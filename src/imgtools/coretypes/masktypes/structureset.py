@@ -14,7 +14,7 @@ import SimpleITK as sitk
 from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
-from imgtools.coretypes.base_masks import ROIMaskMapping
+from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
 from imgtools.coretypes.masktypes.roi_matching import ROIMatchingError
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
@@ -505,7 +505,8 @@ class RTStructureSet:
         self,
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
-    ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
+    ) -> VectorMask | None:
+        # ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
         """Contruct multi-channel (vector) mask using ROI matching.
 
         This function applies the given `ROIMatcher` to select ROIs and stack
@@ -565,7 +566,7 @@ class RTStructureSet:
         # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
         # is either 'ignore' or 'warn'
         if len(matched_rois) == 0:
-            return None, {}
+            return None
 
         logger.debug("Matched ROIs", matched_rois=matched_rois)
 
@@ -632,4 +633,9 @@ class RTStructureSet:
         assert mask_image.GetPixelIDValue() == 13
         assert mask_image.GetNumberOfComponentsPerPixel() == len(matched_rois)
 
-        return mask_image, mapping
+        return VectorMask(
+            mask_image,
+            mapping,
+            metadata=self.metadata,
+            errors=self.roi_map_errors,
+        )

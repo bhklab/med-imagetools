@@ -74,6 +74,8 @@ def index(
         force=force,
     )
 
+    crawler.crawl()
+
     logger.info("Crawling completed.")
     logger.info("Crawl results saved to %s", crawler.output_dir)
 
