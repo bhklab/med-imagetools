@@ -59,9 +59,9 @@
             "type": "object"
         },
         "SampleInput": {
-            "description": "Configuration model for processing medical imaging samples.\n\nThis class provides a standardized configuration for loading and processing\nmedical imaging data, including DICOM crawling and ROI matching settings.\n\nAttributes\n----------\ninput_directory : Path\n    Directory containing the input files. Must exist and be readable.\ndataset_name : str | None\n    Optional name for the dataset. Defaults to the base name of the input directory.\nupdate_crawl : bool\n    Whether to force a new crawl even if one exists. Default is False.\nn_jobs : int\n    Number of jobs to run in parallel. Default is (CPU cores - 2) or 1.\nmodalities : list[str] | None\n    List of modalities to include. None means include all modalities.\nroi_matcher : ROIMatcher\n    Configuration for matching regions of interest in the images.\n\n\nExamples\n--------\n>>> from imgtools.io.loaders.sample_input import (\n...     SampleInput,\n... )\n>>> config = SampleInput(\n...     input_directory=\"data/NSCLC-Radiomics\"\n... )\n>>> config.dataset_name\n'NSCLC-Radiomics'\n\n>>> # Using the factory method with ROI matching parameters\n>>> config = SampleInput.build(\n...     input_directory=\"data/NSCLC-Radiomics\",\n...     roi_match_map={\n...         \"GTV\": [\"GTV.*\"],\n...         \"PTV\": [\"PTV.*\"],\n...     },\n...     roi_ignore_case=True,\n...     roi_handling_strategy=\"merge\",\n... )",
+            "description": "Configuration model for processing medical imaging samples.\n\nThis class provides a standardized configuration for loading and processing\nmedical imaging data, including DICOM crawling and ROI matching settings.\n\nAttributes\n----------\ndirectory : Path\n    Directory containing the input files. Must exist and be readable.\ndataset_name : str | None\n    Optional name for the dataset. Defaults to the base name of the input directory.\nupdate_crawl : bool\n    Whether to force a new crawl even if one exists. Default is False.\nn_jobs : int\n    Number of jobs to run in parallel. Default is (CPU cores - 2) or 1.\nmodalities : list[str] | None\n    List of modalities to include. None means include all modalities.\nroi_matcher : ROIMatcher\n    Configuration for matching regions of interest in the images.\n\n\nExamples\n--------\n>>> from imgtools.io.loaders.sample_input import (\n...     SampleInput,\n... )\n>>> config = SampleInput(\n...     directory=\"data/NSCLC-Radiomics\"\n... )\n>>> config.dataset_name\n'NSCLC-Radiomics'\n\n>>> # Using the factory method with ROI matching parameters\n>>> config = SampleInput.build(\n...     directory=\"data/NSCLC-Radiomics\",\n...     roi_match_map={\n...         \"GTV\": [\"GTV.*\"],\n...         \"PTV\": [\"PTV.*\"],\n...     },\n...     roi_ignore_case=True,\n...     roi_handling_strategy=\"merge\",\n... )",
             "properties": {
-                "input_directory": {
+                "directory": {
                     "description": "Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
                     "examples": [
                         "data/NSCLC-Radiomics",
@@ -209,7 +209,7 @@
                 }
             },
             "required": [
-                "input_directory"
+                "directory"
             ],
             "title": "SampleInput",
             "type": "object"

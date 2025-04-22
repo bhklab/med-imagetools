@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=med-imgtools_jsonschema.json
 input:
-  input_directory: data/RADCURE
+  directory: data/RADCURE
   dataset_name: RADCURE
 
   n_jobs: 10

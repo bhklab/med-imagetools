@@ -42,7 +42,7 @@ class SampleInput(BaseModel):
 
     Attributes
     ----------
-    input_directory : Path
+    directory : Path
         Directory containing the input files. Must exist and be readable.
     dataset_name : str | None
         Optional name for the dataset. Defaults to the base name of the input directory.
@@ -62,14 +62,14 @@ class SampleInput(BaseModel):
     ...     SampleInput,
     ... )
     >>> config = SampleInput(
-    ...     input_directory="data/NSCLC-Radiomics"
+    ...     directory="data/NSCLC-Radiomics"
     ... )
     >>> config.dataset_name
     'NSCLC-Radiomics'
 
     >>> # Using the factory method with ROI matching parameters
     >>> config = SampleInput.build(
-    ...     input_directory="data/NSCLC-Radiomics",
+    ...     directory="data/NSCLC-Radiomics",
     ...     roi_match_map={
     ...         "GTV": ["GTV.*"],
     ...         "PTV": ["PTV.*"],
@@ -79,7 +79,7 @@ class SampleInput(BaseModel):
     ... )
     """
 
-    input_directory: Path = Field(
+    directory: Path = Field(
         description="Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
         title="Input Directory",
         examples=["data/NSCLC-Radiomics", "/absolute/path/to/dicom/data"],
@@ -120,7 +120,11 @@ class SampleInput(BaseModel):
         None,
         description="List of DICOM modalities to include in processing. None means include all modalities. Common values include 'CT', 'MR', 'PT', 'RTSTRUCT', 'RTDOSE', 'SEG'.",
         title="DICOM Modalities",
-        examples=[["CT", "RTSTRUCT"], ["CT", "PT", "RTSTRUCT", "RTDOSE"], ["MR", "SEG"]],
+        examples=[
+            ["CT", "RTSTRUCT"],
+            ["CT", "PT", "RTSTRUCT", "RTDOSE"],
+            ["MR", "SEG"],
+        ],
         json_schema_extra={
             "items": {
                 "enum": [
@@ -168,7 +172,7 @@ class SampleInput(BaseModel):
     def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
         crawler = Crawler(
-            dicom_dir=self.input_directory,
+            dicom_dir=self.directory,
             dataset_name=self.dataset_name,
             force=self.update_crawl,
             n_jobs=self.n_jobs,
@@ -177,9 +181,9 @@ class SampleInput(BaseModel):
         self._crawler = crawler
         self._interlacer = Interlacer(crawl_index=crawler.index)
 
-    @field_validator("input_directory")
+    @field_validator("directory")
     @classmethod
-    def validate_input_directory(cls, v: str | Path) -> Path:
+    def validate_directory(cls, v: str | Path) -> Path:
         """Validate that the input directory exists and is readable."""
         path = Path(v) if not isinstance(v, Path) else v
 
@@ -232,7 +236,7 @@ class SampleInput(BaseModel):
     def set_default_dataset_name(self) -> "SampleInput":
         """Set default dataset name if not provided."""
         if self.dataset_name is None:
-            self.dataset_name = self.input_directory.name
+            self.dataset_name = self.directory.name
             logger.debug(
                 f"Using input directory name as dataset name: {self.dataset_name}"
             )
@@ -242,7 +246,7 @@ class SampleInput(BaseModel):
     @classmethod
     def build(
         cls,
-        input_directory: str | Path,
+        directory: str | Path,
         dataset_name: str | None = None,
         update_crawl: bool = False,
         n_jobs: int | None = None,
@@ -262,7 +266,7 @@ class SampleInput(BaseModel):
 
         Parameters
         ----------
-        input_directory : str | Path
+        directory : str | Path
             Directory containing the input files
         dataset_name : str | None, optional
             Name of the dataset, by default None (uses input directory name)
@@ -311,7 +315,7 @@ class SampleInput(BaseModel):
 
         # Create the SampleInput
         return cls(
-            input_directory=Path(input_directory),
+            directory=Path(directory),
             dataset_name=dataset_name,
             update_crawl=update_crawl,
             n_jobs=num_jobs,
@@ -322,7 +326,11 @@ class SampleInput(BaseModel):
     @classmethod
     def default(cls) -> "SampleInput":
         """Create a default SampleInput instance."""
-        return cls.build(input_directory=Path.cwd())
+        return cls.build(directory=Path.cwd())
+
+    ###################################################################
+    # Interlacer methods
+    ###################################################################
 
     @property
     def crawler(self) -> Crawler:
@@ -330,10 +338,6 @@ class SampleInput(BaseModel):
         if self._crawler is None:
             raise ValueError("Crawler has not been initialized.")
         return self._crawler
-
-    ###################################################################
-    # Interlacer methods
-    ###################################################################
 
     @property
     def interlacer(self) -> Interlacer:
@@ -343,7 +347,7 @@ class SampleInput(BaseModel):
         return self._interlacer
 
     def print_tree(self) -> None:
-        self.interlacer.print_tree(input_directory=self.input_directory)
+        self.interlacer.print_tree(input_directory=self.directory)
 
     def query(self, modalities: str) -> list[list[dict[str, str]]] | None:
         """Query the interlacer for a specific modality."""
@@ -361,7 +365,7 @@ class SampleInput(BaseModel):
         load_subseries: bool = False,
     ) -> list[MedImageT]:
         # we assume that all subseries are in the same directory
-        root_dir = self.input_directory.parent / folder
+        root_dir = self.directory.parent / folder
 
         if not root_dir.exists():
             msg = f"Directory does not exist: {root_dir}"
@@ -458,7 +462,9 @@ class SampleInput(BaseModel):
         images.extend(
             cast("list[MedImage]", reference_images)
         )  # hack to satisfy mypy
-        reference_image = images[0]
+
+        # Extract the first (of possibly many subseries) as the reference image
+        reference_image: MedImage = images[0]
         images = images[1:]
         # Load the rest of the series
         for modality, series_nodes in by_mod.items():
@@ -466,100 +472,108 @@ class SampleInput(BaseModel):
                 # TODO:: maybe implement some check here in case we loading
                 # another of same reference modality?
                 continue
-            for series in series_nodes:
-                match modality:
-                    case "RTSTRUCT":
-                        rt = RTStructureSet.from_dicom(
-                            dicom=self.input_directory.parent / series.folder
-                        )
-                        vm = VectorMask.from_rtstruct(
-                            reference_image=reference_image,
-                            rtstruct=rt,
-                            roi_matcher=self.roi_matcher,
-                        )
-                        if vm is None:
-                            continue
-                        images.append(vm)
-                    case "SEG":
-                        seg = SEG.from_dicom(
-                            dicom=self.input_directory.parent / series.folder
-                        )
-                        vm = VectorMask.from_seg(
-                            reference_image=reference_image,
-                            seg=seg,
-                            roi_matcher=self.roi_matcher,
-                        )
-                        if vm is None:
-                            continue
-                        images.append(vm)
-                    case "PT" | "CT" | "MR" | "RTDOSE":
-                        misc = self._read_series(
-                            series_uid=series.SeriesInstanceUID,
-                            modality=modality,
-                            folder=series.folder,
-                            load_subseries=load_subseries,
-                        )
-                        assert isinstance(misc[0], MedImage) and len(misc) == 1
-                        images.append(misc[0])
-                    case _:
-                        msg = f"Unsupported modality: {modality}"
-                        raise ValueError(msg)
+            self._load_non_ref_images(
+                load_subseries,
+                images,
+                reference_image,
+                modality,
+                series_nodes,
+            )
 
         return [reference_image] + images
 
+    def _load_non_ref_images(
+        self,
+        load_subseries: bool,
+        images: list[MedImage | VectorMask],
+        reference_image: MedImage,
+        modality: str,
+        series_nodes: list[SeriesNode],
+    ) -> None:
+        for series in series_nodes:
+            match modality:
+                case "RTSTRUCT" | "SEG":
+                    mask_klass = (
+                        RTStructureSet if modality == "RTSTRUCT" else SEG
+                    )
+                    vm = mask_klass.from_dicom(
+                        dicom=self.directory.parent / series.folder
+                    ).get_vector_mask(
+                        reference_image=reference_image,
+                        roi_matcher=self.roi_matcher,
+                    )
+                    if vm is None:
+                        continue
+                    images.append(vm)
+                case "PT" | "CT" | "MR" | "RTDOSE":
+                    misc = self._read_series(
+                        series_uid=series.SeriesInstanceUID,
+                        modality=modality,
+                        folder=series.folder,
+                        load_subseries=load_subseries,
+                    )
+                    # if len (misc) > 1, that means that somehow a non-reference
+                    # image has multiple subseries, which is not expected
+                    # and we should handle this at some point
+                    assert isinstance(misc[0], MedImage) and len(misc) == 1
+                    images.append(misc[0])
+                case _:
+                    msg = f"Unsupported modality: {modality}"
+                    raise ValueError(msg)
+
 
 if __name__ == "__main__":  # pragma: no cover
-    from rich import print  # noqa: A004
+    from rich import print  # noqa: A004, F401
     from tqdm import tqdm  # noqa: A003
 
     from imgtools.io.sample_output import SampleOutput
     from imgtools.loggers import tqdm_logging_redirect
 
-    output = SampleOutput(
+    medinput = SampleInput(
+        directory=Path("data/RADCURE"),
+        update_crawl=False,
+        n_jobs=12,
+        dataset_name="RADCURE",
+        modalities=["CT", "RTSTRUCT"],
+        roi_matcher=ROIMatcher(
+            match_map={
+                "GTV": ["GTVp"],
+                "NODES": ["GTVn_.*"],
+                "LPLEXUS": ["BrachialPlex_L"],
+                "RPLEXUS": ["BrachialPlex_R"],
+                "BRAINSTEM": ["Brainstem"],
+                "LACOUSTIC": ["Cochlea_L"],
+                "RACOUSTIC": ["Cochlea_R"],
+                "ESOPHAGUS": ["Esophagus"],
+                "LEYE": ["Eye_L"],
+                "REYE": ["Eye_R"],
+                "LARYNX": ["Larynx"],
+                "LLENS": ["Lens_L"],
+                "RLENS": ["Lens_R"],
+                "LIPS": ["Lips"],
+                "MANDIBLE": ["Mandible_Bone"],
+                "LOPTIC": ["Nrv_Optic_L"],
+                "ROPTIC": ["Nrv_Optic_R"],
+                "CHIASM": ["OpticChiasm"],
+                "LPAROTID": ["Parotid_L"],
+                "RPAROTID": ["Parotid_R"],
+                "CORD": ["SpinalCord"],
+            },
+            allow_multi_key_matches=False, # if True, an ROI can match multiple keys
+            handling_strategy=ROIMatchStrategy.SEPARATE,
+            ignore_case=True,
+            on_missing_regex=ROIMatchFailurePolicy.WARN,
+        ),
+    )
+    medoutput = SampleOutput(
         directory=Path("temp_outputs/RADCURE_PROCESSED"),
     )
-
-    # from imgtools.io.readers import read_dicom_auto
-    # Example usage
-    medinput = SampleInput.build(
-        n_jobs=12,
-        input_directory="data/RADCURE",
-        roi_match_map={
-            "GTV": ["GTVp"],
-            "NODES": ["GTVn_.*"],
-            "LPLEXUS": ["BrachialPlex_L"],
-            "RPLEXUS": ["BrachialPlex_R"],
-            "BRAINSTEM": ["Brainstem"],
-            "LACOUSTIC": ["Cochlea_L"],
-            "RACOUSTIC": ["Cochlea_R"],
-            "ESOPHAGUS": ["Esophagus"],
-            "LEYE": ["Eye_L"],
-            "REYE": ["Eye_R"],
-            "LARYNX": ["Larynx"],
-            "LLENS": ["Lens_L"],
-            "RLENS": ["Lens_R"],
-            "LIPS": ["Lips"],
-            "MANDIBLE": ["Mandible_Bone"],
-            "LOPTIC": ["Nrv_Optic_L"],
-            "ROPTIC": ["Nrv_Optic_R"],
-            "CHIASM": ["OpticChiasm"],
-            "LPAROTID": ["Parotid_L"],
-            "RPAROTID": ["Parotid_R"],
-            "CORD": ["SpinalCord"],
-        },
-        roi_ignore_case=True,
-        roi_handling_strategy="separate",
-        roi_allow_multi_key_matches=False,
-        roi_on_missing_regex=ROIMatchFailurePolicy.WARN,
-    )
-
     query_string = "CT,RTSTRUCT"
 
     sample_sets = medinput.interlacer.query(
         query_string=query_string,
         group_by_root=True,
     )
-    count = 0
     with tqdm_logging_redirect():
         for series in tqdm(
             sample_sets,
@@ -576,31 +590,4 @@ if __name__ == "__main__":  # pragma: no cover
             except ValueError as e:
                 logger.error(f"Error loading series: {e}")
                 continue
-            output(result)
-            count += 1
-            if count > 5:
-                break
-
-    # query_string = "CT,SEG"
-
-    # sample_sets = medinput.interlacer.query(
-    #     query_string=query_string,
-    #     group_by_root=True,
-    # )
-
-    # for series in tqdm(
-    #     sample_sets,
-    #     desc="Loading series",
-    #     unit="series",
-    #     leave=False,
-    #     total=len(sample_sets),
-    # ):
-    #     try:
-    #         series = medinput._load_series(
-    #             sample=series,
-    #             load_subseries=False,
-    #         )
-    #         print(series)
-    #     except ValueError as e:
-    #         print(f"Error loading series: {e}")
-    #         continue
+            medoutput(result)

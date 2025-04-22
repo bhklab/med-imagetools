@@ -2,9 +2,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from matplotlib.cbook import sanitize_sequence
-from rich import print
-
 from imgtools.coretypes.base_masks import VectorMask
 from imgtools.coretypes.base_medimage import MedImage
 from imgtools.coretypes.imagetypes.scan import Scan
@@ -13,7 +10,6 @@ from imgtools.io.writers import (
     ExistingFileMode,
     NIFTIWriter,
 )
-from imgtools.utils import sanitize_file_name
 
 DEFAULT_FILENAME_FORMAT = (
     "{PatientID}/{Modality}_{trunc_SeriesInstanceUID}/{ImageID}.nii.gz"
@@ -72,12 +68,12 @@ class SampleOutput:
                     # Handle MedImage cae
                     self.writer.save(
                         image,
+                        **image.metadata,
                         **kwargs,
                         trunc_SeriesInstanceUID=image.metadata[
                             "SeriesInstanceUID"
                         ][-8:],
                         ImageID=image.metadata["Modality"],
-                        **image.metadata,
                     )
 
                 case _:
