@@ -264,10 +264,7 @@ class Interlacer:
 
         return [modality for modality in valid_order if modality in query_set]
 
-    def _query(
-        self,
-        queried_modalities: list[str],
-    ) -> list[list[SeriesNode]]:
+    def _query(self, queried_modalities: list[str]) -> list[list[SeriesNode]]:
         """Find sequences containing queried modalities in order, optionally grouped by root."""
         results: list[list[SeriesNode]] = []
 
@@ -286,7 +283,7 @@ class Interlacer:
                         special_node.Modality in SPECIAL_MODALITIES
                         and special_node.Modality in queried_modalities
                     ):
-                        # The parent node must ADJACENT in the query
+                        # The parent node must be in the query
                         parent = path[i - 1]
                         if parent.Modality not in queried_modalities:
                             valid_path = False
@@ -305,6 +302,31 @@ class Interlacer:
         for root in self.root_nodes:
             dfs(root, [])
 
+        return results
+
+    def query_all(self) -> list[list[SeriesNode]]:
+        """Simply return ALL possible matches
+        Note this has a different approach than query, since we dont care
+        about the order of the modalities, just that they exist in the
+        Branch
+        """
+        results: list[list[SeriesNode]] = []
+
+        def dfs(node: SeriesNode, path: list[SeriesNode]) -> None:
+            path.append(node)
+            if len(node.children) == 0:
+                # If this is a leaf node, check if the path is unique
+                # but first, if the path has any 'RTPLAN' nodes, remove them
+                # TODO:: create a global VALID_MODALITIES list instead of hardcoding
+                cleaned_path = [n for n in path if n.Modality != "RTPLAN"]
+                if cleaned_path not in results:
+                    results.append(cleaned_path)
+
+            for child in node.children:
+                dfs(child, path.copy())
+
+        for root in self.root_nodes:
+            dfs(root, [])
         return results
 
     @timer("Querying forest")
@@ -341,8 +363,11 @@ class Interlacer:
         - RTSTRUCT: Radiotherapy Structure
         - RTDOSE: Radiotherapy Dose
         """
-        queried_modalities = self._get_valid_query(query_string.split(","))
-        query_results = self._query(queried_modalities)
+        if query_string in ["*", "all"]:
+            query_results = self.query_all()
+        else:
+            queried_modalities = self._get_valid_query(query_string.split(","))
+            query_results = self._query(queried_modalities)
 
         if not group_by_root:
             return query_results
@@ -610,7 +635,8 @@ if __name__ == "__main__":
         # Path("data/NSCLC_Radiogenomics"),
         # Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
-        Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
+        # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
+        Path("data"),
     ]
     interlacers = []
     for directory in dicom_dirs:

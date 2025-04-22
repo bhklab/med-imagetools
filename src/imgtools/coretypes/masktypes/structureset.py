@@ -14,7 +14,8 @@ import SimpleITK as sitk
 from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
-from imgtools.coretypes.base_masks import ROIMaskMapping
+from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
+from imgtools.coretypes.masktypes.roi_matching import ROIMatchingError
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.exceptions import (
@@ -72,7 +73,6 @@ class MaskArrayOutOfBoundsError(Exception):
         self,
         roi_name: str,
         contour_num: int,
-        z_idx: float,
         z_int: int,
         mask_shape: tuple,
         slice_points_shape: tuple,
@@ -81,7 +81,6 @@ class MaskArrayOutOfBoundsError(Exception):
     ) -> None:
         self.roi_name = roi_name
         self.contour_num = contour_num
-        self.z_idx = z_idx
         self.z_int = z_int
         self.mask_shape = mask_shape
         self.slice_points_shape = slice_points_shape
@@ -91,7 +90,7 @@ class MaskArrayOutOfBoundsError(Exception):
 
     def _generate_message(self) -> str:
         return (
-            f"Z-index {self.z_int} ({self.z_idx=}) is out of bounds for mask array "
+            f"Z-index {self.z_int} is out of bounds for mask array "
             f"with shape {self.mask_shape}. "
             f"ROI: {self.roi_name}, "
             f"ContourNum: {self.contour_num}, "
@@ -460,7 +459,6 @@ class RTStructureSet:
                     raise MaskArrayOutOfBoundsError(
                         roi_name,
                         contour_num,
-                        z_idx=z,
                         z_int=z,
                         mask_shape=mask_img_size,
                         slice_points_shape=slice_points.shape,
@@ -507,7 +505,8 @@ class RTStructureSet:
         self,
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
-    ) -> tuple[sitk.Image, dict[int, ROIMaskMapping]]:
+    ) -> VectorMask | None:
+        # ) -> tuple[sitk.Image | None, dict[int, ROIMaskMapping]]:
         """Contruct multi-channel (vector) mask using ROI matching.
 
         This function applies the given `ROIMatcher` to select ROIs and stack
@@ -554,15 +553,20 @@ class RTStructureSet:
         Its companion class `VectorMask` offers high-level access to
         individual ROIs, label conversion, and overlap inspection.
         """
-
-        matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
-            self.roi_names
-        )
-        if not matched_rois:
+        try:
+            matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
+                self.roi_names
+            )
+        except ROIMatchingError as e:
             errmsg = (
                 f"No matching ROIs found. Available ROIs: {self.roi_names}, "
             )
-            raise MissingROIError(errmsg)
+            raise MissingROIError(errmsg) from e
+
+        # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
+        # is either 'ignore' or 'warn'
+        if len(matched_rois) == 0:
+            return None
 
         logger.debug("Matched ROIs", matched_rois=matched_rois)
 
@@ -629,4 +633,9 @@ class RTStructureSet:
         assert mask_image.GetPixelIDValue() == 13
         assert mask_image.GetNumberOfComponentsPerPixel() == len(matched_rois)
 
-        return mask_image, mapping
+        return VectorMask(
+            mask_image,
+            mapping,
+            metadata=self.metadata,
+            errors=self.roi_map_errors,
+        )

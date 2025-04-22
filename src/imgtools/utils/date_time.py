@@ -44,6 +44,10 @@ def convert_dictionary_datetime_values(
     result: dict[str, date | time | float | str] = {}
 
     for key, value in dicom_dict.items():
+        if not isinstance(value, str):
+            # Skip non-string values
+            result[key] = value
+            continue
         if value and value.lower() != "none":
             key_lower = key.lower()
             if (

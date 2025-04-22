@@ -15,7 +15,52 @@ __all__ = [
     "ROIMatcher",
     "ROIMatchStrategy",
     "handle_roi_matching",
+    "ROIMatchFailurePolicy",
+    "ROIMatchingError",
 ]
+
+
+class ROIMatchingError(ValueError):
+    """Custom exception for ROI matching failures.
+
+    Provides detailed information about the ROIs and patterns that failed to match.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        roi_names: list[str],
+        match_patterns: ROIGroupPatterns,
+    ) -> None:
+        """Initialize with detailed information about the matching failure.
+
+        Parameters
+        ----------
+        message : str
+            Base error message
+        roi_names : list[str]
+            ROI names that were being matched
+        match_patterns : ROIGroupPatterns
+            The pattern dictionary that was used for matching
+        """
+        self.roi_names = roi_names
+        self.match_patterns = match_patterns
+
+        # Build detailed error message
+        detailed_message = f"{message}\n\n"
+        detailed_message += "ROI Matching Details:\n"
+        detailed_message += (
+            f"- ROIs to match ({len(roi_names)}): {roi_names}\n"
+        )
+        detailed_message += f"- Pattern groups ({len(match_patterns)}): {{\n"
+
+        for key, patterns in match_patterns.items():
+            detailed_message += f"    '{key}': {patterns}\n"
+
+        detailed_message += "  }\n"
+        detailed_message += "\nPlease check your ROI names and match patterns."
+
+        super().__init__(detailed_message)
 
 
 # we should rename this to be intuitive
@@ -30,6 +75,19 @@ class ROIMatchStrategy(str, Enum):  # noqa: N801
 
     # separate all ROIs
     SEPARATE = "separate"
+
+
+class ROIMatchFailurePolicy(str, Enum):
+    """Policy for how to handle total match failure (when no ROIs match any patterns)."""
+
+    # Ignore the issue and continue silently
+    IGNORE = "ignore"
+
+    # Log a warning but continue execution
+    WARN = "warn"
+
+    # Raise an error and halt execution
+    ERROR = "error"
 
 
 PatternString = str
@@ -50,6 +108,22 @@ Valid_Inputs = (
 """
 
 
+def create_roi_matcher(
+    nonvalidated_input: Valid_Inputs,
+    handling_strategy: ROIMatchStrategy = ROIMatchStrategy.MERGE,
+    ignore_case: bool = True,
+    allow_multi_key_matches: bool = True,
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN,
+) -> ROIMatcher:
+    return ROIMatcher(
+        match_map=ROIMatcher.validate_match_map(nonvalidated_input),
+        handling_strategy=handling_strategy,
+        ignore_case=ignore_case,
+        allow_multi_key_matches=allow_multi_key_matches,
+        on_missing_regex=on_missing_regex,
+    )
+
+
 class ROIMatcher(BaseModel):
     match_map: Annotated[
         ROIGroupPatterns,
@@ -57,6 +131,31 @@ class ROIMatcher(BaseModel):
     ]
     handling_strategy: ROIMatchStrategy = ROIMatchStrategy.MERGE
     ignore_case: bool = True
+    allow_multi_key_matches: bool = True
+    """Whether to allow one ROI to match multiple keys in the match_map.
+    
+    When set to False, an ROI will only be associated with the first key 
+    it matches, based on the order of keys in the match_map.
+    
+    Example:
+        With match_map = {'gtv': 'GTV.*', 'tumor': 'GTVp.*'}
+        ROI name "GTVp" would match both 'gtv' and 'tumor' patterns.
+        
+        If allow_multi_key_matches=True: "GTVp" appears in both key results
+        If allow_multi_key_matches=False: "GTVp" only appears in 'gtv' results
+    """
+
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN
+    """How to handle when no ROI matches any pattern in match_map.
+    
+    - IGNORE: Silently continue execution
+    - WARN: Log a warning but continue execution
+    - ERROR: Raise an error and halt execution
+    
+    Note: This only applies when NO ROIs match ANY patterns. If at least one ROI
+    matches at least one pattern, this policy is not activated.
+    """
+
     default_key: ClassVar[str] = "ROI"
 
     @field_validator("match_map", mode="before")
@@ -110,14 +209,18 @@ class ROIMatcher(BaseModel):
             self.match_map,
             self.handling_strategy,
             ignore_case=self.ignore_case,
+            allow_multi_key_matches=self.allow_multi_key_matches,
+            on_missing_regex=self.on_missing_regex,
         )
 
 
-def handle_roi_matching(
+def handle_roi_matching(  # noqa: PLR0912
     roi_names: list[str],
     roi_matching: ROIGroupPatterns,
     strategy: ROIMatchStrategy,
     ignore_case: bool = True,
+    allow_multi_key_matches: bool = True,
+    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN,
 ) -> list[tuple[str, list[str]]]:
     """
     Match ROI names against regex patterns and apply a handling strategy.
@@ -128,10 +231,19 @@ def handle_roi_matching(
         List of ROI names to match.
     roi_matching : ROIGroupPatterns
         Mapping of keys to list of regex patterns.
-    strategy :ROIMatchStrategy
+    strategy : ROIMatchStrategy
         Strategy to use: MERGE, KEEP_FIRST, or SEPARATE.
     ignore_case : bool
         Whether to ignore case during matching.
+    allow_multi_key_matches : bool
+        Whether to allow an ROI to match multiple keys in the match_map.
+        If False, an ROI will only be associated with the first key it matches,
+        based on the order of keys in the roi_matching dictionary.
+    on_missing_regex :ROIMatchFailurePolicy
+        How to handle when no ROI matches any pattern in roi_matching.
+        IGNORE: Silently continue execution
+        WARN: Log a warning but continue execution
+        ERROR: Raise an error and halt execution
 
     Returns
     -------
@@ -151,6 +263,51 @@ def handle_roi_matching(
     - SEPARATE: Separate all ROIs. Returns possibly multiple tuples for each key,
         because a key may have multiple ROIs matching the pattern.
         i.e [('GTV', ['GTV1']), ('GTV', ['GTV2']), ('PTV', ['PTV1'])]
+
+    Complex Interaction with allow_multi_key_matches:
+
+    When allow_multi_key_matches=True:
+        - One ROI can match to multiple keys
+        - The strategy then only determines how ROIs are organized within
+            each key group
+
+    When allow_multi_key_matches=False:
+        - Each ROI is assigned to exactly one key at most (the first matching key)
+        - Strategy application happens AFTER this restriction
+
+    Example 1:
+        roi_names=['GTVp', 'GTVn', 'PTV']
+        match_map={'gtv': ['GTV.*'], 'primary': ['GTVp'], 'ptv': ['PTV']}
+
+        With allow_multi_key_matches=True:
+            - MERGE: [('gtv', ['GTVp', 'GTVn']), ('primary', ['GTVp']), ('ptv', ['PTV'])]
+            - KEEP_FIRST: [('gtv', ['GTVp']), ('primary', ['GTVp']), ('ptv', ['PTV'])]
+            - SEPARATE: [('gtv', ['GTVp']), ('gtv', ['GTVn']), ('primary', ['GTVp']), ('ptv', ['PTV'])]
+
+        With allow_multi_key_matches=False:
+            **note that primary's GTVp got matched already in 'gtv'**
+            **and thus is never added to the results**
+            - MERGE: [('gtv', ['GTVp', 'GTVn']), ('ptv', ['PTV'])]
+            - KEEP_FIRST: [('gtv', ['GTVp']), ('ptv', ['PTV'])]
+            - SEPARATE: [('gtv', ['GTVp']), ('gtv', ['GTVn']), ('ptv', ['PTV'])]
+
+    Example 2 (demonstrating the key issue):
+        roi_names=['GTVp', 'GTVp_2']
+        match_map={'primary': ['GTVp'], 'gtv': ['GTV.*']}
+
+        With allow_multi_key_matches=True:
+            - KEEP_FIRST: [('primary', ['GTVp']), ('gtv', ['GTVp'])]  # GTVp appears in both keys
+
+        With allow_multi_key_matches=False:
+            **though technically, GTVp_2 wouldve matched in 'primary', since its KEEP_FIRST,**
+            **its still available for 'gtv'**
+            - KEEP_FIRST: [('primary', ['GTVp']), ('gtv', ['GTVp_2'])]
+
+    Raises
+    ------
+    ROIMatchingError
+        If no ROIs match any patterns and the on_missing_regex policy is ERROR.
+        This error includes detailed information about the ROIs and patterns that failed to match.
     """
     flags = re.IGNORECASE if ignore_case else 0
 
@@ -158,116 +315,78 @@ def handle_roi_matching(
     def _match_pattern(roi_name: str, pattern: PatternString) -> bool:
         return re.fullmatch(pattern, roi_name, flags=flags) is not None
 
-    results = defaultdict(list)
-
+    # First pass: collect all potential matches without considering allow_multi_key_matches
+    raw_results = defaultdict(list)
     for key, patterns in roi_matching.items():
         for pattern, roi_name in product(patterns, roi_names):
             if _match_pattern(roi_name, pattern):
-                results[key].append(roi_name)
+                raw_results[key].append(roi_name)
 
+    any_matches_found = any(raw_results.values())
+    # Handle the case where no matches were found
+    if not any_matches_found:
+        message = "No ROIs matched any patterns in the match_map."
+        match on_missing_regex:
+            case ROIMatchFailurePolicy.IGNORE:
+                pass
+            case ROIMatchFailurePolicy.WARN:
+                logger.warning(
+                    message, roi_names=roi_names, roi_matching=roi_matching
+                )
+            case ROIMatchFailurePolicy.ERROR:
+                raise ROIMatchingError(message, roi_names, roi_matching)
+
+    # Apply the selected strategy to the filtered results
+    # TODO:: this is a ugly mess, apologies if youre about to read this
+    # TODO:: refactor!!!
     match strategy:
         case ROIMatchStrategy.MERGE:
             # Merge all ROIs with the same key
-            # this means that we return a single tuple for each key
-            # but the value is a list of all the matched ROIs
-            return [(key, v) for key, v in results.items() if v]
+            # Returns a single tuple for each key with all matched ROIs
+            filtered_results = defaultdict(list)
+            assigned_rois = set()
+            for key, rois in raw_results.items():
+                for roi in rois:
+                    if allow_multi_key_matches:
+                        filtered_results[key].append(roi)
+                    elif roi not in assigned_rois:
+                        filtered_results[key].append(roi)
+                        assigned_rois.add(roi)
+            return [(key, v) for key, v in filtered_results.items() if v]
         case ROIMatchStrategy.KEEP_FIRST:
-            # For each key, keep the first ROI found based on the pattern
-            # this means that we return a single tuple for each key
-            # but the value is a list of size ONE with the first matched ROI
-            return [(key, [v[0]]) for key, v in results.items() if v]
+            # For each key, keep only the first ROI found
+            # Returns a single tuple for each key with at most one ROI
+            # more complex than it seems
+            filtered_results = defaultdict(list)
+            assigned_rois = set()
+            for key, rois in raw_results.items():
+                for roi in rois:
+                    if allow_multi_key_matches:
+                        # If allowing multi-key matches, keep the first match
+                        filtered_results[key].append(roi)
+                        break
+                    elif roi not in assigned_rois:
+                        filtered_results[key].append(roi)
+                        assigned_rois.add(roi)
+                        break  # Stop after the first match
+            return [(key, v) for key, v in filtered_results.items() if v]
         case ROIMatchStrategy.SEPARATE:
             # Separate all ROIs
-            # this means that we possibly return a MULTIPLE tuples for each key
-            # because a key may have multiple ROIs matching the pattern
+            # Returns one tuple per ROI
             tuples = []
-            for key, v in results.items():
+            filtered_results = defaultdict(list)
+            assigned_rois = set()
+            for key, rois in raw_results.items():
+                for roi in rois:
+                    if allow_multi_key_matches:
+                        filtered_results[key].append(roi)
+                    elif roi not in assigned_rois:
+                        filtered_results[key].append(roi)
+                        assigned_rois.add(roi)
+            # Flatten the results into tuples
+            # This is a bit tricky because we want to keep the key
+            # but separate the ROIs
+            for key, v in filtered_results.items():
                 for roi in v:
                     tuples.append((key, [roi]))
             return tuples
-        case _:  # pragma: no cover
-            errmsg = (
-                f"Unrecognized strategy: {strategy}. Something went wrong."
-            )
-            raise ValueError(errmsg)
-
-
-if __name__ == "__main__":  # pragma: no cover
-    from pathlib import Path
-    from typing import (
-        Type,
-    )
-
-    from pydantic_settings import (
-        BaseSettings,
-        PydanticBaseSettingsSource,
-        SettingsConfigDict,
-        # TomlConfigSettingsSource,
-        YamlConfigSettingsSource,
-    )
-    from rich import print  # noqa
-
-    class Settings(BaseSettings):
-        rois: ROIMatcher = ROIMatcher(match_map={"ROI": [".*"]})
-
-        model_config = SettingsConfigDict(
-            # to instantiate the Login class, the variable name would be login.nbia_username in the environment
-            # env_nested_delimiter="__",
-            # env_file=".env",
-            # env_file_encoding="utf-8",
-            yaml_file=(Path().cwd() / "imgtools.yaml",),
-            # allow for other fields to be present in the config file
-            # this allows for the config file to be used for other purposes
-            # but also for users to define anything else they might want
-            extra="ignore",
-        )
-
-        @classmethod
-        def settings_customise_sources(
-            cls,
-            settings_cls: Type[BaseSettings],
-            init_settings: PydanticBaseSettingsSource,
-            env_settings: PydanticBaseSettingsSource,
-            dotenv_settings: PydanticBaseSettingsSource,
-            file_secret_settings: PydanticBaseSettingsSource,
-        ) -> tuple[PydanticBaseSettingsSource, ...]:
-            return (
-                init_settings,
-                YamlConfigSettingsSource(settings_cls),
-            )
-
-        @property
-        def json_schema(self) -> dict:
-            """Return the JSON schema for the settings."""
-            return self.model_json_schema()
-
-        @classmethod
-        def from_user_yaml(cls, path: Path) -> Settings:
-            """Load settings from a YAML file."""
-            source = YamlConfigSettingsSource(cls, yaml_file=path)
-            settings = source()
-            return cls(**settings)
-
-        def to_yaml(self, path: Path) -> None:
-            """Return the YAML representation of the settings."""
-            import yaml  # type: ignore
-
-            model = self.model_dump(mode="json")
-            with path.open("w") as f:
-                yaml.dump(model, f, sort_keys=False)
-
-    settings = Settings()
-    print(settings)
-
-    matcher = ROIMatcher(
-        match_map={
-            "GTV": ["GTV.*"],
-            "PTV": ["PTV.*"],
-            "CTV": ["CTV.*"],
-        }
-    )
-    print(matcher)
-
-    settings.to_yaml(Path("imgtools_settings.yaml"))
-
-    print(Settings.from_user_yaml(Path("imgtools_settings3.yaml")))
