@@ -103,8 +103,49 @@ class MedImageToolsSettings(BaseSettings):
 
 if __name__ == "__main__":
     from rich import print  # noqa
+    from imgtools.io.sample_input import (
+        ROIMatcher,
+        ROIMatchStrategy,
+        ROIMatchFailurePolicy,
+    )
 
-    config = MedImageToolsSettings()
+    config = MedImageToolsSettings(
+        input=SampleInput(
+            directory=Path("data/RADCURE"),
+            update_crawl=False,
+            n_jobs=12,
+            modalities=["CT", "RTSTRUCT"],
+            roi_matcher=ROIMatcher(
+                match_map={
+                    "GTV": ["GTVp"],
+                    "NODES": ["GTVn_.*"],
+                    "LPLEXUS": ["BrachialPlex_L"],
+                    "RPLEXUS": ["BrachialPlex_R"],
+                    "BRAINSTEM": ["Brainstem"],
+                    "LACOUSTIC": ["Cochlea_L"],
+                    "RACOUSTIC": ["Cochlea_R"],
+                    "ESOPHAGUS": ["Esophagus"],
+                    "LEYE": ["Eye_L"],
+                    "REYE": ["Eye_R"],
+                    "LARYNX": ["Larynx"],
+                    "LLENS": ["Lens_L"],
+                    "RLENS": ["Lens_R"],
+                    "LIPS": ["Lips"],
+                    "MANDIBLE": ["Mandible_Bone"],
+                    "LOPTIC": ["Nrv_Optic_L"],
+                    "ROPTIC": ["Nrv_Optic_R"],
+                    "CHIASM": ["OpticChiasm"],
+                    "LPAROTID": ["Parotid_L"],
+                    "RPAROTID": ["Parotid_R"],
+                    "CORD": ["SpinalCord"],
+                },
+                allow_multi_key_matches=False,  # if True, an ROI can match multiple keys
+                handling_strategy=ROIMatchStrategy.SEPARATE,
+                ignore_case=True,
+                on_missing_regex=ROIMatchFailurePolicy.WARN,
+            ),
+        )
+    )
     print(config)
 
     # # config.input.print_tree()
@@ -116,4 +157,4 @@ if __name__ == "__main__":
     with open("med-imgtools_jsonschema.json", "w") as f:  # noqa: PTH123
         json.dump(config.json_schema, f, indent=4)
 
-    config.to_yaml(Path("imgtools.yaml"))
+    # config.to_yaml(Path("imgtools.yaml"))

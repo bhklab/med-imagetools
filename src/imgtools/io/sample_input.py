@@ -92,7 +92,7 @@ class SampleInput(BaseModel):
         },
     )
     dataset_name: str | None = Field(
-        None,
+        default=None,
         description="Name of the dataset, defaults to input directory base name if not provided. Used for organizing outputs and labeling results.",
         title="Dataset Name",
         min_length=1,
@@ -101,13 +101,13 @@ class SampleInput(BaseModel):
         json_schema_extra={"x-display-name": "Dataset Identifier"},
     )
     update_crawl: bool = Field(
-        False,
+        default=False,
         description="Force recrawl even if crawl data already exists. Set to True when directory contents have changed or to refresh metadata cache.",
         title="Update DICOM Crawl",
         json_schema_extra={"x-display-name": "Force Directory Recrawl"},
     )
     n_jobs: int = Field(
-        max(1, multiprocessing.cpu_count() - 2),
+        default=max(1, multiprocessing.cpu_count() - 2),
         description="Number of parallel jobs to run for DICOM processing. Default reserves 2 cores for system operations.",
         title="Parallel Jobs",
         ge=1,  # Greater than or equal to 1
@@ -119,7 +119,7 @@ class SampleInput(BaseModel):
         },
     )
     modalities: list[str] | None = Field(
-        None,
+        default=None,
         description="List of DICOM modalities to include in processing. None means include all modalities. Common values include 'CT', 'MR', 'PT', 'RTSTRUCT', 'RTDOSE', 'SEG'.",
         title="DICOM Modalities",
         examples=[
