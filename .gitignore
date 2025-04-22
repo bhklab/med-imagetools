@@ -232,3 +232,5 @@ notebooks
 .imgtools
 
 *.html
+
+sandbox/*nii.gz
