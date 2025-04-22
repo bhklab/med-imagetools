@@ -4,7 +4,7 @@ import multiprocessing
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from pydantic import (
     BaseModel,
@@ -15,7 +15,6 @@ from pydantic import (
 )
 
 from imgtools.coretypes import MedImage
-from imgtools.coretypes.base_masks import VectorMask
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatcher,
     ROIMatchFailurePolicy,
@@ -29,6 +28,9 @@ from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer, SeriesNode
 from imgtools.io.readers import MedImageT, read_dicom_auto
 from imgtools.loggers import logger
+
+if TYPE_CHECKING:
+    from imgtools.coretypes.base_masks import VectorMask
 
 __all__ = ["SampleInput"]
 
@@ -526,12 +528,12 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004, F401
     from tqdm import tqdm  # noqa: A003
 
-    from imgtools.io.sample_output import SampleOutput
+    from imgtools.io.sample_output import ExistingFileMode, SampleOutput
     from imgtools.loggers import tqdm_logging_redirect
 
     medinput = SampleInput(
         directory=Path("data/RADCURE"),
-        update_crawl=False,
+        update_crawl=True,
         n_jobs=12,
         dataset_name="RADCURE",
         modalities=["CT", "RTSTRUCT"],
@@ -559,7 +561,7 @@ if __name__ == "__main__":  # pragma: no cover
                 "RPAROTID": ["Parotid_R"],
                 "CORD": ["SpinalCord"],
             },
-            allow_multi_key_matches=False, # if True, an ROI can match multiple keys
+            allow_multi_key_matches=False,  # if True, an ROI can match multiple keys
             handling_strategy=ROIMatchStrategy.SEPARATE,
             ignore_case=True,
             on_missing_regex=ROIMatchFailurePolicy.WARN,
@@ -567,6 +569,7 @@ if __name__ == "__main__":  # pragma: no cover
     )
     medoutput = SampleOutput(
         directory=Path("temp_outputs/RADCURE_PROCESSED"),
+        existing_file_mode=ExistingFileMode.OVERWRITE,
     )
     query_string = "CT,RTSTRUCT"
 

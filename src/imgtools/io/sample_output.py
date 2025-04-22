@@ -1,48 +1,171 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
+
+import os
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Dict, List
+
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 
 from imgtools.coretypes.base_masks import VectorMask
-from imgtools.coretypes.base_medimage import MedImage
 from imgtools.coretypes.imagetypes.scan import Scan
 from imgtools.io.writers import (
     AbstractBaseWriter,
     ExistingFileMode,
     NIFTIWriter,
 )
+from imgtools.loggers import logger
+
+if TYPE_CHECKING:
+    from imgtools.coretypes.base_medimage import MedImage
 
 DEFAULT_FILENAME_FORMAT = (
     "{PatientID}/{Modality}_{trunc_SeriesInstanceUID}/{ImageID}.nii.gz"
 )
 
+__all__ = ["SampleOutput"]
 
-@dataclass
-class SampleOutput:
-    directory: Path
-    filename_format: str = field(default=DEFAULT_FILENAME_FORMAT)
 
-    writer: AbstractBaseWriter = field(
-        init=False,
+class SampleOutput(BaseModel):
+    """
+    Configuration model for saving medical imaging outputs.
+
+    This class provides a standardized configuration for saving medical images,
+    supporting various file formats and output organization strategies.
+
+    Attributes
+    ----------
+    directory : Path
+        Directory where output files will be saved. Must exist and be writable.
+    filename_format : str
+        Format string for output filenames with placeholders for metadata values.
+    existing_file_mode : ExistingFileMode
+        How to handle existing files (FAIL, SKIP, OVERWRITE).
+    extra_context : Dict[str, Any]
+        Additional metadata to include when saving files.
+
+    Examples
+    --------
+    >>> from imgtools.io import SampleOutput
+    >>> from imgtools.io.writers import ExistingFileMode
+    >>> output = SampleOutput(
+    ...     directory="results/patient_scans",
+    ...     filename_format="{PatientID}/{Modality}/{ImageID}.nii.gz",
+    ...     existing_file_mode=ExistingFileMode.SKIP,
+    ... )
+    >>> output(scan_list)  # Save all scans in the list
+    """
+
+    directory: Path = Field(
+        description="Path where output files will be saved. Absolute path or relative to the current working directory.",
+        title="Output Directory",
+        examples=["output/processed_scans", "/absolute/path/to/output"],
+        json_schema_extra={
+            "format": "path",
+            "pattern": "^[^\\0]+$",  # Non-null characters
+            "x-descriptive": "Directory where processed files will be saved",
+        },
+    )
+    filename_format: str = Field(
+        default=DEFAULT_FILENAME_FORMAT,
+        description="Format string for output filenames with placeholders for metadata values. Available fields depend on the metadata in the images being saved.",
+        title="Filename Format",
+        examples=[
+            "{PatientID}/{Modality}/{ImageID}.nii.gz",
+            "{PatientID}/roi_{roi_key}.nii.gz",
+        ],
+        json_schema_extra={
+            "x-display-name": "Output Filename Pattern",
+        },
+    )
+    existing_file_mode: ExistingFileMode = Field(
+        ExistingFileMode.FAIL,
+        description="How to handle existing files: FAIL (raise error), SKIP (don't overwrite), or OVERWRITE (replace existing files).",
+        title="Existing File Handling",
+        json_schema_extra={
+            "x-display-name": "File Conflict Resolution",
+        },
+    )
+    extra_context: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Additional metadata fields to include when saving files. These values can be referenced in the filename_format.",
+        title="Extra Metadata",
+        examples=[
+            {"dataset": "NSCLC-Radiomics", "processing_date": "2025-04-22"}
+        ],
+        json_schema_extra={
+            "x-display-name": "Additional Context Fields",
+        },
     )
 
-    def __post_init__(self) -> None:
-        self.writer = NIFTIWriter(
+    _writer: AbstractBaseWriter | None = PrivateAttr(default=None)
+
+    def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
+        """Initialize the writer after model initialization."""
+        self._writer = NIFTIWriter(
             root_directory=self.directory,
-            existing_file_mode=ExistingFileMode.FAIL,
+            existing_file_mode=self.existing_file_mode,
             filename_format=self.filename_format,
+            context=self.extra_context,
         )
 
-    def __call__(
-        self, data: list[MedImage], **kwargs: dict[str, Any]
-    ) -> dict[str, Any]:
-        """
-        Save the data to a file using the writer.
+    @field_validator("directory")
+    @classmethod
+    def validate_directory(cls, v: str | Path) -> Path:
+        """Validate that the output directory exists or can be created, and is writable."""
+        path = Path(v) if not isinstance(v, Path) else v
 
-        Args:
-            data (Any): The data to be saved.
-            name (str): The name of the file.
-            index (int, optional): The index of the file. Defaults to 0.
-            extension (str, optional): The file extension. Defaults to ".nii".
+        # Create directory if it doesn't exist
+        if not path.exists():
+            try:
+                path.mkdir(parents=True, exist_ok=True)
+                logger.debug(f"Created output directory: {path}")
+            except PermissionError as e:
+                msg = f"Cannot create output directory (permission denied): {path}"
+                raise ValueError(msg) from e
+            except Exception as e:
+                msg = f"Failed to create output directory {path}: {str(e)}"
+                raise ValueError(msg) from e
+
+        if not path.is_dir():
+            msg = f"Output path must be a directory: {path}"
+            raise ValueError(msg)
+
+        if not os.access(path, os.W_OK):
+            msg = f"Output directory is not writable: {path}"
+            raise ValueError(msg)
+
+        return path
+
+    @property
+    def writer(self) -> AbstractBaseWriter:
+        """Get the writer instance."""
+        if self._writer is None:
+            raise ValueError("Writer is not initialized.")
+        return self._writer
+
+    def __call__(
+        self, data: List[MedImage], **kwargs: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Save the data to files using the configured writer.
+
+        Parameters
+        ----------
+        data : List[MedImage]
+            List of medical images to save.
+        **kwargs : Dict[str, Any]
+            Additional metadata to include when saving.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Empty dictionary for compatibility with other processors.
         """
         for image in data:
             match image:
@@ -65,7 +188,7 @@ class SampleOutput:
                             ImageID=image_id,
                         )
                 case Scan():
-                    # Handle MedImage cae
+                    # Handle MedImage case
                     self.writer.save(
                         image,
                         **image.metadata,
@@ -75,11 +198,5 @@ class SampleOutput:
                         ][-8:],
                         ImageID=image.metadata["Modality"],
                     )
-
-                case _:
-                    print(
-                        f"Unsupported data type: {type(image)}. Only VectorMask is supported."
-                    )
-                    pass
 
         return {}
