@@ -71,6 +71,8 @@ class VectorMask(MedImage):
         If that fails, falls back to the standard sitk.Image behavior
     """
 
+    __match_args__ = ("roi_mapping", "metadata")
+
     roi_mapping: dict[int, ROIMaskMapping]
     metadata: dict[str, str]
     errors: Mapping[str, Exception] | None
@@ -99,10 +101,13 @@ class VectorMask(MedImage):
         """
         super().__init__(image)
         # Shift index to start from 1 for user-facing keys
-        self.roi_mapping = {0: ROIMaskMapping("Background", ["Background"])}
-
-        for old_idx, roi_mask_mapping in roi_mapping.items():
-            self.roi_mapping[old_idx + 1] = roi_mask_mapping
+        self.roi_mapping = {}
+        if 0 not in roi_mapping:
+            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            for old_idx, roi_mask_mapping in roi_mapping.items():
+                self.roi_mapping[old_idx + 1] = roi_mask_mapping
+        else:
+            self.roi_mapping = roi_mapping
 
         self.metadata = metadata
         self.errors = errors

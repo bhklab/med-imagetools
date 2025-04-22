@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, Sequence
 
 from pydantic import (
     BaseModel,
     Field,
     PrivateAttr,
     field_validator,
-    model_validator,
 )
 
 from imgtools.coretypes.base_masks import VectorMask
@@ -160,7 +159,7 @@ class SampleOutput(BaseModel):
         return self._writer
 
     def __call__(
-        self, data: List[MedImage], **kwargs: Dict[str, Any]
+        self, data: Sequence[MedImage], **kwargs: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
         Save the data to files using the configured writer.

@@ -25,39 +25,23 @@ class MedImageToolsSettings(BaseSettings):
 
     """
 
-    # Attributes
-    # ----------
-    # input : SampleInput
-    #     Configuration for sample input handling and processing
-
-    # Examples
-    # --------
-    # >>> from imgtools.config.configuration import (
-    # ...     MedImageToolsSettings,
-    # ... )
-    # >>> config = MedImageToolsSettings()
-    # >>> config.input.dataset_name
-
     # Use a complete default instance rather than default_factory
     input: SampleInput = Field(
-        default=SampleInput.default(),
+        default_factory=SampleInput.default,
         description="Configuration for sample input handling and processing",
     )
     output: SampleOutput = Field(
-        default=SampleOutput.default(),
+        default_factory=SampleOutput.default,
         description="Configuration for sample output handling and processing",
     )
     model_config = SettingsConfigDict(
-        # to instantiate the Login class, the variable name would be login.nbia_username in the environment
-        # env_nested_delimiter="__",
-        # env_file=".env",
-        # env_file_encoding="utf-8",
         yaml_file=(Path().cwd() / "imgtools.yaml",),
         # allow for other fields to be present in the config file
         # this allows for the config file to be used for other purposes
         # but also for users to define anything else they might want
         extra="ignore",
-        cli_parse_args=True,
+        # in the future we can automatically generate CLI parsers
+        # cli_parse_args=True,
         # cli_use_class_docs_for_groups=True,  # optional: show nested class docstrings as CLI headings
     )
 
@@ -101,60 +85,60 @@ class MedImageToolsSettings(BaseSettings):
             raise ValueError(msg) from e
 
 
-if __name__ == "__main__":
-    from rich import print  # noqa
-    from imgtools.io.sample_input import (
-        ROIMatcher,
-        ROIMatchStrategy,
-        ROIMatchFailurePolicy,
-    )
+# if __name__ == "__main__":
+#     from rich import print  # noqa
+#     from imgtools.io.sample_input import (
+#         ROIMatcher,
+#         ROIMatchStrategy,
+#         ROIMatchFailurePolicy,
+#     )
 
-    config = MedImageToolsSettings(
-        input=SampleInput(
-            directory=Path("data/RADCURE"),
-            update_crawl=False,
-            n_jobs=12,
-            modalities=["CT", "RTSTRUCT"],
-            roi_matcher=ROIMatcher(
-                match_map={
-                    "GTV": ["GTVp"],
-                    "NODES": ["GTVn_.*"],
-                    "LPLEXUS": ["BrachialPlex_L"],
-                    "RPLEXUS": ["BrachialPlex_R"],
-                    "BRAINSTEM": ["Brainstem"],
-                    "LACOUSTIC": ["Cochlea_L"],
-                    "RACOUSTIC": ["Cochlea_R"],
-                    "ESOPHAGUS": ["Esophagus"],
-                    "LEYE": ["Eye_L"],
-                    "REYE": ["Eye_R"],
-                    "LARYNX": ["Larynx"],
-                    "LLENS": ["Lens_L"],
-                    "RLENS": ["Lens_R"],
-                    "LIPS": ["Lips"],
-                    "MANDIBLE": ["Mandible_Bone"],
-                    "LOPTIC": ["Nrv_Optic_L"],
-                    "ROPTIC": ["Nrv_Optic_R"],
-                    "CHIASM": ["OpticChiasm"],
-                    "LPAROTID": ["Parotid_L"],
-                    "RPAROTID": ["Parotid_R"],
-                    "CORD": ["SpinalCord"],
-                },
-                allow_multi_key_matches=False,  # if True, an ROI can match multiple keys
-                handling_strategy=ROIMatchStrategy.SEPARATE,
-                ignore_case=True,
-                on_missing_regex=ROIMatchFailurePolicy.WARN,
-            ),
-        )
-    )
-    print(config)
+#     config = MedImageToolsSettings(
+#         input=SampleInput(
+#             directory=Path("data/RADCURE"),
+#             update_crawl=False,
+#             n_jobs=12,
+#             modalities=["CT", "RTSTRUCT"],
+#             roi_matcher=ROIMatcher(
+#                 match_map={
+#                     "GTV": ["GTVp"],
+#                     "NODES": ["GTVn_.*"],
+#                     "LPLEXUS": ["BrachialPlex_L"],
+#                     "RPLEXUS": ["BrachialPlex_R"],
+#                     "BRAINSTEM": ["Brainstem"],
+#                     "LACOUSTIC": ["Cochlea_L"],
+#                     "RACOUSTIC": ["Cochlea_R"],
+#                     "ESOPHAGUS": ["Esophagus"],
+#                     "LEYE": ["Eye_L"],
+#                     "REYE": ["Eye_R"],
+#                     "LARYNX": ["Larynx"],
+#                     "LLENS": ["Lens_L"],
+#                     "RLENS": ["Lens_R"],
+#                     "LIPS": ["Lips"],
+#                     "MANDIBLE": ["Mandible_Bone"],
+#                     "LOPTIC": ["Nrv_Optic_L"],
+#                     "ROPTIC": ["Nrv_Optic_R"],
+#                     "CHIASM": ["OpticChiasm"],
+#                     "LPAROTID": ["Parotid_L"],
+#                     "RPAROTID": ["Parotid_R"],
+#                     "CORD": ["SpinalCord"],
+#                 },
+#                 allow_multi_key_matches=False,  # if True, an ROI can match multiple keys
+#                 handling_strategy=ROIMatchStrategy.SEPARATE,
+#                 ignore_case=True,
+#                 on_missing_regex=ROIMatchFailurePolicy.WARN,
+#             ),
+#         )
+#     )
+#     print(config)
 
-    # # config.input.print_tree()
+#     # # config.input.print_tree()
 
-    # # print(config.input.query("CT,RTSTRUCT"))
+#     # # print(config.input.query("CT,RTSTRUCT"))
 
-    import json
+#     import json
 
-    with open("med-imgtools_jsonschema.json", "w") as f:  # noqa: PTH123
-        json.dump(config.json_schema, f, indent=4)
+#     with open("med-imgtools_jsonschema.json", "w") as f:  # noqa: PTH123
+#         json.dump(config.json_schema, f, indent=4)
 
-    # config.to_yaml(Path("imgtools.yaml"))
+#     # config.to_yaml(Path("imgtools.yaml"))

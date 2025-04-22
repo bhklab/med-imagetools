@@ -1,5 +1,5 @@
 input:
-    directory: data/RADCURE
+    directory: data/CC-Radiomics-Phantom
     update_crawl: false
     n_jobs: 12
     modalities:
@@ -7,27 +7,28 @@ input:
         - RTSTRUCT
     roi_matcher:
         match_map:
-            GTV: [GTVp]
-            NODES: [GTVn_.*]
-            LPLEXUS: [BrachialPlex_L]
-            RPLEXUS: [BrachialPlex_R]
-            BRAINSTEM: [Brainstem]
-            LACOUSTIC: [Cochlea_L]
-            RACOUSTIC: [Cochlea_R]
-            ESOPHAGUS: [Esophagus]
-            LEYE: [Eye_L]
-            REYE: [Eye_R]
-            LARYNX: [Larynx]
-            LLENS: [Lens_L]
-            RLENS: [Lens_R]
-            LIPS: [Lips]
-            MANDIBLE: [Mandible_Bone]
-            LOPTIC: [Nrv_Optic_L]
-            ROPTIC: [Nrv_Optic_R]
-            CHIASM: [OpticChiasm]
-            LPAROTID: [Parotid_L]
-            RPAROTID: [Parotid_R]
-            CORD: [SpinalCord]
+            ROI: [".*"]
+            # GTV: [GTVp]
+            # NODES: [GTVn_.*]
+            # LPLEXUS: [BrachialPlex_L]
+            # RPLEXUS: [BrachialPlex_R]
+            # BRAINSTEM: [Brainstem]
+            # LACOUSTIC: [Cochlea_L]
+            # RACOUSTIC: [Cochlea_R]
+            # ESOPHAGUS: [Esophagus]
+            # LEYE: [Eye_L]
+            # REYE: [Eye_R]
+            # LARYNX: [Larynx]
+            # LLENS: [Lens_L]
+            # RLENS: [Lens_R]
+            # LIPS: [Lips]
+            # MANDIBLE: [Mandible_Bone]
+            # LOPTIC: [Nrv_Optic_L]
+            # ROPTIC: [Nrv_Optic_R]
+            # CHIASM: [OpticChiasm]
+            # LPAROTID: [Parotid_L]
+            # RPAROTID: [Parotid_R]
+            # CORD: [SpinalCord]
         handling_strategy: separate
         ignore_case: true
         allow_multi_key_matches: false

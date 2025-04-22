@@ -1,14 +1,18 @@
 from dataclasses import dataclass
-from typing import List, Sequence
+from typing import Sequence, TypeVar
 
 import SimpleITK as sitk
 
+from imgtools.coretypes.base_masks import VectorMask
+from imgtools.coretypes.base_medimage import MedImage
 from imgtools.loggers import logger
 from imgtools.transforms import (
     BaseTransform,
     IntensityTransform,
     SpatialTransform,
 )
+
+ImageT = TypeVar("ImageT", bound=sitk.Image)
 
 
 @dataclass
@@ -28,20 +32,20 @@ class Transformer:
             errors.append(errmsg)
             raise ValueError("\n".join(errors))
 
-    def _apply_transforms(self, image: sitk.Image) -> sitk.Image:
+    def _apply_transforms(self, image: ImageT) -> ImageT:
         """Apply transforms to an image."""
 
         # save original image class type + attributes
         img_cls = type(image)
-        attrs = image.__dict__.copy()
-        del attrs["this"]
+        # Only copy attributes we explicitly support
+        metadata = getattr(image, "metadata", None)
 
         for n, transform in enumerate(self.transforms, start=1):
             try:
                 if isinstance(
                     transform, (SpatialTransform, IntensityTransform)
                 ):
-                    image = transform(image)
+                    transformed_image = transform(image)
                 else:
                     msg = f"Invalid transform type: {type(transform)}"
                     raise ValueError(msg)
@@ -51,13 +55,29 @@ class Transformer:
                 raise ValueError(msg) from e
 
         # restore original attributes
-        obj = img_cls(image, attrs.pop("metadata"))
-        for k, v in attrs.items():
-            setattr(obj, k, v)
+        try:
+            match image:
+                case VectorMask(roi_mapping, metadata):
+                    return img_cls(  # type: ignore
+                        transformed_image,
+                        roi_mapping=roi_mapping,
+                        metadata=metadata,
+                    )
+                case MedImage():
+                    metadata = getattr(image, "metadata", None)
+                    return img_cls(  # type: ignore
+                        transformed_image,
+                        metadata=metadata,
+                    )
+                case _:
+                    msg = f"Unsupported image type: {type(image)}"
+                    raise ValueError(msg)
+        except Exception as e:
+            msg = f"Error restoring original attributes for image: {image}."
+            logger.exception(msg)
+            raise ValueError(msg) from e
 
-        return obj
-
-    def __call__(self, images: List[sitk.Image]) -> List[sitk.Image]:
+    def __call__(self, images: Sequence[sitk.Image]) -> Sequence[sitk.Image]:
         """Apply transforms to images."""
         # handle reference image first
         new_images = [self._apply_transforms(images[0])]

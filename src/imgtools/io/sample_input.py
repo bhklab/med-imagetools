@@ -4,7 +4,7 @@ import multiprocessing
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Sequence, cast
 
 from pydantic import (
     BaseModel,
@@ -413,11 +413,11 @@ class SampleInput(BaseModel):
             for file_name_set in file_name_sets
         ]
 
-    def _load_series(  # noqa: PLR0912
+    def load_sample(  # noqa: PLR0912
         self,
         sample: list[SeriesNode],
         load_subseries: bool = False,
-    ) -> list[MedImage | VectorMask]:
+    ) -> Sequence[MedImage | VectorMask]:
         # group list by modality
         by_mod: defaultdict[str, list[SeriesNode]] = defaultdict(list)
         for series in sample:
@@ -586,7 +586,7 @@ if __name__ == "__main__":  # pragma: no cover
             total=len(sample_sets),
         ):
             try:
-                result = medinput._load_series(
+                result = medinput.load_sample(
                     sample=series,
                     load_subseries=False,
                 )
