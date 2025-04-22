@@ -142,6 +142,16 @@ class SampleOutput(BaseModel):
 
         return path
 
+    @classmethod
+    def default(cls) -> SampleOutput:
+        """Create a default instance of SampleOutput."""
+        return cls(
+            directory=Path("output"),
+            filename_format=DEFAULT_FILENAME_FORMAT,
+            existing_file_mode=ExistingFileMode.FAIL,
+            extra_context={},
+        )
+
     @property
     def writer(self) -> AbstractBaseWriter:
         """Get the writer instance."""

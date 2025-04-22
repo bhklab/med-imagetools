@@ -1,5 +1,15 @@
 {
     "$defs": {
+        "ExistingFileMode": {
+            "description": "Enum to specify handling behavior for existing files.\n\nAttributes\n----------\nOVERWRITE: str\n    Overwrite the existing file. Logs as debug and continues with the\n    operation.\nFAIL: str\n    Fail the operation if the file exists. Logs as error and raises a\n    FileExistsError.\nSKIP: str\n    Skip the operation if the file exists. Meant to be used for previewing\n    the path before any expensive computation. `preview_path()` will return\n    None if the file exists. `resolve_path()` will still return the path\n    even if the file exists. The writer's `save` method should handle the\n    file existence if set to SKIP.",
+            "enum": [
+                "overwrite",
+                "skip",
+                "fail"
+            ],
+            "title": "ExistingFileMode",
+            "type": "string"
+        },
         "ROIMatchFailurePolicy": {
             "description": "Policy for how to handle total match failure (when no ROIs match any patterns).",
             "enum": [
@@ -213,6 +223,59 @@
             ],
             "title": "SampleInput",
             "type": "object"
+        },
+        "SampleOutput": {
+            "description": "Configuration model for saving medical imaging outputs.\n\nThis class provides a standardized configuration for saving medical images,\nsupporting various file formats and output organization strategies.\n\nAttributes\n----------\ndirectory : Path\n    Directory where output files will be saved. Must exist and be writable.\nfilename_format : str\n    Format string for output filenames with placeholders for metadata values.\nexisting_file_mode : ExistingFileMode\n    How to handle existing files (FAIL, SKIP, OVERWRITE).\nextra_context : Dict[str, Any]\n    Additional metadata to include when saving files.\n\nExamples\n--------\n>>> from imgtools.io import SampleOutput\n>>> from imgtools.io.writers import ExistingFileMode\n>>> output = SampleOutput(\n...     directory=\"results/patient_scans\",\n...     filename_format=\"{PatientID}/{Modality}/{ImageID}.nii.gz\",\n...     existing_file_mode=ExistingFileMode.SKIP,\n... )\n>>> output(scan_list)  # Save all scans in the list",
+            "properties": {
+                "directory": {
+                    "description": "Path where output files will be saved. Absolute path or relative to the current working directory.",
+                    "examples": [
+                        "output/processed_scans",
+                        "/absolute/path/to/output"
+                    ],
+                    "format": "path",
+                    "pattern": "^[^\\0]+$",
+                    "title": "Output Directory",
+                    "type": "string",
+                    "x-descriptive": "Directory where processed files will be saved"
+                },
+                "filename_format": {
+                    "default": "{PatientID}/{Modality}_{trunc_SeriesInstanceUID}/{ImageID}.nii.gz",
+                    "description": "Format string for output filenames with placeholders for metadata values. Available fields depend on the metadata in the images being saved.",
+                    "examples": [
+                        "{PatientID}/{Modality}/{ImageID}.nii.gz",
+                        "{PatientID}/roi_{roi_key}.nii.gz"
+                    ],
+                    "title": "Filename Format",
+                    "type": "string",
+                    "x-display-name": "Output Filename Pattern"
+                },
+                "existing_file_mode": {
+                    "$ref": "#/$defs/ExistingFileMode",
+                    "default": "fail",
+                    "description": "How to handle existing files: FAIL (raise error), SKIP (don't overwrite), or OVERWRITE (replace existing files).",
+                    "title": "Existing File Handling",
+                    "x-display-name": "File Conflict Resolution"
+                },
+                "extra_context": {
+                    "additionalProperties": true,
+                    "description": "Additional metadata fields to include when saving files. These values can be referenced in the filename_format.",
+                    "examples": [
+                        {
+                            "dataset": "NSCLC-Radiomics",
+                            "processing_date": "2025-04-22"
+                        }
+                    ],
+                    "title": "Extra Metadata",
+                    "type": "object",
+                    "x-display-name": "Additional Context Fields"
+                }
+            },
+            "required": [
+                "directory"
+            ],
+            "title": "SampleOutput",
+            "type": "object"
         }
     },
     "description": "Central configuration class for MedImageTools settings.\n\nThis class provides a standardized way to manage settings for medical image processing,\nsupporting YAML configuration files and programmatic configuration.",
@@ -220,6 +283,10 @@
         "input": {
             "$ref": "#/$defs/SampleInput",
             "description": "Configuration for sample input handling and processing"
+        },
+        "output": {
+            "$ref": "#/$defs/SampleOutput",
+            "description": "Configuration for sample output handling and processing"
         }
     },
     "title": "MedImageToolsSettings",

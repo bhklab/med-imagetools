@@ -13,6 +13,7 @@ from pydantic_settings import (
 )
 
 from imgtools.io.sample_input import SampleInput
+from imgtools.io.sample_output import SampleOutput
 
 
 class MedImageToolsSettings(BaseSettings):
@@ -41,6 +42,10 @@ class MedImageToolsSettings(BaseSettings):
     input: SampleInput = Field(
         default_factory=SampleInput.default,
         description="Configuration for sample input handling and processing",
+    )
+    output: SampleOutput = Field(
+        default_factory=SampleOutput.default,
+        description="Configuration for sample output handling and processing",
     )
     model_config = SettingsConfigDict(
         # to instantiate the Login class, the variable name would be login.nbia_username in the environment
@@ -111,4 +116,4 @@ if __name__ == "__main__":
     with open("med-imgtools_jsonschema.json", "w") as f:  # noqa: PTH123
         json.dump(config.json_schema, f, indent=4)
 
-    # # config.to_yaml(Path("imgtools.yaml"))
+    config.to_yaml(Path("imgtools.yaml"))
