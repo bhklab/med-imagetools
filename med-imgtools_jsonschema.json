@@ -1,0 +1,227 @@
+{
+    "$defs": {
+        "ROIMatchFailurePolicy": {
+            "description": "Policy for how to handle total match failure (when no ROIs match any patterns).",
+            "enum": [
+                "ignore",
+                "warn",
+                "error"
+            ],
+            "title": "ROIMatchFailurePolicy",
+            "type": "string"
+        },
+        "ROIMatchStrategy": {
+            "description": "Enum for ROI handling strategies.",
+            "enum": [
+                "merge",
+                "keep_first",
+                "separate"
+            ],
+            "title": "ROIMatchStrategy",
+            "type": "string"
+        },
+        "ROIMatcher": {
+            "properties": {
+                "match_map": {
+                    "additionalProperties": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "description": "Flexible input for ROI matcher",
+                    "title": "Match Map",
+                    "type": "object"
+                },
+                "handling_strategy": {
+                    "$ref": "#/$defs/ROIMatchStrategy",
+                    "default": "merge"
+                },
+                "ignore_case": {
+                    "default": true,
+                    "title": "Ignore Case",
+                    "type": "boolean"
+                },
+                "allow_multi_key_matches": {
+                    "default": true,
+                    "title": "Allow Multi Key Matches",
+                    "type": "boolean"
+                },
+                "on_missing_regex": {
+                    "$ref": "#/$defs/ROIMatchFailurePolicy",
+                    "default": "warn"
+                }
+            },
+            "required": [
+                "match_map"
+            ],
+            "title": "ROIMatcher",
+            "type": "object"
+        },
+        "SampleInput": {
+            "description": "Configuration model for processing medical imaging samples.\n\nThis class provides a standardized configuration for loading and processing\nmedical imaging data, including DICOM crawling and ROI matching settings.\n\nAttributes\n----------\ninput_directory : Path\n    Directory containing the input files. Must exist and be readable.\ndataset_name : str | None\n    Optional name for the dataset. Defaults to the base name of the input directory.\nupdate_crawl : bool\n    Whether to force a new crawl even if one exists. Default is False.\nn_jobs : int\n    Number of jobs to run in parallel. Default is (CPU cores - 2) or 1.\nmodalities : list[str] | None\n    List of modalities to include. None means include all modalities.\nroi_matcher : ROIMatcher\n    Configuration for matching regions of interest in the images.\n\n\nExamples\n--------\n>>> from imgtools.io.loaders.sample_input import (\n...     SampleInput,\n... )\n>>> config = SampleInput(\n...     input_directory=\"data/NSCLC-Radiomics\"\n... )\n>>> config.dataset_name\n'NSCLC-Radiomics'\n\n>>> # Using the factory method with ROI matching parameters\n>>> config = SampleInput.build(\n...     input_directory=\"data/NSCLC-Radiomics\",\n...     roi_match_map={\n...         \"GTV\": [\"GTV.*\"],\n...         \"PTV\": [\"PTV.*\"],\n...     },\n...     roi_ignore_case=True,\n...     roi_handling_strategy=\"merge\",\n... )",
+            "properties": {
+                "input_directory": {
+                    "description": "Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
+                    "examples": [
+                        "data/NSCLC-Radiomics",
+                        "/absolute/path/to/dicom/data"
+                    ],
+                    "format": "path",
+                    "pattern": "^[^\\0]+$",
+                    "title": "Input Directory",
+                    "type": "string",
+                    "x-descriptive": "Directory with standard DICOM files for processing"
+                },
+                "dataset_name": {
+                    "anyOf": [
+                        {
+                            "maxLength": 100,
+                            "minLength": 1,
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Name of the dataset, defaults to input directory base name if not provided. Used for organizing outputs and labeling results.",
+                    "examples": [
+                        "NSCLC-Radiomics",
+                        "Head-Neck-PET-CT"
+                    ],
+                    "title": "Dataset Name",
+                    "x-display-name": "Dataset Identifier"
+                },
+                "update_crawl": {
+                    "default": false,
+                    "description": "Force recrawl even if crawl data already exists. Set to True when directory contents have changed or to refresh metadata cache.",
+                    "title": "Update DICOM Crawl",
+                    "type": "boolean",
+                    "x-display-name": "Force Directory Recrawl"
+                },
+                "n_jobs": {
+                    "default": 10,
+                    "description": "Number of parallel jobs to run for DICOM processing. Default reserves 2 cores for system operations.",
+                    "examples": [
+                        4,
+                        8,
+                        12
+                    ],
+                    "maximum": 12,
+                    "minimum": 1,
+                    "title": "Parallel Jobs",
+                    "type": "integer",
+                    "x-category": "Performance",
+                    "x-recommended-range": "1-12"
+                },
+                "modalities": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "List of DICOM modalities to include in processing. None means include all modalities. Common values include 'CT', 'MR', 'PT', 'RTSTRUCT', 'RTDOSE', 'SEG'.",
+                    "examples": [
+                        [
+                            "CT",
+                            "RTSTRUCT"
+                        ],
+                        [
+                            "CT",
+                            "PT",
+                            "RTSTRUCT",
+                            "RTDOSE"
+                        ],
+                        [
+                            "MR",
+                            "SEG"
+                        ]
+                    ],
+                    "items": {
+                        "enum": [
+                            "CT",
+                            "MR",
+                            "PT",
+                            "RTSTRUCT",
+                            "RTDOSE",
+                            "RTPLAN",
+                            "SEG"
+                        ]
+                    },
+                    "title": "DICOM Modalities",
+                    "x-modality-dependencies": {
+                        "RTDOSE": [
+                            "CT",
+                            "MR",
+                            "PT"
+                        ],
+                        "RTSTRUCT": [
+                            "CT",
+                            "MR",
+                            "PT"
+                        ],
+                        "SEG": [
+                            "CT",
+                            "MR"
+                        ]
+                    }
+                },
+                "roi_matcher": {
+                    "$ref": "#/$defs/ROIMatcher",
+                    "description": "Configuration for ROI (Region of Interest) matching in segmentation data. Defines how regions are identified, matched and processed from RTSTRUCT or SEG files.",
+                    "title": "ROI Matcher Configuration",
+                    "x-documentation": "See ROIMatcher class documentation for detailed usage examples",
+                    "x-examples": [
+                        {
+                            "handling_strategy": "merge",
+                            "ignore_case": true,
+                            "match_map": {
+                                "GTV": [
+                                    "GTV.*"
+                                ],
+                                "PTV": [
+                                    "PTV.*"
+                                ]
+                            }
+                        },
+                        {
+                            "handling_strategy": "separate",
+                            "match_map": {
+                                "OAR": [
+                                    ".*organ.*",
+                                    ".*risk.*"
+                                ],
+                                "Tumor": [
+                                    ".*tumor.*",
+                                    ".*gtv.*"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "input_directory"
+            ],
+            "title": "SampleInput",
+            "type": "object"
+        }
+    },
+    "description": "Central configuration class for MedImageTools settings.\n\nThis class provides a standardized way to manage settings for medical image processing,\nsupporting YAML configuration files and programmatic configuration.",
+    "properties": {
+        "input": {
+            "$ref": "#/$defs/SampleInput",
+            "description": "Configuration for sample input handling and processing"
+        }
+    },
+    "title": "MedImageToolsSettings",
+    "type": "object"
+}

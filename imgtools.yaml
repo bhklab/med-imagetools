@@ -1,30 +1,30 @@
-# yaml-language-server: $schema=imgtools.json
+# yaml-language-server: $schema=med-imgtools_jsonschema.json
 input:
-    input_directory: data/RADCURE
-    dataset_name: RADCURE
+  input_directory: data/RADCURE
+  dataset_name: RADCURE
 
-    n_jobs: 10
+  n_jobs: 10
 
-    update_crawl: false
+  update_crawl: false
 
-    modalities:
-        - CT
-        - RTSTRUCT
+  modalities:
+    - CT
+    - RTSTRUCT
 
-    roi_matcher:
-        match_map:
-            GTV:
-                - .*gtv.*
-                - .*tumor.*
-            Lung:
-                - .*lung.*
-            Heart:
-                - .*heart.*
-            Brain:
-                - brain
-                - brainstem.*
-                - spinal_cord.*
-        handling_strategy: merge
-        ignore_case: true
-        allow_multi_key_matches: true
-        on_missing_regex: warn
+  roi_matcher:
+    match_map:
+      GTV:
+        - .*gtv.*
+        - .*tumor.*
+      Lung:
+        - .*lung.*
+      Heart:
+        - .*heart.*
+      Brain:
+        - brain
+        - brainstem.*
+        - spinal_cord.*
+    handling_strategy: merge
+    ignore_case: true
+    allow_multi_key_matches: true
+    on_missing_regex: warn

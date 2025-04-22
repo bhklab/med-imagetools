@@ -82,24 +82,85 @@ class SampleInput(BaseModel):
     input_directory: Path = Field(
         description="Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
         title="Input Directory",
+        examples=["data/NSCLC-Radiomics", "/absolute/path/to/dicom/data"],
+        json_schema_extra={
+            "format": "path",
+            "pattern": "^[^\\0]+$",  # Non-null characters
+            "x-descriptive": "Directory with standard DICOM files for processing",
+        },
     )
     dataset_name: str | None = Field(
         None,
-        description="Name of the dataset, defaults to input directory base name",
+        description="Name of the dataset, defaults to input directory base name if not provided. Used for organizing outputs and labeling results.",
+        title="Dataset Name",
+        min_length=1,
+        max_length=100,
+        examples=["NSCLC-Radiomics", "Head-Neck-PET-CT"],
+        json_schema_extra={"x-display-name": "Dataset Identifier"},
     )
     update_crawl: bool = Field(
-        False, description="Force recrawl even if crawl data already exists"
+        False,
+        description="Force recrawl even if crawl data already exists. Set to True when directory contents have changed or to refresh metadata cache.",
+        title="Update DICOM Crawl",
+        json_schema_extra={"x-display-name": "Force Directory Recrawl"},
     )
     n_jobs: int = Field(
         max(1, multiprocessing.cpu_count() - 2),
-        description="Number of parallel jobs to run",
+        description="Number of parallel jobs to run for DICOM processing. Default reserves 2 cores for system operations.",
+        title="Parallel Jobs",
+        ge=1,  # Greater than or equal to 1
+        le=multiprocessing.cpu_count(),  # Less than or equal to available cores
+        examples=[4, 8, 12],
+        json_schema_extra={
+            "x-category": "Performance",
+            "x-recommended-range": f"1-{multiprocessing.cpu_count()}",
+        },
     )
     modalities: list[str] | None = Field(
-        None, description="List of modalities to include (None = all)"
+        None,
+        description="List of DICOM modalities to include in processing. None means include all modalities. Common values include 'CT', 'MR', 'PT', 'RTSTRUCT', 'RTDOSE', 'SEG'.",
+        title="DICOM Modalities",
+        examples=[["CT", "RTSTRUCT"], ["CT", "PT", "RTSTRUCT", "RTDOSE"], ["MR", "SEG"]],
+        json_schema_extra={
+            "items": {
+                "enum": [
+                    "CT",
+                    "MR",
+                    "PT",
+                    "RTSTRUCT",
+                    "RTDOSE",
+                    "RTPLAN",
+                    "SEG",
+                ]
+            },
+            "x-modality-dependencies": {
+                "RTSTRUCT": ["CT", "MR", "PT"],
+                "RTDOSE": ["CT", "MR", "PT"],
+                "SEG": ["CT", "MR"],
+            },
+        },
     )
     roi_matcher: ROIMatcher = Field(
         default_factory=lambda: ROIMatcher(match_map={"ROI": [".*"]}),
-        description="Configuration for ROI matching",
+        description="Configuration for ROI (Region of Interest) matching in segmentation data. Defines how regions are identified, matched and processed from RTSTRUCT or SEG files.",
+        title="ROI Matcher Configuration",
+        json_schema_extra={
+            "x-examples": [
+                {
+                    "match_map": {"GTV": ["GTV.*"], "PTV": ["PTV.*"]},
+                    "handling_strategy": "merge",
+                    "ignore_case": True,
+                },
+                {
+                    "match_map": {
+                        "Tumor": [".*tumor.*", ".*gtv.*"],
+                        "OAR": [".*organ.*", ".*risk.*"],
+                    },
+                    "handling_strategy": "separate",
+                },
+            ],
+            "x-documentation": "See ROIMatcher class documentation for detailed usage examples",
+        },
     )
     _crawler: Crawler | None = PrivateAttr(default=None, init=False)
     _interlacer: Interlacer | None = PrivateAttr(default=None, init=False)
