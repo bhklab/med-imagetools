@@ -13,15 +13,13 @@ from imgtools.utils import (
 )
 
 if TYPE_CHECKING:
-    from imgtools.coretypes import MedImage
-    from imgtools.coretypes.imagetypes.dose import Dose
-    from imgtools.coretypes.imagetypes.pet import PET
-    from imgtools.coretypes.imagetypes.scan import Scan
-    from imgtools.coretypes.masktypes.seg import SEG
-    from imgtools.coretypes.masktypes.structureset import RTStructureSet
-
+    from imgtools.coretypes import (
+        SEG,
+        MedImage,
+        RTStructureSet,
+    )
 # Type for dispatch functions return values
-MedImageT = Union["MedImage", "Scan", "Dose", "PET", "RTStructureSet", "SEG"]
+MedImageT = Union["MedImage", "RTStructureSet", "SEG"]
 
 
 def read_dicom_series(
