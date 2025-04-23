@@ -122,7 +122,7 @@ def parse_spacing(ctx, param, value):
 @click.option(
     "--roi-strategy", 
     type=click.Choice([s.name for s in ROIMatchStrategy]), 
-    default="MERGE",
+    default="SEPARATE",
     show_default=True,
     help="Strategy for handling ROI matches"
 )
@@ -232,13 +232,13 @@ def autopipeline(
         level=level,
     )
     
-    # # Run the pipeline
-    # try:
-    #     results = pipeline.run(first_n=first_n)
-    # except Exception as e:
-    #     logger.exception(f"Error running pipeline: {str(e)}")
-    #     raise click.Abort()
-    # click.echo(f"Processed {len(results)} samples.")
+    # Run the pipeline
+    try:
+        results = pipeline.run(first_n=first_n)
+    except Exception as e:
+        logger.exception(f"Error running pipeline: {str(e)}")
+        raise click.Abort()
+    click.echo(f"Processed {len(results)} samples.")
 
 
 if __name__ == "__main__":

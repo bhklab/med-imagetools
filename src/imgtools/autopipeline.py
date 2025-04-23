@@ -21,7 +21,7 @@ from imgtools.transforms import (
     Transformer,
     WindowIntensity,
 )
-
+from joblib import Parallel, delayed
 if TYPE_CHECKING:
     import rich.repr
 
@@ -32,6 +32,51 @@ if TYPE_CHECKING:
 from tqdm.contrib.concurrent import process_map
 from tqdm.std import tqdm as std_tqdm
 
+def process_one_sample(
+    args: tuple[str, Sequence[SeriesNode], SampleInput, Transformer, SampleOutput]
+) -> Sequence[Path]:
+    """
+    Process a single sample.
+    """
+    sample: Sequence[SeriesNode]
+    idx, sample, sample_input, transformer, sample_output = args
+    try:
+        # Load the sample
+        sample_images: Sequence[MedImage | VectorMask] = (
+            sample_input.load_sample(sample)
+        )
+    except Exception as e:
+        logger.exception("Failed to load sample", e=e)
+        return []
+
+    # by this point all images SHOULD have some bare minimum
+    # metadata attribute, which should have the SeriesInstanceUID
+    # lets just quickly validate that the unique list of SeriesInstanceUIDs
+    # in our input 'samples' is the same as the unique list of SeriesInstanceUIDs
+    # in our loaded sample_images
+    series_instance_uids = {s.SeriesInstanceUID for s in sample}
+    loaded_series_instance_uids = {
+        s.metadata.get("SeriesInstanceUID", None) for s in sample_images
+    }
+    # check if our input samples is a subset of our loaded sample_images
+    if not series_instance_uids.issubset(loaded_series_instance_uids):
+        logger.warning(
+            f"Loaded {len(loaded_series_instance_uids)} sample"
+            f" images do not match input samples {len(series_instance_uids)}. "
+            "This most likely may be due to failures to match ROIs. "
+            f"The {len(sample_images)} will not be processed or saved. ",
+            loaded_series=loaded_series_instance_uids,
+            input_samples=sample,
+        )
+        return []
+    transformed_images = transformer(sample_images)
+
+    saved_files = sample_output(
+        transformed_images,
+        SampleNumber=idx,
+    )
+
+    return saved_files
 
 class DeltaPipeline:
     """Pipeline for processing medical images."""
@@ -127,75 +172,28 @@ class DeltaPipeline:
 
         logger.info("Pipeline initialized")
 
-    def process_one_sample(
-        self, args: tuple[str, Sequence[SeriesNode]]
-    ) -> Sequence[Path]:
-        """
-        Process a single sample.
-        """
-        sample: Sequence[SeriesNode]
-        idx, sample = args
-        try:
-            # Load the sample
-            sample_images: Sequence[MedImage | VectorMask] = (
-                self.input.load_sample(sample)
-            )
-        except Exception as e:
-            logger.exception("Failed to load sample", e=e)
-            import sys
-
-            sys.exit(1)
-
-        # by this point all images SHOULD have some bare minimum
-        # metadata attribute, which should have the SeriesInstanceUID
-        # lets just quickly validate that the unique list of SeriesInstanceUIDs
-        # in our input 'samples' is the same as the unique list of SeriesInstanceUIDs
-        # in our loaded sample_images
-        series_instance_uids = {s.SeriesInstanceUID for s in sample}
-        loaded_series_instance_uids = {
-            s.metadata.get("SeriesInstanceUID", None) for s in sample_images
-        }
-        # check if our input samples is a subset of our loaded sample_images
-        if not series_instance_uids.issubset(loaded_series_instance_uids):
-            logger.warning(
-                f"Loaded {len(loaded_series_instance_uids)} sample"
-                " images do not match input samples {len(series_instance_uids)}. "
-                "This most likely may be due to failures to match ROIs. "
-                f"The {len(sample_images)} will not be processed or saved. ",
-                loaded_series=loaded_series_instance_uids,
-                input_samples=sample,
-            )
-            return []
-        transformed_images = self.transformer(sample_images)
-
-        saved_files = self.output(
-            transformed_images,
-            SampleNumber=idx,
-        )
-
-        return saved_files
-
     def run(self, first_n: int | None = None) -> Sequence[Path]:
         """
         Run the pipeline.
         """
         # Load the samples
         samples = self.input.query()
-        samples = sorted(samples, key=lambda x: x[0].PatientID)
+        samples = sorted(samples, key=lambda x: x[0].PatientID.lower())
 
         arg_tuples = [
-            (f"{idx:04}", sample) for idx, sample in enumerate(samples)
+            (
+                f"{idx:04}", 
+                sample,
+                self.input,
+                self.transformer,
+                self.output,
+            ) for idx, sample in enumerate(samples)
         ]
 
         with tqdm_logging_redirect():
-            result = process_map(
-                self.process_one_sample,
-                arg_tuples[:first_n] if first_n is not None else arg_tuples,
-                max_workers=self.input.n_jobs,
-                desc="Processing samples",
-                unit="sample",
-                leave=True,
-                tqdm_class=std_tqdm,
+            result = Parallel(n_jobs=self.input.n_jobs, backend="loky")(
+            delayed(process_one_sample)(arg)
+            for arg in (arg_tuples[:first_n] if first_n is not None else arg_tuples)
             )
             logger.info(f"Processed {len(result)} samples.")
 
@@ -212,6 +210,7 @@ class DeltaPipeline:
 
 if __name__ == "__main__":
     import shutil
+
 
     from rich import print  # noqa
 
