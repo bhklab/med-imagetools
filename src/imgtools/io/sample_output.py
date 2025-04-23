@@ -160,7 +160,7 @@ class SampleOutput(BaseModel):
 
     def __call__(
         self, data: Sequence[MedImage], **kwargs: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> Sequence[Path]:
         """
         Save the data to files using the configured writer.
 
@@ -173,9 +173,10 @@ class SampleOutput(BaseModel):
 
         Returns
         -------
-        Dict[str, Any]
-            Empty dictionary for compatibility with other processors.
+        List[Path]
+            List of paths to the saved files.
         """
+        saved_files = []
         for image in data:
             match image:
                 case VectorMask(roi_mapping, metadata):
@@ -185,7 +186,7 @@ class SampleOutput(BaseModel):
                         roi_mask = image.extract_mask(label)
                         matched_rois_str = "|".join(matched_rois)
                         image_id = f"{roi_key}_[{matched_rois_str}]"
-                        self.writer.save(
+                        p = self.writer.save(
                             roi_mask,
                             roi_key=roi_key,
                             matched_rois=matched_rois,
@@ -198,7 +199,7 @@ class SampleOutput(BaseModel):
                         )
                 case Scan():
                     # Handle MedImage case
-                    self.writer.save(
+                    p = self.writer.save(
                         image,
                         **image.metadata,
                         **kwargs,
@@ -214,4 +215,5 @@ class SampleOutput(BaseModel):
                     )
                     logger.error(errmsg)
                     raise TypeError(errmsg)
-        return {}
+            saved_files.append(p)
+        return saved_files

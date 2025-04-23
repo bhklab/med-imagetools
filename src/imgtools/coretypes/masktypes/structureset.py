@@ -15,7 +15,10 @@ from pydicom.dataset import FileDataset
 from skimage.draw import polygon2mask
 
 from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
-from imgtools.coretypes.masktypes.roi_matching import ROIMatchingError
+from imgtools.coretypes.masktypes.roi_matching import (
+    ROIMatchFailurePolicy,
+    ROIMatchingError,
+)
 from imgtools.dicom import DicomInput, load_dicom
 from imgtools.dicom.dicom_metadata import extract_metadata
 from imgtools.exceptions import (
@@ -186,6 +189,16 @@ class RTStructureSet:
         init=False,
     )
 
+    @property
+    def plogger(self):  # type: ignore[no-untyped-def] # noqa
+        """Return the logger for this class."""
+        return self._logger
+
+    @plogger.setter
+    def plogger(self, logger):  # type: ignore[no-untyped-def] # noqa
+        """Set the logger for this class."""
+        self._logger = logger
+
     @classmethod
     def from_dicom(
         cls,
@@ -253,6 +266,14 @@ class RTStructureSet:
                 rt.roi_map[roi_name] = extracted_roi
                 rt.roi_names.append(roi_name)
 
+        # tag the logger with the original RTSTRUCT file name
+        rt.plogger = logger.bind(
+            PatientID=metadata.get("PatientID", "Unknown"),
+            SeriesInstanceUID=metadata.get("SeriesInstanceUID", "Unknown")[
+                -8:
+            ],
+            filepath=Path(dicom) if isinstance(dicom, (str, Path)) else dicom,
+        )
         return rt
 
     @staticmethod
@@ -368,13 +389,6 @@ class RTStructureSet:
                     f"slice, or str."
                 )
         raise MissingROIError(errmsg)
-
-    def _ipython_key_completions_(self) -> list[str]:  # pragma: no cover
-        """IPython/Jupyter tab completion when indexing rtstruct[...]"""
-        return self.roi_names
-
-    def __len__(self) -> int:
-        return len(self.roi_names)
 
     def get_mask_ndarray(
         self,
@@ -544,7 +558,7 @@ class RTStructureSet:
         Raises
         ------
         MissingROIError
-            If no ROIs matched the specified patterns.
+            If no ROIs matched the specified patterns and the ROIMatchFailurePolicy is ERROR.
 
         Notes
         -----
@@ -553,22 +567,34 @@ class RTStructureSet:
         Its companion class `VectorMask` offers high-level access to
         individual ROIs, label conversion, and overlap inspection.
         """
-        try:
-            matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
-                self.roi_names
-            )
-        except ROIMatchingError as e:
-            errmsg = (
-                f"No matching ROIs found. Available ROIs: {self.roi_names}, "
-            )
-            raise MissingROIError(errmsg) from e
+        matched_rois: list[tuple[str, list[str]]] = roi_matcher.match_rois(
+            self.roi_names
+        )
 
-        # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
-        # is either 'ignore' or 'warn'
-        if len(matched_rois) == 0:
+        # Handle the case where no matches were found, according to the policy
+        if not matched_rois:
+            message = "No ROIs matched any patterns in the match_map."
+            match roi_matcher.on_missing_regex:
+                case ROIMatchFailurePolicy.IGNORE:
+                    # Silently return None
+                    pass
+                case ROIMatchFailurePolicy.WARN:
+                    self.plogger.warning(
+                        message,
+                        roi_names=self.roi_names,
+                        roi_matching=roi_matcher.match_map,
+                    )
+                case ROIMatchFailurePolicy.ERROR:
+                    # Raise an error
+                    errmsg = f"{message} Available ROIs: {self.roi_names}, "
+                    raise ROIMatchingError(
+                        errmsg,
+                        roi_names=self.roi_names,
+                        match_patterns=roi_matcher.match_map,
+                    )
             return None
 
-        logger.debug("Matched ROIs", matched_rois=matched_rois)
+        self.plogger.debug("Matched ROIs", matched_rois=matched_rois)
 
         ref_size = reference_image.size
         mask_img_size: tuple[int, int, int, int] = (
@@ -589,9 +615,8 @@ class RTStructureSet:
         mapping: dict[int, ROIMaskMapping] = {}
 
         for iroi, (roi_key, matches) in enumerate(matched_rois):
-            logger.debug(
-                f"Processing {roi_key=} ({iroi + 1}/{len(matched_rois)})",
-                matches=matches,
+            self.plogger.debug(
+                f"Processing {roi_key=} & {matches=} : ({iroi + 1}/{len(matched_rois)})",
             )
             match matches:
                 case [*many_rois]:

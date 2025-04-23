@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
+import rich.repr
+
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -14,6 +16,7 @@ from imgtools.io.sample_output import (
     ExistingFileMode,
     SampleOutput,
 )
+from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.transforms import (
     BaseTransform,
     Resample,
@@ -26,6 +29,9 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_medimage import MedImage
     from imgtools.dicom.interlacer import SeriesNode
 
+from tqdm.contrib.concurrent import process_map
+from tqdm.std import tqdm as std_tqdm
+
 
 class DeltaPipeline:
     """Pipeline for processing medical images."""
@@ -34,21 +40,12 @@ class DeltaPipeline:
     output: SampleOutput
     transformer: Transformer[MedImage | VectorMask]
 
-    # Interlacer parameters
-    query: str = "CT,RTSTRUCT"
-
-    # Transformer parameters
-    spacing: tuple[float, float, float] = (1.0, 1.0, 0.0)
-    window: float | None = None
-    level: float | None = None
-
     def __init__(
         self,
         input_directory: str | Path,
         output_directory: str | Path,
         output_filename_format: str = DEFAULT_FILENAME_FORMAT,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
-        dataset_name: str | None = None,
         update_crawl: bool = False,
         n_jobs: int | None = None,
         modalities: list[str] | None = None,
@@ -59,6 +56,9 @@ class DeltaPipeline:
         roi_on_missing_regex: str | ROIMatchFailurePolicy = (
             ROIMatchFailurePolicy.WARN
         ),
+        spacing: tuple[float, float, float] = (1.0, 1.0, 0.0),
+        window: float | None = None,
+        level: float | None = None,
     ) -> None:
         """
         Initialize the DeltaPipeline.
@@ -67,8 +67,6 @@ class DeltaPipeline:
         ----------
         input_directory : str | Path
             Directory containing the input files
-        dataset_name : str | None, optional
-            Name of the dataset, by default None (uses input directory name)
         output_directory : str | Path
             Directory to save the output nifti files
         output_filename_format : str
@@ -94,7 +92,6 @@ class DeltaPipeline:
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
-            dataset_name=dataset_name,
             update_crawl=update_crawl,
             n_jobs=n_jobs,
             modalities=modalities,
@@ -113,7 +110,7 @@ class DeltaPipeline:
         transforms: list[BaseTransform]
         transforms = [
             Resample(
-                self.spacing,
+                spacing,
                 interpolation="linear",
                 anti_alias=True,
                 anti_alias_sigma=None,
@@ -122,14 +119,14 @@ class DeltaPipeline:
             ),
         ]
 
-        if self.window is not None and self.level is not None:
-            transforms.append(
-                WindowIntensity(window=self.window, level=self.level)
-            )
+        if window is not None and level is not None:
+            transforms.append(WindowIntensity(window=window, level=level))
 
         self.transformer = Transformer(transforms)
 
-    def process_one_sample(self, sample: Sequence[SeriesNode]) -> None:
+    def process_one_sample(
+        self, sample: Sequence[SeriesNode]
+    ) -> Sequence[Path]:
         """
         Process a single sample.
         """
@@ -138,16 +135,70 @@ class DeltaPipeline:
             self.input.load_sample(sample)
         )
 
+        # by this point all images SHOULD have some bare minimum
+        # metadata attribute, which should have the SeriesInstanceUID
+        # lets just quickly validate that the unique list of SeriesInstanceUIDs
+        # in our input 'samples' is the same as the unique list of SeriesInstanceUIDs
+        # in our loaded sample_images
+        series_instance_uids = {s.SeriesInstanceUID for s in sample}
+        loaded_series_instance_uids = {
+            s.metadata.get("SeriesInstanceUID", None) for s in sample_images
+        }
+        # check if our input samples is a subset of our loaded sample_images
+        if not series_instance_uids.issubset(loaded_series_instance_uids):
+            logger.warning(
+                f"Loaded {len(loaded_series_instance_uids)} sample"
+                " images do not match input samples {len(series_instance_uids)}. "
+                "This most likely may be due to failures to match ROIs. ",
+                loaded_series=loaded_series_instance_uids,
+                input_samples=sample,
+            )
+            return []
+
         transformed_images = self.transformer(sample_images)
 
-        self.output(transformed_images)
+        saved_files = self.output(transformed_images)
+
+        return saved_files
+
+    def run(self, first_n: int | None = None) -> None:
+        """
+        Run the pipeline.
+        """
+        # Load the samples
+        samples = self.input.query()
+
+        with tqdm_logging_redirect():
+            result = process_map(
+                self.process_one_sample,
+                samples[:first_n] if first_n is not None else samples,
+                max_workers=self.input.n_jobs,
+                desc="Processing samples",
+                unit="sample",
+                leave=True,
+                tqdm_class=std_tqdm,
+            )
+            logger.warning(f"Processed {len(result)} samples.")
+
+    def __rich_repr__(self) -> rich.repr.Result:
+        """
+        Rich representation of the pipeline.
+        """
+        yield "SampleInput", self.input
+        yield "Transformer", self.transformer
+        yield "SampleOutput", self.output
 
 
 if __name__ == "__main__":
+    import shutil
+
     from rich import print  # noqa: A004
 
-    dataset_name = "HNSCC"
+    # Interlacer parameters
+    query: str = "CT,RTSTRUCT"
+    dataset_name = "RADCURE"
 
+    shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
     pipeline = DeltaPipeline(
         input_directory=f"data/{dataset_name}",
         output_directory=f"temp_outputs/{dataset_name}",
@@ -155,11 +206,34 @@ if __name__ == "__main__":
         n_jobs=10,
         modalities=["CT", "RTSTRUCT"],
         roi_match_map={
-            # "GTV": [".*"],
-            "PTV": [".*PTV.*"],
+            "GTV": ["GTVp"],
+            "NODES": ["GTVn_.*"],
+            "LPLEXUS": ["BrachialPlex_L"],
+            "RPLEXUS": ["BrachialPlex_R"],
+            "BRAINSTEM": ["Brainstem"],
+            "LACOUSTIC": ["Cochlea_L"],
+            "RACOUSTIC": ["Cochlea_R"],
+            "ESOPHAGUS": ["Esophagus"],
+            "LEYE": ["Eye_L"],
+            "REYE": ["Eye_R"],
+            "LARYNX": ["Larynx"],
+            "LLENS": ["Lens_L"],
+            "RLENS": ["Lens_R"],
+            "LIPS": ["Lips"],
+            "MANDIBLE": ["Mandible_Bone"],
+            "LOPTIC": ["Nrv_Optic_L"],
+            "ROPTIC": ["Nrv_Optic_R"],
+            "CHIASM": ["OpticChiasm"],
+            "LPAROTID": ["Parotid_L"],
+            "RPAROTID": ["Parotid_R"],
+            "CORD": ["SpinalCord"],
         },
+        roi_allow_multi_key_matches=False,
+        roi_ignore_case=True,
         roi_handling_strategy=ROIMatchStrategy.SEPARATE,
+        roi_on_missing_regex=ROIMatchFailurePolicy.IGNORE,
     )
 
     print(pipeline)
-    pipeline.process_one_sample(pipeline.input.query("CT,RTSTRUCT")[0])
+
+    pipeline.run(first_n=20)

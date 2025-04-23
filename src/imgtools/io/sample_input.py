@@ -320,8 +320,10 @@ class SampleInput(BaseModel):
     def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.directory)
 
-    def query(self, modalities: str) -> list[list[SeriesNode]]:
+    def query(self, modalities: str | None = None) -> list[list[SeriesNode]]:
         """Query the interlacer for a specific modality."""
+        if modalities is None:
+            modalities = ",".join(self.modalities) if self.modalities else None
         return self.interlacer.query(modalities)
 
     ###################################################################
