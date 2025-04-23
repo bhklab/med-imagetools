@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Type
+from typing import TYPE_CHECKING, Any, Iterator, Mapping
 
 import numpy as np
 import SimpleITK as sitk
@@ -118,8 +118,6 @@ class VectorMask(MedImage):
             msg = f"Expected sitkVectorUInt8, got {self.dtype=} instead."
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
-
-    __match_args__ = ("roi_mapping", "metadata")
 
     __match_args__ = ("roi_mapping", "metadata")
 
@@ -274,7 +272,6 @@ class VectorMask(MedImage):
             logger.debug(f"Cache hit for mask {key}")
             return self._mask_cache[key]
 
-        # If not in cache, extract it and cache the result
         mask_metadata = (
             self.metadata.copy()
         )  # Copy the metadata from vector mask
@@ -313,7 +310,10 @@ class VectorMask(MedImage):
                     self.roi_mapping[idx].roi_names
                 )
             case _:
-                msg = f"Invalid key type {type(key)}. Expected int or str."
+                msg = (
+                    f"Invalid key type {type(key)=} where {key=}. "
+                    "Expected int or str."
+                )
                 raise TypeError(msg)
 
         mask = Mask(
@@ -412,16 +412,6 @@ class Mask(MedImage):
         """
         super().__init__(image)
         self.metadata = metadata
-        if self.dtype not in (sitk.sitkUInt8, sitk.sitkLabelUInt8):
-            msg = f"Expected sitkUInt8 or sitkLabelUInt8, got {self.dtype=} instead."
-            msg += f" {self.dtype_str=}"
-            raise TypeError(msg)
-
-    @property
-    def unique_labels(self) -> np.ndarray:
-        """Return all unique label values present in the image."""
-        arr, _ = self.to_numpy()
-        return np.unique(arr)
 
     def to_labeled_image(self) -> Mask:
         """Convert to a labeled image with unique labels."""
@@ -435,17 +425,3 @@ class Mask(MedImage):
         yield from super().__rich_repr__()
         if hasattr(self, "metadata") and self.metadata:
             yield "metadata", self.metadata
-
-    @classmethod
-    def from_array(
-        cls: Type[Mask],
-        array: np.ndarray,
-        reference: sitk.Image | MedImage,
-        metadata: dict[str, str] | None = None,
-    ) -> Mask:
-        """Create Mask from numpy array with copied spatial metadata."""
-        img = sitk.GetImageFromArray(array)
-        img.CopyInformation(reference)
-        return cls(
-            sitk.Cast(img, sitk.sitkLabelUInt8), metadata=metadata or {}
-        )

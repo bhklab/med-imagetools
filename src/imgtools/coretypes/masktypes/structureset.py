@@ -639,3 +639,30 @@ class RTStructureSet:
             metadata=self.metadata,
             errors=self.roi_map_errors,
         )
+
+
+if __name__ == "__main__":
+    from imgtools.coretypes.imagetypes import Scan
+    from imgtools.coretypes.masktypes.roi_matching import (
+        ROIMatcher,
+    )
+
+    ct_path = Path(
+        "data/CC-Radiomics-Phantom/CC-Radiomics-Phantom/CCR1_S2/CT_Series-25167136"
+    )
+    rt_path = Path(
+        "data/CC-Radiomics-Phantom/CC-Radiomics-Phantom/CCR1_S2/RTSTRUCT_Series-18879934/00000001.dcm"
+    )
+
+    scan = Scan.from_dicom(ct_path.as_posix())
+    rtstruct = RTStructureSet.from_dicom(rt_path)
+
+    roi_matcher = ROIMatcher(
+        match_map={"ROI": [".*"]},
+    )
+
+    vm = rtstruct.get_vector_mask(
+        scan,
+        roi_matcher,
+    )
+    print(vm)  # noqa: T201

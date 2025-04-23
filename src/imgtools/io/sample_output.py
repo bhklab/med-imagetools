@@ -207,5 +207,11 @@ class SampleOutput(BaseModel):
                         ][-8:],
                         ImageID=image.metadata["Modality"],
                     )
-
+                case _:
+                    errmsg = (
+                        f"Unsupported image type: {type(image)}. "
+                        "Expected Scan or VectorMask."
+                    )
+                    logger.error(errmsg)
+                    raise TypeError(errmsg)
         return {}

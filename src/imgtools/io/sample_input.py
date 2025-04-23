@@ -351,7 +351,7 @@ class SampleInput(BaseModel):
     def print_tree(self) -> None:
         self.interlacer.print_tree(input_directory=self.directory)
 
-    def query(self, modalities: str) -> list[list[dict[str, str]]] | None:
+    def query(self, modalities: str) -> list[list[SeriesNode]]:
         """Query the interlacer for a specific modality."""
         return self.interlacer.query(modalities)
 
@@ -415,7 +415,7 @@ class SampleInput(BaseModel):
 
     def load_sample(  # noqa: PLR0912
         self,
-        sample: list[SeriesNode],
+        sample: Sequence[SeriesNode],
         load_subseries: bool = False,
     ) -> Sequence[MedImage | VectorMask]:
         # group list by modality
@@ -438,9 +438,9 @@ class SampleInput(BaseModel):
             )
         if len(by_mod[reference_modality]) > 1:
             msg = (
-                f"Found {len(by_mod[reference_modality])}"
-                f"{reference_modality} series,"
-                " using the first one as reference."
+                f"Found {len(by_mod[reference_modality])} "
+                f"{reference_modality} series, "
+                "using the first one as reference."
             )
             logger.warning(msg, reference_list=by_mod[reference_modality])
 
@@ -452,28 +452,24 @@ class SampleInput(BaseModel):
             folder=reference_series.folder,
             load_subseries=load_subseries,
         )
-        if len(reference_images) > 1:
-            msg = (
-                f"Found multiple {reference_modality} sub"
-                "series, using the first one as reference."
-            )
-            logger.warning(msg, numsubseries=len(reference_images))
 
-        images: list[MedImage | VectorMask] = []
+        images: Sequence[MedImage] = []
 
-        images.extend(
-            cast("list[MedImage]", reference_images)
-        )  # hack to satisfy mypy
+        # hack to satisfy mypy for now
+        reference_scans = cast("list[MedImage]", reference_images)
 
         # Extract the first (of possibly many subseries) as the reference image
-        reference_image: MedImage = images[0]
-        images = images[1:]
+        reference_image = reference_scans[0]
+        images = reference_scans[1:]
         # Load the rest of the series
         for modality, series_nodes in by_mod.items():
             if modality == reference_modality:
                 # TODO:: maybe implement some check here in case we loading
                 # another of same reference modality?
                 continue
+
+            # for all other series, we load them and insert them into the
+            # images list
             self._load_non_ref_images(
                 load_subseries,
                 images,

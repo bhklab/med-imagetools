@@ -12,7 +12,7 @@ from imgtools.transforms import (
     SpatialTransform,
 )
 
-ImageT = TypeVar("ImageT", bound=sitk.Image)
+ImageT_co = TypeVar("ImageT_co", bound=sitk.Image, covariant=True)
 
 
 @dataclass
@@ -32,7 +32,7 @@ class Transformer:
             errors.append(errmsg)
             raise ValueError("\n".join(errors))
 
-    def _apply_transforms(self, image: ImageT) -> ImageT:
+    def _apply_transforms(self, image: ImageT_co) -> ImageT_co:
         """Apply transforms to an image."""
 
         # save original image class type + attributes
@@ -69,6 +69,9 @@ class Transformer:
                         transformed_image,
                         metadata=metadata,
                     )
+                case sitk.Image():
+                    # just return as is
+                    return transformed_image
                 case _:
                     msg = f"Unsupported image type: {type(image)}"
                     raise ValueError(msg)
