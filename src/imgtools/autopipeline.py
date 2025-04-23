@@ -34,6 +34,7 @@ class DeltaPipeline:
 
     input: SampleInput
     output: SampleOutput
+    transformer: Transformer[MedImage | VectorMask]
 
     # Interlacer parameters
     query: str = "CT,RTSTRUCT"
