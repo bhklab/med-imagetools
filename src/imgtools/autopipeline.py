@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
+from joblib import Parallel, delayed
+
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -21,7 +23,7 @@ from imgtools.transforms import (
     Transformer,
     WindowIntensity,
 )
-from joblib import Parallel, delayed
+
 if TYPE_CHECKING:
     import rich.repr
 
@@ -29,11 +31,11 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_medimage import MedImage
     from imgtools.dicom.interlacer import SeriesNode
 
-from tqdm.contrib.concurrent import process_map
-from tqdm.std import tqdm as std_tqdm
 
 def process_one_sample(
-    args: tuple[str, Sequence[SeriesNode], SampleInput, Transformer, SampleOutput]
+    args: tuple[
+        str, Sequence[SeriesNode], SampleInput, Transformer, SampleOutput
+    ],
 ) -> Sequence[Path]:
     """
     Process a single sample.
@@ -77,6 +79,7 @@ def process_one_sample(
     )
 
     return saved_files
+
 
 class DeltaPipeline:
     """Pipeline for processing medical images."""
@@ -182,18 +185,21 @@ class DeltaPipeline:
 
         arg_tuples = [
             (
-                f"{idx:04}", 
+                f"{idx:04}",
                 sample,
                 self.input,
                 self.transformer,
                 self.output,
-            ) for idx, sample in enumerate(samples)
+            )
+            for idx, sample in enumerate(samples)
         ]
 
         with tqdm_logging_redirect():
             result = Parallel(n_jobs=self.input.n_jobs, backend="loky")(
-            delayed(process_one_sample)(arg)
-            for arg in (arg_tuples[:first_n] if first_n is not None else arg_tuples)
+                delayed(process_one_sample)(arg)
+                for arg in (
+                    arg_tuples[:first_n] if first_n is not None else arg_tuples
+                )
             )
             logger.info(f"Processed {len(result)} samples.")
 
@@ -210,7 +216,6 @@ class DeltaPipeline:
 
 if __name__ == "__main__":
     import shutil
-
 
     from rich import print  # noqa
 

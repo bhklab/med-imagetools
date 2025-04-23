@@ -50,7 +50,9 @@ SopSeriesMap: t.TypeAlias = dict[SopUID, SeriesUID]
 
 
 # Add this outside of any function, at the module level
-def extract_metadata_wrapper(dicom) -> dict[str, object | list[object]]:
+def extract_metadata_wrapper(
+    dicom: pathlib.Path,
+) -> dict[str, object | list[object]]:
     """Wrapper for extract_metadata to avoid lambda in parallel processing."""
     return extract_metadata(dicom, None, ["SOPInstanceUID"])
 

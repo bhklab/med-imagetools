@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Sequence
+from typing import Any, Dict, Sequence
 
 from pydantic import (
     BaseModel,
@@ -11,17 +11,13 @@ from pydantic import (
     field_validator,
 )
 
-from imgtools.coretypes import MedImage
-from imgtools.coretypes.base_masks import VectorMask
+from imgtools.coretypes import MedImage, VectorMask
 from imgtools.io.writers import (
     AbstractBaseWriter,
     ExistingFileMode,
     NIFTIWriter,
 )
 from imgtools.loggers import logger
-
-if TYPE_CHECKING:
-    from imgtools.coretypes.base_medimage import MedImage
 
 DEFAULT_FILENAME_FORMAT = "{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz"
 
