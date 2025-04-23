@@ -632,23 +632,17 @@ class RTStructureSet:
                         mask_array_4d[:, :, :, iroi] = np.logical_or(
                             mask_array_4d[:, :, :, iroi], mask_3d
                         )
+                    # image_id depends on the roi_matcher.handling_strategy
+                    # if merging, image_id is just the key
+                    # if separate, image_id is {roi_key}__[{roi_name}]
+                    # if keeping first, image_id is {roi_key}__[{roi_name}]
+
                     mapping[iroi] = ROIMaskMapping(
                         roi_key=roi_key,
                         roi_names=many_rois,
-                    )
-                case str(single_matched_roi):
-                    # theoretically should never get to this point
-                    mask_3d = self.get_mask_ndarray(
-                        reference_image,
-                        single_matched_roi,
-                        mask_img_size,
-                        continuous=False,
-                    )
-                    # here each roi is in its own 4th dimension
-                    mask_array_4d[:, :, :, iroi] = mask_3d
-                    mapping[iroi] = ROIMaskMapping(
-                        roi_key=roi_key,
-                        roi_names=[roi_key],
+                        image_id=roi_key
+                        if roi_matcher.handling_strategy.value == "merge"
+                        else f"{roi_key}__[{many_rois[0]}]",
                     )
 
         # convert to sitk image
@@ -667,16 +661,16 @@ class RTStructureSet:
 
 
 if __name__ == "__main__":
+    from rich import print  # noqa
+
     from imgtools.coretypes.imagetypes import Scan
     from imgtools.coretypes.masktypes.roi_matching import (
         ROIMatcher,
     )
 
-    ct_path = Path(
-        "data/CC-Radiomics-Phantom/CC-Radiomics-Phantom/CCR1_S2/CT_Series-25167136"
-    )
+    ct_path = Path("data/RADCURE/RADCURE-0331/Study-03560/CT-3.0")
     rt_path = Path(
-        "data/CC-Radiomics-Phantom/CC-Radiomics-Phantom/CCR1_S2/RTSTRUCT_Series-18879934/00000001.dcm"
+        "data/RADCURE/RADCURE-0331/Study-03560/RTSTRUCT-1.0/00000001.dcm"
     )
 
     scan = Scan.from_dicom(ct_path.as_posix())

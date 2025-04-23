@@ -11,8 +11,8 @@ from pydantic import (
     field_validator,
 )
 
+from imgtools.coretypes import MedImage
 from imgtools.coretypes.base_masks import VectorMask
-from imgtools.coretypes.imagetypes.scan import Scan
 from imgtools.io.writers import (
     AbstractBaseWriter,
     ExistingFileMode,
@@ -23,9 +23,7 @@ from imgtools.loggers import logger
 if TYPE_CHECKING:
     from imgtools.coretypes.base_medimage import MedImage
 
-DEFAULT_FILENAME_FORMAT = (
-    "{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz"
-)
+DEFAULT_FILENAME_FORMAT = "{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz"
 
 __all__ = ["SampleOutput"]
 
@@ -159,7 +157,7 @@ class SampleOutput(BaseModel):
         return self._writer
 
     def __call__(
-        self, data: Sequence[MedImage], **kwargs: Dict[str, Any]
+        self, data: Sequence[MedImage], /, **kwargs: object
     ) -> Sequence[Path]:
         """
         Save the data to files using the configured writer.
@@ -168,7 +166,7 @@ class SampleOutput(BaseModel):
         ----------
         data : List[MedImage]
             List of medical images to save.
-        **kwargs : Dict[str, Any]
+        **kwargs
             Additional metadata to include when saving.
 
         Returns
@@ -179,30 +177,29 @@ class SampleOutput(BaseModel):
         saved_files = []
         for image in data:
             if isinstance(image, VectorMask):
-                for _i, roi_key, roi_names, mask in image.iter_masks():
-                    matched_rois = "|".join(roi_names)
-                    image_id = f"{roi_key}_[{matched_rois}]"
+                for (
+                    _i,
+                    roi_key,
+                    roi_names,
+                    image_id,
+                    mask,
+                ) in image.iter_masks():
+                    # image_id = f"{roi_key}_[{matched_rois}]"
                     p = self.writer.save(
                         mask,
                         roi_key=roi_key,
-                        matched_rois=matched_rois,
-                        trunc_SeriesInstanceUID=image.metadata[
-                            "SeriesInstanceUID"
-                        ][-8:],
+                        matched_rois="|".join(roi_names),
                         **image.metadata,
                         **kwargs,
                         ImageID=image_id,
                     )
                     saved_files.append(p)
-            elif isinstance(image, Scan):
+            elif isinstance(image, MedImage):
                 # Handle MedImage case
                 p = self.writer.save(
                     image,
                     **image.metadata,
                     **kwargs,
-                    trunc_SeriesInstanceUID=image.metadata[
-                        "SeriesInstanceUID"
-                    ][-8:],
                     ImageID=image.metadata["Modality"],
                 )
                 saved_files.append(p)

@@ -49,6 +49,12 @@ SopSeriesMap: t.TypeAlias = dict[SopUID, SeriesUID]
 """Datatype represents: {`SOPInstanceUID`: `SeriesInstanceUID`}"""
 
 
+# Add this outside of any function, at the module level
+def extract_metadata_wrapper(dicom) -> dict[str, object | list[object]]:
+    """Wrapper for extract_metadata to avoid lambda in parallel processing."""
+    return extract_metadata(dicom, None, ["SOPInstanceUID"])
+
+
 @timer("Parsing all DICOMs")
 def parse_all_dicoms(
     dicom_files: list[pathlib.Path],
@@ -100,7 +106,7 @@ def parse_all_dicoms(
     for dcm, result in zip(
         dicom_files,
         Parallel(n_jobs=n_jobs, return_as="generator")(
-            delayed(extract_metadata)(dicom, None, ["SOPInstanceUID"])
+            delayed(extract_metadata_wrapper)(dicom)
             for dicom in tqdm(
                 dicom_files,
                 desc=description,

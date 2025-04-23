@@ -3,8 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
-import rich.repr
-
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -25,6 +23,8 @@ from imgtools.transforms import (
 )
 
 if TYPE_CHECKING:
+    import rich.repr
+
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
     from imgtools.dicom.interlacer import SeriesNode
@@ -51,7 +51,8 @@ class DeltaPipeline:
         modalities: list[str] | None = None,
         roi_match_map: ROIMatcherInputs = None,
         roi_ignore_case: bool = True,
-        roi_handling_strategy: str | ROIMatchStrategy = ROIMatchStrategy.MERGE,
+        roi_handling_strategy: str
+        | ROIMatchStrategy = ROIMatchStrategy.SEPARATE,
         roi_allow_multi_key_matches: bool = True,
         roi_on_missing_regex: str | ROIMatchFailurePolicy = (
             ROIMatchFailurePolicy.WARN
@@ -124,16 +125,26 @@ class DeltaPipeline:
 
         self.transformer = Transformer(transforms)
 
+        logger.info("Pipeline initialized")
+
     def process_one_sample(
-        self, sample: Sequence[SeriesNode]
+        self, args: tuple[str, Sequence[SeriesNode]]
     ) -> Sequence[Path]:
         """
         Process a single sample.
         """
-        # Load the sample
-        sample_images: Sequence[MedImage | VectorMask] = (
-            self.input.load_sample(sample)
-        )
+        sample: Sequence[SeriesNode]
+        idx, sample = args
+        try:
+            # Load the sample
+            sample_images: Sequence[MedImage | VectorMask] = (
+                self.input.load_sample(sample)
+            )
+        except Exception as e:
+            logger.exception("Failed to load sample", e=e)
+            import sys
+
+            sys.exit(1)
 
         # by this point all images SHOULD have some bare minimum
         # metadata attribute, which should have the SeriesInstanceUID
@@ -157,7 +168,10 @@ class DeltaPipeline:
             return []
         transformed_images = self.transformer(sample_images)
 
-        saved_files = self.output(transformed_images)
+        saved_files = self.output(
+            transformed_images,
+            SampleNumber=idx,
+        )
 
         return saved_files
 
@@ -167,11 +181,16 @@ class DeltaPipeline:
         """
         # Load the samples
         samples = self.input.query()
+        samples = sorted(samples, key=lambda x: x[0].PatientID)
+
+        arg_tuples = [
+            (f"{idx:04}", sample) for idx, sample in enumerate(samples)
+        ]
 
         with tqdm_logging_redirect():
             result = process_map(
                 self.process_one_sample,
-                samples[:first_n] if first_n is not None else samples,
+                arg_tuples[:first_n] if first_n is not None else arg_tuples,
                 max_workers=self.input.n_jobs,
                 desc="Processing samples",
                 unit="sample",
@@ -194,7 +213,7 @@ class DeltaPipeline:
 if __name__ == "__main__":
     import shutil
 
-    from rich import print  # noqa: A004
+    from rich import print  # noqa
 
     # Interlacer parameters
     query: str = "CT,RTSTRUCT"
@@ -237,5 +256,5 @@ if __name__ == "__main__":
     )
 
     # print(pipeline)
-    results = pipeline.run(first_n=1)
-    print(f"Results: {results}")
+    # results = pipeline.run(first_n=1)
+    # print(f"Results: {results}")

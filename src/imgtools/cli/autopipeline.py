@@ -3,6 +3,7 @@ import yaml
 from pathlib import Path
 from typing import Tuple
 from enum import Enum
+from imgtools.loggers import logger
 
 # Redfining these here to lazy load them later
 # we should rename this to be intuitive
@@ -47,7 +48,7 @@ def parse_spacing(ctx, param, value):
         raise click.BadParameter("Spacing values must be valid floats")
 
 
-@click.command()
+@click.command(no_args_is_help=True)
 @click.argument(
     "input_directory",
     type=click.Path(
@@ -66,13 +67,20 @@ def parse_spacing(ctx, param, value):
     type=str,
     metavar="FORMAT",
     show_default=True,
-    default="{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz", 
+    default="{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz", 
     help="Format string for output filenames with placeholders for metadata values"
+)
+@click.option(
+    "--modalities", 
+    "-m",
+    type=str,
+    required=True, 
+    help="List of modalities to include"
 )
 @click.option(
     "--existing-file-mode", 
     type=click.Choice(existing_file_modes), 
-    default="FAIL",
+    default="fail",
     help="How to handle existing files"
 )
 @click.option(
@@ -88,15 +96,9 @@ def parse_spacing(ctx, param, value):
     help="Number of parallel jobs"
 )
 @click.option(
-    "--modalities", 
-    "-m", 
-    multiple=True, 
-    help="List of modalities to include"
-)
-@click.option(
     "--spacing", 
     callback=parse_spacing, 
-    default=(0.0, 0.0, 0.0),
+    default="0.0,0.0,0.0",
     help="Resampling spacing as comma-separated values i.e '--spacing 1.0,1.0,1.0'"
 )
 @click.option(
@@ -132,7 +134,7 @@ def parse_spacing(ctx, param, value):
     help="Allow one ROI to match multiple keys in the match map"
 )
 @click.option(
-    "--roi-on-missing", 
+    "--roi-on-missing-regex", 
     type=click.Choice([p.name for p in ROIMatchFailurePolicy]), 
     default="WARN",
     show_default=True,
@@ -157,6 +159,10 @@ def parse_spacing(ctx, param, value):
     default=None, 
     help="Process only the first N samples"
 )
+@click.help_option(
+    "-h",
+    "--help",
+)
 def autopipeline(
     input_directory: str,
     output_directory: str,
@@ -164,14 +170,14 @@ def autopipeline(
     existing_file_mode: str,
     update_crawl: bool,
     jobs: int,
-    modalities: Tuple[str],
+    modalities: str,
     spacing: Tuple[float, float, float],
     window: float,
     level: float,
     roi_ignore_case: bool,
     roi_strategy: str,
     roi_allow_multi_matches: bool,
-    roi_on_missing: str,
+    roi_on_missing_regex: str,
     roi_match_map: Tuple[str],
     roi_match_yaml: Path,
     first_n: int
@@ -212,23 +218,27 @@ def autopipeline(
         input_directory=input_directory,
         output_directory=output_directory,
         output_filename_format=filename_format,
-        existing_file_mode=ExistingFileMode[existing_file_mode],
+        existing_file_mode=ExistingFileMode[existing_file_mode.upper()],
         update_crawl=update_crawl,
         n_jobs=jobs,
-        modalities=list(modalities) if modalities else None,
+        modalities=list(modalities.split(",")),
         roi_match_map=roi_map if roi_map else None,
         roi_ignore_case=roi_ignore_case,
         roi_handling_strategy=ROIMatchStrategy[roi_strategy],
         roi_allow_multi_key_matches=roi_allow_multi_matches,
-        roi_on_missing_regex=ROIMatchFailurePolicy[roi_on_missing],
+        roi_on_missing_regex=ROIMatchFailurePolicy[roi_on_missing_regex],
         spacing=spacing,
         window=window,
         level=level,
     )
     
-    # Run the pipeline
-    results = pipeline.run(first_n=first_n)
-    click.echo(f"Processed {len(results)} samples.")
+    # # Run the pipeline
+    # try:
+    #     results = pipeline.run(first_n=first_n)
+    # except Exception as e:
+    #     logger.exception(f"Error running pipeline: {str(e)}")
+    #     raise click.Abort()
+    # click.echo(f"Processed {len(results)} samples.")
 
 
 if __name__ == "__main__":

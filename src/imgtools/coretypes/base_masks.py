@@ -18,7 +18,9 @@ if TYPE_CHECKING:
     )
 
 # we dont have to use a named tuple here, but its simple and easy to read
-ROIMaskMapping = namedtuple("ROIMaskMapping", ["roi_key", "roi_names"])
+ROIMaskMapping = namedtuple(
+    "ROIMaskMapping", ["roi_key", "roi_names", "image_id"]
+)
 
 
 class VectorMask(MedImage):
@@ -108,12 +110,16 @@ class VectorMask(MedImage):
             self.roi_mapping = roi_mapping
         elif 0 in roi_mapping:
             # Background is not set to 0, so we need to adjust the mapping
-            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            self.roi_mapping[0] = ROIMaskMapping(
+                "Background", ["Background"], "Background"
+            )
             for old_idx, roi_mask_mapping in roi_mapping.items():
                 self.roi_mapping[old_idx + 1] = roi_mask_mapping
         else:
             # no background, so just set 0 and keep the rest
-            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            self.roi_mapping[0] = ROIMaskMapping(
+                "Background", ["Background"], "Background"
+            )
             for old_idx, roi_mask_mapping in roi_mapping.items():
                 self.roi_mapping[old_idx] = roi_mask_mapping
 
@@ -167,12 +173,18 @@ class VectorMask(MedImage):
 
     def iter_masks(
         self, include_background: bool = False
-    ) -> Iterator[tuple[int, str, list[str], Mask]]:
-        """Yield (index, roi_key, roi_names, Mask) for each mask channel."""
+    ) -> Iterator[tuple[int, str, list[str], str, Mask]]:
+        """Yield (index, roi_key, roi_names, image_id, Mask) for each mask channel."""
         for i, mapping in self.roi_mapping.items():
             if i == 0 and not include_background:
                 continue
-            yield i, mapping.roi_key, mapping.roi_names, self.extract_mask(i)
+            yield (
+                i,
+                mapping.roi_key,
+                mapping.roi_names,
+                mapping.image_id,
+                self.extract_mask(i),
+            )
 
     def has_overlap(self) -> bool:
         """Return True if any voxel has >1 mask"""
