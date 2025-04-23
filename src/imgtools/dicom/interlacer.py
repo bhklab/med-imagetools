@@ -171,7 +171,6 @@ class Interlacer:
         ]
         self._build_series_forest()
 
-    @timer("Building forest based on references")
     def _build_series_forest(self) -> None:
         """
         Creates SeriesNode objects for each row in the DataFrame and
@@ -329,7 +328,6 @@ class Interlacer:
             dfs(root, [])
         return results
 
-    @timer("Querying forest")
     def query(
         self,
         query_string: str,
