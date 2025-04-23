@@ -1,108 +1,108 @@
-# # """Tests for the sample_images module which provides synthetic image creation functions."""
-# # NOTE: commented these out because they started taking forever on Github Actions
+# """Tests for the sample_images module which provides synthetic image creation functions."""
+# NOTE: commented these out because they started taking forever on Github Actions
 
-# # import pytest
-# # import numpy as np
-# # import SimpleITK as sitk
-# # from typing import Tuple
+# import pytest
+# import numpy as np
+# import SimpleITK as sitk
+# from typing import Tuple
 
-# # from imgtools.datasets.sample_images import (
-# #     create_sphere_image,
-# #     create_grid_image,
-# #     create_gradient_image,
-# #     create_cross_image,
-# #     create_rod_image,
-# #     create_noisy_sphere_image,
-# #     create_checkerboard_image,
-# #     create_ct_hounsfield_image,
-# # )
-
-
-# # @pytest.fixture(autouse=True, scope="module")
-# # def suppress_debug_logging():
-# #     """Suppress debug logging for cleaner test output."""
-# #     import logging
-# #     logging.getLogger("imgtools").setLevel(logging.WARNING)
+# from imgtools.datasets.sample_images import (
+#     create_sphere_image,
+#     create_grid_image,
+#     create_gradient_image,
+#     create_cross_image,
+#     create_rod_image,
+#     create_noisy_sphere_image,
+#     create_checkerboard_image,
+#     create_ct_hounsfield_image,
+# )
 
 
-# # class TestSphereImage:
-# #     """Tests for create_sphere_image function."""
+# @pytest.fixture(autouse=True, scope="module")
+# def suppress_debug_logging():
+#     """Suppress debug logging for cleaner test output."""
+#     import logging
+#     logging.getLogger("imgtools").setLevel(logging.WARNING)
 
-# #     def test_default_parameters(self):
-# #         """Test creating a sphere image with default parameters."""
-# #         image = create_sphere_image()
-# #         assert isinstance(image, sitk.Image)
-# #         assert image.GetSize() == (64, 64, 64)
-# #         assert image.GetSpacing() == (1.0, 1.0, 1.0)
-# #         assert image.GetPixelID() == sitk.sitkFloat32
 
-# #         # Test that there's a sphere in the image
-# #         stats = sitk.StatisticsImageFilter()
-# #         stats.Execute(image)
-# #         assert stats.GetMinimum() == 0.0
-# #         assert stats.GetMaximum() == 1.0
-# #         # Center point should be foreground (1.0)
-# #         assert image[32, 32, 32] == 1.0
-# #         # Corner points should be background (0.0)
-# #         assert image[0, 0, 0] == 0.0
-# #         assert image[63, 63, 63] == 0.0
+# class TestSphereImage:
+#     """Tests for create_sphere_image function."""
 
-# #     def test_custom_size(self):
-# #         """Test creating a sphere with custom size."""
-# #         size = (32, 32, 32)
-# #         image = create_sphere_image(size=size)
-# #         assert image.GetSize() == size
+#     def test_default_parameters(self):
+#         """Test creating a sphere image with default parameters."""
+#         image = create_sphere_image()
+#         assert isinstance(image, sitk.Image)
+#         assert image.GetSize() == (64, 64, 64)
+#         assert image.GetSpacing() == (1.0, 1.0, 1.0)
+#         assert image.GetPixelID() == sitk.sitkFloat32
 
-# #     def test_custom_spacing(self):
-# #         """Test creating a sphere with custom spacing."""
-# #         spacing = (0.5, 0.5, 0.5)
-# #         image = create_sphere_image(spacing=spacing)
-# #         assert image.GetSpacing() == spacing
+#         # Test that there's a sphere in the image
+#         stats = sitk.StatisticsImageFilter()
+#         stats.Execute(image)
+#         assert stats.GetMinimum() == 0.0
+#         assert stats.GetMaximum() == 1.0
+#         # Center point should be foreground (1.0)
+#         assert image[32, 32, 32] == 1.0
+#         # Corner points should be background (0.0)
+#         assert image[0, 0, 0] == 0.0
+#         assert image[63, 63, 63] == 0.0
 
-# #     def test_custom_center(self):
-# #         """Test creating a sphere with custom center."""
-# #         center = (10, 20, 30)
-# #         image = create_sphere_image(center=center)
-# #         # Center of sphere should be foreground
-# #         assert image[10, 20, 30] == 1.0
+#     def test_custom_size(self):
+#         """Test creating a sphere with custom size."""
+#         size = (32, 32, 32)
+#         image = create_sphere_image(size=size)
+#         assert image.GetSize() == size
 
-# #     def test_custom_radius(self):
-# #         """Test creating a sphere with custom radius."""
-# #         radius = 5.0
-# #         image = create_sphere_image(radius=radius)
-# #         # Center should be foreground
-# #         assert image[32, 32, 32] == 1.0
-# #         # Points just within radius should be foreground
-# #         assert image[32 + 4, 32, 32] == 1.0
-# #         # Points beyond radius should be background
-# #         assert image[32 + 6, 32, 32] == 0.0
+#     def test_custom_spacing(self):
+#         """Test creating a sphere with custom spacing."""
+#         spacing = (0.5, 0.5, 0.5)
+#         image = create_sphere_image(spacing=spacing)
+#         assert image.GetSpacing() == spacing
 
-# #     def test_custom_values(self):
-# #         """Test creating a sphere with custom foreground and background values."""
-# #         fg = 10.0
-# #         bg = -5.0
-# #         image = create_sphere_image(foreground_value=fg, background_value=bg)
+#     def test_custom_center(self):
+#         """Test creating a sphere with custom center."""
+#         center = (10, 20, 30)
+#         image = create_sphere_image(center=center)
+#         # Center of sphere should be foreground
+#         assert image[10, 20, 30] == 1.0
+
+#     def test_custom_radius(self):
+#         """Test creating a sphere with custom radius."""
+#         radius = 5.0
+#         image = create_sphere_image(radius=radius)
+#         # Center should be foreground
+#         assert image[32, 32, 32] == 1.0
+#         # Points just within radius should be foreground
+#         assert image[32 + 4, 32, 32] == 1.0
+#         # Points beyond radius should be background
+#         assert image[32 + 6, 32, 32] == 0.0
+
+#     def test_custom_values(self):
+#         """Test creating a sphere with custom foreground and background values."""
+#         fg = 10.0
+#         bg = -5.0
+#         image = create_sphere_image(foreground_value=fg, background_value=bg)
         
-# #         # Center should be foreground
-# #         assert image[32, 32, 32] == fg
-# #         # Corner should be background
-# #         assert image[0, 0, 0] == bg
+#         # Center should be foreground
+#         assert image[32, 32, 32] == fg
+#         # Corner should be background
+#         assert image[0, 0, 0] == bg
 
-# #     def test_custom_pixel_type(self):
-# #         """Test creating a sphere with custom pixel type."""
-# #         pixel_type = sitk.sitkUInt8
-# #         image = create_sphere_image(pixel_type=pixel_type)
-# #         assert image.GetPixelID() == pixel_type
+#     def test_custom_pixel_type(self):
+#         """Test creating a sphere with custom pixel type."""
+#         pixel_type = sitk.sitkUInt8
+#         image = create_sphere_image(pixel_type=pixel_type)
+#         assert image.GetPixelID() == pixel_type
 
-# #     def test_custom_origin(self):
-# #         """Test creating a sphere with custom origin."""
-# #         origin = (10.0, 20.0, 30.0)
-# #         image = create_sphere_image(origin=origin)
-# #         assert image.GetOrigin() == origin
+#     def test_custom_origin(self):
+#         """Test creating a sphere with custom origin."""
+#         origin = (10.0, 20.0, 30.0)
+#         image = create_sphere_image(origin=origin)
+#         assert image.GetOrigin() == origin
 
 
-# # class TestGridImage:
-# #     """Tests for create_grid_image function."""
+# class TestGridImage:
+#     """Tests for create_grid_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating a grid image with default parameters."""
@@ -141,8 +141,8 @@
 #         assert image[1, 1, 1] == bg
 
 
-# # class TestGradientImage:
-# #     """Tests for create_gradient_image function."""
+# class TestGradientImage:
+#     """Tests for create_gradient_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating an x-axis gradient image with default parameters."""
@@ -199,8 +199,8 @@
 #             create_gradient_image(direction="invalid")
 
 
-# # class TestCrossImage:
-# #     """Tests for create_cross_image function."""
+# class TestCrossImage:
+#     """Tests for create_cross_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating a cross image with default parameters."""
@@ -250,8 +250,8 @@
 #         assert image[32, 32 + 2, 32 + 2] == 0.0
 
 
-# # class TestRodImage:
-# #     """Tests for create_rod_image function."""
+# class TestRodImage:
+#     """Tests for create_rod_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating an x-axis rod image with default parameters."""
@@ -364,8 +364,8 @@
 #         assert stats.GetSigma() > 0.1
 
 
-# # class TestCheckerboardImage:
-# #     """Tests for create_checkerboard_image function."""
+# class TestCheckerboardImage:
+#     """Tests for create_checkerboard_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating a checkerboard image with default parameters."""
@@ -406,8 +406,8 @@
 #         assert image[0, 0, 8] == value2
 
 
-# # class TestCTHounsfieldImage:
-# #     """Tests for create_ct_hounsfield_image function."""
+# class TestCTHounsfieldImage:
+#     """Tests for create_ct_hounsfield_image function."""
 
 #     def test_default_parameters(self):
 #         """Test creating a CT Hounsfield unit image with default parameters."""
