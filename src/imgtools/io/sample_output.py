@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_medimage import MedImage
 
 DEFAULT_FILENAME_FORMAT = (
-    "{PatientID}/{Modality}_{trunc_SeriesInstanceUID}/{ImageID}.nii.gz"
+    "{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz"
 )
 
 __all__ = ["SampleOutput"]

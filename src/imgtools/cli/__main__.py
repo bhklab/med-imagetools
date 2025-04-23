@@ -36,6 +36,7 @@ import click
 from imgtools import __version__
 
 from . import set_log_verbosity
+from .autopipeline import autopipeline
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
@@ -47,10 +48,13 @@ from .testdatasets import testdata
 registry = CommandRegistry()
 
 # Register groups and commands
-registry.create_group("dicom-tools", "Tools for working with DICOM files.")
-registry.add("dicom-tools", dicomfind)
-registry.add("dicom-tools", dicomsort)
-registry.add('dicom-tools', index)
+registry.create_group("core commands", "Main subcommands for the med-imagetools package.")
+registry.add('core commands', index)
+registry.add('core commands', autopipeline)
+
+registry.create_group("utilities", "Tools for working with DICOM files.")
+registry.add("utilities", dicomfind)
+registry.add("utilities", dicomsort)
 
 if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")
@@ -66,7 +70,8 @@ if not testdata.hidden:
     message="%(package)s:%(prog)s:%(version)s",
 )
 @click.help_option("-h", "--help")
-def cli(verbose: int, quiet: bool) -> None:
+@click.pass_context
+def cli(ctx, verbose: int, quiet: bool) -> None:
     """A collection of tools for working with medical imaging data."""
     # Notes
     # -----
