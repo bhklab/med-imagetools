@@ -1,4 +1,3 @@
-from .base_masks import Mask, VectorMask  # noqa
 from .base_medimage import MedImage
 from .box import BoxPadMethod, RegionBox
 from .imagetypes import PET, Dose, Scan
@@ -13,6 +12,8 @@ from .masktypes import (
     handle_roi_matching,
 )
 from .spatial_types.coord_types import Coordinate3D, Size3D, Spacing3D
+
+from .base_masks import Mask, VectorMask  # isort: skip
 
 __all__ = [
     "MedImage",
