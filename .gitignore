@@ -232,5 +232,3 @@ notebooks
 .imgtools
 
 *.html
-
-!med-imgtools_jsonschema.json
