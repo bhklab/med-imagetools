@@ -23,6 +23,8 @@ class MedImage(sitk.Image):
     medical image processing and analysis.
     """
 
+    metadata: dict[str, Any]
+
     @property
     def size(self) -> Size3D:
         """Get the size of the image in voxels.

@@ -1,3 +1,5 @@
+import json as jsonlib
+import logging
 import logging.config
 import os
 from pathlib import Path
@@ -16,6 +18,8 @@ from imgtools.loggers.processors import (
 VALID_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 DEFAULT_LOG_LEVEL = "WARNING"
 
+LOG_DIR_NAME = Path(".imgtools/logs")
+
 
 class LoggingManager:
     """
@@ -23,38 +27,6 @@ class LoggingManager:
 
     This class provides flexible options for configuring log levels, formats,
     and output destinations.
-
-    Parameters
-    ----------
-    name : str
-        Name of the logger instance.
-
-    Attributes
-    ----------
-    name : str
-        Name of the logger instance.
-    base_dir : Path
-        Base directory for path prettification.
-                    i.e if base_dir is /home/user/project and logs include a path like /home/user/project/data/file.txt
-                    then the path will be prettified to data/file.txt
-    level : str
-        Log level for the logger.
-
-
-    Methods
-    -------
-    get_logger()
-        Retrieve the configured logger instance.
-    configure_logging(level=None)
-        Dynamically adjust logging settings.
-
-    Raises
-    ------
-    ValueError
-        If an invalid log level is provided.
-    RuntimeError
-        If the log directory or file cannot be created.
-
     Examples
     --------
     Initialize with default settings:
@@ -71,6 +43,10 @@ class LoggingManager:
         self.name = name
         self.base_dir = base_dir or Path.cwd()
         self.level = self.env_level
+        self.disable_json_logging = (
+            os.environ.get(f"{self.name}_DISABLE_JSON_LOGGING".upper(), "0")
+            == "1"
+        )
         self._initialize_logger()
 
     @property
@@ -89,19 +65,35 @@ class LoggingManager:
         dict
             Base logging configuration.
         """
-        return {
+        base = {
             "version": 1,
             "disable_existing_loggers": False,
             "formatters": {
                 "console": {
                     "()": structlog.stdlib.ProcessorFormatter,
                     "processors": [
+                        ESTTimeStamper(fmt="%H:%M:%S"),
                         CallPrettifier(concise=True),
                         structlog.stdlib.ProcessorFormatter.remove_processors_meta,
                         structlog.dev.ConsoleRenderer(
+                            colors=True,
+                            sort_keys=False,
                             exception_formatter=structlog.dev.RichTracebackFormatter(
-                                width=-1, show_locals=False
+                                width=-1, show_locals=True
                             ),
+                        ),
+                    ],
+                    "foreign_pre_chain": self.pre_chain,
+                },
+                "json": {
+                    "()": structlog.stdlib.ProcessorFormatter,
+                    "processors": [
+                        ESTTimeStamper(),
+                        CallPrettifier(concise=False),
+                        structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                        structlog.processors.dict_tracebacks,
+                        structlog.processors.JSONRenderer(
+                            serializer=jsonlib.dumps, indent=2
                         ),
                     ],
                     "foreign_pre_chain": self.pre_chain,
@@ -122,11 +114,37 @@ class LoggingManager:
             },
         }
 
+        if not self.disable_json_logging:
+            from datetime import datetime
+
+            timestamped_logfile = (
+                LOG_DIR_NAME
+                / f"imgtools_{datetime.now():%Y-%m-%d_%H-%M-%S}.log"
+            )
+            # Ensure the log directory exists
+            LOG_DIR_NAME.mkdir(parents=True, exist_ok=True)
+            latest_symlink = LOG_DIR_NAME / "latest.log"
+            if latest_symlink.exists() or latest_symlink.is_symlink():
+                latest_symlink.unlink()
+            latest_symlink.symlink_to(
+                timestamped_logfile.name, target_is_directory=False
+            )
+
+            base["handlers"]["json"] = {  # type: ignore
+                "class": "logging.handlers.RotatingFileHandler",
+                "formatter": "json",
+                "filename": timestamped_logfile,
+                "maxBytes": 10485760,
+                "backupCount": 5,
+            }
+            base["loggers"][self.name]["handlers"].append("json")  # type: ignore
+
+        return base
+
     @property
     def pre_chain(self) -> List[Processor]:
         return [
             structlog.stdlib.add_log_level,
-            ESTTimeStamper(),
             structlog.stdlib.add_logger_name,
             structlog.stdlib.PositionalArgumentsFormatter(),
             CallsiteParameterAdder(
@@ -177,17 +195,17 @@ class LoggingManager:
         Parameters
         ----------
         level : str, optional
-                        Set the log level.
+            Set the log level.
 
         Returns
         -------
         structlog.stdlib.BoundLogger
-                        Updated logger instance.
+            Updated logger instance.
 
         Raises
         ------
         ValueError
-                        If an invalid log level is specified.
+            If an invalid log level is specified.
         """
         level_upper = level.upper()
         if level_upper not in VALID_LOG_LEVELS:
@@ -195,16 +213,9 @@ class LoggingManager:
             raise ValueError(msg)
 
         # Store the old level for logging the change
-        old_level = self.level
         self.level = level_upper
 
         self._initialize_logger()
         logger = self.get_logger()
-
-        # Log the level change
-        if old_level != self.level:
-            logger.info(
-                "Log level changed", old_level=old_level, new_level=self.level
-            )
 
         return logger

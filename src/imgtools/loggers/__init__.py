@@ -125,5 +125,5 @@ if __name__ == "__main__":
 
     with tqdm_logging_redirect():
         for i in tqdm(range(10), desc="Processing"):
-            logger.info(f"Processing {i}")
+            logger.info("Processing %d", i)
             time.sleep(0.1)

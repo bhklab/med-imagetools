@@ -2,6 +2,8 @@ from .roi_matching import (
     ROIMatcher,
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
+    Valid_Inputs,
+    create_roi_matcher,
     handle_roi_matching,
 )
 from .seg import SEG, Segment
@@ -18,6 +20,8 @@ __all__ = [
     "ROIMatcher",
     "handle_roi_matching",
     "ROIMatchFailurePolicy",
+    "Valid_Inputs",
+    "create_roi_matcher",
     # structureset
     "RTStructureSet",
     "ContourPointsAcrossSlicesError",

@@ -174,7 +174,7 @@ class ImageVisualizer:
 
     @property
     def array(self) -> np.ndarray:
-        return sitk.GetArrayFromImage(self.main_image)
+        return sitk.GetArrayViewFromImage(self.main_image)
 
     def view_slices(self) -> SliceWidgets:
         return create_interactive(self.array)
