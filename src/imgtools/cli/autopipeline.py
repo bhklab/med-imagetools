@@ -35,7 +35,7 @@ class ROIMatchFailurePolicy(str, Enum):
 existing_file_modes = ["overwrite", "skip", "fail"]
 
 
-def parse_spacing(ctx, param, value):
+def parse_spacing(ctx, param, value): # type: ignore
     """Parse spacing as a tuple of floats."""
     if not value:
         return (0.0, 0.0, 0.0)
@@ -181,7 +181,7 @@ def autopipeline(
     roi_match_map: Tuple[str],
     roi_match_yaml: Path,
     first_n: int
-):
+) -> None:
     """
     Run the DeltaPipeline for processing medical images.
     

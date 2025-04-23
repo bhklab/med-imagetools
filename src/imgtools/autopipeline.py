@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence
 
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed  # type: ignore
 
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,

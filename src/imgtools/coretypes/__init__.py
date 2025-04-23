@@ -1,3 +1,4 @@
+from .base_masks import Mask, VectorMask  # noqa
 from .base_medimage import MedImage
 from .box import BoxPadMethod, RegionBox
 from .imagetypes import PET, Dose, Scan
@@ -40,4 +41,7 @@ __all__ = [
     # seg
     "SEG",
     "Segment",
+    # base masks
+    "VectorMask",
+    "Mask",
 ]

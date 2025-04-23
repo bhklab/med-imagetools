@@ -70,8 +70,7 @@ if not testdata.hidden:
     message="%(package)s:%(prog)s:%(version)s",
 )
 @click.help_option("-h", "--help")
-@click.pass_context
-def cli(ctx, verbose: int, quiet: bool) -> None:
+def cli(verbose: int, quiet: bool) -> None:
     """A collection of tools for working with medical imaging data."""
     # Notes
     # -----
