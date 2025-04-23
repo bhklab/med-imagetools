@@ -27,7 +27,6 @@ from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer, SeriesNode
 from imgtools.io.readers import MedImageT, read_dicom_auto
 from imgtools.io.validators import (
-    set_default_dataset_name,
     validate_directory,
     validate_modalities,
     validate_n_jobs,
