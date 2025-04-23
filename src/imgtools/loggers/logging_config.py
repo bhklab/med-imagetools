@@ -43,8 +43,8 @@ class LoggingManager:
         self.name = name
         self.base_dir = base_dir or Path.cwd()
         self.level = self.env_level
-        self.disable_json_logging = (
-            os.environ.get(f"{self.name}_DISABLE_JSON_LOGGING".upper(), "0")
+        self.enable_json_logging = (
+            os.environ.get(f"{self.name}_enable_json_logging".upper(), "0")
             == "1"
         )
         self._initialize_logger()
@@ -114,7 +114,7 @@ class LoggingManager:
             },
         }
 
-        if not self.disable_json_logging:
+        if self.enable_json_logging:
             from datetime import datetime
 
             timestamped_logfile = (
