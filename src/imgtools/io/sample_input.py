@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import multiprocessing
-import os
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Sequence, cast
@@ -15,18 +14,24 @@ from pydantic import (
 )
 
 from imgtools.coretypes import MedImage
-from imgtools.coretypes.masktypes.roi_matching import (
+from imgtools.coretypes.masktypes import (
+    SEG,
     ROIMatcher,
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
+    RTStructureSet,
     Valid_Inputs as ROIMatcherInputs,
     create_roi_matcher,
 )
-from imgtools.coretypes.masktypes.seg import SEG
-from imgtools.coretypes.masktypes.structureset import RTStructureSet
 from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer, SeriesNode
 from imgtools.io.readers import MedImageT, read_dicom_auto
+from imgtools.io.validators import (
+    set_default_dataset_name,
+    validate_directory,
+    validate_modalities,
+    validate_n_jobs,
+)
 from imgtools.loggers import logger
 
 if TYPE_CHECKING:
@@ -168,8 +173,8 @@ class SampleInput(BaseModel):
             "x-documentation": "See ROIMatcher class documentation for detailed usage examples",
         },
     )
-    _crawler: Crawler | None = PrivateAttr(default=None, init=False)
-    _interlacer: Interlacer | None = PrivateAttr(default=None, init=False)
+    _crawler: Crawler | None = PrivateAttr(default=None)
+    _interlacer: Interlacer | None = PrivateAttr(default=None)
 
     def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
         """Initialize the Crawler instance after model initialization."""
@@ -183,66 +188,29 @@ class SampleInput(BaseModel):
         self._crawler = crawler
         self._interlacer = Interlacer(crawl_index=crawler.index)
 
+    # Use validators from the validators module
     @field_validator("directory")
     @classmethod
-    def validate_directory(cls, v: str | Path) -> Path:
-        """Validate that the input directory exists and is readable."""
-        path = Path(v) if not isinstance(v, Path) else v
-
-        if not path.exists():
-            msg = f"Input directory does not exist: {path}"
-            raise ValueError(msg)
-
-        if not path.is_dir():
-            msg = f"Input path must be a directory: {path}"
-            raise ValueError(msg)
-
-        if not os.access(path, os.R_OK):
-            msg = f"Input directory is not readable: {path}"
-            raise ValueError(msg)
-
-        return path
+    def _validate_directory(cls, v: str | Path) -> Path:
+        return validate_directory(v)
 
     @field_validator("n_jobs")
     @classmethod
-    def validate_n_jobs(cls, v: int) -> int:
-        """Validate that n_jobs is reasonable."""
-        cpu_count = multiprocessing.cpu_count()
-
-        if v <= 0:
-            logger.warning("n_jobs must be positive, using default")
-            return max(1, cpu_count - 2)
-
-        if v > cpu_count:
-            logger.warning(
-                f"n_jobs ({v}) exceeds available CPU count ({cpu_count}), "
-                f"setting to {cpu_count}"
-            )
-            return cpu_count
-
-        return v
+    def _validate_n_jobs(cls, v: int) -> int:
+        return validate_n_jobs(v)
 
     @field_validator("modalities")
     @classmethod
-    def validate_modalities(cls, v: list[str] | None) -> list[str] | None:
-        """Validate that modalities are a list of strings."""
-        if v is None:
-            return v
-
-        if not all(isinstance(m, str) for m in v):
-            raise ValueError("Modalities must be a list of strings")
-
-        return v
+    def _validate_modalities(cls, v: list[str] | None) -> list[str] | None:
+        return validate_modalities(v)
 
     @model_validator(mode="after")
-    def set_default_dataset_name(self) -> "SampleInput":
-        """Set default dataset name if not provided."""
+    def _set_default_dataset_name(self) -> "SampleInput":
         if self.dataset_name is None:
             self.dataset_name = self.directory.name
             logger.debug(
                 f"Using input directory name as dataset name: {self.dataset_name}"
             )
-
         return self
 
     @classmethod
@@ -268,6 +236,8 @@ class SampleInput(BaseModel):
 
         Parameters
         ----------
+        cls : class
+            The SampleInput class
         directory : str | Path
             Directory containing the input files
         dataset_name : str | None, optional
