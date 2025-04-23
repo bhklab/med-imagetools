@@ -162,25 +162,23 @@ def read_dicom_auto(
 
     match modality:
         case "CT" | "MR":
-            from imgtools.coretypes.imagetypes.scan import Scan
+            from imgtools.coretypes import Scan
 
             return Scan.from_dicom(path, **kwargs)
         case "PT":
-            from imgtools.coretypes.imagetypes.pet import PET
+            from imgtools.coretypes import PET
 
             return PET.from_dicom(path, **kwargs)
         case "RTDOSE":
-            from imgtools.coretypes.imagetypes.dose import Dose
+            from imgtools.coretypes import Dose
 
             return Dose.from_dicom(path, **kwargs)
         case "RTSTRUCT":
-            from imgtools.coretypes.masktypes.structureset import (
-                RTStructureSet,
-            )
+            from imgtools.coretypes import RTStructureSet
 
             return RTStructureSet.from_dicom(path)
         case "SEG":
-            from imgtools.coretypes.masktypes.seg import SEG
+            from imgtools.coretypes import SEG
 
             return SEG.from_dicom(path)
         case _:
