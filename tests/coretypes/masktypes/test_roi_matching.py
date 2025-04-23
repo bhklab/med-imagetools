@@ -278,7 +278,6 @@ def test_roi_matcher_class_with_new_params():
     # Test that the parameters are passed correctly to handle_roi_matching
     # when calling match_rois (we can't easily test this directly, so we'll
     # use a test case where we know the behavior differs)
-    
     # This should not raise an error even with on_missing_regex=ERROR
     # because there are matches
     results = matcher.match_rois(["GTVp"])
