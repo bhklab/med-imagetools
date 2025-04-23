@@ -178,42 +178,39 @@ class SampleOutput(BaseModel):
         """
         saved_files = []
         for image in data:
-            match image:
-                case VectorMask(roi_mapping, metadata):
-                    for label, (roi_key, matched_rois) in roi_mapping.items():
-                        if label == 0:
-                            continue  # Skip background
-                        roi_mask = image.extract_mask(label)
-                        matched_rois_str = "|".join(matched_rois)
-                        image_id = f"{roi_key}_[{matched_rois_str}]"
-                        p = self.writer.save(
-                            roi_mask,
-                            roi_key=roi_key,
-                            matched_rois=matched_rois,
-                            trunc_SeriesInstanceUID=metadata[
-                                "SeriesInstanceUID"
-                            ][-8:],
-                            **metadata,
-                            **kwargs,
-                            ImageID=image_id,
-                        )
-                case Scan():
-                    # Handle MedImage case
+            if isinstance(image, VectorMask):
+                for _i, roi_key, roi_names, mask in image.iter_masks():
+                    matched_rois = "|".join(roi_names)
+                    image_id = f"{roi_key}_[{matched_rois}]"
                     p = self.writer.save(
-                        image,
-                        **image.metadata,
-                        **kwargs,
+                        mask,
+                        roi_key=roi_key,
+                        matched_rois=matched_rois,
                         trunc_SeriesInstanceUID=image.metadata[
                             "SeriesInstanceUID"
                         ][-8:],
-                        ImageID=image.metadata["Modality"],
+                        **image.metadata,
+                        **kwargs,
+                        ImageID=image_id,
                     )
-                case _:
-                    errmsg = (
-                        f"Unsupported image type: {type(image)}. "
-                        "Expected Scan or VectorMask."
-                    )
-                    logger.error(errmsg)
-                    raise TypeError(errmsg)
-            saved_files.append(p)
+                    saved_files.append(p)
+            elif isinstance(image, Scan):
+                # Handle MedImage case
+                p = self.writer.save(
+                    image,
+                    **image.metadata,
+                    **kwargs,
+                    trunc_SeriesInstanceUID=image.metadata[
+                        "SeriesInstanceUID"
+                    ][-8:],
+                    ImageID=image.metadata["Modality"],
+                )
+                saved_files.append(p)
+            else:
+                errmsg = (
+                    f"Unsupported image type: {type(image)}. "
+                    "Expected Scan or VectorMask."
+                )
+                logger.error(errmsg)
+                raise TypeError(errmsg)
         return saved_files

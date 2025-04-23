@@ -56,7 +56,7 @@ class DeltaPipeline:
         roi_on_missing_regex: str | ROIMatchFailurePolicy = (
             ROIMatchFailurePolicy.WARN
         ),
-        spacing: tuple[float, float, float] = (1.0, 1.0, 0.0),
+        spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
     ) -> None:
@@ -149,19 +149,19 @@ class DeltaPipeline:
             logger.warning(
                 f"Loaded {len(loaded_series_instance_uids)} sample"
                 " images do not match input samples {len(series_instance_uids)}. "
-                "This most likely may be due to failures to match ROIs. ",
+                "This most likely may be due to failures to match ROIs. "
+                f"The {len(sample_images)} will not be processed or saved. ",
                 loaded_series=loaded_series_instance_uids,
                 input_samples=sample,
             )
             return []
-
         transformed_images = self.transformer(sample_images)
 
         saved_files = self.output(transformed_images)
 
         return saved_files
 
-    def run(self, first_n: int | None = None) -> None:
+    def run(self, first_n: int | None = None) -> Sequence[Path]:
         """
         Run the pipeline.
         """
@@ -178,7 +178,9 @@ class DeltaPipeline:
                 leave=True,
                 tqdm_class=std_tqdm,
             )
-            logger.warning(f"Processed {len(result)} samples.")
+            logger.info(f"Processed {len(result)} samples.")
+
+        return result
 
     def __rich_repr__(self) -> rich.repr.Result:
         """
@@ -234,6 +236,6 @@ if __name__ == "__main__":
         roi_on_missing_regex=ROIMatchFailurePolicy.IGNORE,
     )
 
-    print(pipeline)
-
-    pipeline.run(first_n=20)
+    # print(pipeline)
+    results = pipeline.run(first_n=1)
+    print(f"Results: {results}")

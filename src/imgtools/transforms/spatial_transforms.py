@@ -50,9 +50,9 @@ class SpatialTransform(BaseTransform):
         Returns
         -------
         bool
-            Always True for spatial transforms.
+            False by default. Subclasses should override this method
         """
-        return True
+        return False
 
 
 @dataclass
@@ -95,6 +95,16 @@ class Resample(SpatialTransform):
     anti_alias_sigma: float | None = None
     transform: sitk.Transform | None = None
     output_size: list[float] | None = None
+
+    def supports_reference(self) -> bool:
+        """Return whether this transform supports reference images.
+
+        Returns
+        -------
+        bool
+            Always True for spatial transforms.
+        """
+        return True
 
     def __call__(
         self, image: sitk.Image, ref: sitk.Image | None = None

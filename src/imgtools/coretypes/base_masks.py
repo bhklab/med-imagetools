@@ -102,12 +102,20 @@ class VectorMask(MedImage):
         super().__init__(image)
         # Shift index to start from 1 for user-facing keys
         self.roi_mapping = {}
-        if 0 not in roi_mapping:
+
+        if 0 in roi_mapping and roi_mapping[0].roi_key == "Background":
+            # Background is already set to 0, no need to change
+            self.roi_mapping = roi_mapping
+        elif 0 in roi_mapping:
+            # Background is not set to 0, so we need to adjust the mapping
             self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
             for old_idx, roi_mask_mapping in roi_mapping.items():
                 self.roi_mapping[old_idx + 1] = roi_mask_mapping
         else:
-            self.roi_mapping = roi_mapping
+            # no background, so just set 0 and keep the rest
+            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            for old_idx, roi_mask_mapping in roi_mapping.items():
+                self.roi_mapping[old_idx] = roi_mask_mapping
 
         self.metadata = metadata
         self.errors = errors
@@ -118,8 +126,6 @@ class VectorMask(MedImage):
             msg = f"Expected sitkVectorUInt8, got {self.dtype=} instead."
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
-
-    __match_args__ = ("roi_mapping", "metadata")
 
     @property
     def n_masks(self) -> int:

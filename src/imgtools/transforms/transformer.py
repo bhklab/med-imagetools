@@ -33,13 +33,21 @@ class Transformer(Generic[T_MedImage]):
             errors.append(errmsg)
             raise ValueError("\n".join(errors))
 
-    def _apply_transforms(self, image: T_MedImage) -> T_MedImage:
+    def _apply_transforms(
+        self,
+        image: T_MedImage,
+        ref: MedImage | None = None,
+    ) -> T_MedImage:
         """Apply transforms to an image, preserving its type.
 
         Parameters
         ----------
         image : T_MedImage
             The image to transform, can be any subclass of MedImage
+        ref : MedImage, optional
+            For some transforms, a reference image can be used for
+            transformation. This is typically used for spatial transforms
+            like Resample.
 
         Returns
         -------
@@ -55,8 +63,13 @@ class Transformer(Generic[T_MedImage]):
         transformed_image = image
         for n, transform in enumerate(self.transforms, start=1):
             try:
-                if isinstance(
-                    transform, (SpatialTransform, IntensityTransform)
+                if (
+                    isinstance(transform, SpatialTransform)
+                    and transform.supports_reference()
+                ):
+                    transformed_image = transform(transformed_image, ref)
+                elif isinstance(
+                    transform, (IntensityTransform, SpatialTransform)
                 ):
                     transformed_image = transform(transformed_image)
                 else:
@@ -106,12 +119,12 @@ class Transformer(Generic[T_MedImage]):
             The transformed images, with the same types as the inputs
         """
         # Initialize new image list
-        new_images: list[T_MedImage] = []
+        new_images: list[T_MedImage] = [self._apply_transforms(images[0])]
 
         # Process each image
-        for image in images:
+        for image in images[1:]:
             # Apply transforms and maintain type
-            new_images.append(self._apply_transforms(image))
+            new_images.append(self._apply_transforms(image, ref=new_images[0]))
 
         return new_images
 
