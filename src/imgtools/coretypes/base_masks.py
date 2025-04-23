@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import namedtuple
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Type
+from typing import TYPE_CHECKING, Any, Iterator, Mapping
 
 import numpy as np
 import SimpleITK as sitk
@@ -71,6 +71,8 @@ class VectorMask(MedImage):
         If that fails, falls back to the standard sitk.Image behavior
     """
 
+    __match_args__ = ("roi_mapping", "metadata")
+
     roi_mapping: dict[int, ROIMaskMapping]
     metadata: dict[str, str]
     errors: Mapping[str, Exception] | None
@@ -99,10 +101,21 @@ class VectorMask(MedImage):
         """
         super().__init__(image)
         # Shift index to start from 1 for user-facing keys
-        self.roi_mapping = {0: ROIMaskMapping("Background", ["Background"])}
+        self.roi_mapping = {}
 
-        for old_idx, roi_mask_mapping in roi_mapping.items():
-            self.roi_mapping[old_idx + 1] = roi_mask_mapping
+        if 0 in roi_mapping and roi_mapping[0].roi_key == "Background":
+            # Background is already set to 0, no need to change
+            self.roi_mapping = roi_mapping
+        elif 0 in roi_mapping:
+            # Background is not set to 0, so we need to adjust the mapping
+            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            for old_idx, roi_mask_mapping in roi_mapping.items():
+                self.roi_mapping[old_idx + 1] = roi_mask_mapping
+        else:
+            # no background, so just set 0 and keep the rest
+            self.roi_mapping[0] = ROIMaskMapping("Background", ["Background"])
+            for old_idx, roi_mask_mapping in roi_mapping.items():
+                self.roi_mapping[old_idx] = roi_mask_mapping
 
         self.metadata = metadata
         self.errors = errors
@@ -113,8 +126,6 @@ class VectorMask(MedImage):
             msg = f"Expected sitkVectorUInt8, got {self.dtype=} instead."
             msg += f" {self.dtype_str=}"
             raise TypeError(msg)
-
-    __match_args__ = ("roi_mapping", "metadata")
 
     @property
     def n_masks(self) -> int:
@@ -267,7 +278,6 @@ class VectorMask(MedImage):
             logger.debug(f"Cache hit for mask {key}")
             return self._mask_cache[key]
 
-        # If not in cache, extract it and cache the result
         mask_metadata = (
             self.metadata.copy()
         )  # Copy the metadata from vector mask
@@ -306,7 +316,10 @@ class VectorMask(MedImage):
                     self.roi_mapping[idx].roi_names
                 )
             case _:
-                msg = f"Invalid key type {type(key)}. Expected int or str."
+                msg = (
+                    f"Invalid key type {type(key)=} where {key=}. "
+                    "Expected int or str."
+                )
                 raise TypeError(msg)
 
         mask = Mask(
@@ -405,16 +418,6 @@ class Mask(MedImage):
         """
         super().__init__(image)
         self.metadata = metadata
-        if self.dtype not in (sitk.sitkUInt8, sitk.sitkLabelUInt8):
-            msg = f"Expected sitkUInt8 or sitkLabelUInt8, got {self.dtype=} instead."
-            msg += f" {self.dtype_str=}"
-            raise TypeError(msg)
-
-    @property
-    def unique_labels(self) -> np.ndarray:
-        """Return all unique label values present in the image."""
-        arr, _ = self.to_numpy()
-        return np.unique(arr)
 
     def to_labeled_image(self) -> Mask:
         """Convert to a labeled image with unique labels."""
@@ -428,17 +431,3 @@ class Mask(MedImage):
         yield from super().__rich_repr__()
         if hasattr(self, "metadata") and self.metadata:
             yield "metadata", self.metadata
-
-    @classmethod
-    def from_array(
-        cls: Type[Mask],
-        array: np.ndarray,
-        reference: sitk.Image | MedImage,
-        metadata: dict[str, str] | None = None,
-    ) -> Mask:
-        """Create Mask from numpy array with copied spatial metadata."""
-        img = sitk.GetImageFromArray(array)
-        img.CopyInformation(reference)
-        return cls(
-            sitk.Cast(img, sitk.sitkLabelUInt8), metadata=metadata or {}
-        )

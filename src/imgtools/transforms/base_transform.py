@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 from SimpleITK import Image
 
+# Define a TypeVar for images that includes SimpleITK.Image and any subclasses
+T_Image = TypeVar("T_Image", bound=Image)
 
-class BaseTransform(ABC):
+
+class BaseTransform(Generic[T_Image], ABC):
     """Abstract base class for image transforms.
 
     Classes inheriting from this must implement the `__call__` method that
@@ -12,6 +15,12 @@ class BaseTransform(ABC):
 
     This class provides a common interface for all transforms in the package,
     allowing them to be used interchangeably and composed together.
+
+    Type Parameters
+    --------------
+    T_Image
+        The type of image this transform operates on. Defaults to SimpleITK.Image,
+        but can be specialized to any subclass like MedImage or its derivatives.
     """
 
     @property
@@ -26,7 +35,7 @@ class BaseTransform(ABC):
         return self.__class__.__name__
 
     @abstractmethod
-    def __call__(self, image: Image, *args: Any, **kwargs: Any) -> Image:  # noqa
+    def __call__(self, image: T_Image, *args: Any, **kwargs: Any) -> T_Image:  # noqa
         """Apply the transformation operation to the given image.
 
         This abstract method must be implemented by subclasses to apply a specific
@@ -35,7 +44,7 @@ class BaseTransform(ABC):
 
         Parameters
         ----------
-        image : Image
+        image : T_Image
             The input image to be transformed.
         *args : Any
             Additional positional arguments for the transformation.
@@ -44,8 +53,8 @@ class BaseTransform(ABC):
 
         Returns
         -------
-        Image
-            The transformed image.
+        T_Image
+            The transformed image, preserving the input type.
         """
         pass
 

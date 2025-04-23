@@ -22,8 +22,7 @@ from .spatial_transforms import (
     SpatialTransform,
     Zoom,
 )
-
-# from .transformer import Transformer
+from .transformer import Transformer
 
 __all__ = [
     # functional
@@ -51,5 +50,5 @@ __all__ = [
     "Rotate",
     "InPlaneRotate",
     # transformer
-    # "Transformer",
+    "Transformer",
 ]

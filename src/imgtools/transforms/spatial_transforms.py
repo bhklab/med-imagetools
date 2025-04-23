@@ -50,9 +50,9 @@ class SpatialTransform(BaseTransform):
         Returns
         -------
         bool
-            Always True for spatial transforms.
+            False by default. Subclasses should override this method
         """
-        return True
+        return False
 
 
 @dataclass
@@ -87,44 +87,6 @@ class Resample(SpatialTransform):
     output_size : list[float] | None, optional
         Size of the output image. If None, it is computed to preserve the
         whole extent of the input image.
-
-    Examples
-    --------
-    >>> import SimpleITK as sitk
-    >>> from imgtools.datasets.sample_images import (
-    ...     create_sphere_image,
-    ... )
-    >>> from imgtools.transforms import Resample
-    >>> # Create a test image (50x50x25) with 2.0mm spacing
-    >>> image = create_sphere_image(
-    ...     size=(50, 50, 25), spacing=(2.0, 2.0, 2.0)
-    ... )
-    >>> # Create resample transform to change to 1.0mm isotropic spacing
-    >>> resampler = Resample(spacing=1.0)
-    >>> resampled_image = resampler(image)
-    >>> print(f"Original size: {image.GetSize()}")
-    Original size: (50, 50, 25)
-    >>> print(f"Original spacing: {image.GetSpacing()}")
-    Original spacing: (2.0, 2.0, 2.0)
-    >>> print(
-    ...     f"Resampled size: {resampled_image.GetSize()}"
-    ... )
-    Resampled size: (100, 100, 50)
-    >>> print(
-    ...     f"Resampled spacing: {resampled_image.GetSpacing()}"
-    ... )
-    Resampled spacing: (1.0, 1.0, 1.0)
-    >>> # Create resample transform with reference image
-    >>> ref_image = create_sphere_image(
-    ...     size=(100, 100, 100), spacing=(1.5, 1.5, 1.5)
-    ... )
-    >>> resampled_to_ref = resampler(
-    ...     image, ref=ref_image
-    ... )
-    >>> print(
-    ...     f"Reference-based resampling output spacing: {resampled_to_ref.GetSpacing()}"
-    ... )
-    Reference-based resampling output spacing: (1.5, 1.5, 1.5)
     """
 
     spacing: float | Sequence[float] | np.ndarray
@@ -133,6 +95,16 @@ class Resample(SpatialTransform):
     anti_alias_sigma: float | None = None
     transform: sitk.Transform | None = None
     output_size: list[float] | None = None
+
+    def supports_reference(self) -> bool:
+        """Return whether this transform supports reference images.
+
+        Returns
+        -------
+        bool
+            Always True for spatial transforms.
+        """
+        return True
 
     def __call__(
         self, image: sitk.Image, ref: sitk.Image | None = None
@@ -204,32 +176,6 @@ class Resize(SpatialTransform):
         This should be used to avoid aliasing artifacts.
     anti_alias_sigma : float | None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
-
-    Examples
-    --------
-    >>> import SimpleITK as sitk
-    >>> from imgtools.datasets.sample_images import (
-    ...     create_gradient_image,
-    ... )
-    >>> from imgtools.transforms import Resize
-    >>> # Create a test image (100x150x50)
-    >>> image = create_gradient_image(
-    ...     size=(100, 150, 50), direction="radial"
-    ... )
-    >>> # Resize to uniform dimensions (64x64x64)
-    >>> resizer = Resize(size=64)
-    >>> resized_image = resizer(image)
-    >>> print(f"Original size: {image.GetSize()}")
-    Original size: (100, 150, 50)
-    >>> print(f"Resized to: {resized_image.GetSize()}")
-    Resized to: (64, 64, 64)
-    >>> # Resize only first two dimensions
-    >>> resizer_2d = Resize(size=[50, 50, 0])
-    >>> resized_2d = resizer_2d(image)
-    >>> print(
-    ...     f"Partially resized: {resized_2d.GetSize()}"
-    ... )
-    Partially resized: (50, 50, 50)
     """
 
     size: int | list[int] | np.ndarray
@@ -290,37 +236,6 @@ class Zoom(SpatialTransform):
         This should be used to avoid aliasing artifacts.
     anti_alias_sigma : float | None, optional
         The standard deviation of the Gaussian kernel used for anti-aliasing.
-
-    Examples
-    --------
-    >>> import SimpleITK as sitk
-    >>> import numpy as np
-    >>> from imgtools.datasets.sample_images import (
-    ...     create_grid_image,
-    ... )
-    >>> from imgtools.transforms import Zoom
-    >>> # Create a test image (64x64x64) with a grid pattern
-    >>> image = create_grid_image(grid_spacing=8)
-    >>> # Create zoom with factor 2 (zooming in, grid lines will appear thinner)
-    >>> zoomer = Zoom(scale_factor=2.0)
-    >>> zoomed_in = zoomer(image)
-    >>> print(f"Original size: {image.GetSize()}")
-    Original size: (64, 64, 64)
-    >>> print(
-    ...     f"Zoomed size (unchanged): {zoomed_in.GetSize()}"
-    ... )
-    Zoomed size (unchanged): (64, 64, 64)
-    >>> print(f"Original spacing: {image.GetSpacing()}")
-    Original spacing: (1.0, 1.0, 1.0)
-    >>> print(
-    ...     f"Zoomed spacing: {zoomed_in.GetSpacing()}"
-    ... )
-    Zoomed spacing: (1.0, 1.0, 1.0)
-    >>> # Anisotropic zoom (different factors per dimension)
-    >>> aniso_zoomer = Zoom(scale_factor=[0.5, 1.0, 2.0])
-    >>> aniso_zoomed = aniso_zoomer(image)
-    >>> print("Applied anisotropic zoom")
-    Applied anisotropic zoom
     """
 
     scale_factor: float | list[float]
@@ -373,41 +288,6 @@ class Rotate(SpatialTransform):
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
-
-    Examples
-    --------
-    >>> import SimpleITK as sitk
-    >>> import math
-    >>> from imgtools.datasets.sample_images import (
-    ...     create_rod_image,
-    ... )
-    >>> from imgtools.transforms import Rotate
-    >>> # Create a test image (64x64x64) with a line along the x-axis
-    >>> image = create_rod_image(axis="x")
-    >>> # Get the center point for rotation
-    >>> center = [32, 32, 32]  # Center of the image
-    >>> # Create a rotation transform (45° around z-axis)
-    >>> rotator = Rotate(
-    ...     rotation_centre=center,
-    ...     angles=[0.0, 0.0, math.pi / 4],
-    ... )
-    >>> rotated = rotator(image)
-    >>> print(f"Original size: {image.GetSize()}")
-    Original size: (64, 64, 64)
-    >>> print(f"Rotated size: {rotated.GetSize()}")
-    Rotated size: (64, 64, 64)
-    >>> # Multiple angles (rotate around all three axes)
-    >>> multi_rotator = Rotate(
-    ...     rotation_centre=center,
-    ...     angles=[
-    ...         math.pi / 6,
-    ...         math.pi / 4,
-    ...         math.pi / 3,
-    ...     ],
-    ... )
-    >>> multi_rotated = multi_rotator(image)
-    >>> print("Applied rotation around all three axes")
-    Applied rotation around all three axes
     """
 
     rotation_centre: list[int]
@@ -470,32 +350,6 @@ class InPlaneRotate(SpatialTransform):
         - "linear" for bi/trilinear interpolation (default)
         - "nearest" for nearest neighbour interpolation
         - "bspline" for order-3 b-spline interpolation
-
-    Examples
-    --------
-    >>> import SimpleITK as sitk
-    >>> import math
-    >>> from imgtools.datasets.sample_images import (
-    ...     create_cross_image,
-    ... )
-    >>> from imgtools.transforms import InPlaneRotate
-    >>> # Create a test image (128x128x32) with a cross pattern
-    >>> image = create_cross_image(size=(128, 128, 32))
-    >>> # Rotate 45 degrees in-plane (around z-axis)
-    >>> rotator = InPlaneRotate(angle=math.pi / 4)
-    >>> rotated = rotator(image)
-    >>> print(f"Original size: {image.GetSize()}")
-    Original size: (128, 128, 32)
-    >>> print(f"Rotated size: {rotated.GetSize()}")
-    Rotated size: (128, 128, 32)
-    >>> # Multiple rotations can be applied sequentially
-    >>> rotated_again = rotator(
-    ...     rotated
-    ... )  # Rotate another 45 degrees
-    >>> print(
-    ...     "Applied two sequential rotations (total 90 degrees)"
-    ... )
-    Applied two sequential rotations (total 90 degrees)
     """
 
     angle: float

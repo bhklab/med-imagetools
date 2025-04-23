@@ -9,6 +9,10 @@ import numpy as np
 import SimpleITK as sitk
 
 from imgtools.coretypes.base_masks import ROIMaskMapping, VectorMask
+from imgtools.coretypes.masktypes.roi_matching import (
+    ROIMatchFailurePolicy,
+    ROIMatchingError,
+)
 
 # from imgtools.modalities import Scan, Segmentation
 from imgtools.dicom import DicomInput, load_dicom
@@ -310,12 +314,60 @@ class SEG:
         reference_image: MedImage,
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
-        roi_identifier_mapping = self.extract_roi_identifiers()
+        """
+        Convert the SEG segments to a VectorMask using ROI matching.
 
-        matched_rois: list[tuple[str, list[Segment]]] = []
-        for key, matches in roi_matcher.match_rois(
+        Parameters
+        ----------
+        reference_image : MedImage
+            The reference image to align the mask with.
+        roi_matcher : ROIMatcher
+            The matcher used to match segment identifiers to ROI keys.
+
+        Returns
+        -------
+        VectorMask | None
+            A VectorMask representation of the matched segments, or None if
+            no matches were found and the ROIMatchFailurePolicy is not ERROR.
+
+        Raises
+        ------
+        SegmentationError
+            If no segments matched the specified patterns and the ROIMatchFailurePolicy is ERROR.
+        """
+        roi_identifier_mapping = self.extract_roi_identifiers()
+        roi_names = self.labels
+
+        matched_results = roi_matcher.match_rois(
             list(roi_identifier_mapping.keys())
-        ):
+        )
+
+        # Handle the case where no matches were found, according to the policy
+        if not matched_results:
+            message = "No ROIs matched any patterns in the match_map."
+            match roi_matcher.on_missing_regex:
+                case ROIMatchFailurePolicy.IGNORE:
+                    # Silently return None
+                    pass
+                case ROIMatchFailurePolicy.WARN:
+                    logger.warning(
+                        message,
+                        roi_names=list(roi_identifier_mapping.keys()),
+                        roi_matching=roi_matcher.match_map,
+                    )
+                case ROIMatchFailurePolicy.ERROR:
+                    # Raise an error
+                    errmsg = f"{message} Available ROIs: {list(roi_identifier_mapping.keys())}, "
+                    raise ROIMatchingError(
+                        errmsg,
+                        roi_names=roi_names,
+                        match_patterns=roi_matcher.match_map,
+                    )
+            return None
+
+        # Process the matches and build the segments
+        matched_rois: list[tuple[str, list[Segment]]] = []
+        for key, matches in matched_results:
             segs = [
                 self.segments[idx]
                 for idx in set(
@@ -323,11 +375,6 @@ class SEG:
                 )
             ]
             matched_rois.append((key, segs))
-
-        # we would only get to this part if roi_matcher.ROIMatchFailurePolicy
-        # is either 'ignore' or 'warn'
-        if len(matched_rois) == 0:
-            return None
 
         ref_image_indices = [
             reference_image.TransformPhysicalPointToIndex(pos)
@@ -351,7 +398,6 @@ class SEG:
             )
             # we use the pre-stored data in each segment
             # then for each z slice, we need to determine which index in the output mask
-
             for segment_of_interest in segment_matches:
                 # Use the pre-stored data_array from the segment
                 arr = segment_of_interest.data_array

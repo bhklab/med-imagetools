@@ -6,11 +6,9 @@ from typing import Any, Dict
 import SimpleITK as sitk
 from pydicom import dcmread
 
+from imgtools.coretypes import MedImage
 from imgtools.io.readers import read_dicom_series
 
-"""
-TODO:: Move metadata extraction to on load
-"""
 __all__ = ["Dose"]
 
 
@@ -31,7 +29,7 @@ def read_dicom_dose(
 
 
 @dataclass
-class Dose(sitk.Image):
+class Dose(MedImage):
     metadata: Dict[str, str]
 
     def __init__(self, image: sitk.Image, metadata: Dict[str, str]) -> None:

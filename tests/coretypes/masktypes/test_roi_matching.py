@@ -219,49 +219,49 @@ def test_multi_key_matches(roi_names, roi_matching):
     if "tumor" in result_dict:
         assert "GTVp" not in result_dict["tumor"]
 
-
-def test_missing_regex_policy(roi_names, caplog):
-    """Test the on_missing_regex parameter."""
-    # No ROIs that would match these patterns
-    roi_names = ["JUNK1", "JUNK2"]
-    roi_matching = {
-        "gtv": ["GTV.*"],
-        "ptv": ["PTV.*"],
-    }
+# This has now been moved to the RTStructureset and SEG class to_vector_mask methods
+# def test_missing_regex_policy(roi_names, caplog):
+#     """Test the on_missing_regex parameter."""
+#     # No ROIs that would match these patterns
+#     roi_names = ["JUNK1", "JUNK2"]
+#     roi_matching = {
+#         "gtv": ["GTV.*"],
+#         "ptv": ["PTV.*"],
+#     }
     
-    # Test with IGNORE policy
-    results = handle_roi_matching(
-        roi_names=roi_names,
-        roi_matching=roi_matching,
-        strategy=ROIMatchStrategy.MERGE,
-        on_missing_regex=ROIMatchFailurePolicy.IGNORE,
-    )
-    assert len(results) == 0  # No matches
+#     # Test with IGNORE policy
+#     results = handle_roi_matching(
+#         roi_names=roi_names,
+#         roi_matching=roi_matching,
+#         strategy=ROIMatchStrategy.MERGE,
+#         on_missing_regex=ROIMatchFailurePolicy.IGNORE,
+#     )
+#     assert len(results) == 0  # No matches
 
-    # need to propagate the logger to capture the logs
-    imgtools_logger = logging.getLogger("imgtools")
-    imgtools_logger.setLevel(logging.DEBUG)
-    imgtools_logger.propagate = True
-    # Test with WARN policy
-    with caplog.at_level(logging.WARNING):
-        results = handle_roi_matching(
-            roi_names=roi_names,
-            roi_matching=roi_matching,
-            strategy=ROIMatchStrategy.MERGE,
-            on_missing_regex=ROIMatchFailurePolicy.WARN,
-        )
-        assert len(results) == 0  # No matches
-        # Check that a warning was logged
-        assert "No ROIs matched any patterns" in caplog.text
+#     # need to propagate the logger to capture the logs
+#     imgtools_logger = logging.getLogger("imgtools")
+#     imgtools_logger.setLevel(logging.DEBUG)
+#     imgtools_logger.propagate = True
+#     # Test with WARN policy
+#     with caplog.at_level(logging.WARNING):
+#         results = handle_roi_matching(
+#             roi_names=roi_names,
+#             roi_matching=roi_matching,
+#             strategy=ROIMatchStrategy.MERGE,
+#             on_missing_regex=ROIMatchFailurePolicy.WARN,
+#         )
+#         assert len(results) == 0  # No matches
+#         # Check that a warning was logged
+#         assert "No ROIs matched any patterns" in caplog.text
     
-    # Test with ERROR policy
-    with pytest.raises(ValueError, match="No ROIs matched any patterns"):
-        handle_roi_matching(
-            roi_names=roi_names,
-            roi_matching=roi_matching,
-            strategy=ROIMatchStrategy.MERGE,
-            on_missing_regex=ROIMatchFailurePolicy.ERROR,
-        )
+#     # Test with ERROR policy
+#     with pytest.raises(ValueError, match="No ROIs matched any patterns"):
+#         handle_roi_matching(
+#             roi_names=roi_names,
+#             roi_matching=roi_matching,
+#             strategy=ROIMatchStrategy.MERGE,
+#             on_missing_regex=ROIMatchFailurePolicy.ERROR,
+#         )
 
 
 def test_roi_matcher_class_with_new_params():
@@ -278,7 +278,6 @@ def test_roi_matcher_class_with_new_params():
     # Test that the parameters are passed correctly to handle_roi_matching
     # when calling match_rois (we can't easily test this directly, so we'll
     # use a test case where we know the behavior differs)
-    
     # This should not raise an error even with on_missing_regex=ERROR
     # because there are matches
     results = matcher.match_rois(["GTVp"])
@@ -292,9 +291,6 @@ def test_roi_matcher_class_with_new_params():
     if "tumor" in result_dict:
         assert "GTVp" not in result_dict["tumor"]
     
-    # This should raise an error with on_missing_regex=ERROR
-    with pytest.raises(ValueError, match="No ROIs matched any patterns"):
-        matcher.match_rois(["JUNK1", "JUNK2"])
 
 
 def test_keep_first_with_no_multi_key_matches():

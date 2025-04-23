@@ -210,7 +210,6 @@ class ROIMatcher(BaseModel):
             self.handling_strategy,
             ignore_case=self.ignore_case,
             allow_multi_key_matches=self.allow_multi_key_matches,
-            on_missing_regex=self.on_missing_regex,
         )
 
 
@@ -220,7 +219,6 @@ def handle_roi_matching(  # noqa: PLR0912
     strategy: ROIMatchStrategy,
     ignore_case: bool = True,
     allow_multi_key_matches: bool = True,
-    on_missing_regex: ROIMatchFailurePolicy = ROIMatchFailurePolicy.WARN,
 ) -> list[tuple[str, list[str]]]:
     """
     Match ROI names against regex patterns and apply a handling strategy.
@@ -244,6 +242,7 @@ def handle_roi_matching(  # noqa: PLR0912
         IGNORE: Silently continue execution
         WARN: Log a warning but continue execution
         ERROR: Raise an error and halt execution
+        Note: This parameter is processed at the caller level, not within this function.
 
     Returns
     -------
@@ -302,12 +301,6 @@ def handle_roi_matching(  # noqa: PLR0912
             **though technically, GTVp_2 wouldve matched in 'primary', since its KEEP_FIRST,**
             **its still available for 'gtv'**
             - KEEP_FIRST: [('primary', ['GTVp']), ('gtv', ['GTVp_2'])]
-
-    Raises
-    ------
-    ROIMatchingError
-        If no ROIs match any patterns and the on_missing_regex policy is ERROR.
-        This error includes detailed information about the ROIs and patterns that failed to match.
     """
     flags = re.IGNORECASE if ignore_case else 0
 
@@ -322,19 +315,10 @@ def handle_roi_matching(  # noqa: PLR0912
             if _match_pattern(roi_name, pattern):
                 raw_results[key].append(roi_name)
 
-    any_matches_found = any(raw_results.values())
-    # Handle the case where no matches were found
-    if not any_matches_found:
-        message = "No ROIs matched any patterns in the match_map."
-        match on_missing_regex:
-            case ROIMatchFailurePolicy.IGNORE:
-                pass
-            case ROIMatchFailurePolicy.WARN:
-                logger.warning(
-                    message, roi_names=roi_names, roi_matching=roi_matching
-                )
-            case ROIMatchFailurePolicy.ERROR:
-                raise ROIMatchingError(message, roi_names, roi_matching)
+    # If no matches were found, return an empty list
+    # The ROIMatchFailurePolicy is now handled in the caller
+    if not any(raw_results.values()):
+        return []
 
     # Apply the selected strategy to the filtered results
     # TODO:: this is a ugly mess, apologies if youre about to read this

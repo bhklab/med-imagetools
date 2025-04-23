@@ -163,17 +163,13 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             # OVERWRITE would have deleted the file
             and self.existing_file_mode == ExistingFileMode.SKIP
         ):
-            logger.debug(
-                "File exists, skipping.", kwargs=kwargs, out_path=out_path
-            )
+            logger.debug("File exists, skipping.", out_path=out_path)
             return out_path
 
         try:
             logger.debug(
                 f"Saving image to {out_path}.",
-                kwargs=kwargs,
                 out_path=out_path,
-                compression_level=self.compression_level,
             )
             sitk.WriteImage(
                 image,
@@ -184,11 +180,6 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         except Exception as e:
             msg = f"Error writing image to file {out_path}: {e}"
             raise NiftiWriterIOError(msg) from e
-        else:
-            logger.info("Image saved successfully.", out_path=out_path)
-
-        # Log and dump metadata to CSV
-        logger.debug(f"Image saved successfully: {out_path}")
 
         self.add_to_index(
             out_path,
