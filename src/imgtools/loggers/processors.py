@@ -2,7 +2,7 @@
 import contextlib
 import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import pytz
 from structlog.types import EventDict
