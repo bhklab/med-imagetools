@@ -144,14 +144,15 @@ def read_dicom_auto(
                 directory=path_obj,
                 recursive=kwargs.pop("recursive", False),
                 limit=1,
-            )[0]
+            )
             if not first_file:
                 errmsg = (
                     f"No DICOM files found in directory: {path_obj}. "
                     "Please check the path and try again."
                 )
                 raise FileNotFoundError(errmsg)
-            dcm = dcmread(first_file, stop_before_pixels=True)
+            # find_dicoms returns a list, even if limit=1
+            dcm = dcmread(first_file[0], stop_before_pixels=True)
         else:
             # It's a file
             dcm = dcmread(path, stop_before_pixels=True)

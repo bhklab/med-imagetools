@@ -79,7 +79,10 @@ def parse_spacing(ctx, param, value): # type: ignore
     "-m",
     type=str,
     required=True, 
-    help="List of modalities to include"
+    help=(
+        "List of modalities to process, in hierarchical order."
+        " For example, '--modalities CT,PT,RTSTRUCT' or '--modalities MR,SEG'"
+    )
 )
 @click.option(
     "--existing-file-mode", 
@@ -149,14 +152,18 @@ def parse_spacing(ctx, param, value): # type: ignore
     "--roi-match-map", 
     "-rmap",
     multiple=True, 
-    help="ROI matching patterns in format 'key:pattern1,pattern2,...'"
+    help=(
+        "ROI matching patterns in format 'key:pattern1,pattern2,...'."
+        " Can be used multiple times to specify multiple roi mappings."
+        " CLI arguments take precedence over entries in the YAML file, if common keys exist."
+    )
 )
 @click.option(
     "--roi-match-yaml", 
     "-ryaml",
     type=click.Path(file_okay=True, dir_okay=False, readable=True, path_type=Path, resolve_path=True),
     default=None,
-    help="Path to ROI YAML file."
+    help="Path to YAML file containing ROI matching patterns."
 )
 @click.help_option(
     "-h",

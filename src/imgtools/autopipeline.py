@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -109,7 +110,6 @@ def process_one_sample(
     # TODO:: the logic for all the result information is a bit messy
     # rework it to pass in custom exception objects that get parsed in the
     # to_dict method
-    import time
 
     start_time = time.time()
 
@@ -223,7 +223,7 @@ class Autopipeline:
         Parameters
         ----------
         input_directory : str | Path
-            Directory containing the input files
+            Directory containing the DICOM files (or subdirectories with DICOM files)
         output_directory : str | Path
             Directory to save the output nifti files
         output_filename_format : str
@@ -292,16 +292,10 @@ class Autopipeline:
         logger.info("Pipeline initialized")
 
     def run(
-        self, report_path: Optional[Path] = None
+        self,
     ) -> Dict[str, List[ProcessSampleResult]]:
         """
         Run the pipeline on all samples.
-
-        Parameters
-        ----------
-        report_path : Optional[Path], default=None
-            Directory where to save the success and failure reports.
-            If None, reports will be saved in the output directory.
 
         Returns
         -------
