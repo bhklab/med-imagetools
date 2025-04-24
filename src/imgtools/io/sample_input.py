@@ -295,6 +295,37 @@ class SampleInput(BaseModel):
         folder: str,
         load_subseries: bool = False,
     ) -> list[MedImageT]:
+        """
+        Read a medical image series from DICOM files.
+
+        This function loads one or more medical images from DICOM files based on their series UID.
+
+        First, we locate the directory containing the DICOM files, then we extract file paths
+        for all instances in the series. If load_subseries is True, we'll load each subseries
+        as a separate image; otherwise, we'll combine all instances into a single image.
+
+        Parameters
+        ----------
+        series_uid : str
+            Unique identifier for the DICOM series to load
+        modality : str
+            The imaging modality (CT, MR, PT, etc.) of the series
+        folder : str
+            The folder path containing the DICOM files
+        load_subseries : bool, default=False
+            Whether to load subseries as separate images
+
+        Returns
+        -------
+        list[MedImageT]
+            A list of loaded medical images, one per subseries if load_subseries=True,
+            otherwise a list containing a single combined image
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified folder does not exist
+        """
         # we assume that all subseries are in the same directory
         root_dir = self.directory.parent / folder
 
@@ -347,6 +378,45 @@ class SampleInput(BaseModel):
         sample: Sequence[SeriesNode],
         load_subseries: bool = False,
     ) -> Sequence[MedImage | VectorMask]:
+        """
+        Load a complete sample of medical images and masks from DICOM series.
+
+        This function processes a collection of DICOM series and loads them as
+        `MedImage` or `VectorMask` objects. 
+
+        It automatically identifies a reference image (preferring
+        CT, then MR, then PT) and loads all other modalities relative to this reference.
+
+        First, we group the input series by modality, then we identify and load a reference
+        image. 
+
+        All other series (RTSTRUCT, SEG, additional CT/MR/PT) are loaded with
+        reference to the primary image to ensure proper alignment.
+
+        Parameters
+        ----------
+        sample : Sequence[SeriesNode]
+            Collection of series nodes representing the DICOM series to load
+        load_subseries : bool, default=False
+            Whether to load subseries as separate images
+
+        Returns
+        -------
+        Sequence[MedImage | VectorMask]
+            Collection of loaded medical images and vector masks, with the reference
+            image always as the first element
+
+        Raises
+        ------
+        ValueError
+            If no suitable reference image (CT, MR, or PT) is found
+
+        Notes
+        -----
+        RTSTRUCT and SEG modalities are loaded as VectorMask using the reference image
+        for spatial alignment. Other modalities (CT, MR, PT, RTDOSE) are loaded as
+        MedImage objects.
+        """
         # group list by modality
         by_mod: defaultdict[str, list[SeriesNode]] = defaultdict(list)
         for series in sample:
