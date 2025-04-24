@@ -680,9 +680,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#branch" class="md-nav__link">
+  <a href="#interlacer" class="md-nav__link">
     <span class="md-ellipsis">
-      Branch
+      Interlacer
     </span>
   </a>
   
@@ -697,15 +697,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#interlacer" class="md-nav__link">
-    <span class="md-ellipsis">
-      Interlacer
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -715,6 +706,15 @@
   <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
       Usage Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Rules and Dependencies
     </span>
   </a>
   
@@ -1353,9 +1353,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#branch" class="md-nav__link">
+  <a href="#interlacer" class="md-nav__link">
     <span class="md-ellipsis">
-      Branch
+      Interlacer
     </span>
   </a>
   
@@ -1370,15 +1370,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#interlacer" class="md-nav__link">
-    <span class="md-ellipsis">
-      Interlacer
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1388,6 +1379,15 @@
   <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
       Usage Example
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Rules and Dependencies
     </span>
   </a>
   
@@ -1435,7 +1435,12 @@
 
 
 <h1 id="interlacer-module">Interlacer Module</h1>
-<p>The <strong>Interlacer</strong> module builds and searches a tree-like structure made from DICOM series using metadata links. This makes it easier to group, explore, and work with medical imaging data. </p>
+<p>The <strong>Interlacer</strong> module builds and searches a tree-like structure made from
+DICOM series using metadata links. </p>
+<p>This tool enables efficient grouping, querying, and vizualization of medical
+imaging series, making it easier to understand the complex
+relationships between various imaging modalities (CT, MR, PT) and derived
+objects (RTSTRUCT, RTDOSE, SEG)</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This module is available in <code>med-imagetools 2.0</code> and later versions.
@@ -1443,20 +1448,36 @@ It replaces the now deprecated <code>DataGraph</code> module from <code>med-imag
 </div>
 <hr />
 <h2 id="overview">Overview</h2>
-<p>This module turns DICOM series into a set of trees (a forest), using metadata to connect related series. This helps users follow the relationships between series — for example, linking a <code>CT</code> scan to its <code>RTSTRUCT</code> and <code>RTDOSE</code> — and makes it easier to run queries or group series by type.</p>
+<p>This module turns DICOM series into a set of trees (a forest), using metadata
+to connect related series. This helps users follow the relationships between
+series — for example, linking a <code>CT</code> scan to its <code>RTSTRUCT</code> and <code>RTDOSE</code> —
+and makes it easier to run queries or group series by type.</p>
 <hr />
 <h2 id="main-classes">Main Classes</h2>
 <h3 id="seriesnode"><code>SeriesNode</code></h3>
-<p>Represents one DICOM series and its connections to other related series. Each node holds:</p>
+<p>Represents an individual DICOM series and its hierarchical relationships:</p>
 <ul>
-<li>Basic metadata like <code>SeriesInstanceUID</code> and <code>Modality</code></li>
-<li>Links to child nodes </li>
+<li><strong>Attributes</strong>:</li>
+<li><code>SeriesInstanceUID</code></li>
+<li><code>Modality</code></li>
+<li><code>PatientID</code></li>
+<li><code>StudyInstanceUID</code></li>
+<li><code>folder</code>: Path to the folder containing the DICOM files</li>
+<li><code>ReferencedSeriesUID</code>: Series that this one references, if any</li>
+<li><code>children</code>: List of child nodes representing referenced series<ul>
 <li>i.e a <code>CT</code> series might have 1 or more links to <code>RTSTRUCT</code> and/or  <code>PT</code> series</li>
 </ul>
+</li>
+</ul>
 <hr />
-<h3 id="branch"><code>Branch</code></h3>
-<p>Represents a single path through the tree, showing an ordered set of modalities. This is useful for queries.</p>
-<hr />
+<h3 id="interlacer"><code>Interlacer</code></h3>
+<p>Key features:</p>
+<ul>
+<li><strong>Query validation</strong>: Ensures that modality queries follow DICOM standard requirements</li>
+<li><strong>Interactive visualization</strong>: Creates HTML-based network graphs of relationships</li>
+<li><strong>Rich text console display</strong>: Pretty-prints the hierarchy with color-coding</li>
+<li><strong>Dependency validation</strong>: Enforces rules like "RTSTRUCT requires CT, MR, or PT"</li>
+</ul>
 <h3 id="grouping-series">Grouping Series</h3>
 <p>The Interlacer currently groups series using <strong>Referenced Series UID</strong>, which links series based on their metadata references (i.e the <code>ReferencedSeriesInstanceUID</code> tag in <code>RTSTRUCT</code>s). This creates a hierarchical structure showing the relationships between different series.</p>
 <div class="admonition note">
@@ -1469,44 +1490,48 @@ It replaces the now deprecated <code>DataGraph</code> module from <code>med-imag
 <p>This enhancement is being tracked in <a href="https://github.com/bhklab/med-imagetools/issues/318">GitHub issue #318</a>.</p>
 </div>
 <hr />
-<h3 id="interlacer"><code>Interlacer</code></h3>
-<p>This is the main class. It handles:</p>
-<ul>
-<li><strong>Building the forest</strong> from a list of DICOM series  </li>
-<li><strong>Running queries</strong> to find certain modality paths (like "CT,RTSTRUCT")  </li>
-<li><strong>Visualizing the forest</strong> to see how series are connected</li>
-</ul>
-<hr />
 <h2 id="usage-example">Usage Example</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">rich</span><span class="w"> </span><span class="kn">import</span> <span class="nb">print</span>  <span class="c1"># noqa</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">CrawlerSettings</span><span class="p">,</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">Crawler</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># Define path to DICOM directory</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="n">dicom_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># Create crawler settings and crawler instance</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">crawler_settings</span> <span class="o">=</span> <span class="n">CrawlerSettings</span><span class="p">(</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">dicom_dir</span><span class="o">=</span><span class="n">dicom_dir</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">force</span><span class="o">=</span><span class="kc">False</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="n">crawler</span> <span class="o">=</span> <span class="n">Crawler</span><span class="p">(</span><span class="n">crawler_settings</span><span class="p">)</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">interlacer</span> <span class="o">=</span> <span class="n">Interlacer</span><span class="p">(</span><span class="n">crawler</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crawler</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Define path to DICOM directory</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">dicom_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Create crawler and scan the directory</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">crawler</span> <span class="o">=</span> <span class="n">Crawler</span><span class="p">(</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">dicom_dir</span><span class="o">=</span><span class="n">dicom_dir</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">crawler</span><span class="o">.</span><span class="n">crawl</span><span class="p">()</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Create the Interlacer from crawler results</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">interlacer</span> <span class="o">=</span> <span class="n">Interlacer</span><span class="p">(</span><span class="n">crawler</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Visualize the forest structure</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">print_tree</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span>  <span class="c1"># Console visualization</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Visualize the constructed forest</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">print_tree</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">visualize_forest</span><span class="p">(</span><span class="n">dicom_dir</span> <span class="o">/</span> <span class="s2">&quot;interlacer.html&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Query for specific modality combinations</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Find CT series with associated RTSTRUCT objects</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">ct_rtstruct_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;CT,RTSTRUCT&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Query modality chains (e.g., CT followed by RTSTRUCT)</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;CT,RTSTRUCT&quot;</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="n">samples</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Get all possible series combinations</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">all_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># or interlacer.query(&quot;all&quot;)</span>
 </code></pre></div>
+<h2 id="query-rules-and-dependencies">Query Rules and Dependencies</h2>
+<p>The Interlacer enforces the following modality dependency rules:</p>
+<ol>
+<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
+<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
+</ol>
+<p>Examples of valid and invalid queries:</p>
+<ul>
+<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
+<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
+<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
+<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
+</ul>
 <h2 id="example-output">Example Output</h2>
 <p><strong>The raw graph of all series in the DICOM directory:</strong></p>
 <p><img alt="Unstructured Data" src="../../../images/unstructured.png" style="background: white; height:125%;" /></p>
@@ -1529,11 +1554,12 @@ It replaces the now deprecated <code>DataGraph</code> module from <code>med-imag
   <span class="md-source-file__fact">
     <span class="md-icon" title="Contributors">
       
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9 3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3 3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3 3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13zM0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9-.59.68-.95 1.62-.95 2.65V20zm24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65 2.56.34 4.45 1.51 4.45 2.9z"/></svg>
       
     </span>
     <nav>
       
+        <a href="mailto:jermiahjoseph98@gmail.com">Jermiah Joseph</a>, 
         <a href="mailto:72413722+joshuasiraj@users.noreply.github.com">Joshua Siraj</a>
     </nav>
   </span>
