@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 
 from joblib import Parallel, delayed  # type: ignore
+from tqdm import tqdm
 
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
@@ -32,25 +35,105 @@ if TYPE_CHECKING:
     from imgtools.dicom.interlacer import SeriesNode
 
 
+@dataclass
+class ProcessSampleResult:
+    """Result of processing a single sample."""
+
+    # Sample identifier information
+    sample_id: str
+    sample: Sequence[SeriesNode]  # Store the entire sample
+
+    # Output information
+    output_files: List[Path] = field(default_factory=list)
+
+    # Status information
+    success: bool = False
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+    error_details: Optional[Dict] = None
+    processing_time: Optional[float] = None
+
+    @property
+    def has_error(self) -> bool:
+        """Check if the processing had an error."""
+        return not self.success or self.error_message is not None
+
+    def to_dict(self) -> Dict:
+        """Convert the result to a dictionary."""
+
+        base_dict = {
+            "SampleID": self.sample_id,
+            "PatientID": self.sample[0].PatientID if self.sample else None,
+            "samples": [
+                {
+                    "SeriesInstanceUID": s.SeriesInstanceUID,
+                    "Modality": s.Modality,
+                    "folder": s.folder,
+                }
+                for s in self.sample
+            ],
+            "processing_time": f"{self.processing_time:.2f}s",
+        }
+
+        if self.success:
+            return {
+                **base_dict,
+                "output_files": [str(f) for f in self.output_files],
+            }
+        else:
+            return {
+                **base_dict,
+                "error_type": self.error_type,
+                "error_message": self.error_message,
+                "error_details": self.error_details,
+            }
+
+
 def process_one_sample(
     args: tuple[
-        str, Sequence[SeriesNode], SampleInput, Transformer, SampleOutput
+        str,
+        Sequence[SeriesNode],
+        SampleInput,
+        Transformer,
+        SampleOutput,
     ],
-) -> Sequence[Path]:
+) -> ProcessSampleResult:
     """
     Process a single sample.
+
+    Returns
+    -------
+    ProcessSampleResult
+        Result of processing the sample, including success/failure information
     """
+    # TODO:: the logic for all the result information is a bit messy
+    # rework it to pass in custom exception objects that get parsed in the
+    # to_dict method
+    import time
+
+    start_time = time.time()
+
     sample: Sequence[SeriesNode]
     idx, sample, sample_input, transformer, sample_output = args
+
+    # Initialize the result with sample information
+    result = ProcessSampleResult(
+        sample_id=idx,
+        sample=sample,  # Store the entire sample
+    )
+
     try:
         # Load the sample
         sample_images: Sequence[MedImage | VectorMask] = (
             sample_input.load_sample(sample)
         )
     except Exception as e:
+        error_message = str(e)
         logger.exception("Failed to load sample", e=e)
-
-        return []
+        result.error_type = "LoadError"
+        result.error_message = f"Failed to load sample: {error_message}"
+        result.processing_time = time.time() - start_time
+        return result
 
     # by this point all images SHOULD have some bare minimum
     # metadata attribute, which should have the SeriesInstanceUID
@@ -61,25 +144,49 @@ def process_one_sample(
     loaded_series_instance_uids = {
         s.metadata.get("SeriesInstanceUID", None) for s in sample_images
     }
+
     # check if our input samples is a subset of our loaded sample_images
     if not series_instance_uids.issubset(loaded_series_instance_uids):
-        logger.warning(
+        error_msg = (
             f"Loaded {len(loaded_series_instance_uids)} sample"
             f" images do not match input samples {len(series_instance_uids)}. "
             "This most likely may be due to failures to match ROIs. "
-            f"The {len(sample_images)} will not be processed or saved. ",
-            loaded_series=loaded_series_instance_uids,
-            input_samples=sample,
+            f"The {len(sample_images)} will not be processed or saved."
         )
-        return []
-    transformed_images = transformer(sample_images)
+        result.error_type = "ROIMatchError"
+        result.error_message = error_msg
+        result.error_details = {
+            "loaded_series": list(loaded_series_instance_uids),
+            "input_series": list(series_instance_uids),
+        }
+        result.processing_time = time.time() - start_time
+        return result
 
-    saved_files = sample_output(
-        transformed_images,
-        SampleNumber=idx,
-    )
+    try:
+        transformed_images = transformer(sample_images)
+    except Exception as e:
+        error_message = str(e)
+        result.error_type = "TransformError"
+        result.error_message = f"Failed during transformation: {error_message}"
+        result.processing_time = time.time() - start_time
+        return result
 
-    return saved_files
+    try:
+        saved_files = sample_output(
+            transformed_images,
+            SampleNumber=idx,
+        )
+        result.output_files = list(saved_files)
+        result.success = True
+    except Exception as e:
+        error_message = str(e)
+        result.error_type = "SaveError"
+        result.error_message = f"Failed to save output: {error_message}"
+        result.processing_time = time.time() - start_time
+        return result
+
+    result.processing_time = time.time() - start_time
+    return result
 
 
 class DeltaPipeline:
@@ -184,14 +291,34 @@ class DeltaPipeline:
 
         logger.info("Pipeline initialized")
 
-    def run(self, first_n: int | None = None) -> Sequence[Path]:
+    def run(
+        self, report_path: Optional[Path] = None
+    ) -> Dict[str, List[ProcessSampleResult]]:
         """
-        Run the pipeline.
+        Run the pipeline on all samples.
+
+        Parameters
+        ----------
+        report_path : Optional[Path], default=None
+            Directory where to save the success and failure reports.
+            If None, reports will be saved in the output directory.
+
+        Returns
+        -------
+        Dict[str, List[ProcessSampleResult]]
+            Dictionary with 'success' and 'failure' keys, each containing a list of
+            ProcessSampleResult objects.
         """
+        import json
+
         # Load the samples
         samples = self.input.query()
         samples = sorted(samples, key=lambda x: x[0].PatientID.lower())
 
+        # Create a timestamp for this run
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Prepare arguments for parallel processing
         arg_tuples = [
             (
                 f"{idx:04}",
@@ -203,16 +330,75 @@ class DeltaPipeline:
             for idx, sample in enumerate(samples)
         ]
 
-        with tqdm_logging_redirect():
-            result = Parallel(n_jobs=self.input.n_jobs, backend="loky")(
-                delayed(process_one_sample)(arg)
-                for arg in (
-                    arg_tuples[:first_n] if first_n is not None else arg_tuples
-                )
-            )
-            logger.info(f"Processed {len(result)} samples.")
+        # Lists to track results
+        all_results = []
+        successful_results = []
+        failed_results = []
 
-        return result
+        with (
+            tqdm_logging_redirect(),
+            tqdm(
+                total=len(arg_tuples),
+                desc="Processing samples",
+                unit="sample",
+            ) as pbar,
+        ):
+            # Process samples in parallel
+            for result in Parallel(
+                n_jobs=self.input.n_jobs,
+                backend="loky",
+                return_as="generator",
+            )(delayed(process_one_sample)(arg) for arg in arg_tuples):
+                all_results.append(result)
+
+                # Update progress bar and track results by success/failure
+                if result.success:
+                    successful_results.append(result)
+                    pbar.update(1)
+                else:
+                    failed_results.append(result)
+                    pbar.update(0)
+
+        # Log summary information
+        success_count = len(successful_results)
+        failure_count = len(failed_results)
+        total_count = len(all_results)
+
+        logger.info(
+            f"Processing complete. {success_count} successful, {failure_count} failed "
+            f"out of {total_count} total samples ({success_count / total_count * 100:.1f}% success rate)."
+        )
+
+        index_file = self.output.writer.index_file
+        # TODO:: discuss how we want to name these files
+        # Generate report file names
+        success_file = index_file.with_name(
+            f"{self.output.writer.root_directory.name}_successful_{timestamp}.json"
+        )
+        failure_file = index_file.with_name(
+            f"{self.output.writer.root_directory.name}_failed_{timestamp}.json"
+        )
+
+        # Convert results to dictionaries for JSON serialization
+        success_dicts = [result.to_dict() for result in successful_results]
+        failure_dicts = [result.to_dict() for result in failed_results]
+
+        # Write reports
+        # with open(success_file, "w") as f:
+        with success_file.open("w", encoding="utf-8") as f:
+            json.dump(success_dicts, f, indent=2)
+        logger.info(f"Detailed success report saved to {success_file}")
+
+        # if no failures, we can skip writing the failure file
+        if failure_count == 0:
+            return {"success": successful_results, "failure": []}
+
+        with failure_file.open("w", encoding="utf-8") as f:
+            json.dump(failure_dicts, f, indent=2)
+        logger.info(f"Detailed failure report saved to {failure_file}")
+
+        # Return all results categorized
+        return {"success": successful_results, "failure": failed_results}
 
     def __rich_repr__(self) -> rich.repr.Result:
         """
@@ -229,7 +415,7 @@ if __name__ == "__main__":
     from rich import print  # noqa
 
     # Interlacer parameters
-    dataset_name = "CPTAC-UCEC"
+    dataset_name = "RADCURE"
 
     shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
     pipeline = DeltaPipeline(
@@ -238,29 +424,29 @@ if __name__ == "__main__":
         existing_file_mode=ExistingFileMode.OVERWRITE,
         n_jobs=10,
         modalities=["all"],
-        # roi_match_map={
-        #     "GTV": ["GTVp"],
-        #     "NODES": ["GTVn_.*"],
-        #     "LPLEXUS": ["BrachialPlex_L"],
-        #     "RPLEXUS": ["BrachialPlex_R"],
-        #     "BRAINSTEM": ["Brainstem"],
-        #     "LACOUSTIC": ["Cochlea_L"],
-        #     "RACOUSTIC": ["Cochlea_R"],
-        #     "ESOPHAGUS": ["Esophagus"],
-        #     "LEYE": ["Eye_L"],
-        #     "REYE": ["Eye_R"],
-        #     "LARYNX": ["Larynx"],
-        #     "LLENS": ["Lens_L"],
-        #     "RLENS": ["Lens_R"],
-        #     "LIPS": ["Lips"],
-        #     "MANDIBLE": ["Mandible_Bone"],
-        #     "LOPTIC": ["Nrv_Optic_L"],
-        #     "ROPTIC": ["Nrv_Optic_R"],
-        #     "CHIASM": ["OpticChiasm"],
-        #     "LPAROTID": ["Parotid_L"],
-        #     "RPAROTID": ["Parotid_R"],
-        #     "CORD": ["SpinalCord"],
-        # },
+        roi_match_map={
+            "GTV": ["GTVp"],
+            "NODES": ["GTVn_.*"],
+            "LPLEXUS": ["BrachialPlex_L"],
+            "RPLEXUS": ["BrachialPlex_R"],
+            "BRAINSTEM": ["Brainstem"],
+            "LACOUSTIC": ["Cochlea_L"],
+            "RACOUSTIC": ["Cochlea_R"],
+            "ESOPHAGUS": ["Esophagus"],
+            "LEYE": ["Eye_L"],
+            "REYE": ["Eye_R"],
+            "LARYNX": ["Larynx"],
+            "LLENS": ["Lens_L"],
+            "RLENS": ["Lens_R"],
+            "LIPS": ["Lips"],
+            "MANDIBLE": ["Mandible_Bone"],
+            "LOPTIC": ["Nrv_Optic_L"],
+            "ROPTIC": ["Nrv_Optic_R"],
+            "CHIASM": ["OpticChiasm"],
+            "LPAROTID": ["Parotid_L"],
+            "RPAROTID": ["Parotid_R"],
+            "CORD": ["SpinalCord"],
+        },
         roi_allow_multi_key_matches=False,
         roi_ignore_case=True,
         roi_handling_strategy=ROIMatchStrategy.SEPARATE,

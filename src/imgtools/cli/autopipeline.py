@@ -260,8 +260,6 @@ def autopipeline(
     except Exception as e:
         logger.exception(f"Error running pipeline: {str(e)}")
         raise click.Abort() from e
-    click.echo(f"Processed {len(results)} samples.")
-
 
 if __name__ == "__main__":
     autopipeline()
