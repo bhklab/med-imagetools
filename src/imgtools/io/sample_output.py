@@ -58,11 +58,6 @@ class SampleOutput(BaseModel):
         description="Path where output files will be saved. Absolute path or relative to the current working directory.",
         title="Output Directory",
         examples=["output/processed_scans", "/absolute/path/to/output"],
-        json_schema_extra={
-            "format": "path",
-            "pattern": "^[^\\0]+$",  # Non-null characters
-            "x-descriptive": "Directory where processed files will be saved",
-        },
     )
     filename_format: str = Field(
         default=DEFAULT_FILENAME_FORMAT,
@@ -72,17 +67,11 @@ class SampleOutput(BaseModel):
             "{PatientID}/{Modality}/{ImageID}.nii.gz",
             "{PatientID}/roi_{roi_key}.nii.gz",
         ],
-        json_schema_extra={
-            "x-display-name": "Output Filename Pattern",
-        },
     )
     existing_file_mode: ExistingFileMode = Field(
         ExistingFileMode.FAIL,
         description="How to handle existing files: FAIL (raise error), SKIP (don't overwrite), or OVERWRITE (replace existing files).",
         title="Existing File Handling",
-        json_schema_extra={
-            "x-display-name": "File Conflict Resolution",
-        },
     )
     extra_context: Dict[str, Any] = Field(
         default_factory=dict,
@@ -91,9 +80,6 @@ class SampleOutput(BaseModel):
         examples=[
             {"dataset": "NSCLC-Radiomics", "processing_date": "2025-04-22"}
         ],
-        json_schema_extra={
-            "x-display-name": "Additional Context Fields",
-        },
     )
 
     _writer: AbstractBaseWriter | None = PrivateAttr(default=None)
