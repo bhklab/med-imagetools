@@ -142,9 +142,7 @@ def process_one_sample(
 
     try:
         # Load the sample
-        sample_images: Sequence[MedImage | VectorMask] = sample_input(
-            sample
-        )
+        sample_images: Sequence[MedImage | VectorMask] = sample_input(sample)
     except Exception as e:
         error_message = str(e)
         logger.exception("Failed to load sample", e=e)
