@@ -26,7 +26,7 @@ from rich.theme import Theme
 from rich.tree import Tree as RichTree
 
 from imgtools.loggers import logger
-from imgtools.utils import OptionalImportError, optional_import, timer
+from imgtools.utils import OptionalImportError, optional_import
 
 pyvis, _pyvis_available = optional_import("pyvis")
 

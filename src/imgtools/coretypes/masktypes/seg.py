@@ -427,8 +427,8 @@ class SEG:
                     roi_key=roi_key,
                     roi_names=segment_matches,
                     image_id=roi_key
-                        if roi_matcher.handling_strategy.value == "merge"
-                        else f"{roi_key}__[{segment_matches[0].label}::{segment_matches[0].description}]",
+                    if roi_matcher.handling_strategy.value == "merge"
+                    else f"{roi_key}__[{segment_matches[0].label}::{segment_matches[0].description}]",
                 )
             mask_images.append(sitk.GetImageFromArray(mask_array_3d))
 
