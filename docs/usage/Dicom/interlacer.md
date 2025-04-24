@@ -1,6 +1,12 @@
 # Interlacer Module
 
-The **Interlacer** module builds and searches a tree-like structure made from DICOM series using metadata links. This makes it easier to group, explore, and work with medical imaging data. 
+The **Interlacer** module builds and searches a tree-like structure made from
+DICOM series using metadata links. 
+
+This tool enables efficient grouping, querying, and vizualization of medical
+imaging series, making it easier to understand the complex
+relationships between various imaging modalities (CT, MR, PT) and derived
+objects (RTSTRUCT, RTDOSE, SEG)
 
 
 !!! note 
@@ -12,7 +18,10 @@ The **Interlacer** module builds and searches a tree-like structure made from DI
 
 ## Overview
 
-This module turns DICOM series into a set of trees (a forest), using metadata to connect related series. This helps users follow the relationships between series — for example, linking a `CT` scan to its `RTSTRUCT` and `RTDOSE` — and makes it easier to run queries or group series by type.
+This module turns DICOM series into a set of trees (a forest), using metadata
+to connect related series. This helps users follow the relationships between
+series — for example, linking a `CT` scan to its `RTSTRUCT` and `RTDOSE` —
+and makes it easier to run queries or group series by type.
 
 ---
 
@@ -20,19 +29,27 @@ This module turns DICOM series into a set of trees (a forest), using metadata to
 
 ### `SeriesNode`
 
-Represents one DICOM series and its connections to other related series. Each node holds:
+Represents an individual DICOM series and its hierarchical relationships:
 
-- Basic metadata like `SeriesInstanceUID` and `Modality`
-- Links to child nodes 
-   - i.e a `CT` series might have 1 or more links to `RTSTRUCT` and/or  `PT` series
+- **Attributes**:
+  - `SeriesInstanceUID`
+  - `Modality`
+  - `PatientID`
+  - `StudyInstanceUID`
+  - `folder`: Path to the folder containing the DICOM files
+  - `ReferencedSeriesUID`: Series that this one references, if any
+  - `children`: List of child nodes representing referenced series
+    - i.e a `CT` series might have 1 or more links to `RTSTRUCT` and/or  `PT` series
 
 ---
+### `Interlacer`
 
-### `Branch`
+Key features:
 
-Represents a single path through the tree, showing an ordered set of modalities. This is useful for queries.
-
----
+- **Query validation**: Ensures that modality queries follow DICOM standard requirements
+- **Interactive visualization**: Creates HTML-based network graphs of relationships
+- **Rich text console display**: Pretty-prints the hierarchy with color-coding
+- **Dependency validation**: Enforces rules like "RTSTRUCT requires CT, MR, or PT"
 
 ### Grouping Series
 
@@ -49,48 +66,51 @@ The Interlacer currently groups series using **Referenced Series UID**, which li
 
 ---
 
-### `Interlacer`
-
-This is the main class. It handles:
-
-- **Building the forest** from a list of DICOM series  
-- **Running queries** to find certain modality paths (like "CT,RTSTRUCT")  
-- **Visualizing the forest** to see how series are connected
-
----
-
 ## Usage Example
 
 ```python
 from pathlib import Path
-from rich import print  # noqa
-
-from imgtools.dicom.crawl import (
-    CrawlerSettings,
-    Crawler,
-)
+from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer
 
 # Define path to DICOM directory
-dicom_dir = Path("data")
+dicom_dir = Path("data/")
 
-# Create crawler settings and crawler instance
-crawler_settings = CrawlerSettings(
+# Create crawler and scan the directory
+crawler = Crawler(
     dicom_dir=dicom_dir,
-    n_jobs=12,
-    force=False
+    n_jobs=5,
+    force=False,
 )
-crawler = Crawler(crawler_settings)
+crawler.crawl()
+
+# Create the Interlacer from crawler results
 interlacer = Interlacer(crawler.index)
 
-# Visualize the constructed forest
-interlacer.print_tree(dicom_dir)
-interlacer.visualize_forest(dicom_dir / "interlacer.html")
+# Visualize the forest structure
+interlacer.print_tree(dicom_dir)  # Console visualization
 
-# Query modality chains (e.g., CT followed by RTSTRUCT)
-query = "CT,RTSTRUCT"
-samples = interlacer.query(query)
+# Query for specific modality combinations
+# Find CT series with associated RTSTRUCT objects
+ct_rtstruct_results = interlacer.query("CT,RTSTRUCT")
+
+# Get all possible series combinations
+all_results = interlacer.query("*")  # or interlacer.query("all")
 ```
+
+## Query Rules and Dependencies
+
+The Interlacer enforces the following modality dependency rules:
+
+1. `RTSTRUCT` and `RTDOSE` require a `CT`, `MR`, or `PT` series
+2. `SEG` requires a `CT` or `MR` series
+
+Examples of valid and invalid queries:
+
+- ✅ `"CT,RTDOSE"` - Valid: CT with associated RTDOSE
+- ✅ `"CT,PT,RTSTRUCT"` - Valid: CT and PT with associated RTSTRUCT
+- ❌ `"PT,SEG"` - Invalid: SEG requires CT or MR, not PT
+- ❌ `"RTSTRUCT,RTDOSE"` - Invalid: Both require a source imaging series
 
 ## Example Output
 
