@@ -200,7 +200,11 @@ def autopipeline(
         - PatientID: The ID of the patient.
         - Modality: The imaging modality (e.g., CT, MRI).
         - SeriesInstanceUID: The unique identifier for the series.
-        - ImageID: The ID of the image.
+        - ImageID: The cutomized identifier for the image.
+            - By default, the modality of the image
+            - If RTSTRUCT or SEG, uses custom format based on the roi_strategy
+                roi_match_map and roi names.
+            TODO:: explain this in the docs?
 
     It is not recommended to change the default filename format to prevent
     overwriting files. The default format is designed to ensure that the output
