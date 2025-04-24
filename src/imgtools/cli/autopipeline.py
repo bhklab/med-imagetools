@@ -1,3 +1,4 @@
+from dis import show_code
 import click
 import yaml
 from pathlib import Path
@@ -103,19 +104,22 @@ def parse_spacing(ctx, param, value): # type: ignore
     "--spacing", 
     callback=parse_spacing, 
     default="0.0,0.0,0.0",
+    show_default=True,
     help="Resampling spacing as comma-separated values i.e '--spacing 1.0,1.0,1.0'"
 )
 @click.option(
-    "--window", 
+    "--window-width",
+    "window", 
     type=float, 
     default=None, 
-    help="Window value for intensity windowing"
+    help="Width of the window for intensity windowing"
 )
 @click.option(
-    "--level", 
+    "--window-level",
+    "level",
     type=float, 
     default=None, 
-    help="Level value for intensity windowing"
+    help="Midpoint of the window for intensity windowing"
 )
 @click.option(
     "--roi-ignore-case/--roi-case-sensitive",  
@@ -137,7 +141,7 @@ def parse_spacing(ctx, param, value): # type: ignore
     help="Allow one ROI to match multiple keys in the match map"
 )
 @click.option(
-    "--roi-on-missing-regex", 
+    "--roi-on-missing-regex",
     type=click.Choice([p.name for p in ROIMatchFailurePolicy]), 
     default="WARN",
     show_default=True,
@@ -145,22 +149,16 @@ def parse_spacing(ctx, param, value): # type: ignore
 )
 @click.option(
     "--roi-match-map", 
-    "-r",
+    "-rmap",
     multiple=True, 
     help="ROI matching patterns in format 'key:pattern1,pattern2,...'"
 )
 @click.option(
     "--roi-match-yaml", 
+    "-ryaml",
     type=click.Path(file_okay=True, dir_okay=False, readable=True, path_type=Path, resolve_path=True),
     default=None,
-    show_default=True,
     help="Path to ROI YAML file."
-)
-@click.option(
-    "--first-n", 
-    type=int, 
-    default=None, 
-    help="Process only the first N samples"
 )
 @click.help_option(
     "-h",
@@ -183,13 +181,32 @@ def autopipeline(
     roi_on_missing_regex: str,
     roi_match_map: Tuple[str],
     roi_match_yaml: Path,
-    first_n: int
 ) -> None:
     """
     Run the DeltaPipeline for processing medical images.
     
     This command allows you to process medical images in a directory structure,
     apply transformations, and save the results to a specified output directory.
+
+    \b
+    INPUT_DIRECTORY: Directory containing the input images.
+    OUTPUT_DIRECTORY: Directory to save the processed images.
+
+    \b
+    The default filename format is:
+    {SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz
+    where:
+        - SampleNumber: The identifier for the sample after querying.
+        - PatientID: The ID of the patient.
+        - Modality: The imaging modality (e.g., CT, MRI).
+        - SeriesInstanceUID: The unique identifier for the series.
+        - ImageID: The ID of the image.
+
+    It is not recommended to change the default filename format to prevent
+    overwriting files. The default format is designed to ensure that the output
+    filenames are unique and informative. If you need to customize the output
+    make sure to use a format that maintains uniqueness and clarity.
+    \b
     """
     # Parse ROI match map
     roi_map = {}
@@ -214,6 +231,8 @@ def autopipeline(
             key, patterns = parts
             roi_map[key] = patterns.split(",")
 
+    logger.debug(f"ROI match map: {roi_map}")
+
     from imgtools.autopipeline import DeltaPipeline
     from imgtools.io.sample_output import ExistingFileMode
     # Create the pipeline
@@ -237,7 +256,7 @@ def autopipeline(
     
     # Run the pipeline
     try:
-        results = pipeline.run(first_n=first_n)
+        results = pipeline.run()
     except Exception as e:
         logger.exception(f"Error running pipeline: {str(e)}")
         raise click.Abort() from e
