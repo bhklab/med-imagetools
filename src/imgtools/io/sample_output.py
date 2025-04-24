@@ -129,7 +129,7 @@ class SampleOutput(BaseModel):
             msg = f"Output path must be a directory: {path}"
             raise ValueError(msg)
 
-        if not os.access(path, os.W_OK):
+        if not os.access(path, os.W_OK | os.X_OK):
             msg = f"Output directory is not writable: {path}"
             raise ValueError(msg)
 

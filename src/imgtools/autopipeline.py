@@ -49,6 +49,7 @@ def process_one_sample(
         )
     except Exception as e:
         logger.exception("Failed to load sample", e=e)
+
         return []
 
     # by this point all images SHOULD have some bare minimum
@@ -138,6 +139,13 @@ class DeltaPipeline:
             Whether to allow one ROI to match multiple keys in the match_map.
         roi_on_missing_regex : str | ROIMatchFailurePolicy, optional
             How to handle when no ROI matches any pattern in match_map.
+            By default ROIMatchFailurePolicy.WARN
+        spacing : tuple[float, float, float], default=(0.0, 0.0, 0.0)
+            Spacing for resampling, by default (0.0, 0.0, 0.0)
+        window : float | None, optional
+            Window level for intensity normalization, by default None
+        level : float | None, optional
+            Window level for intensity normalization, by default None
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
@@ -154,6 +162,7 @@ class DeltaPipeline:
             directory=Path(output_directory),
             filename_format=output_filename_format,
             existing_file_mode=existing_file_mode,
+            extra_context={},
         )
 
         transforms: list[BaseTransform]

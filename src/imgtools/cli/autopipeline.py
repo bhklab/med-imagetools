@@ -5,8 +5,12 @@ from typing import Tuple
 from enum import Enum
 from imgtools.loggers import logger
 
+# TODO:: think of a smarter way to handle this,
+# perhaps only try loading autopipeline cli help if the user
+# is using it, would need to modify click.Command to do this
 # Redfining these here to lazy load them later
-# we should rename this to be intuitive
+
+
 class ROIMatchStrategy(str, Enum):  # noqa: N801
     """Enum for ROI handling strategies."""
 
@@ -114,10 +118,9 @@ def parse_spacing(ctx, param, value): # type: ignore
     help="Level value for intensity windowing"
 )
 @click.option(
-    "--roi-ignore-case", 
-    is_flag=True, 
-    default=True, 
-    help="Ignore case in ROI matching"
+    "--roi-ignore-case/--roi-case-sensitive",  
+    default=True,  
+    help="Perform case‑insensitive ROI matching (default: enabled)",  
 )
 @click.option(
     "--roi-strategy", 
@@ -197,10 +200,10 @@ def autopipeline(
             with open(roi_match_yaml, 'r') as f:
                 yaml_data = yaml.safe_load(f)
                 if not isinstance(yaml_data, dict):
-                    raise click.BadParameter(f"ROI match YAML must contain a dictionary")
+                    raise click.BadParameter("ROI match YAML must contain a dictionary")
                 roi_map = yaml_data
         except Exception as e:
-            raise click.BadParameter(f"Error reading ROI match YAML file: {str(e)}")
+            raise click.BadParameter(f"Error reading ROI match YAML file: {str(e)}") from e 
     
     # Add CLI-provided mappings (these take precedence over YAML)
     if roi_match_map:
@@ -237,7 +240,7 @@ def autopipeline(
         results = pipeline.run(first_n=first_n)
     except Exception as e:
         logger.exception(f"Error running pipeline: {str(e)}")
-        raise click.Abort()
+        raise click.Abort() from e
     click.echo(f"Processed {len(results)} samples.")
 
 

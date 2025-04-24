@@ -27,9 +27,7 @@ from imgtools.dicom.crawl import Crawler
 from imgtools.dicom.interlacer import Interlacer, SeriesNode
 from imgtools.io.readers import MedImageT, read_dicom_auto
 from imgtools.io.validators import (
-    validate_directory,
     validate_modalities,
-    validate_n_jobs,
 )
 from imgtools.loggers import logger
 
@@ -89,11 +87,6 @@ class SampleInput(BaseModel):
         description="Path to the input directory containing DICOM files. Absolute path or relative to the current working directory.",
         title="Input Directory",
         examples=["data/NSCLC-Radiomics", "/absolute/path/to/dicom/data"],
-        json_schema_extra={
-            "format": "path",
-            "pattern": "^[^\\0]+$",  # Non-null characters
-            "x-descriptive": "Directory with standard DICOM files for processing",
-        },
     )
     dataset_name: str | None = Field(
         default=None,
@@ -102,7 +95,6 @@ class SampleInput(BaseModel):
         min_length=1,
         max_length=100,
         examples=["NSCLC-Radiomics", "Head-Neck-PET-CT"],
-        json_schema_extra={"x-display-name": "Dataset Identifier"},
     )
     update_crawl: bool = Field(
         default=False,
@@ -117,10 +109,6 @@ class SampleInput(BaseModel):
         ge=1,  # Greater than or equal to 1
         le=multiprocessing.cpu_count(),  # Less than or equal to available cores
         examples=[4, 8, 12],
-        json_schema_extra={
-            "x-category": "Performance",
-            "x-recommended-range": f"1-{multiprocessing.cpu_count()}",
-        },
     )
     modalities: list[str] | None = Field(
         default=None,
@@ -131,72 +119,26 @@ class SampleInput(BaseModel):
             ["CT", "PT", "RTSTRUCT", "RTDOSE"],
             ["MR", "SEG"],
         ],
-        json_schema_extra={
-            "items": {
-                "enum": [
-                    "CT",
-                    "MR",
-                    "PT",
-                    "RTSTRUCT",
-                    "RTDOSE",
-                    "RTPLAN",
-                    "SEG",
-                ]
-            },
-            "x-modality-dependencies": {
-                "RTSTRUCT": ["CT", "MR", "PT"],
-                "RTDOSE": ["CT", "MR", "PT"],
-                "SEG": ["CT", "MR"],
-            },
-        },
     )
     roi_matcher: ROIMatcher = Field(
         default_factory=lambda: ROIMatcher(match_map={"ROI": [".*"]}),
         description="Configuration for ROI (Region of Interest) matching in segmentation data. Defines how regions are identified, matched and processed from RTSTRUCT or SEG files.",
         title="ROI Matcher Configuration",
-        json_schema_extra={
-            "x-examples": [
-                {
-                    "match_map": {"GTV": ["GTV.*"], "PTV": ["PTV.*"]},
-                    "handling_strategy": "merge",
-                    "ignore_case": True,
-                },
-                {
-                    "match_map": {
-                        "Tumor": [".*tumor.*", ".*gtv.*"],
-                        "OAR": [".*organ.*", ".*risk.*"],
-                    },
-                    "handling_strategy": "separate",
-                },
-            ],
-            "x-documentation": "See ROIMatcher class documentation for detailed usage examples",
-        },
     )
     _crawler: Crawler | None = PrivateAttr(default=None)
     _interlacer: Interlacer | None = PrivateAttr(default=None)
 
-    def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
-        """Initialize the Crawler instance after model initialization."""
-        crawler = Crawler(
-            dicom_dir=self.directory,
-            dataset_name=self.dataset_name,
-            force=self.update_crawl,
-            n_jobs=self.n_jobs,
-        )
-        crawler.crawl()
-        self._crawler = crawler
-        self._interlacer = Interlacer(crawl_index=crawler.index)
-
-    # Use validators from the validators module
-    @field_validator("directory")
-    @classmethod
-    def _validate_directory(cls, v: str | Path) -> Path:
-        return validate_directory(v)
-
-    @field_validator("n_jobs")
-    @classmethod
-    def _validate_n_jobs(cls, v: int) -> int:
-        return validate_n_jobs(v)
+    # def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
+    #     """Initialize the Crawler instance after model initialization."""
+    #     crawler = Crawler(
+    #         dicom_dir=self.directory,
+    #         dataset_name=self.dataset_name,
+    #         force=self.update_crawl,
+    #         n_jobs=self.n_jobs,
+    #     )
+    #     crawler.crawl()
+    #     self._crawler = crawler
+    #     self._interlacer = Interlacer(crawl_index=crawler.index)
 
     @field_validator("modalities")
     @classmethod
@@ -305,16 +247,44 @@ class SampleInput(BaseModel):
 
     @property
     def crawler(self) -> Crawler:
-        """Get the Crawler instance."""
+        """Get the Crawler instance, initializing it if needed.
+
+        Returns
+        -------
+        Crawler
+            A DICOM crawler instance, initialized with the current configuration.
+
+        Notes
+        -----
+        The crawler is lazily initialized on first access.
+        """
         if self._crawler is None:
-            raise ValueError("Crawler has not been initialized.")
+            crawler = Crawler(
+                dicom_dir=self.directory,
+                dataset_name=self.dataset_name,
+                force=self.update_crawl,
+                n_jobs=self.n_jobs,
+            )
+            crawler.crawl()
+            self._crawler = crawler
         return self._crawler
 
     @property
     def interlacer(self) -> Interlacer:
-        """Get the Interlacer instance."""
+        """Get the Interlacer instance, initializing it if needed.
+
+        Returns
+        -------
+        Interlacer
+            An Interlacer instance tied to the current crawler.
+
+        Notes
+        -----
+        The interlacer is lazily initialized on first access, which may trigger
+        crawler initialization if it hasn't been accessed yet.
+        """
         if self._interlacer is None:
-            raise ValueError("Interlacer has not been initialized.")
+            self._interlacer = Interlacer(crawl_index=self.crawler.index)
         return self._interlacer
 
     def print_tree(self) -> None:
@@ -323,7 +293,7 @@ class SampleInput(BaseModel):
     def query(self, modalities: str | None = None) -> list[list[SeriesNode]]:
         """Query the interlacer for a specific modality."""
         if modalities is None:
-            modalities = ",".join(self.modalities) if self.modalities else None
+            modalities = ",".join(self.modalities) if self.modalities else "*"
         return self.interlacer.query(modalities)
 
     ###################################################################
