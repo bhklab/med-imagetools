@@ -183,7 +183,7 @@ def autopipeline(
     roi_match_yaml: Path,
 ) -> None:
     """
-    Run the DeltaPipeline for processing medical images.
+    Run the Autopipeline for processing medical images.
     
     This command allows you to process medical images in a directory structure,
     apply transformations, and save the results to a specified output directory.
@@ -233,10 +233,10 @@ def autopipeline(
 
     logger.debug(f"ROI match map: {roi_map}")
 
-    from imgtools.autopipeline import DeltaPipeline
+    from imgtools.autopipeline import Autopipeline
     from imgtools.io.sample_output import ExistingFileMode
     # Create the pipeline
-    pipeline = DeltaPipeline(
+    pipeline = Autopipeline(
         input_directory=input_directory,
         output_directory=output_directory,
         output_filename_format=filename_format,

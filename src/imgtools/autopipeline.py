@@ -189,7 +189,7 @@ def process_one_sample(
     return result
 
 
-class DeltaPipeline:
+class Autopipeline:
     """Pipeline for processing medical images."""
 
     input: SampleInput
@@ -218,7 +218,7 @@ class DeltaPipeline:
         level: float | None = None,
     ) -> None:
         """
-        Initialize the DeltaPipeline.
+        Initialize the Autopipeline.
 
         Parameters
         ----------
@@ -418,7 +418,7 @@ if __name__ == "__main__":
     dataset_name = "RADCURE"
 
     shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
-    pipeline = DeltaPipeline(
+    pipeline = Autopipeline(
         input_directory=f"data/{dataset_name}",
         output_directory=f"temp_outputs/{dataset_name}",
         existing_file_mode=ExistingFileMode.OVERWRITE,
