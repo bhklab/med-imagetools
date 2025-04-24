@@ -220,8 +220,7 @@ if __name__ == "__main__":
     from rich import print  # noqa
 
     # Interlacer parameters
-    query: str = "CT,RTSTRUCT"
-    dataset_name = "RADCURE"
+    dataset_name = "CPTAC-UCEC"
 
     shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
     pipeline = DeltaPipeline(
@@ -229,36 +228,36 @@ if __name__ == "__main__":
         output_directory=f"temp_outputs/{dataset_name}",
         existing_file_mode=ExistingFileMode.OVERWRITE,
         n_jobs=10,
-        modalities=["CT", "RTSTRUCT"],
-        roi_match_map={
-            "GTV": ["GTVp"],
-            "NODES": ["GTVn_.*"],
-            "LPLEXUS": ["BrachialPlex_L"],
-            "RPLEXUS": ["BrachialPlex_R"],
-            "BRAINSTEM": ["Brainstem"],
-            "LACOUSTIC": ["Cochlea_L"],
-            "RACOUSTIC": ["Cochlea_R"],
-            "ESOPHAGUS": ["Esophagus"],
-            "LEYE": ["Eye_L"],
-            "REYE": ["Eye_R"],
-            "LARYNX": ["Larynx"],
-            "LLENS": ["Lens_L"],
-            "RLENS": ["Lens_R"],
-            "LIPS": ["Lips"],
-            "MANDIBLE": ["Mandible_Bone"],
-            "LOPTIC": ["Nrv_Optic_L"],
-            "ROPTIC": ["Nrv_Optic_R"],
-            "CHIASM": ["OpticChiasm"],
-            "LPAROTID": ["Parotid_L"],
-            "RPAROTID": ["Parotid_R"],
-            "CORD": ["SpinalCord"],
-        },
+        modalities=["all"],
+        # roi_match_map={
+        #     "GTV": ["GTVp"],
+        #     "NODES": ["GTVn_.*"],
+        #     "LPLEXUS": ["BrachialPlex_L"],
+        #     "RPLEXUS": ["BrachialPlex_R"],
+        #     "BRAINSTEM": ["Brainstem"],
+        #     "LACOUSTIC": ["Cochlea_L"],
+        #     "RACOUSTIC": ["Cochlea_R"],
+        #     "ESOPHAGUS": ["Esophagus"],
+        #     "LEYE": ["Eye_L"],
+        #     "REYE": ["Eye_R"],
+        #     "LARYNX": ["Larynx"],
+        #     "LLENS": ["Lens_L"],
+        #     "RLENS": ["Lens_R"],
+        #     "LIPS": ["Lips"],
+        #     "MANDIBLE": ["Mandible_Bone"],
+        #     "LOPTIC": ["Nrv_Optic_L"],
+        #     "ROPTIC": ["Nrv_Optic_R"],
+        #     "CHIASM": ["OpticChiasm"],
+        #     "LPAROTID": ["Parotid_L"],
+        #     "RPAROTID": ["Parotid_R"],
+        #     "CORD": ["SpinalCord"],
+        # },
         roi_allow_multi_key_matches=False,
         roi_ignore_case=True,
         roi_handling_strategy=ROIMatchStrategy.SEPARATE,
         roi_on_missing_regex=ROIMatchFailurePolicy.IGNORE,
     )
 
-    # print(pipeline)
+    print(pipeline)
     # results = pipeline.run(first_n=1)
     # print(f"Results: {results}")
