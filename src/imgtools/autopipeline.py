@@ -290,8 +290,11 @@ class Autopipeline:
             extra_context={},
         )
 
-        transforms: list[BaseTransform]
-        transforms = [
+        transforms: list[BaseTransform] = [
+            # we could choose to only add resampling if any spacing component
+            # is non-zero, but this currently does additional non-intuitive 
+            # alignment by assuming the first image in the sample is the reference
+            # and all other images get resampled to that via sitk.Resample
             Resample(
                 spacing,
                 interpolation="linear",
