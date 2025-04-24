@@ -26,7 +26,7 @@ from rich.theme import Theme
 from rich.tree import Tree as RichTree
 
 from imgtools.loggers import logger
-from imgtools.utils import OptionalImportError, optional_import, timer
+from imgtools.utils import OptionalImportError, optional_import
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
@@ -171,7 +171,6 @@ class Interlacer:
         ]
         self._build_series_forest()
 
-    @timer("Building forest based on references")
     def _build_series_forest(self) -> None:
         """
         Creates SeriesNode objects for each row in the DataFrame and
@@ -329,7 +328,6 @@ class Interlacer:
             dfs(root, [])
         return results
 
-    @timer("Querying forest")
     def query(
         self,
         query_string: str,
@@ -372,14 +370,14 @@ class Interlacer:
         if not group_by_root:
             return query_results
 
-        grouped: dict[SeriesNode, list[SeriesNode]] = defaultdict(list)
+        grouped: dict[SeriesNode, set[SeriesNode]] = defaultdict(set)
         # pretty much start with the root node, then add all branches
         for path in query_results:
             root = path[0]
-            grouped[root].extend(path[1:])
+            grouped[root].update(path[1:])
 
         # break each item into a list starting with key, then all the values
-        return [[key] + value for key, value in grouped.items()]
+        return [[key] + list(value) for key, value in grouped.items()]
 
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
@@ -636,7 +634,7 @@ if __name__ == "__main__":
         # Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
         # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
-        Path("data"),
+        Path("data/CPTAC-UCEC/C3L-00947"),
     ]
     interlacers = []
     for directory in dicom_dirs:
@@ -657,4 +655,5 @@ if __name__ == "__main__":
     for interlacer, input_dir in zip(interlacers, dicom_dirs):
         interlacer.print_tree(input_dir)
 
-        query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
+        # query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
+        print(set(interlacer.query("CT,PT,RTSTRUCT")[0]))
