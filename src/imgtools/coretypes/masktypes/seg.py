@@ -426,6 +426,9 @@ class SEG:
                 mapping[iroi] = ROIMaskMapping(
                     roi_key=roi_key,
                     roi_names=segment_matches,
+                    image_id=roi_key
+                    if roi_matcher.handling_strategy.value == "merge"
+                    else f"{roi_key}__[{segment_matches[0].label}::{segment_matches[0].description}]",
                 )
             mask_images.append(sitk.GetImageFromArray(mask_array_3d))
 
@@ -442,6 +445,7 @@ class SEG:
                     f"{segment.label}::{segment.description}"
                     for segment in m.roi_names
                 ],
+                image_id=m.image_id,
             )
 
         return VectorMask(

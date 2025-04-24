@@ -13,6 +13,8 @@ from .masktypes import (
 )
 from .spatial_types.coord_types import Coordinate3D, Size3D, Spacing3D
 
+from .base_masks import Mask, VectorMask  # isort: skip
+
 __all__ = [
     "MedImage",
     "Coordinate3D",
@@ -40,4 +42,7 @@ __all__ = [
     # seg
     "SEG",
     "Segment",
+    # base masks
+    "VectorMask",
+    "Mask",
 ]
