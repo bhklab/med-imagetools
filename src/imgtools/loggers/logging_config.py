@@ -79,7 +79,8 @@ class LoggingManager:
                             colors=True,
                             sort_keys=False,
                             exception_formatter=structlog.dev.RichTracebackFormatter(
-                                width=-1, show_locals=True
+                                width=-1,
+                                show_locals=False,
                             ),
                         ),
                     ],
