@@ -150,7 +150,6 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             case sitk.Image():
                 image = data
             case np.ndarray():
-                logger.debug("Converting numpy array to SimpleITK image.")
                 image = sitk.GetImageFromArray(data)
             case _:
                 msg = "Input must be a SimpleITK Image or a numpy array"
@@ -167,10 +166,6 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             return out_path
 
         try:
-            logger.debug(
-                f"Saving image to {out_path}.",
-                out_path=out_path,
-            )
             sitk.WriteImage(
                 image,
                 out_path.as_posix(),
