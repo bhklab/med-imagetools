@@ -342,7 +342,7 @@ class SampleInput(BaseModel):
             for file_name_set in file_name_sets
         ]
 
-    def load_sample(  # noqa: PLR0912
+    def __call__(  # noqa: PLR0912
         self,
         sample: Sequence[SeriesNode],
         load_subseries: bool = False,
@@ -513,7 +513,7 @@ if __name__ == "__main__":  # pragma: no cover
             total=len(sample_sets),
         ):
             try:
-                result = medinput.load_sample(
+                result = medinput(
                     sample=series,
                     load_subseries=False,
                 )

@@ -142,8 +142,8 @@ def process_one_sample(
 
     try:
         # Load the sample
-        sample_images: Sequence[MedImage | VectorMask] = (
-            sample_input.load_sample(sample)
+        sample_images: Sequence[MedImage | VectorMask] = sample_input(
+            sample
         )
     except Exception as e:
         error_message = str(e)
@@ -292,7 +292,7 @@ class Autopipeline:
 
         transforms: list[BaseTransform] = [
             # we could choose to only add resampling if any spacing component
-            # is non-zero, but this currently does additional non-intuitive 
+            # is non-zero, but this currently does additional non-intuitive
             # alignment by assuming the first image in the sample is the reference
             # and all other images get resampled to that via sitk.Resample
             Resample(
