@@ -5,12 +5,33 @@ This module defines the `Interlacer` class, which constructs and queries a hiera
 forest of DICOM series based on their metadata relationships. It enables efficient
 grouping, querying, and visualization of medical imaging series.
 
+The Interlacer provides tools for analyzing complex DICOM relationships, such as
+connections between different imaging modalities (CT, MR, PT) and derived objects
+(RTSTRUCT, RTDOSE, SEG). It enables validation of relationships based on DICOM
+standards and medical imaging workflows.
+
 Classes
 -------
 SeriesNode
     Represents an individual DICOM series and its hierarchical relationships.
 Interlacer
     Builds the hierarchy, processes queries, and visualizes the relationships.
+InterlacerQueryError
+    Base exception for query validation errors.
+UnsupportedModalityError
+    Raised when an unsupported modality is specified in a query.
+MissingDependencyModalityError
+    Raised when modalities in a query are missing required dependencies.
+ModalityHighlighter
+    Rich text highlighter for pretty-printing DICOM modalities.
+
+Features
+--------
+- Hierarchical representation of DICOM relationships
+- Query for specific combinations of modalities with dependency validation
+- Interactive visualization of DICOM series relationships
+- Rich text console display of patient/series hierarchies
+- Validation of modality dependencies based on DICOM standards
 """
 
 from __future__ import annotations
