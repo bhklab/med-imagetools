@@ -123,7 +123,7 @@ def parse_spacing(ctx, param, value): # type: ignore
 )
 @click.option(
     "--roi-ignore-case/--roi-case-sensitive",  
-    default=True,  
+    default=True,
     help="Perform case‑insensitive ROI matching (default: enabled)",  
 )
 @click.option(
@@ -133,12 +133,11 @@ def parse_spacing(ctx, param, value): # type: ignore
     show_default=True,
     help="Strategy for handling ROI matches"
 )
-@click.option(
-    "--roi-allow-multi-matches", 
-    is_flag=True, 
-    default=True, 
-    show_default=True,
-    help="Allow one ROI to match multiple keys in the match map"
+@click.option(  
+    "--roi-allow-multi-matches/--roi-disallow-multi-matches",  
+    default=True,  
+    show_default=True,  
+    help="Allow one ROI to match multiple keys in the match map"  
 )
 @click.option(
     "--roi-on-missing-regex",
