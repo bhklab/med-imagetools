@@ -100,7 +100,25 @@ def process_one_sample(
     ],
 ) -> ProcessSampleResult:
     """
-    Process a single sample.
+    Process a single medical imaging sample through the complete pipeline.
+
+    The single 'args' tuple contains the following elements, likely passed in
+    from the components of the autopipeline class:
+    - idx: str (arbitrary, generated from enumerate)
+    - sample: Sequence[SeriesNode] (a sample is the group of series that belong to the same reference image)
+    - sample_input: SampleInput (class that handles loading the sample)
+    - transformer: Transformer (class that handles the transformation pipeline)
+    - sample_output: SampleOutput (class that handles saving the sample)
+
+    This function handles the entire lifecycle of processing a medical image sample:
+
+    1. First, we load the sample images from the provided input source
+    2. Then, we verify that all requested images were properly loaded
+    3. Next, we apply the transformation pipeline to the images (resampling, windowing, etc.)
+    4. Finally, we save the processed images to the output location
+
+    Throughout this process, we track any errors that occur and return detailed
+    information about successes or failures for reporting purposes.
 
     Returns
     -------
