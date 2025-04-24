@@ -382,13 +382,13 @@ class SampleInput(BaseModel):
         Load a complete sample of medical images and masks from DICOM series.
 
         This function processes a collection of DICOM series and loads them as
-        `MedImage` or `VectorMask` objects. 
+        `MedImage` or `VectorMask` objects.
 
         It automatically identifies a reference image (preferring
         CT, then MR, then PT) and loads all other modalities relative to this reference.
 
         First, we group the input series by modality, then we identify and load a reference
-        image. 
+        image.
 
         All other series (RTSTRUCT, SEG, additional CT/MR/PT) are loaded with
         reference to the primary image to ensure proper alignment.
