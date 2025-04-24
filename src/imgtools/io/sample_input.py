@@ -128,18 +128,6 @@ class SampleInput(BaseModel):
     _crawler: Crawler | None = PrivateAttr(default=None)
     _interlacer: Interlacer | None = PrivateAttr(default=None)
 
-    # def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
-    #     """Initialize the Crawler instance after model initialization."""
-    #     crawler = Crawler(
-    #         dicom_dir=self.directory,
-    #         dataset_name=self.dataset_name,
-    #         force=self.update_crawl,
-    #         n_jobs=self.n_jobs,
-    #     )
-    #     crawler.crawl()
-    #     self._crawler = crawler
-    #     self._interlacer = Interlacer(crawl_index=crawler.index)
-
     @field_validator("modalities")
     @classmethod
     def _validate_modalities(cls, v: list[str] | None) -> list[str] | None:
@@ -411,25 +399,24 @@ class SampleInput(BaseModel):
 
             # for all other series, we load them and insert them into the
             # images list
-            self._load_non_ref_images(
-                load_subseries,
-                images,
-                reference_image,
-                modality,
-                series_nodes,
-            )
+            for series in series_nodes:
+                image = self._load_non_ref_image(
+                    load_subseries, reference_image, modality, series
+                )
+                if image is not None:
+                    images.append(image)
 
         return [reference_image] + images
 
-    def _load_non_ref_images(
+    def _load_non_ref_image(
         self,
         load_subseries: bool,
-        images: list[MedImage | VectorMask],
         reference_image: MedImage,
         modality: str,
-        series_nodes: list[SeriesNode],
-    ) -> None:
-        for series in series_nodes:
+        series: SeriesNode,
+    ) -> MedImage | VectorMask | None:
+        """Load a non-reference image series based on modality."""
+        try:
             match modality:
                 case "RTSTRUCT" | "SEG":
                     mask_klass = (
@@ -441,9 +428,7 @@ class SampleInput(BaseModel):
                         reference_image=reference_image,
                         roi_matcher=self.roi_matcher,
                     )
-                    if vm is None:
-                        continue
-                    images.append(vm)
+                    return vm
                 case "PT" | "CT" | "MR" | "RTDOSE":
                     misc = self._read_series(
                         series_uid=series.SeriesInstanceUID,
@@ -455,10 +440,15 @@ class SampleInput(BaseModel):
                     # image has multiple subseries, which is not expected
                     # and we should handle this at some point
                     assert isinstance(misc[0], MedImage) and len(misc) == 1
-                    images.append(misc[0])
+                    return misc[0]
                 case _:
                     msg = f"Unsupported modality: {modality}"
                     raise ValueError(msg)
+        except Exception as e:
+            logger.error(
+                f"Error loading series {series.SeriesInstanceUID}: {e}"
+            )
+            return None
 
 
 if __name__ == "__main__":  # pragma: no cover

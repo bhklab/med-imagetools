@@ -133,20 +133,24 @@ def read_dicom_auto(
     """
     from pydicom import dcmread
 
+    from imgtools.dicom import find_dicoms
+
     # Try to determine modality if not provided
     if not modality:
         # If it's a directory with DICOM files, read the first file
         path_obj = Path(path)
         if path_obj.is_dir():
-            dicom_files = (
-                list(path_obj.glob("**/*.dcm"))
-                if kwargs.get("recursive", False)
-                else list(path_obj.glob("*.dcm"))
-            )
-            if not dicom_files:
-                error_msg = f"No DICOM files found in {path}"
-                raise ValueError(error_msg)
-            first_file = dicom_files[0]
+            first_file = find_dicoms(
+                directory=path_obj,
+                recursive=kwargs.pop("recursive", False),
+                limit=1,
+            )[0]
+            if not first_file:
+                errmsg = (
+                    f"No DICOM files found in directory: {path_obj}. "
+                    "Please check the path and try again."
+                )
+                raise FileNotFoundError(errmsg)
             dcm = dcmread(first_file, stop_before_pixels=True)
         else:
             # It's a file

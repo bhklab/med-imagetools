@@ -12,6 +12,7 @@ from pydantic import (
 )
 
 from imgtools.coretypes import MedImage, VectorMask
+from imgtools.io.validators import validate_directory
 from imgtools.io.writers import (
     AbstractBaseWriter,
     ExistingFileMode,
@@ -97,29 +98,7 @@ class SampleOutput(BaseModel):
     @classmethod
     def validate_directory(cls, v: str | Path) -> Path:
         """Validate that the output directory exists or can be created, and is writable."""
-        path = Path(v) if not isinstance(v, Path) else v
-
-        # Create directory if it doesn't exist
-        if not path.exists():
-            try:
-                path.mkdir(parents=True, exist_ok=True)
-                logger.debug(f"Created output directory: {path}")
-            except PermissionError as e:
-                msg = f"Cannot create output directory (permission denied): {path}"
-                raise ValueError(msg) from e
-            except Exception as e:
-                msg = f"Failed to create output directory {path}: {str(e)}"
-                raise ValueError(msg) from e
-
-        if not path.is_dir():
-            msg = f"Output path must be a directory: {path}"
-            raise ValueError(msg)
-
-        if not os.access(path, os.W_OK | os.X_OK):
-            msg = f"Output directory is not writable: {path}"
-            raise ValueError(msg)
-
-        return path
+        return validate_directory(v)
 
     @classmethod
     def default(cls) -> SampleOutput:
@@ -188,7 +167,7 @@ class SampleOutput(BaseModel):
             else:
                 errmsg = (
                     f"Unsupported image type: {type(image)}. "
-                    "Expected Scan or VectorMask."
+                    "Expected MedImage or VectorMask."
                 )
                 logger.error(errmsg)
                 raise TypeError(errmsg)
