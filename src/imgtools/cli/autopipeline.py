@@ -1,4 +1,3 @@
-from dis import show_code
 import click
 import yaml
 from pathlib import Path
