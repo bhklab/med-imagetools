@@ -97,7 +97,7 @@ class SampleOutput(BaseModel):
     @classmethod
     def validate_directory(cls, v: str | Path) -> Path:
         """Validate that the output directory exists or can be created, and is writable."""
-        return validate_directory(v)
+        return validate_directory(v, create=True)
 
     @classmethod
     def default(cls) -> SampleOutput:

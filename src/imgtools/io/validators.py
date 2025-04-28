@@ -9,20 +9,27 @@ from pathlib import Path
 from imgtools.loggers import logger
 
 
-def validate_directory(v: str | Path) -> Path:
+def validate_directory(v: str | Path, create: bool = False) -> Path:
     """Validate that the input directory exists and is readable."""
     path = Path(v) if not isinstance(v, Path) else v
 
     if not path.exists():
-        msg = f"Input directory does not exist: {path}"
-        raise ValueError(msg)
+        if create:
+            try:
+                path.mkdir(parents=True, exist_ok=True)
+            except (OSError, PermissionError) as e:
+                msg = f"Failed to create directory: {path} ({e})"
+                raise ValueError(msg) from e
+        else:
+            msg = f"Directory does not exist: {path}"
+            raise ValueError(msg)
 
     if not path.is_dir():
-        msg = f"Input path must be a directory: {path}"
+        msg = f"Path must be a directory: {path}"
         raise ValueError(msg)
 
     if not os.access(path, os.R_OK):
-        msg = f"Input directory is not readable: {path}"
+        msg = f"Directory is not readable {path}"
         raise ValueError(msg)
 
     return path
