@@ -3,7 +3,6 @@ name: Publish Docker image
 
 on:
   release:
-    types: [published]
 
 jobs:
   build-and-push:
