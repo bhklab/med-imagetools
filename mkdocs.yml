@@ -15,6 +15,8 @@ markdown_extensions:
       alternate_style: true
   - mkdocs-click
   - admonition
+  - toc:
+      permalink: "#"
 
 extra:
   homepage: https://bhklab.github.io/med-imagetools
@@ -72,13 +74,14 @@ plugins:
   - search                            # necessary for search functionality to work
   - git-authors                       # adds authors to pages using git history
   - include-markdown                  # allows for including Markdown files into another Markdown file
-  - mkdocs-jupyter:
-      allow_errors: false
-      include_source: true
+  - autorefs                          # automatically generates references to classes, functions, and methods 
+  # - mkdocs-jupyter:
+  #     allow_errors: false
+  #     include_source: true
   - mkdocstrings:
       handlers:
         python:
-          paths: [src/imgtools/dicom/sort, src/imgtools/io]
+          paths: [src/imgtools]
           options:
             extensions:
               - griffe_inherited_docstrings:
@@ -98,7 +101,7 @@ plugins:
             parameter_headings: true
             relative_crossrefs: true
             scoped_crossrefs: true
-            show_bases: false
+            show_bases: True
             show_inheritance_diagram: true
             show_root_heading: true
             show_root_full_path: false

@@ -106,17 +106,50 @@ class MedImage(sitk.Image):
         return sitk.extra._get_numpy_dtype(self)
 
     @property
-    def img_stats(self) -> dict[str, Any]:  # noqa: ANN001
+    def fingerprint(self) -> dict[str, Any]:  # noqa: ANN001
         """Get image statistics."""
-        img_stats = {
-            "dtype_str": self.dtype_str,
-            "dtype_numpy": self.dtype_np,
+        filter_ = sitk.StatisticsImageFilter()
+        filter_.Execute(self)
+        return {
+            "class": self.__class__.__name__,
+            "hash": sitk.Hash(self),
             "size": self.size,
+            "ndim": self.ndim,
+            "nvoxels": self.size.volume,
             "spacing": self.spacing,
             "origin": self.origin,
             "direction": self.direction,
+            "min": filter_.GetMinimum(),
+            "max": filter_.GetMaximum(),
+            "sum": filter_.GetSum(),
+            "mean": filter_.GetMean(),
+            "std": filter_.GetSigma(),
+            "variance": filter_.GetVariance(),
+            "dtype_str": self.dtype_str,
+            "dtype_numpy": self.dtype_np,
         }
-        return img_stats
+
+    @property
+    def serialized_fingerprint(self) -> dict[str, Any]:
+        """Get a serialized version of the image fingerprint with primitive types.
+
+        Returns
+        -------
+        dict[str, Any]
+            A dictionary with serialized image metadata that can be easily
+            converted to JSON or other serialization formats.
+        """
+        fp = self.fingerprint.copy()
+        # Convert custom types to tuples
+        if "size" in fp:
+            fp["size"] = fp["size"].to_tuple()
+        if "spacing" in fp:
+            fp["spacing"] = fp["spacing"].to_tuple()
+        if "origin" in fp:
+            fp["origin"] = fp["origin"].to_tuple()
+        if "direction" in fp:
+            fp["direction"] = fp["direction"].matrix
+        return fp
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield "ndim", self.ndim

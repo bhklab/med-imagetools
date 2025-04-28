@@ -1,4 +1,4 @@
 nav:
   - Home: index.md
-  - Core Types: CoreTypes
+  - Crawler and Interlacer: crawl_interlacer
   - ...
