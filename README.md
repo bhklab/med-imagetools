@@ -20,6 +20,8 @@
 [![Codecov](https://img.shields.io/codecov/c/github/bhklab/med-imagetools?labelColor=violet&color=white)](https://codecov.io/gh/bhklab/med-imagetools)
 
 
+**Installation and Usage Documentation**: [https://bhklab.github.io/med-imagetools](https://bhklab.github.io/med-imagetools)
+
 </div>
 <!--intro-start-->
 
@@ -52,10 +54,6 @@ med-imagetools, queries the graph and process the
 queried raw DICOMS. The processed DICOMS are saved as nrrds,
 which med-imagetools converts to torchio subject dataset and
 eventually torch dataloader for ML pipeline.
-
-![graph](https://github.com/bhklab/med-imagetools/blob/main/images/autopipeline.png?raw=true)
-
-Fig.2 - Med-Imagetools AutoPipeline diagram
 
 ## Installing med-imagetools
 
