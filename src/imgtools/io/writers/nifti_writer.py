@@ -6,6 +6,7 @@ import numpy as np
 import SimpleITK as sitk
 
 from imgtools.loggers import logger
+from imgtools.utils import truncate_uid
 
 from .abstract_base_writer import AbstractBaseWriter, ExistingFileMode
 
@@ -41,6 +42,11 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
     compression_level : int, default=9
         Compression level (0-9). Higher means better compression but slower writing.
         Value must be between MIN_COMPRESSION_LEVEL (0) and MAX_COMPRESSION_LEVEL (9).
+    truncate_uids_in_filename : int, default=8
+        Many DICOM files have long UIDs in the filename. If used in the filename format,
+        this will truncate the UID to the **last** `truncate_uids_in_filename`
+        characters.
+        A value of 0 means **no truncation**.
     VALID_EXTENSIONS : ClassVar[list[str]]
         List of valid file extensions for NIFTI files (".nii", ".nii.gz").
     MAX_COMPRESSION_LEVEL : ClassVar[int]
@@ -86,6 +92,7 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
     """
 
     compression_level: int = field(default=9)
+    truncate_uids_in_filename: int = field(default=8)
 
     # Make extensions immutable
     VALID_EXTENSIONS: ClassVar[list[str]] = [
@@ -155,7 +162,22 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
                 msg = "Input must be a SimpleITK Image or a numpy array"
                 raise NiftiWriterValidationError(msg)
 
-        out_path = self.resolve_path(**kwargs)
+        # TODO:: think of a better way to handle the truncate_uids_in_filename
+        if self.truncate_uids_in_filename:
+            trunctated_kwargs = {
+                k: truncate_uid(str(v), self.truncate_uids_in_filename)
+                if k.lower().endswith("uid")
+                else v
+                for k, v in kwargs.items()
+            }
+            out_path = self.resolve_path(**trunctated_kwargs)
+            # need to update the context with the old kwargs
+            # because it will be used in the index, and we dont want
+            # to truncate the UIDs in the index
+            self.set_context(**kwargs)
+        else:
+            out_path = self.resolve_path(**kwargs)
+
         if (
             out_path.exists()  # check if it exists
             # This will only be true if SKIP,
