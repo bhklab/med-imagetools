@@ -1,6 +1,68 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.24 (2025-04-28)
+
+### Documentation
+
+- **interlacer**: Enhance documentation for Interlacer module and add error handling classes
+  ([`f31d17d`](https://github.com/bhklab/med-imagetools/commit/f31d17d560b1e8d58863ebd7a4b46dc150956735))
+
+### Features
+
+- Autopipeline and Docker Containers
+  ([`6ee5a68`](https://github.com/bhklab/med-imagetools/commit/6ee5a68f927a9c34d3e8babbcff97246af3b4095))
+
+### Refactoring
+
+- Add wrapper for extract_metadata to improve parallel processing
+  ([`5e8ee49`](https://github.com/bhklab/med-imagetools/commit/5e8ee493be02c6b8a3d76c0a1d13b7dd48066c3f))
+
+- Coretype, logging, transforms ([#338](https://github.com/bhklab/med-imagetools/pull/338),
+  [`d029ce9`](https://github.com/bhklab/med-imagetools/commit/d029ce96f7ac1cfa0b2a34f4c840648b89aa1711))
+
+Standardize core types for medical images and enhance logging practices. Update image handling
+  methods and improve ROI matching functionality.
+
+- Disable locals in RichTracebackFormatter for cleaner exception logging
+  ([`96b71fd`](https://github.com/bhklab/med-imagetools/commit/96b71fd25e1c1ca0d2712f1a095449267cd20d01))
+
+- Enhance error handling and streamline crawling functionality
+  ([#337](https://github.com/bhklab/med-imagetools/pull/337),
+  [`5e152e0`](https://github.com/bhklab/med-imagetools/commit/5e152e0857a5b278a0e32f46cb50ca2bf4b6944a))
+
+Improve error handling across various components and add unit tests for image utility functions
+
+This update also includes custom exceptions for better error management.
+
+- Enhance ROIMaskMapping to include image_id for better mask handling
+  ([`df0a087`](https://github.com/bhklab/med-imagetools/commit/df0a0871b5f3edac6865a06e2394d5ef2acca50a))
+
+- Interlacer qol improvements, and detailed errors
+  ([#333](https://github.com/bhklab/med-imagetools/pull/333),
+  [`290a848`](https://github.com/bhklab/med-imagetools/commit/290a848c127c37f5b7e2c8d697de6424c5cfb45f))
+
+- **Improvements** - Enhanced readability of displayed identifiers by truncating long values in
+  relevant outputs. - Updated terminology in some user-facing messages for greater clarity. - Minor
+  formatting improvements in printed output for better presentation. - Improved querying of DICOM
+  series with detailed error messages for unsupported or missing modalities. - Added option to group
+  query results by root series for clearer organization. - **Tests** - Added comprehensive tests for
+  querying and visualizing DICOM data collections, covering both private and public datasets.
+
+Co-authored-by: Jermiah Joseph <44614774+jjjermiah@users.noreply.github.com>
+
+Co-authored-by: Jermiah Joseph <jermiahjoseph98@gmail.com>
+
+- Remove redundant debug logging in NIFTIWriter
+  ([`526747e`](https://github.com/bhklab/med-imagetools/commit/526747e958b4afc10be3acc19edafb80cd6e3c46))
+
+- Remove unused __init__.py file from loaders directory
+  ([`eb4429b`](https://github.com/bhklab/med-imagetools/commit/eb4429b4aa48d6a8fdd6622fce1a6571438bcbc9))
+
+- Update Python version constraint and add types-pyyaml dependency
+  ([`fabd737`](https://github.com/bhklab/med-imagetools/commit/fabd737d217cf5537d8f94a280f5660f62cab08e))
+
+
 ## v2.0.0-rc.23 (2025-04-17)
 
 ### Features
