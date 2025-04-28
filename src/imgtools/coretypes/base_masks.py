@@ -189,7 +189,7 @@ class VectorMask(MedImage):
     def has_overlap(self) -> bool:
         """Return True if any voxel has >1 mask"""
         arr = sitk.GetArrayFromImage(self)
-        return bool(np.any(np.sum(arr, axis=-1) > 1))
+        return self.n_masks > 1 and bool(np.any(np.sum(arr, axis=-1) > 1))
 
     def to_sparsemask(self) -> Mask:
         """Convert the vector mask to a single-channel binary mask via argmax operation.
@@ -210,8 +210,37 @@ class VectorMask(MedImage):
         preserved per voxel. If preserving all overlapping labels is important,
         keep working with the original VectorMask.
         """
-        msg = "Converting to a sparse mask is not implemented yet."
-        raise NotImplementedError(msg)
+        
+        if self.n_masks == 1: # Already a label image
+            return Mask(
+                sitk.Cast(self[1], sitk.sitkUInt8),
+                metadata=self.metadata.copy(),
+            )
+
+        arr = sitk.GetArrayFromImage(self)
+
+        # Check for overlaps before proceeding
+        overlap_mask = np.sum(arr, axis=-1) > 1
+        if np.any(overlap_mask):
+            logger.warning(
+                f"Vector mask has overlaps. "
+                "Converting to sparse mask will result in a lossy conversion."
+            )
+
+        # Assign label index (1-based, since 0 = background)
+        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
+
+        for i in range(arr.shape[-1]):
+            label_arr[arr[..., i] == 1] = i + 1
+
+        label_img = sitk.GetImageFromArray(label_arr)
+        label_img.CopyInformation(self)
+
+        # Attach merged metadata
+        return Mask(
+            sitk.Cast(label_img, sitk.sitkUInt8),
+            metadata=self.metadata.copy(),
+        )
 
     def to_label_image(self) -> Mask:
         """Convert the vector mask to a scalar label image with unique labels for each ROI.
@@ -239,6 +268,13 @@ class VectorMask(MedImage):
         if there are no overlaps. The mapping between label values and original ROI names
         is preserved in the metadata.
         """
+
+        if self.n_masks == 1: # Already a label image
+            return Mask(
+                sitk.Cast(self[1], sitk.sitkUInt8),
+                metadata=self.metadata.copy(),
+            )
+
         arr = sitk.GetArrayFromImage(self)
 
         # Check for overlaps before proceeding
