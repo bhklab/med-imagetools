@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.27 (2025-04-28)
+
+### Bug Fixes
+
+- Update CI-CD workflow for PyPI publishing and adjust Python version matrix
+  ([`fecdfcd`](https://github.com/bhklab/med-imagetools/commit/fecdfcdc04166ec467d192d7cc625d458fa9f62e))
+
+
 ## v2.0.0-rc.26 (2025-04-28)
 
 ### Features
