@@ -309,8 +309,6 @@ jobs:
         run: python3 -m build --sdist --wheel --outdir dist/
 
       - name: Publish to PyPI
-        # only push to pypi if on main
-        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
@@ -326,7 +324,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: [3.10, 3.11, 3.12]
+        python_version: ['3.10', '3.11', '3.12']
 
     steps:
       - name: Checkout repository
@@ -362,7 +360,7 @@ jobs:
           provenance: false
 
   does-the-pip-squeak:
-    needs: pip-squeak
+    needs: [pip-squeak, Continuous-Deployment]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -379,5 +377,5 @@ jobs:
 
       - name: Install using PyPi
         run: |
-          pip install med-imagetools
+          pip install med-imagetools==${{ needs.Continuous-Deployment.outputs.tag}}
           imgtools --help
