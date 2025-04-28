@@ -15,6 +15,9 @@ __all__ = [
     "PTMetadataExtractor",
     "SEGMetadataExtractor",
     "RTSTRUCTMetadataExtractor",
+    "RTDOSEMetadataExtractor",
+    "RTPLANMetadataExtractor",
+    "SRMetadataExtractor",
 ]
 
 
