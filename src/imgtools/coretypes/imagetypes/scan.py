@@ -149,7 +149,7 @@ class Scan(MedImage):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    from rich import print
+    from rich import print  # noqa: A004
 
     directory = "data/4D-Lung/113_HM10395/CT_Series-00173972"
     scan = read_dicom_scan(directory)
