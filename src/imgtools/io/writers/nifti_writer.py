@@ -5,6 +5,7 @@ from typing import ClassVar
 import numpy as np
 import SimpleITK as sitk
 
+from imgtools.coretypes import MedImage
 from imgtools.loggers import logger
 from imgtools.utils import truncate_uid
 
@@ -162,6 +163,22 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
                 msg = "Input must be a SimpleITK Image or a numpy array"
                 raise NiftiWriterValidationError(msg)
 
+        # if the object has the 'fingerprint' property, update the context
+        if hasattr(data, "serialized_fingerprint"):
+            self.set_context(**data.serialized_fingerprint)
+        elif isinstance(data, MedImage):
+            # if there is no fingerprint, this is unexpected
+            # this is an issue now since we auto keep context between
+            # saves, so this could lead to using the fingerprint
+            # of the previous save
+            logger.error(
+                "No fingerprint found in the writer object. "
+                "This is unexpected and may indicate a bug. "
+                "The fingerprint fields in the index might be incorrect."
+            )
+            # TODO:: think of a better way to handle this
+            self.clear_context()
+
         # TODO:: think of a better way to handle the truncate_uids_in_filename
         if self.truncate_uids_in_filename:
             truncated_kwargs = {
@@ -197,20 +214,6 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         except Exception as e:
             msg = f"Error writing image to file {out_path}: {e}"
             raise NiftiWriterIOError(msg) from e
-
-        # if the object has the 'fingerprint' property, update the context
-        if hasattr(data, "serialized_fingerprint"):
-            self.set_context(**data.serialized_fingerprint)
-        else:
-            # if there is no fingerprint, this is unexpected
-            # this is an issue now since we auto keep context between
-            # saves, so this could lead to using the fingerprint
-            # of the previous save
-            logger.error(
-                "No fingerprint found in the writer object. "
-                "This is unexpected and may indicate a bug. "
-                "The fingerprint fields in the index might be incorrect."
-            )
 
         self.add_to_index(
             out_path,
