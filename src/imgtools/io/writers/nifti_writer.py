@@ -164,13 +164,13 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
 
         # TODO:: think of a better way to handle the truncate_uids_in_filename
         if self.truncate_uids_in_filename:
-            trunctated_kwargs = {
+            truncated_kwargs = {
                 k: truncate_uid(str(v), self.truncate_uids_in_filename)
                 if k.lower().endswith("uid")
                 else v
                 for k, v in kwargs.items()
             }
-            out_path = self.resolve_path(**trunctated_kwargs)
+            out_path = self.resolve_path(**truncated_kwargs)
             # need to update the context with the old kwargs
             # because it will be used in the index, and we dont want
             # to truncate the UIDs in the index
@@ -198,9 +198,24 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             msg = f"Error writing image to file {out_path}: {e}"
             raise NiftiWriterIOError(msg) from e
 
+        # if the object has the 'fingerprint' property, update the context
+        if hasattr(data, "serialized_fingerprint"):
+            self.set_context(**data.serialized_fingerprint)
+        else:
+            # if there is no fingerprint, this is unexpected
+            # this is an issue now since we auto keep context between
+            # saves, so this could lead to using the fingerprint
+            # of the previous save
+            logger.error(
+                "No fingerprint found in the writer object. "
+                "This is unexpected and may indicate a bug. "
+                "The fingerprint fields in the index might be incorrect."
+            )
+
         self.add_to_index(
             out_path,
             filepath_column="filepath",
             replace_existing=out_path.exists(),
         )
+
         return out_path

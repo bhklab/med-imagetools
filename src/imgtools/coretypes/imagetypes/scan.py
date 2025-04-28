@@ -139,9 +139,7 @@ class Scan(MedImage):
         # with angulated brackets
         retr_str = "Scan<"
         for k, v in self.metadata.items():
-            retr_str += f"\n\t{k}={v}"
-        for k, v in self.img_stats.items():
-            retr_str += f"\n\t{k}={v}"
+            retr_str += f"\n\t{k}={v}" if v else ""
         retr_str += "\n>"
         return retr_str
 
@@ -151,6 +149,9 @@ class Scan(MedImage):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    directory = "data/4D-Lung/113_HM10395/CT_Series00173972"
+    from rich import print
+
+    directory = "data/4D-Lung/113_HM10395/CT_Series-00173972"
     scan = read_dicom_scan(directory)
     print(f"{scan!r}")  # noqa
+    print(scan.fingerprint)
