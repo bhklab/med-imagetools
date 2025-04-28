@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.26 (2025-04-28)
+
+### Features
+
+- Add Docker publish workflow to CI-CD process
+  ([`ad0d321`](https://github.com/bhklab/med-imagetools/commit/ad0d321d7afb3bfde0e857cc039c76d856515720))
+
+
 ## v2.0.0-rc.25 (2025-04-28)
 
 ### Bug Fixes
