@@ -38,6 +38,7 @@ dependencies = [
     "scikit-learn>=1.4.2,<2",
     "simpleitk>=2.4.0,<3",
     "highdicom",
+    "nibabel",
     # lockfile
     "fasteners==0.19",
     "pyyaml>=6.0.1,<7",
@@ -71,6 +72,7 @@ all = [
     "h5py>=3.11.0",
     "pynrrd>=1.0.0",
     "pyvis>=0.3.2,<0.4",
+    "pyvista","imageio"
 ]
 
 # Entry points for CLI commands

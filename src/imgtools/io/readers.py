@@ -28,7 +28,7 @@ def read_dicom_series(
     recursive: bool = False,
     file_names: list[str] | None = None,
     **kwargs: Any,  # noqa
-) -> tuple[sitk.Image, dict]:
+) -> tuple[sitk.Image, dict, list[str]]:
     """Read DICOM series as SimpleITK Image.
 
     Parameters
@@ -91,7 +91,7 @@ def read_dicom_series(
     metadata = cleanse_metadata(metadata)
     metadata = convert_dictionary_datetime_values(metadata)
     metadata = attrify(metadata)
-    return reader.Execute(), metadata
+    return reader.Execute(), metadata, file_names
 
 
 def read_dicom_auto(

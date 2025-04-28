@@ -621,7 +621,10 @@ def print_interlacer_tree(
             folder = Path(node.folder).resolve()
 
         if folder.exists():
-            folder_str = f"\t\t[dim]{str(folder.relative_to(Path().cwd()))}[/]"
+            try:
+                folder_str = f"\t\t[dim]{str(folder.relative_to(Path().cwd()))}[/]"
+            except ValueError:
+                folder_str = f"\t\t[dim]{str(folder)}[/]"
             left_part += folder_str
 
         child_branch = branch.add(left_part, highlight=True)

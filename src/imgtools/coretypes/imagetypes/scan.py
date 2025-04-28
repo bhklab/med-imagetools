@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict
 
+import pydicom
+
 from imgtools.coretypes import MedImage
 from imgtools.io.readers import read_dicom_series
 from imgtools.loggers import logger
@@ -49,10 +51,17 @@ def read_dicom_scan(
 
 class Scan(MedImage):
     metadata: Dict[str, Any]
+    dcm_meta: pydicom.Dataset | None = None
 
-    def __init__(self, image: sitk.Image, metadata: Dict[str, Any]) -> None:
+    def __init__(
+        self,
+        image: sitk.Image,
+        metadata: Dict[str, Any],
+        dcm_meta: pydicom.Dataset | None = None,
+    ) -> None:
         super().__init__(image)
         self.metadata = metadata
+        self.dcm_meta = dcm_meta
         self._fix_direction()
 
     def _fix_direction(self) -> None:
@@ -124,15 +133,17 @@ class Scan(MedImage):
         Scan
             The read scan.
         """
-        image, metadata = read_dicom_series(
+        image, metadata, filenames = read_dicom_series(
             path,
             series_id=series_id,
             recursive=recursive,
             file_names=file_names,
             **kwargs,
         )
+        from imgtools.dicom import load_dicom
 
-        return cls(image, metadata)
+        dcm_meta = load_dicom(filenames[0])
+        return cls(image, metadata, dcm_meta=dcm_meta)
 
     def __repr__(self) -> str:  # type: ignore
         # convert metadata and img_stats to string

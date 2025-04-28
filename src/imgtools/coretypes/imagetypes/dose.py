@@ -47,7 +47,7 @@ class Dose(MedImage):
         """
         Reads the data and returns the data frame and the image dosage in SITK format
         """
-        dose, metadata = read_dicom_series(
+        dose, metadata, _ = read_dicom_series(
             path,
             series_id=series_id,
             file_names=file_names,

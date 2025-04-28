@@ -100,7 +100,7 @@ class PET(MedImage):
         have some error.
         """
         # TODO: this logic might repetitive... idk how pet is supposed to be used
-        image, metadata = read_dicom_series(
+        image, metadata, _ = read_dicom_series(
             path,
             series_id=series_id,
             recursive=recursive,
