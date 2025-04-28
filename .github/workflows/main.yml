@@ -6,6 +6,7 @@ on:
     branches: ["*"]
   pull_request:
     branches: ["*"]
+  release:
 
 concurrency:
   group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
@@ -315,6 +316,50 @@ jobs:
           verbose: true
           user: ${{ secrets.pypi_token }}
           password: ${{ secrets.pypi_api }}
+
+  ################################################################################################
+  # Docker: Build and publish Docker image when Continuous-Deployment is successful
+  ################################################################################################
+  Docker-Publish:
+    needs: Continuous-Deployment
+    if: needs.Continuous-Deployment.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: [3.10, 3.11, 3.12]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.BHKLAB_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.BHKLAB_DOCKERHUB_ACCESS_KEY }}
+
+      - name: Set build metadata
+        id: meta
+        run: echo "build_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            bhklab/med-imagetools:${{ matrix.python_version }}-${{ needs.Continuous-Deployment.outputs.tag}}
+            bhklab/med-imagetools:latest
+          build-args: |
+            PYTHON_VERSION=${{ matrix.python_version }}
+            VERSION=${{ needs.Continuous-Deployment.outputs.tag}}
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ steps.meta.outputs.build_date }}
+          provenance: false
 
   does-the-pip-squeak:
     needs: pip-squeak
