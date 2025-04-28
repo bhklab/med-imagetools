@@ -1,6 +1,24 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.25 (2025-04-28)
+
+### Bug Fixes
+
+- Update dependencies for optional groups
+  ([`751ea82`](https://github.com/bhklab/med-imagetools/commit/751ea829395ba2aa60cf8598b9cbec440a282602))
+
+### Chores
+
+- Remove unnecessary event type from Docker publish workflow
+  ([`81b7b1d`](https://github.com/bhklab/med-imagetools/commit/81b7b1d8af10524f1503f237fd2e7dc964a792f3))
+
+### Refactoring
+
+- Reorganize Dockerfile structure for clarity and maintainability
+  ([`e3811b8`](https://github.com/bhklab/med-imagetools/commit/e3811b8a198ccd792e09ed4bc2c77197982098a1))
+
+
 ## v2.0.0-rc.24 (2025-04-28)
 
 ### Documentation
