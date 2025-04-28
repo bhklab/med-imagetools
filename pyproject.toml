@@ -60,16 +60,11 @@ issues = "https://github.com/bhklab/med-imagetools/issues"
 
 # Optional dependencies (extras)
 [project.optional-dependencies]
-torch = ["torch", "torchio"] # dont think these are even used anymore
 pyvis = ["pyvis>=0.3.2,<0.4"]
-hdf5 = ["h5py>=3.11.0"]
-nrrd = ["pynrrd>=1.0.0"]
 datasets = ["pygithub>=2.5.0", "aiohttp>=3.8.1"]
 all = [
     "pygithub>=2.5.0",
     "aiohttp>=3.8.1",
-    "h5py>=3.11.0",
-    "pynrrd>=1.0.0",
     "pyvis>=0.3.2,<0.4",
 ]
 
