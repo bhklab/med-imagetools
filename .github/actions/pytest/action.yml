@@ -46,7 +46,7 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
         TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
-        pixi run -e ${{ inputs.env }} unittests_no_cov
+        pixi run -e ${{ inputs.env }} unittests
       shell: bash
 
     - name: Upload coverage report artifact to be used by Codecov
