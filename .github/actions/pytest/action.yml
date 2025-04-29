@@ -11,9 +11,11 @@ inputs:
   test_access_type:
     description: 'Test access type (public or private)'
     required: true
+    default: 'public'
   github_token:
     description: 'GitHub token for accessing test data'
-    required: true
+    required: false
+    default: ''
   test_type:
     description: 'Type of test to run (e.g., unittests, integration)'
     required: true
