@@ -236,7 +236,7 @@ jobs:
       issues: write
       pull-requests: write
 
-    needs: Unit-Tests
+    needs: [Unit-Tests, Integration-Tests, Linting, Build-Docs]
 
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
 
