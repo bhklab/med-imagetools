@@ -54,7 +54,7 @@ runs:
 
     - name: JUnit Test Summary
       id: pytest-summary
-      if: always()
+      if: failure()
       uses: test-summary/action@v2
       with: 
         paths: .cache/test-results/**/*.xml
