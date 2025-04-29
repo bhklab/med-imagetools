@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Run Unit Tests
-        uses: ./.github/actions/unit_tests_action.yml
+        uses: ./.github/actions/pytest/action.yml
         with:
           os: ${{ matrix.os }}
           env: ${{ matrix.env }}
