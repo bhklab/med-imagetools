@@ -39,6 +39,7 @@ jobs:
           env: ${{ matrix.env }}
           test_access_type: ${{ matrix.TestAccessType }}
           github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          test_type: "unittests"
 
   ################################################################################################
   # Codecov: Run codecov to check coverage
