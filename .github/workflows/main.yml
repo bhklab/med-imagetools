@@ -25,6 +25,30 @@ jobs:
         env: ["py310", "py311", "py313"] #"py312" removed for now...
         TestAccessType: ["public", "private"]
 
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Unit Tests
+        uses: ./.github/actions/pytest/
+        with:
+          os: ${{ matrix.os }}
+          env: ${{ matrix.env }}
+          test_access_type: ${{ matrix.TestAccessType }}
+          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          test_type: "unittests" # Updated to "unittests" for consistency
+
+  ###############################################################################################
+  # Integration-Tests: Run integration tests (downloading and running on data)
+  ################################################################################################
+  Integration-Tests:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true # dont fail the whole matrix if one fails
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
+        env: ["py310", "py311", "py313"] #"py312" removed for now...
+        TestAccessType: ["public", "private"]
+
     # this action needs to be able to read contents of other repos
     permissions:
       contents: read
@@ -39,7 +63,7 @@ jobs:
           env: ${{ matrix.env }}
           test_access_type: ${{ matrix.TestAccessType }}
           github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
-          test_type: "unittests"
+          test_type: "integration"
 
   ################################################################################################
   # Codecov: Run codecov to check coverage
