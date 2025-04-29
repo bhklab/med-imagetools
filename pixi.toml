@@ -5,7 +5,6 @@ description = "Add a short description here"
 name = "med-imagetools"
 platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
 
-
 [dependencies]
 python = "3.12.*, <3.12.10"
 pip = ">=24.3.1,<25"
@@ -66,17 +65,57 @@ filelock = ">=3.17.0,<4"
 pytest-asyncio = ">=0.26.0,<0.27"
 anyio = ">=4.9.0,<5"
 
-[feature.test.tasks.test]
-cmd = "pytest -c pytest.ini --rootdir . --basetemp='./tests/temp' -s"
-description = "Run pytest (make sure to run in root directory)"
 
-[feature.test.tasks.test_ci]
-cmd = "pytest -c pytest.ini --rootdir ."
 
-[feature.test.tasks.cov]
-cmd = "coverage report --rcfile=config/coverage.toml"
-inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
-description = "Run pytest and generate coverage report"
+# pytest task with custom arguments
+# we want to be able to mainly have configurability for 
+# 1) pytest markers (e.g. slow, fast, etc.)
+# 2) using either (--cov=src/imgtools + --cov-report=xml) OR --no-cov for speed
+# 3) using --numprocesses if we want to run tests in parallel
+[feature.test.tasks.test_base]
+cmd = "pytest {{ markers }} {{ coverage }} {{ parallel }}"
+args = [
+    # available markers in pytest.ini (unittests, integration)
+    {"arg" = "markers", "default" = "-m unittests"}, 
+    # automatically uses the config file with the env variable
+    # activate coverage with "--cov=src/imgtools --cov-report=xml"
+    {"arg" = "coverage", "default" = "--no-cov"}, 
+    # run tests in parallel with "--numprocesses=auto"
+    {"arg" = "parallel", "default" = "--numprocesses=0"}
+]
+env = { "COVERAGE_RCFILE" = "config/coverage.toml" }
+
+# Specialized versions inheriting from test_base
+[feature.test.tasks.unittests]
+depends-on = [
+    { task = "test_base", args = ["-m unittests"] }
+]
+
+[feature.test.tasks.integrationtests]
+depends-on = [
+    { task = "test_base", args = ["-m integration"] }
+]
+
+[feature.test.tasks.unittests_cov]
+depends-on = [
+    { task = "test_base", args = ["-m unittests", "--cov=src/imgtools -cov-report=xml:coverage-report/coverage.xml"] }
+]
+[feature.test.tasks.integrationtests_cov]
+depends-on = [
+    { task = "test_base", args = ["-m integration", "--cov=src/imgtools -cov-report=xml:coverage-report/coverage.xml"] }
+]
+
+# [feature.test.tasks.test]
+# cmd = "pytest --basetemp='./temp_outputs/test_outputs'"
+# description = "Run pytest (make sure to run in root directory)"
+
+# [feature.test.tasks.test_ci]
+# cmd = "pytest"
+
+# [feature.test.tasks.cov]
+# cmd = "coverage report --rcfile=config/coverage.toml"
+# inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
+# description = "Run pytest and generate coverage report"
 
 [feature.test.tasks.clean_tests]
 cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
