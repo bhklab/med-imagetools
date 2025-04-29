@@ -45,12 +45,12 @@ runs:
       shell: bash
 
     # TODO:: reintroduce coverage report upload
-    # - name: Upload coverage report artifact to be used by Codecov
-    #   if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: coverage-report-${{ inputs.test_type }}
-    #     path: coverage-report
+    - name: Upload coverage report artifact to be used by Codecov
+      if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ inputs.test_type }}
+        path: coverage-report
 
     - name: JUnit Test Summary
       id: pytest-summary
