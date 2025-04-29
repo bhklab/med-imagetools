@@ -24,7 +24,7 @@ runs:
       uses: prefix-dev/setup-pixi@v0.8.1
       with:
         environments: ${{ inputs.env }}
-        pixi-version: v0.41.1
+        pixi-version: v0.46.0
         cache: true
         locked: false
 
