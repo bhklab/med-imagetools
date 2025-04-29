@@ -98,11 +98,11 @@ depends-on = [
 
 [feature.test.tasks.unittests_cov]
 depends-on = [
-    { task = "test_base", args = ["-m unittests", "--cov=src/imgtools -cov-report=xml:coverage-report/coverage.xml"] }
+    { task = "test_base", args = ["-m unittests", "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"] }
 ]
 [feature.test.tasks.integrationtests_cov]
 depends-on = [
-    { task = "test_base", args = ["-m integration", "--cov=src/imgtools -cov-report=xml:coverage-report/coverage.xml"] }
+    { task = "test_base", args = ["-m integration", "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"] }
 ]
 
 # [feature.test.tasks.test]
