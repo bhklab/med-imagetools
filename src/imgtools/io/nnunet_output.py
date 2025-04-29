@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Dict, Sequence
 
+import pandas as pd
 from pydantic import (
     BaseModel,
     Field,
     PrivateAttr,
     field_validator,
-    
 )
 
 from imgtools.coretypes import MedImage, VectorMask
@@ -19,18 +19,16 @@ from imgtools.io.writers import (
     NIFTIWriter,
 )
 from imgtools.loggers import logger
-
-MODALITY_MAP = {
-    "CT": "0000",
-    "MR": "0001",
-    "PET": "0002",
-}   
-
+from imgtools.utils.nnunet import (
+    MODALITY_MAP,
+    generate_dataset_json,
+    generate_nnunet_scripts,
+)
 
 __all__ = ["nnUNetOutput"]
 
 
-class nnUNetOutput(BaseModel):
+class nnUNetOutput(BaseModel): # noqa: N801
     """
     Configuration model for saving medical imaging outputs in nnUNet format.
 
@@ -88,7 +86,7 @@ class nnUNetOutput(BaseModel):
         ],
     )
 
-    dataset_id: int | None = Field(init=False, default=None)
+    dataset_id: int = Field(init=False, default=1)
 
     _writer: AbstractBaseWriter | None = PrivateAttr(default=None)
     _file_name_format: str | None = PrivateAttr(default=None)    
@@ -108,7 +106,7 @@ class nnUNetOutput(BaseModel):
         self.dataset_id = min(set(range(1, 1000)) - existing_ids)
 
         # Update root directory to the specific dataset folder
-        self.directory /= f"nnUNet_raw/Dataset{self.dataset_id:03d}_{self.dataset_name}"
+        self.directory = self.directory / "nnUNet_raw" / f"Dataset{self.dataset_id:03d}_{self.dataset_name}"
 
         self._file_name_format = "{DirType}{SplitType}/{Dataset}_{SampleID}.nii.gz"
 
@@ -130,6 +128,8 @@ class nnUNetOutput(BaseModel):
         """Create a default instance of SampleOutput."""
         return cls(
             directory=Path("output"),
+            dataset_name="Dataset",
+            roi_keys=["ROI_1", "ROI_2"],
             existing_file_mode=ExistingFileMode.FAIL,
             extra_context={},
         )
@@ -139,10 +139,39 @@ class nnUNetOutput(BaseModel):
         """Get the writer instance."""
         if self._writer is None:
             raise ValueError("Writer is not initialized.")
-        return self._writer                
+        return self._writer     
+
+    def finalize_dataset(self) -> None:
+        """Finalize dataset by generating preprocessing scripts and dataset JSON configuration."""
+
+        generate_nnunet_scripts(self.directory, self.dataset_id)
+
+        index_df = pd.read_csv(self.writer.index_file)
+        _image_modalities = index_df["Modality"].unique()
+
+        # Construct channel names mapping
+        channel_names = {
+            channel_num.lstrip('0') or '0': modality
+            for modality, channel_num in MODALITY_MAP.items()
+            if modality in _image_modalities
+        }
+
+        # Count the number of training cases
+        num_training_cases = sum(
+            1 for file in (self.directory / "imagesTr").iterdir() 
+            if file.is_file()
+        )
+
+        generate_dataset_json(
+            self.directory,
+            channel_names=channel_names,
+            labels={"background": 0, **{label: i + 1 for i, label in enumerate(self.roi_keys)}},
+            num_training_cases=num_training_cases,
+            file_ending='nii.gz',
+        )           
 
     def __call__(
-        self, data: Sequence[MedImage], /, SampleNumber: int, **kwargs: object
+        self, data: Sequence[MedImage], /, SampleNumber: str, **kwargs: object # noqa: N803
     ) -> Sequence[Path]:
         """
         Save the data to files using the configured writer.
@@ -166,10 +195,9 @@ class nnUNetOutput(BaseModel):
             raise ValueError(msg)
 
         for image in data:
-            if isinstance(image, VectorMask):
-                if not all(roi_key in image.roi_keys for roi_key in self.roi_keys):
-                    msg = f"Not all required roi names found in sample {SampleNumber}. Expected: {self.roi_keys}. Found: {image.roi_keys}"
-                    raise ValueError(msg)
+            if isinstance(image, VectorMask) and not all(roi_key in image.roi_keys for roi_key in self.roi_keys):
+                msg = f"Not all required roi names found in sample {SampleNumber}. Expected: {self.roi_keys}. Found: {image.roi_keys}"
+                raise ValueError(msg)
 
         saved_files = []
         for image in data:
@@ -207,7 +235,9 @@ class nnUNetOutput(BaseModel):
                 raise TypeError(errmsg)
         return saved_files
 
-if __name__ == "__main__":
+
+if __name__ == "__main__": 
+        
     from imgtools.io.sample_input import SampleInput
 
     input_directory = "./data/RADCURE"
@@ -222,13 +252,13 @@ if __name__ == "__main__":
             directory=Path(input_directory),
             modalities=modalities,
             roi_match_map=roi_match_map,
-            roi_on_missing_regex="error",
     )
     output = nnUNetOutput(
         directory=output_directory,
         existing_file_mode=ExistingFileMode.OVERWRITE,
         dataset_name="RADCURE",
-        extra_context={}
+        extra_context={},
+        roi_keys=list(roi_match_map.keys()),
     )
 
     samples = input.query()
@@ -238,7 +268,9 @@ if __name__ == "__main__":
         loaded_sample = input(sample)
 
         try:
-            output(loaded_sample, SampleNumber=f"{idx:03}", roi_keys=roi_match_map.keys())
+            output(loaded_sample, SampleNumber=f"{idx:03}")
         except Exception as e:
             print(e)
+
+    output.finalize_dataset()
 

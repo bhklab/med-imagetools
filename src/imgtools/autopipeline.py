@@ -14,13 +14,13 @@ from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchStrategy,
     Valid_Inputs as ROIMatcherInputs,
 )
+from imgtools.io.nnunet_output import nnUNetOutput
 from imgtools.io.sample_input import SampleInput
 from imgtools.io.sample_output import (
     DEFAULT_FILENAME_FORMAT,
     ExistingFileMode,
     SampleOutput,
 )
-from imgtools.io.nnunet_output import nnUNetOutput
 from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.transforms import (
     BaseTransform,
@@ -209,8 +209,8 @@ def process_one_sample(
 class Autopipeline:
     """Pipeline for processing medical images."""
 
-    input: SampleInput
-    output: SampleOutput
+    input: SampleInput 
+    output: SampleOutput | nnUNetOutput
     transformer: Transformer[MedImage | VectorMask]
 
     def __init__(
@@ -294,7 +294,7 @@ class Autopipeline:
                 directory=Path(output_directory),
                 existing_file_mode=existing_file_mode,
                 dataset_name=Path(input_directory).name,
-                roi_keys=self.input.roi_matcher.match_map.keys(),
+                roi_keys=list(self.input.roi_matcher.match_map.keys()),
                 extra_context={},
             )
         else:
@@ -399,6 +399,9 @@ class Autopipeline:
             f"out of {total_count} total samples ({success_count / total_count * 100:.1f}% success rate)."
         )
 
+        if isinstance(self.output, nnUNetOutput):
+            self.output.finalize_dataset()
+
         index_file = self.output.writer.index_file
         # TODO:: discuss how we want to name these files
         # Generate report file names
@@ -440,7 +443,6 @@ class Autopipeline:
 
 
 if __name__ == "__main__":
-    import shutil
 
     from rich import print  # noqa
 
@@ -448,9 +450,11 @@ if __name__ == "__main__":
     dataset_name = "RADCURE"
 
     # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
+    output_path = Path(f"temp_outputs/{dataset_name}")
+    output_path.mkdir(exist_ok=True, parents=True)
     pipeline = Autopipeline(
         input_directory=f"data/{dataset_name}",
-        output_directory=f"temp_outputs/{dataset_name}",
+        output_directory=output_path,
         existing_file_mode=ExistingFileMode.OVERWRITE,
         n_jobs=10,
         modalities=["CT,RTSTRUCT"],
