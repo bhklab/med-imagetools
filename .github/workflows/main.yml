@@ -24,20 +24,20 @@ jobs:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest] 
         env: ["py310", "py311", "py313"] #"py312" removed for now...
         TestAccessType: ["public", "private"]
-    #   # exclude macos and windows stests for py310 and py311
-    #     exclude:
-    #       - os: macos-latest
-    #         env: "py310"
-    #       - os: macos-latest
-    #         env: "py311"
-    #       - os: macos-13
-    #         env: "py310"
-    #       - os: macos-13
-    #         env: "py311"
-    #       - os: windows-latest
-    #         env: "py310"
-    #       - os: windows-latest
-    #         env: "py311"
+      # exclude macos and windows stests for py310 and py311
+        exclude:
+          - os: macos-latest
+            env: "py310"
+          - os: macos-latest
+            env: "py311"
+          - os: macos-13
+            env: "py310"
+          - os: macos-13
+            env: "py311"
+          - os: windows-latest
+            env: "py310"
+          - os: windows-latest
+            env: "py311"
 
     # this action needs to be able to read contents of other repos
     permissions:
