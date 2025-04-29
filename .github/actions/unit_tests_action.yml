@@ -1,0 +1,58 @@
+name: 'Unit Tests Action'
+description: 'Run unit tests using pytest with configurable parameters'
+
+inputs:
+  os:
+    description: 'Operating system to run tests on'
+    required: true
+  env:
+    description: 'Python environment to use (e.g., py310, py311, py313)'
+    required: true
+  test_access_type:
+    description: 'Test access type (public or private)'
+    required: true
+  github_token:
+    description: 'GitHub token for accessing test data'
+    required: true
+  additional_args:
+    description: 'Additional arguments to pass to pytest'
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Pixi
+      uses: prefix-dev/setup-pixi@v0.8.1
+      with:
+        environments: ${{ inputs.env }}
+        pixi-version: v0.41.1
+        cache: true
+        locked: false
+      shell: bash
+
+    - name: Run pytest
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
+      run: |
+        pixi run -e ${{ inputs.env }} test_ci -s -vv ${{ inputs.additional_args }}
+      shell: bash
+
+    - name: Upload coverage report artifact to be used by Codecov
+      if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage-report
+
+    - name: JUnit Test Summary
+      id: pytest-summary
+      uses: test-summary/action@v2
+      with: 
+        paths: .cache/test-results/**/*.xml
+        show: "fail,skip"
+      if: always()
