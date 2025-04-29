@@ -59,6 +59,6 @@ runs:
       id: pytest-summary
       uses: test-summary/action@v2
       with: 
-      paths: .cache/test-results/**/*.xml
+        paths: .cache/test-results/**/*.xml
       show: "fail,skip"
       if: always()
