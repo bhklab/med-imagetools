@@ -26,7 +26,6 @@ runs:
         environments: ${{ inputs.env }}
         pixi-version: v0.46.0
         cache: true
-        locked: false
 
     # To save time across runs, we dont do code coverage if we dont need to!
     - name: Run pytest with coverage
