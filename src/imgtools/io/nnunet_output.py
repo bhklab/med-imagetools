@@ -167,7 +167,7 @@ class nnUNetOutput(BaseModel): # noqa: N801
             channel_names=channel_names,
             labels={"background": 0, **{label: i + 1 for i, label in enumerate(self.roi_keys)}},
             num_training_cases=num_training_cases,
-            file_ending='nii.gz',
+            file_ending='.nii.gz',
         )           
 
     def __call__(

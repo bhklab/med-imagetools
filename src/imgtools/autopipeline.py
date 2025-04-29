@@ -351,7 +351,7 @@ class Autopipeline:
         # Prepare arguments for parallel processing
         arg_tuples = [
             (
-                f"{idx:03}",
+                f"{idx:04}",
                 sample,
                 self.input,
                 self.transformer,
