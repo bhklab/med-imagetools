@@ -190,6 +190,58 @@ class VectorMask(MedImage):
         """Return True if any voxel has >1 mask"""
         arr = sitk.GetArrayFromImage(self)
         return self.n_masks > 1 and bool(np.any(np.sum(arr, axis=-1) > 1))
+    
+    def _to_label_array(self, allow_overlap: bool) -> Mask:
+        """
+        Convert vector mask to 3D label array with unique label per mask.
+
+        Parameters
+        ----------
+        allow_overlap : bool
+            If True, overlapping voxels are allowed and resolved using priority (argmax-style).
+            If False, will raise ValueError if overlaps are found.
+
+        Returns
+        -------
+        Mask
+            A single-channel binary mask where each voxel belongs to at most one class.
+            The output is a standard Mask with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8.
+        """
+
+        if self.n_masks == 1: # Already a label image
+            return Mask(
+                sitk.Cast(self[1], sitk.sitkUInt8),
+                metadata=self.metadata.copy(),
+            )
+        
+        if self.has_overlap():
+            if allow_overlap:
+                logger.warning(
+                    "Vector mask has overlaps. "
+                    "Converting to sparse mask will result in a lossy conversion."
+                )
+            else:
+                raise ValueError(
+                    "Cannot convert to label image: overlap detected. "
+                    "Use `to_sparsemask()` instead if you want lossy argmax conversion."
+                )
+
+        arr = sitk.GetArrayFromImage(self)
+
+        # Assign label index (1-based, since 0 = background)
+        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
+
+        for i in range(arr.shape[-1]):
+            label_arr[arr[..., i] == 1] = i + 1
+
+        label_img = sitk.GetImageFromArray(label_arr)
+        label_img.CopyInformation(self)
+
+        # Attach merged metadata
+        return Mask(
+            sitk.Cast(label_img, sitk.sitkUInt8),
+            metadata=self.metadata.copy(),
+        )
 
     def to_sparsemask(self) -> Mask:
         """Convert the vector mask to a single-channel binary mask via argmax operation.
@@ -211,36 +263,7 @@ class VectorMask(MedImage):
         keep working with the original VectorMask.
         """
         
-        if self.n_masks == 1: # Already a label image
-            return Mask(
-                sitk.Cast(self[1], sitk.sitkUInt8),
-                metadata=self.metadata.copy(),
-            )
-
-        arr = sitk.GetArrayFromImage(self)
-
-        # Check for overlaps before proceeding
-        overlap_mask = np.sum(arr, axis=-1) > 1
-        if np.any(overlap_mask):
-            logger.warning(
-                f"Vector mask has overlaps. "
-                "Converting to sparse mask will result in a lossy conversion."
-            )
-
-        # Assign label index (1-based, since 0 = background)
-        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
-
-        for i in range(arr.shape[-1]):
-            label_arr[arr[..., i] == 1] = i + 1
-
-        label_img = sitk.GetImageFromArray(label_arr)
-        label_img.CopyInformation(self)
-
-        # Attach merged metadata
-        return Mask(
-            sitk.Cast(label_img, sitk.sitkUInt8),
-            metadata=self.metadata.copy(),
-        )
+        return self._to_label_array(allow_overlap=True)
 
     def to_label_image(self) -> Mask:
         """Convert the vector mask to a scalar label image with unique labels for each ROI.
@@ -269,36 +292,7 @@ class VectorMask(MedImage):
         is preserved in the metadata.
         """
 
-        if self.n_masks == 1: # Already a label image
-            return Mask(
-                sitk.Cast(self[1], sitk.sitkUInt8),
-                metadata=self.metadata.copy(),
-            )
-
-        arr = sitk.GetArrayFromImage(self)
-
-        # Check for overlaps before proceeding
-        overlap_mask = np.sum(arr, axis=-1) > 1
-        if np.any(overlap_mask):
-            raise ValueError(
-                "Cannot convert to label image: overlap detected. "
-                "Use `to_sparsemask()` instead if you want lossy argmax conversion."
-            )
-
-        # Assign label index (1-based, since 0 = background)
-        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
-
-        for i in range(arr.shape[-1]):
-            label_arr[arr[..., i] == 1] = i + 1
-
-        label_img = sitk.GetImageFromArray(label_arr)
-        label_img.CopyInformation(self)
-
-        # Attach merged metadata
-        return Mask(
-            sitk.Cast(label_img, sitk.sitkUInt8),
-            metadata=self.metadata.copy(),
-        )
+        return self._to_label_array(allow_overlap=True)
 
     def extract_mask(self, key: str | int) -> Mask:
         """Extract a single binary mask by index or ROI key.
