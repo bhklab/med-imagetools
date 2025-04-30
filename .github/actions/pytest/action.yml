@@ -57,19 +57,19 @@ runs:
         TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
         # specifically run code-coverage for py313 public ubuntu tests
-        if [[ "${{ inputs.os }}" == "ubuntu-latest" && "${{ inputs.env }}" == "py313" && "${{ inputs.test_access_type }}" == "public" ]]; then
-          USE_COVERAGE=--cov=imgtools --cov-report=xml:coverage-report/coverage.xml
-        else
-          USE_COVERAGE=--no-cov
-        fi
-
         mkdir -p coverage-report
-
-        pixi run -e ${{ inputs.env }} pytest \
-          -m ${{ inputs.test_type }} \
-            $USE_COVERAGE \
-          --numprocesses=auto
-
+        
+        if [[ "${{ inputs.os }}" == "ubuntu-latest" && "${{ inputs.env }}" == "py313" && "${{ inputs.test_access_type }}" == "public" ]]; then
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --cov=imgtools --cov-report="xml:coverage-report/coverage.xml" \
+            --numprocesses=auto
+        else
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --no-cov \
+            --numprocesses=auto
+        fi
       shell: bash
 
     - name: Upload coverage report
