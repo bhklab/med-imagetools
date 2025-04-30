@@ -2,23 +2,23 @@ name: CI-CD
 
 # only run on pushes to main or pull requests
 on:
-    push:
-        branches: ["*"]
     pull_request:
-        branches: ["*"]
-    release:
+        branches:
+          - "development"
+          - "main"
+          - "jjjermiah/*"
 
-concurrency:
-    group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
-    cancel-in-progress: true
+# concurrency:
+#     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
+#     cancel-in-progress: true
 
 jobs:
+
     ###############################################################################################
     # Unit-Tests: Run unit tests using pytest
     ################################################################################################
     Unit-Tests:
         runs-on: ${{ matrix.os }}
-        continue-on-error: true # dont fail the whole matrix if one fails
         strategy:
             matrix:
                 os: [ubuntu-latest, macos-latest, windows-latest]
@@ -32,6 +32,7 @@ jobs:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
                   github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "unittests"
 
     ###############################################################################################
@@ -39,7 +40,6 @@ jobs:
     ################################################################################################
     Integration-Tests:
         runs-on: ${{ matrix.os }}
-        continue-on-error: true # dont fail the whole matrix if one fails
         strategy:
             matrix:
                 os: [ubuntu-latest, macos-latest, windows-latest]
@@ -54,6 +54,7 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
+
             - name: Run Integration Tests
               uses: ./.github/actions/pytest/
               with:
@@ -61,52 +62,8 @@ jobs:
                   env: ${{ matrix.env }}
                   test_access_type: ${{ matrix.TestAccessType }}
                   github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "integration"
-
-    ###############################################################################################
-    #   Codecov: Run codecov to check coverage
-    ###############################################################################################
-    Code-Coverage:
-        needs: Unit-Tests
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Download coverage.xml artifact
-              uses: actions/download-artifact@v4
-              with:
-                  pattern: coverage-report*
-                  path: coverage-reports
-
-            - name: prepare coverage files
-              run: | 
-                  # so we should have a bunch of zip artifacts
-                  # and they will unzipped into the coverage-reports directory
-                  # lets list everything in there
-                  ls -laR coverage-reports
-                  
-                  # lets find all the coverage.xml files
-                  # and save them to a env variable
-                  # this will be used to upload to codecov
-                  cov_files=$(find coverage-reports -name "coverage.xml")
-
-                  # print for debugging
-                  echo "Found coverage files: $cov_files"
-
-                  # save to env variable
-                  echo "COV_FILES=$cov_files" >> $GITHUB_ENV
-
-            - name: Use Codecov to track coverage
-              uses: codecov/codecov-action@v3
-              env:
-                  COV_FILES: ${{ env.COV_FILES }}
-              with:
-                  token: ${{ secrets.CODECOV_TOKEN }}
-                  files: ${{ env.COV_FILES }}
-                  fail_ci_if_error: true
-                  verbose: true
-                  name: codecov-umbrella
 
     ################################################################################################
     # Linting: Run linting using Ruff & Mypy
@@ -136,7 +93,7 @@ jobs:
 
             - name: Run ruff check
               id: ruff_check
-              if: always()
+            #   if: always()
               run: |
                   set -eu pipefail
                   pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
@@ -150,7 +107,7 @@ jobs:
 
             - name: Run ruff format
               id: ruff_format
-              if: always()
+            #   if: always()
               run: |
                   pixi run -e test ruff-format --exit-non-zero-on-format
 
@@ -163,7 +120,7 @@ jobs:
 
             - name: Run mypy check
               id: mypy
-              if: always()
+            #   if: always()
               run: |
                   pixi run -e test type-check
 

@@ -158,33 +158,42 @@ async def download_dataset(
         headers["Authorization"] = f"bearer {token}"
 
     timeout = aiohttp.ClientTimeout(total=timeout_seconds)
+    max_retries = 3
+    retry_delay = 5  # seconds
+
     async with aiohttp.ClientSession(
         timeout=timeout, raise_for_status=True
     ) as session:
-        try:
-            async with session.get(download_link, headers=headers) as response:
-                total = int(response.headers.get("content-length", 0))
-                progress.update(task_id, total=total)
-                with temp_file_path.open("wb") as f:
-                    async for chunk in response.content.iter_chunked(8192):
-                        f.write(chunk)
-                        progress.update(task_id, advance=len(chunk))
-        except asyncio.TimeoutError:
-            logger.error(
-                f"[bold red]Timeout while downloading {file_path.name}. Please try again later."
-            )
-            # Clean up the temporary file if it exists
-            if temp_file_path.exists():
-                temp_file_path.unlink(missing_ok=True)
-            raise
-        except aiohttp.ClientResponseError as e:
-            logger.error(
-                f"[bold red]Error downloading {file_path.name}: {str(e)}"
-            )
-            # Clean up the temporary file if it exists
-            if temp_file_path.exists():
-                temp_file_path.unlink(missing_ok=True)
-            raise
+        for attempt in range(max_retries):
+            try:
+                async with session.get(
+                    download_link, headers=headers
+                ) as response:
+                    total = int(response.headers.get("content-length", 0))
+                    progress.update(task_id, total=total)
+                    with temp_file_path.open("wb") as f:
+                        async for chunk in response.content.iter_chunked(8192):
+                            f.write(chunk)
+                            progress.update(task_id, advance=len(chunk))
+                break  # If successful, break out of the retry loop
+            except (
+                asyncio.TimeoutError,
+                aiohttp.ClientResponseError,
+                aiohttp.ClientConnectionError,
+            ) as e:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"Attempt {attempt + 1} failed: {e}. Retrying in {retry_delay} seconds..."
+                    )
+                    await asyncio.sleep(retry_delay)  # Wait before retrying
+                else:
+                    logger.error(
+                        f"Max retries reached. Error downloading {file_path.name}: {str(e)}"
+                    )
+                    # Clean up the temporary file if it exists
+                    if temp_file_path.exists():
+                        temp_file_path.unlink(missing_ok=True)
+                    raise
 
     # Rename the temporary file to the final file path
     if temp_file_path.exists():
@@ -222,12 +231,21 @@ class MedImageTestData:
     asset_status: dict[str, AssetStatus] = field(
         default_factory=dict, init=False, repr=False
     )
+    token: Optional[str] = field(
+        default=None,
+        init=True,
+        repr=False,
+    )
 
     # github parameters
     timeout = 300
 
     def __post_init__(self) -> None:
-        token = os.environ.get("GITHUB_TOKEN", os.environ.get("GH_TOKEN"))
+        # if user provides a token, use it
+        # otherwise, use the token from the environment
+        token = self.token or os.environ.get(
+            "GITHUB_TOKEN", os.environ.get("GH_TOKEN")
+        )
         if token:
             logger.info("Using GH token")
             self.github = Github(token, timeout=self.timeout)
@@ -338,42 +356,50 @@ class MedImageTestData:
         task_map: dict[str, TaskID],
     ) -> Optional[Path]:
         # this whole function can PROBABLY be cleaned up a lot lool
-        filepath: Path = dest / asset.name
-        alt_filepath: Path = filepath.with_suffix("").with_suffix("")
+        targz: Path = dest / asset.name
+
+        if asset.name.endswith(".tar.gz"):
+            # remove the '.tar.gz' suffix to get the directory name
+            extracted_path: Path = targz.with_suffix("").with_suffix("")
+        else:
+            extracted_path = dest / asset.label
+
         task_id: TaskID = task_map[asset.name]
 
-        if filepath.exists() or alt_filepath.exists():
+        if extracted_path.exists():
+            self.asset_status[asset.name] = AssetStatus.SKIPPED
+            self._update_progress(progress, task_id, asset.name, completed=1)
+            return extracted_path
+        elif targz.exists():
             self.asset_status[asset.name] = AssetStatus.EXISTS
             self._update_progress(progress, task_id, asset.name, completed=1)
-            return filepath
-
-        dest.mkdir(parents=True, exist_ok=True)
-        self.asset_status[asset.name] = AssetStatus.DOWNLOADING
-        self._update_progress(progress, task_id, asset.name)
-
-        try:
-            _path = await download_dataset(
-                asset.url, filepath, progress, task_id
-            )
-            self.asset_status[asset.name] = AssetStatus.DOWNLOADED
-            self._update_progress(progress, task_id, asset.name, completed=1)
-        except aiohttp.ClientResponseError as e:  # pragma: no cover
-            self.asset_status[asset.name] = AssetStatus.FAILED
-            self._update_progress(progress, task_id, asset.name, completed=1)
-            logger.error(
-                f"Error downloading {asset.name}. Skipping extraction. Error: {str(e)}"
-            )
-            raise e
-
-        # Extract
-        extract_path: Path = alt_filepath
-        if extract_path.exists():
-            self.asset_status[asset.name] = AssetStatus.DONE
-            self._update_progress(progress, task_id, asset.name)
-            return extract_path
         else:
-            self.asset_status[asset.name] = AssetStatus.EXTRACTING
+            # download the asset
+
+            self.asset_status[asset.name] = AssetStatus.DOWNLOADING
             self._update_progress(progress, task_id, asset.name)
+
+            try:
+                p = await download_dataset(asset.url, targz, progress, task_id)
+                assert p.exists() and str(p) == str(targz), (
+                    f"Downloaded file {p} does not match expected path {targz}"
+                )
+                self.asset_status[asset.name] = AssetStatus.DOWNLOADED
+                self._update_progress(
+                    progress, task_id, asset.name, completed=1
+                )
+            except aiohttp.ClientResponseError as e:  # pragma: no cover
+                self.asset_status[asset.name] = AssetStatus.FAILED
+                self._update_progress(
+                    progress, task_id, asset.name, completed=1
+                )
+                logger.error(
+                    f"Error downloading {asset.name}. Skipping extraction. Error: {str(e)}"
+                )
+                raise e
+
+        self.asset_status[asset.name] = AssetStatus.EXTRACTING
+        self._update_progress(progress, task_id, asset.name)
 
         # extracting is a blocking operation, so we need to run it in a thread
         # pool
@@ -395,7 +421,7 @@ class MedImageTestData:
         loop = asyncio.get_running_loop()
         try:
             await loop.run_in_executor(
-                None, functools.partial(extract, filepath, extract_path)
+                None, functools.partial(extract, targz, extracted_path)
             )
         except Exception:  # pragma: no cover
             self.asset_status[asset.name] = AssetStatus.FAILED
@@ -404,7 +430,7 @@ class MedImageTestData:
 
         self.asset_status[asset.name] = AssetStatus.DONE
         self._update_progress(progress, task_id, asset.name)
-        return extract_path
+        return extracted_path
 
     def download(
         self,
@@ -434,11 +460,11 @@ class MedImageTestData:
 
         task_map: dict[str, TaskID] = {}
         logger.info(
-            f"[bold blue]Downloading {len(assets)} assets from {self.repo_name}..."
+            f"Downloading {len(assets)} assets from {self.repo_name}..."
         )
         with Progress(
             SpinnerColumn(),
-            TextColumn("[bold blue]{task.description}", justify="right"),
+            TextColumn("{task.description}", justify="right"),
             BarColumn(),
             TaskProgressColumn(),
             TimeRemainingColumn(),
@@ -453,6 +479,7 @@ class MedImageTestData:
                     description=f"[white]{asset.label}", total=1
                 )
 
+            dest.mkdir(parents=True, exist_ok=True)
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             extracted_paths = loop.run_until_complete(
@@ -464,8 +491,9 @@ class MedImageTestData:
                 )
             )
             loop.close()
+
         logger.info(
-            f"[bold green]Downloaded {len(extracted_paths)} assets from {self.repo_name}."
+            f"Downloaded {len(assets)} assets from {self.repo_name} to {dest}"
         )
 
         return [p for p in extracted_paths if p is not None]

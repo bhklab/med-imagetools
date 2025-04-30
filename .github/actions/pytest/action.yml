@@ -19,6 +19,10 @@ inputs:
   test_type:
     description: 'Type of test to run (e.g., unittests, integration)'
     required: true
+  codecov_token:
+    description: 'Codecov token for uploading coverage reports'
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -31,6 +35,21 @@ runs:
         environments: ${{ inputs.env }}
         pixi-version: v0.46.0
         cache: true
+
+    - name: Prepare data if needed
+      if: inputs.test_type == 'integration'
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
+      run: |
+        if [[ "${{ inputs.test_access_type }}" == "private" ]]; then
+          pixi run -e ${{ inputs.env }} imgtools testdata -p -d data
+        else
+          pixi run -e ${{ inputs.env }} imgtools testdata -d data
+        fi
+      shell: bash
+
     - name: Run pytest
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
@@ -38,20 +57,30 @@ runs:
         TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
         # specifically run code-coverage for py313 public ubuntu tests
+        mkdir -p coverage-report
+        
         if [[ "${{ inputs.os }}" == "ubuntu-latest" && "${{ inputs.env }}" == "py313" && "${{ inputs.test_access_type }}" == "public" ]]; then
-          pixi run -e ${{ inputs.env }} ${{ inputs.test_type }}_cov
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --cov=imgtools --cov-report="xml:coverage-report/coverage.xml" \
+            --numprocesses=auto
         else
-          pixi run -e ${{ inputs.env }} ${{ inputs.test_type }}
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --no-cov \
+            --numprocesses=auto
         fi
       shell: bash
 
-    # TODO:: reintroduce coverage report upload
-    - name: Upload coverage report artifact to be used by Codecov
+    - name: Upload coverage report
       if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
-      uses: actions/upload-artifact@v4
+      uses: codecov/codecov-action@v3
       with:
-        name: coverage-report-${{ inputs.test_type }}
-        path: coverage-report
+          token: ${{ inputs.codecov_token }}
+          files: coverage-report/coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+          name: codecov-umbrella
 
     - name: JUnit Test Summary
       id: pytest-summary
