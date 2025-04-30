@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import multiprocessing
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, Sequence
 
@@ -135,6 +137,13 @@ class SampleOutput(BaseModel):
             List of paths to the saved files.
         """
         saved_files = []
+        # Use ThreadPoolExecutor for parallel IO operations
+        # Reserve some cores for system operations
+        max_workers = max(4, multiprocessing.cpu_count() - 1)
+
+        # Create tasks for threadpool
+        tasks = []
+
         for image in data:
             if isinstance(image, VectorMask):
                 for (
@@ -144,25 +153,24 @@ class SampleOutput(BaseModel):
                     image_id,
                     mask,
                 ) in image.iter_masks():
-                    # image_id = f"{roi_key}_[{matched_rois}]"
-                    p = self.writer.save(
-                        mask,
-                        roi_key=roi_key,
-                        matched_rois="|".join(roi_names),
-                        **image.metadata,
-                        **kwargs,
-                        ImageID=image_id,
+                    tasks.append(
+                        {
+                            "type": "mask",
+                            "mask": mask,
+                            "roi_key": roi_key,
+                            "roi_names": roi_names,
+                            "image_id": image_id,
+                            "metadata": image.metadata,
+                        }
                     )
-                    saved_files.append(p)
             elif isinstance(image, MedImage):
-                # Handle MedImage case
-                p = self.writer.save(
-                    image,
-                    **image.metadata,
-                    **kwargs,
-                    ImageID=image.metadata["Modality"],
+                tasks.append(
+                    {
+                        "type": "image",
+                        "image": image,
+                        "metadata": image.metadata,
+                    }
                 )
-                saved_files.append(p)
             else:
                 errmsg = (
                     f"Unsupported image type: {type(image)}. "
@@ -170,4 +178,40 @@ class SampleOutput(BaseModel):
                 )
                 logger.error(errmsg)
                 raise TypeError(errmsg)
+
+        # Execute save operations in parallel
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks to the executor
+            future_to_task = {}
+            for task in tasks:
+                if task["type"] == "mask":
+                    future = executor.submit(
+                        self.writer.save,
+                        task["mask"],
+                        roi_key=task["roi_key"],
+                        matched_rois="|".join(task["roi_names"]),
+                        **task["metadata"],
+                        **kwargs,
+                        ImageID=task["image_id"],
+                    )
+                else:  # MedImage case
+                    future = executor.submit(
+                        self.writer.save,
+                        task["image"],
+                        **task["metadata"],
+                        **kwargs,
+                        ImageID=task["metadata"]["Modality"],
+                    )
+                future_to_task[future] = task
+
+            # Collect results as they complete
+            for future in as_completed(future_to_task):
+                try:
+                    path = future.result()
+                    saved_files.append(path)
+                except Exception as e:
+                    task = future_to_task[future]
+                    logger.error(f"Error saving {task['type']}: {str(e)}")
+                    raise  # Re-raise to maintain original behavior
+
         return saved_files
