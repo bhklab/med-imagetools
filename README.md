@@ -14,6 +14,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![GitHub Release](https://img.shields.io/github/v/release/bhklab/med-imagetools?include_prereleases&label=pre-release)](https://github.com/bhklab/med-imagetools/releases)
 [![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools?label=stable-pypi)](https://pypi.org/project/med-imagetools/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/bhklab/med-imagetools?label=dockerhub-pulls)](https://hub.docker.com/r/bhklab/med-imagetools)
+[![Docker Size](https://img.shields.io/docker/image-size/bhklab/med-imagetools/latest?label=docker-size)](https://hub.docker.com/r/bhklab/med-imagetools/tags)
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
