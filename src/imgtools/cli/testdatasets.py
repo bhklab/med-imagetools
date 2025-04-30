@@ -84,7 +84,7 @@ def testdata(
     repo = "bhklab/med-image_test-data"
     if private:
         repo = f"{repo}_private"
-        
+        # TODO:: use clicks automatic env variable parsing!
         token = token or os.environ.get(
             "GITHUB_TOKEN", os.environ.get("GH_TOKEN")
         )
@@ -93,6 +93,7 @@ def testdata(
                 "A GitHub token is required for accessing private repositories. "
                 "You can set it using the GITHUB_TOKEN or GH_TOKEN environment variable."
             )
+            click.Abort(1)
 
     manager = MedImageTestData(repo_name=repo, token=token)
 
