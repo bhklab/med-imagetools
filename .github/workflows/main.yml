@@ -8,9 +8,9 @@ on:
           - "main"
           - "jjjermiah/*"
 
-concurrency:
-    group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
-    cancel-in-progress: true
+# concurrency:
+#     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
+#     cancel-in-progress: true
 
 jobs:
 
@@ -108,7 +108,7 @@ jobs:
 
             - name: Run ruff check
               id: ruff_check
-              if: always()
+            #   if: always()
               run: |
                   set -eu pipefail
                   pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
@@ -122,7 +122,7 @@ jobs:
 
             - name: Run ruff format
               id: ruff_format
-              if: always()
+            #   if: always()
               run: |
                   pixi run -e test ruff-format --exit-non-zero-on-format
 
@@ -135,7 +135,7 @@ jobs:
 
             - name: Run mypy check
               id: mypy
-              if: always()
+            #   if: always()
               run: |
                   pixi run -e test type-check
 
