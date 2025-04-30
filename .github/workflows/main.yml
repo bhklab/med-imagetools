@@ -32,6 +32,8 @@ jobs:
               with:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "unittests"
 
     ###############################################################################################

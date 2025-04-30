@@ -35,6 +35,17 @@ runs:
         environments: ${{ inputs.env }}
         pixi-version: v0.46.0
         cache: true
+
+    - name: Prepare data if needed
+      if: inputs.test_type == 'integration'
+      run: |
+        if [[ "${{ inputs.test_access_type }}" == "private" ]]; then
+          pixi run -e ${{ inputs.env }} imgtools testdata -p -d data
+        else
+          pixi run -e ${{ inputs.env }} imgtools testdata -d data
+        fi
+      shell: bash
+
     - name: Run pytest
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
