@@ -34,6 +34,8 @@ It not only processes DICOMs consisting of different modalities
 deep learning ready subject based format taking the dependencies of
 these modalities into consideration.  
 
+![cli](/assets/imgtools_cli.png)
+
 ## Introduction
 
 A medical dataset, typically contains multiple different types of scans
@@ -42,7 +44,7 @@ the different scans containing DICOM of different modalities are
 interdependent on each other. For making effective machine
 learning models, one ought to take different modalities into account.
 
-![graph](https://github.com/bhklab/med-imagetools/blob/main/images/graph.png?raw=true)
+![graph](/assets/graph.png)
 
 Fig.1 - Different network topology for different studies of different patients
 
@@ -60,6 +62,7 @@ eventually torch dataloader for ML pipeline.
 ```console
 pip install med-imagetools
 ```
+
 
 ## Repository Stars
 
