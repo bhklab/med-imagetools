@@ -43,19 +43,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest] 
-        env: ["py310", "py311", "py312", "py313"]
+        env: ["py310", "py313"]
         TestAccessType: ["public", "private"]
-        # To save time and resources, we skip some tests on some platforms
-        # that I think are redundant
-        exclude:
-            - os: macos-latest
-              env: "py310"
-            - os: macos-latest
-              env: "py311"
-            - os: windows-latest
-              env: "py310"
-            - os: windows-latest
-              env: "py311"
 
     # this action needs to be able to read contents of other repos
     # for the test data (specifically private test data)
