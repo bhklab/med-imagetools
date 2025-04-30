@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.29 (2025-04-30)
+
+### Bug Fixes
+
+- Update test_invalid_dicom_file to use temporary path for invalid DICOM file
+  ([`ccc1ef5`](https://github.com/bhklab/med-imagetools/commit/ccc1ef59a84ed37ec1ffa4f93ca800c247ddd4a8))
+
+
 ## v2.0.0-rc.28 (2025-04-30)
 
 ### Bug Fixes
