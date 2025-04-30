@@ -133,4 +133,4 @@ def test_dicomsort(
             str(output_dir + "%dry/"),
         ],
     )
-    assert invalid.exit_code >= 0
+    assert invalid.exit_code > 0, "Command should fail with an error code for invalid key"
