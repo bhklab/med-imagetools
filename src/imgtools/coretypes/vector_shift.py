@@ -104,7 +104,6 @@ class PartitionResult(NamedTuple):
 
 def collapse_vector_mask(
     vector_mask: VectorMask,
-    separator: str = "+",
 ) -> PartitionResult:
     """
     Encodes a VectorUInt8 image (with binary 0/1 components) into a single-channel
@@ -115,12 +114,6 @@ def collapse_vector_mask(
     ----------
     vector_mask : sitk.Image
         A VectorUInt8 image where each component is 0 or 1.
-
-    component_names : dict[str, int]
-        Mapping from name to index (e.g., {"circle": 0, "square": 1, "stripe": 2})
-
-    separator : str
-        String used to join names in the lookup table values.
 
     Returns
     -------
@@ -175,7 +168,7 @@ if __name__ == "__main__":
     )
 
     sitk.WriteImage(vm, output_dir / "vector_mask.nii.gz")
-    result = collapse_vector_mask(vm, component_names)
+    result = collapse_vector_mask(vm)
 
     sitk.WriteImage(result.label_image, output_dir / "collapsed_mask.nii.gz")
     console = Console()
