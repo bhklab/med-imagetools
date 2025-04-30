@@ -7,10 +7,14 @@ on:
           - "development"
           - "main"
           - "jjjermiah/*"
+    push:
+        branches:
+          - "development"
+          - "main"
 
-# concurrency:
-#     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
-#     cancel-in-progress: true
+concurrency:
+    group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 
 jobs:
 
