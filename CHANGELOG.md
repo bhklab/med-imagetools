@@ -1,6 +1,32 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.30 (2025-04-30)
+
+### Chores
+
+- Qc
+  ([`cc3aca4`](https://github.com/bhklab/med-imagetools/commit/cc3aca4b756821dd2b41d7ccb44da8e644c8a84b))
+
+- Remove 'readii' from known-first-party in isort configuration
+  ([`9e33870`](https://github.com/bhklab/med-imagetools/commit/9e3387097280234b917202be4ecf347845239ea4))
+
+### Documentation
+
+- Update README with imgtools screenshot ([#343](https://github.com/bhklab/med-imagetools/pull/343),
+  [`a1dc944`](https://github.com/bhklab/med-imagetools/commit/a1dc944956e2899afe735890a10df8a4bc92238d))
+
+### Features
+
+- Add simplified index file generation and more information in fingerprints
+  ([`1fb0b1e`](https://github.com/bhklab/med-imagetools/commit/1fb0b1e6cb9e46681763a6e22663793c94c3bd06))
+
+### Refactoring
+
+- Streamline ruff commands and update linting configuration
+  ([`88ce5d8`](https://github.com/bhklab/med-imagetools/commit/88ce5d88e42633bd509dc29c82d0772867c2c009))
+
+
 ## v2.0.0-rc.29 (2025-04-30)
 
 ### Bug Fixes
