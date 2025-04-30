@@ -114,8 +114,7 @@ max-complexity = 10
 convention = "numpy"
 
 [lint.isort]
-known-first-party = ["imgtools", "readii"]
-force-wrap-aliases = true
+known-first-party = ["imgtools"]
 combine-as-imports = true
 relative-imports-order = "closest-to-furthest"
 
