@@ -299,11 +299,3 @@ def available_collections(dataset_type: str, public_collections: list[str], priv
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run completes, right before returning the exit status."""
     pytest_logger.info("✅ Pytest session finished.")
-    
-    # Clean up the lockfile
-    if Path(LOCKFILE).exists():
-        try:
-            LOCKFILE.unlink()
-            pytest_logger.info(f"✅ Deleted lockfile: {LOCKFILE}")
-        except Exception as e:
-            pytest_logger.warning(f"⚠️ Could not delete lockfile: {e}")
