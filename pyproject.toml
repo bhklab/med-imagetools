@@ -40,6 +40,7 @@ dependencies = [
     # lockfile
     "fasteners==0.19",
     "dill>=0.3.8,<1",
+    "pyyaml>=6.0,<7",
 ]
 
 classifiers = [
