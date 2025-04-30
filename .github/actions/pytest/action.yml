@@ -12,10 +12,6 @@ inputs:
     description: 'Test access type (public or private)'
     required: true
     default: 'public'
-  github_token:
-    description: 'GitHub token for accessing test data'
-    required: false
-    default: ''
   test_type:
     description: 'Type of test to run (e.g., unittests, integration)'
     required: true
@@ -33,8 +29,8 @@ runs:
         cache: true
     - name: Run pytest
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-        GH_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+        GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
         TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
         # specifically run code-coverage for py313 public ubuntu tests
@@ -46,12 +42,14 @@ runs:
       shell: bash
 
     # TODO:: reintroduce coverage report upload
-    - name: Upload coverage report artifact to be used by Codecov
+    - name: Use Codecov to track coverage
       if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
-      uses: actions/upload-artifact@v4
+      uses: codecov/codecov-action@v3
       with:
-        name: coverage-report-${{ inputs.test_type }}
-        path: coverage-report
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-report/coverage.xml
+          verbose: true
+          name: codecov-umbrella
 
     - name: JUnit Test Summary
       id: pytest-summary
