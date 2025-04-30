@@ -76,7 +76,6 @@ jobs:
     # even if one fails, it should still run the other
     Linting:
         runs-on: ubuntu-latest
-        if: github.event_name == 'pull_request'
         permissions:
             contents: read
             checks: write
@@ -249,7 +248,7 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   git_committer_name: "gh-actions-semver"
 
-    pip-squeak:
+    Publish-PyPI:
         needs: Continuous-Deployment
         if: needs.Continuous-Deployment.outputs.released == 'true'
         runs-on: ubuntu-latest
@@ -281,7 +280,7 @@ jobs:
     # Docker: Build and publish Docker image when Continuous-Deployment is successful
     ################################################################################################
     Docker-Publish:
-        needs: Continuous-Deployment
+        needs: [Continuous-Deployment, Publish-PyPI]
         if: needs.Continuous-Deployment.outputs.released == 'true'
         runs-on: ubuntu-latest
         strategy:
@@ -321,8 +320,8 @@ jobs:
                       BUILD_DATE=${{ steps.meta.outputs.build_date }}
                   provenance: false
 
-    does-the-pip-squeak:
-        needs: [pip-squeak, Continuous-Deployment]
+    Test-PyPI:
+        needs: [Publish-PyPI, Continuous-Deployment]
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
