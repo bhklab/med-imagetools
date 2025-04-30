@@ -66,6 +66,7 @@ jobs:
                     # this is the path to the test data in the repo
                     fileName: '*'
                     out-file-path: 'data'
+                    token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
 
             - name: Run Integration Tests
               uses: ./.github/actions/pytest/
@@ -73,7 +74,6 @@ jobs:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
                   test_access_type: ${{ matrix.TestAccessType }}
-                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
                   test_type: "integration"
 
     ################################################################################################
