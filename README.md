@@ -42,7 +42,7 @@ the different scans containing DICOM of different modalities are
 interdependent on each other. For making effective machine
 learning models, one ought to take different modalities into account.
 
-![graph](https://github.com/bhklab/med-imagetools/blob/main/images/graph.png?raw=true)
+![graph](/assets/graph.png)
 
 Fig.1 - Different network topology for different studies of different patients
 
@@ -60,6 +60,9 @@ eventually torch dataloader for ML pipeline.
 ```console
 pip install med-imagetools
 ```
+
+![cli](/assets/imgtools_help.png)
+
 
 ## Repository Stars
 
