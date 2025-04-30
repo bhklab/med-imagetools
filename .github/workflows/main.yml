@@ -318,7 +318,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.10', '3.11', '3.12']
+        python_version: ['3.13']
 
     steps:
       - name: Checkout repository
@@ -344,7 +344,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            bhklab/med-imagetools:${{ matrix.python_version }}-${{ needs.Continuous-Deployment.outputs.tag}}
+            bhklab/med-imagetools:${{ needs.Continuous-Deployment.outputs.tag}}
             bhklab/med-imagetools:latest
           build-args: |
             PYTHON_VERSION=${{ matrix.python_version }}
