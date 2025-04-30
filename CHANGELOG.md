@@ -1,6 +1,56 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.28 (2025-04-30)
+
+### Bug Fixes
+
+- Update CI-CD workflow to correct job dependencies and conditions for linting and publishing
+  ([`9f3bab4`](https://github.com/bhklab/med-imagetools/commit/9f3bab44ea13e8fb87346d24ecf177559c64d839))
+
+### Continuous Integration
+
+- Update CI-CD workflow to include push triggers for development and main branches
+  ([`7f734de`](https://github.com/bhklab/med-imagetools/commit/7f734deda47f6710227e3c023639be72578b0eb8))
+
+### Features
+
+- Robust test suite and github action workflow
+  ([#341](https://github.com/bhklab/med-imagetools/pull/341),
+  [`ad89e48`](https://github.com/bhklab/med-imagetools/commit/ad89e481dbd7669085ec8303fb8aba5037c4c56b))
+
+move unittests into its own directory
+
+now can run
+
+``` pytest -m unittests ```
+
+or
+
+``` pytest -m "not unittests" ```
+
+which will speed things up
+
+will also specify `e2e`, `integration` and `regression` tests
+
+- **New Features** - Added integration tests for CLI commands, including `autopipeline`,
+  `dicomsort`, and `index`, to ensure correct behavior across various datasets and scenarios. -
+  Introduced CLI options for accessing private test datasets with authentication tokens. - Enhanced
+  dataset download functionality with retry logic and improved authentication handling.
+
+- **Bug Fixes** - Improved handling of DICOM tag reading for non-standard files in unit tests. -
+  Refined error handling and context management in NIFTI image writing.
+
+- **Refactor** - Migrated global test configuration to pytest fixtures for better modularity. -
+  Updated class and fixture names for clarity in unit tests. - Streamlined internal logic for
+  dataset asset processing and progress reporting.
+
+- **Chores** - Removed deprecated and legacy test files to clean up the codebase. - Excluded
+  specific code blocks from coverage measurement for more accurate reporting.
+
+- **Style** - Improved code readability and formatting in test files and function signatures.
+
+
 ## v2.0.0-rc.27 (2025-04-28)
 
 ### Bug Fixes
