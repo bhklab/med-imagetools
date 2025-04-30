@@ -130,7 +130,7 @@ def medimage_test_data(
                 case TestAccessType.PUBLIC:
                     # public data
                     path = DATA_DIR / collection / patient_id / f"{modality}_Series-{series_uid[-8:]}"
-                case TestAccessType.PRIVATE:
+                case TestAccessType.PRIVATE: # temp until new release
                     # private data
                     path = DATA_DIR / collection / patient_id / f"{modality}_Series{series_uid[-8:]}"
             if not path.exists():
