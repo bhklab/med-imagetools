@@ -67,7 +67,7 @@ runs:
 
         pixi run -e ${{ inputs.env }} pytest \
           -m ${{ inputs.test_type }} \
-          ${{ USE_COVERAGE }} \
+            $USE_COVERAGE \
           --numprocesses=auto
 
       shell: bash
