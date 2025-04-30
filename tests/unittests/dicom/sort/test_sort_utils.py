@@ -69,7 +69,10 @@ def dicom_test_file() -> Generator[Path, Any, None]:  # type: ignore
     # Create a temporary file
     with tempfile.NamedTemporaryFile(suffix=".dcm", delete=False) as temp:
         temp_file = Path(temp.name)
-    ds.save_as(temp_file, write_like_original=False)
+
+    # we use enforce_file_format false because we dont have a valid dicom file
+    # and we just want to test the read_tags functionality anyways
+    ds.save_as(temp_file, enforce_file_format=False)
 
     yield temp_file
 
@@ -97,7 +100,7 @@ class TestReadTags:
             "SeriesDescription",
             "ManufacturerModelName",
         ]
-        result = read_tags(file=dicom_test_file, tags=tags, truncate=True)
+        result = read_tags(file=dicom_test_file, tags=tags, truncate=True, force=True)
         assert result["PatientName"] == str("Test^Firstname")
         assert result["PatientID"] == str("123456")
         assert result["ContentDate"] == str("20021114")
@@ -119,7 +122,7 @@ class TestReadTags:
         tags: list[str] = []
         result = read_tags(
             file=dicom_test_file,
-            tags=tags,
+            tags=tags, force=True
         )
         assert result == {}
 
@@ -131,6 +134,7 @@ class TestReadTags:
             read_tags(
                 file=dicom_test_file,
                 tags=tags,
+                force=True
             )
 
     def test_read_tags_with_partial_metadata(
@@ -141,6 +145,7 @@ class TestReadTags:
             read_tags(
                 file=dicom_test_file,
                 tags=tags,
+                force=True
             )
         # assert result['PatientName'] == 'Test^Firstname'
         # assert result['Modality'] == 'CT'
@@ -154,6 +159,7 @@ class TestReadTags:
             file=dicom_test_file,
             tags=tags,
             truncate=0,
+            force=True
         )
         assert (
             result["SeriesInstanceUID"]
@@ -165,6 +171,7 @@ class TestReadTags:
             read_tags(
                 file=None,  # type: ignore
                 tags=["PatientID"],
+                force=True
             )
 
     def test_invalid_dicom_file(self) -> None:

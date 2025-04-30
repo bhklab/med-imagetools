@@ -46,7 +46,7 @@ __all__ = [
 ]
 
 
-class ContourPointsAcrossSlicesError(Exception):
+class ContourPointsAcrossSlicesError(Exception):  # pragma: no cover
     """Exception raised when contour points span across multiple slices."""
 
     def __init__(
@@ -69,7 +69,7 @@ class ContourPointsAcrossSlicesError(Exception):
         )
 
 
-class MaskArrayOutOfBoundsError(Exception):
+class MaskArrayOutOfBoundsError(Exception):  # pragma: no cover
     """Exception raised when a mask array index is out of bounds for the reference image."""
 
     def __init__(
@@ -103,7 +103,7 @@ class MaskArrayOutOfBoundsError(Exception):
         )
 
 
-class UnexpectedContourPointsError(Exception):
+class UnexpectedContourPointsError(Exception):  # pragma: no cover
     """Exception raised when contour points have an unexpected structure."""
 
     def __init__(
@@ -124,7 +124,7 @@ class UnexpectedContourPointsError(Exception):
         )
 
 
-class NonIntegerZSliceIndexError(Exception):
+class NonIntegerZSliceIndexError(Exception):  # pragma: no cover
     """Exception raised when the Z-slice index is not an integer."""
 
     def __init__(self, roi_name: str, contour_num: int, z_idx: float) -> None:
@@ -660,7 +660,7 @@ class RTStructureSet:
         )
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
     from imgtools.coretypes.imagetypes import Scan

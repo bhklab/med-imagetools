@@ -25,7 +25,7 @@ def suppress_debug_logging():
     # automatically reset the log level after the test
 
 
-class TestImage(Image):
+class SampleImage(Image):
     """A convenience class to store metadata information related to the image.
 
     Attributes
@@ -85,7 +85,7 @@ def temp_nifti_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
         },
     ]
 )
-def parameterized_image(request: pytest.FixtureRequest) -> TestImage:
+def parameterized_image(request: pytest.FixtureRequest) -> SampleImage:
     """Parameterized fixture to generate SimpleITK images of varying sizes and types."""
     params = request.param
 
@@ -102,7 +102,7 @@ def parameterized_image(request: pytest.FixtureRequest) -> TestImage:
             sigma=[8] * len(params["size"]),
         )
 
-    test_image = TestImage(image)
+    test_image = SampleImage(image)
     test_image.metadata = {
         k: v for k, v in params.items() if k not in ["size", "pixel_type"]
     }
@@ -128,7 +128,7 @@ def nifti_writer(temp_nifti_dir: Path, request: pytest.FixtureRequest) -> NIFTIW
 
 @pytest.mark.xdist_group("nifti_writer")
 def test_parameterized_image_save(
-    nifti_writer: NIFTIWriter, parameterized_image: TestImage
+    nifti_writer: NIFTIWriter, parameterized_image: SampleImage
 ):
     """Test saving parameterized images with NIFTIWriter."""
     for version_suffix in range(10):

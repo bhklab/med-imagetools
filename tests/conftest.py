@@ -21,17 +21,42 @@ class TestAccessType(str, Enum):
     PUBLIC = "public"
     PRIVATE = "private"
 
-TEST_DATASET_TYPE = TestAccessType(
-    os.environ.get("TEST_DATASET_TYPE", "public").lower()
-)
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-if not DATA_DIR.exists():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+@pytest.fixture(scope="session")
+def TEST_DATASET_TYPE() -> TestAccessType:
+    """Fixture for the test dataset type (public or private)."""
+    return TestAccessType(
+        os.environ.get("TEST_DATASET_TYPE", "public").lower()
+    )
 
-LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+@pytest.fixture(scope="session")
+def dataset_type(TEST_DATASET_TYPE) -> str:
+    """Returns the current test dataset type (public or private).
+    
+    Provides access to the configured dataset type for tests that need
+    to behave differently based on the available test data. The value
+    comes from the TEST_DATASET_TYPE environment variable.
+    """
+    return TEST_DATASET_TYPE.value
 
-METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
+@pytest.fixture(scope="session")
+def DATA_DIR() -> Path:
+    """Fixture for the data directory."""
+    data_dir = Path(__file__).parent.parent / "data"
+    if not data_dir.exists():
+        data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+
+@pytest.fixture(scope="session")
+def LOCKFILE(DATA_DIR,TEST_DATASET_TYPE) -> Path:
+    """Fixture for the lockfile path."""
+    return DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+
+@pytest.fixture(scope="session")
+def METADATA_CACHE_FILE(LOCKFILE) -> Path:
+    """Fixture for the metadata cache file path."""
+    return LOCKFILE.with_suffix(".json")
 
 class MedImageDataEntry(TypedDict):
 	Collection: str
@@ -42,7 +67,12 @@ class MedImageDataEntry(TypedDict):
 	NumInstances: int
 
 @pytest.fixture(scope="session")
-def medimage_test_data() -> list[MedImageDataEntry]:
+def medimage_test_data(
+    TEST_DATASET_TYPE,
+    LOCKFILE,
+    DATA_DIR,
+    METADATA_CACHE_FILE,
+    ) -> list[MedImageDataEntry]:
     """Provides access to medical imaging test data files.
     
     Downloads and caches standardized medical imaging test data from GitHub.
@@ -100,7 +130,7 @@ def medimage_test_data() -> list[MedImageDataEntry]:
                 case TestAccessType.PUBLIC:
                     # public data
                     path = DATA_DIR / collection / patient_id / f"{modality}_Series-{series_uid[-8:]}"
-                case TestAccessType.PRIVATE:
+                case TestAccessType.PRIVATE: # temp until new release
                     # private data
                     path = DATA_DIR / collection / patient_id / f"{modality}_Series{series_uid[-8:]}"
             if not path.exists():
@@ -205,18 +235,6 @@ def medimage_by_seriesUID(
         for entry in medimage_test_data
     }
 
-
-
-@pytest.fixture(scope="session")
-def dataset_type() -> str:
-    """Returns the current test dataset type (public or private).
-    
-    Provides access to the configured dataset type for tests that need
-    to behave differently based on the available test data. The value
-    comes from the TEST_DATASET_TYPE environment variable.
-    """
-    return TEST_DATASET_TYPE.value
-
 @pytest.fixture(scope="session")
 def public_collections() -> list[str]:
     """Public collections available 
@@ -281,11 +299,3 @@ def available_collections(dataset_type: str, public_collections: list[str], priv
 def pytest_sessionfinish(session, exitstatus):
     """Called after whole test run completes, right before returning the exit status."""
     pytest_logger.info("✅ Pytest session finished.")
-    
-    # Clean up the lockfile
-    if Path(LOCKFILE).exists():
-        try:
-            LOCKFILE.unlink()
-            pytest_logger.info(f"✅ Deleted lockfile: {LOCKFILE}")
-        except Exception as e:
-            pytest_logger.warning(f"⚠️ Could not delete lockfile: {e}")

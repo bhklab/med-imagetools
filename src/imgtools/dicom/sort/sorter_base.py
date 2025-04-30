@@ -167,8 +167,6 @@ class SorterBase(ABC):
         except Exception as e:
             errmsg = "Failed to initialize SorterBase."
             raise SorterBaseError(errmsg) from e
-
-    def __post_init__(self) -> None:
         self.validate_keys()
 
     def _initialize_console(self) -> Console:

@@ -22,5 +22,5 @@ def test_read_scan(medimage_by_collection, caplog) -> None:
         scan = read_dicom_scan(series_object['Path'], series_id=series_object['SeriesInstanceUID'])
         #
         # should be attrified, allowing dot access
-        assert isinstance(scan.metadata.ContentTime, datetime.time)
+        assert isinstance(scan.metadata['ContentTime'], datetime.time)
         break

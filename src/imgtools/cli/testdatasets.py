@@ -1,6 +1,6 @@
 import pathlib
 from typing import List, Pattern
-
+import os
 import click
 
 from imgtools.loggers import logger
@@ -50,11 +50,25 @@ def is_testdata_available() -> bool:
     is_flag=True,
     help="List available assets and exit.",
 )
+@click.option(
+    '--private',
+    '-p',
+    is_flag=True,
+    help="Use private GitHub token for accessing private repositories.",
+)
+@click.option(
+    '--token',
+    '-t',
+    type=str,
+    help="GitHub token for accessing private repositories.",
+)
 def testdata(
     dest: pathlib.Path,
     assets: List[str],
     no: List[Pattern[str]],
     list_assets: bool,
+    private: bool,
+    token: str | None = None,
 ) -> None:
     """Download test data from the latest GitHub release."""
 
@@ -66,7 +80,22 @@ def testdata(
             "Please install the required dependencies using: `pip install imgtools[datasets]`."
         )
         return
-    manager = MedImageTestData()
+    
+    repo = "bhklab/med-image_test-data"
+    if private:
+        repo = f"{repo}_private"
+        # TODO:: use clicks automatic env variable parsing!
+        token = token or os.environ.get(
+            "GITHUB_TOKEN", os.environ.get("GH_TOKEN")
+        )
+        if not token:
+            click.echo(
+                "A GitHub token is required for accessing private repositories. "
+                "You can set it using the GITHUB_TOKEN or GH_TOKEN environment variable."
+            )
+            click.Abort(1)
+
+    manager = MedImageTestData(repo_name=repo, token=token)
 
     if list_assets:
         click.echo("Available assets:")

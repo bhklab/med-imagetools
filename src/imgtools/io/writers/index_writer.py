@@ -274,7 +274,7 @@ class IndexWriter:
             writer.writerows(rows)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     import random
     import shutil
     from datetime import datetime

@@ -35,13 +35,12 @@ dependencies = [
     # image processing
     "pydicom>=2.4.4",
     "scikit-image>=0.23.2,<1",
-    "scikit-learn>=1.4.2,<2",
     "simpleitk>=2.4.0,<3",
     "highdicom",
     # lockfile
     "fasteners==0.19",
-    "pyyaml>=6.0.1,<7",
     "dill>=0.3.8,<1",
+    "pyyaml>=6.0,<7",
 ]
 
 classifiers = [
@@ -105,3 +104,21 @@ prerelease_token = "rc"
 [tool.ruff]
 # Extend the `pyproject.toml` file in the parent directory...
 extend = "config/ruff.toml"
+
+[tool.coverage.paths]
+source = [
+    "src/imgtools",
+]
+
+[tool.coverage.run]
+omit = [
+    "src/imgtools/loggers/**/*.py",
+    "src/imgtools/cli/**/*.py",
+    "tests/**/*.py",
+    "src/imgtools/datasets/sample_images.py", # take forever on GHA
+    "src/imgtools/vizualize/**/*.py",
+    # ignore all __init__.py files
+    "src/imgtools/**/__init__.py",
+]
+
+[tool.coverage.report]

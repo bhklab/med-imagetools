@@ -1,5 +1,4 @@
 import pathlib
-
 import click
 
 from imgtools.loggers import logger
