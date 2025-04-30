@@ -63,11 +63,13 @@ runs:
           USE_COVERAGE=--no-cov
         fi
 
+        mkdir -p coverage-report
+
         pixi run -e ${{ inputs.env }} pytest \
           -m ${{ inputs.test_type }} \
-          ${USE_COVERAGE} \
+          ${{ USE_COVERAGE }} \
           --numprocesses=auto
-  
+
       shell: bash
 
     - name: Upload coverage report
