@@ -24,9 +24,6 @@ jobs:
             test-data-version: ${{ steps.download-test-data.outputs.tag_name }}
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
             - name: Download test data
               uses: robinraju/release-downloader@v1
               id: download-test-data
@@ -38,6 +35,7 @@ jobs:
                   # this is the path to the test data in the repo
                   fileName: '*'
                   out-file-path: 'data'
+                  extract: true
 
             - name: Print contents for debugging
               run: |
@@ -48,7 +46,7 @@ jobs:
               id: cache
               uses: actions/cache@v4
               with:
-                key: $test-data-version-${{ steps.download-test-data.outputs.tag_name }}
+                key: test-data-version-${{ steps.download-test-data.outputs.tag_name }}
                 path: data
 
     ###############################################################################################
@@ -56,7 +54,6 @@ jobs:
     ################################################################################################
     Unit-Tests:
         runs-on: ${{ matrix.os }}
-        needs: Prepare-Data
         continue-on-error: true # dont fail the whole matrix if one fails
         strategy:
             matrix:
@@ -65,17 +62,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v4
-            - name: Download cache
-              uses: actions/cache/restore@v4
-              with:
-                  key: $test-data-version-${{ needs.Prepare-Data.outputs.test-data-version }}
-                  path: data
-            
-            - name: List data directory
-              run: |
-                  # print the contents of the data directory
-                  ls -laR data
-
             - name: Run Unit Tests
               uses: ./.github/actions/pytest/
               with:

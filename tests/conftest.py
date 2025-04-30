@@ -21,17 +21,42 @@ class TestAccessType(str, Enum):
     PUBLIC = "public"
     PRIVATE = "private"
 
-TEST_DATASET_TYPE = TestAccessType(
-    os.environ.get("TEST_DATASET_TYPE", "public").lower()
-)
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-if not DATA_DIR.exists():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+@pytest.fixture(scope="session")
+def TEST_DATASET_TYPE() -> TestAccessType:
+    """Fixture for the test dataset type (public or private)."""
+    return TestAccessType(
+        os.environ.get("TEST_DATASET_TYPE", "public").lower()
+    )
 
-LOCKFILE = DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+@pytest.fixture(scope="session")
+def dataset_type(TEST_DATASET_TYPE) -> str:
+    """Returns the current test dataset type (public or private).
+    
+    Provides access to the configured dataset type for tests that need
+    to behave differently based on the available test data. The value
+    comes from the TEST_DATASET_TYPE environment variable.
+    """
+    return TEST_DATASET_TYPE.value
 
-METADATA_CACHE_FILE = LOCKFILE.with_suffix(".json")
+@pytest.fixture(scope="session")
+def DATA_DIR() -> Path:
+    """Fixture for the data directory."""
+    data_dir = Path(__file__).parent.parent / "data"
+    if not data_dir.exists():
+        data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir
+
+
+@pytest.fixture(scope="session")
+def LOCKFILE(DATA_DIR,TEST_DATASET_TYPE) -> Path:
+    """Fixture for the lockfile path."""
+    return DATA_DIR / f"{TEST_DATASET_TYPE.value}-medimage_testdata.lock"
+
+@pytest.fixture(scope="session")
+def METADATA_CACHE_FILE(LOCKFILE) -> Path:
+    """Fixture for the metadata cache file path."""
+    return LOCKFILE.with_suffix(".json")
 
 class MedImageDataEntry(TypedDict):
 	Collection: str
@@ -42,7 +67,12 @@ class MedImageDataEntry(TypedDict):
 	NumInstances: int
 
 @pytest.fixture(scope="session")
-def medimage_test_data() -> list[MedImageDataEntry]:
+def medimage_test_data(
+    TEST_DATASET_TYPE,
+    LOCKFILE,
+    DATA_DIR,
+    METADATA_CACHE_FILE,
+    ) -> list[MedImageDataEntry]:
     """Provides access to medical imaging test data files.
     
     Downloads and caches standardized medical imaging test data from GitHub.
@@ -204,18 +234,6 @@ def medimage_by_seriesUID(
         entry["SeriesInstanceUID"]: entry
         for entry in medimage_test_data
     }
-
-
-
-@pytest.fixture(scope="session")
-def dataset_type() -> str:
-    """Returns the current test dataset type (public or private).
-    
-    Provides access to the configured dataset type for tests that need
-    to behave differently based on the available test data. The value
-    comes from the TEST_DATASET_TYPE environment variable.
-    """
-    return TEST_DATASET_TYPE.value
 
 @pytest.fixture(scope="session")
 def public_collections() -> list[str]:
