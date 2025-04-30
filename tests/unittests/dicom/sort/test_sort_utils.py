@@ -174,8 +174,8 @@ class TestReadTags:
                 force=True
             )
 
-    def test_invalid_dicom_file(self) -> None:
-        inv_file = Path("invalid.dcm")
+    def test_invalid_dicom_file(self, tmp_path: Path) -> None:
+        inv_file = tmp_path / "invalid.dcm"
         inv_file.touch()
         with pytest.raises(InvalidDicomError):
             read_tags(
