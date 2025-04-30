@@ -116,6 +116,8 @@ omit = [
     "src/imgtools/cli/**/*.py",
     "tests/**/*.py",
     "src/imgtools/datasets/sample_images.py", # take forever on GHA
+    # ignore all __init__.py files
+    "src/imgtools/**/__init__.py",
 ]
 
 [tool.coverage.report]
