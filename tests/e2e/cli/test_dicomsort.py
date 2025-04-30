@@ -3,6 +3,8 @@ from pathlib import Path
 from click.testing import CliRunner
 import os
 from imgtools.cli.dicomsort import dicomsort as dicomsort_cli
+from imgtools.cli.testdatasets import testdata as download_github_cli
+from tests.conftest import MedImageDataEntry
 
 
 @pytest.fixture(scope="function")
@@ -38,7 +40,15 @@ def test_dicomsort(
     # Now inspect the output structure
     root_output = tmp_path / "dicomsort_output"
     output_dir = str(root_output.absolute()) + "/%PatientID/%Modality_%SeriesInstanceUID/"
-    
+    download_result = runner.invoke(
+        download_github_cli,
+        [
+            "-d", "data",
+            "-a", "NSCLC-Radiomics",
+        ],
+    )
+    assert download_result.exit_code == 0, "Failed to download test data"
+
     result  = runner.invoke(
         dicomsort_cli,
         [
@@ -70,8 +80,8 @@ def test_dicomsort(
         actual_subdirs = {p.name for p in patient_dir.iterdir() if p.is_dir()}
         assert actual_subdirs == expected_subdirs, \
             f"Mismatch in {patient_id}: expected {expected_subdirs}, got {actual_subdirs}"
-        
-    
+
+
     # Test --dry-run
     #     ‼ Dry run mode enabled. No files will be moved or copied. ‼ 
 
