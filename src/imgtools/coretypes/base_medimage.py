@@ -141,14 +141,11 @@ class MedImage(sitk.Image):
         """
         fp = self.fingerprint.copy()
         # Convert custom types to tuples
-        if "size" in fp:
-            fp["size"] = fp["size"].to_tuple()
-        if "spacing" in fp:
-            fp["spacing"] = fp["spacing"].to_tuple()
-        if "origin" in fp:
-            fp["origin"] = fp["origin"].to_tuple()
-        if "direction" in fp:
-            fp["direction"] = fp["direction"].matrix
+        for k, v in fp.items():
+            if isinstance(v, (Coordinate3D, Size3D, Spacing3D)):
+                fp[k] = v.to_tuple()
+            elif isinstance(v, Direction):
+                fp[k] = v.matrix
         return fp
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204

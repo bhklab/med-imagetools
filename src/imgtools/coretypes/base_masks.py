@@ -8,6 +8,7 @@ import numpy as np
 import SimpleITK as sitk
 
 from imgtools.coretypes import MedImage
+from imgtools.coretypes.box import RegionBox
 from imgtools.loggers import logger
 
 if TYPE_CHECKING:
@@ -431,15 +432,31 @@ class Mask(MedImage):
         super().__init__(image)
         self.metadata = metadata
 
-    def to_labeled_image(self) -> Mask:
-        """Convert to a labeled image with unique labels."""
-        label_img = sitk.ConnectedComponent(self)
-        label_img = sitk.Cast(label_img, sitk.sitkLabelUInt8)
-        # TODO:: need to update metadata to reflect separation of ROI Names
-        # and add a mapping to the new labels
-        return Mask(label_img, metadata=self.metadata)
-
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield from super().__rich_repr__()
         if hasattr(self, "metadata") and self.metadata:
             yield "metadata", self.metadata
+
+    def get_label_bounding_box(
+        self,
+    ) -> RegionBox:
+        """Get bounding box around a label image for a given label or name.
+
+        Returns
+        -------
+        RegionBox
+            Bounding box around non-zero voxels in the label image.
+            Contains min and max coordinates and size.
+        """
+        return RegionBox.from_mask_bbox(self, label=1)
+
+    @property
+    def fingerprint(self) -> dict[str, Any]:  # noqa: ANN001
+        """Append to MedImage fingerprint"""
+        bbox = self.get_label_bounding_box()
+        return {
+            **super().fingerprint,
+            "bbox.size": bbox.size,
+            "bbox.min_coord": bbox.min,
+            "bbox.max_coord": bbox.max,
+        }
