@@ -19,8 +19,8 @@ def create_demo_vector_mask(
     sitk.Image
         - Component 0: Circle
         - Component 1: Square
-        - Component 2: Triangle-like diagonal stripe
-        - Component 3: Star pattern
+        - Component 2: stripe
+        - Component 3: clover pattern
     dict[str, int]
         Mapping from component name to index.
     """
@@ -30,8 +30,8 @@ def create_demo_vector_mask(
     # Blank masks
     circle = sitk.Image(img_size, dtype)
     square = sitk.Image(img_size, dtype)
-    triangle = sitk.Image(img_size, dtype)
-    star = sitk.Image(img_size, dtype)
+    stripe = sitk.Image(img_size, dtype)
+    clover = sitk.Image(img_size, dtype)
 
     # Draw circle: set pixels inside radius
     center = [s // 2 for s in img_size]
@@ -51,48 +51,48 @@ def create_demo_vector_mask(
         for x in range(center[0] - offset, center[0] + offset):
             square[x, y] = 1
 
-    # Draw triangle-ish diagonal stripe
+    # Draw stripe-ish diagonal stripe
     for i in range(img_size[0]):
         for j in range(img_size[1]):
             if abs(i - j) < 10:  # diagonal band
-                triangle[i, j] = 1
+                stripe[i, j] = 1
 
-    # Draw star pattern in the bottom right quadrant
-    star_center = [3 * img_size[0] // 4, 3 * img_size[1] // 4]
-    star_radius_outer = min(img_size) // 5
-    star_radius_inner = min(img_size) // 10
+    # Draw clover pattern in the bottom right quadrant
+    clover_center = [3 * img_size[0] // 4, 3 * img_size[1] // 4]
+    clover_radius_outer = min(img_size) // 5
+    clover_radius_inner = min(img_size) // 10
     num_points = 5
 
     for y in range(img_size[1]):
         for x in range(img_size[0]):
-            dx = x - star_center[0]
-            dy = y - star_center[1]
+            dx = x - clover_center[0]
+            dy = y - clover_center[1]
             distance = (dx**2 + dy**2) ** 0.5
 
             if distance == 0:  # Avoid division by zero
-                star[x, y] = 1
+                clover[x, y] = 1
                 continue
 
             # Calculate angle in radians
             angle = abs(((dx / distance) * 0) + ((dy / distance) * 1))
             angle = angle % (2 * 3.14159 / num_points)
 
-            # Threshold changes based on angle to create star points
-            threshold = star_radius_inner + (
-                star_radius_outer - star_radius_inner
+            # Threshold changes based on angle to create clover points
+            threshold = clover_radius_inner + (
+                clover_radius_outer - clover_radius_inner
             ) * abs(angle - 3.14159 / num_points) / (3.14159 / num_points)
 
             if distance < threshold:
-                star[x, y] = 1
+                clover[x, y] = 1
 
     # Compose into a VectorUInt8 image
-    vector_mask = sitk.Compose([circle, square, triangle, star])
+    vector_mask = sitk.Compose([circle, square, stripe, clover])
 
     mapping = {
         "circle": 0,
         "square": 1,
-        "triangle": 2,
-        "star": 3,
+        "stripe": 2,
+        "clover": 3,
     }
     return vector_mask, mapping
 
@@ -117,7 +117,7 @@ def collapse_vector_mask(
         A VectorUInt8 image where each component is 0 or 1.
 
     component_names : dict[str, int]
-        Mapping from name to index (e.g., {"circle": 0, "square": 1, "triangle": 2})
+        Mapping from name to index (e.g., {"circle": 0, "square": 1, "stripe": 2})
 
     separator : str
         String used to join names in the lookup table values.
