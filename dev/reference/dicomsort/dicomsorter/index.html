@@ -2363,7 +2363,9 @@ Performing a dry-run execute will display more information.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/sort/sorter_base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-271">271</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-269">269</a></span>
+<span class="normal"><a href="#__codelineno-0-270">270</a></span>
+<span class="normal"><a href="#__codelineno-0-271">271</a></span>
 <span class="normal"><a href="#__codelineno-0-272">272</a></span>
 <span class="normal"><a href="#__codelineno-0-273">273</a></span>
 <span class="normal"><a href="#__codelineno-0-274">274</a></span>
@@ -2382,30 +2384,28 @@ Performing a dry-run execute will display more information.</p>
 <span class="normal"><a href="#__codelineno-0-287">287</a></span>
 <span class="normal"><a href="#__codelineno-0-288">288</a></span>
 <span class="normal"><a href="#__codelineno-0-289">289</a></span>
-<span class="normal"><a href="#__codelineno-0-290">290</a></span>
-<span class="normal"><a href="#__codelineno-0-291">291</a></span>
-<span class="normal"><a href="#__codelineno-0-292">292</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="k">def</span><span class="w"> </span><span class="nf">print_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-272" name="__codelineno-0-272"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">    Display the pattern structure as a tree visualization.</span>
-<a id="__codelineno-0-274" name="__codelineno-0-274"></a>
-<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    Notes</span>
-<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    -----</span>
-<a id="__codelineno-0-277" name="__codelineno-0-277"></a><span class="sd">    This only prints the target pattern, parsed and formatted.</span>
-<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    Performing a dry-run execute will display more information.</span>
-<a id="__codelineno-0-279" name="__codelineno-0-279"></a>
-<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    Raises</span>
-<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">    ------</span>
-<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    SorterBaseError</span>
-<a id="__codelineno-0-283" name="__codelineno-0-283"></a><span class="sd">        If the tree visualization fails to generate.</span>
-<a id="__codelineno-0-284" name="__codelineno-0-284"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-285" name="__codelineno-0-285"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-286" name="__codelineno-0-286"></a>        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="ow">or</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-<a id="__codelineno-0-287" name="__codelineno-0-287"></a>        <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_tree</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span>
-<a id="__codelineno-0-288" name="__codelineno-0-288"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_tree_structure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_preview</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
-<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
-<a id="__codelineno-0-290" name="__codelineno-0-290"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-<a id="__codelineno-0-291" name="__codelineno-0-291"></a>        <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;Failed to generate tree visualization.&quot;</span>
-<a id="__codelineno-0-292" name="__codelineno-0-292"></a>        <span class="k">raise</span> <span class="n">SorterBaseError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+<span class="normal"><a href="#__codelineno-0-290">290</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-269" name="__codelineno-0-269"></a><span class="k">def</span><span class="w"> </span><span class="nf">print_tree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-270" name="__codelineno-0-270"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-271" name="__codelineno-0-271"></a><span class="sd">    Display the pattern structure as a tree visualization.</span>
+<a id="__codelineno-0-272" name="__codelineno-0-272"></a>
+<a id="__codelineno-0-273" name="__codelineno-0-273"></a><span class="sd">    Notes</span>
+<a id="__codelineno-0-274" name="__codelineno-0-274"></a><span class="sd">    -----</span>
+<a id="__codelineno-0-275" name="__codelineno-0-275"></a><span class="sd">    This only prints the target pattern, parsed and formatted.</span>
+<a id="__codelineno-0-276" name="__codelineno-0-276"></a><span class="sd">    Performing a dry-run execute will display more information.</span>
+<a id="__codelineno-0-277" name="__codelineno-0-277"></a>
+<a id="__codelineno-0-278" name="__codelineno-0-278"></a><span class="sd">    Raises</span>
+<a id="__codelineno-0-279" name="__codelineno-0-279"></a><span class="sd">    ------</span>
+<a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="sd">    SorterBaseError</span>
+<a id="__codelineno-0-281" name="__codelineno-0-281"></a><span class="sd">        If the tree visualization fails to generate.</span>
+<a id="__codelineno-0-282" name="__codelineno-0-282"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-284" name="__codelineno-0-284"></a>        <span class="n">base_dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="ow">or</span> <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<a id="__codelineno-0-285" name="__codelineno-0-285"></a>        <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_tree</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span>
+<a id="__codelineno-0-286" name="__codelineno-0-286"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_generate_tree_structure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_preview</span><span class="p">,</span> <span class="n">tree</span><span class="p">)</span>
+<a id="__codelineno-0-287" name="__codelineno-0-287"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+<a id="__codelineno-0-288" name="__codelineno-0-288"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-0-289" name="__codelineno-0-289"></a>        <span class="n">errmsg</span> <span class="o">=</span> <span class="s2">&quot;Failed to generate tree visualization.&quot;</span>
+<a id="__codelineno-0-290" name="__codelineno-0-290"></a>        <span class="k">raise</span> <span class="n">SorterBaseError</span><span class="p">(</span><span class="n">errmsg</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
