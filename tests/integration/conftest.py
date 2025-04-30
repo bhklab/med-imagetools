@@ -1,4 +1,4 @@
-# tests/unit/conftest.py
+# tests/integration/conftest.py
 
 import pytest
 from pathlib import Path
