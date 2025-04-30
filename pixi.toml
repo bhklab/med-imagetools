@@ -80,8 +80,6 @@ args = [
     # run tests in parallel with "--numprocesses=auto"
     {"arg" = "parallel", "default" = "--numprocesses=0"}
 ]
-env = { "COVERAGE_RCFILE" = "config/coverage.toml" }
-
 # Specialized versions inheriting from test_base
 [feature.test.tasks.unittests]
 depends-on = [

@@ -2,391 +2,413 @@ name: CI-CD
 
 # only run on pushes to main or pull requests
 on:
-  push:
-    branches: ["*"]
-  pull_request:
-    branches: ["*"]
-  release:
+    push:
+        branches: ["*"]
+    pull_request:
+        branches: ["*"]
+    release:
 
 concurrency:
-  group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 
 jobs:
-  ###############################################################################################
-  # Unit-Tests: Run unit tests using pytest
-  ################################################################################################
-  Unit-Tests:
-    runs-on: ${{ matrix.os }}
-    continue-on-error: true # dont fail the whole matrix if one fails
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest] 
-        env: ["py310", "py311", "py312", "py313"]
+    ###############################################################################################
+    # Unit-Tests: Run unit tests using pytest
+    ################################################################################################
+    Unit-Tests:
+        runs-on: ${{ matrix.os }}
+        continue-on-error: true # dont fail the whole matrix if one fails
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macos-latest, windows-latest]
+                env: ["py310", "py311", "py312", "py313"]
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Unit Tests
-        uses: ./.github/actions/pytest/
-        with:
-          os: ${{ matrix.os }}
-          env: ${{ matrix.env }}
-          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
-          test_type: "unittests"
+        steps:
+            - uses: actions/checkout@v4
+            - name: Run Unit Tests
+              uses: ./.github/actions/pytest/
+              with:
+                  os: ${{ matrix.os }}
+                  env: ${{ matrix.env }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  test_type: "unittests"
 
-  ###############################################################################################
-  # Integration-Tests: Run integration tests (downloading and running on data)
-  ################################################################################################
-  Integration-Tests:
-    runs-on: ${{ matrix.os }}
-    continue-on-error: true # dont fail the whole matrix if one fails
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest] 
-        env: ["py310", "py313"]
-        TestAccessType: ["public", "private"]
+    ###############################################################################################
+    # Integration-Tests: Run integration tests (downloading and running on data)
+    ################################################################################################
+    Integration-Tests:
+        runs-on: ${{ matrix.os }}
+        continue-on-error: true # dont fail the whole matrix if one fails
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macos-latest, windows-latest]
+                # just going to test lowest and latest
+                env: ["py310", "py313"]
+                TestAccessType: ["public", "private"]
 
-    # this action needs to be able to read contents of other repos
-    # for the test data (specifically private test data)
-    permissions:
-      contents: read
+        # this action needs to be able to read contents of other repos
+        # for the test data (specifically private test data)
+        permissions:
+            contents: read
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Integration Tests
-        uses: ./.github/actions/pytest/
-        with:
-          os: ${{ matrix.os }}
-          env: ${{ matrix.env }}
-          test_access_type: ${{ matrix.TestAccessType }}
-          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
-          test_type: "integration"
+        steps:
+            - uses: actions/checkout@v4
+            - name: Run Integration Tests
+              uses: ./.github/actions/pytest/
+              with:
+                  os: ${{ matrix.os }}
+                  env: ${{ matrix.env }}
+                  test_access_type: ${{ matrix.TestAccessType }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  test_type: "integration"
 
-  ###############################################################################################
-  # Integration-Tests: Run e2e tests (downloading and running on data)
-  ################################################################################################
-  End-To-End-Tests:
-    runs-on: ${{ matrix.os }}
-    continue-on-error: true # dont fail the whole matrix if one fails
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest] 
-        env: ["py313"]
-        TestAccessType: ["public", "private"]
+    ###############################################################################################
+    # Integration-Tests: Run e2e tests (downloading and running on data)
+    ################################################################################################
+    End-To-End-Tests:
+        runs-on: ${{ matrix.os }}
+        continue-on-error: true # dont fail the whole matrix if one fails
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macos-latest, windows-latest]
+                # just going to test lowest and latest
+                env: ["py310", "py313"]
+                TestAccessType: ["public", "private"]
 
-    # this action needs to be able to read contents of other repos
-    # for the test data (specifically private test data)
-    permissions:
-      contents: read
+        # this action needs to be able to read contents of other repos
+        # for the test data (specifically private test data)
+        permissions:
+            contents: read
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run e2e Tests
-        uses: ./.github/actions/pytest/
-        with:
-          os: ${{ matrix.os }}
-          env: ${{ matrix.env }}
-          test_access_type: ${{ matrix.TestAccessType }}
-          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
-          test_type: "e2e"
-  ################################################################################################
-  # Codecov: Run codecov to check coverage
-  ################################################################################################
-#   Code-Coverage:
-#     needs: Unit-Tests
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+        steps:
+            - uses: actions/checkout@v4
+            - name: Run e2e Tests
+              uses: ./.github/actions/pytest/
+              with:
+                  os: ${{ matrix.os }}
+                  env: ${{ matrix.env }}
+                  test_access_type: ${{ matrix.TestAccessType }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  test_type: "e2e"
 
-#       - name: Download coverage.xml artifact
-#         uses: actions/download-artifact@v4
-#         with:
-#           name: coverage-report
-#           path: coverage-report
+    ###############################################################################################
+    #   Codecov: Run codecov to check coverage
+    ###############################################################################################
+    Code-Coverage:
+        needs: Unit-Tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-#       - name: Use Codecov to track coverage
-#         uses: codecov/codecov-action@v3
-#         with:
-#           token: ${{ secrets.CODECOV_TOKEN }}
-#           files: ./coverage-report/coverage.xml
-#           fail_ci_if_error: true
-#           verbose: true
-#           name: codecov-umbrella
+            - name: Download coverage.xml artifact
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: coverage-report*
+                  path: coverage-reports
 
-  ################################################################################################
-  # Linting: Run linting using Ruff & Mypy
-  ################################################################################################
-  # Goal here is to run ruff check and mypy, and then upload the results to the PR
-  # even if one fails, it should still run the other
-  Linting:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    permissions:
-      contents: read
-      checks: write
-      issues: write
-      pull-requests: write
-    timeout-minutes: 15
+            - name: prepare coverage files
+              run: | 
+                  # so we should have a bunch of zip artifacts
+                  # and they will unzipped into the coverage-reports directory
+                  # lets list everything in there
+                  ls -laR coverage-reports
+                  
+                  # lets find all the coverage.xml files
+                  # and save them to a env variable
+                  # this will be used to upload to codecov
+                  cov_files=$(find coverage-reports -name "coverage.xml")
 
-    steps:
-      - uses: actions/checkout@v4
+                  # print for debugging
+                  echo "Found coverage files: $cov_files"
 
-      - name: Install Pixi
-        uses: prefix-dev/setup-pixi@v0.8.8
-        with:
-          environments: "test"
-          pixi-version: v0.46.0
-          cache: true
-          locked: false
+                  # save to env variable
+                  echo "COV_FILES=$cov_files" >> $GITHUB_ENV
 
-      - name: Run ruff check
-        id: ruff_check
-        if: always()
-        run: |
-          set -eu pipefail
-          pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
+            - name: Use Codecov to track coverage
+              uses: codecov/codecov-action@v3
+              env:
+                  COV_FILES: ${{ env.COV_FILES }}
+              with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
+                  files: ${{ env.COV_FILES }}
+                  fail_ci_if_error: true
+                  verbose: true
+                  name: codecov-umbrella
 
-      - name: Post ruff lint suggestions
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-lint
-          fail_level: none
-          filter_mode: added
+    ################################################################################################
+    # Linting: Run linting using Ruff & Mypy
+    ################################################################################################
+    # Goal here is to run ruff check and mypy, and then upload the results to the PR
+    # even if one fails, it should still run the other
+    Linting:
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        permissions:
+            contents: read
+            checks: write
+            issues: write
+            pull-requests: write
+        timeout-minutes: 15
 
-      - name: Run ruff format
-        id: ruff_format
-        if: always()
-        run: |
-          pixi run -e test ruff-format --exit-non-zero-on-format
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Post ruff format suggestions
-        uses: reviewdog/action-suggester@v1
-        with:
-          tool_name: ruff-format
-          fail_level: none
-          filter_mode: diff_context
+            - name: Install Pixi
+              uses: prefix-dev/setup-pixi@v0.8.8
+              with:
+                  environments: "test"
+                  pixi-version: v0.46.0
+                  cache: true
+                  locked: false
 
-      - name: Run mypy check
-        id: mypy
-        if: always()
-        run: |
-          pixi run -e test type-check
+            - name: Run ruff check
+              id: ruff_check
+              if: always()
+              run: |
+                  set -eu pipefail
+                  pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
 
-  ################################################################################################
-  # Build-Docs: Build documentation using mkdocs
-  ################################################################################################
-  Build-Docs:
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15 # Consider increasing timeout
-    strategy:
-      matrix:
-        os: [ubuntu-latest] # , windows-latest removed for now
-        env: ["docs"]
+            - name: Post ruff lint suggestions
+              uses: reviewdog/action-suggester@v1
+              with:
+                  tool_name: ruff-lint
+                  fail_level: none
+                  filter_mode: added
 
-    steps:
-      - uses: actions/checkout@v4
+            - name: Run ruff format
+              id: ruff_format
+              if: always()
+              run: |
+                  pixi run -e test ruff-format --exit-non-zero-on-format
 
-      - name: Install Pixi
-        uses: prefix-dev/setup-pixi@v0.8.8
-        with:
-          environments: ${{ matrix.env }}
-          pixi-version: v0.46.0
-          cache: true
-          locked: false # wont be the same because of the tag
+            - name: Post ruff format suggestions
+              uses: reviewdog/action-suggester@v1
+              with:
+                  tool_name: ruff-format
+                  fail_level: none
+                  filter_mode: diff_context
 
-      - name: Test docs build
-        run: |
-          pixi run -e ${{ matrix.env }} doc-build
+            - name: Run mypy check
+              id: mypy
+              if: always()
+              run: |
+                  pixi run -e test type-check
 
-  ################################################################################################
-  # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
-  ################################################################################################
-  Publish-Docs:
-    needs: Build-Docs
-    if: github.ref == 'refs/heads/development'
+    ################################################################################################
+    # Build-Docs: Build documentation using mkdocs
+    ################################################################################################
+    Build-Docs:
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 15 # Consider increasing timeout
+        strategy:
+            matrix:
+                os: [ubuntu-latest] # , windows-latest removed for now
+                env: ["docs"]
 
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+        steps:
+            - uses: actions/checkout@v4
 
-    permissions:
-      # Need to give the action permission to write to the repository to deploy the docs
-      contents: write
+            - name: Install Pixi
+              uses: prefix-dev/setup-pixi@v0.8.8
+              with:
+                  environments: ${{ matrix.env }}
+                  pixi-version: v0.46.0
+                  cache: true
+                  locked: false # wont be the same because of the tag
 
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        env: ["docs"]
+            - name: Test docs build
+              run: |
+                  pixi run -e ${{ matrix.env }} doc-build
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    ################################################################################################
+    # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
+    ################################################################################################
+    Publish-Docs:
+        needs: Build-Docs
+        if: github.ref == 'refs/heads/development'
 
-      - name: Configure Git Credentials
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
+        concurrency:
+            group: ${{ github.workflow }}-${{ github.ref }}
 
-      - name: Install Pixi
-        uses: prefix-dev/setup-pixi@v0.8.8
-        with:
-          environments: ${{ matrix.env }}
-          pixi-version: v0.46.0
-          cache: true
-          locked: false # wont be the same because of the tag
+        permissions:
+            # Need to give the action permission to write to the repository to deploy the docs
+            contents: write
 
-      - name: Test docs build
-        run: |
-          pixi run -e ${{ matrix.env }} doc-build
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest]
+                env: ["docs"]
 
-      - name: Publish docs using mike
-        run: |
-          pixi run -e ${{ matrix.env }} mike deploy --push dev devel
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
+            - name: Configure Git Credentials
+              run: |
+                  git config user.name github-actions[bot]
+                  git config user.email github-actions[bot]@users.noreply.github.com
 
-  ################################################################################################
-  # CD: Continuous Deployment
-  ################################################################################################
-  Continuous-Deployment:
-    concurrency: release
-    permissions:
-      id-token: write
-      actions: read
-      contents: write
-      packages: write
-      issues: write
-      pull-requests: write
+            - name: Install Pixi
+              uses: prefix-dev/setup-pixi@v0.8.8
+              with:
+                  environments: ${{ matrix.env }}
+                  pixi-version: v0.46.0
+                  cache: true
+                  locked: false # wont be the same because of the tag
 
-    needs: [Unit-Tests, Integration-Tests, Linting, Build-Docs]
+            - name: Test docs build
+              run: |
+                  pixi run -e ${{ matrix.env }} doc-build
 
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
+            - name: Publish docs using mike
+              run: |
+                  pixi run -e ${{ matrix.env }} mike deploy --push dev devel
 
-    # Set up operating system
-    runs-on: ubuntu-latest
+    ################################################################################################
+    # CD: Continuous Deployment
+    ################################################################################################
+    Continuous-Deployment:
+        concurrency: release
+        permissions:
+            id-token: write
+            actions: read
+            contents: write
+            packages: write
+            issues: write
+            pull-requests: write
 
-    outputs:
-      released: ${{ steps.release.outputs.released }}
-      version: ${{ steps.release.outputs.version }}
-      tag: ${{ steps.release.outputs.tag }}
+        needs: [Unit-Tests, Integration-Tests, Linting, Build-Docs]
 
-    # Define job steps
-    steps:
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.SEMVERPOLICE_ID }}
-          private-key: ${{ secrets.SEMVER_APP_KEY }}
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.12
+        # Set up operating system
+        runs-on: ubuntu-latest
 
-      - name: Check-out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        outputs:
+            released: ${{ steps.release.outputs.released }}
+            version: ${{ steps.release.outputs.version }}
+            tag: ${{ steps.release.outputs.tag }}
 
-      - name: Python Semantic Release
-        uses: python-semantic-release/python-semantic-release@master
-        id: release
-        with:
-          root_options: -v
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          git_committer_name: "gh-actions-semver"
+        # Define job steps
+        steps:
+            - uses: actions/create-github-app-token@v1
+              id: app-token
+              with:
+                  app-id: ${{ vars.SEMVERPOLICE_ID }}
+                  private-key: ${{ secrets.SEMVER_APP_KEY }}
 
-  pip-squeak:
-    needs: Continuous-Deployment
-    if: needs.Continuous-Deployment.outputs.released == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the code with tag ${{ needs.Continuous-Deployment.outputs.tag }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.Continuous-Deployment.outputs.tag }}
+            - name: Set up Python 3.12
+              uses: actions/setup-python@v5
+              with:
+                  python-version: 3.12
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12
+            - name: Check-out repository
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
 
-      - name: Install Package Builder
-        run: python3 -m pip install build
+            - name: Python Semantic Release
+              uses: python-semantic-release/python-semantic-release@master
+              id: release
+              with:
+                  root_options: -v
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  git_committer_name: "gh-actions-semver"
 
-      - name: Build package
-        run: python3 -m build --sdist --wheel --outdir dist/
+    pip-squeak:
+        needs: Continuous-Deployment
+        if: needs.Continuous-Deployment.outputs.released == 'true'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout the code with tag ${{ needs.Continuous-Deployment.outputs.tag }}
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ needs.Continuous-Deployment.outputs.tag }}
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          verbose: true
-          user: ${{ secrets.pypi_token }}
-          password: ${{ secrets.pypi_api }}
+            - name: Set up Python 3.12
+              uses: actions/setup-python@v4
+              with:
+                  python-version: 3.12
 
-  ################################################################################################
-  # Docker: Build and publish Docker image when Continuous-Deployment is successful
-  ################################################################################################
-  Docker-Publish:
-    needs: Continuous-Deployment
-    if: needs.Continuous-Deployment.outputs.released == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: ['3.13']
+            - name: Install Package Builder
+              run: python3 -m pip install build
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+            - name: Build package
+              run: python3 -m build --sdist --wheel --outdir dist/
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+            - name: Publish to PyPI
+              uses: pypa/gh-action-pypi-publish@release/v1
+              with:
+                  verbose: true
+                  user: ${{ secrets.pypi_token }}
+                  password: ${{ secrets.pypi_api }}
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.BHKLAB_DOCKERHUB_USERNAME }}
-          password: ${{ secrets.BHKLAB_DOCKERHUB_ACCESS_KEY }}
+    ################################################################################################
+    # Docker: Build and publish Docker image when Continuous-Deployment is successful
+    ################################################################################################
+    Docker-Publish:
+        needs: Continuous-Deployment
+        if: needs.Continuous-Deployment.outputs.released == 'true'
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                python_version: ["3.13"]
 
-      - name: Set build metadata
-        id: meta
-        run: echo "build_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            bhklab/med-imagetools:${{ needs.Continuous-Deployment.outputs.tag}}
-            bhklab/med-imagetools:latest
-          build-args: |
-            PYTHON_VERSION=${{ matrix.python_version }}
-            VERSION=${{ needs.Continuous-Deployment.outputs.tag}}
-            GIT_COMMIT=${{ github.sha }}
-            BUILD_DATE=${{ steps.meta.outputs.build_date }}
-          provenance: false
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
-  does-the-pip-squeak:
-    needs: [pip-squeak, Continuous-Deployment]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.12", "3.11", "3.10"]
+            - name: Login to DockerHub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.BHKLAB_DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.BHKLAB_DOCKERHUB_ACCESS_KEY }}
 
-    steps:
-      - uses: actions/checkout@v3
+            - name: Set build metadata
+              id: meta
+              run: echo "build_date=$(date --utc +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+            - name: Build and Push Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  platforms: linux/amd64,linux/arm64
+                  push: true
+                  tags: |
+                      bhklab/med-imagetools:${{ needs.Continuous-Deployment.outputs.tag}}
+                      bhklab/med-imagetools:latest
+                  build-args: |
+                      PYTHON_VERSION=${{ matrix.python_version }}
+                      VERSION=${{ needs.Continuous-Deployment.outputs.tag}}
+                      GIT_COMMIT=${{ github.sha }}
+                      BUILD_DATE=${{ steps.meta.outputs.build_date }}
+                  provenance: false
 
-      - name: Install using PyPi
-        run: |
-          pip install med-imagetools==${{ needs.Continuous-Deployment.outputs.tag}}
-          imgtools --help
+    does-the-pip-squeak:
+        needs: [pip-squeak, Continuous-Deployment]
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest, macos-latest, windows-latest]
+                python-version: ["3.12", "3.11", "3.10"]
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+
+            - name: Install using PyPi
+              run: |
+                  pip install med-imagetools==${{ needs.Continuous-Deployment.outputs.tag}}
+                  imgtools --help
