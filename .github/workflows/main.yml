@@ -93,7 +93,6 @@ jobs:
 
             - name: Run ruff check
               id: ruff_check
-            #   if: always()
               run: |
                   set -eu pipefail
                   pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
@@ -107,7 +106,6 @@ jobs:
 
             - name: Run ruff format
               id: ruff_format
-            #   if: always()
               run: |
                   pixi run -e test ruff-format --exit-non-zero-on-format
 
@@ -120,7 +118,6 @@ jobs:
 
             - name: Run mypy check
               id: mypy
-            #   if: always()
               run: |
                   pixi run -e test type-check
 

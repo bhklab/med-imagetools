@@ -6,11 +6,9 @@ from imgtools.coretypes.masktypes import (
 )
 import pytest
 from rich import print
-import logging
-###############################################################################
-# Tests
-###############################################################################
-# parametrize the test function with different matcher inputs
+
+# mark this module as 'unittests'
+pytestmark = pytest.mark.unittests
 
 @pytest.mark.parametrize(
     "roi_matching",
