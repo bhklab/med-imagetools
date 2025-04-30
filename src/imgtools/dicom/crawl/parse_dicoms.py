@@ -117,6 +117,7 @@ def parse_all_dicoms(
                 colour="green",
             )
         ),
+        strict=False,
     ):
         series_uid = result["SeriesInstanceUID"]
         sop_uid = result["SOPInstanceUID"]

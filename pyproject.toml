@@ -101,10 +101,6 @@ match = "(development|dev)"
 prerelease = true
 prerelease_token = "rc"
 
-[tool.ruff]
-# Extend the `pyproject.toml` file in the parent directory...
-extend = "config/ruff.toml"
-
 [tool.coverage.paths]
 source = [
     "src/imgtools",
