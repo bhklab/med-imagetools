@@ -74,6 +74,8 @@ jobs:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
                   test_access_type: ${{ matrix.TestAccessType }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "integration"
 
     ################################################################################################

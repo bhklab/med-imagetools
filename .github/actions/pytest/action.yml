@@ -12,9 +12,17 @@ inputs:
     description: 'Test access type (public or private)'
     required: true
     default: 'public'
+  github_token:
+    description: 'GitHub token for accessing test data'
+    required: false
+    default: ''
   test_type:
     description: 'Type of test to run (e.g., unittests, integration)'
     required: true
+  codecov_token:
+    description: 'Codecov token for uploading coverage reports'
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -29,8 +37,8 @@ runs:
         cache: true
     - name: Run pytest
       env:
-        GITHUB_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
-        GH_TOKEN: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
         TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
         # specifically run code-coverage for py313 public ubuntu tests
@@ -46,8 +54,9 @@ runs:
       if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
       uses: codecov/codecov-action@v3
       with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ inputs.codecov_token }}
           files: coverage-report/coverage.xml
+          fail_ci_if_error: true
           verbose: true
           name: codecov-umbrella
 
