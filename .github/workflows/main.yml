@@ -14,6 +14,34 @@ concurrency:
 
 jobs:
     ###############################################################################################
+    # Prepare-Data: Download test data for unit and integration tests
+    # And then cache it for later use
+    ################################################################################################
+    Prepare-Data:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Download test data
+              uses: robinraju/release-downloader@v1
+              with:
+
+                  # this is the repo where the test data is stored
+                  repository: bhklab/med-image_test-data
+                  # this is the tag of the release to download
+                  latest: true
+                  # this is the path to the test data in the repo
+                  fileName: '*'
+                  out-file-path: 'data'
+
+            - name: Print contents for debugging
+              run: |
+                  # print the contents of the data directory
+                  ls -laR data
+
+
+    ###############################################################################################
     # Unit-Tests: Run unit tests using pytest
     ################################################################################################
     Unit-Tests:
