@@ -4,6 +4,10 @@ repo_url: https://github.com/bhklab/med-imagetools
 watch: [docs, src, mkdocs.yml]
 dev_addr: "127.0.0.1:8001"
 
+# Hook to copy assets from project root to docs directory during build
+hooks:
+  - docs/hooks.py
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true

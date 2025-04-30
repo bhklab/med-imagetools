@@ -36,7 +36,7 @@ It not only processes DICOMs consisting of different modalities
 deep learning ready subject based format taking the dependencies of
 these modalities into consideration.  
 
-![cli](/assets/imgtools_cli.png)
+![cli](assets/imgtools_cli.png)
 
 ## Introduction
 
@@ -46,7 +46,7 @@ the different scans containing DICOM of different modalities are
 interdependent on each other. For making effective machine
 learning models, one ought to take different modalities into account.
 
-![graph](/assets/graph.png)
+![graph](assets/graph.png)
 
 Fig.1 - Different network topology for different studies of different patients
 
