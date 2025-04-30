@@ -34,7 +34,7 @@ It not only processes DICOMs consisting of different modalities
 deep learning ready subject based format taking the dependencies of
 these modalities into consideration.  
 
-![cli](/assets/imgtools_help.png)
+![cli](/assets/imgtools_cli.png)
 
 ## Introduction
 
