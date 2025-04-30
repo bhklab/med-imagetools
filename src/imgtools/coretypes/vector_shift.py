@@ -123,7 +123,9 @@ def collapse_vector_mask(
     """
     n_components = vector_mask.GetNumberOfComponentsPerPixel()
     assert vector_mask.GetPixelID() == sitk.sitkVectorUInt8
-    assert len(component_names) == n_components
+    assert (
+        len(vector_mask.roi_mapping) == n_components + 1
+    )  # +1 for background
 
     # Reverse the name map for easy index lookup
     index_to_roi_mapping: dict[int, ROIMaskMapping] = vector_mask.roi_mapping
