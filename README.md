@@ -34,6 +34,8 @@ It not only processes DICOMs consisting of different modalities
 deep learning ready subject based format taking the dependencies of
 these modalities into consideration.  
 
+![cli](/assets/imgtools_help.png)
+
 ## Introduction
 
 A medical dataset, typically contains multiple different types of scans
@@ -60,8 +62,6 @@ eventually torch dataloader for ML pipeline.
 ```console
 pip install med-imagetools
 ```
-
-![cli](/assets/imgtools_help.png)
 
 
 ## Repository Stars
