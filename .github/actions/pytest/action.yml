@@ -38,6 +38,10 @@ runs:
 
     - name: Prepare data if needed
       if: inputs.test_type == 'integration'
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
       run: |
         if [[ "${{ inputs.test_access_type }}" == "private" ]]; then
           pixi run -e ${{ inputs.env }} imgtools testdata -p -d data

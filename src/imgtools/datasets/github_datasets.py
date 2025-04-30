@@ -471,7 +471,7 @@ class MedImageTestData:
             TimeElapsedColumn(),
             console=console,
             # disable progress bar in CI
-            disable=os.environ.get("CI", "").lower() == "true",
+            # disable=os.environ.get("CI", "").lower() == "true",
         ) as progress:
             # Create tasks first
             for asset in assets:
@@ -491,5 +491,9 @@ class MedImageTestData:
                 )
             )
             loop.close()
+
+        logger.info(
+            f"Downloaded {len(assets)} assets from {self.repo_name} to {dest}"
+        )
 
         return [p for p in extracted_paths if p is not None]
