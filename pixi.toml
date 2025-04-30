@@ -93,6 +93,11 @@ depends-on = [
     { task = "test_base", args = ["-m integration"] }
 ]
 
+[feature.test.tasks.e2e]
+depends-on = [
+    { task = "test_base", args = ["-m e2e"] }
+]
+
 [feature.test.tasks.unittests_cov]
 depends-on = [
     { task = "test_base", args = ["-m unittests", "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"] }
@@ -100,6 +105,10 @@ depends-on = [
 [feature.test.tasks.integration_cov]
 depends-on = [
     { task = "test_base", args = ["-m integration", "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"] }
+]
+[feature.test.tasks.e2e_cov]
+depends-on = [
+    { task = "test_base", args = ["-m e2e", "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"] }
 ]
 
 [feature.test.tasks.clean_tests]

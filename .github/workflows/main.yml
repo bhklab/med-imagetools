@@ -31,6 +31,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
           env: ${{ matrix.env }}
+          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
           test_type: "unittests"
 
   ###############################################################################################
@@ -72,6 +73,33 @@ jobs:
           github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
           test_type: "integration"
 
+  ###############################################################################################
+  # Integration-Tests: Run e2e tests (downloading and running on data)
+  ################################################################################################
+  End-To-End-Tests:
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true # dont fail the whole matrix if one fails
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest] 
+        env: ["py313"]
+        TestAccessType: ["public", "private"]
+
+    # this action needs to be able to read contents of other repos
+    # for the test data (specifically private test data)
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run e2e Tests
+        uses: ./.github/actions/pytest/
+        with:
+          os: ${{ matrix.os }}
+          env: ${{ matrix.env }}
+          test_access_type: ${{ matrix.TestAccessType }}
+          github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+          test_type: "e2e"
   ################################################################################################
   # Codecov: Run codecov to check coverage
   ################################################################################################
