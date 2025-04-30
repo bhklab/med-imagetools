@@ -63,9 +63,9 @@ class AttrDict(dict):
             super().__init__()
             return
 
-        super().__init__({
-            k: attrify(v) for k, v in dict(*args, **kwargs).items()
-        })
+        super().__init__(
+            {k: attrify(v) for k, v in dict(*args, **kwargs).items()}
+        )
 
     @classmethod
     def from_flat_dict(cls, *args: Any, **kwargs: Any) -> AttrDict:
