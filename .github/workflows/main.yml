@@ -60,7 +60,7 @@ jobs:
               id: download-test-data
               with:
                     # this is the repo where the test data is stored
-                    repository: bhklab/med-image_test-data
+                    repository: bhklab/med-image_test-data${{ matrix.TestAccessType == 'private' && '_private' || '' }}
                     # this is the tag of the release to download
                     latest: true
                     # this is the path to the test data in the repo
