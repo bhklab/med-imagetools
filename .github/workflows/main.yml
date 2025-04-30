@@ -5,8 +5,10 @@ on:
     push:
         branches: ["*"]
     pull_request:
-        branches: ["*"]
-    release:
+        branches:
+          - "development"
+          - "main"
+          - "jjjermiah/*"
 
 concurrency:
     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
