@@ -108,7 +108,7 @@ class Crawler:
         """Return the crawl database raw."""
         return self.crawl_results.crawl_db_raw
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # pragma: no cover
         """Return a string representation of the crawler."""
         attributes = [
             "dicom_dir",

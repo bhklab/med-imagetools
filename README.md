@@ -14,6 +14,8 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![GitHub Release](https://img.shields.io/github/v/release/bhklab/med-imagetools?include_prereleases&label=pre-release)](https://github.com/bhklab/med-imagetools/releases)
 [![PyPI - Version](https://img.shields.io/pypi/v/med-imagetools?label=stable-pypi)](https://pypi.org/project/med-imagetools/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/bhklab/med-imagetools?label=dockerhub-pulls)](https://hub.docker.com/r/bhklab/med-imagetools)
+[![Docker Size](https://img.shields.io/docker/image-size/bhklab/med-imagetools/latest?label=docker-size)](https://hub.docker.com/r/bhklab/med-imagetools/tags)
 
 [![PyPI - Format](https://img.shields.io/pypi/format/med-imagetools)](https://pypi.org/project/med-imagetools/)
 [![Downloads](https://static.pepy.tech/badge/med-imagetools)](https://pepy.tech/project/med-imagetools)
@@ -34,6 +36,8 @@ It not only processes DICOMs consisting of different modalities
 deep learning ready subject based format taking the dependencies of
 these modalities into consideration.  
 
+![cli](assets/imgtools_cli.png)
+
 ## Introduction
 
 A medical dataset, typically contains multiple different types of scans
@@ -42,7 +46,7 @@ the different scans containing DICOM of different modalities are
 interdependent on each other. For making effective machine
 learning models, one ought to take different modalities into account.
 
-![graph](https://github.com/bhklab/med-imagetools/blob/main/images/graph.png?raw=true)
+![graph](assets/graph.png)
 
 Fig.1 - Different network topology for different studies of different patients
 
@@ -60,6 +64,7 @@ eventually torch dataloader for ML pipeline.
 ```console
 pip install med-imagetools
 ```
+
 
 ## Repository Stars
 

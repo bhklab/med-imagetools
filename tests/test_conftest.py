@@ -2,7 +2,12 @@ from pathlib import Path
 from collections import Counter
 import pytest
 
-def test_meta(medimage_test_data: list[dict[str, str | Path]], dataset_type: str, public_collections: list[str], private_collections: list[str]):
+def test_meta(
+        medimage_test_data: list[dict[str, str | Path]],
+        dataset_type: str, 
+        public_collections: list[str],
+        private_collections: list[str]
+    ):
     """Test meta data."""
     assert medimage_test_data is not None
 

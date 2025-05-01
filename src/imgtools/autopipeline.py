@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 
+import pandas as pd
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
@@ -35,6 +36,41 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
     from imgtools.dicom.interlacer import SeriesNode
+
+# on top of the full index csv, we create a simplified version
+# that contains some of the most important columns in this order
+SIMPLIFIED_COLUMNS = [
+    "filepath",
+    "hash",
+    "saved_time",
+    "SampleNumber",
+    "ImageID",
+    "PatientID",
+    "Modality",
+    "SeriesInstanceUID",
+    # for Masks
+    "roi_key",
+    "matched_rois",
+    # created from MedImage (or subclass) `fingerprint` property
+    "class",
+    "dtype_str",
+    "dtype_numpy",
+    "ndim",
+    "nvoxels",
+    "size",
+    "spacing",
+    "origin",
+    "direction",
+    "bbox.size",
+    "bbox.min_coord",
+    "bbox.max_coord",
+    "sum",
+    "min",
+    "max",
+    "mean",
+    "std",
+    "variance",
+]
 
 
 @dataclass
@@ -411,6 +447,28 @@ class Autopipeline:
         failure_file = index_file.with_name(
             f"{self.output.writer.root_directory.name}_failed_{timestamp}.json"
         )
+        # write simplified index file
+        index_file = self.output.writer.index_file
+        simple_index = index_file.parent / f"{index_file.stem}-simple.csv"
+
+        index_df = pd.read_csv(index_file)
+
+        # get columns in the order we want
+        # if the column is not in the index_df, it will be filled
+        # with NaN
+        index_df = index_df[SIMPLIFIED_COLUMNS]
+        # sort by 'filepath' to make it easier to read
+        index_df = index_df.sort_values(by=["filepath"])
+
+        index_df.to_csv(simple_index, index=False)
+        logger.info(f"Index file saved to {simple_index}")
+
+        # remove lockfile
+        if self.output.writer._get_index_lock().exists():
+            self.output.writer._get_index_lock().unlink()
+            logger.debug(
+                f"Lock file removed: {self.output.writer._get_index_lock()}"
+            )
 
         # Convert results to dictionaries for JSON serialization
         success_dicts = [result.to_dict() for result in successful_results]

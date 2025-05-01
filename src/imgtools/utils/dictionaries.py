@@ -23,8 +23,8 @@ from __future__ import annotations
 
 import collections.abc
 import datetime
-import math
 from typing import Any
+import math
 
 from .date_time import datetime_to_iso_string
 

@@ -673,7 +673,7 @@ if __name__ == "__main__":
         # )
         # print(f"Query Result: {interlacer.query('MR,RTSTRUCT')}")
 
-    for interlacer, input_dir in zip(interlacers, dicom_dirs):
+    for interlacer, input_dir in zip(interlacers, dicom_dirs):  # noqa
         interlacer.print_tree(input_dir)
 
         # query_results = interlacer.query("CT,RTSTRUCT", group_by_root=True)
