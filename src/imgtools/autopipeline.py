@@ -13,6 +13,8 @@ from tqdm import tqdm
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
+)
+from imgtools.coretypes.masktypes.roi_matching import (
     Valid_Inputs as ROIMatcherInputs,
 )
 from imgtools.io.sample_input import SampleInput
@@ -259,8 +261,7 @@ class Autopipeline:
         modalities: list[str] | None = None,
         roi_match_map: ROIMatcherInputs = None,
         roi_ignore_case: bool = True,
-        roi_handling_strategy: str
-        | ROIMatchStrategy = ROIMatchStrategy.SEPARATE,
+        roi_handling_strategy: str | ROIMatchStrategy = ROIMatchStrategy.SEPARATE,
         roi_allow_multi_key_matches: bool = True,
         roi_on_missing_regex: str | ROIMatchFailurePolicy = (
             ROIMatchFailurePolicy.WARN
@@ -446,9 +447,7 @@ class Autopipeline:
         # remove lockfile
         if self.output.writer._get_index_lock().exists():
             self.output.writer._get_index_lock().unlink()
-            logger.debug(
-                f"Lock file removed: {self.output.writer._get_index_lock()}"
-            )
+            logger.debug(f"Lock file removed: {self.output.writer._get_index_lock()}")
 
         # Convert results to dictionaries for JSON serialization
         success_dicts = [result.to_dict() for result in successful_results]
