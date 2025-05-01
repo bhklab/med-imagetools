@@ -1,0 +1,50 @@
+name: Termshot PNG Test
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - development
+
+jobs:
+  generate-png:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            url: https://github.com/homeport/termshot/releases/download/v0.5.0/termshot_0.5.0_linux_amd64.tar.gz
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download and install termshot
+        run: |
+          curl -L "${{ matrix.url }}" -o termshot.tar.gz
+          tar -xzf termshot.tar.gz
+          chmod +x termshot
+          sudo mv termshot /usr/local/bin/termshot
+
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          environments: "py313" 
+          pixi-version: v0.46.0
+          cache: true
+          activate-environment: true
+
+      - name: Install the project
+        run: imgtools --help
+
+      - name: Generate PNG using termshot
+        run: |
+          mkdir -p assets
+          termshot --show-cmd --filename assets/imgtools_cli.png -- imgtools --help
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add assets/imgtools_cli.png
+          git commit -m "chore: update cli help image"
+          git push
