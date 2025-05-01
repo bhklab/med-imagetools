@@ -187,8 +187,7 @@ def autopipeline(
     roi_match_map: Tuple[str],
     roi_match_yaml: Path,
 ) -> None:
-    """
-    Run the Autopipeline for processing medical images.
+    """Core utility to process messy DICOM data into organized NIfTI files.
     
     This command allows you to process medical images in a directory structure,
     apply transformations, and save the results to a specified output directory.
@@ -199,18 +198,21 @@ def autopipeline(
 
     \b
     The default filename format is:
-    {SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz
+    `{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz`
     where:
-        - SampleNumber: The identifier for the sample after querying.
-        - PatientID: The ID of the patient.
-        - Modality: The imaging modality (e.g., CT, MRI).
-        - SeriesInstanceUID: The unique identifier for the series.
-        - ImageID: The cutomized identifier for the image.
-            - By default, the modality of the image
-            - If RTSTRUCT or SEG, uses custom format based on the roi_strategy
-                roi_match_map and roi names.
-            TODO:: explain this in the docs?
 
+    \b
+    - SampleNumber: The identifier for the sample after querying.
+    - PatientID: The ID of the patient.
+    - Modality: The imaging modality (e.g., CT, MRI).
+    - SeriesInstanceUID: The unique identifier for the series.
+    - ImageID: The cutomized identifier for the image.
+        - By default, the modality of the image
+        - If RTSTRUCT or SEG, uses custom format based on the roi_strategy
+            roi_match_map and roi names.
+        TODO:: explain this in the docs?
+
+    \b
     It is not recommended to change the default filename format to prevent
     overwriting files. The default format is designed to ensure that the output
     filenames are unique and informative. If you need to customize the output

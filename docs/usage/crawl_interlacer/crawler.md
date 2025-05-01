@@ -10,15 +10,17 @@ to build an internal database of the data users have.
 ## Metadata extraction
 
 As of the 2.0 release, the crawler implements a modality-specific set of
-extractions which facilitate raw extraction of a DICOM tag (i.e `SeriesInstanceUID`)
-as well as a 'ComputedValue' which requires computation on one or more tags
+extractions which facilitates: 
+
+1. raw extraction of a DICOM tag (i.e `SeriesInstanceUID`)
+2. and possible 'ComputedValue' which requires computation on one or more tags
 (i.e `ROINames` in `RTSTRUCT` files are computed from the `ROIContourSequence` tag).
 
 This is done using the [ModalityMedataExtractor][imgtools.dicom.dicom_metadata.extractor_base.ModalityMetadataExtractor] base class, which defines the `base_tags`
 that are common to all modalities, and the `computed_tags` which sub-classes
 can implement to extract modality-specific information on top of their own `modality_tags`.
 
-See the following:
+See the following api documentation for the supported modalities:
 
 - [CTMetadataExtractor][imgtools.dicom.dicom_metadata.extractors.CTMetadataExtractor]
 - [MRMetadataExtractor][imgtools.dicom.dicom_metadata.extractors.MRMetadataExtractor]
@@ -35,6 +37,11 @@ There also may be a `computed_tags` property that returns a mapping of
 keys defined by Med-ImageTools (i.e `SegSpacing` in the `SEG` extractor)
 to a callable function that will compute the value from the DICOM file.
 
+!!! tip "how can I find what tags are extracted?"
+
+    You can view the `modality_tags` and `computed_tags` for each modality
+    in the above links, and open the `Souce code` dropdown for each property.
+
 ## Assumptions made when crawling
 
 As of 2.0, the crawler makes the following assumptions:
@@ -46,13 +53,13 @@ As of 2.0, the crawler makes the following assumptions:
     This assumption is made, to simplify pointing to a series of files, by 
     just pointing to the directory containing the files.
 
-    !!! note
+!!! note
 
-        Though we require that all files in a series are in the same directory,
-        we do not require that all files in a directory belong to the same series.
-        That is, a directory may contain files from multiple series, and the
-        crawler will still be able to extract the series information from each
-        file.
+    Though we require that all files in a series are in the same directory,
+    we do not require that all files in a directory belong to the same series.
+    That is, a directory may contain files from multiple series, and the
+    crawler will still be able to extract the series information from each
+    file.
 
 ## Reference building
 
