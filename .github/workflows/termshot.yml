@@ -26,11 +26,16 @@ jobs:
           chmod +x termshot
           sudo mv termshot /usr/local/bin/termshot
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
+      - name: Install Pixi
+        uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          environments: "py313" 
+          pixi-version: v0.46.0
+          cache: true
+          activate-environment: true
 
       - name: Install the project
-        run: uvx --from 'med-imagetools[all]' --prerelease=allow imgtools --help
+        run: imgtools --help
 
       - name: Generate PNG using termshot
         run: |
