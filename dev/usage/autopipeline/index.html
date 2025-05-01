@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/usage/crawl_interlacer/interlacer/">
+        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/usage/autopipeline/">
       
       
-        <link rel="prev" href="../crawler/">
+        <link rel="prev" href="../..">
       
       
-        <link rel="next" href="../../Writers/BaseWriter/">
+        <link rel="next" href="../core/crawler/">
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
-        <title>Interlacer - Med-ImageTools Documentation</title>
+        <title>Taming the Chaos: AutoPipeline for Medical Image Processing - Med-ImageTools Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#interlacer-module" class="md-skip">
+        <a href="#taming-the-chaos-autopipeline-for-medical-image-processing" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Interlacer
+              Taming the Chaos: AutoPipeline for Medical Image Processing
             
           </span>
         </div>
@@ -229,7 +229,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -252,7 +252,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../" class="md-tabs__link">
+        <a href="./" class="md-tabs__link">
           
   
   
@@ -274,7 +274,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../cli/imgtools/" class="md-tabs__link">
+        <a href="../../cli/imgtools/" class="md-tabs__link">
           
   
   
@@ -296,7 +296,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../reference/crawler/" class="md-tabs__link">
+        <a href="../../reference/crawler/" class="md-tabs__link">
           
   
   
@@ -368,7 +368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -395,8 +395,6 @@
     
       
         
-          
-        
       
         
       
@@ -421,9 +419,8 @@
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <div class="md-nav__link md-nav__container">
-            <a href="../../" class="md-nav__link ">
-              
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
   
   
   <span class="md-ellipsis">
@@ -432,14 +429,8 @@
   </span>
   
 
-            </a>
-            
-              
-              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
-                <span class="md-nav__icon md-icon"></span>
-              </label>
-            
-          </div>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
@@ -447,85 +438,6 @@
             Usage
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-          
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    Crawler and Interlacer
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_2_2">
-            <span class="md-nav__icon md-icon"></span>
-            Crawler and Interlacer
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../crawler/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Crawler
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
             
               
                 
@@ -548,7 +460,7 @@
   
   
   <span class="md-ellipsis">
-    Interlacer
+    Taming the Chaos: AutoPipeline for Medical Image Processing
     
   </span>
   
@@ -561,7 +473,7 @@
   
   
   <span class="md-ellipsis">
-    Interlacer
+    Taming the Chaos: AutoPipeline for Medical Image Processing
     
   </span>
   
@@ -584,46 +496,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#tldr-from-raw-data-to-research-ready-in-minutes" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      TLDR; From Raw Data to Research-Ready in Minutes
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#main-classes" class="md-nav__link">
+  <a href="#the-medical-imaging-data-problem" class="md-nav__link">
     <span class="md-ellipsis">
-      Main Classes
+      The Medical Imaging Data Problem
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Main Classes">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autopipeline-streamlined-medical-imaging-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      AutoPipeline: Streamlined Medical Imaging Workflow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-autopipeline-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How AutoPipeline Works
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How AutoPipeline Works">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#seriesnode" class="md-nav__link">
+  <a href="#crawler-the-data-explorer" class="md-nav__link">
     <span class="md-ellipsis">
-      SeriesNode
+      Crawler: The Data Explorer
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#interlacer" class="md-nav__link">
+  <a href="#interlacer-the-relationship-builder" class="md-nav__link">
     <span class="md-ellipsis">
-      Interlacer
+      Interlacer: The Relationship Builder
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#grouping-series" class="md-nav__link">
+  <a href="#sample-processing-the-conversion-engine" class="md-nav__link">
     <span class="md-ellipsis">
-      Grouping Series
+      Sample Processing: The Conversion Engine
     </span>
   </a>
   
@@ -635,37 +565,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
+  <a href="#using-autopipeline-a-quick-start" class="md-nav__link">
     <span class="md-ellipsis">
-      Query Rules and Dependencies
+      Using AutoPipeline: A Quick Start
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Example">
+    <nav class="md-nav" aria-label="Using AutoPipeline: A Quick Start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
+  <a href="#standardizing-region-names-with-roi-matching" class="md-nav__link">
     <span class="md-ellipsis">
-      CLI
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python Code
+      Standardizing Region Names with ROI Matching
     </span>
   </a>
   
@@ -677,9 +589,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-output" class="md-nav__link">
+  <a href="#advanced-features" class="md-nav__link">
     <span class="md-ellipsis">
-      Example Output
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel Processing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-output-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Output Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-existing-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handling Existing Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -689,6 +652,104 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Core API
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Core API
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/crawler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Crawler
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/interlacer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Interlacer
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -761,7 +822,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Writers/BaseWriter/" class="md-nav__link">
+      <a href="../Writers/BaseWriter/" class="md-nav__link">
         
   
   
@@ -784,7 +845,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../Writers/ImplementingWriters/" class="md-nav__link">
+      <a href="../Writers/ImplementingWriters/" class="md-nav__link">
         
   
   
@@ -871,7 +932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cli/imgtools/" class="md-nav__link">
+      <a href="../../cli/imgtools/" class="md-nav__link">
         
   
   
@@ -894,7 +955,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cli/shell-completion/" class="md-nav__link">
+      <a href="../../cli/shell-completion/" class="md-nav__link">
         
   
   
@@ -979,7 +1040,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/crawler/" class="md-nav__link">
+      <a href="../../reference/crawler/" class="md-nav__link">
         
   
   
@@ -1002,7 +1063,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom_metadata/" class="md-nav__link">
+      <a href="../../reference/dicom_metadata/" class="md-nav__link">
         
   
   
@@ -1025,7 +1086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/interlacer/" class="md-nav__link">
+      <a href="../../reference/interlacer/" class="md-nav__link">
         
   
   
@@ -1103,7 +1164,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom-utils/load-dicom/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/load-dicom/" class="md-nav__link">
         
   
   
@@ -1126,7 +1187,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom-utils/find-dicoms/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/find-dicoms/" class="md-nav__link">
         
   
   
@@ -1149,7 +1210,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom-utils/lookup_tag/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/lookup_tag/" class="md-nav__link">
         
   
   
@@ -1172,7 +1233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom-utils/similar_tags/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/similar_tags/" class="md-nav__link">
         
   
   
@@ -1195,7 +1256,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicom-utils/tag_exists/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/tag_exists/" class="md-nav__link">
         
   
   
@@ -1275,7 +1336,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicomsort/dicomsorter/" class="md-nav__link">
+      <a href="../../reference/dicomsort/dicomsorter/" class="md-nav__link">
         
   
   
@@ -1298,7 +1359,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/dicomsort/patternparser/" class="md-nav__link">
+      <a href="../../reference/dicomsort/patternparser/" class="md-nav__link">
         
   
   
@@ -1356,46 +1417,64 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#tldr-from-raw-data-to-research-ready-in-minutes" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      TLDR; From Raw Data to Research-Ready in Minutes
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#main-classes" class="md-nav__link">
+  <a href="#the-medical-imaging-data-problem" class="md-nav__link">
     <span class="md-ellipsis">
-      Main Classes
+      The Medical Imaging Data Problem
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Main Classes">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#autopipeline-streamlined-medical-imaging-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      AutoPipeline: Streamlined Medical Imaging Workflow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-autopipeline-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How AutoPipeline Works
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How AutoPipeline Works">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#seriesnode" class="md-nav__link">
+  <a href="#crawler-the-data-explorer" class="md-nav__link">
     <span class="md-ellipsis">
-      SeriesNode
+      Crawler: The Data Explorer
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#interlacer" class="md-nav__link">
+  <a href="#interlacer-the-relationship-builder" class="md-nav__link">
     <span class="md-ellipsis">
-      Interlacer
+      Interlacer: The Relationship Builder
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#grouping-series" class="md-nav__link">
+  <a href="#sample-processing-the-conversion-engine" class="md-nav__link">
     <span class="md-ellipsis">
-      Grouping Series
+      Sample Processing: The Conversion Engine
     </span>
   </a>
   
@@ -1407,37 +1486,19 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
+  <a href="#using-autopipeline-a-quick-start" class="md-nav__link">
     <span class="md-ellipsis">
-      Query Rules and Dependencies
+      Using AutoPipeline: A Quick Start
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Example">
+    <nav class="md-nav" aria-label="Using AutoPipeline: A Quick Start">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
+  <a href="#standardizing-region-names-with-roi-matching" class="md-nav__link">
     <span class="md-ellipsis">
-      CLI
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python Code
+      Standardizing Region Names with ROI Matching
     </span>
   </a>
   
@@ -1449,9 +1510,60 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-output" class="md-nav__link">
+  <a href="#advanced-features" class="md-nav__link">
     <span class="md-ellipsis">
-      Example Output
+      Advanced Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel Processing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-output-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Output Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-existing-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Handling Existing Files
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Resources
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -1473,7 +1585,7 @@
 
 
   
-    <a href="https://github.com/bhklab/med-imagetools/edit/master/docs/usage/crawl_interlacer/interlacer.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/bhklab/med-imagetools/edit/master/docs/usage/autopipeline.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1482,139 +1594,233 @@
     
       
     
-    <a href="https://github.com/bhklab/med-imagetools/raw/master/docs/usage/crawl_interlacer/interlacer.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/bhklab/med-imagetools/raw/master/docs/usage/autopipeline.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="interlacer-module">Interlacer Module<a class="headerlink" href="#interlacer-module" title="Permanent link">#</a></h1>
-<p>The <strong>Interlacer</strong> module builds and searches a tree-like structure made from
-DICOM series using metadata links. </p>
-<p>This tool enables efficient grouping, querying, and vizualization of medical
-imaging series, making it easier to understand the complex
-relationships between various imaging modalities (CT, MR, PT) and derived
-objects (RTSTRUCT, RTDOSE, SEG)</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This module is available in <code>med-imagetools 2.0</code> and later versions.
-It replaces the now deprecated <code>DataGraph</code> module from <code>med-imagetools 1.0</code>.</p>
-</div>
-<hr />
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>This module turns DICOM series into a set of trees (a forest), using metadata
-to connect related series. This helps users follow the relationships between
-series — for example, linking a <code>CT</code> scan to its <code>RTSTRUCT</code> and <code>RTDOSE</code> —
-and makes it easier to run queries or group series by type.</p>
-<hr />
-<h2 id="main-classes">Main Classes<a class="headerlink" href="#main-classes" title="Permanent link">#</a></h2>
-<h3 id="seriesnode"><code>SeriesNode</code><a class="headerlink" href="#seriesnode" title="Permanent link">#</a></h3>
-<p>Represents an individual DICOM series and its hierarchical relationships:</p>
+<h1 id="taming-the-chaos-autopipeline-for-medical-image-processing">Taming the Chaos: AutoPipeline for Medical Image Processing<a class="headerlink" href="#taming-the-chaos-autopipeline-for-medical-image-processing" title="Permanent link">#</a></h1>
+<h2 id="tldr-from-raw-data-to-research-ready-in-minutes">TLDR; From Raw Data to Research-Ready in Minutes<a class="headerlink" href="#tldr-from-raw-data-to-research-ready-in-minutes" title="Permanent link">#</a></h2>
+<p>AutoPipeline bridges the gap between raw clinical data and research analysis, 
+making it easier for imaging researchers of all experience levels to work with 
+complex medical imaging data.</p>
+<p>By standardizing the processing pipeline and capturing provenance information, 
+it also improves reproducibility - a crucial aspect of scientific research.</p>
+<h2 id="the-medical-imaging-data-problem">The Medical Imaging Data Problem<a class="headerlink" href="#the-medical-imaging-data-problem" title="Permanent link">#</a></h2>
+<p>Ever spent hours organizing messy DICOM files from different scanners and 
+institutions? Medical imaging datasets are notoriously complex - with multiple
+scan types, segmentation masks, and treatment plans all interconnected but
+scattered across folder structures that seem designed to confuse.</p>
+<p>As an imaging researcher or student, you've probably faced this frustration:</p>
 <ul>
-<li><strong>Attributes</strong>:</li>
-<li><code>SeriesInstanceUID</code></li>
-<li><code>Modality</code></li>
-<li><code>PatientID</code></li>
-<li><code>StudyInstanceUID</code></li>
-<li><code>folder</code>: Path to the folder containing the DICOM files</li>
-<li><code>ReferencedSeriesUID</code>: Series that this one references, if any</li>
-<li><code>children</code>: List of child nodes representing referenced series<ul>
-<li>i.e a <code>CT</code> series might have 1 or more links to <code>RTSTRUCT</code> and/or  <code>PT</code> series</li>
+<li><strong>Folder chaos</strong>: Hundreds of nested directories with cryptic names</li>
+<li><strong>Format soup</strong>: DICOM files that need conversion to research-friendly formats</li>
+<li><strong>Relationship puzzles</strong>: CT scans that reference segmentation masks that 
+  reference treatment plans</li>
+<li><strong>Name confusion</strong>: Different institutions using different terms for the same 
+  anatomical structures</li>
 </ul>
-</li>
-</ul>
-<hr />
-<h3 id="interlacer"><code>Interlacer</code><a class="headerlink" href="#interlacer" title="Permanent link">#</a></h3>
-<p>Key features:</p>
-<ul>
-<li><strong>Query validation</strong>: Ensures that modality queries follow DICOM standard requirements</li>
-<li><strong>Interactive visualization</strong>: Creates HTML-based network graphs of relationships</li>
-<li><strong>Rich text console display</strong>: Pretty-prints the hierarchy with color-coding</li>
-<li><strong>Dependency validation</strong>: Enforces rules like "RTSTRUCT requires CT, MR, or PT"</li>
-</ul>
-<details class="warning">
-<summary>Supported Modalities</summary>
-<p>Though the Crawler will indiscriminately crawl all DICOM files,
-the Interlacer currently only supports the following modalities for interlacing:</p>
-<div class="highlight"><pre><span></span><code>- CT
-- MR
-- PT
-- RTSTRUCT
-- RTDOSE
-- SEG
-- RTPLAN (used in interlacing but not in queries)
-</code></pre></div>
-<p>These were the primary modalities targeted during the development of this module,
-but can easily be extended to support others in the future.
-Please <a href="https://github.com/bhklab/med-imagetools/issues">open an issue</a>
-for which modalities you would like to see supported.</p>
-</details>
-<h3 id="grouping-series">Grouping Series<a class="headerlink" href="#grouping-series" title="Permanent link">#</a></h3>
-<p>The Interlacer currently groups series using <strong>Referenced Series UID</strong>,
-which links series based on their metadata references 
-(i.e the <code>ReferencedSeriesInstanceUID</code> tag in <code>RTSTRUCT</code>s).
-This creates a hierarchical structure showing the relationships between different series.</p>
-<details class="info">
-<summary>Future Support for Grouping by Study Instance UID and Patient ID</summary>
-<p>In a future release, the Interlacer will support additional grouping methods:</p>
-<ul>
-<li><strong>Study Instance UID</strong> – Group everything in the same study</li>
-<li><strong>Patient ID</strong> – Group all series from the same patient</li>
-</ul>
-<p>This enhancement is being tracked in <a href="https://github.com/bhklab/med-imagetools/issues/318">GitHub issue #318</a>.</p>
-</details>
-<h2 id="query-rules-and-dependencies">Query Rules and Dependencies<a class="headerlink" href="#query-rules-and-dependencies" title="Permanent link">#</a></h2>
-<p>The Interlacer enforces the following modality dependency rules:</p>
+<h2 id="autopipeline-streamlined-medical-imaging-workflow">AutoPipeline: Streamlined Medical Imaging Workflow<a class="headerlink" href="#autopipeline-streamlined-medical-imaging-workflow" title="Permanent link">#</a></h2>
+<p>AutoPipeline is the core automation feature of med-imagetools designed to rescue
+you from these headaches. It provides a streamlined, reproducible workflow that:</p>
 <ol>
-<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
-<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
+<li><strong>Crawls</strong> through your messy DICOM directories to discover all files</li>
+<li><strong>Indexes</strong> the metadata and builds relationships between different series</li>
+<li><strong>Processes</strong> linked series together, applying transformations as needed</li>
+<li><strong>Organizes</strong> the output in a clean, standardized structure</li>
+<li><strong>Tracks</strong> everything it does for complete reproducibility</li>
 </ol>
-<p>Examples of valid and invalid queries:</p>
+<p>Think of it as your personal research assistant that handles all the tedious
+data preparation work, letting you focus on the exciting science!</p>
+<h2 id="how-autopipeline-works">How AutoPipeline Works<a class="headerlink" href="#how-autopipeline-works" title="Permanent link">#</a></h2>
+<p>Behind the scenes, AutoPipeline brings together several powerful components:</p>
+<pre class="mermaid"><code>flowchart TD
+    subgraph Ingest["Ingest 📂 + 📇"]
+        A[Input DICOM Directory]
+        B[Crawler]
+        C[Index File]
+        A --&gt; B --&gt; C
+    end
+
+    subgraph Relationship_Builder["Relationship Builder 🕸️ "]
+        D[Interlacer]
+        E[Query Results]
+        D --&gt; E
+    end
+
+    subgraph Processing["Processing 🖼️ + 🔧"]
+        F[Sample Input]
+        G["MedImage Objects: Scan/VectorMask"]
+        H["Transforms (optional): Resample, Windowing"]
+        I[Processed Images]
+        F --&gt; G --&gt; H --&gt; I
+    end
+
+    subgraph Output["Output 📁 + 📝"]
+        J[Sample Output]
+        K[NIfTI Files]
+        J --&gt; K
+    end
+
+    Ingest --&gt; Relationship_Builder
+    Relationship_Builder --&gt; Processing
+    Processing --&gt; Output
+</code></pre>
+<h3 id="crawler-the-data-explorer">Crawler: The Data Explorer<a class="headerlink" href="#crawler-the-data-explorer" title="Permanent link">#</a></h3>
+<p>First, AutoPipeline dispatches the <strong>Crawler</strong> to search recursively through 
+your input directories. The Crawler identifies all DICOM files and extracts key 
+metadata like:</p>
 <ul>
-<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
-<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
-<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
-<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
+<li>Patient identifiers  </li>
+<li>Study and series UIDs</li>
+<li>Modality information (CT, MR, RTSTRUCT, etc.)</li>
+<li>Spatial characteristics</li>
+<li>References between series</li>
 </ul>
-<hr />
-<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
-<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h3>
-<p><img alt="interlacer_cli" src="../../../images/interlacer_cli.png" style="background: white; height:125%;" /></p>
-<h3 id="python-code">Python Code<a class="headerlink" href="#python-code" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crawler</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Define path to DICOM directory</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">dicom_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Create crawler and scan the directory</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">crawler</span> <span class="o">=</span> <span class="n">Crawler</span><span class="p">(</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">dicom_dir</span><span class="o">=</span><span class="n">dicom_dir</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">crawler</span><span class="o">.</span><span class="n">crawl</span><span class="p">()</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Create the Interlacer from crawler results</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">interlacer</span> <span class="o">=</span> <span class="n">Interlacer</span><span class="p">(</span><span class="n">crawler</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Visualize the forest structure</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">print_tree</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span>  <span class="c1"># Console visualization</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Query for specific modality combinations</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Find CT series with associated RTSTRUCT objects</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">ct_rtstruct_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;CT,RTSTRUCT&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Get all possible series combinations</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">all_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># or interlacer.query(&quot;all&quot;)</span>
+<p>This information is compiled into an index that serves as a map of your entire 
+dataset.</p>
+<h3 id="interlacer-the-relationship-builder">Interlacer: The Relationship Builder<a class="headerlink" href="#interlacer-the-relationship-builder" title="Permanent link">#</a></h3>
+<p>Next, the <strong>Interlacer</strong> takes this index and constructs a hierarchical forest 
+that represents the relationships between different series. It understands the 
+DICOM standards and knows, for example, that:</p>
+<ul>
+<li>An <code>RTSTRUCT</code> (radiation therapy structure) references a specific CT series</li>
+<li>A <code>PET</code> scan might be registered to a corresponding CT</li>
+<li>A treatment plan (<code>RTPLAN</code>) might hold the information about the referenced
+    <code>RTSTRUCT</code> used in a <code>RTDOSE</code> file</li>
+</ul>
+<p>The Interlacer can visualize these relationships and query them based on 
+modality combinations you're interested in.</p>
+<h3 id="sample-processing-the-conversion-engine">Sample Processing: The Conversion Engine<a class="headerlink" href="#sample-processing-the-conversion-engine" title="Permanent link">#</a></h3>
+<p>When you specify which modalities you want (like <code>"CT,RTSTRUCT"</code>), AutoPipeline:</p>
+<ol>
+<li>Queries the Interlacer for samples matching your criteria</li>
+<li>Loads the DICOM data into memory as MedImage objects</li>
+<li>Applies transformations like resampling or intensity windowing</li>
+<li>Saves the results in standard research formats (<code>NIfTI</code>)</li>
+</ol>
+<p>For segmentation data (<code>RTSTRUCT</code> or <code>SEG</code>), AutoPipeline can match region names 
+(like "parotid" or "GTV") to standardized keys using regular expressions, 
+solving the problem of inconsistent naming across institutions.</p>
+<h2 id="using-autopipeline-a-quick-start">Using AutoPipeline: A Quick Start<a class="headerlink" href="#using-autopipeline-a-quick-start" title="Permanent link">#</a></h2>
+<p>Using AutoPipeline is simple! </p>
+<p>The command line interface provides an intuitive way to process your data:</p>
+<details class="info">
+<summary>Full CLI Interface</summary>
+<p><a class="autorefs autorefs-internal" title="autopipeline" href="../../cli/imgtools/#imgtools-autopipeline">API Reference</a></p>
+<p><img alt="autopipeline --help" src="../../images/autopipeline_cli.png" /></p>
+</details>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Basic Usage</label><label for="__tabbed_1_2">With Transformations</label><label for="__tabbed_1_3">Force Update the Index</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Basic usage with CT and RT structure sets</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>imgtools<span class="w"> </span>autopipeline<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span>/path/to/messy/dicoms/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>/path/to/output/
 </code></pre></div>
-<h2 id="example-output">Example Output<a class="headerlink" href="#example-output" title="Permanent link">#</a></h2>
-<p><strong>The raw graph of all series in the DICOM directory:</strong></p>
-<p><img alt="Unstructured Data" src="../../../images/unstructured.png" style="background: white; height:125%;" /></p>
-<p><strong>The interlaced connections between series:</strong></p>
-<p><img alt="Structured Data" src="../../../images/structured.png" style="background: white; height:125%;" /></p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Adding transformations </span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>imgtools<span class="w"> </span>autopipeline<span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span>--spacing<span class="w"> </span><span class="m">1</span>.0,1.0,1.0<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span>--window-width<span class="w"> </span><span class="m">400</span><span class="w"> </span>--window-level<span class="w"> </span><span class="m">40</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span>/path/to/dicoms/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span>/path/to/output/
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Force update the index if you have new files</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>imgtools<span class="w"> </span>autopipeline<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span>--update-crawl<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span>/path/to/dicoms/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span>/path/to/output/
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="standardizing-region-names-with-roi-matching">Standardizing Region Names with ROI Matching<a class="headerlink" href="#standardizing-region-names-with-roi-matching" title="Permanent link">#</a></h3>
+<p>A common challenge in medical imaging is inconsistent naming of regions of 
+interest (ROIs). AutoPipeline solves this with powerful pattern matching.</p>
+<p>Med-ImageTools implements the <code>ROIMatcher</code> class, which allows you to define
+pattern matching rules for your ROIs.
+AutoPipeline will match the ROI names from your RTSTRUCT or SEG files against 
+these patterns and standardize them in the output files.</p>
+<p>We flexibly support describing these in the CLI and/or in a YAML file.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">With CLI</label><label for="__tabbed_2_2">With YAML File</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools<span class="w"> </span>autopipeline<span class="se">\</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span>-rmap<span class="w"> </span><span class="s2">&quot;GTV:GTV,gtv,Gross.*Volume&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span>-rmap<span class="w"> </span><span class="s2">&quot;Parotid_L:LeftParotid,PAROTID_L,L_Parotid&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span>-rmap<span class="w"> </span><span class="s2">&quot;Parotid_R:RightParotid,PAROTID_R,R_Parotid&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span>-rmap<span class="w"> </span><span class="s2">&quot;Cord:SpinalCord,Cord,Spinal_Cord&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span>-rmap<span class="w"> </span><span class="s2">&quot;Mandible:mandible.*&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span>/path/to/dicoms/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span>/path/to/output/
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>Create a YAML file like this:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># roi_patterns.yaml</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">GTV</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;GTV&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;gtv&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;Gross.*Volume&quot;</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nt">Parotid_L</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;LeftParotid&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;PAROTID_L&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;L_Parotid&quot;</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nt">Parotid_R</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;RightParotid&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;PAROTID_R&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;R_Parotid&quot;</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nt">Cord</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;SpinalCord&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;Cord&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;Spinal_Cord&quot;</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nt">Mandible</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;mandible.*&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p>Then run AutoPipeline with the <code>--roi-match-yaml</code> option:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>imgtools<span class="w"> </span>autopipeline<span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>--roi-match-yaml<span class="w"> </span>roi_patterns.yaml
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="advanced-features">Advanced Features<a class="headerlink" href="#advanced-features" title="Permanent link">#</a></h2>
+<h3 id="parallel-processing">Parallel Processing<a class="headerlink" href="#parallel-processing" title="Permanent link">#</a></h3>
+<p>Processing large datasets? AutoPipeline can parallelize operations:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>imgtools<span class="w"> </span>autopipeline<span class="w"> </span>/path/to/dicoms/<span class="w"> </span>/path/to/output/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>--jobs<span class="w"> </span><span class="m">8</span><span class="w">  </span><span class="c1"># Use 8 parallel processes</span>
+</code></pre></div>
+<h3 id="custom-output-formatting">Custom Output Formatting<a class="headerlink" href="#custom-output-formatting" title="Permanent link">#</a></h3>
+<p>Control your output file structure with formatting patterns:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>imgtools<span class="w"> </span>autopipeline<span class="w"> </span>/path/to/dicoms/<span class="w"> </span>/path/to/output/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span>--filename-format<span class="w"> </span><span class="s2">&quot;{PatientID}/{Modality}/{ImageID}.nii.gz&quot;</span>
+</code></pre></div>
+<h3 id="handling-existing-files">Handling Existing Files<a class="headerlink" href="#handling-existing-files" title="Permanent link">#</a></h3>
+<p>Choose how to handle existing files in your output directory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>imgtools<span class="w"> </span>autopipeline<span class="w"> </span>/path/to/dicoms/<span class="w"> </span>/path/to/output/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span>--existing-file-mode<span class="w"> </span>skip<span class="w">  </span><span class="c1"># Options: skip, overwrite, fail</span>
+</code></pre></div>
+<h2 id="additional-resources">Additional Resources<a class="headerlink" href="#additional-resources" title="Permanent link">#</a></h2>
+<p>For more details on the components that AutoPipeline uses:</p>
+<ul>
+<li><a href="../../reference/crawler/">Crawler Documentation</a></li>
+<li><a href="../../reference/interlacer/">Interlacer Documentation</a></li>
+<li>[ROI Matching and Masks] TODO::</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">#</a></h2>
+<ol>
+<li>
+<p>Kim S, Kazmierski M, et al. (2025). "Med-ImageTools: An open-source Python 
+   package for robust data processing pipelines and curating medical imaging 
+   data." F1000Research, 12:118.</p>
+</li>
+<li>
+<p>Clark K, Vendt B, Smith K, et al. (2013). "The Cancer Imaging Archive (TCIA): 
+   Maintaining and Operating a Public Information Repository." Journal of Digital 
+   Imaging, 26(6):1045-1057.</p>
+</li>
+</ol>
 
 
 
@@ -1632,14 +1838,12 @@ This creates a hierarchical structure showing the relationships between differen
   <span class="md-source-file__fact">
     <span class="md-icon" title="Contributors">
       
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9 3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3 3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3 3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13zM0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9-.59.68-.95 1.62-.95 2.65V20zm24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65 2.56.34 4.45 1.51 4.45 2.9z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
       
     </span>
     <nav>
       
-        <a href="mailto:jermiahjoseph98@gmail.com">Jermiah Joseph</a>, 
-        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>, 
-        <a href="mailto:72413722+joshuasiraj@users.noreply.github.com">Joshua Siraj</a>
+        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>
     </nav>
   </span>
 
@@ -1674,7 +1878,7 @@ This creates a hierarchical structure showing the relationships between differen
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../crawler/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Crawler">
+          <a href="../.." class="md-footer__link md-footer__link--prev" aria-label="Previous: Home">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1684,20 +1888,20 @@ This creates a hierarchical structure showing the relationships between differen
                 Previous
               </span>
               <div class="md-ellipsis">
-                Crawler
+                Home
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../Writers/BaseWriter/" class="md-footer__link md-footer__link--next" aria-label="Next: Abstract Base Writer">
+          <a href="../core/crawler/" class="md-footer__link md-footer__link--next" aria-label="Next: Crawler">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Abstract Base Writer
+                Crawler
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1748,10 +1952,10 @@ This creates a hierarchical structure showing the relationships between differen
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
       
     
   </body>

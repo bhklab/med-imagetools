@@ -57,7 +57,7 @@
          <lastmod>2025-05-01</lastmod>
     </url>
     <url>
-         <loc>https://bhklab.github.io/med-imagetools/dev/usage/</loc>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/autopipeline/</loc>
          <lastmod>2025-05-01</lastmod>
     </url>
     <url>
@@ -69,11 +69,11 @@
          <lastmod>2025-05-01</lastmod>
     </url>
     <url>
-         <loc>https://bhklab.github.io/med-imagetools/dev/usage/crawl_interlacer/crawler/</loc>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/core/crawler/</loc>
          <lastmod>2025-05-01</lastmod>
     </url>
     <url>
-         <loc>https://bhklab.github.io/med-imagetools/dev/usage/crawl_interlacer/interlacer/</loc>
+         <loc>https://bhklab.github.io/med-imagetools/dev/usage/core/interlacer/</loc>
          <lastmod>2025-05-01</lastmod>
     </url>
 </urlset>
