@@ -1,6 +1,31 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.32 (2025-05-01)
+
+### Chores
+
+- Update cli help image
+  ([`fada490`](https://github.com/bhklab/med-imagetools/commit/fada49011bc061ced2d8403790b8c31fb8ff8408))
+
+### Documentation
+
+- Add AutoPipeline documentation and core module details
+  ([#348](https://github.com/bhklab/med-imagetools/pull/348),
+  [`1a489a6`](https://github.com/bhklab/med-imagetools/commit/1a489a6ded16ed2a05509998de8b82ec1089cb0d))
+
+Comprehensive documentation for AutoPipeline has been introduced, detailing its functionality in
+  medical image processing. This includes usage examples, command line interface instructions, and
+  separate documentation for the Crawler and Interlacer modules. A navigation structure for core
+  documentation pages has also been established.
+
+### Features
+
+- Add github actions to update cli screenshot png
+  ([#347](https://github.com/bhklab/med-imagetools/pull/347),
+  [`88fe4c0`](https://github.com/bhklab/med-imagetools/commit/88fe4c00a3675e707f742101e1b2bc1cf400786d))
+
+
 ## v2.0.0-rc.31 (2025-05-01)
 
 ### Chores
