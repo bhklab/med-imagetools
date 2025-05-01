@@ -152,4 +152,4 @@ def generate_dataset_json(output_folder: pathlib.Path | str,
 
     output_path = pathlib.Path(output_folder) / 'dataset.json'
     with output_path.open("w") as f:
-        json.dump(dataset_json, f, indent=4)
+        json.dump(dataset_json, f, indent=4, sort_keys=False)
