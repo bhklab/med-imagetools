@@ -2,10 +2,9 @@ name: Termshot PNG Test
 
 on:
     workflow_dispatch:
-    pull_request:
+    push:
         branches:
             - development
-            - 'jjjermiah/*'
 
 jobs:
   generate-png:
@@ -39,11 +38,13 @@ jobs:
 
       - name: Generate PNG using termshot
         run: |
-          mkdir -p output
-          termshot --show-cmd --filename output/screenshot.png -- imgtools --help
+          mkdir -p assets
+          termshot --show-cmd --filename assets/imgtools_cli.png -- imgtools --help
 
-      - name: Upload PNG artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: termshot-png-${{ runner.os }}
-          path: output/screenshot.png
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add assets/imgtools_cli.png
+          git commit -m "chore: update cli help image"
+          git push
