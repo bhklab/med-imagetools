@@ -635,20 +635,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage Example
+      Query Rules and Dependencies
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Query Rules and Dependencies
+      Usage Example
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Usage Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Code
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1383,20 +1407,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage Example
+      Query Rules and Dependencies
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Query Rules and Dependencies
+      Usage Example
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Usage Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Code
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1503,7 +1551,10 @@ Please <a href="https://github.com/bhklab/med-imagetools/issues">open an issue</
 for which modalities you would like to see supported.</p>
 </details>
 <h3 id="grouping-series">Grouping Series<a class="headerlink" href="#grouping-series" title="Permanent link">#</a></h3>
-<p>The Interlacer currently groups series using <strong>Referenced Series UID</strong>, which links series based on their metadata references (i.e the <code>ReferencedSeriesInstanceUID</code> tag in <code>RTSTRUCT</code>s). This creates a hierarchical structure showing the relationships between different series.</p>
+<p>The Interlacer currently groups series using <strong>Referenced Series UID</strong>,
+which links series based on their metadata references 
+(i.e the <code>ReferencedSeriesInstanceUID</code> tag in <code>RTSTRUCT</code>s).
+This creates a hierarchical structure showing the relationships between different series.</p>
 <details class="info">
 <summary>Future Support for Grouping by Study Instance UID and Patient ID</summary>
 <p>In a future release, the Interlacer will support additional grouping methods:</p>
@@ -1513,8 +1564,24 @@ for which modalities you would like to see supported.</p>
 </ul>
 <p>This enhancement is being tracked in <a href="https://github.com/bhklab/med-imagetools/issues/318">GitHub issue #318</a>.</p>
 </details>
+<h2 id="query-rules-and-dependencies">Query Rules and Dependencies<a class="headerlink" href="#query-rules-and-dependencies" title="Permanent link">#</a></h2>
+<p>The Interlacer enforces the following modality dependency rules:</p>
+<ol>
+<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
+<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
+</ol>
+<p>Examples of valid and invalid queries:</p>
+<ul>
+<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
+<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
+<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
+<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
+</ul>
 <hr />
 <h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
+<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h3>
+<p><img alt="interlacer_cli" src="../../../images/interlacer_cli.png" style="background: white; height:125%;" /></p>
+<h3 id="python-code">Python Code<a class="headerlink" href="#python-code" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crawler</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
@@ -1543,19 +1610,6 @@ for which modalities you would like to see supported.</p>
 <a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Get all possible series combinations</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">all_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># or interlacer.query(&quot;all&quot;)</span>
 </code></pre></div>
-<h2 id="query-rules-and-dependencies">Query Rules and Dependencies<a class="headerlink" href="#query-rules-and-dependencies" title="Permanent link">#</a></h2>
-<p>The Interlacer enforces the following modality dependency rules:</p>
-<ol>
-<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
-<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
-</ol>
-<p>Examples of valid and invalid queries:</p>
-<ul>
-<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
-<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
-<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
-<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
-</ul>
 <h2 id="example-output">Example Output<a class="headerlink" href="#example-output" title="Permanent link">#</a></h2>
 <p><strong>The raw graph of all series in the DICOM directory:</strong></p>
 <p><img alt="Unstructured Data" src="../../../images/unstructured.png" style="background: white; height:125%;" /></p>
@@ -1584,6 +1638,7 @@ for which modalities you would like to see supported.</p>
     <nav>
       
         <a href="mailto:jermiahjoseph98@gmail.com">Jermiah Joseph</a>, 
+        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>, 
         <a href="mailto:72413722+joshuasiraj@users.noreply.github.com">Joshua Siraj</a>
     </nav>
   </span>
