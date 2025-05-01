@@ -1,6 +1,41 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.31 (2025-05-01)
+
+### Chores
+
+- Remove Test-PyPI job from CI/CD workflow
+  ([`f664644`](https://github.com/bhklab/med-imagetools/commit/f664644395479ba5fc79af8c8eb40c09b76e2e50))
+
+- Update classifiers in pyproject.toml for better project categorization
+  ([`2780ebc`](https://github.com/bhklab/med-imagetools/commit/2780ebc2db36fa890712d9b97d00468bfdf95aec))
+
+- Update lockfile
+  ([`6e97c7c`](https://github.com/bhklab/med-imagetools/commit/6e97c7c1bb9c6168ee6cf2d970d300edf4db6160))
+
+- Update README.md with docker info
+  ([`d83e5b9`](https://github.com/bhklab/med-imagetools/commit/d83e5b99eff3dc34fb3cdaf7275aad5a7ceef65e))
+
+### Documentation
+
+- Add MkDocs hooks for asset management during build process
+  ([`4e64438`](https://github.com/bhklab/med-imagetools/commit/4e64438c50f062739c36fc3d883a84db2bc75027))
+
+- Fix typos/formatting/grammar in docs
+  ([`5eab61e`](https://github.com/bhklab/med-imagetools/commit/5eab61e626eca827134f3592e7eab089ec500512))
+
+### Features
+
+- Add interlacer cli command for visualizing DICOM series relationships and update documentation
+  ([`84cc9e0`](https://github.com/bhklab/med-imagetools/commit/84cc9e0ef0a9376b4b09731523a2706665b05c1e))
+
+### Refactoring
+
+- Remove doc hooks, dont reference readme in docs landing page
+  ([`e8d82a6`](https://github.com/bhklab/med-imagetools/commit/e8d82a6df3ca1b1c02b1496baf12c4db2b644901))
+
+
 ## v2.0.0-rc.30 (2025-04-30)
 
 ### Chores
