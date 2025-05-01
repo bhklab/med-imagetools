@@ -1,0 +1,45 @@
+name: Termshot PNG Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-png:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            url: https://github.com/homeport/termshot/releases/download/v0.5.0/termshot_0.5.0_linux_amd64.tar.gz
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download and install termshot
+        run: |
+          curl -L "${{ matrix.url }}" -o termshot.tar.gz
+          tar -xzf termshot.tar.gz
+          chmod +x termshot
+          sudo mv termshot /usr/local/bin/termshot
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: set the python version
+        uses: actions/setup-python@v5
+        with:
+            python-version-file: "pyproject.toml"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras
+
+      - name: Generate PNG using termshot
+        run: |
+          mkdir -p output
+          termshot --out output/screenshot.png -- bash -c "echo Hello from ${{ runner.os }}"
+
+      - name: Upload PNG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termshot-png-${{ runner.os }}
+          path: output/screenshot.png
