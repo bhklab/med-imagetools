@@ -598,7 +598,8 @@ class ModalityHighlighter(RegexHighlighter):
 
 
 def print_interlacer_tree(
-    root_nodes: list[SeriesNode], input_directory: Path | None
+    root_nodes: list[SeriesNode],
+    input_directory: Path | None,
 ) -> None:
     from collections import defaultdict
 

@@ -15,6 +15,7 @@ markdown_extensions:
       alternate_style: true
   - mkdocs-click
   - admonition
+  - pymdownx.details
   - toc:
       permalink: "#"
 

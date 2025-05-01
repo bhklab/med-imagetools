@@ -51,11 +51,29 @@ Key features:
 - **Rich text console display**: Pretty-prints the hierarchy with color-coding
 - **Dependency validation**: Enforces rules like "RTSTRUCT requires CT, MR, or PT"
 
+??? warning "Supported Modalities"
+
+    Though the Crawler will indiscriminately crawl all DICOM files,
+    the Interlacer currently only supports the following modalities for interlacing:
+
+        - CT
+        - MR
+        - PT
+        - RTSTRUCT
+        - RTDOSE
+        - SEG
+        - RTPLAN (used in interlacing but not in queries)
+
+    These were the primary modalities targeted during the development of this module,
+    but can easily be extended to support others in the future.
+    Please [open an issue](https://github.com/bhklab/med-imagetools/issues)
+    for which modalities you would like to see supported.
+
 ### Grouping Series
 
 The Interlacer currently groups series using **Referenced Series UID**, which links series based on their metadata references (i.e the `ReferencedSeriesInstanceUID` tag in `RTSTRUCT`s). This creates a hierarchical structure showing the relationships between different series.
 
-!!! note "Future Development"
+??? info "Future Support for Grouping by Study Instance UID and Patient ID"
     
     In a future release, the Interlacer will support additional grouping methods:
     
