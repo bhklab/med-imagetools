@@ -15,8 +15,8 @@ from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchStrategy,
     Valid_Inputs as ROIMatcherInputs,
 )
-from imgtools.io.nnunet_output import nnUNetOutput
 from imgtools.io.sample_input import SampleInput
+from imgtools.io.nnunet_output import nnUNetOutput
 from imgtools.io.sample_output import (
     DEFAULT_FILENAME_FORMAT,
     ExistingFileMode,
@@ -133,7 +133,7 @@ def process_one_sample(
         Sequence[SeriesNode],
         SampleInput,
         Transformer,
-        SampleOutput,
+        SampleOutput | nnUNetOutput,
     ],
 ) -> ProcessSampleResult:
     """
@@ -245,8 +245,8 @@ def process_one_sample(
 class Autopipeline:
     """Pipeline for processing medical images."""
 
-    input: SampleInput 
-    output: SampleOutput | nnUNetOutput
+    input: SampleInput
+    output: SampleOutput
     transformer: Transformer[MedImage | VectorMask]
 
     def __init__(
@@ -258,7 +258,6 @@ class Autopipeline:
         update_crawl: bool = False,
         n_jobs: int | None = None,
         modalities: list[str] | None = None,
-        nnunet: bool = False,
         roi_match_map: ROIMatcherInputs = None,
         roi_ignore_case: bool = True,
         roi_handling_strategy: str
@@ -290,8 +289,6 @@ class Autopipeline:
             Number of parallel jobs, by default None (uses CPU count - 2)
         modalities : list[str] | None, optional
             List of modalities to include, by default None (all)
-        nnunet : bool, optional
-            Whether to save in nnUNet format, by default False
         roi_match_map : ROIMatcherInputs, optional
             ROI matching patterns, by default None
         roi_ignore_case : bool, optional
@@ -310,9 +307,6 @@ class Autopipeline:
         level : float | None, optional
             Window level for intensity normalization, by default None
         """
-        if nnunet:
-            roi_handling_strategy = ROIMatchStrategy.MERGE # IS THIS FINE?????
-
         self.input = SampleInput.build(
             directory=Path(input_directory),
             update_crawl=update_crawl,
@@ -324,22 +318,12 @@ class Autopipeline:
             roi_allow_multi_key_matches=roi_allow_multi_key_matches,
             roi_on_missing_regex=roi_on_missing_regex,
         )
-
-        if nnunet:
-            self.output = nnUNetOutput(
-                directory=Path(output_directory),
-                existing_file_mode=existing_file_mode,
-                dataset_name=Path(input_directory).name,
-                roi_keys=list(self.input.roi_matcher.match_map.keys()),
-                extra_context={},
-            )
-        else:
-            self.output = SampleOutput(
-                directory=Path(output_directory),
-                filename_format=output_filename_format,
-                existing_file_mode=existing_file_mode,
-                extra_context={},
-            )
+        self.output = SampleOutput(
+            directory=Path(output_directory),
+            filename_format=output_filename_format,
+            existing_file_mode=existing_file_mode,
+            extra_context={},
+        )
 
         transforms: list[BaseTransform] = [
             # we could choose to only add resampling if any spacing component
@@ -393,7 +377,7 @@ class Autopipeline:
                 self.transformer,
                 self.output,
             )
-            for idx, sample in enumerate(samples, start=1)
+            for idx, sample in enumerate(samples)
         ]
 
         # Lists to track results
@@ -434,9 +418,6 @@ class Autopipeline:
             f"Processing complete. {success_count} successful, {failure_count} failed "
             f"out of {total_count} total samples ({success_count / total_count * 100:.1f}% success rate)."
         )
-
-        if isinstance(self.output, nnUNetOutput):
-            self.output.finalize_dataset()
 
         index_file = self.output.writer.index_file
         # TODO:: discuss how we want to name these files
@@ -501,32 +482,49 @@ class Autopipeline:
 
 
 if __name__ == "__main__":
+    import shutil
 
     from rich import print  # noqa
 
     # Interlacer parameters
     dataset_name = "RADCURE"
 
-    # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
-    output_path = Path(f"temp_outputs/{dataset_name}")
-    output_path.mkdir(exist_ok=True, parents=True)
+    shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
     pipeline = Autopipeline(
         input_directory=f"data/{dataset_name}",
-        output_directory=output_path,
+        output_directory=f"temp_outputs/{dataset_name}",
         existing_file_mode=ExistingFileMode.OVERWRITE,
         n_jobs=10,
-        modalities=["CT,RTSTRUCT"],
-        nnunet=True,
+        modalities=["all"],
         roi_match_map={
+            "GTV": ["GTVp"],
+            "NODES": ["GTVn_.*"],
+            "LPLEXUS": ["BrachialPlex_L"],
+            "RPLEXUS": ["BrachialPlex_R"],
             "BRAINSTEM": ["Brainstem"],
+            "LACOUSTIC": ["Cochlea_L"],
+            "RACOUSTIC": ["Cochlea_R"],
+            "ESOPHAGUS": ["Esophagus"],
+            "LEYE": ["Eye_L"],
+            "REYE": ["Eye_R"],
             "LARYNX": ["Larynx"],
+            "LLENS": ["Lens_L"],
+            "RLENS": ["Lens_R"],
+            "LIPS": ["Lips"],
+            "MANDIBLE": ["Mandible_Bone"],
+            "LOPTIC": ["Nrv_Optic_L"],
+            "ROPTIC": ["Nrv_Optic_R"],
+            "CHIASM": ["OpticChiasm"],
+            "LPAROTID": ["Parotid_L"],
+            "RPAROTID": ["Parotid_R"],
+            "CORD": ["SpinalCord"],
         },
-        # roi_allow_multi_key_matches=False,
-        # roi_ignore_case=True,
-        # roi_handling_strategy=ROIMatchStrategy.SEPARATE,
-        # roi_on_missing_regex=ROIMatchFailurePolicy.IGNORE,
+        roi_allow_multi_key_matches=False,
+        roi_ignore_case=True,
+        roi_handling_strategy=ROIMatchStrategy.SEPARATE,
+        roi_on_missing_regex=ROIMatchFailurePolicy.IGNORE,
     )
 
     print(pipeline)
-    results = pipeline.run()
-    print(f"Results: {results}")
+    # results = pipeline.run(first_n=1)
+    # print(f"Results: {results}")
