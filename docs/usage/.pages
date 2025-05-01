@@ -1,4 +1,4 @@
 nav:
-  - Home: index.md
-  - Crawler and Interlacer: crawl_interlacer
+  - autopipeline.md
+  - Core API: core
   - ...
