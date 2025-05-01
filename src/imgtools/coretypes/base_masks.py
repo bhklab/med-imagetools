@@ -224,7 +224,7 @@ class VectorMask(MedImage):
             else:
                 raise ValueError(
                     "Cannot convert to label image: overlap detected. "
-                    "Use `to_sparsemask()` instead if you want lossy argmax conversion."
+                    "Use `to_sparse_mask()` instead if you want lossy argmax conversion."
                 )
 
         arr = sitk.GetArrayFromImage(self)
@@ -244,7 +244,7 @@ class VectorMask(MedImage):
             metadata=self.metadata.copy(),
         )
 
-    def to_sparsemask(self) -> Mask:
+    def to_sparse_mask(self) -> Mask:
         """Convert the vector mask to a single-channel binary mask via argmax operation.
 
         Creates a sparse representation where each voxel is assigned to exactly one class,
@@ -293,7 +293,42 @@ class VectorMask(MedImage):
         is preserved in the metadata.
         """
 
-        return self._to_label_array(allow_overlap=True)
+        return self._to_label_array(allow_overlap=False)
+    
+    def to_region_mask(
+        self,
+    ) -> Mask:
+        """
+        Encodes a VectorUInt8 image (with binary 0/1 components) into a single-channel
+        image where each voxel value is a unique integer representing the bitmask
+        of active components. Names are used in the lookup table.
+
+        Parameters
+        ----------
+        vector_mask : sitk.Image
+            A VectorUInt8 image where each component is 0 or 1.
+
+        Returns
+        -------
+        Mask
+        """
+        n_components = self.GetNumberOfComponentsPerPixel()
+        assert self.GetPixelID() == sitk.sitkVectorUInt8
+        assert (
+            len(self.roi_mapping) == n_components + 1
+        )  # +1 for background
+
+        label_image = sitk.Image(self.GetSize(), sitk.sitkUInt32)
+        label_image.CopyInformation(self)
+
+        for i in range(n_components):
+            component = sitk.VectorIndexSelectionCast(
+                self, i, outputPixelType=sitk.sitkUInt32
+            )
+            shifted = sitk.ShiftScale(component, shift=0, scale=2**i)
+            label_image += shifted
+            
+        return Mask(label_image, metadata=self.metadata.copy())
 
     def extract_mask(self, key: str | int) -> Mask:
         """Extract a single binary mask by index or ROI key.
