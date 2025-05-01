@@ -4,10 +4,6 @@ repo_url: https://github.com/bhklab/med-imagetools
 watch: [docs, src, mkdocs.yml]
 dev_addr: "127.0.0.1:8001"
 
-# Hook to copy assets from project root to docs directory during build
-hooks:
-  - docs/hooks.py
-
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -77,7 +73,6 @@ plugins:
   - awesome-pages                     # simplifies configuring page titles and their order
   - search                            # necessary for search functionality to work
   - git-authors                       # adds authors to pages using git history
-  - include-markdown                  # allows for including Markdown files into another Markdown file
   - autorefs                          # automatically generates references to classes, functions, and methods 
   # - mkdocs-jupyter:
   #     allow_errors: false
