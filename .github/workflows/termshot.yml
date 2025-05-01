@@ -40,7 +40,7 @@ jobs:
       - name: Generate PNG using termshot
         run: |
           mkdir -p output
-          termshot --show-cmd --filename output/screenshot.png -- uvx --from 'med-imagetools[all]' --prerelease=allow imgtools --help
+          termshot --show-cmd --filename output/screenshot.png -- imgtools --help
 
       - name: Upload PNG artifact
         uses: actions/upload-artifact@v4
