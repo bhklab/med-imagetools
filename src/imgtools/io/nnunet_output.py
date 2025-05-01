@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Sequence
 
@@ -26,6 +27,25 @@ from imgtools.utils.nnunet import (
 )
 
 __all__ = ["nnUNetOutput"]
+
+
+class MaskSavingStrategy(str, Enum):
+    """
+    Enum for mask saving strategies.
+
+    Attributes
+    ----------
+    LABEL_IMAGE : str
+        No overlaps allowed.
+    SPARSE_MASK : str
+        Allows overlaps, but is lossy due to argmax.
+    REGION_MASK : str
+        Work around that creates a new region for each overlap.
+    """
+    
+    LABEL_IMAGE = "label_image"
+    SPARSE_MASK = "sparse_mask"
+    REGION_MASK = "region_mask"
 
 
 class nnUNetOutput(BaseModel): # noqa: N801
@@ -71,6 +91,12 @@ class nnUNetOutput(BaseModel): # noqa: N801
         description="List of ROI's to process.",
         title="ROI Keys",
         examples=["Lung_L", "Lung_R"],
+    )
+    mask_saving_strategy: MaskSavingStrategy = Field(
+        MaskSavingStrategy.LABEL_IMAGE,
+        description="Strategy for saving masks: 'label_image' for no overlap, 'sparse_mask' for lossy, or 'region_mask'.",
+        title="Mask Saving Strategy",
+        examples=["label_image", "sparse_mask", "region_mask"],
     )
     existing_file_mode: ExistingFileMode = Field(
         ExistingFileMode.FAIL,
@@ -162,12 +188,33 @@ class nnUNetOutput(BaseModel): # noqa: N801
             if file.is_file()
         )
 
+        # Construct labels
+        labels = {"background": 0}
+        if self.mask_saving_strategy == "region_mask":
+
+            n_components = len(self.roi_keys)
+            max_val = 2 ** n_components
+
+            for component_index in range(n_components):
+                indices = [
+                    value for value in range(1, max_val) 
+                    if (value >> component_index) & 1
+                ]
+                labels[self.roi_keys[component_index]] = indices
+            regions_class_order = [idx + 1 for idx in range(n_components)]
+        else:
+            labels = {
+                **{label: i + 1 for i, label in enumerate(self.roi_keys)},
+            }
+            regions_class_order = None
+
         generate_dataset_json(
             self.directory,
             channel_names=channel_names,
-            labels={"background": 0, **{label: i + 1 for i, label in enumerate(self.roi_keys)}},
+            labels=labels,
             num_training_cases=num_training_cases,
             file_ending='.nii.gz',
+            regions_class_order=regions_class_order
         )           
 
     def __call__(
@@ -202,9 +249,18 @@ class nnUNetOutput(BaseModel): # noqa: N801
         saved_files = []
         for image in data:
             if isinstance(image, VectorMask):
-                label_image = image.to_sparsemask()
+                match self.mask_saving_strategy:
+                    case MaskSavingStrategy.LABEL_IMAGE:
+                        mask = image.to_label_image()
+                    case MaskSavingStrategy.SPARSE_MASK:
+                        mask = image.to_sparse_mask()
+                    case MaskSavingStrategy.REGION_MASK:
+                        mask = image.to_region_mask()
+                    case _:
+                        raise ValueError(f"Unknown mask saving strategy: {self.mask_saving_strategy}")
+                
                 p = self.writer.save(
-                    label_image,
+                    mask,
                     DirType="labels",
                     SplitType="Tr",
                     SampleID=SampleNumber,
@@ -241,12 +297,13 @@ if __name__ == "__main__":
     from imgtools.io.sample_input import SampleInput
 
     input_directory = "./data/RADCURE"
-    output_directory = Path("./temp_output")
+    output_directory = Path("./temp_outputs")
     output_directory.mkdir(exist_ok=True)
     modalities = ["CT", "RTSTRUCT"]
-    roi_match_map = {
-        "Larynx": "Larynx"
-    }
+    roi_match_map={
+            "BRAIN": ["Brain"],
+            "BRAINSTEM": ["Brainstem"],
+        }
 
     input = SampleInput.build(
             directory=Path(input_directory),
@@ -259,6 +316,7 @@ if __name__ == "__main__":
         dataset_name="RADCURE",
         extra_context={},
         roi_keys=list(roi_match_map.keys()),
+        mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
     )
 
     samples = input.query()
@@ -271,6 +329,9 @@ if __name__ == "__main__":
             output(loaded_sample, SampleNumber=f"{idx:03}")
         except Exception as e:
             print(e)
+        
+        if idx == 5:
+            break
 
     output.finalize_dataset()
 
