@@ -1,7 +1,11 @@
 name: Termshot PNG Test
 
 on:
-  workflow_dispatch:
+    workflow_dispatch:
+    pull_request:
+        branches:
+            - main
+            - 'jjjermiah/*'
 
 jobs:
   generate-png:
