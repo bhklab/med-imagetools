@@ -29,18 +29,13 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      - name: set the python version
-        uses: actions/setup-python@v5
-        with:
-            python-version-file: "pyproject.toml"
-
       - name: Install the project
-        run: uv sync --locked --all-extras
+        run: uvx --from 'med-imagetools[all]' --prerelease=allow imgtools --help
 
       - name: Generate PNG using termshot
         run: |
           mkdir -p output
-          termshot --out output/screenshot.png -- bash -c "echo Hello from ${{ runner.os }}"
+          termshot --show-cmd --filename output/screenshot.png -- uvx --from 'med-imagetools[all]' --prerelease=allow imgtools --help
 
       - name: Upload PNG artifact
         uses: actions/upload-artifact@v4
