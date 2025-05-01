@@ -728,6 +728,19 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    imgtools CLI
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -739,6 +752,85 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#imgtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      imgtools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="imgtools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-autopipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      autopipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-dicomfind" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomfind
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-dicomsort" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomsort
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      index
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-interlacer" class="md-nav__link">
+    <span class="md-ellipsis">
+      interlacer
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1207,6 +1299,74 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#imgtools" class="md-nav__link">
+    <span class="md-ellipsis">
+      imgtools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="imgtools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-autopipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      autopipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-dicomfind" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomfind
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-dicomsort" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomsort
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-index" class="md-nav__link">
+    <span class="md-ellipsis">
+      index
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-interlacer" class="md-nav__link">
+    <span class="md-ellipsis">
+      interlacer
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1238,7 +1398,7 @@
 
 
 <h1 id="imgtools-cli"><code>imgtools</code> CLI<a class="headerlink" href="#imgtools-cli" title="Permanent link">#</a></h1>
-<h1 id="imgtools">imgtools<a class="headerlink" href="#imgtools" title="Permanent link">#</a></h1>
+<h2 id="imgtools">imgtools<a class="headerlink" href="#imgtools" title="Permanent link">#</a></h2>
 <p>A collection of tools for working with medical imaging data.</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>imgtools [OPTIONS] COMMAND [ARGS]...
@@ -1282,29 +1442,34 @@
 </table>
 <p><strong>Subcommands</strong></p>
 <ul>
-<li><em><a href="#imgtools-autopipeline">autopipeline</a></em>: </li>
+<li><em><a href="#imgtools-autopipeline">autopipeline</a></em>: Core utility to process messy DICOM data into organized NIfTI files.</li>
 <li><em><a href="#imgtools-dicomfind">dicomfind</a></em>: A tool to find DICOM files.</li>
 <li><em><a href="#imgtools-dicomsort">dicomsort</a></em>: Sorts DICOM files into directories based on their tags.</li>
 <li><em><a href="#imgtools-index">index</a></em>: Crawl DICOM directory and create a database index.</li>
+<li><em><a href="#imgtools-interlacer">interlacer</a></em>: Visualize DICOM series relationships after indexing.</li>
 </ul>
-<h2 id="imgtools-autopipeline">imgtools autopipeline<a class="headerlink" href="#imgtools-autopipeline" title="Permanent link">#</a></h2>
-<p>Run the Autopipeline for processing medical images.</p>
+<h3 id="imgtools-autopipeline">imgtools autopipeline<a class="headerlink" href="#imgtools-autopipeline" title="Permanent link">#</a></h3>
+<p>Core utility to process messy DICOM data into organized NIfTI files.</p>
 <p>This command allows you to process medical images in a directory structure,
 apply transformations, and save the results to a specified output directory.</p>
 <p>INPUT_DIRECTORY: Directory containing the input images.
 OUTPUT_DIRECTORY: Directory to save the processed images.</p>
 <p>The default filename format is:
-{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz
-where:
-    - SampleNumber: The identifier for the sample after querying.
-    - PatientID: The ID of the patient.
-    - Modality: The imaging modality (e.g., CT, MRI).
-    - SeriesInstanceUID: The unique identifier for the series.
-    - ImageID: The cutomized identifier for the image.
-        - By default, the modality of the image
-        - If RTSTRUCT or SEG, uses custom format based on the roi_strategy
-            roi_match_map and roi names.
-        TODO:: explain this in the docs?</p>
+<code>{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz</code>
+where:</p>
+<ul>
+<li>SampleNumber: The identifier for the sample after querying.</li>
+<li>PatientID: The ID of the patient.</li>
+<li>Modality: The imaging modality (e.g., CT, MRI).</li>
+<li>SeriesInstanceUID: The unique identifier for the series.</li>
+<li>ImageID: The cutomized identifier for the image.<ul>
+<li>By default, the modality of the image</li>
+<li>If RTSTRUCT or SEG, uses custom format based on the roi_strategy
+    roi_match_map and roi names.
+TODO:: explain this in the docs?</li>
+</ul>
+</li>
+</ul>
 <p>It is not recommended to change the default filename format to prevent
 overwriting files. The default format is designed to ensure that the output
 filenames are unique and informative. If you need to customize the output
@@ -1415,7 +1580,7 @@ make sure to use a format that maintains uniqueness and clarity.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="imgtools-dicomfind">imgtools dicomfind<a class="headerlink" href="#imgtools-dicomfind" title="Permanent link">#</a></h2>
+<h3 id="imgtools-dicomfind">imgtools dicomfind<a class="headerlink" href="#imgtools-dicomfind" title="Permanent link">#</a></h3>
 <p>A tool to find DICOM files.</p>
 <p>PATH is the directory to search for DICOM files.</p>
 <p>SEARCH_INPUT is an optional list of substring(s) to search for in the DICOM files.
@@ -1473,7 +1638,7 @@ If multiple substrings are provided, all substrings must match to return a resul
 </tr>
 </tbody>
 </table>
-<h2 id="imgtools-dicomsort">imgtools dicomsort<a class="headerlink" href="#imgtools-dicomsort" title="Permanent link">#</a></h2>
+<h3 id="imgtools-dicomsort">imgtools dicomsort<a class="headerlink" href="#imgtools-dicomsort" title="Permanent link">#</a></h3>
 <p>Sorts DICOM files into directories based on their tags.</p>
 <p><strong>Usage:</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools dicomsort [OPTIONS] SOURCE_DIRECTORY TARGET_DIRECTORY
@@ -1521,7 +1686,7 @@ If multiple substrings are provided, all substrings must match to return a resul
 </tr>
 </tbody>
 </table>
-<h2 id="imgtools-index">imgtools index<a class="headerlink" href="#imgtools-index" title="Permanent link">#</a></h2>
+<h3 id="imgtools-index">imgtools index<a class="headerlink" href="#imgtools-index" title="Permanent link">#</a></h3>
 <p>Crawl DICOM directory and create a database index.</p>
 <ul>
 <li>
@@ -1593,6 +1758,42 @@ If multiple substrings are provided, all substrings must match to return a resul
 </tr>
 </tbody>
 </table>
+<h3 id="imgtools-interlacer">imgtools interlacer<a class="headerlink" href="#imgtools-interlacer" title="Permanent link">#</a></h3>
+<p>Visualize DICOM series relationships after indexing.</p>
+<p>This command will print the tree hierarchy of DICOM series relationships
+similar to GNU/Linux <code>tree</code> command.</p>
+<p>Only shows supported modalities.</p>
+<p>`interlacer INDEX_FILE will print the series tree for the given index file.</p>
+<p>The index file should be a CSV file with the following columns:
+- SeriesInstanceUID
+- Modality
+- PatientID
+- StudyInstanceUID
+- folder
+- ReferencedSeriesUID</p>
+<p>Visit https://bhklab.github.io/med-imagetools/ for more information.</p>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>imgtools interlacer [OPTIONS] INDEX_FILE
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--help</code>, <code>-h</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 
 
 
@@ -1610,12 +1811,13 @@ If multiple substrings are provided, all substrings must match to return a resul
   <span class="md-source-file__fact">
     <span class="md-icon" title="Contributors">
       
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9 3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3 3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3 3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13zM0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9-.59.68-.95 1.62-.95 2.65V20zm24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65 2.56.34 4.45 1.51 4.45 2.9z"/></svg>
       
     </span>
     <nav>
       
-        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>
+        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>, 
+        <a href="mailto:jermiahjoseph98@gmail.com">Jermiah Joseph</a>
     </nav>
   </span>
 

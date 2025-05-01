@@ -1485,17 +1485,34 @@ and makes it easier to run queries or group series by type.</p>
 <li><strong>Rich text console display</strong>: Pretty-prints the hierarchy with color-coding</li>
 <li><strong>Dependency validation</strong>: Enforces rules like "RTSTRUCT requires CT, MR, or PT"</li>
 </ul>
+<details class="warning">
+<summary>Supported Modalities</summary>
+<p>Though the Crawler will indiscriminately crawl all DICOM files,
+the Interlacer currently only supports the following modalities for interlacing:</p>
+<div class="highlight"><pre><span></span><code>- CT
+- MR
+- PT
+- RTSTRUCT
+- RTDOSE
+- SEG
+- RTPLAN (used in interlacing but not in queries)
+</code></pre></div>
+<p>These were the primary modalities targeted during the development of this module,
+but can easily be extended to support others in the future.
+Please <a href="https://github.com/bhklab/med-imagetools/issues">open an issue</a>
+for which modalities you would like to see supported.</p>
+</details>
 <h3 id="grouping-series">Grouping Series<a class="headerlink" href="#grouping-series" title="Permanent link">#</a></h3>
 <p>The Interlacer currently groups series using <strong>Referenced Series UID</strong>, which links series based on their metadata references (i.e the <code>ReferencedSeriesInstanceUID</code> tag in <code>RTSTRUCT</code>s). This creates a hierarchical structure showing the relationships between different series.</p>
-<div class="admonition note">
-<p class="admonition-title">Future Development</p>
+<details class="info">
+<summary>Future Support for Grouping by Study Instance UID and Patient ID</summary>
 <p>In a future release, the Interlacer will support additional grouping methods:</p>
 <ul>
 <li><strong>Study Instance UID</strong> – Group everything in the same study</li>
 <li><strong>Patient ID</strong> – Group all series from the same patient</li>
 </ul>
 <p>This enhancement is being tracked in <a href="https://github.com/bhklab/med-imagetools/issues/318">GitHub issue #318</a>.</p>
-</div>
+</details>
 <hr />
 <h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
