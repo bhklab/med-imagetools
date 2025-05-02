@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import time
-from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List
@@ -9,13 +7,13 @@ from typing import TYPE_CHECKING, Dict, List
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
-from imgtools.autopipeline import process_one_sample, ProcessSampleResult
+from imgtools.autopipeline import ProcessSampleResult, process_one_sample
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
     Valid_Inputs as ROIMatcherInputs,
 )
-from imgtools.io.nnunet_output import nnUNetOutput, MaskSavingStrategy
+from imgtools.io.nnunet_output import MaskSavingStrategy, nnUNetOutput
 from imgtools.io.sample_input import SampleInput
 from imgtools.io.sample_output import ExistingFileMode
 from imgtools.loggers import logger, tqdm_logging_redirect
@@ -31,13 +29,12 @@ if TYPE_CHECKING:
 
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
-    from imgtools.dicom.interlacer import SeriesNode
 
 
-class nnUNetpipeline:
+class nnUNetpipeline:  # noqa: N801
     """Pipeline for processing medical images in nnUNet format."""
 
-    input: SampleInput 
+    input: SampleInput
     output: nnUNetOutput
     transformer: Transformer[MedImage | VectorMask]
 
@@ -46,7 +43,7 @@ class nnUNetpipeline:
         input_directory: str | Path,
         output_directory: str | Path,
         roi_match_map: ROIMatcherInputs,
-        mask_saving_strategy: MaskSavingStrategy = MaskSavingStrategy.LABEL_IMAGE, # SHOULD THIS BE THE DEFAULT????
+        mask_saving_strategy: MaskSavingStrategy = MaskSavingStrategy.LABEL_IMAGE,  # SHOULD THIS BE THE DEFAULT????
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
         n_jobs: int | None = None,
@@ -249,7 +246,6 @@ class nnUNetpipeline:
 
 
 if __name__ == "__main__":
-
     from rich import print  # noqa
 
     # Interlacer parameters

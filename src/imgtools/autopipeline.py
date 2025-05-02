@@ -16,7 +16,6 @@ from imgtools.coretypes.masktypes.roi_matching import (
     Valid_Inputs as ROIMatcherInputs,
 )
 from imgtools.io.sample_input import SampleInput
-from imgtools.io.nnunet_output import nnUNetOutput
 from imgtools.io.sample_output import (
     DEFAULT_FILENAME_FORMAT,
     ExistingFileMode,
@@ -133,7 +132,7 @@ def process_one_sample(
         Sequence[SeriesNode],
         SampleInput,
         Transformer,
-        SampleOutput | nnUNetOutput,
+        SampleOutput,
     ],
 ) -> ProcessSampleResult:
     """
