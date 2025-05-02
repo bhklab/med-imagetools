@@ -6,9 +6,12 @@ MODALITY_MAP = {
     "CT": "0000",
     "MR": "0001",
     "PET": "0002",
-}   
+}
 
-def generate_nnunet_scripts(output_directory: str | pathlib.Path, dataset_id: int) -> None:
+
+def generate_nnunet_scripts(
+    output_directory: str | pathlib.Path, dataset_id: int
+) -> None:
     """
     Creates two bash scripts:
     1. `nnunet_preprocess.sh` for running nnUNet preprocessing.
@@ -20,10 +23,10 @@ def generate_nnunet_scripts(output_directory: str | pathlib.Path, dataset_id: in
     """
     # Define paths using pathlib
     output_directory = pathlib.Path(output_directory).resolve()
-    
+
     # Paths for the scripts
-    preprocess_shell_path = output_directory / 'nnunet_preprocess.sh'
-    train_shell_path = output_directory / 'nnunet_train.sh'
+    preprocess_shell_path = output_directory / "nnunet_preprocess.sh"
+    train_shell_path = output_directory / "nnunet_train.sh"
     base_dir = output_directory.parent.parent
 
     # Remove any existing script files before creating new ones
@@ -43,7 +46,7 @@ export nnUNet_results="{base_dir}/nnUNet_results"
 # Preprocessing command for dataset {dataset_id}
 nnUNetv2_plan_and_preprocess -d {dataset_id} --verify_dataset_integrity -c 3d_fullres
 """
-    
+
     # Write the preprocessing script
     with preprocess_shell_path.open("w", newline="\n") as f:
         f.write(preprocess_script_content)
@@ -67,19 +70,22 @@ done
     with train_shell_path.open("w", newline="\n") as f:
         f.write(train_script_content)
 
-def generate_dataset_json(output_folder: pathlib.Path | str,
-                          channel_names: Dict[str, str],
-                          labels: Dict[str, int],
-                          num_training_cases: int,
-                          file_ending: str,
-                          regions_class_order: Tuple[int, ...] | None = None,
-                          dataset_name: str | None = None, 
-                          reference: str | None = None, 
-                          release: str | None = None, 
-                          usage_license: str = 'hands off!',
-                          description: str | None = None,
-                          overwrite_image_reader_writer: str | None = None, 
-                          **kwargs: object) -> None:
+
+def generate_dataset_json(
+    output_folder: pathlib.Path | str,
+    channel_names: Dict[str, str],
+    labels: Dict[str, int],
+    num_training_cases: int,
+    file_ending: str,
+    regions_class_order: Tuple[int, ...] | None = None,
+    dataset_name: str | None = None,
+    reference: str | None = None,
+    release: str | None = None,
+    usage_license: str = "hands off!",
+    description: str | None = None,
+    overwrite_image_reader_writer: str | None = None,
+    **kwargs: object,
+) -> None:
     """
     Generates a dataset.json file in the output folder
 
@@ -126,30 +132,34 @@ def generate_dataset_json(output_folder: pathlib.Path | str,
 
     """
 
-    has_regions: bool = any([isinstance(i, (tuple, list)) and len(i) > 1 for i in labels.values()])
+    has_regions: bool = any(
+        [isinstance(i, (tuple, list)) and len(i) > 1 for i in labels.values()]
+    )
     if has_regions:
-        assert regions_class_order is not None, "You have defined regions but regions_class_order is not set. " \
-                                                "You need that."
+        assert regions_class_order is not None, (
+            "You have defined regions but regions_class_order is not set. "
+            "You need that."
+        )
 
-    # Construct the dataset JSON structure  
-    dataset_json = {  
-        "channel_names": channel_names,  
-        "labels": labels,  
-        "numTraining": num_training_cases,  
-        "file_ending": file_ending,  
-        "name": dataset_name,  
-        "reference": reference,  
-        "release": release,  
-        "licence": usage_license,  
-        "description": description,  
-        "overwrite_image_reader_writer": overwrite_image_reader_writer,  
-        "regions_class_order": regions_class_order,  
-    }   
+    # Construct the dataset JSON structure
+    dataset_json = {
+        "channel_names": channel_names,
+        "labels": labels,
+        "numTraining": num_training_cases,
+        "file_ending": file_ending,
+        "name": dataset_name,
+        "reference": reference,
+        "release": release,
+        "licence": usage_license,
+        "description": description,
+        "overwrite_image_reader_writer": overwrite_image_reader_writer,
+        "regions_class_order": regions_class_order,
+    }
 
-    dataset_json = {k: v for k, v in dataset_json.items() if v is not None}  
+    dataset_json = {k: v for k, v in dataset_json.items() if v is not None}
 
-    dataset_json.update(kwargs) 
+    dataset_json.update(kwargs)
 
-    output_path = pathlib.Path(output_folder) / 'dataset.json'
+    output_path = pathlib.Path(output_folder) / "dataset.json"
     with output_path.open("w") as f:
         json.dump(dataset_json, f, indent=4, sort_keys=False)

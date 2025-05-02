@@ -191,7 +191,7 @@ class VectorMask(MedImage):
         """Return True if any voxel has >1 mask"""
         arr = sitk.GetArrayFromImage(self)
         return self.n_masks > 1 and bool(np.any(np.sum(arr, axis=-1) > 1))
-    
+
     def _to_label_array(self, allow_overlap: bool) -> Mask:
         """
         Convert vector mask to 3D label array with unique label per mask.
@@ -209,12 +209,12 @@ class VectorMask(MedImage):
             The output is a standard Mask with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8.
         """
 
-        if self.n_masks == 1: # Already a label image
+        if self.n_masks == 1:  # Already a label image
             return Mask(
                 sitk.Cast(self[1], sitk.sitkUInt8),
                 metadata=self.metadata.copy(),
             )
-        
+
         if self.has_overlap():
             if allow_overlap:
                 logger.warning(
@@ -263,7 +263,7 @@ class VectorMask(MedImage):
         preserved per voxel. If preserving all overlapping labels is important,
         keep working with the original VectorMask.
         """
-        
+
         return self._to_label_array(allow_overlap=True)
 
     def to_label_image(self) -> Mask:
@@ -294,7 +294,7 @@ class VectorMask(MedImage):
         """
 
         return self._to_label_array(allow_overlap=False)
-    
+
     def to_region_mask(
         self,
     ) -> Mask:
@@ -314,9 +314,7 @@ class VectorMask(MedImage):
         """
         n_components = self.GetNumberOfComponentsPerPixel()
         assert self.GetPixelID() == sitk.sitkVectorUInt8
-        assert (
-            len(self.roi_mapping) == n_components + 1
-        )  # +1 for background
+        assert len(self.roi_mapping) == n_components + 1  # +1 for background
 
         label_image = sitk.Image(self.GetSize(), sitk.sitkUInt32)
         label_image.CopyInformation(self)
@@ -327,7 +325,7 @@ class VectorMask(MedImage):
             )
             shifted = sitk.ShiftScale(component, shift=0, scale=2**i)
             label_image += shifted
-            
+
         return Mask(label_image, metadata=self.metadata.copy())
 
     def extract_mask(self, key: str | int) -> Mask:
