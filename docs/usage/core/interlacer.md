@@ -51,11 +51,32 @@ Key features:
 - **Rich text console display**: Pretty-prints the hierarchy with color-coding
 - **Dependency validation**: Enforces rules like "RTSTRUCT requires CT, MR, or PT"
 
+??? warning "Supported Modalities"
+
+    Though the Crawler will indiscriminately crawl all DICOM files,
+    the Interlacer currently only supports the following modalities for interlacing:
+
+        - CT
+        - MR
+        - PT
+        - RTSTRUCT
+        - RTDOSE
+        - SEG
+        - RTPLAN (used in interlacing but not in queries)
+
+    These were the primary modalities targeted during the development of this module,
+    but can easily be extended to support others in the future.
+    Please [open an issue](https://github.com/bhklab/med-imagetools/issues)
+    for which modalities you would like to see supported.
+
 ### Grouping Series
 
-The Interlacer currently groups series using **Referenced Series UID**, which links series based on their metadata references (i.e the `ReferencedSeriesInstanceUID` tag in `RTSTRUCT`s). This creates a hierarchical structure showing the relationships between different series.
+The Interlacer currently groups series using **Referenced Series UID**,
+which links series based on their metadata references 
+(i.e the `ReferencedSeriesInstanceUID` tag in `RTSTRUCT`s).
+This creates a hierarchical structure showing the relationships between different series.
 
-!!! note "Future Development"
+??? info "Future Support for Grouping by Study Instance UID and Patient ID"
     
     In a future release, the Interlacer will support additional grouping methods:
     
@@ -64,9 +85,30 @@ The Interlacer currently groups series using **Referenced Series UID**, which li
     
     This enhancement is being tracked in [GitHub issue #318](https://github.com/bhklab/med-imagetools/issues/318).
 
+## Query Rules and Dependencies
+
+The Interlacer enforces the following modality dependency rules:
+
+1. `RTSTRUCT` and `RTDOSE` require a `CT`, `MR`, or `PT` series
+2. `SEG` requires a `CT` or `MR` series
+
+Examples of valid and invalid queries:
+
+- ✅ `"CT,RTDOSE"` - Valid: CT with associated RTDOSE
+- ✅ `"CT,PT,RTSTRUCT"` - Valid: CT and PT with associated RTSTRUCT
+- ❌ `"PT,SEG"` - Invalid: SEG requires CT or MR, not PT
+- ❌ `"RTSTRUCT,RTDOSE"` - Invalid: Both require a source imaging series
+
 ---
 
 ## Usage Example
+
+### CLI 
+
+![interlacer_cli](../../images/interlacer_cli.png){: style="background: white; height:125%;"}
+
+
+### Python Code
 
 ```python
 from pathlib import Path
@@ -97,20 +139,6 @@ ct_rtstruct_results = interlacer.query("CT,RTSTRUCT")
 # Get all possible series combinations
 all_results = interlacer.query("*")  # or interlacer.query("all")
 ```
-
-## Query Rules and Dependencies
-
-The Interlacer enforces the following modality dependency rules:
-
-1. `RTSTRUCT` and `RTDOSE` require a `CT`, `MR`, or `PT` series
-2. `SEG` requires a `CT` or `MR` series
-
-Examples of valid and invalid queries:
-
-- ✅ `"CT,RTDOSE"` - Valid: CT with associated RTDOSE
-- ✅ `"CT,PT,RTSTRUCT"` - Valid: CT and PT with associated RTSTRUCT
-- ❌ `"PT,SEG"` - Invalid: SEG requires CT or MR, not PT
-- ❌ `"RTSTRUCT,RTDOSE"` - Invalid: Both require a source imaging series
 
 ## Example Output
 

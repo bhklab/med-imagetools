@@ -1,6 +1,66 @@
 # CHANGELOG
 
 
+## v2.0.0-rc.32 (2025-05-01)
+
+### Chores
+
+- Update cli help image
+  ([`fada490`](https://github.com/bhklab/med-imagetools/commit/fada49011bc061ced2d8403790b8c31fb8ff8408))
+
+### Documentation
+
+- Add AutoPipeline documentation and core module details
+  ([#348](https://github.com/bhklab/med-imagetools/pull/348),
+  [`1a489a6`](https://github.com/bhklab/med-imagetools/commit/1a489a6ded16ed2a05509998de8b82ec1089cb0d))
+
+Comprehensive documentation for AutoPipeline has been introduced, detailing its functionality in
+  medical image processing. This includes usage examples, command line interface instructions, and
+  separate documentation for the Crawler and Interlacer modules. A navigation structure for core
+  documentation pages has also been established.
+
+### Features
+
+- Add github actions to update cli screenshot png
+  ([#347](https://github.com/bhklab/med-imagetools/pull/347),
+  [`88fe4c0`](https://github.com/bhklab/med-imagetools/commit/88fe4c00a3675e707f742101e1b2bc1cf400786d))
+
+
+## v2.0.0-rc.31 (2025-05-01)
+
+### Chores
+
+- Remove Test-PyPI job from CI/CD workflow
+  ([`f664644`](https://github.com/bhklab/med-imagetools/commit/f664644395479ba5fc79af8c8eb40c09b76e2e50))
+
+- Update classifiers in pyproject.toml for better project categorization
+  ([`2780ebc`](https://github.com/bhklab/med-imagetools/commit/2780ebc2db36fa890712d9b97d00468bfdf95aec))
+
+- Update lockfile
+  ([`6e97c7c`](https://github.com/bhklab/med-imagetools/commit/6e97c7c1bb9c6168ee6cf2d970d300edf4db6160))
+
+- Update README.md with docker info
+  ([`d83e5b9`](https://github.com/bhklab/med-imagetools/commit/d83e5b99eff3dc34fb3cdaf7275aad5a7ceef65e))
+
+### Documentation
+
+- Add MkDocs hooks for asset management during build process
+  ([`4e64438`](https://github.com/bhklab/med-imagetools/commit/4e64438c50f062739c36fc3d883a84db2bc75027))
+
+- Fix typos/formatting/grammar in docs
+  ([`5eab61e`](https://github.com/bhklab/med-imagetools/commit/5eab61e626eca827134f3592e7eab089ec500512))
+
+### Features
+
+- Add interlacer cli command for visualizing DICOM series relationships and update documentation
+  ([`84cc9e0`](https://github.com/bhklab/med-imagetools/commit/84cc9e0ef0a9376b4b09731523a2706665b05c1e))
+
+### Refactoring
+
+- Remove doc hooks, dont reference readme in docs landing page
+  ([`e8d82a6`](https://github.com/bhklab/med-imagetools/commit/e8d82a6df3ca1b1c02b1496baf12c4db2b644901))
+
+
 ## v2.0.0-rc.30 (2025-04-30)
 
 ### Chores

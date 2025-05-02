@@ -40,6 +40,7 @@ from .autopipeline import autopipeline
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
+from .interlacer import interlacer
 
 from .sectioned_group import SectionedGroup, CommandRegistry
 from .testdatasets import testdata
@@ -50,6 +51,7 @@ registry = CommandRegistry()
 # Register groups and commands
 registry.create_group("core commands", "Main subcommands for the med-imagetools package.")
 registry.add('core commands', index)
+registry.add('core commands', interlacer)
 registry.add('core commands', autopipeline)
 
 registry.create_group("utilities", "Tools for working with DICOM files.")

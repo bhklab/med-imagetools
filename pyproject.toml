@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "2.0.0-rc.30"
+version = "2.0.0-rc.32"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
     { name = "Sejin Kim" },
@@ -44,13 +44,25 @@ dependencies = [
 ]
 
 classifiers = [
+    "Development Status :: 4 - Beta",
+	"Intended Audience :: Developers",
+	"Intended Audience :: Healthcare Industry",
+	"Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
+	"Operating System :: MacOS",
+	"Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+	"Topic :: Scientific/Engineering :: Image Processing",
+	"Topic :: Scientific/Engineering :: Medical Science Apps.",
+	"Topic :: Scientific/Engineering :: Visualization",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Utilities",
+	"Typing :: Typed",
 ]
 [project.urls]
 homepage = "https://github.com/bhklab/med-imagetools"
@@ -69,7 +81,6 @@ all = [
 
 # Entry points for CLI commands
 [project.scripts]
-autopipeline = "imgtools.autopipeline:main"
 imgtools = "imgtools.cli.__main__:cli"
 
 [build-system]

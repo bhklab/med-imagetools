@@ -248,6 +248,61 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
                   git_committer_name: "gh-actions-semver"
 
+    ################################################################################################
+    # Generate-PNG: Generate PNG images of CLI help output
+    ################################################################################################
+    Generate-PNG:
+        needs: Continuous-Deployment
+        if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+              with:
+                  ref: ${{ github.ref }}
+
+            - name: Download and install termshot
+              run: |
+                  curl -L "https://github.com/homeport/termshot/releases/download/v0.5.0/termshot_0.5.0_linux_amd64.tar.gz" -o termshot.tar.gz
+                  tar -xzf termshot.tar.gz
+                  chmod +x termshot
+                  sudo mv termshot /usr/local/bin/termshot
+                  rm termshot.tar.gz
+                  termshot --version
+
+            - name: Install Pixi
+              uses: prefix-dev/setup-pixi@v0.8.8
+              with:
+                  environments: "py313" 
+                  pixi-version: v0.46.0
+                  cache: true
+                  locked: false
+                  activate-environment: true
+
+            - name: Install the project
+              run: imgtools --help
+
+            - name: Generate PNG using termshot
+              run: |
+                  mkdir -p assets
+                  termshot --show-cmd --filename assets/imgtools_cli.png -- imgtools --help
+
+            - name: Commit and push changes
+              run: |
+                  git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                  git config --local user.name "github-actions[bot]"
+                  git add assets/imgtools_cli.png
+                  if git diff --cached --quiet; then
+                      echo "No changes to commit"
+                  else
+                      git commit -m "chore: update cli help image"
+                      git push
+                  fi
+
+    ################################################################################################
+    # Publish-PyPI: Publish to PyPI when Continuous-Deployment is successful
+    ################################################################################################
     Publish-PyPI:
         needs: Continuous-Deployment
         if: needs.Continuous-Deployment.outputs.released == 'true'

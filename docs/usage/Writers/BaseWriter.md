@@ -110,6 +110,32 @@ writer.save(
 
 ## Advanced Concepts
 
+### Sanitizing Filenames
+
+**Why Sanitize Filenames?**:
+
+- To ensure that filenames are safe and compatible across different operating systems.  
+
+**How It Works**:
+
+- Replaces illegal characters (e.g., `<`, `>`, `:`, `"`, `/`, `\`, `|`, `?`, `*`) with underscores.  
+- Trims leading or trailing spaces and periods to avoid issues.
+
+**When Is It Applied?**:
+
+- Automatically applied when generating filenames, unless disabled by setting `sanitize_filenames=False`.
+
+### Multiprocessing Compatibility
+
+**Why It Matters**:
+
+- In batch operations or high-performance use cases, multiple processes may write files simultaneously.  
+
+**Key Features**:
+
+- Supports multiprocessing with inter-process locking to ensure thread-safe file writes.  
+- Avoids conflicts or data corruption when multiple instances of a writer are running.
+
 ### Lifecycle Management
 
 **Context Manager Support**:
@@ -306,38 +332,14 @@ def save(self, content, **kwargs):
 
 The `merge_columns` parameter (defaults to `True`) controls how the IndexWriter handles changes to your data schema:
 
-- **When `True`**: If your context has new fields that didn't exist in previous CSV entries, they'll be added as new columns. This is great for:
+**When `True`**: If your context has new fields that didn't exist in previous CSV entries, they'll be added as new columns. This is great for:
+
   - Iterative development when you're adding new metadata fields
   - Different processes writing files with slightly different context variables
   - Ensuring backward compatibility with existing index files
 
-- **When `False`**: Strict schema enforcement is applied. The IndexWriter will raise an error if the columns don't match exactly what's already in the index file. This is useful when:
+**When `False`**: Strict schema enforcement is applied. The IndexWriter will raise an error if the columns don't match exactly what's already in the index file. This is useful when:
+
   - You want to enforce a consistent schema across all entries
   - You're concerned about typos or unintended fields creeping into your index
   - Data consistency is critical for downstream processing
-
-### Sanitizing Filenames
-
-**Why Sanitize Filenames?**:
-
-- To ensure that filenames are safe and compatible across different operating systems.  
-
-**How It Works**:
-
-- Replaces illegal characters (e.g., `<`, `>`, `:`, `"`, `/`, `\`, `|`, `?`, `*`) with underscores.  
-- Trims leading or trailing spaces and periods to avoid issues.
-
-**When Is It Applied?**:
-
-- Automatically applied when generating filenames, unless disabled by setting `sanitize_filenames=False`.
-
-### Multiprocessing Compatibility
-
-**Why It Matters**:
-
-- In batch operations or high-performance use cases, multiple processes may write files simultaneously.  
-
-**Key Features**:
-
-- Supports multiprocessing with inter-process locking to ensure thread-safe file writes.  
-- Avoids conflicts or data corruption when multiple instances of a writer are running.

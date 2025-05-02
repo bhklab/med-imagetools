@@ -6,3 +6,4 @@
     :prog_name: imgtools
     :style: table
     :list_subcommands: True
+    :depth: 1
