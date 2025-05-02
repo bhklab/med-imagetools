@@ -229,7 +229,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         self,
         data: Sequence[MedImage],
         /,
-        SampleNumber: str,
+        SampleNumber: str,  # noqa: N803
         **kwargs: object,  # noqa: N803
     ) -> Sequence[Path]:
         """
