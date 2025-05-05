@@ -1,5 +1,3 @@
 nav:
-  - AutoPipeline.md
-  - nnUNet.md
   - imgtools.md
   - ...

@@ -1,4 +1,4 @@
 nav:
-  - Home: index.md
-  - Core Types: CoreTypes
+  - autopipeline.md
+  - Core API: core
   - ...

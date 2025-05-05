@@ -5,7 +5,9 @@ from typing import ClassVar
 import numpy as np
 import SimpleITK as sitk
 
-from imgtools.logging import logger
+from imgtools.coretypes import MedImage
+from imgtools.loggers import logger
+from imgtools.utils import truncate_uid
 
 from .abstract_base_writer import AbstractBaseWriter, ExistingFileMode
 
@@ -30,14 +32,68 @@ class NiftiWriterIOError(NiftiWriterError):
 
 @dataclass
 class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
-    """Class for managing file writing with customizable paths and filenames for NIFTI files."""
+    """Class for managing file writing with customizable paths and filenames for NIFTI files.
 
-    compression_level: int = field(
-        default=9,
-        metadata={
-            "help": "Compression level (0-9). Higher mean better compression but slower writing."
-        },
-    )
+    This class extends the AbstractBaseWriter to provide specialized functionality
+    for writing NIFTI image files. It supports both SimpleITK Image objects and numpy arrays
+    as input data types.
+
+    Attributes
+    ----------
+    compression_level : int, default=9
+        Compression level (0-9). Higher means better compression but slower writing.
+        Value must be between MIN_COMPRESSION_LEVEL (0) and MAX_COMPRESSION_LEVEL (9).
+    truncate_uids_in_filename : int, default=8
+        Many DICOM files have long UIDs in the filename. If used in the filename format,
+        this will truncate the UID to the **last** `truncate_uids_in_filename`
+        characters.
+        A value of 0 means **no truncation**.
+    VALID_EXTENSIONS : ClassVar[list[str]]
+        List of valid file extensions for NIFTI files (".nii", ".nii.gz").
+    MAX_COMPRESSION_LEVEL : ClassVar[int]
+        Maximum allowed compression level (9).
+    MIN_COMPRESSION_LEVEL : ClassVar[int]
+        Minimum allowed compression level (0).
+
+    Inherited Attributes
+    -------------------
+    root_directory : Path
+        Root directory where files will be saved. This directory will be created
+        if it doesn't exist and `create_dirs` is True.
+    filename_format : str
+        Format string defining the directory and filename structure.
+        Supports placeholders for context variables enclosed in curly braces.
+        Example: '{subject_id}_{date}/{disease}.nii.gz'
+    create_dirs : bool, default=True
+        Creates necessary directories if they don't exist.
+    existing_file_mode : ExistingFileMode, default=ExistingFileMode.FAIL
+        Behavior when a file already exists.
+        Options: OVERWRITE, SKIP, FAIL
+    sanitize_filenames : bool, default=True
+        Replaces illegal characters from filenames with underscores.
+    context : Dict[str, Any], default={}
+        Internal context storage for pre-checking.
+    index_filename : Optional[str], default=None
+        Name of the index file to track saved files.
+        If an absolute path is provided, it will be used as is.
+        If not provided, it will be saved in the root directory with the format
+        of {root_directory.name}_index.csv.
+    overwrite_index : bool, default=False
+        Overwrites the index file if it already exists.
+    absolute_paths_in_index : bool, default=False
+        If True, saves absolute paths in the index file.
+        If False, saves paths relative to the root directory.
+    pattern_resolver : PatternResolver
+        Instance used to handle filename formatting with placeholders.
+
+    Notes
+    -----
+    When using this class, ensure your filename_format ends with one of the VALID_EXTENSIONS.
+    The class validates the compression level and filename format during initialization.
+    """
+
+    compression_level: int = field(default=9)
+    truncate_uids_in_filename: int = field(default=8)
 
     # Make extensions immutable
     VALID_EXTENSIONS: ClassVar[list[str]] = [
@@ -102,31 +158,53 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
             case sitk.Image():
                 image = data
             case np.ndarray():
-                logger.debug("Converting numpy array to SimpleITK image.")
                 image = sitk.GetImageFromArray(data)
             case _:
                 msg = "Input must be a SimpleITK Image or a numpy array"
                 raise NiftiWriterValidationError(msg)
 
-        out_path = self.resolve_path(**kwargs)
+        # if the object has the 'fingerprint' property, update the context
+        if hasattr(data, "serialized_fingerprint"):
+            self.set_context(**data.serialized_fingerprint)
+        elif isinstance(data, MedImage):
+            # if there is no fingerprint, this is unexpected
+            # this is an issue now since we auto keep context between
+            # saves, so this could lead to using the fingerprint
+            # of the previous save
+            logger.error(
+                "No fingerprint found in the writer object. "
+                "This is unexpected and may indicate a bug. "
+                "The fingerprint fields in the index might be incorrect."
+            )
+            # TODO:: think of a better way to handle this
+            self.clear_context()
+
+        # TODO:: think of a better way to handle the truncate_uids_in_filename
+        if self.truncate_uids_in_filename:
+            truncated_kwargs = {
+                k: truncate_uid(str(v), self.truncate_uids_in_filename)
+                if k.lower().endswith("uid")
+                else v
+                for k, v in kwargs.items()
+            }
+            out_path = self.resolve_path(**truncated_kwargs)
+            # need to update the context with the old kwargs
+            # because it will be used in the index, and we dont want
+            # to truncate the UIDs in the index
+            self.set_context(**kwargs)
+        else:
+            out_path = self.resolve_path(**kwargs)
+
         if (
             out_path.exists()  # check if it exists
             # This will only be true if SKIP,
             # OVERWRITE would have deleted the file
             and self.existing_file_mode == ExistingFileMode.SKIP
         ):
-            logger.debug(
-                "File exists, skipping.", kwargs=kwargs, out_path=out_path
-            )
+            logger.debug("File exists, skipping.", out_path=out_path)
             return out_path
 
         try:
-            logger.debug(
-                f"Saving image to {out_path}.",
-                kwargs=kwargs,
-                out_path=out_path,
-                compression_level=self.compression_level,
-            )
             sitk.WriteImage(
                 image,
                 out_path.as_posix(),
@@ -136,15 +214,11 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         except Exception as e:
             msg = f"Error writing image to file {out_path}: {e}"
             raise NiftiWriterIOError(msg) from e
-        else:
-            logger.info("Image saved successfully.", out_path=out_path)
-
-        # Log and dump metadata to CSV
-        logger.debug(f"Image saved successfully: {out_path}")
 
         self.add_to_index(
             out_path,
             filepath_column="filepath",
             replace_existing=out_path.exists(),
         )
+
         return out_path

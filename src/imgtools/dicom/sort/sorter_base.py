@@ -45,10 +45,10 @@ from rich.text import Text
 from rich.theme import Theme
 from rich.tree import Tree
 
-from imgtools.dicom import find_dicoms
+from imgtools.dicom.dicom_find import find_dicoms
+from imgtools.dicom.read_tags import read_tags
 from imgtools.dicom.sort import PatternParser, SorterBaseError, TagHighlighter
-from imgtools.dicom.sort.utils import read_tags
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 DEFAULT_PATTERN_PARSER: Pattern = re.compile(r"%([A-Za-z]+)|\{([A-Za-z]+)\}")
 
@@ -57,8 +57,9 @@ def resolve_path(
     path: Path,
     keys: Set[str],
     format_str: str,
+    truncate: int = 5,
     check_existing: bool = True,
-    truncate: bool = True,
+    force: bool = True,
 ) -> Tuple[Path, Path]:
     """
     Worker function to resolve a single path.
@@ -73,8 +74,10 @@ def resolve_path(
         The format string for the resolved path.
     check_existing : bool, optional
         If True, check if the resolved path already exists (default is True).
-    truncate : bool, optional
-        If True, truncate long values in the resolved path (default is True).
+    truncate : int, optional
+        The number of characters to trunctae UID values (default is 5).
+    force : bool, optional
+        passed to pydicom.dcmread() to force reading the file (default is False).
 
     Returns
     -------
@@ -82,7 +85,7 @@ def resolve_path(
         The source path and resolved path.
     """
     tags: Dict[str, str] = read_tags(
-        path, list(keys), truncate=truncate
+        path, list(keys), truncate=truncate, force=force, default="Unknown"
     )
     resolved_path = Path(format_str % tags, path.name)
     if check_existing and not resolved_path.exists():
@@ -164,8 +167,6 @@ class SorterBase(ABC):
         except Exception as e:
             errmsg = "Failed to initialize SorterBase."
             raise SorterBaseError(errmsg) from e
-
-    def __post_init__(self) -> None:
         self.validate_keys()
 
     def _initialize_console(self) -> Console:

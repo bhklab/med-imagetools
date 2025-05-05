@@ -6,7 +6,7 @@ from enum import Enum
 
 import SimpleITK as sitk
 
-from imgtools.logging import logger
+from imgtools.loggers import logger
 
 from .spatial_types import Coordinate3D, Size3D
 
@@ -109,7 +109,9 @@ class RegionBox:
         return cls(Coordinate3D(*coordmin), Coordinate3D(*coordmax))
 
     @classmethod
-    def from_mask_centroid(cls, mask: sitk.Image, label: int = 1, desired_size: int | None = None) -> RegionBox:
+    def from_mask_centroid(
+        cls, mask: sitk.Image, label: int = 1, desired_size: int | None = None
+    ) -> RegionBox:
         """Creates a RegionBox from the centroid of a mask image.
 
         Parameters
@@ -134,8 +136,7 @@ class RegionBox:
         centroid_idx = mask.TransformPhysicalPointToIndex(centroid)
 
         return RegionBox(
-            Coordinate3D(*centroid_idx), 
-            Coordinate3D(*centroid_idx)
+            Coordinate3D(*centroid_idx), Coordinate3D(*centroid_idx)
         ).expand_to_cube(desired_size)
 
     @classmethod
@@ -289,10 +290,14 @@ class RegionBox:
         extra_z = max(0, size - self.size.depth) / 2
 
         # Round extra dimension values UP to the nearest integer before adding to existing minimum coordinates
-        min_coord = self.min - tuple([math.ceil(extra) for extra in(extra_x, extra_y, extra_z)])
+        min_coord = self.min - tuple(
+            [math.ceil(extra) for extra in (extra_x, extra_y, extra_z)]
+        )
 
         # Round extra dimensions DOWN to the nearest integer before adding to existing maximum coordinates
-        max_coord = self.max + tuple([math.floor(extra) for extra in(extra_x, extra_y, extra_z)])
+        max_coord = self.max + tuple(
+            [math.floor(extra) for extra in (extra_x, extra_y, extra_z)]
+        )
 
         # Adjust negative coordinates to ensure that the min values are not negative
         self._adjust_negative_coordinates(min_coord, max_coord)
@@ -313,7 +318,6 @@ class RegionBox:
                 setattr(min_coord, axis, 0)
                 setattr(max_coord, axis, getattr(max_coord, axis) + diff)
 
-
     def check_out_of_bounds_coordinates(self, image: sitk.Image) -> None:
         """Adjust the coordinates to ensure that the max values are not greater than the image size."""
         # if any of the max values are greater than the image size, set them to the image size,
@@ -322,11 +326,12 @@ class RegionBox:
             max_value = getattr(self.max, axis)
             image_size = image.GetSize()[idx]
             if max_value > image_size:
-                logger.debug(f"Adjusting box {axis} coordinates to be within the image size.")
+                logger.debug(
+                    f"Adjusting box {axis} coordinates to be within the image size."
+                )
                 diff = max_value - image_size
                 setattr(self.min, axis, getattr(self.min, axis) - diff)
                 setattr(self.max, axis, image_size)
-    
 
     def crop_image(self, image: sitk.Image) -> sitk.Image:
         """Crop an image to the coordinates defined by the box.
@@ -393,6 +398,7 @@ class RegionBox:
     def copy(self) -> RegionBox:
         """Create a copy of the RegionBox."""
         return RegionBox(self.min, self.max)
+
 
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa

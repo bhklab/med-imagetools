@@ -23,7 +23,7 @@ def array_to_image(
         1.0,
     ),
     spacing: Array3D = (1.0, 1.0, 1.0),
-    reference_image: sitk.Image = None,
+    reference_image: sitk.Image | None = None,
 ) -> sitk.Image:
     """Convert a numpy array to a SimpleITK image with optional metadata.
 
@@ -48,10 +48,16 @@ def array_to_image(
     image = sitk.GetImageFromArray(array)
     if reference_image is not None:
         image.CopyInformation(reference_image)
-    else:
+    elif all(x is not None for x in (origin, direction, spacing)):
         image.SetOrigin(origin)
         image.SetDirection(direction)
         image.SetSpacing(spacing)
+    else:
+        errmsg = (
+            "Either a reference image or all of the origin, direction, and spacing "
+            "must be provided to create a new image."
+        )
+        raise ValueError(errmsg)
 
     return image
 
@@ -66,18 +72,15 @@ def image_to_array(image: sitk.Image) -> ImageArrayMetadata:
 
     Returns
     -------
-    ImageArrayMetadata
+    ImageArrayMetadata : Tuple[np.ndarray, Array3D, Array3D, Array3D]
         A tuple containing:
         - The image as a numpy array.
         - The origin of the image (tuple of floats).
         - The direction cosines of the image (tuple of floats).
         - The pixel spacing of the image (tuple of floats).
     """
-    origin: Array3D = image.GetOrigin()
-    direction: Array3D = image.GetDirection()
-    spacing: Array3D = image.GetSpacing()
     array: np.ndarray = sitk.GetArrayFromImage(image)
-    return array, origin, direction, spacing
+    return array, image["origin"], image["direction"], image["spacing"]
 
 
 def physical_points_to_idxs(
@@ -166,12 +169,19 @@ def idxs_to_physical_points(image: sitk.Image, idxs: np.ndarray) -> np.ndarray:
         Physical coordinates corresponding to the given indices.
     """
     continuous = np.issubdtype(idxs.dtype, np.floating)
+
+    # TransformIndexToPhysicalPoint expects a list not a numpy array
+
     transform = (
         image.TransformContinuousIndexToPhysicalPoint
         if continuous
         else image.TransformIndexToPhysicalPoint
     )
-    vectorized_transform = np.vectorize(
-        lambda x: np.array(transform(x)), signature="(3)->(3)"
-    )
-    return vectorized_transform(idxs)
+    # vectorized_transform = np.vectorize(
+    #     lambda x: np.array(transform(x)), signature="(3)->(3)"
+    # )
+    # return vectorized_transform(idxs)
+
+    # Convert indices to lists of lists and apply the transformation
+    idxs_list = idxs.tolist()
+    return np.array([transform(idx) for idx in idxs_list])

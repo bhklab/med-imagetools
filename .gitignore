@@ -229,3 +229,7 @@ data/**
 test_data
 
 notebooks
+.imgtools
+
+*.html
+sandbox/*

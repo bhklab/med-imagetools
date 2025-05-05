@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, ClassVar, Dict, Tuple
 
 from imgtools.dicom.sort.exceptions import InvalidPatternError
-from imgtools.logging import logger
+from imgtools.loggers import logger
 from imgtools.pattern_parser.parser import PatternParser
 
 
@@ -99,9 +99,9 @@ class PatternResolver:
             msg = f"Invalid filename format: {e}"
             raise PatternResolverError(msg) from e
         else:
-            logger.debug("All keys are valid.", keys=self.keys)
             logger.debug(
-                "Formatted Pattern valid.",
+                "Pattern validation successful.",
+                keys=self.keys,
                 formatted_pattern=self.formatted_pattern,
             )
 

@@ -1,29 +1,36 @@
-FROM python:3.11-slim as base
+ARG PYTHON_VERSION=3.13
+FROM python:${PYTHON_VERSION}-slim
 
-LABEL maintainer="Benjamin Haibe-Kains"
-LABEL license="MIT"
-LABEL usage="docker run -it --rm <image_name> imgtools --help"
-LABEL org.opencontainers.image.source="https://github.com/bhklab/med-imagetools"
+# Add uv binary from official release
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
+# Use uv to install into system Python environment
+ENV UV_SYSTEM_PYTHON=1
+RUN uv pip install --system --pre --no-cache med-imagetools
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-  build-essential \
-  && rm -rf /var/lib/apt/lists/*
+# Metadata
+ARG VERSION
+ARG GIT_COMMIT
+ARG BUILD_DATE
 
-# install readii
-RUN pip install --no-cache-dir --upgrade pip
-# RUN pip install --no-cache-dir numpy==1.26.4
-RUN pip install --no-cache-dir med-imagetools
+LABEL maintainer="Benjamin Haibe-Kains" \
+    license="MIT" \
+    usage="docker run -it --rm <image_name> imgtools --help" \
+    org.opencontainers.image.title="Med-ImageTools" \
+    org.opencontainers.image.description="Tools for medical imaging analysis" \
+    org.opencontainers.image.url="https://github.com/bhklab/med-imagetools" \
+    org.opencontainers.image.source="https://github.com/bhklab/med-imagetools" \
+    org.opencontainers.image.version="${VERSION}" \
+    org.opencontainers.image.revision="${GIT_COMMIT}" \
+    org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.authors="Jermiah Joseph"
 
-# Create a new image with just the bare minimum required to use the python package
-FROM python:3.11-slim as final
+# Clean up all non-essential files
+RUN rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/*
 
-COPY --from=base /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=base /usr/local/bin /usr/local/bin
-
-# Check that the package is installed
+# Optional test
 RUN imgtools --help
 
-# On run, open a bash shell
 CMD ["/bin/bash"]

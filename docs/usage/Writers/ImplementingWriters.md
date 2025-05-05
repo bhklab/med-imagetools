@@ -45,8 +45,8 @@ class MyCustomWriter(AbstractBaseWriter[str]):
         with output_path.open(mode="w", encoding="utf-8") as f:
             f.write(content)
 
-        # Log and track the save operation
-        self.add_to_index(output_path, **self.context)
+        # Log and track the save operation using the new IndexWriter
+        self.add_to_index(output_path)
 
         return output_path
 ```
@@ -85,7 +85,7 @@ is written to files and interacts with the core features of `AbstractBaseWriter`
 
 ### Example Implementation
 
-Here’s a minimal implementation of the `save` method for a custom writer.
+Here's a minimal implementation of the `save` method for a custom writer.
 
 ```python
 from pathlib import Path
@@ -111,7 +111,13 @@ class MyCustomWriter(AbstractBaseWriter[str]):
             f.write(content)
 
         # Step 3: Log and track the save operation
-        self.add_to_index(output_path, filepath_column="filepath", **kwargs)
+        self.add_to_index(
+            path=output_path,
+            include_all_context=True,
+            filepath_column="filepath", 
+            replace_existing=False,
+            merge_columns=True,
+        )
 
         # Step 4: ALWAYS Return the saved file path
         return output_path
@@ -174,8 +180,46 @@ print(output_path)
 
 ---
 
-::: imgtools.io.writers.AbstractBaseWriter.add_to_index
+### add_to_index
 
+**What It Does**:
+
+- Records file information in a centralized CSV index file using the powerful IndexWriter
+- Safely handles concurrent writes with inter-process locking
+- Supports schema evolution to handle changing metadata fields
+
+**When to Use It**:
+
+- Call this method from your `save()` implementation to track files
+- Great for batch operations where you need to maintain records of processed files
+
+**Usage Example**:
+
+```python
+def save(self, content, **kwargs):
+    path = self.resolve_path(**kwargs)
+    # ... write content to file ...
+    
+    # Add entry to index with all context variables
+    self.add_to_index(
+        path=path,
+        include_all_context=True,  # Include ALL context vars (not just those in filename)
+        filepath_column="path",    # Column name for file paths
+        replace_existing=False     # Whether to replace existing entries
+    )
+    
+    return path
+```
+
+**Important Parameters**:
+
+- `include_all_context`: Controls whether to save all context variables or only those used in the filename
+- `filepath_column`: Customizes the column name for file paths
+- `replace_existing`: Whether to replace or append entries for the same file
+
+**Error Handling**:
+
+The method uses robust error handling with specific exceptions like `WriterIndexError` that wrap any underlying IndexWriter errors, making troubleshooting easier.
 
 ---
 
