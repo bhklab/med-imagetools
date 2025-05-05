@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v2.2.0 (2025-05-05)
+
+### Chores
+
+- Cleanup ruff config and remove old functional module
+  ([`efbfeea`](https://github.com/bhklab/med-imagetools/commit/efbfeea07a2ea7baf9104be958d35cdbb979d344))
+
+- Remove git merge annotations
+  ([`5569eb2`](https://github.com/bhklab/med-imagetools/commit/5569eb268a4beaebef42ebb564e84aaa50931dd4))
+
+- Update lockfile
+  ([`1485171`](https://github.com/bhklab/med-imagetools/commit/1485171e9511bf50ef88f20ab028b5d533d8e56a))
+
+### Code Style
+
+- Ruff check
+  ([`8030aba`](https://github.com/bhklab/med-imagetools/commit/8030aba4f4bc64dfc3f294bcf66393f7aa07e1c4))
+
+### Continuous Integration
+
+- Update ruff format command params
+  ([`04ecd23`](https://github.com/bhklab/med-imagetools/commit/04ecd235906963f686319eff18f400b5b8c95f7c))
+
+### Features
+
+- Release on PyPi
+  ([`94f1304`](https://github.com/bhklab/med-imagetools/commit/94f1304b90d01db44d867eacbb6ff1820b7100f0))
+
+
 ## v2.1.0 (2025-05-05)
 
 ### Chores
@@ -10,11 +39,6 @@
 
 - Update pixi.lock file
   ([`1d080b0`](https://github.com/bhklab/med-imagetools/commit/1d080b002b2b4172af531f1acf1de1dccd87d0bd))
-
-
-## v2.0.0 (2025-05-05)
-
-### Chores
 
 - Update pixi.lock file
   ([`f3ff708`](https://github.com/bhklab/med-imagetools/commit/f3ff70822e579676b426d5ad915ea1a771f0d5ce))
