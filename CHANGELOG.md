@@ -1,6 +1,35 @@
 # CHANGELOG
 
 
+## v2.1.0 (2025-05-05)
+
+### Chores
+
+- Prepare 2.0 release
+  ([`c33dfd7`](https://github.com/bhklab/med-imagetools/commit/c33dfd7efc6e2924dd4db994643a42e2fdb43d65))
+
+- Update pixi.lock file
+  ([`1d080b0`](https://github.com/bhklab/med-imagetools/commit/1d080b002b2b4172af531f1acf1de1dccd87d0bd))
+
+
+## v2.0.0 (2025-05-05)
+
+### Chores
+
+- Update pixi.lock file
+  ([`f3ff708`](https://github.com/bhklab/med-imagetools/commit/f3ff70822e579676b426d5ad915ea1a771f0d5ce))
+
+### Continuous Integration
+
+- Merge termshot action into main workflow
+  ([`f9bfc40`](https://github.com/bhklab/med-imagetools/commit/f9bfc4052751d42e4eed26a297946ccdfd293224))
+
+### Documentation
+
+- Add interlacer html demo to website
+  ([`bee79d4`](https://github.com/bhklab/med-imagetools/commit/bee79d44f03da339f5fb04d4e18ee2a35b59d9da))
+
+
 ## v2.0.0-rc.32 (2025-05-01)
 
 ### Chores
@@ -1029,6 +1058,51 @@ I also updated the `crop_image` function to call this before applying the crop.
 
 - Update lockfile
   ([`f3c4837`](https://github.com/bhklab/med-imagetools/commit/f3c4837e14ca692f68eba2f0d27c30cab2cf7a7c))
+
+
+## v1.23.2 (2025-02-07)
+
+### Bug Fixes
+
+- Add function to handle out of bounds coordinates for a RegionBox in an image
+  ([#221](https://github.com/bhklab/med-imagetools/pull/221),
+  [`155f59a`](https://github.com/bhklab/med-imagetools/commit/155f59aec7f2c625ab7cb4f90b97c203d4450abf))
+
+This works the same way as `_adjust_negative_coordinates`, but requires the image as an addition
+  input and modifies the RegionBox object directly.
+
+A message is logged in the debugger if a dimension is adjusted.
+
+I also updated the `crop_image` function to call this before applying the crop.
+
+
+## v1.23.1 (2025-02-07)
+
+### Bug Fixes
+
+- Handle odd extra dimension values in expand_to_min_size
+  ([#220](https://github.com/bhklab/med-imagetools/pull/220),
+  [`6eb58ea`](https://github.com/bhklab/med-imagetools/commit/6eb58eab110cabc7655372246870488f42c3daf8))
+
+
+## v1.23.0 (2025-02-07)
+
+### Features
+
+- Add desired_size to centroid bounding box generation
+  ([#219](https://github.com/bhklab/med-imagetools/pull/219),
+  [`30a129f`](https://github.com/bhklab/med-imagetools/commit/30a129ff47f94328c870c98681215e7561a7546a))
+
+In old version, bounding box was a single voxel. Now is expanded to at least the minimum dimension
+  default.
+
+- **New Features** - Now, users can optionally specify a desired size when generating image bounding
+  boxes for enhanced control.
+
+- **Chores** - Updated the software version from 1.21.1 to 1.22.0.
+
+
+## v1.22.0 (2025-02-07)
 
 ### Features
 
