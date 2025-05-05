@@ -65,7 +65,7 @@ class nnUNetPipeline:  # noqa: N801
             Directory to save the output nifti files
                existing_file_mode : ExistingFileMode
             How to handle existing files (FAIL, SKIP, OVERWRITE).
-        modalities : list[str] 
+        modalities : list[str]
             List of modalities to include
         roi_match_map : ROIMatcherInputs
             ROI matching patterns
@@ -88,15 +88,18 @@ class nnUNetPipeline:  # noqa: N801
         """
 
         # Validate modalities
-        allowed_modalities = [["CT", "SEG"], ["MR", "SEG"], ["CT", "RTSTRUCT"], ["MR", "RTSTRUCT"]]
+        allowed_modalities = [
+            ["CT", "SEG"],
+            ["MR", "SEG"],
+            ["CT", "RTSTRUCT"],
+            ["MR", "RTSTRUCT"],
+        ]
         if modalities not in allowed_modalities:
             msg = (
-                f"Invalid modalities: {",".join(modalities)}. "
-                f"Allowed combinations are: {[",".join(allowed) for allowed in allowed_modalities]}"
+                f"Invalid modalities: {','.join(modalities)}. "
+                f"Allowed combinations are: {[','.join(allowed) for allowed in allowed_modalities]}"
             )
-            raise ValueError(
-                msg
-            )
+            raise ValueError(msg)
 
         self.input = SampleInput.build(
             directory=Path(input_directory),

@@ -27,7 +27,7 @@ ROIMaskMapping = namedtuple(
 class TooManyComponentsError(ValueError):
     """Raised when attempting to encode a mask with more components than supported by the available integer types."""
 
-    def __init__(self, n_components: int, max_supported: int=32) -> None:
+    def __init__(self, n_components: int, max_supported: int = 32) -> None:
         msg = (
             f"Cannot encode masks with {n_components} components: "
             f"maximum supported is {max_supported} due to bitmask size limits."
@@ -236,10 +236,10 @@ class VectorMask(MedImage):
                 )
             else:
                 raise ValueError(
-                "Cannot convert to label image: overlap detected. "
-                "Use `to_sparse_mask()` for lossy conversion that resolves overlaps by label order."
-                "Or use `to_region_mask()` for lossless conversion that creates a new region per overlap."
-            )
+                    "Cannot convert to label image: overlap detected. "
+                    "Use `to_sparse_mask()` for lossy conversion that resolves overlaps by label order."
+                    "Or use `to_region_mask()` for lossless conversion that creates a new region per overlap."
+                )
 
         arr = sitk.GetArrayFromImage(self)
 
@@ -328,7 +328,7 @@ class VectorMask(MedImage):
         """
         n_components = self.GetNumberOfComponentsPerPixel()
         assert self.GetPixelID() == sitk.sitkVectorUInt8
-        assert len(self.roi_mapping) == n_components + 1  # +1 for background   
+        assert len(self.roi_mapping) == n_components + 1  # +1 for background
 
         if n_components <= 8:
             output_type = sitk.sitkUInt8

@@ -30,14 +30,15 @@ from imgtools.utils.nnunet import (
 __all__ = ["nnUNetOutput", "MaskSavingStrategy"]
 
 
-class nnUNetOutputError(Exception): # noqa: N801
+class nnUNetOutputError(Exception):  # noqa: N801
     """Base class for errors related to sample data."""
+
     pass
 
 
 class NoSegmentationImagesError(nnUNetOutputError):
     """Raised when no segmentation images are found in a sample."""
-    
+
     def __init__(self, sample_number: str) -> None:
         msg = f"No segmentation images found in sample {sample_number}"
         super().__init__(msg)
@@ -46,8 +47,13 @@ class NoSegmentationImagesError(nnUNetOutputError):
 
 class MissingROIsError(nnUNetOutputError):
     """Raised when a VectorMask does not contain all required ROI keys."""
-    
-    def __init__(self, sample_number: str, expected_rois: list[str], found_rois: list[list[str]]) -> None:
+
+    def __init__(
+        self,
+        sample_number: str,
+        expected_rois: list[str],
+        found_rois: list[list[str]],
+    ) -> None:
         msg = (
             f"Not all required ROI names found in sample {sample_number}. "
             f"Expected: {expected_rois}. Found: {found_rois}"
@@ -206,9 +212,11 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         if self._writer is None:
             raise ValueError("Writer is not initialized.")
         return self._writer
-    
+
     def _get_valid_masks(
-        self, data: Sequence[MedImage], SampleNumber: str # noqa: N803
+        self,
+        data: Sequence[MedImage],
+        SampleNumber: str,  # noqa: N803
     ) -> list[VectorMask]:
         """
         Get the valid VectorMask instances from the data.
@@ -233,21 +241,22 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         valid_masks: list[VectorMask] = []
 
         for image in data:
-            if (isinstance(image, VectorMask) and
-                    all(roi_key in image.roi_keys for roi_key in self.roi_keys)):
+            if isinstance(image, VectorMask) and all(
+                roi_key in image.roi_keys for roi_key in self.roi_keys
+            ):
                 valid_masks.append(image)
 
         if not valid_masks:
             raise MissingROIsError(
                 SampleNumber,
                 self.roi_keys,
-                [img.roi_keys for img in data if isinstance(img, VectorMask)]
+                [img.roi_keys for img in data if isinstance(img, VectorMask)],
             )
 
         if len(valid_masks) > 1:
             logger.warning(
                 "Multiple valid segmentations found in sample %s. Picking the first one.",
-                SampleNumber
+                SampleNumber,
             )
 
         return valid_masks
@@ -327,10 +336,10 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         """
 
         valid_masks = self._get_valid_masks(data, SampleNumber)
-        selected_mask = valid_masks[0] # Select the first valid mask
+        selected_mask = valid_masks[0]  # Select the first valid mask
 
         saved_files = []
-        
+
         match self.mask_saving_strategy:
             case MaskSavingStrategy.LABEL_IMAGE:
                 mask = selected_mask.to_label_image()
@@ -341,9 +350,9 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             case _:
                 msg = f"Unknown mask saving strategy: {self.mask_saving_strategy}"
                 raise MaskSavingStrategyError(msg)
-            
+
         roi_match_data = {
-            f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names) 
+            f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names)
             for rmap in selected_mask.roi_mapping.values()
         }
 
@@ -353,7 +362,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             SplitType="Tr",
             SampleID=SampleNumber,
             Dataset=self.dataset_name,
-            **roi_match_data, 
+            **roi_match_data,
             **selected_mask.metadata,
             **kwargs,
         )
@@ -381,7 +390,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
                 )
                 logger.error(errmsg)
                 raise TypeError(errmsg)
-            
+
         return saved_files
 
 
