@@ -135,7 +135,7 @@ def nnunet_pipeline(
 ) -> None:
     """Process medical images in nnUNet format.
     
-    This command allows you to process medical images in a directory structure,
+    This command allows you to process medical images in the nnUNet directory structure,
     apply transformations, and save the results to a specified output directory.
 
     \b
