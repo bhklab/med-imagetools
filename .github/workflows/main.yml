@@ -4,20 +4,19 @@ name: CI-CD
 on:
     pull_request:
         branches:
-          - "development"
-          - "main"
-          - "jjjermiah/*"
+            - "development"
+            - "main"
+            - "jjjermiah/*"
     push:
         branches:
-          - "development"
-          - "main"
+            - "development"
+            - "main"
 
 concurrency:
     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 
 jobs:
-
     ###############################################################################################
     # Unit-Tests: Run unit tests using pytest
     ################################################################################################
@@ -100,24 +99,10 @@ jobs:
                   set -eu pipefail
                   pixi run -e test ruff-check --fix --unsafe-fixes --exit-non-zero-on-fix
 
-            - name: Post ruff lint suggestions
-              uses: reviewdog/action-suggester@v1
-              with:
-                  tool_name: ruff-lint
-                  fail_level: none
-                  filter_mode: added
-
             - name: Run ruff format
               id: ruff_format
               run: |
-                  pixi run -e test ruff-format --exit-non-zero-on-format
-
-            - name: Post ruff format suggestions
-              uses: reviewdog/action-suggester@v1
-              with:
-                  tool_name: ruff-format
-                  fail_level: none
-                  filter_mode: diff_context
+                  pixi run -e test ruff-format --diff
 
             - name: Run mypy check
               id: mypy
@@ -255,7 +240,7 @@ jobs:
         needs: Continuous-Deployment
         if: github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
-        
+
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
@@ -274,7 +259,7 @@ jobs:
             - name: Install Pixi
               uses: prefix-dev/setup-pixi@v0.8.8
               with:
-                  environments: "py313" 
+                  environments: "py313"
                   pixi-version: v0.46.0
                   cache: true
                   locked: false
@@ -374,4 +359,3 @@ jobs:
                       GIT_COMMIT=${{ github.sha }}
                       BUILD_DATE=${{ steps.meta.outputs.build_date }}
                   provenance: false
-
