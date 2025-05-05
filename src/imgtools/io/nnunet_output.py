@@ -68,7 +68,7 @@ class MaskSavingStrategy(str, Enum):
     LABEL_IMAGE : str
         No overlaps allowed.
     SPARSE_MASK : str
-        Allows overlaps, but is lossy due to argmax.
+        Allows overlaps, but is lossy if overlaps exist.
     REGION_MASK : str
         Work around that creates a new region for each overlap.
     """

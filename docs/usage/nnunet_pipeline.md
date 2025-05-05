@@ -12,11 +12,24 @@ It's fast, reproducible, and designed for segmentation workflows using CT/MR wit
 `nnUNet` is the standard for training deep automated segmentation models on medical images.
 
 `nnUNetPipeline`:
+
 - Crawls and indexes DICOM files
 - Links scans to associated segmentations
 - Applies optional transforms (e.g., resample, window/level)
 - Matches ROI labels to your standard keys
 - Outputs clean NIfTI files for training with `nnUNet`
+
+---
+
+## Comparison to `AutoPipeline`
+
+| Feature                     | `nnUNetPipeline`                                   | `Autopipeline`                                         |
+|-----------------------------|----------------------------------------------------|--------------------------------------------------------|
+| **Primary Use Case**         | Converts clinical DICOMs into nnUNet-ready        | General-purpose medical image processing               |
+| **Modalities**               | Specific pairs of CT/MR with `RTSTRUCT` or `SEG`  | Flexible, supports any modality list                   |
+| **ROI Matching**             | Requires `roi_match_map` for nnUNet compatibility | Optional, with more flexibility for handling ROIs      |
+| **Mask Saving Strategy**     | Uses `MaskSavingStrategy` (e.g., `sparse_mask`)    | Saves each ROI as a separate mask file                |
+| **ROI Strategy**             | `ROIMatchStrategy.MERGE` for overlaps              | Default is `ROIMatchStrategy.SEPARATE`                |
 
 ---
 
@@ -48,8 +61,10 @@ When converting segmentations (e.g., from `RTSTRUCT` or `SEG`) into NIfTI masks 
 
 - **Single-channel label image**  
 - Each voxel contains an integer label corresponding to a single region.
-- **Overlaps allowed**, but only one region can be selected per voxel in downstream pipelines due to the `argmax` operation.
-- **Lossy** if ROIs overlap, since overlap information is collapsed during training.
+- **Overlapping regions are allowed** in the input, but only one label is assigned per voxel in the output.
+- When overlaps occur, the label from the **last matching region (highest index)** is assigned, and earlier labels are overwritten.
+- User can decide the order when passing in ROI map.
+- **Lossy** if regions overlap, since only one region label is retained per voxel and all others are discarded.
 
 ---
 
@@ -72,13 +87,13 @@ Imagine you have three regions of interest (ROIs):
 
 Each voxel in the mask encodes a combination of these ROIs using **bitwise addition**.
 
-| Voxel Location | Present ROIs           | Bitmask Calculation         | Encoded Value |
-|----------------|------------------------|-----------------------------|---------------|
-| (10, 30, 40)   | GTV                    | `2^0`                       | 1             |
-| (12, 30, 40)   | Cord                   | `2^1`                       | 2             |
-| (15, 30, 40)   | Parotid_L              | `2^2`                       | 4             |
-| (17, 30, 40)   | GTV + Parotid_L        | `2^0 + 2^2 = 1 + 4`         | 5             |
-| (20, 30, 40)   | GTV + Cord + Parotid_L | `1 + 2 + 4 = 7`             | 7             |
+| Voxel Location | Present ROIs           | Bitmask Calculation                 | Encoded Value |
+|----------------|------------------------|-------------------------------------|---------------|
+| (10, 30, 40)   | GTV                    | `2^0`                               | 1             |
+| (12, 30, 40)   | Cord                   | `2^1`                               | 2             |
+| (15, 30, 40)   | Parotid_L              | `2^2`                               | 4             |
+| (17, 30, 40)   | GTV + Parotid_L        | `2^0 + 2^2 = 2^0 + 2^2 = 1 + 4`     | 5             |
+| (20, 30, 40)   | GTV + Cord + Parotid_L | `2^0 + 2^1 + 2^2 = 1 + 2 + 4`       | 7             |
 
 ---
 

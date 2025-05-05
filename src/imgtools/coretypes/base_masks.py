@@ -212,8 +212,8 @@ class VectorMask(MedImage):
         Parameters
         ----------
         allow_overlap : bool
-            If True, overlapping voxels are allowed and resolved using priority (argmax-style).
-            If False, will raise ValueError if overlaps are found.
+            If True, overlapping voxels are allowed and resolved by assigning the label of the highest-index region.
+            If False, a ValueError is raised if overlaps are found.
 
         Returns
         -------
@@ -236,9 +236,10 @@ class VectorMask(MedImage):
                 )
             else:
                 raise ValueError(
-                    "Cannot convert to label image: overlap detected. "
-                    "Use `to_sparse_mask()` instead if you want lossy argmax conversion."
-                )
+                "Cannot convert to label image: overlap detected. "
+                "Use `to_sparse_mask()` for lossy conversion that resolves overlaps by label order."
+                "Or use `to_region_mask()` for lossless conversion that creates a new region per overlap."
+            )
 
         arr = sitk.GetArrayFromImage(self)
 
@@ -258,11 +259,11 @@ class VectorMask(MedImage):
         )
 
     def to_sparse_mask(self) -> Mask:
-        """Convert the vector mask to a single-channel binary mask via argmax operation.
+        """Convert the vector mask to a single-channel binary mass.
 
         Creates a sparse representation where each voxel is assigned to exactly one class,
         even if there are overlaps in the original vector mask. In case of overlaps,
-        the mask with the lowest index (highest priority) is chosen.
+        the mask with the highest index is chosen.
 
         Returns
         -------
