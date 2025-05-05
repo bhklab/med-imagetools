@@ -90,9 +90,12 @@ class nnUNetPipeline:  # noqa: N801
         # Validate modalities
         allowed_modalities = [["CT", "SEG"], ["MR", "SEG"], ["CT", "RTSTRUCT"], ["MR", "RTSTRUCT"]]
         if modalities not in allowed_modalities:
-            raise ValueError(
+            msg = (
                 f"Invalid modalities: {",".join(modalities)}. "
                 f"Allowed combinations are: {[",".join(allowed) for allowed in allowed_modalities]}"
+            )
+            raise ValueError(
+                msg
             )
 
         self.input = SampleInput.build(

@@ -2,7 +2,6 @@ import json
 import pathlib
 from typing import Dict, Tuple
 
-
 MODALITY_MAP = {
     "CT": "0000",
     "MR": "0001",
@@ -74,7 +73,7 @@ done
 def generate_dataset_json(
     output_folder: pathlib.Path | str,
     channel_names: Dict[str, str],
-    labels: Dict[str, int],
+    labels: Dict[str, int | list[int]],
     num_training_cases: int,
     file_ending: str,
     regions_class_order: Tuple[int, ...] | None = None,

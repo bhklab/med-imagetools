@@ -1,8 +1,9 @@
-import click
-import yaml
 from pathlib import Path
 from typing import Tuple
-from enum import Enum
+
+import click
+import yaml
+
 from imgtools.loggers import logger
 
 # TODO:: think of a smarter way to handle this,
@@ -11,7 +12,7 @@ from imgtools.loggers import logger
 # Redfining these here to lazy load them later
 
 
-def parse_spacing(ctx, param, value): # type: ignore
+def parse_spacing(ctx, param, value): # type: ignore # noqa
     """Parse spacing as a tuple of floats."""
     if not value:
         return (0.0, 0.0, 0.0)
@@ -21,7 +22,7 @@ def parse_spacing(ctx, param, value): # type: ignore
             raise click.BadParameter("Spacing must be three comma-separated values")
         return tuple(float(p) for p in parts)
     except ValueError:
-        raise click.BadParameter("Spacing values must be valid floats")
+        raise click.BadParameter("Spacing values must be valid floats") from ValueError
 
 
 existing_file_modes = ["overwrite", "skip", "fail"]
@@ -159,19 +160,20 @@ def nnunet_pipeline(
     
     # Load from YAML file if provided
     try:
-        with open(roi_match_yaml, 'r') as f:
+        with roi_match_yaml.open('r') as f:
             yaml_data = yaml.safe_load(f)
             if not isinstance(yaml_data, dict):
                 raise click.BadParameter("ROI match YAML must contain a dictionary")
             roi_map = yaml_data
     except Exception as e:
-        raise click.BadParameter(f"Error reading ROI match YAML file: {str(e)}") from e 
+        msg = f"Error reading ROI match YAML file: {str(e)}"
+        raise click.BadParameter(msg) from e 
 
     logger.debug(f"ROI match map: {roi_map}")
 
-    from imgtools.nnunet_pipeline import nnUNetPipeline
     from imgtools.io.nnunet_output import MaskSavingStrategy
     from imgtools.io.sample_output import ExistingFileMode
+    from imgtools.nnunet_pipeline import nnUNetPipeline
     # Create the pipeline
     pipeline = nnUNetPipeline(
         input_directory=input_directory,
@@ -191,7 +193,7 @@ def nnunet_pipeline(
     
     # Run the pipeline
     try:
-        results = pipeline.run()
+        _ = pipeline.run()
     except Exception as e:
         logger.exception(f"Error running pipeline: {str(e)}")
         raise click.Abort() from e

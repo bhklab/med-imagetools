@@ -27,7 +27,7 @@ ROIMaskMapping = namedtuple(
 class TooManyComponentsError(ValueError):
     """Raised when attempting to encode a mask with more components than supported by the available integer types."""
 
-    def __init__(self, n_components, max_supported=32):
+    def __init__(self, n_components: int, max_supported: int=32) -> None:
         msg = (
             f"Cannot encode masks with {n_components} components: "
             f"maximum supported is {max_supported} due to bitmask size limits."

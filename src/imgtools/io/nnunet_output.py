@@ -27,11 +27,10 @@ from imgtools.utils.nnunet import (
     generate_nnunet_scripts,
 )
 
-
 __all__ = ["nnUNetOutput", "MaskSavingStrategy"]
 
 
-class nnUNetOutputError(Exception):
+class nnUNetOutputError(Exception): # noqa: N801
     """Base class for errors related to sample data."""
     pass
 
@@ -39,7 +38,7 @@ class nnUNetOutputError(Exception):
 class NoSegmentationImagesError(nnUNetOutputError):
     """Raised when no segmentation images are found in a sample."""
     
-    def __init__(self, sample_number):
+    def __init__(self, sample_number: str) -> None:
         msg = f"No segmentation images found in sample {sample_number}"
         super().__init__(msg)
         self.sample_number = sample_number
@@ -48,7 +47,7 @@ class NoSegmentationImagesError(nnUNetOutputError):
 class MissingROIsError(nnUNetOutputError):
     """Raised when a VectorMask does not contain all required ROI keys."""
     
-    def __init__(self, sample_number, expected_rois, found_rois):
+    def __init__(self, sample_number: str, expected_rois: list[str], found_rois: list[list[str]]) -> None:
         msg = (
             f"Not all required ROI names found in sample {sample_number}. "
             f"Expected: {expected_rois}. Found: {found_rois}"
@@ -78,7 +77,7 @@ class MaskSavingStrategy(str, Enum):
     REGION_MASK = "region_mask"
 
 
-class MaskSavingStrategyError(ValueError):
+class MaskSavingStrategyError(nnUNetOutputError):
     """Raised when an invalid mask saving strategy is provided."""
 
 
@@ -196,6 +195,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             directory=Path("output"),
             dataset_name="Dataset",
             roi_keys=["ROI_1", "ROI_2"],
+            mask_saving_strategy=MaskSavingStrategy.LABEL_IMAGE,
             existing_file_mode=ExistingFileMode.FAIL,
             extra_context={},
         )
@@ -206,6 +206,51 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         if self._writer is None:
             raise ValueError("Writer is not initialized.")
         return self._writer
+    
+    def _get_valid_masks(
+        self, data: Sequence[MedImage], SampleNumber: str # noqa: N803
+    ) -> list[VectorMask]:
+        """
+        Get the valid VectorMask instances from the data.
+
+        A valid VectorMask is one that contains all required ROI keys.
+
+        Parameters
+        ----------
+        data : List[MedImage]
+            List of medical images to search for valid VectorMasks.
+        SampleNumber : str
+            The sample number for error reporting.
+
+        Returns
+        -------
+        List[VectorMask]
+            List of valid VectorMask instances.
+        """
+        if not any(isinstance(image, VectorMask) for image in data):
+            raise NoSegmentationImagesError(SampleNumber)
+
+        valid_masks: list[VectorMask] = []
+
+        for image in data:
+            if (isinstance(image, VectorMask) and
+                    all(roi_key in image.roi_keys for roi_key in self.roi_keys)):
+                valid_masks.append(image)
+
+        if not valid_masks:
+            raise MissingROIsError(
+                SampleNumber,
+                self.roi_keys,
+                [img.roi_keys for img in data if isinstance(img, VectorMask)]
+            )
+
+        if len(valid_masks) > 1:
+            logger.warning(
+                "Multiple valid segmentations found in sample %s. Picking the first one.",
+                SampleNumber
+            )
+
+        return valid_masks
 
     def finalize_dataset(self) -> None:
         """Finalize dataset by generating preprocessing scripts and dataset JSON configuration."""
@@ -230,7 +275,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         )
 
         # Construct labels
-        labels = {"background": 0}
+        labels: dict[str, int | list[int]] = {"background": 0}
         if self.mask_saving_strategy == "region_mask":
             n_components = len(self.roi_keys)
             max_val = 2**n_components
@@ -242,7 +287,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
                     if (value >> component_index) & 1
                 ]
                 labels[self.roi_keys[component_index]] = indices
-            regions_class_order = [idx + 1 for idx in range(n_components)]
+            regions_class_order = tuple(idx + 1 for idx in range(n_components))
         else:
             labels = {
                 **{label: i + 1 for i, label in enumerate(self.roi_keys)},
@@ -281,28 +326,8 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             List of paths to the saved files.
         """
 
-        if not any(isinstance(image, VectorMask) for image in data):
-            raise NoSegmentationImagesError(SampleNumber)
-        
-        valid_masks: list[VectorMask] = []
-
-        for image in data:
-            if isinstance(image, VectorMask):
-                if all(roi_key in image.roi_keys for roi_key in self.roi_keys):
-                    valid_masks.append(image)
-
-        if not valid_masks:
-            raise MissingROIsError(
-                SampleNumber, 
-                self.roi_keys, 
-                [img.roi_keys for img in data if isinstance(img, VectorMask)]
-            )
-
-        if len(valid_masks) > 1:
-            logger.warning("Multiple valid segmentations found in sample %s. Picking the first one.", SampleNumber)
-
-        # Select the first valid mask
-        selected_mask = valid_masks[0]
+        valid_masks = self._get_valid_masks(data, SampleNumber)
+        selected_mask = valid_masks[0] # Select the first valid mask
 
         saved_files = []
         
@@ -329,7 +354,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             SampleID=SampleNumber,
             Dataset=self.dataset_name,
             **roi_match_data, 
-            **image.metadata,
+            **selected_mask.metadata,
             **kwargs,
         )
         saved_files.append(p)
