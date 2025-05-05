@@ -13,7 +13,7 @@ from pydantic import (
     field_validator,
 )
 
-from imgtools.coretypes import MedImage, VectorMask
+from imgtools.coretypes import MedImage, Scan, VectorMask
 from imgtools.io.validators import validate_directory
 from imgtools.io.writers import (
     AbstractBaseWriter,
@@ -27,7 +27,36 @@ from imgtools.utils.nnunet import (
     generate_nnunet_scripts,
 )
 
-__all__ = ["nnUNetOutput"]
+
+__all__ = ["nnUNetOutput", "MaskSavingStrategy"]
+
+
+class nnUNetOutputError(Exception):
+    """Base class for errors related to sample data."""
+    pass
+
+
+class NoSegmentationImagesError(nnUNetOutputError):
+    """Raised when no segmentation images are found in a sample."""
+    
+    def __init__(self, sample_number):
+        msg = f"No segmentation images found in sample {sample_number}"
+        super().__init__(msg)
+        self.sample_number = sample_number
+
+
+class MissingROIsError(nnUNetOutputError):
+    """Raised when a VectorMask does not contain all required ROI keys."""
+    
+    def __init__(self, sample_number, expected_rois, found_rois):
+        msg = (
+            f"Not all required ROI names found in sample {sample_number}. "
+            f"Expected: {expected_rois}. Found: {found_rois}"
+        )
+        super().__init__(msg)
+        self.sample_number = sample_number
+        self.expected_rois = expected_rois
+        self.found_rois = found_rois
 
 
 class MaskSavingStrategy(str, Enum):
@@ -100,7 +129,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         examples=["label_image", "sparse_mask", "region_mask"],
     )
     existing_file_mode: ExistingFileMode = Field(
-        ExistingFileMode.FAIL,
+        ExistingFileMode.OVERWRITE,
         description="How to handle existing files: FAIL (raise error), SKIP (don't overwrite), or OVERWRITE (replace existing files).",
         title="Existing File Handling",
     )
@@ -249,44 +278,61 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         """
 
         if not any(isinstance(image, VectorMask) for image in data):
-            # Usually happens when none of the roi names match
-            msg = f"No segmentation images found in sample {SampleNumber}"
-            raise ValueError(msg)
+            raise NoSegmentationImagesError(SampleNumber)
+        
+        valid_masks: list[VectorMask] = []
 
-        for image in data:
-            if isinstance(image, VectorMask) and not all(
-                roi_key in image.roi_keys for roi_key in self.roi_keys
-            ):
-                msg = f"Not all required roi names found in sample {SampleNumber}. Expected: {self.roi_keys}. Found: {image.roi_keys}"
-                raise ValueError(msg)
-
-        saved_files = []
         for image in data:
             if isinstance(image, VectorMask):
-                match self.mask_saving_strategy:
-                    case MaskSavingStrategy.LABEL_IMAGE:
-                        mask = image.to_label_image()
-                    case MaskSavingStrategy.SPARSE_MASK:
-                        mask = image.to_sparse_mask()
-                    case MaskSavingStrategy.REGION_MASK:
-                        mask = image.to_region_mask()
-                    case _:
-                        msg = f"Unknown mask saving strategy: {self.mask_saving_strategy}"
-                        raise ValueError(msg)
+                if all(roi_key in image.roi_keys for roi_key in self.roi_keys):
+                    valid_masks.append(image)
 
-                p = self.writer.save(
-                    mask,
-                    DirType="labels",
-                    SplitType="Tr",
-                    SampleID=SampleNumber,
-                    Dataset=self.dataset_name,
-                    **image.metadata,
-                    **kwargs,
-                )
-                saved_files.append(p)
+        if not valid_masks:
+            raise MissingROIsError(
+                SampleNumber, 
+                self.roi_keys, 
+                [img.roi_keys for img in data if isinstance(img, VectorMask)]
+            )
 
-            elif isinstance(image, MedImage):
-                # Handle MedImage case
+        if len(valid_masks) > 1:
+            logger.warning("Multiple valid segmentations found in sample %s. Picking the first one.", SampleNumber)
+
+        # Select the first valid mask
+        selected_mask = valid_masks[0]
+
+        saved_files = []
+        
+        match self.mask_saving_strategy:
+            case MaskSavingStrategy.LABEL_IMAGE:
+                mask = selected_mask.to_label_image()
+            case MaskSavingStrategy.SPARSE_MASK:
+                mask = selected_mask.to_sparse_mask()
+            case MaskSavingStrategy.REGION_MASK:
+                mask = selected_mask.to_region_mask()
+            case _:
+                msg = f"Unknown mask saving strategy: {self.mask_saving_strategy}"
+                raise ValueError(msg)
+            
+        roi_match_data = {
+            f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names) 
+            for rmap in selected_mask.roi_mapping.values()
+        }
+
+        p = self.writer.save(
+            mask,
+            DirType="labels",
+            SplitType="Tr",
+            SampleID=SampleNumber,
+            Dataset=self.dataset_name,
+            **roi_match_data, 
+            **image.metadata,
+            **kwargs,
+        )
+        saved_files.append(p)
+
+        for image in data:
+            if isinstance(image, Scan):
+                # Handle Scan case(CT or MR)
                 p = self.writer.save(
                     image,
                     DirType="images",
@@ -297,13 +343,16 @@ class nnUNetOutput(BaseModel):  # noqa: N801
                     **kwargs,
                 )
                 saved_files.append(p)
+            elif isinstance(image, VectorMask):
+                pass
             else:
                 errmsg = (
                     f"Unsupported image type: {type(image)}. "
-                    "Expected MedImage or VectorMask."
+                    "Expected Scan or VectorMask."
                 )
                 logger.error(errmsg)
                 raise TypeError(errmsg)
+            
         return saved_files
 
 

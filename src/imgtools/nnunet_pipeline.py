@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_medimage import MedImage
 
 
-class nnUNetpipeline:  # noqa: N801
+class nnUNetPipeline:  # noqa: N801
     """Pipeline for processing medical images in nnUNet format."""
 
     input: SampleInput
@@ -42,12 +42,12 @@ class nnUNetpipeline:  # noqa: N801
         self,
         input_directory: str | Path,
         output_directory: str | Path,
+        modalities: list[str],
         roi_match_map: ROIMatcherInputs,
-        mask_saving_strategy: MaskSavingStrategy = MaskSavingStrategy.LABEL_IMAGE,  # SHOULD THIS BE THE DEFAULT????
+        mask_saving_strategy: MaskSavingStrategy,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
         n_jobs: int | None = None,
-        modalities: list[str] | None = None,
         roi_ignore_case: bool = True,
         roi_allow_multi_key_matches: bool = True,
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
@@ -55,7 +55,7 @@ class nnUNetpipeline:  # noqa: N801
         level: float | None = None,
     ) -> None:
         """
-        Initialize the Autopipeline.
+        Initialize the nnUNetpipeline.
 
         Parameters
         ----------
@@ -65,16 +65,16 @@ class nnUNetpipeline:  # noqa: N801
             Directory to save the output nifti files
                existing_file_mode : ExistingFileMode
             How to handle existing files (FAIL, SKIP, OVERWRITE).
+        modalities : list[str] 
+            List of modalities to include
         roi_match_map : ROIMatcherInputs
-            ROI matching patterns, by default None
-        mask_saving_strategy : MaskSavingStrategy, optional
-            Mask saving strategy, by default MaskSavingStrategy.LABEL_IMAGE
+            ROI matching patterns
+        mask_saving_strategy : MaskSavingStrategy
+            Mask saving strateg
         update_crawl : bool, optional
             Whether to force recrawling, by default False
         n_jobs : int | None, optional
             Number of parallel jobs, by default None (uses CPU count - 2)
-        modalities : list[str] | None, optional
-            List of modalities to include, by default None (all)
         roi_ignore_case : bool, optional
             Whether to ignore case in ROI matching, by default True
         roi_allow_multi_key_matches : bool, optional
@@ -86,6 +86,14 @@ class nnUNetpipeline:  # noqa: N801
         level : float | None, optional
             Window level for intensity normalization, by default None
         """
+
+        # Validate modalities
+        allowed_modalities = [["CT", "SEG"], ["MR", "SEG"], ["CT", "RTSTRUCT"], ["MR", "RTSTRUCT"]]
+        if modalities not in allowed_modalities:
+            raise ValueError(
+                f"Invalid modalities: {",".join(modalities)}. "
+                f"Allowed combinations are: {[",".join(allowed) for allowed in allowed_modalities]}"
+            )
 
         self.input = SampleInput.build(
             directory=Path(input_directory),
@@ -242,7 +250,7 @@ class nnUNetpipeline:  # noqa: N801
         """
         yield "SampleInput", self.input
         yield "Transformer", self.transformer
-        yield "SampleOutput", self.output
+        yield "nnUNetOutput", self.output
 
 
 if __name__ == "__main__":
@@ -252,14 +260,14 @@ if __name__ == "__main__":
     dataset_name = "RADCURE"
 
     # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
-    output_path = Path(f"temp_outputs/{dataset_name}")
+    output_path = Path("temp_outputs") / dataset_name
     output_path.mkdir(exist_ok=True, parents=True)
-    pipeline = nnUNetpipeline(
+    pipeline = nnUNetPipeline(
         input_directory=f"data/{dataset_name}",
         output_directory=output_path,
         existing_file_mode=ExistingFileMode.OVERWRITE,
         n_jobs=10,
-        modalities=["CT,RTSTRUCT"],
+        modalities=["CT", "RTSTRUCT"],
         roi_match_map={
             "BRAIN": ["Brain"],
             "BRAINSTEM": ["Brainstem"],
@@ -269,4 +277,4 @@ if __name__ == "__main__":
 
     print(pipeline)
     results = pipeline.run()
-    print(f"Results: {results}")
+    # print(f"Results: {results}")

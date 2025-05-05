@@ -2,10 +2,10 @@ import json
 import pathlib
 from typing import Dict, Tuple
 
+
 MODALITY_MAP = {
     "CT": "0000",
     "MR": "0001",
-    "PET": "0002",
 }
 
 

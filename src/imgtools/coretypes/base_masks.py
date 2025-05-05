@@ -24,6 +24,19 @@ ROIMaskMapping = namedtuple(
 )
 
 
+class TooManyComponentsError(ValueError):
+    """Raised when attempting to encode a mask with more components than supported by the available integer types."""
+
+    def __init__(self, n_components, max_supported=32):
+        msg = (
+            f"Cannot encode masks with {n_components} components: "
+            f"maximum supported is {max_supported} due to bitmask size limits."
+        )
+        super().__init__(msg)
+        self.n_components = n_components
+        self.max_supported = max_supported
+
+
 class VectorMask(MedImage):
     """A multi-label binary mask image with vector pixels (sitkVectorUInt8).
 
@@ -314,14 +327,23 @@ class VectorMask(MedImage):
         """
         n_components = self.GetNumberOfComponentsPerPixel()
         assert self.GetPixelID() == sitk.sitkVectorUInt8
-        assert len(self.roi_mapping) == n_components + 1  # +1 for background
+        assert len(self.roi_mapping) == n_components + 1  # +1 for background   
 
-        label_image = sitk.Image(self.GetSize(), sitk.sitkUInt32)
+        if n_components <= 8:
+            output_type = sitk.sitkUInt8
+        elif n_components <= 16:
+            output_type = sitk.sitkUInt16
+        elif n_components <= 32:
+            output_type = sitk.sitkUInt32
+        else:
+            raise TooManyComponentsError(n_components)
+
+        label_image = sitk.Image(self.GetSize(), output_type)
         label_image.CopyInformation(self)
 
         for i in range(n_components):
             component = sitk.VectorIndexSelectionCast(
-                self, i, outputPixelType=sitk.sitkUInt32
+                self, i, outputPixelType=output_type
             )
             shifted = sitk.ShiftScale(component, shift=0, scale=2**i)
             label_image += shifted
