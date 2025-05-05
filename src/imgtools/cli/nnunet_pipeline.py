@@ -24,6 +24,9 @@ def parse_spacing(ctx, param, value): # type: ignore
         raise click.BadParameter("Spacing values must be valid floats")
 
 
+existing_file_modes = ["overwrite", "skip", "fail"]
+
+
 @click.command(no_args_is_help=True)
 @click.argument(
     "input_directory",
@@ -60,6 +63,12 @@ def parse_spacing(ctx, param, value): # type: ignore
     type=str,
     default="label_image",
     help="Strategy for saving masks. Can be 'label_image' or 'sparse_mask' or 'region_mask'"
+)
+@click.option(
+    "--existing-file-mode", 
+    type=click.Choice(existing_file_modes), 
+    default="fail",
+    help="How to handle existing files"
 )
 @click.option(
     "--update-crawl", 
@@ -115,6 +124,7 @@ def nnunet_pipeline(
     modalities: str,
     roi_match_yaml: Path,
     mask_saving_strategy: str,
+    existing_file_mode: str,
     update_crawl: bool,
     jobs: int,
     spacing: Tuple[float, float, float],
@@ -161,6 +171,7 @@ def nnunet_pipeline(
 
     from imgtools.nnunet_pipeline import nnUNetPipeline
     from imgtools.io.nnunet_output import MaskSavingStrategy
+    from imgtools.io.sample_output import ExistingFileMode
     # Create the pipeline
     pipeline = nnUNetPipeline(
         input_directory=input_directory,
@@ -168,6 +179,7 @@ def nnunet_pipeline(
         modalities=list(modalities.split(",")),
         roi_match_map=roi_map,
         mask_saving_strategy=MaskSavingStrategy(mask_saving_strategy),
+        existing_file_mode=ExistingFileMode[existing_file_mode.upper()],
         update_crawl=update_crawl,
         n_jobs=jobs,
         roi_ignore_case=roi_ignore_case,

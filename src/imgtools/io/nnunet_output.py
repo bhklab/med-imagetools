@@ -78,6 +78,10 @@ class MaskSavingStrategy(str, Enum):
     REGION_MASK = "region_mask"
 
 
+class MaskSavingStrategyError(ValueError):
+    """Raised when an invalid mask saving strategy is provided."""
+
+
 class nnUNetOutput(BaseModel):  # noqa: N801
     """
     Configuration model for saving medical imaging outputs in nnUNet format.
@@ -311,7 +315,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
                 mask = selected_mask.to_region_mask()
             case _:
                 msg = f"Unknown mask saving strategy: {self.mask_saving_strategy}"
-                raise ValueError(msg)
+                raise MaskSavingStrategyError(msg)
             
         roi_match_data = {
             f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names) 

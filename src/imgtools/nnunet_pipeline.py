@@ -211,7 +211,8 @@ class nnUNetPipeline:  # noqa: N801
         )
 
         # Finalize output(Generate dataset.json and nnUNet scripts)
-        self.output.finalize_dataset()
+        if success_count > 0:
+            self.output.finalize_dataset()
 
         index_file = self.output.writer.index_file
         # TODO:: discuss how we want to name these files
