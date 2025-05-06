@@ -285,7 +285,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
 
         # Construct labels
         labels: dict[str, int | list[int]] = {"background": 0}
-        if self.mask_saving_strategy == "region_mask":
+        if self.mask_saving_strategy is MaskSavingStrategy.REGION_MASK:
             n_components = len(self.roi_keys)
             max_val = 2**n_components
 

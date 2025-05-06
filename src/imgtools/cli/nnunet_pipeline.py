@@ -59,11 +59,11 @@ existing_file_modes = ["overwrite", "skip", "fail"]
     help="Path to YAML file containing ROI matching patterns."
 )
 @click.option(
-    "--mask-saving-strategy", 
-    "-ms", 
-    type=str,
+    "--mask-saving-strategy",
+    "-ms",
+    type=click.Choice(["label_image", "sparse_mask", "region_mask"]),
     default="label_image",
-    help="Strategy for saving masks. Can be 'label_image' or 'sparse_mask' or 'region_mask'"
+    help="Strategy for saving masks."
 )
 @click.option(
     "--existing-file-mode", 

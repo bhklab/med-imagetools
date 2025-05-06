@@ -50,6 +50,9 @@ nnUNetv2_plan_and_preprocess -d {dataset_id} --verify_dataset_integrity -c 3d_fu
     with preprocess_shell_path.open("w", newline="\n") as f:
         f.write(preprocess_script_content)
 
+    # Make script executable
+    preprocess_shell_path.chmod(preprocess_shell_path.stat().st_mode | 0o111)
+
     # Training script content
     train_script_content = f"""#!/bin/bash
 set -e
@@ -68,6 +71,9 @@ done
     # Write the training script
     with train_shell_path.open("w", newline="\n") as f:
         f.write(train_script_content)
+
+    # Make script executable
+    train_shell_path.chmod(train_shell_path.stat().st_mode | 0o111)
 
 
 def generate_dataset_json(
