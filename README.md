@@ -63,8 +63,12 @@ eventually torch dataloader for ML pipeline.
 
 ```console
 pip install med-imagetools
+imgtools --help
 ```
 
+```console
+uvx --from 'med-imagetools[all]' imgtools --help
+```
 
 ## Repository Stars
 
