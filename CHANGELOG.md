@@ -1,6 +1,36 @@
 # CHANGELOG
 
 
+## v2.3.0 (2025-05-08)
+
+### Bug Fixes
+
+- Correct formatting of allowed modalities validation in nnUNetPipeline
+  ([`5baf828`](https://github.com/bhklab/med-imagetools/commit/5baf82859cea52da0d3c2cc0fc4b23f3a76e28fd))
+
+### Features
+
+- Add nnunet output ([#340](https://github.com/bhklab/med-imagetools/pull/340),
+  [`33a3792`](https://github.com/bhklab/med-imagetools/commit/33a37926fdc216f415eeb71b604e6775a6d19b27))
+
+- **New Features** - Introduced a new CLI command for nnUNet pipeline processing with comprehensive
+  options for modalities, ROI matching, mask saving, and parallel execution. - Added advanced vector
+  mask conversion methods supporting overlap handling and bitmask encoding. - Enabled exporting
+  datasets in nnUNet format with configurable mask strategies, metadata embedding, and automated
+  generation of preprocessing scripts and dataset JSON files. - Provided utilities to generate
+  nnUNet training and preprocessing scripts and dataset configuration files.
+
+- **Documentation** - Clarified documentation on vector mask conversion, explicitly describing
+  overlap resolution by label priority.
+
+- **Bug Fixes** - Improved mask overlap detection efficiency by short-circuiting when only one mask
+  component exists. <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+Co-authored-by: Jermiah Joseph <jermiahjoseph98@gmail.com>
+
+Co-authored-by: Jermiah Joseph <44614774+jjjermiah@users.noreply.github.com>
+
+
 ## v2.2.0 (2025-05-05)
 
 ### Chores
