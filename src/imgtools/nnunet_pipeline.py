@@ -88,13 +88,13 @@ class nnUNetPipeline:  # noqa: N801
         """
 
         # Validate modalities
-        allowed_modalities = {  
-            frozenset(("CT", "SEG")),  
-            frozenset(("MR", "SEG")),  
-            frozenset(("CT", "RTSTRUCT")),  
-            frozenset(("MR", "RTSTRUCT")),  
-        }  
-        if frozenset(modalities) not in allowed_modalities:  
+        allowed_modalities = {
+            frozenset(("CT", "SEG")),
+            frozenset(("MR", "SEG")),
+            frozenset(("CT", "RTSTRUCT")),
+            frozenset(("MR", "RTSTRUCT")),
+        }
+        if frozenset(modalities) not in allowed_modalities:
             msg = (
                 f"Invalid modalities: {','.join(modalities)}. "
                 f"Allowed combinations are: {[','.join(allowed) for allowed in allowed_modalities]}"
