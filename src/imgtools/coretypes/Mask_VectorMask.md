@@ -63,8 +63,9 @@ were always `sitk.sitkUInt8` images **with a single label**.
     know the label of the mask.
 
 **`Segmentation.to_sparsemask`**
-In my opinion, this approach is by design, lossy, as we take the argmax of the 
-vector image and return a single label image.
+In my opinion, this approach is by design, lossy, as it resolves overlapping 
+regions by assigning the label of the highest-index region, returning a single-label 
+image from the vector mask.
 
 ### Object count 
 
@@ -207,7 +208,7 @@ class VectorMask(MedImage):
         ...
 
     def to_sparsemask(self) -> Mask:
-        """Convert to a single binary mask with the argmax of the vector mask."""
+    """Convert to a single binary mask by resolving overlaps with the highest-index label."""
         ...
 
     def to_label_image(self) -> Mask:

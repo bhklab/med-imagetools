@@ -6,11 +6,11 @@ on:
         branches:
             - "development"
             - "main"
-            - "jjjermiah/*"
     push:
         branches:
             - "development"
             - "main"
+    workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}

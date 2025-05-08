@@ -41,6 +41,7 @@ from .dicomfind import dicomfind
 from .dicomsort import dicomsort
 from .index import index
 from .interlacer import interlacer
+from .nnunet_pipeline import nnunet_pipeline
 
 from .sectioned_group import SectionedGroup, CommandRegistry
 from .testdatasets import testdata
@@ -53,6 +54,7 @@ registry.create_group("core commands", "Main subcommands for the med-imagetools 
 registry.add('core commands', index)
 registry.add('core commands', interlacer)
 registry.add('core commands', autopipeline)
+registry.add('core commands', nnunet_pipeline)
 
 registry.create_group("utilities", "Tools for working with DICOM files.")
 registry.add("utilities", dicomfind)
