@@ -37,7 +37,7 @@ def interlacer(file_path: Path,
     Only shows supported modalities.
 
     \b
-    `interlacer INDEX_FILE will print the series tree for the given index file.
+    `interlacer FILE_PATH will print the series tree for the given index file / directory.
 
     \b
     The index file should be a CSV file with the following columns:
