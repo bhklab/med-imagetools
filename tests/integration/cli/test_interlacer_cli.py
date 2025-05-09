@@ -14,8 +14,8 @@ INDEXABLE_COLLECTIONS = [
     "CPTAC-UCEC",
     "NSCLC_Radiogenomics",
     "LIDC-IDRI",
-    "Head-Neck-PET-CT",
-    "HNSCC",
+    # "Head-Neck-PET-CT",
+    # "HNSCC",
     "Pancreatic-CT-CBCT-SEG",
 ]
 
