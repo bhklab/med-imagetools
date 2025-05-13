@@ -27,8 +27,8 @@ def collection(request):
     "CPTAC-UCEC",
     "NSCLC_Radiogenomics",
     "LIDC-IDRI",
-    # "Head-Neck-PET-CT",
-    # "HNSCC",
+    "Head-Neck-PET-CT",
+    "HNSCC",
     "Pancreatic-CT-CBCT-SEG",
 ], indirect=True)
 def test_interlacer_collections(
