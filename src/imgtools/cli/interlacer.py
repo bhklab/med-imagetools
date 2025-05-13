@@ -63,17 +63,18 @@ def interlacer(path: Path,
         logger.warning(f"n_jobs requires a directory as input. {path} will be used as the index.")
 
     elif (path.is_dir()):
-        if (force or not (path.parent / ".imgtools" / path.name / "index.csv").exists()):
+        index_path = path.parent / ".imgtools" / path.name / "index.csv"
+        if (force or not index_path.exists()):
             from imgtools.dicom.crawl import Crawler
             crawler = Crawler(
                 dicom_dir=path,
                 n_jobs=n_jobs,
                 force=force,
-                )
+            )
             crawler.crawl()
             logger.info("Crawling completed.")
             logger.info("Crawl results saved to %s", crawler.output_dir)
-        path = path = path.parent / ".imgtools" / path.name / "index.csv"
+        path = index_path
 
 
     interlacer = Interlacer(path)
