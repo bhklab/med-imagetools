@@ -8,7 +8,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
 
 @click.command(no_args_is_help=True)
 @click.argument(
-    "file_path",
+    "path",
     type=click.Path(
         exists=True, path_type=Path, dir_okay=True, file_okay=True
     ),
@@ -26,7 +26,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     help="Force overwrite existing files.",
 )
 @click.help_option("--help", "-h")
-def interlacer(file_path: Path,
+def interlacer(path: Path,
                n_jobs: int,
                force: bool) -> None:
     """Visualize DICOM series relationships after indexing.
@@ -37,7 +37,11 @@ def interlacer(file_path: Path,
     Only shows supported modalities.
 
     \b
-    `interlacer FILE_PATH will print the series tree for the given index file / directory.
+    `interlacer PATH will print the series tree for the given index file / directory.
+
+    If PATH is a path to an index.csv file, then the tree will be constructed using that index file.
+    If instead PATH is a path to a directory, if the an index file for the directory exists it will be used to contruct the tree, 
+    otherwise the directory will be crawled first.
 
     \b
     The index file should be a CSV file with the following columns:
@@ -52,22 +56,22 @@ def interlacer(file_path: Path,
     Visit https://bhklab.github.io/med-imagetools/ for more information.
     """
     from imgtools.dicom.interlacer import Interlacer
-    if (file_path.is_file() and force):
-        logger.warning(f"force requires a directory as input. {file_path} will be used as the index.")
+    if (path.is_file() and force):
+        logger.warning(f"force requires a directory as input. {path} will be used as the index.")
 
-    elif (file_path.is_dir()):
-        if (force or not (file_path.parent / ".imgtools" / file_path.name / "index.csv").exists()):
+    elif (path.is_dir()):
+        if (force or not (path.parent / ".imgtools" / path.name / "index.csv").exists()):
             from imgtools.dicom.crawl import Crawler
             crawler = Crawler(
-                dicom_dir=file_path,
+                dicom_dir=path,
                 n_jobs=n_jobs,
                 force=force,
                 )
             crawler.crawl()
             logger.info("Crawling completed.")
             logger.info("Crawl results saved to %s", crawler.output_dir)
-        file_path = file_path = file_path.parent / ".imgtools" / file_path.name / "index.csv"
+        path = path = path.parent / ".imgtools" / path.name / "index.csv"
 
 
-    interlacer = Interlacer(file_path)
+    interlacer = Interlacer(path)
     interlacer.print_tree(None)

@@ -3,36 +3,48 @@ from pathlib import Path
 from click.testing import CliRunner
 import os
 from imgtools.cli.interlacer import interlacer as interlacer_cli
+import shutil
 
 
 @pytest.fixture(scope="function")
 def runner() -> CliRunner:
     return CliRunner()
 
-# these are just randomly selected collections!
-INDEXABLE_COLLECTIONS = [
+@pytest.fixture(scope="function")
+def collection(request):
+    data_dir = Path("data")
+    
+    value = request.param
+    if not (data_dir / value).exists():
+        yield value
+    else:
+        shutil.copytree(data_dir / value, data_dir / f"{value}-interlacer-test-temp", dirs_exist_ok=True)
+        yield f"{value}-interlacer-test-temp"
+        shutil.rmtree(data_dir / f"{value}-interlacer-test-temp")
+
+
+@pytest.mark.parametrize("collection", [
     "CPTAC-UCEC",
     "NSCLC_Radiogenomics",
     "LIDC-IDRI",
     # "Head-Neck-PET-CT",
     # "HNSCC",
     "Pancreatic-CT-CBCT-SEG",
-]
-
-@pytest.mark.parametrize("collection", INDEXABLE_COLLECTIONS)
+], indirect=True)
 def test_interlacer_collections(
     runner: CliRunner,
-    collection: str,
     medimage_by_collection,
+    collection: str,
     dataset_type: str,
 ):
     """Test `imgtools interlacer` on each collection from public or private sets."""
-
-
-    if collection not in medimage_by_collection:
-        pytest.skip(f"Collection {collection} not found in medimage_by_collection {dataset_type=}")
+ 
 
     input_dir = Path("data") / collection
+
+    if not Path(input_dir).exists():
+        pytest.skip(f"Collection {collection} not found {dataset_type=}")
+
     print(f"Testing {collection} in {input_dir}")
     out_dir = input_dir.parent / ".imgtools" / collection
 
