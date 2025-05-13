@@ -58,6 +58,9 @@ def interlacer(path: Path,
     from imgtools.dicom.interlacer import Interlacer
     if (path.is_file() and force):
         logger.warning(f"force requires a directory as input. {path} will be used as the index.")
+    
+    if (path.is_file() and n_jobs > 1):
+        logger.warning(f"n_jobs requires a directory as input. {path} will be used as the index.")
 
     elif (path.is_dir()):
         if (force or not (path.parent / ".imgtools" / path.name / "index.csv").exists()):
