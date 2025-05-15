@@ -400,6 +400,51 @@ class Interlacer:
         # break each item into a list starting with key, then all the values
         return [[key] + list(value) for key, value in grouped.items()]
 
+    @property
+    def valid_queries(self) -> list[str]:
+        """Compute all valid queries based on the current forest.
+        Mostly for debugging and informing the user of what
+        we have determined what we can query.
+
+        Essentially, traverse each possible branch path and
+        add the modalities to a set, afterwards, permutate
+        each element's subpaths that might be valid
+        """
+        results: set[str] = set()
+
+        def dfs(node: SeriesNode, path: list[SeriesNode]) -> None:
+            """Recursive DFS to traverse the tree and find unique paths.
+
+            Parameters
+            ----------
+            node : SeriesNode
+                The current node in the tree.
+            path : list[SeriesNode]
+                The current path of nodes traversed.
+            """
+            path.append(node)
+            if len(node.children) == 0:
+                # If this is a leaf node, check if the path is unique
+                cleaned_path_str = ",".join([n.Modality for n in path])
+                results.add(cleaned_path_str)
+            for child in node.children:
+                dfs(child, path.copy())
+
+        for root in self.root_nodes:
+            dfs(root, [])
+
+        # filter queries by running them through the _get_valid_query
+        # function to ensure they are valid
+        valid_queries = set()
+        for query in results:
+            try:
+                self._get_valid_query(query.split(","))
+                valid_queries.add(query)
+            except InterlacerQueryError:
+                # Ignore invalid queries
+                pass
+        return list(valid_queries)
+
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
         Visualize the forest as an interactive network graph.
@@ -653,10 +698,10 @@ if __name__ == "__main__":
     dicom_dirs = [
         # Path("data/Vestibular-Schwannoma-SEG"),
         # Path("data/NSCLC_Radiogenomics"),
-        # Path("data/Head-Neck-PET-CT"),
+        Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
         # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
-        Path("data/CPTAC-UCEC/C3L-00947"),
+        # Path("data/CPTAC-UCEC/C3L-00947"),
     ]
     interlacers = []
     for directory in dicom_dirs:
