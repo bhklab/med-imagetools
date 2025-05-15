@@ -525,7 +525,6 @@ if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa: A004, F401
     from tqdm import tqdm  # noqa: A003
 
-    from imgtools.io.sample_output import ExistingFileMode, SampleOutput
     from imgtools.loggers import tqdm_logging_redirect
 
     medinput = SampleInput(
@@ -564,10 +563,7 @@ if __name__ == "__main__":  # pragma: no cover
             on_missing_regex=ROIMatchFailurePolicy.WARN,
         ),
     )
-    medoutput = SampleOutput(
-        directory=Path("temp_outputs/RADCURE_PROCESSED"),
-        existing_file_mode=ExistingFileMode.OVERWRITE,
-    )
+
     query_string = "CT,RTSTRUCT"
 
     sample_sets = medinput.interlacer.query(
@@ -590,4 +586,5 @@ if __name__ == "__main__":  # pragma: no cover
             except ValueError as e:
                 logger.error(f"Error loading series: {e}")
                 continue
-            medoutput(result)
+            break
+    print(result[1].extract_mask(1).fingerprint)
