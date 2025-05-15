@@ -50,6 +50,8 @@ class NoValidSamplesError(Exception):
             f"{message}\n"
             f"User query: {user_query}\n"
             f"Valid queries: {valid_queries}\n"
+            # TODO::when we write docs on the logic of modality queries,
+            # we should add a link to the docs in this message
         )
 
         super().__init__(msg)
