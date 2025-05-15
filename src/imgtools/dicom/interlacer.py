@@ -39,6 +39,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from rich.console import Console
@@ -48,6 +49,9 @@ from rich.tree import Tree as RichTree
 
 from imgtools.loggers import logger
 from imgtools.utils import OptionalImportError, optional_import
+
+if TYPE_CHECKING:
+    from rich.repr import RichReprResult
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
@@ -348,6 +352,43 @@ class Interlacer:
         for root in self.root_nodes:
             dfs(root, [])
         return results
+
+    def __rich_repr__(self) -> RichReprResult:
+        """Rich representation of the Interlacer object.
+
+        Looks like:
+
+        Interlacer(
+            nPatients=6,
+            nSeries=73,
+            nRoots=9,
+            nSeriesWithReferences=46,
+            validQueries=[
+                "CT->RTDOSE",
+                "CT->PT->RTSTRUCT",
+                "CT->RTSTRUCT",
+            ],
+        )
+
+        """
+
+        yield "nPatients", len(self.crawl_df.PatientID.unique())
+        yield "nSeries", len(self.crawl_df.SeriesInstanceUID.unique())
+        yield "nRoots", len(self.root_nodes)
+        yield (
+            "nSeriesWithReferences",
+            len(
+                [
+                    s
+                    for s in self.series_nodes.values()
+                    if s.ReferencedSeriesUID
+                ]
+            ),
+        )
+        yield (
+            "validQueries",
+            ["->".join(q.split(",")) for q in self.valid_queries],
+        )
 
     def query(
         self,
