@@ -587,4 +587,3 @@ if __name__ == "__main__":  # pragma: no cover
                 logger.error(f"Error loading series: {e}")
                 continue
             break
-    print(result[1].extract_mask(1).fingerprint)
