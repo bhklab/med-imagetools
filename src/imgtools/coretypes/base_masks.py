@@ -501,6 +501,13 @@ class Mask(MedImage):
     """
 
     metadata: dict[str, str] = field(default_factory=dict)
+    _label_shape_filter_results: (
+        sitk.LabelShapeStatisticsImageFilter | None
+    ) = None
+
+    # this is to signify for development that
+    # we assume the Mask currently only has a single label!!!
+    _label_value: int = field(default=1, init=False)
 
     def __init__(
         self,
@@ -534,7 +541,84 @@ class Mask(MedImage):
             Bounding box around non-zero voxels in the label image.
             Contains min and max coordinates and size.
         """
-        return RegionBox.from_mask_bbox(self, label=1)
+        return RegionBox.from_mask_bbox(self, label=self._label_value)
+
+    @property
+    def label_shape_filter(
+        self,
+    ) -> sitk.LabelShapeStatisticsImageFilter:
+        """Get the label shape filter for the mask image.
+
+        Returns
+        -------
+        sitk.LabelShapeStatisticsImageFilter
+            The label shape filter for the mask image.
+        """
+        if self._label_shape_filter_results is None:
+            self._label_shape_filter_results = (
+                sitk.LabelShapeStatisticsImageFilter()
+            )
+            self._label_shape_filter_results.ComputeFeretDiameterOn()
+            self._label_shape_filter_results.Execute(self)
+
+        return self._label_shape_filter_results
+
+    @property
+    def equivalent_ellipsoid_diameters(self) -> tuple[float, float, float]:
+        """Get the diameters of the ellipsoid that has the same principal
+        moments of inertia as the mask image.
+
+        Interpretation:
+            If you built an ellipsoid that “behaves” like your shape under
+            rotation, these would be its diameters.
+        """
+        return self.label_shape_filter.GetEquivalentEllipsoidDiameter(
+            self._label_value
+        )
+
+    @property
+    def equivalent_spherical_radius(self) -> float:
+        """Get the radius of the sphere that has the same volume as the mask image.
+
+        Interpretation:
+            If you built a sphere that has the same volume as your shape,
+            this would be its radius.
+        """
+        return self.label_shape_filter.GetEquivalentSphericalRadius(
+            self._label_value
+        )
+
+    @property
+    def equivalent_spherical_perimeter(self) -> float:
+        """Get the perimeter of the sphere that has the same volume as the mask image.
+
+        Interpretation:
+            If you built a sphere that has the same volume as your shape,
+            this would be its perimeter.
+        """
+        return self.label_shape_filter.GetEquivalentSphericalPerimeter(
+            self._label_value
+        )
+
+    @property
+    def feret_diameter(self) -> float:
+        """Get the longest distance between any two points on the mask image."""
+        return self.label_shape_filter.GetFeretDiameter(self._label_value)
+
+    @property
+    def roundness(self) -> float:
+        """Get how similar the mask image is to a sphere"""
+        return self.label_shape_filter.GetRoundness(self._label_value)
+
+    @property
+    def flatness(self) -> float:
+        """Get the flatness of the mask image."""
+        return self.label_shape_filter.GetFlatness(self._label_value)
+
+    @property
+    def elongation(self) -> float:
+        """Get how 'stretched out' the mask is"""
+        return self.label_shape_filter.GetElongation(self._label_value)
 
     @property
     def fingerprint(self) -> dict[str, Any]:  # noqa: ANN001
@@ -542,7 +626,14 @@ class Mask(MedImage):
         bbox = self.get_label_bounding_box()
         return {
             **super().fingerprint,
-            "bbox.size": bbox.size,
-            "bbox.min_coord": bbox.min,
-            "bbox.max_coord": bbox.max,
+            "mask.bbox.size": bbox.size,
+            "mask.bbox.min_coord": bbox.min,
+            "mask.bbox.max_coord": bbox.max,
+            "mask.feret_diameter": self.feret_diameter,
+            "mask.roundness": self.roundness,
+            "mask.flatness": self.flatness,
+            "mask.elongation": self.elongation,
+            "mask.equivalent_spherical_radius": self.equivalent_spherical_radius,
+            "mask.equivalent_spherical_perimeter": self.equivalent_spherical_perimeter,
+            "mask.equivalent_ellipsoid_diameters": self.equivalent_ellipsoid_diameters,
         }
