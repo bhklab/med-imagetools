@@ -502,10 +502,10 @@ def remove_duplicate_entries(
     hash_values = set()
     output = []
     for record in slim_db:
-        hash_key = hash("".join(["" if key == "SubSeries" else str(record[key]) for key in record.keys()]))
-        if hash_key not in hash_values:
+        hash_key = [record[key] for key in record.keys() if key != "SubSeries"]
+        if (*hash_key,) not in hash_values:
             output.append(record)
-            hash_values.add(hash_key)
+            hash_values.add((*hash_key,))
 
     return output
 
