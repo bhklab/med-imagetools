@@ -331,7 +331,7 @@ def parse_dicom_dir(
     The `crawl_db.json` file contains the simplified crawl database, while
 
     """
-
+    # TODO: DECLAN! figure out how to deal with duplicates in slim_db
     top = pathlib.Path(dicom_dir).absolute()
     output_dir = pathlib.Path(output_dir)
     ds_name = dataset_name or top.name
@@ -407,8 +407,12 @@ def parse_dicom_dir(
     # and extract the relevant fields for barebones_dict
     slim_db = construct_barebones_dict(series_meta_raw)
 
+    # drop duplicate entries with different subseries. 
+    slim_db = remove_duplicate_entries(slim_db)
+
     # convert slimb_db to a pandas dataframe
     index_df = pd.DataFrame.from_records(slim_db)
+    
     index_df.to_csv(index_csv, index=False)
     logger.debug("Saved index CSV.", index_csv=index_csv)
 
@@ -466,3 +470,49 @@ def construct_barebones_dict(
             )
 
     return barebones_dict
+
+def remove_duplicate_entries(
+        slim_db: list[dict[str, str]]
+    ) -> list[dict[str, str]]:
+    """Removes duplicate entries from a barebones dict, ignoring the subseries field.
+    Parameters
+    ----------
+    
+        slim_db : list[dict[str, str]]
+            - The barebones dict to operate on. MUST contain the following keys:
+                    "PatientID"
+                    "StudyInstanceUID"
+                    "SeriesInstanceUID"
+                    "SubSeries"
+                    "Modality"
+                    "ReferencedModality"
+                    "ReferencedSeriesUID"
+                    "instances"
+                    "folder"
+    
+    Returns
+    -------
+        
+        list[dict[str, str]]
+            - the barebones dict with duplicates removed.    
+
+    Note: I tried to make this as efficient as possible, sorry if it slows down everything. 
+    """
+
+    hash_values = set()
+    output = []
+    for record in slim_db:
+        hash_key = hash("".join(["" if key == "SubSeries" else str(record[key]) for key in record.keys()]))
+        if hash_key not in hash_values:
+            output.append(record)
+            hash_values.add(hash_key)
+
+    return output
+
+        
+        
+
+            
+    
+
+        

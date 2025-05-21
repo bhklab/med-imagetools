@@ -100,4 +100,11 @@ def test_interlacer_visualize(medimage_by_collection, caplog) -> None:
 
         assert viz_path.exists()
 
+        index_duplicates = crawler.index
+        index_duplicates.loc[len(index_duplicates)] = index_duplicates.loc[0]
+
+        with pytest.raises(Exception, match="The input file contains duplicate rows."):
+            interlacer = Interlacer(crawler.index)
+
+
         break
