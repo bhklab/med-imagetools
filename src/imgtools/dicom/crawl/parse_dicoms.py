@@ -331,7 +331,7 @@ def parse_dicom_dir(
     The `crawl_db.json` file contains the simplified crawl database, while
 
     """
-    # TODO: DECLAN! figure out how to deal with duplicates in slim_db
+
     top = pathlib.Path(dicom_dir).absolute()
     output_dir = pathlib.Path(output_dir)
     ds_name = dataset_name or top.name
