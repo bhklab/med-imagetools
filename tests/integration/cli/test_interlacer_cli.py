@@ -51,6 +51,7 @@ def test_interlacer_collections(
     result = runner.invoke(interlacer_cli, [
         str(input_dir),
         "--n-jobs", "1",
+        "--force"
     ])
 
     assert result.exit_code == 0, f"{collection} failed: {result.exception}\n {result.exc_info}"
