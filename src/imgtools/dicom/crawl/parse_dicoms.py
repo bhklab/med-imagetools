@@ -473,8 +473,9 @@ def construct_barebones_dict(
 
 def remove_duplicate_entries(
         slim_db: list[dict[str, str]]
+        ignore_keys: list[str] = ["SubSeries"]
     ) -> list[dict[str, str]]:
-    """Removes duplicate entries from a barebones dict, ignoring the subseries field.
+    """Removes duplicate entries from a barebones dict, ignoring the keys in `ignore_keys`.
     Parameters
     ----------
     
@@ -489,6 +490,11 @@ def remove_duplicate_entries(
                     "ReferencedSeriesUID"
                     "instances"
                     "folder"
+        ignore_keys: list[str], default = ["SubSeries"]
+            - The list of keys to ignore when searching for duplicates. 
+            - If a row is exactly the same as another row, except for one of the keys listed in `ignore_keys`
+              the row will still be considered a duplicate. 
+        
     
     Returns
     -------
@@ -500,9 +506,11 @@ def remove_duplicate_entries(
     """
 
     hash_values = set()
+    # I find it more intuitive to pass in a list, rather than a set, but since sets are faster for our usecase I cast ignore_keys to a set.
+    ignore_keys = set(ignore_keys) 
     output = []
     for record in slim_db:
-        hash_key = [record[key] for key in record.keys() if key != "SubSeries"]
+        hash_key = [record[key] for key in record.keys() if key not in ignore_keys]
         if (*hash_key,) not in hash_values:
             output.append(record)
             hash_values.add((*hash_key,))
