@@ -472,7 +472,7 @@ def construct_barebones_dict(
     return barebones_dict
 
 def remove_duplicate_entries(
-        slim_db: list[dict[str, str]]
+        slim_db: list[dict[str, str]],
         ignore_keys: list[str] = ["SubSeries"]
     ) -> list[dict[str, str]]:
     """Removes duplicate entries from a barebones dict, ignoring the keys in `ignore_keys`.
