@@ -69,10 +69,9 @@ def dicomshow(
     else:
         if not isinstance(result, FileDataset):
             raise click.ClickException("Expected DICOM dataset for metadata extraction")
-        for key in result:
-            row = result.get(key, default="")
-            tag = row.keyword
-            val = str(row.value)
+        for data_element in result.iterall():
+            tag = data_element.keyword
+            val = str(data_element.value)
             table.add_row(str(tag), val)
 
     print(table)
