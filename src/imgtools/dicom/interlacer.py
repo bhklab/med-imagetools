@@ -47,7 +47,7 @@ from imgtools.utils import optional_import
 from imgtools.utils.interlacer_utils import (
     SeriesNode,
     print_interlacer_tree,
-    visualize_forest
+    visualize_forest,
 )
 
 if TYPE_CHECKING:
@@ -442,32 +442,32 @@ class Interlacer:
         """Print a representation of the forest."""
         print_interlacer_tree(self.root_nodes, input_directory)
 
-    def visualize_forest(
-    self, save_path: str | Path
-    ) -> Path:
+    def visualize_forest(self, save_path: str | Path) -> Path:
         """
-    Visualize the forest as an interactive network graph.
+        Visualize the forest as an interactive network graph.
 
-    Creates an HTML visualization showing nodes for each SeriesNode and
-    edges for parent-child relationships.
+        Creates an HTML visualization showing nodes for each SeriesNode and
+        edges for parent-child relationships.
 
-    Parameters
-    ----------
-    save_path : str | Path
-        Path to save the HTML visualization.
+        Parameters
+        ----------
+        save_path : str | Path
+            Path to save the HTML visualization.
 
-    Returns
-    -------
-    Path
-        Path to the saved HTML visualization
+        Returns
+        -------
+        Path
+            Path to the saved HTML visualization
 
-    Raises
-    ------
-    OptionalImportError
-        If pyvis package is not installed
-    """
-        return visualize_forest(self.root_nodes, save_path=save_path) # call external method. 
-    
+        Raises
+        ------
+        OptionalImportError
+            If pyvis package is not installed
+        """
+        return visualize_forest(
+            self.root_nodes, save_path=save_path
+        )  # call external method.
+
 
 if __name__ == "__main__":
     from rich import print  # noqa

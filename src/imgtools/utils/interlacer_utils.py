@@ -81,7 +81,7 @@ def visualize_forest(
     ----------
 
     root_nodes: list[SeriesNode]
-        the root nodes of the tree. 
+        the root nodes of the tree.
 
     save_path : str | Path
         Path to save the HTML visualization.
