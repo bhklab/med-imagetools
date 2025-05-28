@@ -1,6 +1,36 @@
 # CHANGELOG
 
 
+## v2.4.0 (2025-05-21)
+
+### Chores
+
+- Update cli help image
+  ([`32c6176`](https://github.com/bhklab/med-imagetools/commit/32c617671df4d620c73bb3171667750bea5c0bea))
+
+- Update pixi lock
+  ([`13b325f`](https://github.com/bhklab/med-imagetools/commit/13b325f6f27c9e088040f2ae12a8375149833b97))
+
+### Features
+
+- Improve no valid samples w/ more useful info to user
+  ([#365](https://github.com/bhklab/med-imagetools/pull/365),
+  [`e843a12`](https://github.com/bhklab/med-imagetools/commit/e843a12640a1ab076321562e1aaea06e78c4e88e))
+
+addresses not outputting helpful information on failing to get valid samples #363 , add a bunch of
+  helper methods for debugging, and extract success/failure reporting into autopipeline_utils
+
+once we abstract the pipeline logic, we can organize this a bit better
+
+- **New Features** - Added improved error handling with a new exception for cases where no valid
+  samples are found during pipeline runs. - Introduced detailed reporting and summary statistics for
+  pipeline results, including success and failure rates. - Enhanced the display of DICOM series
+  information with rich, user-friendly summaries and a new property listing all valid query paths.
+
+- **Refactor** - Streamlined report generation and result aggregation into reusable components for
+  clearer pipeline processing.
+
+
 ## v2.3.0 (2025-05-08)
 
 ### Bug Fixes

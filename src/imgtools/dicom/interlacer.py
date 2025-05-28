@@ -39,6 +39,7 @@ from __future__ import annotations
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pandas as pd
 from rich.console import Console
@@ -48,6 +49,9 @@ from rich.tree import Tree as RichTree
 
 from imgtools.loggers import logger
 from imgtools.utils import OptionalImportError, optional_import
+
+if TYPE_CHECKING:
+    from rich.repr import RichReprResult
 
 pyvis, _pyvis_available = optional_import("pyvis")
 
@@ -357,6 +361,43 @@ class Interlacer:
             dfs(root, [])
         return results
 
+    def __rich_repr__(self) -> RichReprResult:
+        """Rich representation of the Interlacer object.
+
+        Looks like:
+
+        Interlacer(
+            nPatients=6,
+            nSeries=73,
+            nRoots=9,
+            nSeriesWithReferences=46,
+            validQueries=[
+                "CT->RTDOSE",
+                "CT->PT->RTSTRUCT",
+                "CT->RTSTRUCT",
+            ],
+        )
+
+        """
+
+        yield "nPatients", len(self.crawl_df.PatientID.unique())
+        yield "nSeries", len(self.crawl_df.SeriesInstanceUID.unique())
+        yield "nRoots", len(self.root_nodes)
+        yield (
+            "nSeriesWithReferences",
+            len(
+                [
+                    s
+                    for s in self.series_nodes.values()
+                    if s.ReferencedSeriesUID
+                ]
+            ),
+        )
+        yield (
+            "validQueries",
+            ["->".join(q.split(",")) for q in self.valid_queries],
+        )
+
     def query(
         self,
         query_string: str,
@@ -407,6 +448,51 @@ class Interlacer:
 
         # break each item into a list starting with key, then all the values
         return [[key] + list(value) for key, value in grouped.items()]
+
+    @property
+    def valid_queries(self) -> list[str]:
+        """Compute all valid queries based on the current forest.
+        Mostly for debugging and informing the user of what
+        we have determined what we can query.
+
+        Essentially, traverse each possible branch path and
+        add the modalities to a set, afterwards, permutate
+        each element's subpaths that might be valid
+        """
+        results: set[str] = set()
+
+        def dfs(node: SeriesNode, path: list[SeriesNode]) -> None:
+            """Recursive DFS to traverse the tree and find unique paths.
+
+            Parameters
+            ----------
+            node : SeriesNode
+                The current node in the tree.
+            path : list[SeriesNode]
+                The current path of nodes traversed.
+            """
+            path.append(node)
+            if len(node.children) == 0:
+                # If this is a leaf node, check if the path is unique
+                cleaned_path_str = ",".join([n.Modality for n in path])
+                results.add(cleaned_path_str)
+            for child in node.children:
+                dfs(child, path.copy())
+
+        for root in self.root_nodes:
+            dfs(root, [])
+
+        # filter queries by running them through the _get_valid_query
+        # function to ensure they are valid
+        valid_queries = set()
+        for query in results:
+            try:
+                self._get_valid_query(query.split(","))
+                valid_queries.add(query)
+            except InterlacerQueryError:
+                # Ignore invalid queries
+                pass
+        return list(valid_queries)
 
     def visualize_forest(self, save_path: str | Path) -> Path:
         """
@@ -678,10 +764,10 @@ if __name__ == "__main__":
     dicom_dirs = [
         # Path("data/Vestibular-Schwannoma-SEG"),
         # Path("data/NSCLC_Radiogenomics"),
-        # Path("data/Head-Neck-PET-CT"),
+        Path("data/Head-Neck-PET-CT"),
         # Path("data/4D-Lung"),
         # Path("data/Head-Neck-PET-CT/HN-CHUS-052/")
-        Path("data/CPTAC-UCEC/C3L-00947"),
+        # Path("data/CPTAC-UCEC/C3L-00947"),
     ]
     interlacers = []
     for directory in dicom_dirs:

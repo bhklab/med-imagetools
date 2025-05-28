@@ -6,10 +6,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 
-import pandas as pd
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
+from imgtools.autopipeline_utils import PipelineResults, save_pipeline_reports
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -35,6 +35,29 @@ if TYPE_CHECKING:
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
     from imgtools.dicom.interlacer import SeriesNode
+
+
+class NoValidSamplesError(Exception):
+    """Exception raised when no valid samples are found."""
+
+    def __init__(
+        self,
+        message: str,
+        user_query: list[str] | None,
+        valid_queries: list[str],
+    ) -> None:
+        msg = (
+            f"{message}\n"
+            f"User query: {user_query}\n"
+            f"Valid queries: {valid_queries}\n"
+            # TODO::when we write docs on the logic of modality queries,
+            # we should add a link to the docs in this message
+        )
+
+        super().__init__(msg)
+        self.user_query = user_query
+        self.valid_queries = valid_queries
+
 
 # on top of the full index csv, we create a simplified version
 # that contains some of the most important columns in this order
@@ -358,11 +381,17 @@ class Autopipeline:
             Dictionary with 'success' and 'failure' keys, each containing a list of
             ProcessSampleResult objects.
         """
-        import json
 
         # Load the samples
         samples = self.input.query()
         samples = sorted(samples, key=lambda x: x[0].PatientID.lower())
+
+        if not samples:
+            raise NoValidSamplesError(
+                message="No valid samples found.",
+                user_query=self.input.modalities,
+                valid_queries=self.input.interlacer.valid_queries,
+            )
 
         # Create a timestamp for this run
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -406,70 +435,27 @@ class Autopipeline:
                     pbar.update(1)
                 else:
                     failed_results.append(result)
-                    pbar.update(0)
+                    pbar.update(1)
 
-        # Log summary information
-        success_count = len(successful_results)
-        failure_count = len(failed_results)
-        total_count = len(all_results)
-
-        logger.info(
-            f"Processing complete. {success_count} successful, {failure_count} failed "
-            f"out of {total_count} total samples ({success_count / total_count * 100:.1f}% success rate)."
+        # Create pipeline results object
+        pipeline_results = PipelineResults(
+            successful_results=successful_results,
+            failed_results=failed_results,
+            all_results=all_results,
+            timestamp=timestamp,
         )
 
-        index_file = self.output.writer.index_file
-        # TODO:: discuss how we want to name these files
-        # Generate report file names
-        success_file = index_file.with_name(
-            f"{self.output.writer.root_directory.name}_successful_{timestamp}.json"
+        # Save reports and get file paths
+        save_pipeline_reports(
+            results=pipeline_results,
+            index_file=self.output.writer.index_file,
+            root_dir_name=self.output.writer.root_directory.name,
+            simplified_columns=SIMPLIFIED_COLUMNS,
+            index_lock_check_func=self.output.writer._get_index_lock,
         )
-        failure_file = index_file.with_name(
-            f"{self.output.writer.root_directory.name}_failed_{timestamp}.json"
-        )
-        # write simplified index file
-        index_file = self.output.writer.index_file
-        simple_index = index_file.parent / f"{index_file.stem}-simple.csv"
-
-        index_df = pd.read_csv(index_file)
-
-        # get columns in the order we want
-        # if the column is not in the index_df, it will be filled
-        # with NaN
-        index_df = index_df[SIMPLIFIED_COLUMNS]
-        # sort by 'filepath' to make it easier to read
-        index_df = index_df.sort_values(by=["filepath"])
-
-        index_df.to_csv(simple_index, index=False)
-        logger.info(f"Index file saved to {simple_index}")
-
-        # remove lockfile
-        if self.output.writer._get_index_lock().exists():
-            self.output.writer._get_index_lock().unlink()
-            logger.debug(
-                f"Lock file removed: {self.output.writer._get_index_lock()}"
-            )
-
-        # Convert results to dictionaries for JSON serialization
-        success_dicts = [result.to_dict() for result in successful_results]
-        failure_dicts = [result.to_dict() for result in failed_results]
-
-        # Write reports
-        # with open(success_file, "w") as f:
-        with success_file.open("w", encoding="utf-8") as f:
-            json.dump(success_dicts, f, indent=2)
-        logger.info(f"Detailed success report saved to {success_file}")
-
-        # if no failures, we can skip writing the failure file
-        if failure_count == 0:
-            return {"success": successful_results, "failure": []}
-
-        with failure_file.open("w", encoding="utf-8") as f:
-            json.dump(failure_dicts, f, indent=2)
-        logger.info(f"Detailed failure report saved to {failure_file}")
 
         # Return all results categorized
-        return {"success": successful_results, "failure": failed_results}
+        return pipeline_results.to_dict()
 
     def __rich_repr__(self) -> rich.repr.Result:
         """
