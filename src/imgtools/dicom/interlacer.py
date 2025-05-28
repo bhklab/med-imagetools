@@ -36,20 +36,19 @@ Features
 
 from __future__ import annotations
 
-from imgtools.utils.interlacer_utils import SeriesNode, visualize_forest, print_interlacer_tree, ModalityHighlighter
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pandas as pd
-from rich.console import Console
-from rich.highlighter import RegexHighlighter
-from rich.theme import Theme
-from rich.tree import Tree as RichTree
 
-from imgtools.loggers import logger
 from imgtools.utils import optional_import
+from imgtools.utils.interlacer_utils import (
+    SeriesNode,
+    print_interlacer_tree,
+    visualize_forest
+)
 
 if TYPE_CHECKING:
     from rich.repr import RichReprResult
@@ -104,7 +103,8 @@ class MissingDependencyModalityError(InterlacerQueryError):
             )
 
         return message
-    
+
+
 @dataclass
 class Interlacer:
     """
@@ -437,11 +437,37 @@ class Interlacer:
                 # Ignore invalid queries
                 pass
         return list(valid_queries)
-    
+
     def print_tree(self, input_directory: Path | None) -> None:
         """Print a representation of the forest."""
         print_interlacer_tree(self.root_nodes, input_directory)
 
+    def visualize_forest(
+    self, save_path: str | Path
+    ) -> Path:
+        """
+    Visualize the forest as an interactive network graph.
+
+    Creates an HTML visualization showing nodes for each SeriesNode and
+    edges for parent-child relationships.
+
+    Parameters
+    ----------
+    save_path : str | Path
+        Path to save the HTML visualization.
+
+    Returns
+    -------
+    Path
+        Path to the saved HTML visualization
+
+    Raises
+    ------
+    OptionalImportError
+        If pyvis package is not installed
+    """
+        visualize_forest(self.root_nodes, save_path=save_path) # call external method. 
+    
 
 if __name__ == "__main__":
     from rich import print  # noqa

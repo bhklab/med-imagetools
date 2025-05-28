@@ -6,21 +6,19 @@ This module implements functions utilized by the Interlacer module as well as th
 
 from __future__ import annotations
 
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
+
 from rich.console import Console
 from rich.highlighter import RegexHighlighter
 from rich.theme import Theme
 from rich.tree import Tree as RichTree
-from typing import TYPE_CHECKING
 
 from imgtools.loggers import logger
 from imgtools.utils import OptionalImportError, optional_import
 
-if TYPE_CHECKING:
-    from rich.repr import RichReprResult
-
 pyvis, _pyvis_available = optional_import("pyvis")
+
 
 @dataclass
 class SeriesNode:
@@ -69,7 +67,10 @@ class SeriesNode:
     def __hash__(self) -> int:
         return hash(self.SeriesInstanceUID)
 
-def visualize_forest(root_nodes, save_path: str | Path) -> Path:
+
+def visualize_forest(
+    root_nodes: list[SeriesNode], save_path: str | Path
+) -> Path:
     """
     Visualize the forest as an interactive network graph.
 
@@ -78,6 +79,10 @@ def visualize_forest(root_nodes, save_path: str | Path) -> Path:
 
     Parameters
     ----------
+
+    root_nodes: list[SeriesNode]
+        the root nodes of the tree. 
+
     save_path : str | Path
         Path to save the HTML visualization.
 
@@ -119,7 +124,9 @@ def visualize_forest(root_nodes, save_path: str | Path) -> Path:
         color = modality_colors.get(
             node.Modality, "#7f7f7f"
         )  # Default gray if unknown
-        title = f"PatientID: {node.PatientID}\nSeries: {node.SeriesInstanceUID}"
+        title = (
+            f"PatientID: {node.PatientID}\nSeries: {node.SeriesInstanceUID}"
+        )
         net.add_node(
             node.SeriesInstanceUID,
             label=node.Modality,
@@ -234,6 +241,7 @@ def visualize_forest(root_nodes, save_path: str | Path) -> Path:
 
     return save_path
 
+
 def print_interlacer_tree(
     root_nodes: list[SeriesNode],
     input_directory: Path | None,
@@ -281,6 +289,7 @@ def print_interlacer_tree(
             add_series_node(root, patient_branch)
 
     console.print(root_tree, highlight=True)
+
 
 class ModalityHighlighter(RegexHighlighter):
     """Highlights DICOM modality tags using custom styles."""
