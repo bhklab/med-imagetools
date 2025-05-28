@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 from typing import List
+from typing import Union
 from rich import print
 from rich.table import Table
 import click
@@ -31,11 +32,12 @@ def dicomshow(
     """Extracts and displays the metadata associated with a single dicom file."""
     from pydicom import dcmread
     from pydicom.dataset import FileDataset
+    from pydicom.dataelem import DataElement
     import re
 
     split_input = dicom_file.split("::", 1)
     file_path = split_input[0]
-    tags = []
+    tags: list[Union[int, str, tuple[int, int]]] = []
     if len(split_input)>1:
         parts = split_input[1].split('.')
         for part in parts:
@@ -49,11 +51,10 @@ def dicomshow(
             if match:
                 tags.append(int(match.group(1)))
 
-    print(f"[blue]{tags}")
 
 
     logger.info(f"Extracting tags from {dicom_file}")
-    result = dcmread(file_path, stop_before_pixels=True)
+    result: Union[FileDataset, DataElement] = dcmread(file_path, stop_before_pixels=True)
     table = Table(title=f"[gold1]{dicom_file}", box=None)
     table.add_column("Keyword", justify="left", style="cyan", no_wrap=True)
     table.add_column("Value", style="magenta")
@@ -63,12 +64,12 @@ def dicomshow(
         for tag in tags:
             if type(tag) is int:
                 result = result[tag]
-                print(f"[red]{result.keys()}\n\n[blue]{result.values()}")
             else:
+                assert isinstance(result, FileDataset) # Need to satisfy the type checker. 
                 result = result.get(tag)
         table.add_row(split_input[1], str(result))
     else:
-        
+        assert isinstance(result, FileDataset) # Need to satisfy the type checker. 
         for key in result.keys():
             row = result.get(key, default="")
             tag = row.keyword
