@@ -13,14 +13,6 @@ from imgtools.loggers import logger
     "dicom_file",
     type=str,
 )
-@click.option(
-    "-m",
-    "--modality",
-    default=None,
-    type=str,
-    show_default=True,
-    help="Optionally specify the modality of the dicom, if modality is not specified it will be automatically determined. ",
-)
 @click.help_option(
     "-h",
     "--help",
