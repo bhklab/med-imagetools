@@ -466,7 +466,7 @@ class Interlacer:
     OptionalImportError
         If pyvis package is not installed
     """
-        visualize_forest(self.root_nodes, save_path=save_path) # call external method. 
+        return visualize_forest(self.root_nodes, save_path=save_path) # call external method. 
     
 
 if __name__ == "__main__":
