@@ -42,29 +42,39 @@ def dicomshow(
 
 
 
-    logger.info(f"Extracting tags from {dicom_file}")
-    result: Union[FileDataset, DataElement] = dcmread(file_path, stop_before_pixels=True)
+    try:
+        logger.info(f"Extracting tags from {dicom_file}")
+        result: Union[FileDataset, DataElement] = dcmread(file_path, stop_before_pixels=True)
+    except Exception as e:
+        logger.error(f"Failed to read DICOM file {file_path}: {e}")
+        raise click.ClickException(f"Cannot read DICOM file: {e}")
+
     table = Table(title=f"[gold1]{dicom_file}", box=None)
     table.add_column("Keyword", justify="left", style="cyan", no_wrap=True)
     table.add_column("Value", style="magenta")
-    
 
     if tags:
-        for tag in tags:
-            if type(tag) is int:
-                result = result[tag]
-            else:
-                assert isinstance(result, FileDataset) # Need to satisfy the type checker. 
-                result = result.get(tag)
-        table.add_row(split_input[1], str(result))
+        try:
+            for tag in tags:
+                if isinstance(tag, int):
+                    result = result[tag]
+                else:
+                    if not isinstance(result, FileDataset):
+                        raise ValueError("Cannot access tag by name on non-dataset object")
+                    result = result.get(tag)
+            table.add_row(split_input[1], str(result))
+        except (KeyError, IndexError, ValueError) as e:
+            logger.error(f"Failed to extract tag {split_input[1]}: {e}")
+            raise click.ClickException(f"Tag extraction failed: {e}")
     else:
-        assert isinstance(result, FileDataset) # Need to satisfy the type checker. 
-        for key in result.keys():
+        if not isinstance(result, FileDataset):
+            raise click.ClickException("Expected DICOM dataset for metadata extraction")
+        for key in result:
             row = result.get(key, default="")
             tag = row.keyword
             val = str(row.value)
             table.add_row(str(tag), val)
-    print(table)
-    logger.info(f"Extraction complete.")
 
+    print(table)
+    logger.info("Extraction complete.")
     
