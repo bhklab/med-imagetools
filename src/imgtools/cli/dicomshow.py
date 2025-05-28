@@ -1,9 +1,4 @@
-from pathlib import Path
-import re
-from typing import List
-from typing import Union
-from rich import print
-from rich.table import Table
+
 import click
 
 from imgtools.loggers import logger
@@ -19,13 +14,15 @@ from imgtools.loggers import logger
 )
 def dicomshow(
     dicom_file: str,
-    modality: str,
 ) -> None:
     """Extracts and displays the metadata associated with a single dicom file."""
     from pydicom import dcmread
     from pydicom.dataset import FileDataset
     from pydicom.dataelem import DataElement
     import re
+    from typing import Union
+    from rich import print
+    from rich.table import Table
 
     split_input = dicom_file.split("::", 1)
     file_path = split_input[0]
