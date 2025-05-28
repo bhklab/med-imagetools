@@ -63,11 +63,14 @@ class InterlacerQueryError(Exception):
 
     pass
 
+
 class DuplicateRowError(InterlacerQueryError):
     """Raised when the index.csv file contains duplicate rows."""
-    def __init__(self):
+
+    def __init__(self) -> None:
         msg = "The input file contains duplicate rows."
         super().__init__(msg)
+
 
 class UnsupportedModalityError(InterlacerQueryError):
     """Raised when an unsupported modality is specified in the query."""
@@ -196,12 +199,24 @@ class Interlacer:
             raise TypeError(errmsg)
 
         self.crawl_df.set_index("SeriesInstanceUID", inplace=True, drop=False)
-        #if True in self.crawl_df.index.drop(labels=["SubSeries"], errors="ignore").duplicated(keep="first"):
-        if self.crawl_df.duplicated(subset=["PatientID","StudyInstanceUID","SeriesInstanceUID","Modality","ReferencedModality","ReferencedSeriesUID","instances","folder"], keep="first").any():
+        # if True in self.crawl_df.index.drop(labels=["SubSeries"], errors="ignore").duplicated(keep="first"):
+        if self.crawl_df.duplicated(
+            subset=[
+                "PatientID",
+                "StudyInstanceUID",
+                "SeriesInstanceUID",
+                "Modality",
+                "ReferencedModality",
+                "ReferencedSeriesUID",
+                "instances",
+                "folder",
+            ],
+            keep="first",
+        ).any():
             raise DuplicateRowError()
-        #self.crawl_df = self.crawl_df[
+        # self.crawl_df = self.crawl_df[
         #    ~self.crawl_df.index.duplicated(keep="first")
-        #]
+        # ]
         self._build_series_forest()
 
     def _build_series_forest(self) -> None:
@@ -660,8 +675,7 @@ class Interlacer:
         return save_path
 
     def print_tree(self, input_directory: Path | None) -> None:
-        """Print a representation of the forest.
-        """
+        """Print a representation of the forest."""
         print_interlacer_tree(self.root_nodes, input_directory)
 
 
@@ -697,19 +711,19 @@ def print_interlacer_tree(
     input_directory: Path | None,
 ) -> None:
     """
-    prints the tree structure of the root_nodes. 
+    prints the tree structure of the root_nodes.
     Uses input_directory to display the file paths of each DICOM.
 
     Parameters
     ----------
 
         root_nodes: List[SeriesNode]
-        
+
         input_directory: Path | None
 
     Returns
     -------
-    
+
     None
     """
     from collections import defaultdict
