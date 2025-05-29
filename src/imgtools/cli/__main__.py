@@ -39,6 +39,7 @@ from . import set_log_verbosity
 from .autopipeline import autopipeline
 from .dicomfind import dicomfind
 from .dicomsort import dicomsort
+from .query import query
 from .index import index
 from .interlacer import interlacer
 from .nnunet_pipeline import nnunet_pipeline
@@ -59,6 +60,7 @@ registry.add('core commands', nnunet_pipeline)
 registry.create_group("utilities", "Tools for working with DICOM files.")
 registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
+registry.add("utilities", query)
 
 if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")
