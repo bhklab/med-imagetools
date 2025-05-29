@@ -44,8 +44,7 @@ def query(  path: Path,
             force: bool,
             ) -> None:
 
-    from imgtools.dicom.interlacer import Interlacer, ModalityHighlighter, print_interlacer_tree
-    from rich.console import Console
+    from imgtools.dicom.interlacer import Interlacer, print_interlacer_tree
 
     if (path.is_file() and force):
         logger.warning(f"force requires a directory as input. {path} will be used as the index.")
