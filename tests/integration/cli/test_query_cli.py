@@ -18,9 +18,9 @@ def collection(request):
     if not (data_dir / value).exists():
         yield value
     else:
-        shutil.copytree(data_dir / value, data_dir / f"{value}-interlacer-test-temp", dirs_exist_ok=True)
-        yield f"{value}-interlacer-test-temp"
-        shutil.rmtree(data_dir / f"{value}-interlacer-test-temp")
+        shutil.copytree(data_dir / value, data_dir / f"{value}-query-test-temp", dirs_exist_ok=True)
+        yield f"{value}-query-test-temp"
+        shutil.rmtree(data_dir / f"{value}-query-test-temp")
 
 
 @pytest.mark.parametrize("collection", [
