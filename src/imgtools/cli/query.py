@@ -21,7 +21,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     "--group-by-root",
     type=bool,
     default=True,
-    help="""If True, group the returned SeriesNodes by their root CT/MR/PT
+    help="""If True, group the returned dicoms by their root CT/MR/PT
     node (i.e., avoid duplicate root nodes across results).""",
 )
 @click.option(
@@ -81,7 +81,7 @@ def query(  path: Path,
     try:
         result = interlacer.query(query_string=query_string, group_by_root=group_by_root)
     except Exception as e:
-        logger.exception("Failed to query interlacer tree.")
+        logger.exception("Failed to query interlacer forest.")
         raise click.Abort() from e
 
     # Update root node children to reflect query structure instead of overall index structure
