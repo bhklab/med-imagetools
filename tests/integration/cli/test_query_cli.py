@@ -31,7 +31,7 @@ def collection(request):
     "HNSCC",
     "Pancreatic-CT-CBCT-SEG",
 ], indirect=True)
-def test_interlacer_collections(
+def test_query_collections(
     runner: CliRunner,
     medimage_by_collection,
     collection: str,
