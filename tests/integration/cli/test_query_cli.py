@@ -63,7 +63,10 @@ def test_query_collections(
 
     assert result.exit_code == 0, f"{collection} failed: {result.exception}\n {result.exc_info}"
 
-    os.remove(out_dir / "index.csv")
+    # replace os.remove with pathlib and guard against missing file
+    index_file = out_dir / "index.csv"
+    if index_file.exists():
+        index_file.unlink()
 
     result = runner.invoke(query_cli, [
         str(input_dir),
