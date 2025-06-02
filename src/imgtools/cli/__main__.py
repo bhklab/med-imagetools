@@ -54,13 +54,14 @@ registry = CommandRegistry()
 registry.create_group("core commands", "Main subcommands for the med-imagetools package.")
 registry.add('core commands', index)
 registry.add('core commands', interlacer)
+registry.add('core commands', query)
 registry.add('core commands', autopipeline)
 registry.add('core commands', nnunet_pipeline)
 
 registry.create_group("utilities", "Tools for working with DICOM files.")
 registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
-registry.add("utilities", query)
+
 
 if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")

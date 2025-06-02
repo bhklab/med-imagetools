@@ -43,6 +43,29 @@ def query(  path: Path,
             n_jobs: int,
             force: bool,
             ) -> None:
+    """
+    Queries a dataset for specific modalities.
+
+    Parameters
+
+        path : path
+
+            Path to either an index.csv file or a directory containing a DICOM dataset. 
+            If the path is a directory, and no associated index file exists,
+            the directory will be crawled first, and an index.csv file will be created. 
+
+        query_string : str
+            
+            Comma-separated string of modalities to query (e.g., 'CT,MR')
+
+            Supported modalities:
+            - CT: Computed Tomography
+            - PT: Positron Emission Tomography
+            - MR: Magnetic Resonance Imaging
+            - SEG: Segmentation
+            - RTSTRUCT: Radiotherapy Structure
+            - RTDOSE: Radiotherapy Dose
+        """
 
     from imgtools.dicom.interlacer import Interlacer, print_interlacer_tree
 
