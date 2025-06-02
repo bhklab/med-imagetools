@@ -59,7 +59,7 @@ def interlacer(path: Path,
     if (path.is_file() and force):
         logger.warning(f"force requires a directory as input. {path} will be used as the index.")
     
-    if (path.is_file() and n_jobs > 1):
+    if (path.is_file() and n_jobs != DEFAULT_WORKERS):
         logger.warning(f"n_jobs requires a directory as input. {path} will be used as the index.")
 
     elif (path.is_dir()):
