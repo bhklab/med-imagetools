@@ -64,6 +64,14 @@ class InterlacerQueryError(Exception):
     pass
 
 
+class DuplicateRowError(InterlacerQueryError):
+    """Raised when the index.csv file contains duplicate rows."""
+
+    def __init__(self) -> None:
+        msg = "The input file contains duplicate rows."
+        super().__init__(msg)
+
+
 class UnsupportedModalityError(InterlacerQueryError):
     """Raised when an unsupported modality is specified in the query."""
 
@@ -143,9 +151,24 @@ class Interlacer:
             raise TypeError(errmsg)
 
         self.crawl_df.set_index("SeriesInstanceUID", inplace=True, drop=False)
-        self.crawl_df = self.crawl_df[
-            ~self.crawl_df.index.duplicated(keep="first")
-        ]
+        # if True in self.crawl_df.index.drop(labels=["SubSeries"], errors="ignore").duplicated(keep="first"):
+        if self.crawl_df.duplicated(
+            subset=[
+                "PatientID",
+                "StudyInstanceUID",
+                "SeriesInstanceUID",
+                "Modality",
+                "ReferencedModality",
+                "ReferencedSeriesUID",
+                "instances",
+                "folder",
+            ],
+            keep="first",
+        ).any():
+            raise DuplicateRowError()
+        # self.crawl_df = self.crawl_df[
+        #    ~self.crawl_df.index.duplicated(keep="first")
+        # ]
         self._build_series_forest()
 
     def _build_series_forest(self) -> None:
