@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, List, Sequence
 
 from pydantic import (
     BaseModel,
@@ -21,7 +21,57 @@ from imgtools.loggers import logger
 
 DEFAULT_FILENAME_FORMAT = "{SampleNumber}__{PatientID}/{Modality}_{SeriesInstanceUID}/{ImageID}.nii.gz"
 
-__all__ = ["SampleOutput"]
+__all__ = ["SampleOutput", "AnnotatedPathSequence"]
+
+
+class FailedToSaveSingleImageError(Exception):
+    """Exception raised when a single image fails to save."""
+
+    def __init__(self, message: str, image: MedImage) -> None:
+        super().__init__(message)
+        self.image = image
+
+
+class AnnotatedPathSequence(list):
+    """
+    Custom sequence of paths that behaves like a list but includes an errors attribute.
+
+    This class is returned by SampleOutput.__call__ to allow access to any errors
+    that occurred during the save process while still behaving like a regular
+    sequence of paths.
+
+    Attributes
+    ----------
+    errors : List[FailedToSaveSingleImageError]
+        List of errors that occurred during the save process.
+    """
+
+    errors: List[FailedToSaveSingleImageError | None]
+
+    def __init__(
+        self,
+        paths: List[Path],
+        errors: List[FailedToSaveSingleImageError] = None,
+    ) -> None:
+        """
+        Initialize the annotated path sequence.
+
+        Parameters
+        ----------
+        paths : List[Path]
+            List of paths to saved files.
+        errors : List[FailedToSaveSingleImageError], optional
+            List of errors that occurred during the save process.
+        """
+        super().__init__(paths)
+        self.errors = errors or []
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        paths_repr = super().__repr__()
+        if not self.errors:
+            return paths_repr
+        return f"{paths_repr} (with {len(self.errors)} errors)"
 
 
 class SampleOutput(BaseModel):
@@ -118,7 +168,7 @@ class SampleOutput(BaseModel):
 
     def __call__(
         self, data: Sequence[MedImage], /, **kwargs: object
-    ) -> Sequence[Path]:
+    ) -> AnnotatedPathSequence:
         """
         Save the data to files using the configured writer.
 
@@ -131,43 +181,52 @@ class SampleOutput(BaseModel):
 
         Returns
         -------
-        List[Path]
-            List of paths to the saved files.
+        AnnotatedPathSequence
+            List of paths to the saved files, annotated with any errors that occurred.
         """
         saved_files = []
+        save_errors = []
         for image in data:
-            if isinstance(image, VectorMask):
-                for (
-                    _i,
-                    roi_key,
-                    roi_names,
-                    image_id,
-                    mask,
-                ) in image.iter_masks():
-                    # image_id = f"{roi_key}_[{matched_rois}]"
-                    p = self.writer.save(
+            try:
+                if isinstance(image, VectorMask):
+                    for (
+                        _i,
+                        roi_key,
+                        roi_names,
+                        image_id,
                         mask,
-                        roi_key=roi_key,
-                        matched_rois="|".join(roi_names),
+                    ) in image.iter_masks():
+                        # image_id = f"{roi_key}_[{matched_rois}]"
+                        p = self.writer.save(
+                            mask,
+                            roi_key=roi_key,
+                            matched_rois="|".join(roi_names),
+                            **image.metadata,
+                            **kwargs,
+                            ImageID=image_id,
+                        )
+                        saved_files.append(p)
+                elif isinstance(image, MedImage):
+                    # Handle MedImage case
+                    p = self.writer.save(
+                        image,
                         **image.metadata,
                         **kwargs,
-                        ImageID=image_id,
+                        ImageID=image.metadata["Modality"],
                     )
                     saved_files.append(p)
-            elif isinstance(image, MedImage):
-                # Handle MedImage case
-                p = self.writer.save(
-                    image,
-                    **image.metadata,
-                    **kwargs,
-                    ImageID=image.metadata["Modality"],
-                )
-                saved_files.append(p)
-            else:
-                errmsg = (
-                    f"Unsupported image type: {type(image)}. "
-                    "Expected MedImage or VectorMask."
-                )
-                logger.error(errmsg)
-                raise TypeError(errmsg)
-        return saved_files
+                else:
+                    errmsg = (
+                        f"Unsupported image type: {type(image)}. "
+                        "Expected MedImage or VectorMask."
+                    )
+                    logger.error(errmsg)
+                    raise TypeError(errmsg)
+            except Exception as e:
+                errmsg = f"Failed to save image SeriesUID: {image.metadata.get('SeriesInstanceUID', 'unknown')}: {e}"
+
+                # create an error object
+                save_error = FailedToSaveSingleImageError(errmsg, image)
+                save_errors.append(save_error)
+
+        return AnnotatedPathSequence(saved_files, save_errors)
