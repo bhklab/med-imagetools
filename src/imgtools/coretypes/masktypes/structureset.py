@@ -353,6 +353,16 @@ class RTStructureSet:
         if not hasattr(roi_contour.ContourSequence[0], "ContourData"):
             msg = f"ContourSequence in ROI at index {roi_index} is missing 'ContourData'. "
             raise ROIContourError(msg)
+        elif (
+            geometric_type := roi_contour.ContourSequence[
+                0
+            ].ContourGeometricType
+        ) != "CLOSED_PLANAR":
+            msg = (
+                f"ContourSequence in ROI at index {roi_index} has unexpected "
+                f"ContourGeometricType: {geometric_type}. Expected 'CLOSED_PLANAR'."
+            )
+            raise ROIContourError(msg)
 
         return roi_contour.ContourSequence
 
@@ -663,25 +673,31 @@ class RTStructureSet:
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
-    from imgtools.coretypes.imagetypes import Scan
     from imgtools.coretypes.masktypes.roi_matching import (
         ROIMatcher,
     )
 
-    ct_path = Path("data/RADCURE/RADCURE-0331/Study-03560/CT-3.0")
-    rt_path = Path(
-        "data/RADCURE/RADCURE-0331/Study-03560/RTSTRUCT-1.0/00000001.dcm"
+    # ct_path = Path("data/RADCURE/RADCURE-0331/Study-03560/CT-3.0")
+    # rt_path = Path(
+    #     "data/RADCURE/RADCURE-0331/Study-03560/RTSTRUCT-1.0/00000001.dcm"
+    # )
+
+    # scan = Scan.from_dicom(ct_path.as_posix())
+    # rtstruct = RTStructureSet.from_dicom(rt_path)
+
+    # roi_matcher = ROIMatcher(
+    #     match_map={"ROI": [".*"]},
+    # )
+
+    # vm = rtstruct.get_vector_mask(
+    #     scan,
+    #     roi_matcher,
+    # )
+    # print(vm)  # noqa: T201
+
+    cptac_rt = Path(
+        "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-531285.4/00000001.dcm"
     )
 
-    scan = Scan.from_dicom(ct_path.as_posix())
-    rtstruct = RTStructureSet.from_dicom(rt_path)
-
-    roi_matcher = ROIMatcher(
-        match_map={"ROI": [".*"]},
-    )
-
-    vm = rtstruct.get_vector_mask(
-        scan,
-        roi_matcher,
-    )
-    print(vm)  # noqa: T201
+    rtstruct_cptac = RTStructureSet.from_dicom(cptac_rt)
+    print(rtstruct_cptac.roi_names)  # noqa: T201
