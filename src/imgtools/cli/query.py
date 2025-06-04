@@ -84,13 +84,13 @@ def query(  path: Path,
                 n_jobs=n_jobs,
                 force=force,
             )
-            crawl_result = crawler.crawl()
+            crawler.crawl()
         except Exception as e:
             logger.exception("Failed to crawl directory.")
             raise click.Abort() from e
         logger.info("Crawling completed.")
         logger.info("Crawl results saved to %s", crawler.output_dir)
-        path = crawl_result.index_csv_path
+        path = crawler._crawl_results.index_csv_path
 
     try:
         interlacer = Interlacer(path)
