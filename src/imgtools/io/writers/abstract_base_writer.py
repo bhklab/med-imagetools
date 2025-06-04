@@ -263,7 +263,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             **self.context,
             **kwargs,
             "saved_time": datetime.now(timezone.utc).strftime(
-                "%Y-%m-%d:%H-%M-%S"
+                "%Y-%m-%d:%H:%M:%S"
             ),
         }
         self.set_context(**save_context)
