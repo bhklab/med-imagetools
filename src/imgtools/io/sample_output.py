@@ -46,12 +46,12 @@ class AnnotatedPathSequence(list):
         List of errors that occurred during the save process.
     """
 
-    errors: List[FailedToSaveSingleImageError | None]
+    errors: List[FailedToSaveSingleImageError] | None
 
     def __init__(
         self,
         paths: List[Path],
-        errors: List[FailedToSaveSingleImageError] = None,
+        errors: List[FailedToSaveSingleImageError] | None = None,
     ) -> None:
         """
         Initialize the annotated path sequence.
