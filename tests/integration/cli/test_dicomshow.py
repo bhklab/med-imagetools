@@ -46,7 +46,7 @@ def test_dicomshow_collections(
 ):
     """Test `imgtools dicomshow` on each collection from public or private sets."""
     collection_dicoms, collection_name = collection
-    snapshot.snapshot_dir = f'snapshots/{collection_name}_snapshots'
+    snapshot.snapshot_dir = f'tests/snapshots/dicomshow/{collection_name}_snapshots'
     for modality in collection_dicoms:
         
         result = runner.invoke(dicomshow_cli, [
