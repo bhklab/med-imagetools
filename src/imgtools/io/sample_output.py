@@ -223,10 +223,11 @@ class SampleOutput(BaseModel):
                     logger.error(errmsg)
                     raise TypeError(errmsg)
             except Exception as e:
-                errmsg = f"Failed to save image SeriesUID: {image.metadata.get('SeriesInstanceUID', 'unknown')}: {e}"
+                errmsg = f"Failed to save image SeriesUID: {image.metadata['SeriesInstanceUID']}: {e}"
 
                 # create an error object
                 save_error = FailedToSaveSingleImageError(errmsg, image)
                 save_errors.append(save_error)
+                logger.error(errmsg, error=save_error)
 
         return AnnotatedPathSequence(saved_files, save_errors)
