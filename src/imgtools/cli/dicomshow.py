@@ -42,7 +42,7 @@ def dicomshow(
     if len(split_input)>1:
         parts = split_input[1].split('.')
         for part in parts:
-            if part[0] == '(':
+            if part and part[0] == '(':
                 match = re.search(r"\(([0-9A-Fa-f]{4}),\s*([0-9A-Fa-f]{4})\)", part)
                 if match:
                     tags.append((int(match.group(1), 16), int(match.group(2), 16)))
