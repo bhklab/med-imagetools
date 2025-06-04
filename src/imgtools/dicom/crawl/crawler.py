@@ -73,6 +73,16 @@ class Crawler:
             raise CrawlResultsNotAvailableError("crawl_results")
         return self._crawl_results
 
+    def get_series_info(self, series_uid: str) -> dict[str, str]:
+        """Get the series information for a given series UID."""
+        if series_uid not in self.crawl_results.crawl_db_raw:
+            msg = f"Series UID {series_uid} not found in crawl results."
+            raise ValueError(msg)
+
+        data = self.crawl_results.crawl_db_raw[series_uid]
+        first_subseries = next(iter(data.values()))
+        return first_subseries
+
     def get_folder(self, series_uid: str) -> str:
         """Get the folder for a given series UID."""
         if series_uid not in self.crawl_results.crawl_db_raw:

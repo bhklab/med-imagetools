@@ -180,7 +180,11 @@ class SEG:
     metadata: dict[str, Any] = field(default_factory=dict)  # noqa
 
     @classmethod
-    def from_dicom(cls, dicom: DicomInput) -> SEG:  # noqa: PLR0912
+    def from_dicom(  # noqa: PLR0912
+        cls,
+        dicom: DicomInput,
+        metadata: dict[str, Any] | None = None,
+    ) -> SEG:
         """
         Loads a DICOM-SEG object from a DICOM file.
         """
@@ -206,7 +210,7 @@ class SEG:
             )
             raise SegmentationError(msg) from e
 
-        metadata = extract_metadata(ds_seg, "SEG", extra_tags=None)  # type: ignore
+        metadata = metadata or extract_metadata(ds_seg, "SEG", extra_tags=None)  # type: ignore
         segments: dict[int, Segment] = {}
         for segnum in seg.segment_numbers:
             segdesc = seg.get_segment_description(segnum)
@@ -265,7 +269,7 @@ class SEG:
             raw_seg=seg,
             ref_indices=ref_indices,
             segments=segments,
-            metadata=metadata,
+            metadata={k: v for k, v in metadata.items() if v},
         )
 
     @property
