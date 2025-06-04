@@ -486,6 +486,9 @@ class SampleInput(BaseModel):
         series: SeriesNode,
     ) -> MedImage | VectorMask | None:
         """Load a non-reference image series based on modality."""
+        series_info = self.crawler.get_series_info(
+            series_uid=series.SeriesInstanceUID
+        )
         try:
             match modality:
                 case "RTSTRUCT" | "SEG":
@@ -493,7 +496,8 @@ class SampleInput(BaseModel):
                         RTStructureSet if modality == "RTSTRUCT" else SEG
                     )
                     vm = mask_klass.from_dicom(
-                        dicom=self.directory.parent / series.folder
+                        dicom=self.directory.parent / series.folder,
+                        metadata=series_info,  # pass along metadata
                     ).get_vector_mask(
                         reference_image=reference_image,
                         roi_matcher=self.roi_matcher,
@@ -567,6 +571,7 @@ if __name__ == "__main__":  # pragma: no cover
     medoutput = SampleOutput(
         directory=Path("temp_outputs/RADCURE_PROCESSED"),
         existing_file_mode=ExistingFileMode.OVERWRITE,
+        extra_context={"SampleNumber": "test"},
     )
     query_string = "CT,RTSTRUCT"
 
