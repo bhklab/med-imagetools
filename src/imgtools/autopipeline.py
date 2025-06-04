@@ -70,6 +70,8 @@ SIMPLIFIED_COLUMNS = [
     "PatientID",
     "Modality",
     "SeriesInstanceUID",
+    "StudyInstanceUID",
+    "ReferencedSeriesUID",
     # for Masks
     "roi_key",
     "matched_rois",
