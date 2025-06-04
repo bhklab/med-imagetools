@@ -39,29 +39,36 @@ def collection(request):
 ], indirect=True)
 def test_dicomshow_collections(
     runner: CliRunner,
-    medimage_by_collection,
     collection: tuple[dict[str, str], str],
-    dataset_type: str,
-    snapshot: Any
+    snapshot: Any,
 ):
     """Test `imgtools dicomshow` on each collection from public or private sets."""
     collection_dicoms, collection_name = collection
     snapshot.snapshot_dir = f'tests/snapshots/dicomshow/{collection_name}_snapshots'
     for modality in collection_dicoms:
-        
         result = runner.invoke(dicomshow_cli, [
             str(collection_dicoms[modality])
         ])
-        snapshot.assert_match(result.stdout_bytes, f'{collection_name}_{modality}_default')
-        assert result.exit_code == 0, f"{collection_name} failed on {modality} {collection_dicoms[modality]}(default parameters): {result.exception}\n {result.exc_info}"
-        
+        snapshot.assert_match(
+            result.stdout_bytes,
+            f'{collection_name}_{modality}_default'
+        )
+        assert result.exit_code == 0, (
+            f"{collection_name} failed on {modality} "
+            f"{collection_dicoms[modality]} (default parameters): "
+            f"{result.exception}\n{result.exc_info}"
+        )
+
         result = runner.invoke(dicomshow_cli, [
             str(collection_dicoms[modality]),
             "-p"
         ])
-
-        snapshot.assert_match(result.stdout_bytes, f'{collection_name}_{modality}_pydicom')
-        assert result.exit_code == 0, f"{collection_name} failed on {modality} (--pydicom enabled): {result.exception}\n {result.exc_info}"
-    
-
+        snapshot.assert_match(
+            result.stdout_bytes,
+            f'{collection_name}_{modality}_pydicom'
+        )
+        assert result.exit_code == 0, (
+            f"{collection_name} failed on {modality} (--pydicom enabled): "
+            f"{result.exception}\n{result.exc_info}"
+        )
     
