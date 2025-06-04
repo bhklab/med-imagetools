@@ -1,0 +1,41 @@
+ Keyword                  Value                                                 
+ AcquisitionDate          20091226                                              
+ AcquisitionNumber        1                                                     
+ AcquisitionTime          102204                                                
+ ContentDate              20091226                                              
+ ContentTime              102204                                                
+ EchoTime                 90                                                    
+ EchoTrainLength          13                                                    
+ FlipAngle                90                                                    
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.6450.2626.509071413889752122… 
+ ImageOrientationPatient  [0.999083, 0.0245979, -0.0350352, 0.000549323,        
+                          0.810978, 0.585077]                                   
+ ImagePositionPatient     [-122.414, -67.3587, -278.707]                        
+ ImagingFrequency         63.861131                                             
+ InversionTime            0                                                     
+ MagneticFieldStrength    1.5                                                   
+ Manufacturer             GE MEDICAL SYSTEMS                                    
+ ManufacturerModelName    Signa HDxt                                            
+ Modality                 MR                                                    
+ NumberOfAverages         1.5                                                   
+ PatientID                C3L-02403                                             
+ PatientPosition          FFS                                                   
+ PercentPhaseFieldOfView  100                                                   
+ PercentSampling          100                                                   
+ PixelBandwidth           122.07                                                
+ PixelSpacing             [0.4688, 0.4688]                                      
+ ProtocolName             UTERINE CA/8                                          
+ RepetitionTime           2400                                                  
+ ScanOptions              ['FAST_GEMS', 'SAT_GEMS', 'NPW', 'TRF_GEMS',          
+                          'FILTERED_GEMS', 'SP']                                
+ ScanningSequence         SE                                                    
+ SequenceVariant          ['SK', 'OSP']                                         
+ SeriesDate               20091226                                              
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.6450.2626.144262757963461194… 
+ SeriesTime               102204                                                
+ SliceThickness           4                                                     
+ SoftwareVersions         ['24', 'LX', 'MR Software release:HD16.0_V02_1131.a'] 
+ SpacingBetweenSlices     4.8                                                   
+ StudyDate                20091226                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.6450.2626.272955509432106520… 
+ StudyTime                095914                                                

@@ -1,0 +1,122 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ ImageType                                MultiValue of length 4                
+ InstanceCreationDate                     20081209                              
+ InstanceCreationTime                     121923                                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.2             
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.6450.2626.69… 
+ StudyDate                                20081209                              
+ SeriesDate                               20081209                              
+ AcquisitionDate                          20081209                              
+ ContentDate                              20081209                              
+ StudyTime                                121413                                
+ SeriesTime                               121851                                
+ AcquisitionTime                          121803.711801                         
+ ContentTime                              121923                                
+ AccessionNumber                          empty                                 
+ Modality                                 CT                                    
+ Manufacturer                             GE MEDICAL SYSTEMS                    
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         CT ABDOMEN AND PELVIS WITH CONTRAST   
+ ProcedureCodeSequence                    Sequence of length 1                  
+ CodeValue                                CTABDPELW                             
+ CodeMeaning                              CT ABDOMEN AND PELVIS WITH CONTRAST   
+ SeriesDescription                        2X 2 CORONAL AVG                      
+ ManufacturerModelName                    LightSpeed VCT                        
+ PatientName                              C3L-00947                             
+ PatientID                                C3L-00947                             
+ PatientBirthDate                         empty                                 
+ PatientSex                               F                                     
+ PatientAge                               071Y                                  
+ AdditionalPatientHistory                 endo                                  
+ ClinicalTrialTimePointID                 23                                    
+ ClinicalTrialTimePointDescription        Days offset from diagnosis            
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          CPTAC-UCEC                            
+                                          64502626                              
+ ContrastBolusAgent                       GASTR 25/975 & ISOVUE 370 125CC       
+ ScanOptions                              HELICAL MODE                          
+ SliceThickness                           2.000000                              
+ KVP                                      120                                   
+ DataCollectionDiameter                   500.000000                            
+ ProtocolName                             6.2 ABD/PELVIS ALL WITH               
+ ContrastBolusRoute                       Oral & IV                             
+ ReconstructionDiameter                   483.8                                 
+ GantryDetectorTilt                       0.000000                              
+ ExposureTime                             600                                   
+ ConvolutionKernel                        SOFT                                  
+ PatientPosition                          FFS                                   
+                                          GEMS_ACQU_01                          
+                                          55.000000                             
+                                          0.600000                              
+                                          1024                                  
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.6450.2626.20… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.6450.2626.95… 
+ StudyID                                  empty                                 
+ SeriesNumber                             601                                   
+ AcquisitionNumber                        1                                     
+ InstanceNumber                           92                                    
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.6450.2626.28… 
+ PositionReferenceIndicator               XY                                    
+ SliceLocation                            -18.859375                            
+                                          GEMS_IMAG_01                          
+                                          265                                   
+                                          2                                     
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ Rows                                     512                                   
+ Columns                                  512                                   
+ PixelSpacing                             MultiValue of length 2                
+ BitsAllocated                            16                                    
+ BitsStored                               16                                    
+ HighBit                                  15                                    
+ PixelRepresentation                      1                                     
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ WindowCenter                             40                                    
+ WindowWidth                              400                                   
+ RescaleIntercept                         -1024                                 
+ RescaleSlope                             1                                     
+ RescaleType                              Houndsfield Unit                      
+                                          GEMS_PARM_01                          
+                                          GEMS_HELIOS_01                        
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          GEHC_CT_ADVAPP_001                    
+                                          Slice                                 
+                                          SS30:Slice                            
+                                          30                                    
+                                          empty                                 
+                                          STENTOR                               

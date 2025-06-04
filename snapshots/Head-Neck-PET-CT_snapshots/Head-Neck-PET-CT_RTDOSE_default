@@ -1,0 +1,29 @@
+ Keyword                  Value                                                 
+ AcquisitionDate          18850827                                              
+ AcquisitionTime          230051.649                                            
+ ContentDate              18850827                                              
+ ContentTime              230238.896                                            
+ DoseGridScaling          0.00196567666716                                      
+ DoseSummationType        PLAN                                                  
+ DoseType                 PHYSICAL                                              
+ DoseUnits                GY                                                    
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.5168.2407.307321652657528524… 
+ ImageOrientationPatient  [1.0, 0.0, 0.0, 0.0, 1.0, 0.0]                        
+ ImagePositionPatient     [-249.23840332031, -249.23840332031,                  
+                          -386.42999267578]                                     
+ InstanceCreationDate     18850827                                              
+ InstanceCreationTime     111111                                                
+ Manufacturer             MIM Software                                          
+ ManufacturerModelName    ARIA RadOnc                                           
+ Modality                 RTDOSE                                                
+ PatientID                HN-CHUM-051                                           
+ PixelSpacing             [2.5, 2.5]                                            
+ ReferencedSeriesSOPUIDs  ['1.3.6.1.4.1.14519.5.2.1.5168.2407.5427985412052293… 
+ ReferencedSeriesUID      1.3.6.1.4.1.14519.5.2.1.5168.2407.286948309177385184… 
+ SeriesDate               18850827                                              
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.5168.2407.192406633487995418… 
+ SeriesTime               111111                                                
+ SliceThickness           3.0                                                   
+ StudyDate                18850827                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.5168.2407.235916725954667642… 
+ StudyTime                111111                                                

@@ -1,0 +1,332 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ ImageType                                MultiValue of length 2                
+ InstanceCreationDate                     18850827                              
+ InstanceCreationTime                     111111                                
+ InstanceCreatorUID                       1.3.6.1.4.1.14519.5.2.1.5168.2407.33… 
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.128           
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.5168.2407.24… 
+ StudyDate                                18850827                              
+ SeriesDate                               18850827                              
+ AcquisitionDate                          18850827                              
+ ContentDate                              18850827                              
+ StudyTime                                111111                                
+ SeriesTime                               111111                                
+ AcquisitionTime                          112101                                
+ ContentTime                              112607                                
+ Modality                                 PT                                    
+ Manufacturer                             GE MEDICAL SYSTEMS                    
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         PANC. avec C.A. SPHÈRE ORL  -TP       
+ SeriesDescription                        AC_T-C_3D                             
+ ManufacturerModelName                    Discovery ST                          
+ ReferencedStudySequence                  Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.3.1.2.3.1               
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.5168.2407.24… 
+                                          GEMS_PETD_01                          
+                                          19971016111101.00                     
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.13… 
+                                          19971016111156.00                     
+                                          19971016111106.00                     
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.30… 
+                                          VX                                    
+                                          VX                                    
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          1                                     
+                                          0                                     
+                                          1                                     
+                                          0                                     
+                                          1                                     
+                                          1                                     
+                                          0                                     
+                                          1                                     
+                                          0                                     
+                                          0                                     
+                                          2                                     
+                                          2                                     
+                                          23                                    
+                                          1                                     
+                                          1                                     
+                                          0.0                                   
+                                          0                                     
+                                          70                                    
+                                          153                                   
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          FDG -- fluorodeoxyglucose             
+                                          69787                                 
+                                          388.0                                 
+                                          19971016092800.00                     
+                                          0.5                                   
+                                          19971016092900.00                     
+                                          11.5                                  
+                                          19971016093000.00                     
+                                          18F                                   
+                                          6588.0                                
+                                          0.9700000286102295                    
+                                          0                                     
+                                          23                                    
+                                          23                                    
+                                          4                                     
+                                          4                                     
+                                          32                                    
+                                          800                                   
+                                          650                                   
+                                          375                                   
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.21… 
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.26… 
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.26… 
+                                          0                                     
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.31… 
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.13… 
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.67… 
+                                          150.0                                 
+                                          -150.45599365234375                   
+                                          19971016111135.00                     
+                                          553                                   
+                                          -150.5                                
+                                          0                                     
+                                          19971016112101.00                     
+                                          270                                   
+                                          0                                     
+                                          1                                     
+                                          255                                   
+                                          0                                     
+                                          2                                     
+                                          0                                     
+                                          0.000000                              
+                                          0                                     
+                                          0                                     
+                                          5                                     
+                                          2                                     
+                                          0.09600000083446503                   
+                                          0                                     
+                                          0.0                                   
+                                          0                                     
+                                          0.0                                   
+                                          0.0                                   
+                                          0                                     
+                                          0                                     
+                                          0                                     
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.38… 
+                                          1.3.6.1.4.1.14519.5.2.1.5168.2407.21… 
+                                          0.0                                   
+                                          0.0                                   
+                                          empty                                 
+                                          None                                  
+                                          0.0                                   
+                                          0                                     
+                                          0.0                                   
+                                          0.0                                   
+                                          0.0                                   
+                                          0                                     
+                                          10                                    
+                                          0.0                                   
+                                          -0.0                                  
+                                          0.0                                   
+                                          empty                                 
+                                          empty                                 
+                                          None                                  
+                                          None                                  
+                                          45.0                                  
+                                          None                                  
+                                          None                                  
+                                          0.0                                   
+                                          0                                     
+                                          0.0                                   
+                                          None                                  
+                                          3.859999895095825                     
+                                          None                                  
+                                          0.0                                   
+                                          None                                  
+                                          0.0                                   
+                                          0                                     
+                                          None                                  
+                                          0.0                                   
+                                          0                                     
+                                          None                                  
+                                          0.0                                   
+                                          0.0                                   
+                                          1                                     
+                                          3.3360989093780518                    
+                                          -0.03059300035238266                  
+                                          0.4833829998970032                    
+                                          -0.05761700123548508                  
+                                          1.2000000476837158                    
+                                          0.36486899852752686                   
+                                          0.0                                   
+                                          -0.0                                  
+                                          -385.8999938964844                    
+                                          3                                     
+                                          2                                     
+                                          4.0                                   
+                                          119                                   
+                                          10                                    
+                                          0.0                                   
+                                          0.0                                   
+                                          0.0                                   
+                                          0.0                                   
+ PatientName                              HN-CHUM-051                           
+ PatientID                                HN-CHUM-051                           
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientAge                               999Y                                  
+ PatientSize                              1.8                                   
+ PatientWeight                            95                                    
+ AdditionalPatientHistory                 empty                                 
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+                                          GEMS_PETD_01                          
+                                          19970927075426.00                     
+ SliceThickness                           3.2700                                
+ AcquisitionTerminationCondition          TIME                                  
+ AcquisitionStartCondition                MANU                                  
+ AcquisitionStartConditionData            0                                     
+ AcquisitionTerminationConditionData      0                                     
+ SoftwareVersions                         41.04                                 
+ ProtocolName                             TETE_COU_3D                           
+ TriggerTime                              0                                     
+ FrameTime                                0                                     
+ IntervalsAcquired                        0                                     
+ IntervalsRejected                        0                                     
+ ReconstructionDiameter                   450                                   
+ GantryDetectorTilt                       0                                     
+ FieldOfViewShape                         CYLINDRICAL RING                      
+ FieldOfViewDimensions                    MultiValue of length 2                
+ CollimatorType                           NONE                                  
+ ActualFrameDuration                      270000                                
+ PatientPosition                          HFS                                   
+                                          GEMS_PETD_01                          
+                                          19970927080135                        
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.5168.2407.23… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.5168.2407.13… 
+ StudyID                                  empty                                 
+ SeriesNumber                             4                                     
+ InstanceNumber                           38                                    
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.5168.2407.30… 
+ PositionReferenceIndicator               VX                                    
+ SliceLocation                            -121.0700                             
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ Rows                                     128                                   
+ Columns                                  128                                   
+ PixelSpacing                             MultiValue of length 2                
+ CorrectedImage                           MultiValue of length 8                
+ BitsAllocated                            16                                    
+ BitsStored                               16                                    
+ HighBit                                  15                                    
+ PixelRepresentation                      1                                     
+ SmallestImagePixelValue                  0                                     
+ LargestImagePixelValue                   32766                                 
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ RescaleIntercept                         0                                     
+ RescaleSlope                             0.942849                              
+ LossyImageCompression                    00                                    
+                                          MITRA LINKED ATTRIBUTES 1.0           
+                                          AGFA PACS Archive Mirroring 1.0       
+ StudyStatusID                            READ                                  
+                                          MITRA OBJECT UTF8 ATTRIBUTES 1.0      
+ AcquisitionContextSequence               Sequence of length 1                  
+ ConceptNameCodeSequence                  Sequence of length 1                  
+ CodeValue                                109054                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Patient State                         
+ ConceptCodeSequence                      Sequence of length 1                  
+ CodeValue                                F-01604                               
+ CodingSchemeDesignator                   SRT                                   
+ CodeMeaning                              Resting State                         
+ EnergyWindowRangeSequence                Sequence of length 1                  
+ EnergyWindowLowerLimit                   375                                   
+ EnergyWindowUpperLimit                   650                                   
+ RadiopharmaceuticalInformationSequence   Sequence of length 1                  
+ Radiopharmaceutical                      FDG -- fluorodeoxyglucose             
+ RadiopharmaceuticalVolume                0.5                                   
+ RadiopharmaceuticalStartTime             092900.00                             
+ RadiopharmaceuticalStopTime              093000.00                             
+ RadionuclideTotalDose                    373985504                             
+ RadionuclideHalfLife                     6588                                  
+ RadionuclidePositronFraction             0.97000002861023                      
+ RadiopharmaceuticalStartDateTime         19971017092900.00                     
+ RadiopharmaceuticalStopDateTime          19971017093000.00                     
+ RadionuclideCodeSequence                 Sequence of length 1                  
+ CodeValue                                C-111A1                               
+ CodingSchemeDesignator                   SNM3                                  
+ CodeMeaning                              18F                                   
+ RadiopharmaceuticalCodeSequence          Sequence of length 1                  
+ CodeValue                                C-B1031                               
+ CodingSchemeDesignator                   SNM3                                  
+ CodeMeaning                              FDG -- fluorodeoxyglucose             
+ NumberOfSlices                           119                                   
+ TypeOfDetectorMotion                     NONE                                  
+ PatientOrientationCodeSequence           Sequence of length 1                  
+ CodeValue                                F-10450                               
+ CodingSchemeDesignator                   SNM3                                  
+ CodeMeaning                              recumbent                             
+ PatientOrientationModifierCodeSequence   Sequence of length 1                  
+ CodeValue                                F-10340                               
+ CodingSchemeDesignator                   SNM3                                  
+ CodeMeaning                              supine                                
+ PatientGantryRelationshipCodeSequence    Sequence of length 1                  
+ CodeValue                                F-10470                               
+ CodingSchemeDesignator                   SNM3                                  
+ CodeMeaning                              headfirst                             
+ SeriesType                               MultiValue of length 2                
+ Units                                    BQML                                  
+ CountsSource                             EMISSION                              
+ RandomsCorrectionMethod                  SING                                  
+ AttenuationCorrectionMethod              measured,, 0.096000 cm-1,             
+ DecayCorrection                          START                                 
+ ReconstructionMethod                     3D IR                                 
+ DetectorLinesOfResponseUsed              0                                     
+ ScatterCorrectionMethod                  Model Based                           
+ AxialMash                                MultiValue of length 2                
+ TransverseMash                           2                                     
+ CoincidenceWindowWidth                   0                                     
+ FrameReferenceTime                       545000                                
+ PrimaryPromptsCountsAccumulated          0                                     
+ SecondaryCountsAccumulated               0                                     
+ SliceSensitivityFactor                   1                                     
+ DecayFactor                              1.07413                               
+ DoseCalibrationFactor                    778                                   
+ ScatterFractionFactor                    0.284115                              
+ DeadTimeFactor                           1.09008                               
+ ImageIndex                               82                                    
+                                          Varian Medical Systems VISION 3253    

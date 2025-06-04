@@ -29,16 +29,12 @@ def dicomshow(
     from pydicom.sequence import Sequence
     from pydicom.multival import MultiValue
     import re
-    from typing import Union
+    from typing import Union, Any
     from rich import print
     from rich.table import Table
+    from rich.markup import escape
     from imgtools.dicom.dicom_metadata import extract_metadata
     from tqdm import tqdm
-
-    # TODO: 
-    # use extract_metadata instead of pydicom by default. 
-    # add --pydicom option which runs the current version of the code
-    # integration test: find 1 file for each modality, and capture output (use pytest snapshots) compare to correct output
 
     split_input = dicom_file.split("::", 1)
     file_path = split_input[0]
@@ -64,7 +60,7 @@ def dicomshow(
 
         try:
             logger.info(f"Extracting tags from {dicom_file} (pydicom method)")
-            result: Union[FileDataset, DataElement] = dcmread(file_path, stop_before_pixels=True)
+            result: Any = dcmread(file_path, stop_before_pixels=True)
         except Exception as e:
             logger.error(f"Failed to read DICOM file {file_path}: {e}")
             raise click.ClickException(f"Cannot read DICOM file: {e}")
@@ -78,7 +74,7 @@ def dicomshow(
                         if not isinstance(result, FileDataset):
                             raise ValueError("Cannot access tag by name on non-dataset object")
                         result = result.get(tag)
-                table.add_row(split_input[1], str(result))
+                table.add_row(split_input[1], escape(str(val)))
             except (KeyError, IndexError, ValueError) as e:
                 logger.error(f"Failed to extract tag {split_input[1]}: {e}")
                 raise click.ClickException(f"Tag extraction failed: {e}")
@@ -89,23 +85,29 @@ def dicomshow(
                 
                 tag = data_element.keyword
                 
-                val = data_element.value
+                val: Any = data_element.value
                 if isinstance(val, list) or isinstance(val, Sequence) or isinstance(val, MultiValue):
                    table.add_row(str(tag), f"[orchid1]{val.__class__.__name__}[magenta] of length {len(val)}") 
+                elif isinstance(val, bytes):
+                    table.add_row(str(tag), f"[orchid1]Raw Byte Data")
+                elif str(val) == "":
+                    table.add_row(str(tag), f"[orchid1][italic]empty")
                 else:
-                    table.add_row(str(tag), str(val))
+                    table.add_row(str(tag), escape(str(val)))
     
     else: 
 
         result = extract_metadata(file_path)
         if tags:
             for tag in tqdm(tags):
-                result = result[tag]
+                result = result[str(tag)]
             table.add_row(split_input[1], str(result))
         else: 
             for key in tqdm(result):
-               if result[key] != "":
-                table.add_row(str(key), str(result[key])) 
+                if isinstance(result[key], list):
+                    table.add_row(str(key), f"{sorted(result[key])}")
+                elif result[key] != "":
+                    table.add_row(str(key), str(result[key])) 
     print(table)
     logger.info("Extraction complete.")
     

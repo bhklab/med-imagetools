@@ -1,0 +1,67 @@
+import pytest
+from pathlib import Path
+from click.testing import CliRunner
+import os
+from imgtools.cli.dicomshow import dicomshow as dicomshow_cli
+from typing import Any
+import shutil
+import glob
+import json
+
+@pytest.fixture(scope="function")
+def runner() -> CliRunner:
+    return CliRunner()
+
+@pytest.fixture(scope="function")
+def collection(request):
+    data_dir = Path("data")
+    
+    value = request.param
+    if not (data_dir / value).exists():
+        pytest.skip(f"{value} dataset unavailable.")
+    else:
+        dicoms = {}
+        for modality in ["CT", "SEG", "RTSTRUCT", "MR", "REG", "RTDOSE", "PT", "RTPLAN", "SR"]:
+            dicom_by_modality = sorted(glob.glob(str(data_dir/value)+f"/**/{modality}*/*.dcm", recursive=True))
+            if dicom_by_modality:
+                dicoms[modality] = dicom_by_modality[0]
+        return dicoms, value
+
+
+
+@pytest.mark.parametrize("collection", [
+    "CPTAC-UCEC",
+    "NSCLC_Radiogenomics",
+    "LIDC-IDRI",
+    "Head-Neck-PET-CT",
+    "HNSCC",
+    "Pancreatic-CT-CBCT-SEG",
+], indirect=True)
+def test_dicomshow_collections(
+    runner: CliRunner,
+    medimage_by_collection,
+    collection: tuple[dict[str, str], str],
+    dataset_type: str,
+    snapshot: Any
+):
+    """Test `imgtools dicomshow` on each collection from public or private sets."""
+    collection_dicoms, collection_name = collection
+    snapshot.snapshot_dir = f'snapshots/{collection_name}_snapshots'
+    for modality in collection_dicoms:
+        
+        result = runner.invoke(dicomshow_cli, [
+            str(collection_dicoms[modality])
+        ])
+        snapshot.assert_match(result.stdout_bytes, f'{collection_name}_{modality}_default')
+        assert result.exit_code == 0, f"{collection_name} failed on {modality} {collection_dicoms[modality]}(default parameters): {result.exception}\n {result.exc_info}"
+        
+        result = runner.invoke(dicomshow_cli, [
+            str(collection_dicoms[modality]),
+            "-p"
+        ])
+
+        snapshot.assert_match(result.stdout_bytes, f'{collection_name}_{modality}_pydicom')
+        assert result.exit_code == 0, f"{collection_name} failed on {modality} (--pydicom enabled): {result.exception}\n {result.exc_info}"
+    
+
+    

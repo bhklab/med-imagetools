@@ -1,0 +1,27 @@
+ Keyword                  Value                                                 
+ AcquisitionNumber        2                                                     
+ BodyPartExamined         CHEST                                                 
+ ConvolutionKernel        B45f                                                  
+ DataCollectionDiameter   500                                                   
+ Exposure                 402                                                   
+ ExposureTime             500                                                   
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.4334.1501.453430771385628485… 
+ GantryDetectorTilt       0                                                     
+ ImageOrientationPatient  [1, 0, 0, 0, 1, 0]                                    
+ ImagePositionPatient     [-182.1533203125, -314.1533203125, -67]               
+ KVP                      120                                                   
+ Modality                 CT                                                    
+ PatientID                R01-001                                               
+ PatientPosition          HFS                                                   
+ PixelSpacing             [0.693359375, 0.693359375]                            
+ ProtocolName             01_CAP                                                
+ ReconstructionDiameter   355                                                   
+ RescaleIntercept         -1024                                                 
+ RescaleSlope             1                                                     
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.4334.1501.312037286778380630… 
+ SliceThickness           1                                                     
+ SoftwareVersions         syngo CT 2007S                                        
+ StudyDate                19900906                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.4334.1501.116796918629271881… 
+ StudyTime                110942.109000                                         
+ XRayTubeCurrent          483                                                   

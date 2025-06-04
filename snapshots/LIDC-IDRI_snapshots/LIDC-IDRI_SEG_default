@@ -1,0 +1,29 @@
+ Keyword                Value                                                   
+ BodyPartExamined       CHEST                                                   
+ ContentDate            20190322                                                
+ ContentTime            170440                                                  
+ DeviceSerialNumber     0                                                       
+ FrameOfReferenceUID    1.3.6.1.4.1.14519.5.2.1.6279.6001.10465887249108369974… 
+ Manufacturer           QIICR                                                   
+ ManufacturerModelName  https://github.com/QIICR/dcmqi.git                      
+ Modality               SEG                                                     
+ PatientID              LIDC-IDRI-0068                                          
+ ROIDescriptions        ['Nodule 3 - Annotation 134911']                        
+ ROINames               ['Nodule 3 - Annotation 134911']                        
+ ReferencedSOPUIDs      ['1.3.6.1.4.1.14519.5.2.1.6279.6001.125786383929757015… 
+                        '1.3.6.1.4.1.14519.5.2.1.6279.6001.1418931983907501334… 
+                        '1.3.6.1.4.1.14519.5.2.1.6279.6001.2340364622945221016… 
+                        '1.3.6.1.4.1.14519.5.2.1.6279.6001.3018467728312386536… 
+                        '1.3.6.1.4.1.14519.5.2.1.6279.6001.3077297442255528009… 
+                        '1.3.6.1.4.1.14519.5.2.1.6279.6001.6029943492903303821… 
+ ReferencedSeriesUID    1.3.6.1.4.1.14519.5.2.1.6279.6001.18710860802230650454… 
+ SegDirection           [0.0, 0.0, 0.0, 0.0, 1.0, 1.0]                          
+ SegSpacing             [0.683594, 0.683594, 1.25]                              
+ SegmentationType       BINARY                                                  
+ SeriesDate             20190322                                                
+ SeriesInstanceUID      1.2.276.0.7230010.3.1.3.0.4287.1553288680.174393        
+ SeriesTime             170442                                                  
+ SoftwareVersions       f86b34f                                                 
+ StudyDate              20000101                                                
+ StudyInstanceUID       1.3.6.1.4.1.14519.5.2.1.6279.6001.70963209082144998995… 
+ StudyTime              141900                                                  
