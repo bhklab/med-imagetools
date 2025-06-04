@@ -74,7 +74,7 @@ def dicomshow(
                         if not isinstance(result, FileDataset):
                             raise ValueError("Cannot access tag by name on non-dataset object")
                         result = result.get(tag)
-                table.add_row(split_input[1], escape(str(val)))
+                table.add_row(split_input[1], escape(str(result)))
             except (KeyError, IndexError, ValueError) as e:
                 logger.error(f"Failed to extract tag {split_input[1]}: {e}")
                 raise click.ClickException(f"Tag extraction failed: {e}")
