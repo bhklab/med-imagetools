@@ -149,13 +149,19 @@ class ROIContourExtractionError(ROIContourError):
     and referenced ROI number to provide context for the error.
     """
 
+    roi_index: int
+    roi_name: str
+    referenced_roi_number: int | None
+    additional_info: dict | None
+    message: str
+
     def __init__(
         self,
         message: str,
         roi_index: int,
         roi_name: str,
-        referenced_roi_number: int = None,
-        additional_info: dict = None,
+        referenced_roi_number: int | None = None,
+        additional_info: dict | None = None,
     ) -> None:
         """Initialize with detailed information about the ROI extraction failure.
 
@@ -308,7 +314,7 @@ class RTStructureSet:
 
         # logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
         dicom_rt: FileDataset = load_dicom(dicom)
-        metadata: Dict[str, Any] = metadata or extract_metadata(
+        metadata = metadata or extract_metadata(
             dicom_rt,
             "RTSTRUCT",
             extra_tags=None,
@@ -318,7 +324,7 @@ class RTStructureSet:
         )
 
         # Extract ROI contour points for each ROI and
-        for roi_index, roi_name in enumerate(metadata["ROINames"]):
+        for roi_index, roi_name in enumerate(metadata["ROINames"]):  # type: ignore[arg-type]
             try:
                 extracted_roi: Sequence = cls._get_roi_points(
                     dicom_rt,
@@ -334,7 +340,7 @@ class RTStructureSet:
         # tag the logger with the original RTSTRUCT file name
         rt.plogger = logger.bind(
             PatientID=metadata.get("PatientID", "Unknown"),
-            SeriesInstanceUID=metadata.get("SeriesInstanceUID", "Unknown")[
+            SeriesInstanceUID=metadata.get("SeriesInstanceUID", "Unknown")[  # type: ignore[index]
                 -8:
             ],
             filepath=Path(dicom) if isinstance(dicom, (str, Path)) else dicom,
