@@ -70,6 +70,8 @@ SIMPLIFIED_COLUMNS = [
     "PatientID",
     "Modality",
     "SeriesInstanceUID",
+    "StudyInstanceUID",
+    "ReferencedSeriesUID",
     # for Masks
     "roi_key",
     "matched_rois",
@@ -135,7 +137,7 @@ class ProcessSampleResult:
             "processing_time": f"{self.processing_time:.2f}s",
         }
 
-        if self.success:
+        if not self.has_error:
             return {
                 **base_dict,
                 "output_files": [str(f) for f in self.output_files],
@@ -221,12 +223,14 @@ def process_one_sample(
     }
 
     # check if our input samples is a subset of our loaded sample_images
+    # we use subset, because we may have loaded more images than requested (subseries)
     if not series_instance_uids.issubset(loaded_series_instance_uids):
         error_msg = (
             f"Loaded {len(loaded_series_instance_uids)} sample"
             f" images do not match input samples {len(series_instance_uids)}. "
             "This most likely may be due to failures to match ROIs. "
-            f"The {len(sample_images)} will not be processed or saved."
+            f"We will save {len(loaded_series_instance_uids)} loaded, "
+            f"out of {len(series_instance_uids)} input series. "
         )
         result.error_type = "ROIMatchError"
         result.error_message = error_msg
@@ -234,8 +238,6 @@ def process_one_sample(
             "loaded_series": list(loaded_series_instance_uids),
             "input_series": list(series_instance_uids),
         }
-        result.processing_time = time.time() - start_time
-        return result
 
     try:
         transformed_images = transformer(sample_images)
@@ -252,6 +254,10 @@ def process_one_sample(
             SampleNumber=idx,
         )
         result.output_files = list(saved_files)
+        if not result.output_files:
+            raise ValueError(
+                "No output files were saved. Check the output directory."
+            )
         result.success = True
     except Exception as e:
         error_message = str(e)
@@ -430,12 +436,11 @@ class Autopipeline:
                 all_results.append(result)
 
                 # Update progress bar and track results by success/failure
-                if result.success:
+                if not result.has_error:
                     successful_results.append(result)
-                    pbar.update(1)
                 else:
                     failed_results.append(result)
-                    pbar.update(1)
+                pbar.update(1)
 
         # Create pipeline results object
         pipeline_results = PipelineResults(

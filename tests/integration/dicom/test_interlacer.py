@@ -7,6 +7,8 @@ from pathlib import Path
 from imgtools.dicom import Interlacer
 from imgtools.dicom.crawl import Crawler
 
+from imgtools.utils.interlacer_utils import SeriesNode, visualize_forest, print_interlacer_tree
+
 @pytest.mark.skipif(
     os.getenv("TEST_DATASET_TYPE", "public").lower() == 'public',
     reason="Test uses collections in private data"
@@ -96,8 +98,16 @@ def test_interlacer_visualize(medimage_by_collection, caplog) -> None:
         interlacer = Interlacer(crawler.index)
 
         viz_path = Path(series_list[0].get('Path')).parent.parent / collection / "interlacer.html"
-        interlacer.visualize_forest(viz_path)
+        visualize_forest(interlacer.root_nodes, viz_path)
 
         assert viz_path.exists()
+
+        # forcing duplicate entry to test that the correct exception is thrown. 
+        index_duplicates = crawler.index
+        index_duplicates.loc[len(index_duplicates)] = index_duplicates.loc[0]
+
+        with pytest.raises(Exception, match="The input file contains duplicate rows."):
+            interlacer = Interlacer(index_duplicates)
+
 
         break

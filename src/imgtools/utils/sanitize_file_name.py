@@ -13,15 +13,18 @@ Sanitize a filename:
 
 import re
 
+# Disallowed characters (excluding `/`)
+DISALLOWED_CHARS = r'<>:"\\|?*\x00-\x1f'
+DISALLOWED_CHARS_PATTERN = re.compile(f"[{DISALLOWED_CHARS}]")
+DISALLOWED_CHARS_STRIP_REGEX = re.compile(
+    f"^[{DISALLOWED_CHARS}]+|[{DISALLOWED_CHARS}]+$"
+)
+
 
 def sanitize_file_name(filename: str) -> str:
     """
-    Sanitize the file name by removing potentially dangerous characters at the
-    beginning and end of the filename, and replacing them elsewhere.
-
-    Removes disallowed characters at the beginning and end of the filename,
-    replaces disallowed characters with underscores, converts spaces to
-    underscores, and removes subsequent underscores.
+    Sanitize the file name by removing or replacing disallowed characters,
+    while preserving forward slashes.
 
     Parameters
     ----------
@@ -32,31 +35,21 @@ def sanitize_file_name(filename: str) -> str:
     -------
     str
         The sanitized file name.
-
-    Examples
-    --------
-    >>> sanitize_file_name("test<>file:/name.dcm")
-    'test_file_name.dcm'
-    >>> sanitize_file_name("my file name.dcm")
-    'my_file_name.dcm'
-    >>> sanitize_file_name("<bad>name.dcm")
-    'bad_name.dcm'
     """
-    assert filename is not None and filename != ""
-    assert isinstance(filename, str)
+    assert filename and isinstance(filename, str)
 
-    disallowed_characters_pattern = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+    # Remove disallowed characters at the start and end
+    filename = DISALLOWED_CHARS_STRIP_REGEX.sub("", filename).strip()
 
-    # Remove disallowed characters at the beginning and end
-    filename = re.sub(
-        r'^[<>:"/\\|?*\x00-\x1f]+|[<>:"/\\|?*\x00-\x1f]+$', "", filename
-    )
+    filename = filename.replace(" - ", "-")
 
-    # Remove spaces at the beginning and end
-    filename = filename.strip()
+    # Replace multiple spaces with a single space
+    filename = re.sub(r"\s+", "_", filename)
 
-    # Replace disallowed characters elsewhere with underscores
-    sanitized_name = disallowed_characters_pattern.sub("_", filename)
-    sanitized_name = sanitized_name.replace(" ", "_")
-    sanitized_name = re.sub(r"(_{2,})", "_", sanitized_name)
-    return sanitized_name
+    # Replace multiple consecutive disallowed characters with a single underscore
+    filename = re.sub(f"[{DISALLOWED_CHARS}]+", "_", filename)
+
+    # Replace remaining disallowed characters with underscores
+    sanitized = DISALLOWED_CHARS_PATTERN.sub("_", filename)
+
+    return sanitized

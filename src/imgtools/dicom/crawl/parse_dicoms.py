@@ -2,6 +2,7 @@ import json
 import pathlib
 import typing as t
 from collections import defaultdict
+from typing import Optional
 
 import pandas as pd
 from dpath import (
@@ -407,8 +408,12 @@ def parse_dicom_dir(
     # and extract the relevant fields for barebones_dict
     slim_db = construct_barebones_dict(series_meta_raw)
 
+    # drop duplicate entries with different subseries.
+    slim_db = remove_duplicate_entries(slim_db)
+
     # convert slimb_db to a pandas dataframe
     index_df = pd.DataFrame.from_records(slim_db)
+
     index_df.to_csv(index_csv, index=False)
     logger.debug("Saved index CSV.", index_csv=index_csv)
 
@@ -466,3 +471,52 @@ def construct_barebones_dict(
             )
 
     return barebones_dict
+
+
+def remove_duplicate_entries(
+    slim_db: list[dict[str, str]], ignore_keys: Optional[list[str]] = None
+) -> list[dict[str, str]]:
+    """Removes duplicate entries from a barebones dict, ignoring the keys in `ignore_keys`.
+    Parameters
+    ----------
+
+        slim_db : list[dict[str, str]]
+            - The barebones dict to operate on. MUST contain the following keys:
+                    "PatientID"
+                    "StudyInstanceUID"
+                    "SeriesInstanceUID"
+                    "SubSeries"
+                    "Modality"
+                    "ReferencedModality"
+                    "ReferencedSeriesUID"
+                    "instances"
+                    "folder"
+        ignore_keys: Optional[list[str]], default = None
+            - The list of keys to ignore when searching for duplicates.
+            - If a row is exactly the same as another row, except for one of the keys listed in `ignore_keys`
+              the row will still be considered a duplicate.
+
+
+    Returns
+    -------
+
+        list[dict[str, str]]
+            - the barebones dict with duplicates removed.
+
+    Note: I tried to make this as efficient as possible, sorry if it slows down everything.
+    """
+
+    hash_values = set()
+    # I find it more intuitive to pass in a list, rather than a set, but since sets are faster for our usecase I cast ignore_keys to a set.
+    if ignore_keys is None:
+        ignore_set = set(["SubSeries"])
+    else:
+        ignore_set = set(ignore_keys)
+    output = []
+    for record in slim_db:
+        hash_key = [record[key] for key in record if key not in ignore_set]
+        if (*hash_key,) not in hash_values:
+            output.append(record)
+            hash_values.add((*hash_key,))
+
+    return output
