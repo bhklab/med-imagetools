@@ -62,3 +62,12 @@ class TestSanitizeFileName:
     def test_leading_trailing_spaces(self):
         """Test filenames with leading and trailing spaces."""
         assert sanitize_file_name("  my file name  .dcm") == "my_file_name_.dcm"
+
+    def test_hyphen_with_spaces(self):
+        """Test that ' - ' in filenames is replaced with '-'."""
+        assert sanitize_file_name("file - name.dcm") == "file-name.dcm"
+        assert sanitize_file_name("file - name - test.dcm") == "file-name-test.dcm"
+        assert sanitize_file_name("file -name.dcm") == "file_-name.dcm"  # Single space not replaced
+        assert sanitize_file_name("file- name.dcm") == "file-_name.dcm"  # Single space not replaced
+        assert sanitize_file_name('UTERUS - 1 - SE') == 'UTERUS-1-SE'
+        assert sanitize_file_name(('UTERUS - 2')) == 'UTERUS-2'
