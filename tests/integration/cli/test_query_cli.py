@@ -41,9 +41,6 @@ def test_query_collections(
 
     input_dir = Path("data") / collection
 
-    if not Path(input_dir).exists():
-        pytest.skip(f"Collection {collection} not found {dataset_type=}")
-
     print(f"Testing {collection} in {input_dir}")
     out_dir = input_dir.parent / ".imgtools" / collection
 

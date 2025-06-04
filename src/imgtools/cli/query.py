@@ -76,23 +76,21 @@ def query(  path: Path,
         logger.warning(f"n_jobs requires a directory as input. {path} will be used as the index.")
 
     elif (path.is_dir()):
-        index_path = path.parent / ".imgtools" / path.name / "index.csv"
-        if (force or not index_path.exists()):
-            from imgtools.dicom.crawl import Crawler
-            logger.info("Initializing crawl.")
-            try:
-                crawler = Crawler(
-                    dicom_dir=path,
-                    n_jobs=n_jobs,
-                    force=force,
-                )
-                crawler.crawl()
-            except Exception as e:
-                logger.exception("Failed to crawl directory.")
-                raise click.Abort() from e
-            logger.info("Crawling completed.")
-            logger.info("Crawl results saved to %s", crawler.output_dir)
-        path = index_path
+        from imgtools.dicom.crawl import Crawler
+        logger.info("Initializing crawl.")
+        try:
+            crawler = Crawler(
+                dicom_dir=path,
+                n_jobs=n_jobs,
+                force=force,
+            )
+            crawl_result = crawler.crawl()
+        except Exception as e:
+            logger.exception("Failed to crawl directory.")
+            raise click.Abort() from e
+        logger.info("Crawling completed.")
+        logger.info("Crawl results saved to %s", crawler.output_dir)
+        path = crawl_result.index_csv_path
 
     try:
         interlacer = Interlacer(path)
