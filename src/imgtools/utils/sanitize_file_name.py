@@ -57,6 +57,9 @@ def sanitize_file_name(filename: str) -> str:
 
     # Replace disallowed characters elsewhere with underscores
     sanitized_name = disallowed_characters_pattern.sub("_", filename)
+    # if there is a " - " in the filename, replace it with just "-"
+    sanitized_name = sanitized_name.replace(" - ", "-")
+
     sanitized_name = sanitized_name.replace(" ", "_")
     sanitized_name = re.sub(r"(_{2,})", "_", sanitized_name)
     return sanitized_name
