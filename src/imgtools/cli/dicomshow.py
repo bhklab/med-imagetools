@@ -86,12 +86,13 @@ def dicomshow(
                 tag = data_element.keyword
                 
                 val: Any = data_element.value
-                if isinstance(val, list) or isinstance(val, Sequence) or isinstance(val, MultiValue):
-                   table.add_row(str(tag), f"[orchid1]{val.__class__.__name__}[magenta] of length {len(val)}") 
+                val: Any = data_element.value
+                if isinstance(val, (list, Sequence, MultiValue)):
+                    table.add_row(str(tag), f"[orchid1]{val.__class__.__name__}[magenta] of length {len(val)}")
                 elif isinstance(val, bytes):
-                    table.add_row(str(tag), f"[orchid1]Raw Byte Data")
+                    table.add_row(str(tag), "[orchid1]Raw Byte Data")
                 elif str(val) == "":
-                    table.add_row(str(tag), f"[orchid1][italic]empty")
+                    table.add_row(str(tag), "[orchid1][italic]empty")
                 else:
                     table.add_row(str(tag), escape(str(val)))
     
