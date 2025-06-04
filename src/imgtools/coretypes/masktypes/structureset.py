@@ -174,11 +174,11 @@ class RTStructureSet:
         init=False,
     )
     roi_map: dict[str, Sequence] = field(
-        repr=False,
         default_factory=dict,
     )
     roi_map_errors: dict[str, ROIContourError] = field(
-        repr=False, default_factory=dict, init=False
+        default_factory=dict,
+        init=False,
     )
 
     # store a hidden cache to store the numpy arrays
@@ -673,31 +673,25 @@ class RTStructureSet:
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
-    from imgtools.coretypes.masktypes.roi_matching import (
-        ROIMatcher,
-    )
+    cptac = {
+        "mr": Path("data/CPTAC-UCEC/C3L-02403/MR_Series-45733428.4/"),
+        "rt_seed": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-558960.4/00000001.dcm"
+        ),
+        "rt_contour2": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-520374.4/00000001.dcm"
+        ),
+        "rt_contour": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-55458746/00000001.dcm"
+        ),
+    }
 
-    # ct_path = Path("data/RADCURE/RADCURE-0331/Study-03560/CT-3.0")
-    # rt_path = Path(
-    #     "data/RADCURE/RADCURE-0331/Study-03560/RTSTRUCT-1.0/00000001.dcm"
-    # )
+    rt_seed = RTStructureSet.from_dicom(cptac["rt_seed"])
+    print("[red]THIS SHOULD HAVE ERRORS[/red]")
+    print(rt_seed)
 
-    # scan = Scan.from_dicom(ct_path.as_posix())
-    # rtstruct = RTStructureSet.from_dicom(rt_path)
-
-    # roi_matcher = ROIMatcher(
-    #     match_map={"ROI": [".*"]},
-    # )
-
-    # vm = rtstruct.get_vector_mask(
-    #     scan,
-    #     roi_matcher,
-    # )
-    # print(vm)  # noqa: T201
-
-    cptac_rt = Path(
-        "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-531285.4/00000001.dcm"
-    )
-
-    rtstruct_cptac = RTStructureSet.from_dicom(cptac_rt)
-    print(rtstruct_cptac.roi_names)  # noqa: T201
+    rt_contour = RTStructureSet.from_dicom(cptac["rt_contour"])
+    rt_contour2 = RTStructureSet.from_dicom(cptac["rt_contour2"])
+    print("[green]THESE SHOULD NOT HAVE ERRORS[/green]")
+    print(rt_contour)
+    print(rt_contour2)
