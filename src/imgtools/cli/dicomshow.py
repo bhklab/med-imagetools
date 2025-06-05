@@ -117,7 +117,6 @@ def dicomshow(
                 tag = data_element.keyword
                 
                 val: Any = data_element.value
-                val: Any = data_element.value
                 if isinstance(val, (list, Sequence, MultiValue)):
                     table.add_row(str(tag), f"[orchid1]{val.__class__.__name__}[magenta] of length {len(val)}")
                 elif isinstance(val, bytes):
