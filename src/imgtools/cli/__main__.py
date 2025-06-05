@@ -54,7 +54,6 @@ registry = CommandRegistry()
 registry.create_group("core commands", "Main subcommands for the med-imagetools package.")
 registry.add('core commands', index)
 registry.add('core commands', interlacer)
-registry.add('core commands', query)
 registry.add('core commands', autopipeline)
 registry.add('core commands', nnunet_pipeline)
 
