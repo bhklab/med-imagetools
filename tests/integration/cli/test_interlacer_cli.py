@@ -21,7 +21,7 @@ def collection(request):
         shutil.copytree(data_dir / value, data_dir / f"{value}-interlacer-test-temp", dirs_exist_ok=True)
         yield f"{value}-interlacer-test-temp"
         shutil.rmtree(data_dir / f"{value}-interlacer-test-temp")
-        if (data_dir / ".imgtools" / f"{value}-interlacer-test-temp").exists:
+        if (data_dir / ".imgtools" / f"{value}-interlacer-test-temp").exists():
             shutil.rmtree(data_dir / ".imgtools" / f"{value}-interlacer-test-temp")
 
 
