@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-import csv
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -11,9 +10,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Dict,
-    NoReturn,
     Optional,
-    Sequence,
     TypeVar,
     Generic,
 )
@@ -26,6 +23,7 @@ from imgtools.pattern_parser import (
     PatternResolver,
     MissingPlaceholderValueError,
 )
+from imgtools.utils import sanitize_file_name
 from imgtools.io.writers.index_writer import (
     IndexWriter,
     IndexSchemaMismatchError,
@@ -265,7 +263,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             **self.context,
             **kwargs,
             "saved_time": datetime.now(timezone.utc).strftime(
-                "%Y-%m-%d:%H-%M-%S"
+                "%Y-%m-%d:%H:%M:%S"
             ),
         }
         self.set_context(**save_context)
@@ -279,7 +277,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
                 key=e.key,
             ) from e
         if self.sanitize_filenames:
-            filename = self._sanitize_filename(filename)
+            filename = sanitize_file_name(filename)
         out_path = self.root_directory / filename
         # logger.debug(
         #     f"Resolved path: {out_path} and {out_path.exists()=}",
@@ -489,33 +487,6 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         ):
             logger.debug(f"Deleting empty directory {self.root_directory}")
             self.root_directory.rmdir()  # remove the directory if it's empty
-
-    @staticmethod
-    def _sanitize_filename(filename: str) -> str:
-        """
-        Sanitize a filename to remove or replace bad characters.
-
-        Parameters
-        ----------
-        filename : str
-            The original filename.
-
-        Returns
-        -------
-        str
-            A sanitized filename safe for most file systems.
-        """
-
-        # Replace bad characters with underscores
-        sanitized = re.sub(r'[<>:"\\?*]', "_", filename)
-
-        # replace spaces with underscores
-        sanitized = re.sub(r"\s+", "_", sanitized)
-
-        # Optionally trim leading/trailing spaces or periods
-        sanitized = sanitized.strip(" .")
-
-        return sanitized
 
     def _ensure_directory_exists(self, directory: Path) -> None:
         """
