@@ -1,12 +1,10 @@
 import pytest
 from pathlib import Path
 from click.testing import CliRunner
-import os
 from imgtools.cli.dicomshow import dicomshow as dicomshow_cli
 from typing import Any
-import shutil
+from sys import platform
 import glob
-import json
 
 @pytest.fixture(scope="function")
 def runner() -> CliRunner:
@@ -47,12 +45,15 @@ def test_dicomshow_collections(
     snapshot.snapshot_dir = f'tests/snapshots/dicomshow/{collection_name}_snapshots'
     for modality in collection_dicoms:
         result = runner.invoke(dicomshow_cli, [
-            str(collection_dicoms[modality])
+            str(collection_dicoms[modality]), 
+            "--no-progress"
         ])
-        snapshot.assert_match(
-            result.stdout_bytes,
-            f'{collection_name}_{modality}_default'
-        )
+        if platform == "darwin":
+            # snapshots were taken on macos, so we only use them if testing the macos platform. 
+            snapshot.assert_match(
+                result.stdout_bytes,
+                f'{collection_name}_{modality}_default'
+            )
         assert result.exit_code == 0, (
             f"{collection_name} failed on {modality} "
             f"{collection_dicoms[modality]} (default parameters): "
@@ -61,12 +62,15 @@ def test_dicomshow_collections(
 
         result = runner.invoke(dicomshow_cli, [
             str(collection_dicoms[modality]),
+            "--no-progress",
             "-p"
         ])
-        snapshot.assert_match(
-            result.stdout_bytes,
-            f'{collection_name}_{modality}_pydicom'
-        )
+        if platform == "darwin":
+            # snapshots were taken on macos, so we only use them if testing the macos platform. 
+            snapshot.assert_match(
+                result.stdout_bytes,
+                f'{collection_name}_{modality}_pydicom'
+            )
         assert result.exit_code == 0, (
             f"{collection_name} failed on {modality} (--pydicom enabled): "
             f"{result.exception}\n{result.exc_info}"
