@@ -93,8 +93,10 @@ def dicomshow(
             logger.info(f"Extracting tags from {dicom_file} (pydicom method)")
             result: Any = dcmread(file_path, stop_before_pixels=True)
         except Exception as e:
-            logger.error(f"Failed to read DICOM file {file_path}: {e}")
-            raise click.ClickException(f"Cannot read DICOM file: {e}")
+    except Exception as e:
+        logger.error(f"Failed to read DICOM file {file_path}: {e}")
+-       raise click.ClickException(f"Cannot read DICOM file: {e}")
++       raise click.ClickException(f"Cannot read DICOM file: {e}") from e
 
         if tags:
             try:
