@@ -1,0 +1,1596 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 192                            
+ InstanceCreationDate                     20151123                              
+ InstanceCreationTime                     100408.996                            
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.481.3         
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.761648790666… 
+ StudyDate                                20120115                              
+ SeriesDate                               20151123                              
+ StudyTime                                110314                                
+ SeriesTime                               100408.996                            
+ AccessionNumber                          empty                                 
+ Modality                                 RTSTRUCT                              
+ Manufacturer                             MIM Software Inc.                     
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         PANCREAS                              
+ SeriesDescription                        BSCB_LL_LR_SDCB                       
+ OperatorsName                            empty                                 
+ ManufacturerModelName                    MIM                                   
+ PatientName                              Pancreas-CT-CB_003                    
+ PatientID                                Pancreas-CT-CB_003                    
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientAge                               empty                                 
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+ BodyPartExamined                         ABDOMEN                               
+ SoftwareVersions                         6.9.7                                 
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.202713618921… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.761648790666… 
+ StudyID                                  empty                                 
+ SeriesNumber                             1                                     
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ StructureSetLabel                        RTstruct                              
+ StructureSetName                         BSCB_LL_LR_SDCB                       
+ StructureSetDate                         20151123                              
+ StructureSetTime                         100408.998                            
+ ReferencedFrameOfReferenceSequence       Sequence of length 1                  
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ RTReferencedStudySequence                Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.3.1.2.3.1               
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.202713618921… 
+ RTReferencedSeriesSequence               Sequence of length 1                  
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.176764454955… 
+ ContourImageSequence                     Sequence of length 93                 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.237856220705… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.287578752329… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.190581922988… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.258180758558… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162227075151… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335921306110… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.558754004895… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283068788817… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.188804113614… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.263504568857… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.646148621108… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.249681186350… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.316119350154… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.792160591545… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.194585161623… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.539513372895… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.128288103600… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.291091655686… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.117020964186… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.115615568107… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.285538479465… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.238874100938… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233679867400… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.775489035559… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.272345367164… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.320148962759… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314159592223… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.318366577179… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.280905954245… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.290460331059… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.325467326007… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335346304849… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.182641722531… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.442322470874… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.968522346490… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.207581173029… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.676997950069… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.141275125391… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.205720398799… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.279852375446… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.716981224405… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.194481413759… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231211488603… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.225338938839… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162887411949… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.627761248262… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233056389182… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.129717781239… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283219051893… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.118042750901… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.295649362195… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.160155795877… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283616835229… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.759262457579… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.230545497193… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.259267991539… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314470637184… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.621280889244… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.178089281906… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.274911754783… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.161140566370… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.138944994542… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.391455161921… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219653892656… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.198201810477… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.114361829771… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.605927725412… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.132038132491… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.527060499064… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.100966740487… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.125801048786… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.849001965854… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.213528340686… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.486465960619… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231893021092… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.528139483799… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.153344416229… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162469882385… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.281668704941… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.616328495099… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.217437627396… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.813334491505… 
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.322252220283… 
+ StructureSetROISequence                  Sequence of length 4                  
+ ROINumber                                1                                     
+ ReferencedFrameOfReferenceUID            1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ ROIName                                  Bowel_sm_CBCT                         
+ ROIDescription                           empty                                 
+ ROIGenerationAlgorithm                   MANUAL                                
+ ROINumber                                2                                     
+ ReferencedFrameOfReferenceUID            1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ ROIName                                  LUNG_L                                
+ ROIDescription                           empty                                 
+ ROIGenerationAlgorithm                   MANUAL                                
+ ROINumber                                3                                     
+ ReferencedFrameOfReferenceUID            1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ ROIName                                  LUNG_R                                
+ ROIDescription                           empty                                 
+ ROIGenerationAlgorithm                   MANUAL                                
+ ROINumber                                4                                     
+ ReferencedFrameOfReferenceUID            1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ ROIName                                  Stomach_duo_CBCT                      
+ ROIDescription                           empty                                 
+ ROIGenerationAlgorithm                   MANUAL                                
+ ROIContourSequence                       Sequence of length 4                  
+ ROIDisplayColor                          MultiValue of length 3                
+ ContourSequence                          Sequence of length 108                
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231211488603… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    249                                   
+ ContourData                              MultiValue of length 747              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.225338938839… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    295                                   
+ ContourData                              MultiValue of length 885              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162887411949… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    154                                   
+ ContourData                              MultiValue of length 462              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162887411949… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    335                                   
+ ContourData                              MultiValue of length 1005             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.627761248262… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    686                                   
+ ContourData                              MultiValue of length 2058             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233056389182… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    807                                   
+ ContourData                              MultiValue of length 2421             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.129717781239… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    768                                   
+ ContourData                              MultiValue of length 2304             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283219051893… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    728                                   
+ ContourData                              MultiValue of length 2184             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.118042750901… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    788                                   
+ ContourData                              MultiValue of length 2364             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.295649362195… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    806                                   
+ ContourData                              MultiValue of length 2418             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.160155795877… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    880                                   
+ ContourData                              MultiValue of length 2640             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283616835229… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1011                                  
+ ContourData                              MultiValue of length 3033             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.759262457579… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1060                                  
+ ContourData                              MultiValue of length 3180             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.230545497193… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1113                                  
+ ContourData                              MultiValue of length 3339             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.259267991539… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1002                                  
+ ContourData                              MultiValue of length 3006             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.259267991539… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    174                                   
+ ContourData                              MultiValue of length 522              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314470637184… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    4                                     
+ ContourData                              MultiValue of length 12               
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314470637184… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1042                                  
+ ContourData                              MultiValue of length 3126             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314470637184… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    186                                   
+ ContourData                              MultiValue of length 558              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.621280889244… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    705                                   
+ ContourData                              MultiValue of length 2115             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.621280889244… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    140                                   
+ ContourData                              MultiValue of length 420              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.621280889244… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    248                                   
+ ContourData                              MultiValue of length 744              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.178089281906… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    542                                   
+ ContourData                              MultiValue of length 1626             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.178089281906… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    157                                   
+ ContourData                              MultiValue of length 471              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.178089281906… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    244                                   
+ ContourData                              MultiValue of length 732              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.274911754783… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    617                                   
+ ContourData                              MultiValue of length 1851             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.274911754783… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    154                                   
+ ContourData                              MultiValue of length 462              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.274911754783… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    273                                   
+ ContourData                              MultiValue of length 819              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.161140566370… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    281                                   
+ ContourData                              MultiValue of length 843              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.161140566370… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    111                                   
+ ContourData                              MultiValue of length 333              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.161140566370… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    780                                   
+ ContourData                              MultiValue of length 2340             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    291                                   
+ ContourData                              MultiValue of length 873              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    110                                   
+ ContourData                              MultiValue of length 330              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    632                                   
+ ContourData                              MultiValue of length 1896             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    97                                    
+ ContourData                              MultiValue of length 291              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    405                                   
+ ContourData                              MultiValue of length 1215             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    120                                   
+ ContourData                              MultiValue of length 360              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    633                                   
+ ContourData                              MultiValue of length 1899             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    142                                   
+ ContourData                              MultiValue of length 426              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.138944994542… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    971                                   
+ ContourData                              MultiValue of length 2913             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.138944994542… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    114                                   
+ ContourData                              MultiValue of length 342              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.138944994542… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    135                                   
+ ContourData                              MultiValue of length 405              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.391455161921… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    910                                   
+ ContourData                              MultiValue of length 2730             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.391455161921… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    135                                   
+ ContourData                              MultiValue of length 405              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.391455161921… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    105                                   
+ ContourData                              MultiValue of length 315              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219653892656… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    874                                   
+ ContourData                              MultiValue of length 2622             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219653892656… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    182                                   
+ ContourData                              MultiValue of length 546              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219653892656… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    150                                   
+ ContourData                              MultiValue of length 450              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    204                                   
+ ContourData                              MultiValue of length 612              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    103                                   
+ ContourData                              MultiValue of length 309              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    244                                   
+ ContourData                              MultiValue of length 732              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    179                                   
+ ContourData                              MultiValue of length 537              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    80                                    
+ ContourData                              MultiValue of length 240              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    88                                    
+ ContourData                              MultiValue of length 264              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    140                                   
+ ContourData                              MultiValue of length 420              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    213                                   
+ ContourData                              MultiValue of length 639              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    340                                   
+ ContourData                              MultiValue of length 1020             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    317                                   
+ ContourData                              MultiValue of length 951              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    180                                   
+ ContourData                              MultiValue of length 540              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    114                                   
+ ContourData                              MultiValue of length 342              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    145                                   
+ ContourData                              MultiValue of length 435              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    131                                   
+ ContourData                              MultiValue of length 393              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    210                                   
+ ContourData                              MultiValue of length 630              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    155                                   
+ ContourData                              MultiValue of length 465              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    612                                   
+ ContourData                              MultiValue of length 1836             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    118                                   
+ ContourData                              MultiValue of length 354              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    159                                   
+ ContourData                              MultiValue of length 477              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    307                                   
+ ContourData                              MultiValue of length 921              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    148                                   
+ ContourData                              MultiValue of length 444              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    139                                   
+ ContourData                              MultiValue of length 417              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    99                                    
+ ContourData                              MultiValue of length 297              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    165                                   
+ ContourData                              MultiValue of length 495              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    231                                   
+ ContourData                              MultiValue of length 693              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    479                                   
+ ContourData                              MultiValue of length 1437             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    205                                   
+ ContourData                              MultiValue of length 615              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    115                                   
+ ContourData                              MultiValue of length 345              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    197                                   
+ ContourData                              MultiValue of length 591              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    405                                   
+ ContourData                              MultiValue of length 1215             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.124498170035… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    159                                   
+ ContourData                              MultiValue of length 477              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    164                                   
+ ContourData                              MultiValue of length 492              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    234                                   
+ ContourData                              MultiValue of length 702              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    105                                   
+ ContourData                              MultiValue of length 315              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    705                                   
+ ContourData                              MultiValue of length 2115             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    442                                   
+ ContourData                              MultiValue of length 1326             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    136                                   
+ ContourData                              MultiValue of length 408              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    142                                   
+ ContourData                              MultiValue of length 426              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    4                                     
+ ContourData                              MultiValue of length 12               
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.248157960549… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    386                                   
+ ContourData                              MultiValue of length 1158             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    234                                   
+ ContourData                              MultiValue of length 702              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    229                                   
+ ContourData                              MultiValue of length 687              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    457                                   
+ ContourData                              MultiValue of length 1371             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    119                                   
+ ContourData                              MultiValue of length 357              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1070                                  
+ ContourData                              MultiValue of length 3210             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231683851425… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    168                                   
+ ContourData                              MultiValue of length 504              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    300                                   
+ ContourData                              MultiValue of length 900              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    223                                   
+ ContourData                              MultiValue of length 669              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    326                                   
+ ContourData                              MultiValue of length 978              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    132                                   
+ ContourData                              MultiValue of length 396              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1046                                  
+ ContourData                              MultiValue of length 3138             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    160                                   
+ ContourData                              MultiValue of length 480              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.933656882995… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    101                                   
+ ContourData                              MultiValue of length 303              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    293                                   
+ ContourData                              MultiValue of length 879              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    224                                   
+ ContourData                              MultiValue of length 672              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    342                                   
+ ContourData                              MultiValue of length 1026             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    126                                   
+ ContourData                              MultiValue of length 378              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1015                                  
+ ContourData                              MultiValue of length 3045             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    177                                   
+ ContourData                              MultiValue of length 531              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.167354393887… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    93                                    
+ ContourData                              MultiValue of length 279              
+ ReferencedROINumber                      1                                     
+ ROIDisplayColor                          MultiValue of length 3                
+ ContourSequence                          Sequence of length 32                 
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.287578752329… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    834                                   
+ ContourData                              MultiValue of length 2502             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.190581922988… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    794                                   
+ ContourData                              MultiValue of length 2382             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.258180758558… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    742                                   
+ ContourData                              MultiValue of length 2226             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162227075151… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    753                                   
+ ContourData                              MultiValue of length 2259             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335921306110… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    727                                   
+ ContourData                              MultiValue of length 2181             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.558754004895… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    765                                   
+ ContourData                              MultiValue of length 2295             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283068788817… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    768                                   
+ ContourData                              MultiValue of length 2304             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.188804113614… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    754                                   
+ ContourData                              MultiValue of length 2262             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.263504568857… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    762                                   
+ ContourData                              MultiValue of length 2286             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.646148621108… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    748                                   
+ ContourData                              MultiValue of length 2244             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.249681186350… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    783                                   
+ ContourData                              MultiValue of length 2349             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.316119350154… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    775                                   
+ ContourData                              MultiValue of length 2325             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.792160591545… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    768                                   
+ ContourData                              MultiValue of length 2304             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.194585161623… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    764                                   
+ ContourData                              MultiValue of length 2292             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.539513372895… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    796                                   
+ ContourData                              MultiValue of length 2388             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.128288103600… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    843                                   
+ ContourData                              MultiValue of length 2529             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.291091655686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    798                                   
+ ContourData                              MultiValue of length 2394             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.117020964186… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    673                                   
+ ContourData                              MultiValue of length 2019             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.115615568107… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    972                                   
+ ContourData                              MultiValue of length 2916             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.285538479465… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1148                                  
+ ContourData                              MultiValue of length 3444             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.238874100938… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    971                                   
+ ContourData                              MultiValue of length 2913             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233679867400… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    869                                   
+ ContourData                              MultiValue of length 2607             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.775489035559… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    782                                   
+ ContourData                              MultiValue of length 2346             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.272345367164… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    823                                   
+ ContourData                              MultiValue of length 2469             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.320148962759… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    766                                   
+ ContourData                              MultiValue of length 2298             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314159592223… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    758                                   
+ ContourData                              MultiValue of length 2274             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.318366577179… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    764                                   
+ ContourData                              MultiValue of length 2292             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.280905954245… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    879                                   
+ ContourData                              MultiValue of length 2637             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.290460331059… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    933                                   
+ ContourData                              MultiValue of length 2799             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.325467326007… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    275                                   
+ ContourData                              MultiValue of length 825              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.325467326007… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    750                                   
+ ContourData                              MultiValue of length 2250             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335346304849… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    101                                   
+ ContourData                              MultiValue of length 303              
+ ReferencedROINumber                      2                                     
+ ROIDisplayColor                          MultiValue of length 3                
+ ContourSequence                          Sequence of length 28                 
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.190581922988… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    768                                   
+ ContourData                              MultiValue of length 2304             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.258180758558… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    819                                   
+ ContourData                              MultiValue of length 2457             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162227075151… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    765                                   
+ ContourData                              MultiValue of length 2295             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335921306110… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    747                                   
+ ContourData                              MultiValue of length 2241             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.558754004895… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    720                                   
+ ContourData                              MultiValue of length 2160             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283068788817… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    729                                   
+ ContourData                              MultiValue of length 2187             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.188804113614… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    675                                   
+ ContourData                              MultiValue of length 2025             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.263504568857… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    721                                   
+ ContourData                              MultiValue of length 2163             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.646148621108… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    760                                   
+ ContourData                              MultiValue of length 2280             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.249681186350… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    704                                   
+ ContourData                              MultiValue of length 2112             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.316119350154… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    747                                   
+ ContourData                              MultiValue of length 2241             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.792160591545… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    934                                   
+ ContourData                              MultiValue of length 2802             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.194585161623… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    956                                   
+ ContourData                              MultiValue of length 2868             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.539513372895… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    925                                   
+ ContourData                              MultiValue of length 2775             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.128288103600… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    865                                   
+ ContourData                              MultiValue of length 2595             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.291091655686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    796                                   
+ ContourData                              MultiValue of length 2388             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.117020964186… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    802                                   
+ ContourData                              MultiValue of length 2406             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.115615568107… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    902                                   
+ ContourData                              MultiValue of length 2706             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.285538479465… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    880                                   
+ ContourData                              MultiValue of length 2640             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.238874100938… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    827                                   
+ ContourData                              MultiValue of length 2481             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233679867400… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    866                                   
+ ContourData                              MultiValue of length 2598             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.775489035559… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    867                                   
+ ContourData                              MultiValue of length 2601             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.272345367164… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    794                                   
+ ContourData                              MultiValue of length 2382             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.320148962759… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    999                                   
+ ContourData                              MultiValue of length 2997             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314159592223… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    1039                                  
+ ContourData                              MultiValue of length 3117             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.318366577179… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    466                                   
+ ContourData                              MultiValue of length 1398             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.280905954245… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    450                                   
+ ContourData                              MultiValue of length 1350             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.290460331059… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    403                                   
+ ContourData                              MultiValue of length 1209             
+ ReferencedROINumber                      3                                     
+ ROIDisplayColor                          MultiValue of length 3                
+ ContourSequence                          Sequence of length 43                 
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314159592223… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    178                                   
+ ContourData                              MultiValue of length 534              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.318366577179… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    280                                   
+ ContourData                              MultiValue of length 840              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.280905954245… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    337                                   
+ ContourData                              MultiValue of length 1011             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.290460331059… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    513                                   
+ ContourData                              MultiValue of length 1539             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.325467326007… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    696                                   
+ ContourData                              MultiValue of length 2088             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.335346304849… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    702                                   
+ ContourData                              MultiValue of length 2106             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.182641722531… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    696                                   
+ ContourData                              MultiValue of length 2088             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.442322470874… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    795                                   
+ ContourData                              MultiValue of length 2385             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.968522346490… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    772                                   
+ ContourData                              MultiValue of length 2316             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.207581173029… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    805                                   
+ ContourData                              MultiValue of length 2415             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.676997950069… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    776                                   
+ ContourData                              MultiValue of length 2328             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.141275125391… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    758                                   
+ ContourData                              MultiValue of length 2274             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.205720398799… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    695                                   
+ ContourData                              MultiValue of length 2085             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.279852375446… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    764                                   
+ ContourData                              MultiValue of length 2292             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.716981224405… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    518                                   
+ ContourData                              MultiValue of length 1554             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.194481413759… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    262                                   
+ ContourData                              MultiValue of length 786              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.231211488603… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    307                                   
+ ContourData                              MultiValue of length 921              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.225338938839… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    320                                   
+ ContourData                              MultiValue of length 960              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.162887411949… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    399                                   
+ ContourData                              MultiValue of length 1197             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.627761248262… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    403                                   
+ ContourData                              MultiValue of length 1209             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.233056389182… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    451                                   
+ ContourData                              MultiValue of length 1353             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.129717781239… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    425                                   
+ ContourData                              MultiValue of length 1275             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283219051893… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    388                                   
+ ContourData                              MultiValue of length 1164             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.118042750901… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    365                                   
+ ContourData                              MultiValue of length 1095             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.295649362195… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    360                                   
+ ContourData                              MultiValue of length 1080             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.160155795877… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    366                                   
+ ContourData                              MultiValue of length 1098             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.283616835229… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    357                                   
+ ContourData                              MultiValue of length 1071             
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.759262457579… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    331                                   
+ ContourData                              MultiValue of length 993              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.230545497193… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    158                                   
+ ContourData                              MultiValue of length 474              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.259267991539… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    152                                   
+ ContourData                              MultiValue of length 456              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.314470637184… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    166                                   
+ ContourData                              MultiValue of length 498              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.621280889244… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    308                                   
+ ContourData                              MultiValue of length 924              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.178089281906… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    292                                   
+ ContourData                              MultiValue of length 876              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.274911754783… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    294                                   
+ ContourData                              MultiValue of length 882              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.161140566370… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    243                                   
+ ContourData                              MultiValue of length 729              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.864136248686… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    235                                   
+ ContourData                              MultiValue of length 705              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219043116288… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    276                                   
+ ContourData                              MultiValue of length 828              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.138944994542… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    273                                   
+ ContourData                              MultiValue of length 819              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.391455161921… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    292                                   
+ ContourData                              MultiValue of length 876              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.219653892656… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    269                                   
+ ContourData                              MultiValue of length 807              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.229820276732… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    237                                   
+ ContourData                              MultiValue of length 711              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.913862663535… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    231                                   
+ ContourData                              MultiValue of length 693              
+ ContourImageSequence                     Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.2             
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.814617127805… 
+ ContourGeometricType                     CLOSED_PLANAR                         
+ NumberOfContourPoints                    235                                   
+ ContourData                              MultiValue of length 705              
+ ReferencedROINumber                      4                                     
+ RTROIObservationsSequence                Sequence of length 4                  
+ ObservationNumber                        1                                     
+ ReferencedROINumber                      1                                     
+ ROIObservationDescription                Type:Soft, Range:*/*, Fill:0,         
+                                          Opacity:0.0, Thickness:1,             
+                                          LineThickness:2, read-only:false      
+ RTROIInterpretedType                     empty                                 
+ ROIInterpreter                           empty                                 
+                                          MIM Software Inc.                     
+ ObservationNumber                        2                                     
+ ReferencedROINumber                      2                                     
+ ROIObservationDescription                Type:Soft, Range:*/*, Fill:0,         
+                                          Opacity:0.0, Thickness:1,             
+                                          LineThickness:2, read-only:false      
+ RTROIInterpretedType                     empty                                 
+ ROIInterpreter                           empty                                 
+                                          MIM Software Inc.                     
+ ObservationNumber                        3                                     
+ ReferencedROINumber                      3                                     
+ ROIObservationDescription                Type:Soft, Range:*/*, Fill:0,         
+                                          Opacity:0.0, Thickness:1,             
+                                          LineThickness:2, read-only:false      
+ RTROIInterpretedType                     empty                                 
+ ROIInterpreter                           empty                                 
+                                          MIM Software Inc.                     
+ ObservationNumber                        4                                     
+ ReferencedROINumber                      4                                     
+ ROIObservationDescription                Type:Soft, Range:*/*, Fill:0,         
+                                          Opacity:0.0, Thickness:1,             
+                                          LineThickness:2, read-only:false      
+ RTROIInterpretedType                     empty                                 
+ ROIInterpreter                           empty                                 
+                                          MIM Software Inc.                     
+ ApprovalStatus                           UNAPPROVED                            
+                                          MIM Software Inc.                     

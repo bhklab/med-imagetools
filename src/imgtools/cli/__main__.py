@@ -38,6 +38,7 @@ from imgtools import __version__
 from . import set_log_verbosity
 from .autopipeline import autopipeline
 from .dicomfind import dicomfind
+from .dicomshow import dicomshow
 from .dicomsort import dicomsort
 from .index import index
 from .interlacer import interlacer
@@ -59,6 +60,7 @@ registry.add('core commands', nnunet_pipeline)
 registry.create_group("utilities", "Tools for working with DICOM files.")
 registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
+registry.add("utilities", dicomshow)
 
 if not testdata.hidden:
     registry.create_group("testing", "Datasets for testing and tutorials.")

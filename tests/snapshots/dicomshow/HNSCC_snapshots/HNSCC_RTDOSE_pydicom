@@ -1,0 +1,89 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ InstanceCreationDate                     20020113                              
+ InstanceCreationTime                     140836                                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.481.2         
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.1706.8040.16… 
+ StudyDate                                20090301                              
+ ContentDate                              20020113                              
+ StudyTime                                empty                                 
+ ContentTime                              140836                                
+ AccessionNumber                          2819497684894126                      
+ Modality                                 RTDOSE                                
+ Manufacturer                             ADAC                                  
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         RT SIMULATION                         
+ ManufacturerModelName                    Pinnacle3                             
+ ReferencedStudySequence                  Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.3.1.2.3.2               
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.1706.8040.12… 
+ PatientName                              HNSCC-01-0176                         
+ PatientID                                HNSCC-01-0176                         
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal With Modified     
+                                          Dates Option                          
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+ BodyPartExamined                         HEADNECK                              
+ SliceThickness                           3                                     
+ SoftwareVersions                         MultiValue of length 2                
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.1706.8040.12… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.1706.8040.27… 
+ StudyID                                  empty                                 
+ SeriesNumber                             1                                     
+ InstanceNumber                           1                                     
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.1706.8040.70… 
+ PositionReferenceIndicator               empty                                 
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ NumberOfFrames                           92                                    
+ FrameIncrementPointer                    (3004,000C)                           
+ Rows                                     110                                   
+ Columns                                  105                                   
+ PixelSpacing                             MultiValue of length 2                
+ BitsAllocated                            16                                    
+ BitsStored                               16                                    
+ HighBit                                  15                                    
+ PixelRepresentation                      0                                     
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DoseSummationType                        PLAN                                  
+ GridFrameOffsetVector                    MultiValue of length 92               
+ DoseGridScaling                          0.00477877                            
+ TissueHeterogeneityCorrection            MultiValue of length 2                
+ ReferencedRTPlanSequence                 Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.481.5         
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.1706.8040.47… 

@@ -1,0 +1,756 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 192                            
+ InstanceCreationDate                     20161102                              
+ InstanceCreationTime                     175955                                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.481.2         
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.295046736664… 
+ StudyDate                                20120115                              
+ SeriesDate                               20120120                              
+ ContentDate                              20120120                              
+ StudyTime                                110314                                
+ SeriesTime                               173848.113                            
+ ContentTime                              173848.117                            
+ AccessionNumber                          empty                                 
+ Modality                                 RTDOSE                                
+ Manufacturer                             Varian Medical Systems                
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         PANCREAS                              
+ SeriesDescription                        Eclipse Doses                         
+ ManufacturerModelName                    ARIA RadOnc                           
+ PatientName                              Pancreas-CT-CB_003                    
+ PatientID                                Pancreas-CT-CB_003                    
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+ BodyPartExamined                         ABDOMEN                               
+ SliceThickness                           None                                  
+ DeviceSerialNumber                       0                                     
+ SoftwareVersions                         13.6.30                               
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.202713618921… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.254383009357… 
+ StudyID                                  empty                                 
+ SeriesNumber                             16                                    
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.392977531066… 
+ PositionReferenceIndicator               empty                                 
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ NumberOfFrames                           93                                    
+ FrameIncrementPointer                    (3004,000C)                           
+ Rows                                     134                                   
+ Columns                                  165                                   
+ PixelSpacing                             MultiValue of length 2                
+ BitsAllocated                            32                                    
+ BitsStored                               32                                    
+ HighBit                                  31                                    
+ PixelRepresentation                      0                                     
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DoseSummationType                        PLAN                                  
+ GridFrameOffsetVector                    MultiValue of length 93               
+ DoseGridScaling                          4.5e-05                               
+ TissueHeterogeneityCorrection            MultiValue of length 2                
+ DVHSequence                              Sequence of length 51                 
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      1                                     
+ DVHMinimumDose                           0.00138288461538                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              4.89729395019729                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7690                                  
+ DVHData                                  MultiValue of length 15380            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      5                                     
+ DVHMinimumDose                           3.59129982558139                      
+ DVHMaximumDose                           76.883265                             
+ DVHMeanDose                              43.6279314011761                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      6                                     
+ DVHMinimumDose                           66.8862755882353                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              76.2738143510978                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      7                                     
+ DVHMinimumDose                           44.853615                             
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              59.3816482715139                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          5042                                  
+ DVHData                                  MultiValue of length 10084            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      8                                     
+ DVHMinimumDose                           2.25819289772727                      
+ DVHMaximumDose                           50.4004974038462                      
+ DVHMeanDose                              25.3796111557676                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          6168                                  
+ DVHData                                  MultiValue of length 12336            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      9                                     
+ DVHMinimumDose                           1.9961175                             
+ DVHMaximumDose                           61.6692899999999                      
+ DVHMeanDose                              23.8499378219513                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2484                                  
+ DVHData                                  MultiValue of length 4968             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      10                                    
+ DVHMinimumDose                           0.60078068181818                      
+ DVHMaximumDose                           24.8212069736842                      
+ DVHMeanDose                              8.9329219425321                       
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2621                                  
+ DVHData                                  MultiValue of length 5242             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      11                                    
+ DVHMinimumDose                           0.43004650390625                      
+ DVHMaximumDose                           26.19243                              
+ DVHMeanDose                              3.89400352755823                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2550                                  
+ DVHData                                  MultiValue of length 5100             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      12                                    
+ DVHMinimumDose                           0.47882310344828                      
+ DVHMaximumDose                           25.48062                              
+ DVHMeanDose                              5.85975771382935                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7495                                  
+ DVHData                                  MultiValue of length 14990            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      13                                    
+ DVHMinimumDose                           0.51197586538462                      
+ DVHMaximumDose                           74.9384948571429                      
+ DVHMeanDose                              9.54161004617151                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4524                                  
+ DVHData                                  MultiValue of length 9048             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      14                                    
+ DVHMinimumDose                           1.15483328125                         
+ DVHMaximumDose                           45.228                                
+ DVHMeanDose                              10.7744092490012                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1882                                  
+ DVHData                                  MultiValue of length 3764             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      15                                    
+ DVHMinimumDose                           0.138045                              
+ DVHMaximumDose                           18.80523                              
+ DVHMeanDose                              5.87883995257293                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4177                                  
+ DVHData                                  MultiValue of length 8354             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      16                                    
+ DVHMinimumDose                           0.40217187022901                      
+ DVHMaximumDose                           41.75013                              
+ DVHMeanDose                              5.90901313174659                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7556                                  
+ DVHData                                  MultiValue of length 15112            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      17                                    
+ DVHMinimumDose                           64.557205648855                       
+ DVHMaximumDose                           75.54078                              
+ DVHMeanDose                              71.0775657761166                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      18                                    
+ DVHMinimumDose                           66.8862755882353                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              76.2738143510978                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7666                                  
+ DVHData                                  MultiValue of length 15332            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      19                                    
+ DVHMinimumDose                           44.853615                             
+ DVHMaximumDose                           76.6491098076923                      
+ DVHMeanDose                              56.3508853157345                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2014                                  
+ DVHData                                  MultiValue of length 4028             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      20                                    
+ DVHMinimumDose                           0.13215                               
+ DVHMaximumDose                           20.1244675                            
+ DVHMeanDose                              5.4445114461908                       
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          5603                                  
+ DVHData                                  MultiValue of length 11206            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      21                                    
+ DVHMinimumDose                           18.2516064648438                      
+ DVHMaximumDose                           56.01432375                           
+ DVHMeanDose                              41.1073944787927                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4451                                  
+ DVHData                                  MultiValue of length 8902             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      22                                    
+ DVHMinimumDose                           4.3964137890625                       
+ DVHMaximumDose                           44.497905                             
+ DVHMeanDose                              25.5129004779726                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          3687                                  
+ DVHData                                  MultiValue of length 7374             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      23                                    
+ DVHMinimumDose                           2.68277478515625                      
+ DVHMaximumDose                           36.85638                              
+ DVHMeanDose                              15.8145320952043                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          3039                                  
+ DVHData                                  MultiValue of length 6078             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      24                                    
+ DVHMinimumDose                           1.4887053960396                       
+ DVHMaximumDose                           30.375495                             
+ DVHMeanDose                              10.0837738256427                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7232                                  
+ DVHData                                  MultiValue of length 14464            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      25                                    
+ DVHMinimumDose                           44.853615                             
+ DVHMaximumDose                           72.30906                              
+ DVHMeanDose                              54.5223802394523                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7255                                  
+ DVHData                                  MultiValue of length 14510            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      32                                    
+ DVHMinimumDose                           1.80356537109375                      
+ DVHMaximumDose                           72.5332607142857                      
+ DVHMeanDose                              23.0197203348623                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7565                                  
+ DVHData                                  MultiValue of length 15130            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      33                                    
+ DVHMinimumDose                           1.71339906976744                      
+ DVHMaximumDose                           75.632125                             
+ DVHMeanDose                              22.2770810159331                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      41                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      42                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      43                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4671                                  
+ DVHData                                  MultiValue of length 9342             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      34                                    
+ DVHMinimumDose                           0.3658728515625                       
+ DVHMaximumDose                           46.695455                             
+ DVHMeanDose                              5.51353090805721                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          5063                                  
+ DVHData                                  MultiValue of length 10126            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      35                                    
+ DVHMinimumDose                           1.0075740625                          
+ DVHMaximumDose                           50.61861                              
+ DVHMeanDose                              11.6527076633907                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4868                                  
+ DVHData                                  MultiValue of length 9736             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      36                                    
+ DVHMinimumDose                           1.0441696875                          
+ DVHMaximumDose                           48.662685                             
+ DVHMeanDose                              11.44007387604                        
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4447                                  
+ DVHData                                  MultiValue of length 8894             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      37                                    
+ DVHMinimumDose                           0.37640406976744                      
+ DVHMaximumDose                           44.453895                             
+ DVHMeanDose                              5.689469104845                        
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2605                                  
+ DVHData                                  MultiValue of length 5210             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      38                                    
+ DVHMinimumDose                           0.5496493359375                       
+ DVHMaximumDose                           26.0395785                            
+ DVHMeanDose                              8.64984150816876                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4705                                  
+ DVHData                                  MultiValue of length 9410             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      39                                    
+ DVHMinimumDose                           0.51197586538462                      
+ DVHMaximumDose                           47.0342736290323                      
+ DVHMeanDose                              8.76753511735181                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4447                                  
+ DVHData                                  MultiValue of length 8894             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      40                                    
+ DVHMinimumDose                           0.37640406976744                      
+ DVHMaximumDose                           44.453895                             
+ DVHMeanDose                              5.689469104845                        
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7664                                  
+ DVHData                                  MultiValue of length 15328            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      48                                    
+ DVHMinimumDose                           45.09681                              
+ DVHMaximumDose                           76.629564375                          
+ DVHMeanDose                              62.5633530316977                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          6264                                  
+ DVHData                                  MultiValue of length 12528            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      49                                    
+ DVHMinimumDose                           22.0105589449541                      
+ DVHMaximumDose                           62.621955                             
+ DVHMeanDose                              49.2768974820494                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          5286                                  
+ DVHData                                  MultiValue of length 10572            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      50                                    
+ DVHMinimumDose                           5.04702721153846                      
+ DVHMaximumDose                           52.846785                             
+ DVHMeanDose                              31.222806761689                       
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      44                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      45                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          1                                     
+ DVHData                                  MultiValue of length 2                
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      46                                    
+ DVHMinimumDose                           0                                     
+ DVHMaximumDose                           0                                     
+ DVHMeanDose                              0                                     
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          2592                                  
+ DVHData                                  MultiValue of length 5184             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      47                                    
+ DVHMinimumDose                           0.26204785714286                      
+ DVHMaximumDose                           25.900155                             
+ DVHMeanDose                              8.98261522360346                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      53                                    
+ DVHMinimumDose                           71.9114934868421                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              76.3240463049431                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4941                                  
+ DVHData                                  MultiValue of length 9882             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      54                                    
+ DVHMinimumDose                           45.43398                              
+ DVHMaximumDose                           49.3919362255814                      
+ DVHMeanDose                              46.2914206185349                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7664                                  
+ DVHData                                  MultiValue of length 15328            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      55                                    
+ DVHMinimumDose                           72.0207170454545                      
+ DVHMaximumDose                           76.622914141791                       
+ DVHMeanDose                              75.3444397488946                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          4342                                  
+ DVHData                                  MultiValue of length 8684             
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      51                                    
+ DVHMinimumDose                           2.446938225                           
+ DVHMaximumDose                           43.4052                               
+ DVHMeanDose                              16.610991269665                       
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          6850                                  
+ DVHData                                  MultiValue of length 13700            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      52                                    
+ DVHMinimumDose                           1.84981709302326                      
+ DVHMaximumDose                           68.4878358333333                      
+ DVHMeanDose                              22.9917763634901                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      56                                    
+ DVHMinimumDose                           40.8678076623377                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              57.6739646719963                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      57                                    
+ DVHMinimumDose                           57.4322738709678                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              70.7743767130935                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      58                                    
+ DVHMinimumDose                           72.0714267670157                      
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              76.5049907924728                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7808                                  
+ DVHData                                  MultiValue of length 15616            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      59                                    
+ DVHMinimumDose                           68.1931205                            
+ DVHMaximumDose                           78.0624                               
+ DVHMeanDose                              76.3118903337334                      
+ DVHType                                  CUMULATIVE                            
+ DoseUnits                                GY                                    
+ DoseType                                 PHYSICAL                              
+ DVHDoseScaling                           1                                     
+ DVHVolumeUnits                           CM3                                   
+ DVHNumberOfBins                          7664                                  
+ DVHData                                  MultiValue of length 15328            
+ DVHReferencedROISequence                 Sequence of length 1                  
+ DVHROIContributionType                   INCLUDED                              
+ ReferencedROINumber                      60                                    
+ DVHMinimumDose                           59.52549                              
+ DVHMaximumDose                           76.624005                             
+ DVHMeanDose                              69.8577569582143                      
+ ReferencedRTPlanSequence                 Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.481.5         
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.106398859891… 
+ ReferencedStructureSetSequence           Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.481.3         
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.307417498447… 
