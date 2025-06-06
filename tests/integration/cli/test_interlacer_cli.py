@@ -64,6 +64,13 @@ def test_interlacer_collections(
 
     assert result.exit_code == 0, f"{collection} failed: {result.exception}\n {result.exc_info}"
 
+    result = runner.invoke(interlacer_cli, [
+        str(out_dir / "index.csv"),
+        "-q", "CT,RTSTRUCT"
+    ])
+
+    assert result.exit_code == 0, f"{collection} failed: {result.exception}\n {result.exc_info}"
+
     os.remove(out_dir / "index.csv")
 
     result = runner.invoke(interlacer_cli, [

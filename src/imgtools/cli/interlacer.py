@@ -14,6 +14,23 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     ),
 )
 @click.option(
+    "--query-string", "-q",
+    type=str,
+    default=None,
+    help="""Comma-separated string of modalities to query (e.g., 'CT,MR').
+            
+            Supported modalities: CT, PT, MR, SEG, RTSTRUCT, RTDOSE.
+            
+            """,
+)
+@click.option(
+    "--group-by-root", "-g",
+    type=bool,
+    default=True,
+    help="""If True, group the returned dicoms by their root CT/MR/PT
+    node (i.e., avoid duplicate root nodes across results).""",
+)
+@click.option(
     "--n-jobs",
     type=int,
     default=DEFAULT_WORKERS,
@@ -27,6 +44,8 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
 )
 @click.help_option("--help", "-h")
 def interlacer(path: Path,
+               query_string: str,
+               group_by_root: bool,
                n_jobs: int,
                force: bool) -> None:
     """Visualize DICOM series relationships after indexing.
@@ -55,7 +74,7 @@ def interlacer(path: Path,
     \b
     Visit https://bhklab.github.io/med-imagetools/ for more information.
     """
-    from imgtools.dicom.interlacer import Interlacer
+    from imgtools.dicom.interlacer import Interlacer, print_interlacer_tree, SeriesNode
     if (path.is_file() and force):
         logger.warning(f"force requires a directory as input. {path} will be used as the index.")
     
@@ -63,19 +82,43 @@ def interlacer(path: Path,
         logger.warning(f"n_jobs requires a directory as input. {path} will be used as the index.")
 
     elif (path.is_dir()):
-        index_path = path.parent / ".imgtools" / path.name / "index.csv"
-        if (force or not index_path.exists()):
-            from imgtools.dicom.crawl import Crawler
+        from imgtools.dicom.crawl import Crawler
+        logger.info("Initializing crawl.")
+        try:
             crawler = Crawler(
                 dicom_dir=path,
                 n_jobs=n_jobs,
                 force=force,
             )
             crawler.crawl()
-            logger.info("Crawling completed.")
-            logger.info("Crawl results saved to %s", crawler.output_dir)
-        path = index_path
+        except Exception as e:
+            logger.exception("Failed to crawl directory.")
+            raise click.Abort() from e
+        logger.info("Crawling completed.")
+        logger.info("Crawl results saved to %s", crawler.output_dir)
+        if crawler._crawl_results is not None:
+            path = crawler._crawl_results.index_csv_path
+        else:
+            logger.exception("Failed to crawl directory.")
+            raise click.Abort()
 
 
     interlacer = Interlacer(path)
-    interlacer.print_tree(None)
+    if query_string is None:
+        interlacer.print_tree(None)
+    else:
+        try:
+            result = interlacer.query(query_string=query_string, group_by_root=group_by_root)
+        except Exception as e:
+            logger.exception("Failed to query interlacer.")
+            raise click.Abort() from e
+
+        # Update root node children to reflect query structure instead of overall index structure
+        for group in result:
+            group[0].children = group[1:]
+            for node in group[1:]:
+                node.children = []
+          
+        root_nodes = [group[0] for group in result]
+
+        print_interlacer_tree(root_nodes, input_directory=None)
