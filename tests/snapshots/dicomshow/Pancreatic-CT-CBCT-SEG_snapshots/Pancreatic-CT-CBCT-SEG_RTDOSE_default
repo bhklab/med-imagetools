@@ -1,0 +1,28 @@
+ Keyword                  Value                                                 
+ BodyPartExamined         ABDOMEN                                               
+ ContentDate              20120120                                              
+ ContentTime              173848.117                                            
+ DeviceSerialNumber       0                                                     
+ DoseGridScaling          4.5e-05                                               
+ DoseSummationType        PLAN                                                  
+ DoseType                 PHYSICAL                                              
+ DoseUnits                GY                                                    
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.3929775310669987789609039626… 
+ ImageOrientationPatient  [1, 0, 0, 0, 1, 0]                                    
+ ImagePositionPatient     [-206.9336, -91.4336, 43.000061]                      
+ InstanceCreationDate     20161102                                              
+ InstanceCreationTime     175955                                                
+ Manufacturer             Varian Medical Systems                                
+ ManufacturerModelName    ARIA RadOnc                                           
+ Modality                 RTDOSE                                                
+ PatientID                Pancreas-CT-CB_003                                    
+ PixelSpacing             [2.5, 2.5]                                            
+ ReferencedSeriesSOPUIDs  ['1.3.6.1.4.1.14519.5.2.1.30741749844713802115267821… 
+ SeriesDate               20120120                                              
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.2543830093577747739677895082… 
+ SeriesTime               173848.113                                            
+ SliceThickness           None                                                  
+ SoftwareVersions         13.6.30                                               
+ StudyDate                20120115                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.2027136189212788770525632494… 
+ StudyTime                110314                                                

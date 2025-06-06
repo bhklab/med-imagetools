@@ -1,0 +1,222 @@
+ Keyword                                Value                                   
+ SpecificCharacterSet                   ISO_IR 100                              
+ ImageType                              MultiValue of length 2                  
+ SOPClassUID                            1.2.840.10008.5.1.4.1.1.66.4            
+ SOPInstanceUID                         1.2.276.0.7230010.3.1.4.0.4287.1553288… 
+ StudyDate                              20000101                                
+ SeriesDate                             20190322                                
+ ContentDate                            20190322                                
+ StudyTime                              141900                                  
+ SeriesTime                             170442                                  
+ ContentTime                            170440                                  
+ AccessionNumber                        empty                                   
+ Modality                               SEG                                     
+ Manufacturer                           QIICR                                   
+ ReferringPhysicianName                 empty                                   
+ StudyDescription                       CT CHEST W/ CONT                        
+ SeriesDescription                      Segmentation of Nodule 3 - Annotation   
+                                        134911                                  
+ ManufacturerModelName                  https://github.com/QIICR/dcmqi.git      
+ ReferencedSeriesSequence               Sequence of length 1                    
+ ReferencedInstanceSequence             Sequence of length 6                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.6029… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.1418… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.1257… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.2340… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.3077… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.3018… 
+ SeriesInstanceUID                      1.3.6.1.4.1.14519.5.2.1.6279.6001.1871… 
+ PatientName                            empty                                   
+ PatientID                              LIDC-IDRI-0068                          
+ PatientBirthDate                       empty                                   
+ PatientSex                             M                                       
+ PatientAge                             050Y                                    
+ ClinicalTrialTimePointID               1                                       
+ ClinicalTrialCoordinatingCenterName    TCIA                                    
+ ClinicalTrialSeriesID                  Session1                                
+                                        CTP                                     
+                                        LIDC-IDRI                               
+                                        62796001                                
+ BodyPartExamined                       CHEST                                   
+ DeviceSerialNumber                     0                                       
+ SoftwareVersions                       f86b34f                                 
+ StudyInstanceUID                       1.3.6.1.4.1.14519.5.2.1.6279.6001.7096… 
+ SeriesInstanceUID                      1.2.276.0.7230010.3.1.3.0.4287.1553288… 
+ StudyID                                empty                                   
+ SeriesNumber                           25                                      
+ InstanceNumber                         1                                       
+ FrameOfReferenceUID                    1.3.6.1.4.1.14519.5.2.1.6279.6001.1046… 
+ PositionReferenceIndicator             SN                                      
+ DimensionOrganizationSequence          Sequence of length 1                    
+ DimensionOrganizationUID               1.3.6.1.4.1.43046.3.0.4287.1553288680.… 
+ DimensionIndexSequence                 Sequence of length 2                    
+ DimensionOrganizationUID               1.3.6.1.4.1.43046.3.0.4287.1553288680.… 
+ DimensionIndexPointer                  (0062,000B)                             
+ FunctionalGroupPointer                 (0062,000A)                             
+ DimensionDescriptionLabel              ReferencedSegmentNumber                 
+ DimensionOrganizationUID               1.3.6.1.4.1.43046.3.0.4287.1553288680.… 
+ DimensionIndexPointer                  (0020,0032)                             
+ FunctionalGroupPointer                 (0020,9113)                             
+ DimensionDescriptionLabel              ImagePositionPatient                    
+ SamplesPerPixel                        1                                       
+ PhotometricInterpretation              MONOCHROME2                             
+ NumberOfFrames                         6                                       
+ Rows                                   512                                     
+ Columns                                512                                     
+ BitsAllocated                          1                                       
+ BitsStored                             1                                       
+ HighBit                                0                                       
+ PixelRepresentation                    0                                       
+ LossyImageCompression                  00                                      
+ SegmentationType                       BINARY                                  
+ SegmentSequence                        Sequence of length 1                    
+ AnatomicRegionSequence                 Sequence of length 1                    
+ CodeValue                              T-28000                                 
+ CodingSchemeDesignator                 SRT                                     
+ CodeMeaning                            Lung                                    
+ SegmentedPropertyCategoryCodeSequence  Sequence of length 1                    
+ CodeValue                              M-01000                                 
+ CodingSchemeDesignator                 SRT                                     
+ CodeMeaning                            Morphological Abnormal Structure        
+ SegmentNumber                          1                                       
+ SegmentLabel                           Nodule 3 - Annotation 134911            
+ SegmentDescription                     Nodule 3 - Annotation 134911            
+ SegmentAlgorithmType                   MANUAL                                  
+ RecommendedDisplayCIELabValue          list of length 3                        
+ SegmentedPropertyTypeCodeSequence      Sequence of length 1                    
+ CodeValue                              M-03010                                 
+ CodingSchemeDesignator                 SRT                                     
+ CodeMeaning                            Nodule                                  
+ TrackingID                             Nodule 3                                
+ TrackingUID                            2.25.755354937502111949517541171069587… 
+ ContentLabel                           DCMQI                                   
+ ContentDescription                     DCMQI                                   
+ ContentCreatorName                     Reader1                                 
+ SharedFunctionalGroupsSequence         Sequence of length 1                    
+ PlaneOrientationSequence               Sequence of length 1                    
+ ImageOrientationPatient                MultiValue of length 6                  
+ PixelMeasuresSequence                  Sequence of length 1                    
+ SliceThickness                         1.250000e+00                            
+ SpacingBetweenSlices                   1.250000e+00                            
+ PixelSpacing                           MultiValue of length 2                  
+ PerFrameFunctionalGroupsSequence       Sequence of length 6                    
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.6029… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.1418… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.1257… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.2340… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.3077… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       
+ DerivationImageSequence                Sequence of length 1                    
+ SourceImageSequence                    Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.2               
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6279.6001.3018… 
+ PurposeOfReferenceCodeSequence         Sequence of length 1                    
+ CodeValue                              121322                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Source image for image processing       
+                                        operation                               
+ DerivationCodeSequence                 Sequence of length 1                    
+ CodeValue                              113076                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Segmentation                            
+ FrameContentSequence                   Sequence of length 1                    
+ DimensionIndexValues                   list of length 2                        
+ PlanePositionSequence                  Sequence of length 1                    
+ ImagePositionPatient                   MultiValue of length 3                  
+ SegmentIdentificationSequence          Sequence of length 1                    
+ ReferencedSegmentNumber                1                                       

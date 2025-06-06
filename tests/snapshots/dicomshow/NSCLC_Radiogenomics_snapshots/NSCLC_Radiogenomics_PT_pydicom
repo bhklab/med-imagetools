@@ -1,0 +1,156 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ ImageType                                MultiValue of length 2                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.128           
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.4334.1501.31… 
+ StudyDate                                19901017                              
+ SeriesDate                               19901017                              
+ AcquisitionDate                          19901017                              
+ ContentDate                              19901017                              
+ StudyTime                                115530.00                             
+ SeriesTime                               115823.00                             
+ AcquisitionTime                          115823.00                             
+ ContentTime                              120759.00                             
+ AccessionNumber                          2494200498938883                      
+ Modality                                 PT                                    
+ Manufacturer                             GE MEDICAL SYSTEMS                    
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         PET CT LUNG CANCER                    
+ ProcedureCodeSequence                    Sequence of length 1                  
+ CodeValue                                NEPETLUNG                             
+ CodingSchemeDesignator                   GEIIS                                 
+ CodingSchemeVersion                      0                                     
+ CodeMeaning                              PET CT LUNG CANCER                    
+ SeriesDescription                        PET_BODY_NO_AC                        
+                                          CTP                                   
+ PatientName                              R01-001                               
+ PatientID                                R01-001                               
+ PatientBirthDate                         empty                                 
+ PatientSex                               F                                     
+ PatientAge                               078Y                                  
+ PatientSize                              1.6000000238419                       
+ PatientWeight                            66                                    
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          NSCLC Radiogenomics                   
+                                          43341501                              
+ SliceThickness                           4.25                                  
+ AcquisitionTerminationCondition          TIME                                  
+ AcquisitionStartCondition                MANU                                  
+ AcquisitionStartConditionData            0                                     
+ AcquisitionTerminationConditionData      0                                     
+ SoftwareVersions                         16.01                                 
+ ContrastBolusRoute                       empty                                 
+ IntervalsAcquired                        0                                     
+ IntervalsRejected                        0                                     
+ ReconstructionDiameter                   550                                   
+ GantryDetectorTilt                       0                                     
+ TableHeight                              136.5                                 
+ FieldOfViewShape                         CYLINDRICAL RING                      
+ FieldOfViewDimensions                    MultiValue of length 2                
+ CollimatorType                           RING                                  
+ ActualFrameDuration                      180000                                
+ PatientPosition                          HFS                                   
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.4334.1501.51… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.4334.1501.26… 
+ StudyID                                  empty                                 
+ SeriesNumber                             None                                  
+ InstanceNumber                           81                                    
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.4334.1501.15… 
+ PositionReferenceIndicator               Orbital Meatal Line                   
+ SliceLocation                            -530.00000000000                      
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ Rows                                     128                                   
+ Columns                                  128                                   
+ PixelSpacing                             MultiValue of length 2                
+ CorrectedImage                           MultiValue of length 7                
+ BitsAllocated                            16                                    
+ BitsStored                               16                                    
+ HighBit                                  15                                    
+ PixelRepresentation                      1                                     
+ SmallestImagePixelValue                  0                                     
+ LargestImagePixelValue                   0                                     
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ RescaleIntercept                         0                                     
+ RescaleSlope                             0.000112466                           
+ LossyImageCompression                    00                                    
+ EnergyWindowRangeSequence                Sequence of length 1                  
+ EnergyWindowLowerLimit                   000000000000300                       
+ EnergyWindowUpperLimit                   000000000000650                       
+ RadiopharmaceuticalInformationSequence   Sequence of length 1                  
+ Radiopharmaceutical                      FDG -- fluorodeoxyglucose             
+ RadiopharmaceuticalVolume                0                                     
+ RadiopharmaceuticalStartTime             110500.00                             
+ RadionuclideTotalDose                    421800032                             
+ RadionuclideHalfLife                     6588                                  
+ RadionuclidePositronFraction             0.97000002861023                      
+ RadionuclideCodeSequence                 Sequence of length 1                  
+ CodeValue                                C-111A1                               
+ CodingSchemeDesignator                   99SDM                                 
+ CodeMeaning                              18F                                   
+ RadiopharmaceuticalCodeSequence          Sequence of length 1                  
+ CodeValue                                Y-X1743                               
+ CodingSchemeDesignator                   99SDM                                 
+ CodeMeaning                              FDG -- fluorodeoxyglucose             
+ NumberOfSlices                           205                                   
+ NumberOfTimeSlices                       6                                     
+ TypeOfDetectorMotion                     NONE                                  
+ PatientOrientationCodeSequence           Sequence of length 1                  
+ CodeValue                                F-10450                               
+ CodingSchemeDesignator                   99SDM                                 
+ CodeMeaning                              recumbent                             
+ PatientOrientationModifierCodeSequence   Sequence of length 1                  
+ CodeValue                                F-10340                               
+ CodingSchemeDesignator                   99SDM                                 
+ CodeMeaning                              supine                                
+ PatientGantryRelationshipCodeSequence    Sequence of length 1                  
+ CodeValue                                F-10470                               
+ CodingSchemeDesignator                   99SDM                                 
+ CodeMeaning                              headfirst                             
+ SeriesType                               MultiValue of length 2                
+ Units                                    PROPCNTS                              
+ CountsSource                             EMISSION                              
+ RandomsCorrectionMethod                  RTSUB                                 
+ DecayCorrection                          START                                 
+ ReconstructionMethod                     OSEM                                  
+ ScatterCorrectionMethod                  None                                  
+ AxialMash                                MultiValue of length 2                
+ TransverseMash                           1                                     
+ CoincidenceWindowWidth                   12                                    
+ FrameReferenceTime                       366000                                
+ SliceSensitivityFactor                   0.974202                              
+ DecayFactor                              1.04913                               
+ DoseCalibrationFactor                    0.0000000000                          
+ ImageIndex                               81                                    

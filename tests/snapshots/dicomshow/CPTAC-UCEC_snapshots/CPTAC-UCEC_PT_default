@@ -1,0 +1,40 @@
+ Keyword                          Value                                         
+ AcquisitionDate                  20081216                                      
+ AcquisitionStartCondition        MANU                                          
+ AcquisitionTerminationCondition  TIME                                          
+ AcquisitionTime                  163712                                        
+ ActualFrameDuration              150000                                        
+ AttenuationCorrectionMethod      NONE, 0.000000 cm-1,                          
+ CoincidenceWindowWidth           0                                             
+ ContentDate                      20081216                                      
+ ContentTime                      164023                                        
+ DecayCorrection                  START                                         
+ DecayFactor                      1.07429                                       
+ FrameOfReferenceUID              1.3.6.1.4.1.14519.5.2.1.6450.2626.1181428666… 
+ FrameReferenceTime               606000                                        
+ FrameTime                        0                                             
+ ImageOrientationPatient          [1, 0, 0, 0, 1, -0]                           
+ ImagePositionPatient             [-348.17709350585, -348.17709350585,          
+                                  -273.90002441406]                             
+ InstanceCreationDate             20081216                                      
+ InstanceCreationTime             164023                                        
+ Manufacturer                     GE MEDICAL SYSTEMS                            
+ ManufacturerModelName            Discovery 710                                 
+ Modality                         PT                                            
+ NumberOfSlices                   227                                           
+ PatientID                        C3L-00947                                     
+ PatientPosition                  HFS                                           
+ PixelSpacing                     [3.6458332538605, 3.6458332538605]            
+ ProtocolName                     7.9 PTCT attenuation only  MED 120-199        
+ ReconstructionMethod             VPFX                                          
+ RescaleIntercept                 0                                             
+ RescaleSlope                     0.0384952                                     
+ ScatterCorrectionMethod          None                                          
+ SeriesDate                       20081216                                      
+ SeriesInstanceUID                1.3.6.1.4.1.14519.5.2.1.6450.2626.2166778738… 
+ SeriesTime                       162706                                        
+ SliceThickness                   3.2700                                        
+ SoftwareVersions                 53.00                                         
+ StudyDate                        20081216                                      
+ StudyInstanceUID                 1.3.6.1.4.1.14519.5.2.1.6450.2626.8486122509… 
+ StudyTime                        162421                                        

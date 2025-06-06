@@ -1,0 +1,103 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ ImageType                                MultiValue of length 3                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.2             
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.6279.6001.13… 
+ StudyDate                                20000101                              
+ SeriesDate                               20000101                              
+ AcquisitionDate                          20000101                              
+ ContentDate                              20000101                              
+ OverlayDate                              20000101                              
+ CurveDate                                20000101                              
+ AcquisitionDateTime                      20000101                              
+ StudyTime                                141900                                
+ AcquisitionTime                          142309                                
+ ContentTime                              142424                                
+ AccessionNumber                          empty                                 
+ Modality                                 CT                                    
+ Manufacturer                             GE MEDICAL SYSTEMS                    
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         CT CHEST W/ CONT                      
+ SeriesDescription                        Recon 3: CT CHEST                     
+ ManufacturerModelName                    LightSpeed VCT                        
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.6279.6001.14… 
+ PatientName                              empty                                 
+ PatientID                                LIDC-IDRI-0068                        
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientAge                               050Y                                  
+ AdditionalPatientHistory                 empty                                 
+ LastMenstrualDate                        20000101                              
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   DCM:113100/113105/113107/113108/1131… 
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+ ContrastBolusAgent                       OMNI300                               
+ BodyPartExamined                         CHEST                                 
+ ScanOptions                              HELICAL MODE                          
+ SliceThickness                           1.250000                              
+ KVP                                      120                                   
+ DataCollectionDiameter                   500.000000                            
+ SoftwareVersions                         06MW03.4                              
+ ProtocolName                             5.1 CT #100 ROUTINE CHEST WITH OR     
+                                          WITHOUT CONTRAST*                     
+ ContrastBolusRoute                       IV                                    
+ ReconstructionDiameter                   350.000000                            
+ DistanceSourceToDetector                 949.075012                            
+ DistanceSourceToPatient                  541.000000                            
+ GantryDetectorTilt                       0.000000                              
+ TableHeight                              125.500000                            
+ RotationDirection                        CW                                    
+ ExposureTime                             500                                   
+ XRayTubeCurrent                          298                                   
+ Exposure                                 4                                     
+ FilterType                               BODY FILTER                           
+ GeneratorPower                           36000                                 
+ FocalSpots                               0.700000                              
+ ConvolutionKernel                        STANDARD                              
+ PatientPosition                          FFS                                   
+ RevolutionTime                           0.5                                   
+ SingleCollimationWidth                   0.625                                 
+ TotalCollimationWidth                    40.0                                  
+ TableSpeed                               78.75                                 
+ TableFeedPerRotation                     39.375                                
+ SpiralPitchFactor                        0.984375                              
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.6279.6001.70… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.6279.6001.18… 
+ StudyID                                  empty                                 
+ SeriesNumber                             4                                     
+ AcquisitionNumber                        1                                     
+ InstanceNumber                           196                                   
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.6279.6001.10… 
+ PositionReferenceIndicator               SN                                    
+ SliceLocation                            -252.750000                           
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ Rows                                     512                                   
+ Columns                                  512                                   
+ PixelSpacing                             MultiValue of length 2                
+ BitsAllocated                            16                                    
+ BitsStored                               16                                    
+ HighBit                                  15                                    
+ PixelRepresentation                      1                                     
+ PixelPaddingValue                        -2000                                 
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ WindowCenter                             40                                    
+ WindowWidth                              400                                   
+ RescaleIntercept                         -1024                                 
+ RescaleSlope                             1                                     
+ RescaleType                              HU                                    
+ AdmittingDate                            20000101                              
+ ScheduledProcedureStepStartDate          20000101                              
+ ScheduledProcedureStepEndDate            20000101                              
+ PerformedProcedureStepStartDate          20000101                              
+ PlacerOrderNumberImagingServiceRequest   empty                                 
+ FillerOrderNumberImagingServiceRequest   empty                                 
+ VerifyingObserverName                    Removed by CTP                        
+ PersonName                               Removed by CTP                        
+ UID                                      1.3.6.1.4.1.14519.5.2.1.6279.6001.28… 
+ ContentCreatorName                       empty                                 
+ StorageMediaFileSetUID                   1.3.6.1.4.1.14519.5.2.1.6279.6001.28… 
