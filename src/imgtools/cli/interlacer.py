@@ -17,10 +17,11 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     "--query-string", "-q",
     type=str,
     default=None,
-    help="""Comma-separated string of modalities to query (e.g., 'CT,MR')
-
-            Supported modalities:
-            CT, PT, MR, SEG, RTSTRUCT, RTDOSE""",
+    help="""Comma-separated string of modalities to query (e.g., 'CT,MR').
+            
+            Supported modalities: CT, PT, MR, SEG, RTSTRUCT, RTDOSE.
+            
+            """,
 )
 @click.option(
     "--group-by-root", "-g",
