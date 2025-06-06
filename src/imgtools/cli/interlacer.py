@@ -20,12 +20,7 @@ DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
     help="""Comma-separated string of modalities to query (e.g., 'CT,MR')
 
             Supported modalities:
-            - CT: Computed Tomography
-            - PT: Positron Emission Tomography
-            - MR: Magnetic Resonance Imaging
-            - SEG: Segmentation
-            - RTSTRUCT: Radiotherapy Structure
-            - RTDOSE: Radiotherapy Dose""",
+            CT, PT, MR, SEG, RTSTRUCT, RTDOSE""",
 )
 @click.option(
     "--group-by-root", "-g",
@@ -78,7 +73,7 @@ def interlacer(path: Path,
     \b
     Visit https://bhklab.github.io/med-imagetools/ for more information.
     """
-    from imgtools.dicom.interlacer import Interlacer, print_interlacer_tree
+    from imgtools.dicom.interlacer import Interlacer, print_interlacer_tree, SeriesNode
     if (path.is_file() and force):
         logger.warning(f"force requires a directory as input. {path} will be used as the index.")
     
@@ -120,6 +115,9 @@ def interlacer(path: Path,
         # Update root node children to reflect query structure instead of overall index structure
         for group in result:
             group[0].children = group[1:]
+            for node in group[1:]:
+                node.children = []
+          
         root_nodes = [group[0] for group in result]
 
         print_interlacer_tree(root_nodes, input_directory=None)
