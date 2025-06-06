@@ -93,10 +93,8 @@ def dicomshow(
             logger.info(f"Extracting tags from {dicom_file} (pydicom method)")
             result: Any = dcmread(file_path, stop_before_pixels=True)
         except Exception as e:
-    except Exception as e:
-        logger.error(f"Failed to read DICOM file {file_path}: {e}")
--       raise click.ClickException(f"Cannot read DICOM file: {e}")
-+       raise click.ClickException(f"Cannot read DICOM file: {e}") from e
+            logger.error(f"Failed to read DICOM file {file_path}: {e}")
+            raise click.ClickException(f"Cannot read DICOM file: {e}") from e
 
         if tags:
             try:
@@ -132,14 +130,12 @@ def dicomshow(
 
         result = extract_metadata(file_path)
         if tags:
-        if tags:
             try:
                 for tag in tags:
                     result = result[str(tag)]
             except KeyError as e:
                 logger.error(f"Failed to extract tag {split_input[1]}: {e}")
                 raise click.ClickException(f"Tag extraction failed: {e}") from e
-        table.add_row(split_input[1], str(result))
             table.add_row(split_input[1], str(result))
         else: 
             for key in (result if no_progress else tqdm(result, desc="Printing Table")):
