@@ -130,8 +130,14 @@ def dicomshow(
 
         result = extract_metadata(file_path)
         if tags:
-            for tag in tags:
-                result = result[str(tag)]
+        if tags:
+            try:
+                for tag in tags:
+                    result = result[str(tag)]
+            except KeyError as e:
+                logger.error(f"Failed to extract tag {split_input[1]}: {e}")
+                raise click.ClickException(f"Tag extraction failed: {e}") from e
+        table.add_row(split_input[1], str(result))
             table.add_row(split_input[1], str(result))
         else: 
             for key in (result if no_progress else tqdm(result, desc="Printing Table")):
