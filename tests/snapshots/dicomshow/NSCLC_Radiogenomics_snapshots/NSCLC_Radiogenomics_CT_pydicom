@@ -1,0 +1,106 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.2             
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.4334.1501.22… 
+ StudyDate                                19900906                              
+ StudyTime                                110942.109000                         
+ AccessionNumber                          3077581421648539                      
+ Modality                                 CT                                    
+ ReferringPhysicianName                   empty                                 
+ StudyDescription                         CT CHEST ABD PELVIS WITH CON          
+ ProcedureCodeSequence                    Sequence of length 1                  
+ CodeValue                                CTTAPW                                
+ CodingSchemeDesignator                   GEIIS                                 
+ CodingSchemeVersion                      0                                     
+ CodeMeaning                              CT CHEST ABD PELVIS WITH CON          
+ SeriesDescription                        THORAX 1.0 B45f                       
+                                          CTP                                   
+ PatientName                              R01-001                               
+ PatientID                                R01-001                               
+ PatientBirthDate                         empty                                 
+ PatientSex                               F                                     
+ PatientAge                               078Y                                  
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal Temporal          
+                                          Information Modified Dates Option     
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          NSCLC Radiogenomics                   
+                                          43341501                              
+ BodyPartExamined                         CHEST                                 
+ SliceThickness                           1                                     
+ KVP                                      120                                   
+ DataCollectionDiameter                   500                                   
+ SoftwareVersions                         syngo CT 2007S                        
+ ProtocolName                             01_CAP                                
+ ReconstructionDiameter                   355                                   
+ DistanceSourceToDetector                 1040                                  
+ DistanceSourceToPatient                  570                                   
+ GantryDetectorTilt                       0                                     
+ TableHeight                              137                                   
+ RotationDirection                        CW                                    
+ ExposureTime                             500                                   
+ XRayTubeCurrent                          483                                   
+ Exposure                                 402                                   
+ FilterType                               0                                     
+ GeneratorPower                           42                                    
+ FocalSpots                               1.2                                   
+ DateOfLastCalibration                    19900906                              
+ TimeOfLastCalibration                    074614.000000                         
+ ConvolutionKernel                        B45f                                  
+ PatientPosition                          HFS                                   
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.4334.1501.11… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.4334.1501.31… 
+ StudyID                                  empty                                 
+ SeriesNumber                             3                                     
+ AcquisitionNumber                        2                                     
+ InstanceNumber                           66                                    
+ ImagePositionPatient                     MultiValue of length 3                
+ ImageOrientationPatient                  MultiValue of length 6                
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.4334.1501.45… 
+ PositionReferenceIndicator               empty                                 
+ SliceLocation                            -67                                   
+ ImageComments                            CONTRAST                              
+ SamplesPerPixel                          1                                     
+ PhotometricInterpretation                MONOCHROME2                           
+ Rows                                     512                                   
+ Columns                                  512                                   
+ PixelSpacing                             MultiValue of length 2                
+ BitsAllocated                            16                                    
+ BitsStored                               12                                    
+ HighBit                                  11                                    
+ PixelRepresentation                      0                                     
+ SmallestImagePixelValue                  0                                     
+ LargestImagePixelValue                   4089                                  
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ WindowCenter                             MultiValue of length 2                
+ WindowWidth                              MultiValue of length 2                
+ RescaleIntercept                         -1024                                 
+ RescaleSlope                             1                                     
+ WindowCenterWidthExplanation             MultiValue of length 2                

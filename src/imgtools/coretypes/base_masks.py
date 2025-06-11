@@ -24,6 +24,19 @@ ROIMaskMapping = namedtuple(
 )
 
 
+class TooManyComponentsError(ValueError):
+    """Raised when attempting to encode a mask with more components than supported by the available integer types."""
+
+    def __init__(self, n_components: int, max_supported: int = 32) -> None:
+        msg = (
+            f"Cannot encode masks with {n_components} components: "
+            f"maximum supported is {max_supported} due to bitmask size limits."
+        )
+        super().__init__(msg)
+        self.n_components = n_components
+        self.max_supported = max_supported
+
+
 class VectorMask(MedImage):
     """A multi-label binary mask image with vector pixels (sitkVectorUInt8).
 
@@ -190,14 +203,67 @@ class VectorMask(MedImage):
     def has_overlap(self) -> bool:
         """Return True if any voxel has >1 mask"""
         arr = sitk.GetArrayFromImage(self)
-        return bool(np.any(np.sum(arr, axis=-1) > 1))
+        return self.n_masks > 1 and bool(np.any(np.sum(arr, axis=-1) > 1))
 
-    def to_sparsemask(self) -> Mask:
-        """Convert the vector mask to a single-channel binary mask via argmax operation.
+    def _to_label_array(self, allow_overlap: bool) -> Mask:
+        """
+        Convert vector mask to 3D label array with unique label per mask.
+
+        Parameters
+        ----------
+        allow_overlap : bool
+            If True, overlapping voxels are allowed and resolved by assigning the label of the highest-index region.
+            If False, a ValueError is raised if overlaps are found.
+
+        Returns
+        -------
+        Mask
+            A single-channel binary mask where each voxel belongs to at most one class.
+            The output is a standard Mask with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8.
+        """
+
+        if self.n_masks == 1:  # Already a label image
+            return Mask(
+                sitk.Cast(self[1], sitk.sitkUInt8),
+                metadata=self.metadata.copy(),
+            )
+
+        if self.has_overlap():
+            if allow_overlap:
+                logger.warning(
+                    "Vector mask has overlaps. "
+                    "Converting to sparse mask will result in a lossy conversion."
+                )
+            else:
+                raise ValueError(
+                    "Cannot convert to label image: overlap detected. "
+                    "Use `to_sparse_mask()` for lossy conversion that resolves overlaps by label order."
+                    "Or use `to_region_mask()` for lossless conversion that creates a new region per overlap."
+                )
+
+        arr = sitk.GetArrayFromImage(self)
+
+        # Assign label index (1-based, since 0 = background)
+        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
+
+        for i in range(arr.shape[-1]):
+            label_arr[arr[..., i] == 1] = i + 1
+
+        label_img = sitk.GetImageFromArray(label_arr)
+        label_img.CopyInformation(self)
+
+        # Attach merged metadata
+        return Mask(
+            sitk.Cast(label_img, sitk.sitkUInt8),
+            metadata=self.metadata.copy(),
+        )
+
+    def to_sparse_mask(self) -> Mask:
+        """Convert the vector mask to a single-channel binary mass.
 
         Creates a sparse representation where each voxel is assigned to exactly one class,
         even if there are overlaps in the original vector mask. In case of overlaps,
-        the mask with the lowest index (highest priority) is chosen.
+        the mask with the highest index is chosen.
 
         Returns
         -------
@@ -211,8 +277,8 @@ class VectorMask(MedImage):
         preserved per voxel. If preserving all overlapping labels is important,
         keep working with the original VectorMask.
         """
-        msg = "Converting to a sparse mask is not implemented yet."
-        raise NotImplementedError(msg)
+
+        return self._to_label_array(allow_overlap=True)
 
     def to_label_image(self) -> Mask:
         """Convert the vector mask to a scalar label image with unique labels for each ROI.
@@ -240,30 +306,50 @@ class VectorMask(MedImage):
         if there are no overlaps. The mapping between label values and original ROI names
         is preserved in the metadata.
         """
-        arr = sitk.GetArrayFromImage(self)
 
-        # Check for overlaps before proceeding
-        overlap_mask = np.sum(arr, axis=-1) > 1
-        if np.any(overlap_mask):
-            raise ValueError(
-                "Cannot convert to label image: overlap detected. "
-                "Use `to_sparsemask()` instead if you want lossy argmax conversion."
+        return self._to_label_array(allow_overlap=False)
+
+    def to_region_mask(
+        self,
+    ) -> Mask:
+        """
+        Encodes a VectorUInt8 image (with binary 0/1 components) into a single-channel
+        image where each voxel value is a unique integer representing the bitmask
+        of active components. Names are used in the lookup table.
+
+        Parameters
+        ----------
+        vector_mask : sitk.Image
+            A VectorUInt8 image where each component is 0 or 1.
+
+        Returns
+        -------
+        Mask
+        """
+        n_components = self.GetNumberOfComponentsPerPixel()
+        assert self.GetPixelID() == sitk.sitkVectorUInt8
+        assert len(self.roi_mapping) == n_components + 1  # +1 for background
+
+        if n_components <= 8:
+            output_type = sitk.sitkUInt8
+        elif n_components <= 16:
+            output_type = sitk.sitkUInt16
+        elif n_components <= 32:
+            output_type = sitk.sitkUInt32
+        else:
+            raise TooManyComponentsError(n_components)
+
+        label_image = sitk.Image(self.GetSize(), output_type)
+        label_image.CopyInformation(self)
+
+        for i in range(n_components):
+            component = sitk.VectorIndexSelectionCast(
+                self, i, outputPixelType=output_type
             )
+            shifted = sitk.ShiftScale(component, shift=0, scale=2**i)
+            label_image += shifted
 
-        # Assign label index (1-based, since 0 = background)
-        label_arr = np.zeros(arr.shape[:3], dtype=np.uint8)
-
-        for i in range(arr.shape[-1]):
-            label_arr[arr[..., i] == 1] = i + 1
-
-        label_img = sitk.GetImageFromArray(label_arr)
-        label_img.CopyInformation(self)
-
-        # Attach merged metadata
-        return Mask(
-            sitk.Cast(label_img, sitk.sitkUInt8),
-            metadata=self.metadata.copy(),
-        )
+        return Mask(label_image, metadata=self.metadata.copy())
 
     def extract_mask(self, key: str | int) -> Mask:
         """Extract a single binary mask by index or ROI key.

@@ -1,0 +1,21 @@
+ Keyword                  Value                                                 
+ AcquisitionNumber        59                                                    
+ BodyPartExamined         HEADNECK                                              
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.1706.8040.120880328745261947… 
+ ImageOrientationPatient  [1, 0, 0, 0, 1, 0]                                    
+ ImagePositionPatient     [-250, -184.00131, -383]                              
+ KVP                      None                                                  
+ Manufacturer             GE MEDICAL SYSTEMS                                    
+ Modality                 CT                                                    
+ PatientID                HNSCC-01-0176                                         
+ PatientPosition          HFS                                                   
+ PixelSpacing             [0.97656, 0.97656]                                    
+ RescaleIntercept         -1024                                                 
+ RescaleSlope             1                                                     
+ SeriesDate               20090301                                              
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.1706.8040.151938046710005478… 
+ SeriesTime               1229                                                  
+ SliceThickness           None                                                  
+ StudyDate                20090301                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.1706.8040.120307635397950659… 
+ StudyTime                1229                                                  

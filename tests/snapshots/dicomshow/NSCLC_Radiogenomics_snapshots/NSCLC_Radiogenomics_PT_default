@@ -1,0 +1,34 @@
+ Keyword                          Value                                         
+ AcquisitionDate                  19901017                                      
+ AcquisitionStartCondition        MANU                                          
+ AcquisitionTerminationCondition  TIME                                          
+ AcquisitionTime                  115823.00                                     
+ ActualFrameDuration              180000                                        
+ CoincidenceWindowWidth           12                                            
+ ContentDate                      19901017                                      
+ ContentTime                      120759.00                                     
+ DecayCorrection                  START                                         
+ DecayFactor                      1.04913                                       
+ FrameOfReferenceUID              1.3.6.1.4.1.14519.5.2.1.4334.1501.1531144740… 
+ FrameReferenceTime               366000                                        
+ ImageOrientationPatient          [1, 0, 0, 0, 1, -0]                           
+ ImagePositionPatient             [-275.00000000000, -275.00000000000,          
+                                  -530.00000000000]                             
+ Manufacturer                     GE MEDICAL SYSTEMS                            
+ Modality                         PT                                            
+ NumberOfSlices                   205                                           
+ PatientID                        R01-001                                       
+ PatientPosition                  HFS                                           
+ PixelSpacing                     [4.296875, 4.296875]                          
+ ReconstructionMethod             OSEM                                          
+ RescaleIntercept                 0                                             
+ RescaleSlope                     0.000112466                                   
+ ScatterCorrectionMethod          None                                          
+ SeriesDate                       19901017                                      
+ SeriesInstanceUID                1.3.6.1.4.1.14519.5.2.1.4334.1501.2636791101… 
+ SeriesTime                       115823.00                                     
+ SliceThickness                   4.25                                          
+ SoftwareVersions                 16.01                                         
+ StudyDate                        19901017                                      
+ StudyInstanceUID                 1.3.6.1.4.1.14519.5.2.1.4334.1501.5150263245… 
+ StudyTime                        115530.00                                     

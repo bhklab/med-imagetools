@@ -1,6 +1,95 @@
 # CHANGELOG
 
 
+## v2.4.0 (2025-05-21)
+
+### Chores
+
+- Update cli help image
+  ([`32c6176`](https://github.com/bhklab/med-imagetools/commit/32c617671df4d620c73bb3171667750bea5c0bea))
+
+- Update pixi lock
+  ([`13b325f`](https://github.com/bhklab/med-imagetools/commit/13b325f6f27c9e088040f2ae12a8375149833b97))
+
+### Features
+
+- Improve no valid samples w/ more useful info to user
+  ([#365](https://github.com/bhklab/med-imagetools/pull/365),
+  [`e843a12`](https://github.com/bhklab/med-imagetools/commit/e843a12640a1ab076321562e1aaea06e78c4e88e))
+
+addresses not outputting helpful information on failing to get valid samples #363 , add a bunch of
+  helper methods for debugging, and extract success/failure reporting into autopipeline_utils
+
+once we abstract the pipeline logic, we can organize this a bit better
+
+- **New Features** - Added improved error handling with a new exception for cases where no valid
+  samples are found during pipeline runs. - Introduced detailed reporting and summary statistics for
+  pipeline results, including success and failure rates. - Enhanced the display of DICOM series
+  information with rich, user-friendly summaries and a new property listing all valid query paths.
+
+- **Refactor** - Streamlined report generation and result aggregation into reusable components for
+  clearer pipeline processing.
+
+
+## v2.3.0 (2025-05-08)
+
+### Bug Fixes
+
+- Correct formatting of allowed modalities validation in nnUNetPipeline
+  ([`5baf828`](https://github.com/bhklab/med-imagetools/commit/5baf82859cea52da0d3c2cc0fc4b23f3a76e28fd))
+
+### Features
+
+- Add nnunet output ([#340](https://github.com/bhklab/med-imagetools/pull/340),
+  [`33a3792`](https://github.com/bhklab/med-imagetools/commit/33a37926fdc216f415eeb71b604e6775a6d19b27))
+
+- **New Features** - Introduced a new CLI command for nnUNet pipeline processing with comprehensive
+  options for modalities, ROI matching, mask saving, and parallel execution. - Added advanced vector
+  mask conversion methods supporting overlap handling and bitmask encoding. - Enabled exporting
+  datasets in nnUNet format with configurable mask strategies, metadata embedding, and automated
+  generation of preprocessing scripts and dataset JSON files. - Provided utilities to generate
+  nnUNet training and preprocessing scripts and dataset configuration files.
+
+- **Documentation** - Clarified documentation on vector mask conversion, explicitly describing
+  overlap resolution by label priority.
+
+- **Bug Fixes** - Improved mask overlap detection efficiency by short-circuiting when only one mask
+  component exists. <!-- end of auto-generated comment: release notes by coderabbit.ai -->
+
+Co-authored-by: Jermiah Joseph <jermiahjoseph98@gmail.com>
+
+Co-authored-by: Jermiah Joseph <44614774+jjjermiah@users.noreply.github.com>
+
+
+## v2.2.0 (2025-05-05)
+
+### Chores
+
+- Cleanup ruff config and remove old functional module
+  ([`efbfeea`](https://github.com/bhklab/med-imagetools/commit/efbfeea07a2ea7baf9104be958d35cdbb979d344))
+
+- Remove git merge annotations
+  ([`5569eb2`](https://github.com/bhklab/med-imagetools/commit/5569eb268a4beaebef42ebb564e84aaa50931dd4))
+
+- Update lockfile
+  ([`1485171`](https://github.com/bhklab/med-imagetools/commit/1485171e9511bf50ef88f20ab028b5d533d8e56a))
+
+### Code Style
+
+- Ruff check
+  ([`8030aba`](https://github.com/bhklab/med-imagetools/commit/8030aba4f4bc64dfc3f294bcf66393f7aa07e1c4))
+
+### Continuous Integration
+
+- Update ruff format command params
+  ([`04ecd23`](https://github.com/bhklab/med-imagetools/commit/04ecd235906963f686319eff18f400b5b8c95f7c))
+
+### Features
+
+- Release on PyPi
+  ([`94f1304`](https://github.com/bhklab/med-imagetools/commit/94f1304b90d01db44d867eacbb6ff1820b7100f0))
+
+
 ## v2.1.0 (2025-05-05)
 
 ### Chores
@@ -10,11 +99,6 @@
 
 - Update pixi.lock file
   ([`1d080b0`](https://github.com/bhklab/med-imagetools/commit/1d080b002b2b4172af531f1acf1de1dccd87d0bd))
-
-
-## v2.0.0 (2025-05-05)
-
-### Chores
 
 - Update pixi.lock file
   ([`f3ff708`](https://github.com/bhklab/med-imagetools/commit/f3ff70822e579676b426d5ad915ea1a771f0d5ce))

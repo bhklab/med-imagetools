@@ -6,11 +6,11 @@ on:
         branches:
             - "development"
             - "main"
-            - "jjjermiah/*"
     push:
         branches:
             - "development"
             - "main"
+    workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}_${{ github.event.pull_request.number || github.ref }}
@@ -89,7 +89,7 @@ jobs:
               uses: prefix-dev/setup-pixi@v0.8.8
               with:
                   environments: "test"
-                  pixi-version: v0.46.0
+                  pixi-version: v0.47.0
                   cache: true
                   locked: false
 

@@ -1,0 +1,37 @@
+ Keyword                  Value                                                 
+ AcquisitionDate          20081209                                              
+ AcquisitionNumber        1                                                     
+ AcquisitionTime          121803.711801                                         
+ ContentDate              20081209                                              
+ ContentTime              121923                                                
+ ContrastBolusAgent       GASTR 25/975 & ISOVUE 370 125CC                       
+ ConvolutionKernel        SOFT                                                  
+ DataCollectionDiameter   500.000000                                            
+ ExposureTime             600                                                   
+ FrameOfReferenceUID      1.3.6.1.4.1.14519.5.2.1.6450.2626.288215967837533272… 
+ GantryDetectorTilt       0.000000                                              
+ ImageOrientationPatient  [1.000000, 0.000000, 0.000000, 0.000000, 0.000000,    
+                          -1.000000]                                            
+ ImagePositionPatient     [-226.793, 18.859, -26]                               
+ InstanceCreationDate     20081209                                              
+ InstanceCreationTime     121923                                                
+ KVP                      120                                                   
+ Manufacturer             GE MEDICAL SYSTEMS                                    
+ ManufacturerModelName    LightSpeed VCT                                        
+ Modality                 CT                                                    
+ PatientID                C3L-00947                                             
+ PatientPosition          FFS                                                   
+ PixelSpacing             [0.944824, 0.944824]                                  
+ ProtocolName             6.2 ABD/PELVIS ALL WITH                               
+ ReconstructionDiameter   483.8                                                 
+ RescaleIntercept         -1024                                                 
+ RescaleSlope             1                                                     
+ RescaleType              Houndsfield Unit                                      
+ ScanOptions              HELICAL MODE                                          
+ SeriesDate               20081209                                              
+ SeriesInstanceUID        1.3.6.1.4.1.14519.5.2.1.6450.2626.953776999629443938… 
+ SeriesTime               121851                                                
+ SliceThickness           2.000000                                              
+ StudyDate                20081209                                              
+ StudyInstanceUID         1.3.6.1.4.1.14519.5.2.1.6450.2626.207643928709693209… 
+ StudyTime                121413                                                

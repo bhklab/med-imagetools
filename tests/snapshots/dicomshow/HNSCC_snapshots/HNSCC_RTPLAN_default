@@ -1,0 +1,18 @@
+ Keyword                Value                                                   
+ BodyPartExamined       HEADNECK                                                
+ FrameOfReferenceUID    1.3.6.1.4.1.14519.5.2.1.1706.8040.70671921072650367925… 
+ InstanceCreationDate   20020113                                                
+ InstanceCreationTime   140836                                                  
+ Manufacturer           ADAC                                                    
+ ManufacturerModelName  Pinnacle3                                               
+ Modality               RTPLAN                                                  
+ PatientID              HNSCC-01-0176                                           
+ RTPlanDate             20020113                                                
+ RTPlanLabel            BOT.0                                                   
+ RTPlanName             BOT                                                     
+ RTPlanTime             140835                                                  
+ ReferencedSOPUIDs      ['1.3.6.1.4.1.14519.5.2.1.1706.8040.403955456521802338… 
+ SeriesInstanceUID      1.3.6.1.4.1.14519.5.2.1.1706.8040.31892787356129755008… 
+ SoftwareVersions       ['9.8', '9.8']                                          
+ StudyDate              20090301                                                
+ StudyInstanceUID       1.3.6.1.4.1.14519.5.2.1.1706.8040.12030763539795065926… 

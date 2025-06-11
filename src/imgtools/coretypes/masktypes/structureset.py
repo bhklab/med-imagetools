@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "RTStructureSet",
+    "ROIContourExtractionError",
     "ContourPointsAcrossSlicesError",
     "MaskArrayOutOfBoundsError",
     "UnexpectedContourPointsError",
@@ -141,6 +142,65 @@ class NonIntegerZSliceIndexError(Exception):  # pragma: no cover
         )
 
 
+class ROIContourExtractionError(ROIContourError):
+    """Exception raised when extracting ROI contour data fails with details about the specific ROI.
+
+    This exception contains additional information about the ROI index, name,
+    and referenced ROI number to provide context for the error.
+    """
+
+    roi_index: int
+    roi_name: str
+    referenced_roi_number: int | None
+    additional_info: dict | None
+    message: str
+
+    def __init__(
+        self,
+        message: str,
+        roi_index: int,
+        roi_name: str,
+        referenced_roi_number: int | None = None,
+        additional_info: dict | None = None,
+    ) -> None:
+        """Initialize with detailed information about the ROI extraction failure.
+
+        Parameters
+        ----------
+        message : str
+            Base error message describing what went wrong
+        roi_index : int
+            Index of the ROI in the ROIContourSequence
+        roi_name : str
+            Name of the ROI (for context in error messages)
+        referenced_roi_number : int, optional
+            Referenced ROI number from the DICOM file, by default None
+        additional_info : dict, optional
+            Any additional information to include in the error message, by default None
+        """
+        self.roi_index = roi_index
+        self.roi_name = roi_name
+        self.referenced_roi_number = referenced_roi_number or (roi_index + 1)
+        self.additional_info = additional_info or {}
+
+        # Build detailed error message
+        roi_identifier = (
+            f"ROI at index {self.roi_index}, "
+            f"(ReferencedROINumber={self.referenced_roi_number})"
+            f" with name '{self.roi_name}'"
+        )
+        detailed_message = f"{roi_identifier}: {message}"
+
+        # Add any additional info to the message
+        if self.additional_info:
+            details = ", ".join(
+                f"{k}={v}" for k, v in self.additional_info.items()
+            )
+            detailed_message += f" [Additional info: {details}]"
+
+        super().__init__(detailed_message)
+
+
 @dataclass
 class RTStructureSet:
     """Represents the entire structure set, containing multiple ROIs.
@@ -174,11 +234,11 @@ class RTStructureSet:
         init=False,
     )
     roi_map: dict[str, Sequence] = field(
-        repr=False,
         default_factory=dict,
     )
     roi_map_errors: dict[str, ROIContourError] = field(
-        repr=False, default_factory=dict, init=False
+        default_factory=dict,
+        init=False,
     )
 
     # store a hidden cache to store the numpy arrays
@@ -203,6 +263,7 @@ class RTStructureSet:
     def from_dicom(
         cls,
         dicom: DicomInput,
+        metadata: Dict[str, Any] | None = None,
     ) -> RTStructureSet:
         """Create a RTStructureSet object from an RTSTRUCT DICOM file.
 
@@ -217,6 +278,12 @@ class RTStructureSet:
             - If a directory is provided, it will be searched for a single DICOM
             file. If multiple files are found, an error will be raised.
             - If a `FileDataset` object is provided, it will be used directly.
+        metadata : dict[str, Any] | None, optional
+            If provided, this metadata will be used instead of extracting it
+            from the DICOM file. This is useful because our crawler
+            extracts and processes the metadata, possibly doing some better
+            remapping to figure out the correct ReferencedSeriesInstanceUID.
+
         Returns
         -------
         RTStructureSet
@@ -247,18 +314,22 @@ class RTStructureSet:
 
         # logger.debug("Loading RTSTRUCT DICOM file.", dicom=dicom)
         dicom_rt: FileDataset = load_dicom(dicom)
-        metadata: Dict[str, Any] = extract_metadata(
-            dicom_rt, "RTSTRUCT", extra_tags=None
+        metadata = metadata or extract_metadata(
+            dicom_rt,
+            "RTSTRUCT",
+            extra_tags=None,
         )
         rt = cls(
-            metadata=metadata,
+            metadata={k: v for k, v in metadata.items() if v},
         )
 
         # Extract ROI contour points for each ROI and
-        for roi_index, roi_name in enumerate(metadata["ROINames"]):
+        for roi_index, roi_name in enumerate(metadata["ROINames"]):  # type: ignore[arg-type]
             try:
                 extracted_roi: Sequence = cls._get_roi_points(
-                    dicom_rt, roi_index=roi_index
+                    dicom_rt,
+                    roi_index=roi_index,
+                    roi_name=roi_name,
                 )
             except ROIContourError as ae:
                 rt.roi_map_errors[roi_name] = ae
@@ -269,7 +340,7 @@ class RTStructureSet:
         # tag the logger with the original RTSTRUCT file name
         rt.plogger = logger.bind(
             PatientID=metadata.get("PatientID", "Unknown"),
-            SeriesInstanceUID=metadata.get("SeriesInstanceUID", "Unknown")[
+            SeriesInstanceUID=metadata.get("SeriesInstanceUID", "Unknown")[  # type: ignore[index]
                 -8:
             ],
             filepath=Path(dicom) if isinstance(dicom, (str, Path)) else dicom,
@@ -277,7 +348,11 @@ class RTStructureSet:
         return rt
 
     @staticmethod
-    def _get_roi_points(rtstruct: FileDataset, roi_index: int) -> Sequence:
+    def _get_roi_points(
+        rtstruct: FileDataset,
+        roi_index: int,
+        roi_name: str,
+    ) -> Sequence:
         """Extract and reshapes contour points for a specific ROI in an RTSTRUCT file.
         The passed in roi_index is what is used to index the ROIContourSequence,
         whereas the roi_name is mainly used for debugging purposes.
@@ -293,6 +368,8 @@ class RTStructureSet:
             The loaded DICOM RTSTRUCT file.
         roi_index : int
             The index of the ROI in the ROIContourSequence.
+        roi_name : str
+            The name of the ROI, used for debugging and error messages only.
 
         Returns
         -------
@@ -302,7 +379,7 @@ class RTStructureSet:
 
         Raises
         ------
-        ROIContourError
+        ROIContourExtractionError
             If the ROIContourSequence, ContourSequence, or ContourData is
             missing or malformed.
 
@@ -329,30 +406,34 @@ class RTStructureSet:
                 "The DICOM RTSTRUCT file is missing 'ROIContourSequence'."
             )
 
+        # Try to get ROIContour for this ROI
+        roi_contour = rtstruct.ROIContourSequence[roi_index]
+
+        # Set up the error with common info
+        error = ROIContourExtractionError("", roi_index, roi_name)
+
         # Check for ContourSequence in the specified ROI
-        if not hasattr(
-            roi_contour := rtstruct.ROIContourSequence[roi_index],
-            "ContourSequence",
-        ):
-            msg = (
-                f"ROI at index {roi_index}, (ReferencedROINumber={roi_index + 1}) "
-                "is missing 'ContourSequence';"
-            )
-            raise ROIContourError(msg)
+        if not hasattr(roi_contour, "ContourSequence"):
+            error.message = "Missing 'ContourSequence'"
+            raise error
 
         if len(roi_contour.ContourSequence) == 0:
-            msg = (
-                f"ROI at index {roi_index}, (ReferencedROINumber={roi_index + 1}) "
-                "has an empty 'ContourSequence'."
-            )
-            raise ROIContourError(msg)
+            error.message = "Empty 'ContourSequence'"
+            raise error
 
         # Sometimes the contour could be a POINT or just broken
         # and not have a ContourData
         # Check for ContourData in the first contour
         if not hasattr(roi_contour.ContourSequence[0], "ContourData"):
-            msg = f"ContourSequence in ROI at index {roi_index} is missing 'ContourData'. "
-            raise ROIContourError(msg)
+            error.message = "Missing 'ContourData' in ContourSequence"
+            raise error
+
+        # Check geometry type
+        geometric_type = roi_contour.ContourSequence[0].ContourGeometricType
+        if geometric_type != "CLOSED_PLANAR":
+            error.message = f"Unexpected ContourGeometricType: {geometric_type}. Expected 'CLOSED_PLANAR'."
+            error.additional_info = {"geometric_type": geometric_type}
+            raise error
 
         return roi_contour.ContourSequence
 
@@ -663,25 +744,25 @@ class RTStructureSet:
 if __name__ == "__main__":  # pragma: no cover
     from rich import print  # noqa
 
-    from imgtools.coretypes.imagetypes import Scan
-    from imgtools.coretypes.masktypes.roi_matching import (
-        ROIMatcher,
-    )
+    cptac = {
+        "mr": Path("data/CPTAC-UCEC/C3L-02403/MR_Series-45733428.4/"),
+        "rt_seed": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-558960.4/00000001.dcm"
+        ),
+        "rt_contour2": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-520374.4/00000001.dcm"
+        ),
+        "rt_contour": Path(
+            "data/CPTAC-UCEC/C3L-02403/RTSTRUCT_Series-55458746/00000001.dcm"
+        ),
+    }
 
-    ct_path = Path("data/RADCURE/RADCURE-0331/Study-03560/CT-3.0")
-    rt_path = Path(
-        "data/RADCURE/RADCURE-0331/Study-03560/RTSTRUCT-1.0/00000001.dcm"
-    )
+    rt_seed = RTStructureSet.from_dicom(cptac["rt_seed"])
+    print("[red]THIS SHOULD HAVE ERRORS[/red]")
+    print(rt_seed)
 
-    scan = Scan.from_dicom(ct_path.as_posix())
-    rtstruct = RTStructureSet.from_dicom(rt_path)
-
-    roi_matcher = ROIMatcher(
-        match_map={"ROI": [".*"]},
-    )
-
-    vm = rtstruct.get_vector_mask(
-        scan,
-        roi_matcher,
-    )
-    print(vm)  # noqa: T201
+    rt_contour = RTStructureSet.from_dicom(cptac["rt_contour"])
+    rt_contour2 = RTStructureSet.from_dicom(cptac["rt_contour2"])
+    print("[green]THESE SHOULD NOT HAVE ERRORS[/green]")
+    print(rt_contour)
+    print(rt_contour2)
