@@ -201,8 +201,6 @@ def resolve_reference_series(
 
     if (ref := meta.get("ReferencedSeriesUID")) and ref in series_meta_raw:
         return
-    else:
-        meta["ReferencedSeriesUID"] = ""
 
     match meta["Modality"]:
         case "SEG" | "RTSTRUCT" | "RTDOSE" | "RTPLAN":
