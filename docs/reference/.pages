@@ -1,4 +1,10 @@
 nav:
-  - ...
-  - DICOM Utilities: dicom-utils
-  - DICOM Sorting: dicomsort
+- ...
+- coretypes
+- dicom
+- io
+- loggers
+- pattern_parser
+- transforms
+- utils
+- vizualize
