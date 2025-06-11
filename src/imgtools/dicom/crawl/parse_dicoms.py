@@ -199,7 +199,7 @@ def resolve_reference_series(
         Frame of reference mapping
     """
 
-    if (ref := meta.get("ReferencedSeriesUID")) and ref in series_meta_raw:
+    if meta.get("ReferencedSeriesUID"):
         return
 
     match meta["Modality"]:
@@ -438,11 +438,15 @@ def construct_barebones_dict(
                     ref_series = ""
                     meta["ReferencedModality"] = ""
                 case [*multiple_refs]:  # only SR can have multiple references
-                    ref_series = "|".join(multiple_refs)
-                    meta["ReferencedModality"] = "|".join(
-                        series2modality(ref, series_meta_raw)
-                        for ref in multiple_refs
-                    )
+                    ref_series = ";".join(multiple_refs)
+                    ref_modalities = []
+                    for ref in multiple_refs:
+                        if ref in series_meta_raw:
+                            ref_modalities.append(
+                                series2modality(ref, series_meta_raw)
+                            )
+                    meta["ReferencedSeriesUID"] = ref_series
+                    meta["ReferencedModality"] = ";".join(ref_modalities)
                 case single_ref:
                     ref_series = single_ref
                     meta["ReferencedModality"] = series2modality(
@@ -456,8 +460,8 @@ def construct_barebones_dict(
                     "SeriesInstanceUID": seriesuid,
                     "SubSeries": subseriesid or "1",
                     "Modality": meta["Modality"],
-                    "ReferencedModality": meta["ReferencedModality"],
-                    "ReferencedSeriesUID": meta["ReferencedSeriesUID"],
+                    "ReferencedModality": meta.get("ReferencedModality", ""),
+                    "ReferencedSeriesUID": ref_series,
                     "instances": len(meta.get("instances", [])),
                     "folder": meta["folder"],
                 }
