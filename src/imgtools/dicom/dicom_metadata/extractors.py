@@ -484,6 +484,6 @@ class SRMetadataExtractor(ModalityMetadataExtractor):
             return list(sops)
 
         return {
-            "ReferencedSeriesUIDs": get_series_uids,
+            "ReferencedSeriesUID": get_series_uids,
             "ReferencedSOPUIDs": get_sop_uids,
         }
