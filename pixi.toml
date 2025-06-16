@@ -24,6 +24,7 @@ py313 = { features = ["py313", "test"], no-default-feature = true }
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"] }
+nnunetv2 = ">=2.6.2, <3"
 
 [feature.dev.dependencies]
 ipython = "*"
