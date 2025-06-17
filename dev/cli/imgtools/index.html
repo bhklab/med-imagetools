@@ -398,6 +398,8 @@
       
         
       
+        
+      
     
     
     
@@ -463,6 +465,29 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../usage/nnunet_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    nnUNetPipeline: Structured DICOM-to-NIfTI Conversion for Deep Learning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
       
@@ -483,10 +508,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
             
   
   
@@ -499,8 +524,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
             <span class="md-nav__icon md-icon"></span>
             Core API
           </label>
@@ -586,10 +611,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
             
   
   
@@ -602,8 +627,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Writers
           </label>
@@ -809,6 +834,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#imgtools-dicomshow" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomshow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#imgtools-dicomsort" class="md-nav__link">
     <span class="md-ellipsis">
       dicomsort
@@ -830,6 +864,15 @@
   <a href="#imgtools-interlacer" class="md-nav__link">
     <span class="md-ellipsis">
       interlacer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-nnunet-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      nnunet-pipeline
     </span>
   </a>
   
@@ -1346,6 +1389,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#imgtools-dicomshow" class="md-nav__link">
+    <span class="md-ellipsis">
+      dicomshow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#imgtools-dicomsort" class="md-nav__link">
     <span class="md-ellipsis">
       dicomsort
@@ -1367,6 +1419,15 @@
   <a href="#imgtools-interlacer" class="md-nav__link">
     <span class="md-ellipsis">
       interlacer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools-nnunet-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      nnunet-pipeline
     </span>
   </a>
   
@@ -1456,9 +1517,11 @@
 <ul>
 <li><em><a href="#imgtools-autopipeline">autopipeline</a></em>: Core utility to process messy DICOM data into organized NIfTI files.</li>
 <li><em><a href="#imgtools-dicomfind">dicomfind</a></em>: A tool to find DICOM files.</li>
+<li><em><a href="#imgtools-dicomshow">dicomshow</a></em>: Extracts and displays the metadata associated with a single dicom file.</li>
 <li><em><a href="#imgtools-dicomsort">dicomsort</a></em>: Sorts DICOM files into directories based on their tags.</li>
 <li><em><a href="#imgtools-index">index</a></em>: Crawl DICOM directory and create a database index.</li>
 <li><em><a href="#imgtools-interlacer">interlacer</a></em>: Visualize DICOM series relationships after indexing.</li>
+<li><em><a href="#imgtools-nnunet-pipeline">nnunet-pipeline</a></em>: Process medical images in nnUNet format.</li>
 </ul>
 <h3 id="imgtools-autopipeline">imgtools autopipeline<a class="headerlink" href="#imgtools-autopipeline" title="Permanent link">#</a></h3>
 <p>Core utility to process messy DICOM data into organized NIfTI files.</p>
@@ -1650,10 +1713,60 @@ If multiple substrings are provided, all substrings must match to return a resul
 </tr>
 </tbody>
 </table>
+<h3 id="imgtools-dicomshow">imgtools dicomshow<a class="headerlink" href="#imgtools-dicomshow" title="Permanent link">#</a></h3>
+<p>Extracts and displays the metadata associated with a single dicom file.</p>
+<p>positional arguments:
+    path    Path to the dicom metadata in the following format <code>FILE_PATH::FIELD</code>
+            where <code>FILE_PATH</code> is a filepath to a dicom file. 
+            Optionally, If the <code>::FIELD</code> suffix is present, then only extract the metadata value of <code>FIELD</code>.
+            <code>FIELD</code> supports accessing nested tags as well as the individual elements of a multivalue, sequence 
+            or list element.</p>
+<div class="highlight"><pre><span></span><code>        Examples:
+
+        `imgtools dicomshow your_dicom.dcm::specific_tag`
+        Acesses and returns the value of `specific_tag` in `your_dicom.dcm`.
+
+        `imgtools dicomshow your_dicom.dcm::specific_tag[0].nested_tag`
+        This accesses the first element of `specific_tag` and returns the value of `nested_tag`.
+</code></pre></div>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools dicomshow [OPTIONS] DICOM_FILE
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--pydicom</code>, <code>-p</code></td>
+<td>boolean</td>
+<td>Use pydicom implementation, which does not include computed fields.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--no-progress</code></td>
+<td>boolean</td>
+<td>Disable progress bars. Useful for piping output.</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
+<td>boolean</td>
+<td>Show this message and exit.</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
 <h3 id="imgtools-dicomsort">imgtools dicomsort<a class="headerlink" href="#imgtools-dicomsort" title="Permanent link">#</a></h3>
 <p>Sorts DICOM files into directories based on their tags.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools dicomsort [OPTIONS] SOURCE_DIRECTORY TARGET_DIRECTORY
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>imgtools dicomsort [OPTIONS] SOURCE_DIRECTORY TARGET_DIRECTORY
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -1719,7 +1832,7 @@ If multiple substrings are provided, all substrings must match to return a resul
 </li>
 </ul>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>imgtools index [OPTIONS]
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>imgtools index [OPTIONS]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -1775,7 +1888,10 @@ If multiple substrings are provided, all substrings must match to return a resul
 <p>This command will print the tree hierarchy of DICOM series relationships
 similar to GNU/Linux <code>tree</code> command.</p>
 <p>Only shows supported modalities.</p>
-<p>`interlacer INDEX_FILE will print the series tree for the given index file.</p>
+<p>`interlacer PATH will print the series tree for the given index file / directory.</p>
+<p>If PATH is a path to an index.csv file, then the tree will be constructed using that index file.
+If instead PATH is a path to a directory, if the an index file for the directory exists it will be used to contruct the tree, 
+otherwise the directory will be crawled first.</p>
 <p>The index file should be a CSV file with the following columns:
 - SeriesInstanceUID
 - Modality
@@ -1785,7 +1901,7 @@ similar to GNU/Linux <code>tree</code> command.</p>
 - ReferencedSeriesUID</p>
 <p>Visit https://bhklab.github.io/med-imagetools/ for more information.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>imgtools interlacer [OPTIONS] INDEX_FILE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>imgtools interlacer [OPTIONS] PATH
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -1799,7 +1915,120 @@ similar to GNU/Linux <code>tree</code> command.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>--help</code>, <code>-h</code></td>
+<td><code>--query-string</code>, <code>-q</code></td>
+<td>text</td>
+<td>Comma-separated string of modalities to query (e.g., 'CT,MR').</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Supported modalities: CT, PT, MR, SEG, RTSTRUCT, RTDOSE. | None |
+| <code>--group-by-root</code>, <code>-g</code> | boolean | If True, group the returned dicoms by their root CT/MR/PT
+node (i.e., avoid duplicate root nodes across results). | <code>True</code> |
+| <code>--n-jobs</code> | integer | Number of jobs to use for parallel processing. | <code>2</code> |
+| <code>--force</code> | boolean | Force overwrite existing files. | <code>False</code> |
+| <code>--help</code>, <code>-h</code> | boolean | Show this message and exit. | <code>False</code> |</p>
+<h3 id="imgtools-nnunet-pipeline">imgtools nnunet-pipeline<a class="headerlink" href="#imgtools-nnunet-pipeline" title="Permanent link">#</a></h3>
+<p>Process medical images in nnUNet format.</p>
+<p>This command allows you to process medical images in the nnUNet directory structure,
+apply transformations, and save the results to a specified output directory.</p>
+<p>INPUT_DIRECTORY: Directory containing the input images.
+OUTPUT_DIRECTORY: Directory to save the processed images.</p>
+<ul>
+<li>SampleNumber: The identifier for the sample after querying.</li>
+<li>PatientID: The ID of the patient.</li>
+<li>Modality: The imaging modality (e.g., CT, MRI).</li>
+<li>SeriesInstanceUID: The unique identifier for the series.</li>
+<li>ImageID: The cutomized identifier for the image.<ul>
+<li>By default, the modality of the image</li>
+<li>If RTSTRUCT or SEG, uses custom format based on the roi_strategy
+    roi_match_map and roi names.
+TODO:: explain this in the docs?</li>
+</ul>
+</li>
+</ul>
+<p><strong>Usage:</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>imgtools nnunet-pipeline [OPTIONS] INPUT_DIRECTORY OUTPUT_DIRECTORY
+</code></pre></div>
+<p><strong>Options:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--modalities</code>, <code>-m</code></td>
+<td>text</td>
+<td>List of modalities to process, in hierarchical order. For example, '--modalities CT,RTSTRUCT' or '--modalities MR,SEG'</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--roi-match-yaml</code>, <code>-ryaml</code></td>
+<td>file</td>
+<td>Path to YAML file containing ROI matching patterns.</td>
+<td>_required</td>
+</tr>
+<tr>
+<td><code>--mask-saving-strategy</code>, <code>-ms</code></td>
+<td>choice (<code>label_image</code> &#x7C; <code>sparse_mask</code> &#x7C; <code>region_mask</code>)</td>
+<td>Strategy for saving masks.</td>
+<td><code>label_image</code></td>
+</tr>
+<tr>
+<td><code>--existing-file-mode</code></td>
+<td>choice (<code>overwrite</code> &#x7C; <code>skip</code> &#x7C; <code>fail</code>)</td>
+<td>How to handle existing files</td>
+<td><code>fail</code></td>
+</tr>
+<tr>
+<td><code>--update-crawl</code></td>
+<td>boolean</td>
+<td>Force recrawling of the input directory</td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>--jobs</code>, <code>-j</code></td>
+<td>integer</td>
+<td>Number of parallel jobs</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--spacing</code></td>
+<td>text</td>
+<td>Resampling spacing as comma-separated values i.e '--spacing 1.0,1.0,1.0'</td>
+<td><code>0.0,0.0,0.0</code></td>
+</tr>
+<tr>
+<td><code>--window-width</code></td>
+<td>float</td>
+<td>Width of the window for intensity windowing</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--window-level</code></td>
+<td>float</td>
+<td>Midpoint of the window for intensity windowing</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>--roi-ignore-case</code> / <code>--roi-case-sensitive</code></td>
+<td>boolean</td>
+<td>Perform case‑insensitive ROI matching (default: enabled)</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>--roi-allow-multi-matches</code> / <code>--roi-disallow-multi-matches</code></td>
+<td>boolean</td>
+<td>Allow one ROI to match multiple keys in the match map</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>-h</code>, <code>--help</code></td>
 <td>boolean</td>
 <td>Show this message and exit.</td>
 <td><code>False</code></td>

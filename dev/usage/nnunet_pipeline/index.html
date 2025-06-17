@@ -8,28 +8,28 @@
       
       
       
-        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/reference/dicom-utils/similar_tags/">
+        <link rel="canonical" href="https://bhklab.github.io/med-imagetools/dev/usage/nnunet_pipeline/">
       
       
-        <link rel="prev" href="../lookup_tag/">
+        <link rel="prev" href="../autopipeline/">
       
       
-        <link rel="next" href="../tag_exists/">
+        <link rel="next" href="../core/crawler/">
       
       
-      <link rel="icon" href="../../../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
-        <title>Similar Tags - Med-ImageTools Documentation</title>
+        <title>nnUNetPipeline: Structured DICOM-to-NIfTI Conversion for Deep Learning - Med-ImageTools Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.2afb09e1.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.2afb09e1.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -48,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#similar-tags" class="md-skip">
+        <a href="#nnunetpipeline-structured-dicom-to-nifti-conversion-for-deep-learning" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Similar Tags
+              nnUNetPipeline: Structured DICOM-to-NIfTI Conversion for Deep Learning
             
           </span>
         </div>
@@ -229,7 +229,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../.." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -246,11 +246,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../../usage/autopipeline/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../autopipeline/" class="md-tabs__link">
           
   
   
@@ -272,7 +274,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../../cli/imgtools/" class="md-tabs__link">
+        <a href="../../cli/imgtools/" class="md-tabs__link">
           
   
   
@@ -290,13 +292,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../crawler/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../reference/crawler/" class="md-tabs__link">
           
   
   
@@ -368,7 +368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../.." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -387,8 +387,10 @@
       
   
   
+    
   
   
+  
     
     
       
@@ -404,19 +406,22 @@
     
     
       
+        
+        
+      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -429,7 +434,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -443,7 +448,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../usage/autopipeline/" class="md-nav__link">
+      <a href="../autopipeline/" class="md-nav__link">
         
   
   
@@ -463,10 +468,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../usage/nnunet_pipeline/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    nnUNetPipeline: Structured DICOM-to-NIfTI Conversion for Deep Learning
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -477,6 +504,137 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tldr" class="md-nav__link">
+    <span class="md-ellipsis">
+      TL;DR
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-nnunetpipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why nnUNetPipeline?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-to-autopipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison to AutoPipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mask-saving-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mask Saving Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mask Saving Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#label_image" class="md-nav__link">
+    <span class="md-ellipsis">
+      label_image
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sparse_mask" class="md-nav__link">
+    <span class="md-ellipsis">
+      sparse_mask
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#region_mask-recommended-for-nnu-net" class="md-nav__link">
+    <span class="md-ellipsis">
+      region_mask (Recommended for nnU-Net)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="region_mask (Recommended for nnU-Net)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How It Works
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-the-right-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing the Right Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-cli-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example CLI Usage
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -501,17 +659,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
             
   
   
@@ -538,7 +699,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../usage/core/crawler/" class="md-nav__link">
+      <a href="../core/crawler/" class="md-nav__link">
         
   
   
@@ -561,7 +722,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../usage/core/interlacer/" class="md-nav__link">
+      <a href="../core/interlacer/" class="md-nav__link">
         
   
   
@@ -604,17 +765,20 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
-          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
             
   
   
@@ -641,7 +805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../usage/Writers/BaseWriter/" class="md-nav__link">
+      <a href="../Writers/BaseWriter/" class="md-nav__link">
         
   
   
@@ -664,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../usage/Writers/ImplementingWriters/" class="md-nav__link">
+      <a href="../Writers/ImplementingWriters/" class="md-nav__link">
         
   
   
@@ -751,7 +915,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cli/imgtools/" class="md-nav__link">
+      <a href="../../cli/imgtools/" class="md-nav__link">
         
   
   
@@ -774,7 +938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cli/shell-completion/" class="md-nav__link">
+      <a href="../../cli/shell-completion/" class="md-nav__link">
         
   
   
@@ -801,10 +965,8 @@
       
   
   
-    
   
   
-  
     
     
       
@@ -822,22 +984,19 @@
     
     
       
-        
-        
-      
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -850,7 +1009,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             API Reference
@@ -864,7 +1023,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../crawler/" class="md-nav__link">
+      <a href="../../reference/crawler/" class="md-nav__link">
         
   
   
@@ -887,7 +1046,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dicom_metadata/" class="md-nav__link">
+      <a href="../../reference/dicom_metadata/" class="md-nav__link">
         
   
   
@@ -910,7 +1069,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../interlacer/" class="md-nav__link">
+      <a href="../../reference/interlacer/" class="md-nav__link">
         
   
   
@@ -930,10 +1089,8 @@
                 
   
   
-    
   
   
-  
     
     
       
@@ -952,21 +1109,18 @@
     
       
       
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
         
           
-          
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
             
   
   
@@ -979,7 +1133,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             DICOM Utilities
@@ -993,7 +1147,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../load-dicom/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/load-dicom/" class="md-nav__link">
         
   
   
@@ -1016,7 +1170,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../find-dicoms/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/find-dicoms/" class="md-nav__link">
         
   
   
@@ -1039,7 +1193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lookup_tag/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/lookup_tag/" class="md-nav__link">
         
   
   
@@ -1059,32 +1213,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Similar Tags
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../reference/dicom-utils/similar_tags/" class="md-nav__link">
         
   
   
@@ -1095,68 +1227,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;similar_tags
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label=" similar_tags">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(keyword)" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;keyword
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(n)" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;n
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(threshold)" class="md-nav__link">
-    <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;threshold
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1169,7 +1239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tag_exists/" class="md-nav__link">
+      <a href="../../reference/dicom-utils/tag_exists/" class="md-nav__link">
         
   
   
@@ -1212,20 +1282,17 @@
       
       
         
-          
-          
-        
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
         
           
-          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
             
   
   
@@ -1252,7 +1319,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dicomsort/dicomsorter/" class="md-nav__link">
+      <a href="../../reference/dicomsort/dicomsorter/" class="md-nav__link">
         
   
   
@@ -1275,7 +1342,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dicomsort/patternparser/" class="md-nav__link">
+      <a href="../../reference/dicomsort/patternparser/" class="md-nav__link">
         
   
   
@@ -1333,37 +1400,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags" class="md-nav__link">
+  <a href="#tldr" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;similar_tags
+      TL;DR
     </span>
   </a>
   
-    <nav class="md-nav" aria-label=" similar_tags">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-nnunetpipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why nnUNetPipeline?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-to-autopipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      Comparison to AutoPipeline
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mask-saving-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mask Saving Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mask Saving Options">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(keyword)" class="md-nav__link">
+  <a href="#label_image" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;keyword
+      label_image
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(n)" class="md-nav__link">
+  <a href="#sparse_mask" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;n
+      sparse_mask
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#imgtools.dicom.similar_tags(threshold)" class="md-nav__link">
+  <a href="#region_mask-recommended-for-nnu-net" class="md-nav__link">
     <span class="md-ellipsis">
-      <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;threshold
+      region_mask (Recommended for nnU-Net)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="region_mask (Recommended for nnU-Net)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      How It Works
     </span>
   </a>
   
@@ -1371,6 +1484,29 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-the-right-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing the Right Strategy
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-cli-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example CLI Usage
+    </span>
+  </a>
   
 </li>
       
@@ -1390,7 +1526,7 @@
 
 
   
-    <a href="https://github.com/bhklab/med-imagetools/edit/master/docs/reference/dicom-utils/similar_tags.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/bhklab/med-imagetools/edit/master/docs/usage/nnunet_pipeline.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1399,224 +1535,191 @@
     
       
     
-    <a href="https://github.com/bhklab/med-imagetools/raw/master/docs/reference/dicom-utils/similar_tags.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/bhklab/med-imagetools/raw/master/docs/usage/nnunet_pipeline.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="similar-tags">Similar Tags<a class="headerlink" href="#similar-tags" title="Permanent link">#</a></h1>
-
-
-<div class="doc doc-object doc-function">
-
-
-<h2 id="imgtools.dicom.similar_tags" class="doc doc-heading">
-<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">imgtools.dicom.similar_tags</span>
-
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-cached"><code>cached</code></small>
-  </span>
-
-<a href="#imgtools.dicom.similar_tags" class="headerlink" title="Permanent link">#</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">similar_tags</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;keyword&lt;/code&gt; (&lt;code&gt;imgtools.dicom.similar_tags(keyword)&lt;/code&gt;)" href="#imgtools.dicom.similar_tags(keyword)">keyword</a></span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;n&lt;/code&gt; (&lt;code&gt;imgtools.dicom.similar_tags(n)&lt;/code&gt;)" href="#imgtools.dicom.similar_tags(n)">n</a></span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;threshold&lt;/code&gt; (&lt;code&gt;imgtools.dicom.similar_tags(threshold)&lt;/code&gt;)" href="#imgtools.dicom.similar_tags(threshold)">threshold</a></span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">=</span> <span class="mf">0.6</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="typing">typing</span></span><span class="o">.</span><span class="n"><span title="typing.List">List</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">]</span>
+<h1 id="nnunetpipeline-structured-dicom-to-nifti-conversion-for-deep-learning"><code>nnUNetPipeline</code>: Structured DICOM-to-NIfTI Conversion for Deep Learning<a class="headerlink" href="#nnunetpipeline-structured-dicom-to-nifti-conversion-for-deep-learning" title="Permanent link">#</a></h1>
+<h2 id="tldr">TL;DR<a class="headerlink" href="#tldr" title="Permanent link">#</a></h2>
+<p><code>nnUNetPipeline</code> is a variation of <code>AutoPipeline</code> that simplifies the messy reality of clinical imaging data by converting raw DICOM files into the <a href="https://github.com/MIC-DKFZ/nnUNet">nnUNet</a> standard.  </p>
+<p>It's fast, reproducible, and designed for segmentation workflows using CT/MR with <code>RTSTRUCT</code> or <code>SEG</code>.</p>
+<hr />
+<h2 id="why-nnunetpipeline">Why <code>nnUNetPipeline</code>?<a class="headerlink" href="#why-nnunetpipeline" title="Permanent link">#</a></h2>
+<p><code>nnUNet</code> is the standard for training deep automated segmentation models on medical images.</p>
+<p><code>nnUNetPipeline</code>:</p>
+<ul>
+<li>Crawls and indexes DICOM files</li>
+<li>Links scans to associated segmentations</li>
+<li>Applies optional transforms (e.g., resample, window/level)</li>
+<li>Matches ROI labels to your standard keys</li>
+<li>Outputs clean NIfTI files for training with <code>nnUNet</code></li>
+</ul>
+<hr />
+<h2 id="comparison-to-autopipeline">Comparison to <code>AutoPipeline</code><a class="headerlink" href="#comparison-to-autopipeline" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th><code>nnUNetPipeline</code></th>
+<th><code>Autopipeline</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Primary Use Case</strong></td>
+<td>Converts clinical DICOMs into nnUNet-ready</td>
+<td>General-purpose medical image processing</td>
+</tr>
+<tr>
+<td><strong>Modalities</strong></td>
+<td>Specific pairs of CT/MR with <code>RTSTRUCT</code> or <code>SEG</code></td>
+<td>Flexible, supports any modality list</td>
+</tr>
+<tr>
+<td><strong>ROI Matching</strong></td>
+<td>Requires <code>roi_match_map</code> for nnUNet compatibility</td>
+<td>Optional, with more flexibility for handling ROIs</td>
+</tr>
+<tr>
+<td><strong>Mask Saving Strategy</strong></td>
+<td>Uses <code>MaskSavingStrategy</code> (e.g., <code>sparse_mask</code>)</td>
+<td>Saves each ROI as a separate mask file</td>
+</tr>
+<tr>
+<td><strong>ROI Strategy</strong></td>
+<td><code>ROIMatchStrategy.MERGE</code> for overlaps</td>
+<td>Default is <code>ROIMatchStrategy.SEPARATE</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">#</a></h2>
+<ul>
+<li>✅ Supports modality pairs: <code>["CT", "SEG"]</code>, <code>["MR", "SEG"]</code>, <code>["CT", "RTSTRUCT"]</code>, <code>["MR", "RTSTRUCT"]</code></li>
+<li>✅ Supports different <code>mask_saving_strategy</code> options (<code>"label_image"</code>, <code>"sparse_mask"</code>, <code>"region_mask"</code>)</li>
+<li>✅ Matches ROIs via regex patterns (<code>"GTV": ["gtv", "Gross.*Volume"]</code>)</li>
+<li>✅ Provides <code>nnUNet</code>-specific scripts for preprocessing and training</li>
+</ul>
+<hr />
+<h2 id="mask-saving-options">Mask Saving Options<a class="headerlink" href="#mask-saving-options" title="Permanent link">#</a></h2>
+<p>When converting segmentations (e.g., from <code>RTSTRUCT</code> or <code>SEG</code>) into NIfTI masks for training, you have multiple options depending on how you want to handle overlapping regions and label representation.</p>
+<h3 id="label_image"><code>label_image</code><a class="headerlink" href="#label_image" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Single-channel label image</strong>  </li>
+<li>Each voxel contains an integer label corresponding to a single region.</li>
+<li><strong>Limitations</strong>:</li>
+<li>Does <strong>not</strong> allow overlapping ROIs.</li>
+<li>Each voxel can belong to <strong>only one</strong> region.</li>
+<li>Use this when you're certain there are no overlaps, and you want compatibility with standard segmentation workflows.</li>
+</ul>
+<hr />
+<h3 id="sparse_mask"><code>sparse_mask</code><a class="headerlink" href="#sparse_mask" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Single-channel label image</strong>  </li>
+<li>Each voxel contains an integer label corresponding to a single region.</li>
+<li><strong>Overlapping regions are allowed</strong> in the input, but only one label is assigned per voxel in the output.</li>
+<li>When overlaps occur, the label from the <strong>last matching region (highest index)</strong> is assigned, and earlier labels are overwritten.</li>
+<li>User can decide the order when passing in ROI map.</li>
+<li><strong>Lossy</strong> if regions overlap, since only one region label is retained per voxel and all others are discarded.</li>
+</ul>
+<hr />
+<h3 id="region_mask-recommended-for-nnu-net"><code>region_mask</code> (Recommended for nnU-Net)<a class="headerlink" href="#region_mask-recommended-for-nnu-net" title="Permanent link">#</a></h3>
+<ul>
+<li><strong>Bitmask encoding of overlapping ROIs</strong>  </li>
+<li>Inspired by nnU-Net’s <a href="https://github.com/MIC-DKFZ/nnUNet/blob/master/documentation/region_based_training.md">region-based training</a>.</li>
+<li>Every <strong>unique combination</strong> of ROIs gets its own integer label — preserving overlap information <strong>without loss</strong>.</li>
+<li>Enables multi-class region training with full overlap preservation.</li>
+</ul>
+<h4 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h4>
+<p>Internally, this uses a bitmask approach. Each voxel stores a value representing a combination of active ROI channels (up to 32 ROIs supported).</p>
+<p>Imagine you have three regions of interest (ROIs):</p>
+<ul>
+<li><code>GTV</code> assigned to <strong>bit 0</strong> → value <code>2^0 = 1</code></li>
+<li><code>Cord</code> assigned to <strong>bit 1</strong> → value <code>2^1 = 2</code></li>
+<li><code>Parotid_L</code> assigned to <strong>bit 2</strong> → value <code>2^2 = 4</code></li>
+</ul>
+<p>Each voxel in the mask encodes a combination of these ROIs using <strong>bitwise addition</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Voxel Location</th>
+<th>Present ROIs</th>
+<th>Bitmask Calculation</th>
+<th>Encoded Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(10, 30, 40)</td>
+<td>GTV</td>
+<td><code>2^0</code></td>
+<td>1</td>
+</tr>
+<tr>
+<td>(12, 30, 40)</td>
+<td>Cord</td>
+<td><code>2^1</code></td>
+<td>2</td>
+</tr>
+<tr>
+<td>(15, 30, 40)</td>
+<td>Parotid_L</td>
+<td><code>2^2</code></td>
+<td>4</td>
+</tr>
+<tr>
+<td>(17, 30, 40)</td>
+<td>GTV + Parotid_L</td>
+<td><code>2^0 + 2^2 = 2^0 + 2^2 = 1 + 4</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td>(20, 30, 40)</td>
+<td>GTV + Cord + Parotid_L</td>
+<td><code>2^0 + 2^1 + 2^2 = 1 + 2 + 4</code></td>
+<td>7</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="choosing-the-right-strategy">Choosing the Right Strategy<a class="headerlink" href="#choosing-the-right-strategy" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Overlaps</th>
+<th>Lossless</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>label_image</code></td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>sparse_mask</code></td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>region_mask</code></td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h2 id="example-cli-usage">Example CLI Usage<a class="headerlink" href="#example-cli-usage" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>imgtools<span class="w"> </span>nnunet-pipeline<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span>--modalities<span class="w"> </span>CT,RTSTRUCT<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span>--roi-match-yaml<span class="w"> </span>roi_patterns.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span>--mask-saving-strategy<span class="w"> </span>region_mask<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span>/data/dicoms/<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span>/data/nnunet_ready/
 </code></pre></div>
-
-    <div class="doc doc-contents first">
-
-        <p>Find similar DICOM tags for a given keyword.</p>
-<p>Useful for User Interface to suggest similar tags based on a misspelled keyword.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-<h3 id="imgtools.dicom.similar_tags(keyword)" class="doc doc-heading doc-heading-parameter">                  <code>keyword</code>
-<a href="#imgtools.dicom.similar_tags(keyword)" class="headerlink" title="Permanent link">#</a></h3>            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The keyword to search for similar tags.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-<h3 id="imgtools.dicom.similar_tags(n)" class="doc doc-heading doc-heading-parameter">                  <code>n</code>
-<a href="#imgtools.dicom.similar_tags(n)" class="headerlink" title="Permanent link">#</a></h3>            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Maximum number of similar tags to return (default is 3).</p>
-              </div>
-            </td>
-            <td>
-                  <code>3</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-<h3 id="imgtools.dicom.similar_tags(threshold)" class="doc doc-heading doc-heading-parameter">                  <code>threshold</code>
-<a href="#imgtools.dicom.similar_tags(threshold)" class="headerlink" title="Permanent link">#</a></h3>            </td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Minimum similarity ratio (default is 0.6).</p>
-              </div>
-            </td>
-            <td>
-                  <code>0.6</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing">typing</span>.<span title="typing.List">List</span>[<span title="str">str</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A list of up to <code>n</code> similar DICOM tags.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <p>Find similar tags for a misspelled keyword:</p>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">similar_tags</span><span class="p">(</span><span class="s2">&quot;PatinetID&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">[&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
-</code></pre></div>
-    <p>Adjust the number of results and threshold:</p>
-    <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">similar_tags</span><span class="p">(</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">... </span>    <span class="s2">&quot;PatinetID&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">... </span>    <span class="n">n</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">... </span>    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">... </span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="go">[&#39;PatientID&#39;, &#39;PatientName&#39;]</span>
-</code></pre></div>
-
-
-            <details class="quote">
-              <summary>Source code in <code>src/imgtools/dicom/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-91"> 91</a></span>
-<span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
-<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
-<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
-<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
-<span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
-<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
-<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
-<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
-<span class="normal"><a href="#__codelineno-0-100">100</a></span>
-<span class="normal"><a href="#__codelineno-0-101">101</a></span>
-<span class="normal"><a href="#__codelineno-0-102">102</a></span>
-<span class="normal"><a href="#__codelineno-0-103">103</a></span>
-<span class="normal"><a href="#__codelineno-0-104">104</a></span>
-<span class="normal"><a href="#__codelineno-0-105">105</a></span>
-<span class="normal"><a href="#__codelineno-0-106">106</a></span>
-<span class="normal"><a href="#__codelineno-0-107">107</a></span>
-<span class="normal"><a href="#__codelineno-0-108">108</a></span>
-<span class="normal"><a href="#__codelineno-0-109">109</a></span>
-<span class="normal"><a href="#__codelineno-0-110">110</a></span>
-<span class="normal"><a href="#__codelineno-0-111">111</a></span>
-<span class="normal"><a href="#__codelineno-0-112">112</a></span>
-<span class="normal"><a href="#__codelineno-0-113">113</a></span>
-<span class="normal"><a href="#__codelineno-0-114">114</a></span>
-<span class="normal"><a href="#__codelineno-0-115">115</a></span>
-<span class="normal"><a href="#__codelineno-0-116">116</a></span>
-<span class="normal"><a href="#__codelineno-0-117">117</a></span>
-<span class="normal"><a href="#__codelineno-0-118">118</a></span>
-<span class="normal"><a href="#__codelineno-0-119">119</a></span>
-<span class="normal"><a href="#__codelineno-0-120">120</a></span>
-<span class="normal"><a href="#__codelineno-0-121">121</a></span>
-<span class="normal"><a href="#__codelineno-0-122">122</a></span>
-<span class="normal"><a href="#__codelineno-0-123">123</a></span>
-<span class="normal"><a href="#__codelineno-0-124">124</a></span>
-<span class="normal"><a href="#__codelineno-0-125">125</a></span>
-<span class="normal"><a href="#__codelineno-0-126">126</a></span>
-<span class="normal"><a href="#__codelineno-0-127">127</a></span>
-<span class="normal"><a href="#__codelineno-0-128">128</a></span>
-<span class="normal"><a href="#__codelineno-0-129">129</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="k">def</span><span class="w"> </span><span class="nf">similar_tags</span><span class="p">(</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="n">keyword</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.6</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find similar DICOM tags for a given keyword.</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">    Useful for User Interface to suggest similar tags based on a misspelled keyword.</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">    keyword : str</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">        The keyword to search for similar tags.</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">    n : int, optional</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="sd">        Maximum number of similar tags to return (default is 3).</span>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    threshold : float, optional</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        Minimum similarity ratio (default is 0.6).</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">    List[str]</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a><span class="sd">        A list of up to `n` similar DICOM tags.</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">    Examples</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">    --------</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a><span class="sd">    Find similar tags for a misspelled keyword:</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a><span class="sd">    &gt;&gt;&gt; similar_tags(&quot;PatinetID&quot;)</span>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;, &#39;PatientBirthDate&#39;]</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a><span class="sd">    Adjust the number of results and threshold:</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a><span class="sd">    &gt;&gt;&gt; similar_tags(</span>
-<a id="__codelineno-0-123" name="__codelineno-0-123"></a><span class="sd">    ...     &quot;PatinetID&quot;,</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a><span class="sd">    ...     n=5,</span>
-<a id="__codelineno-0-125" name="__codelineno-0-125"></a><span class="sd">    ...     threshold=0.7,</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a><span class="sd">    ... )</span>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a><span class="sd">    [&#39;PatientID&#39;, &#39;PatientName&#39;]</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>    <span class="k">return</span> <span class="n">difflib</span><span class="o">.</span><span class="n">get_close_matches</span><span class="p">(</span><span class="n">keyword</span><span class="p">,</span> <span class="n">ALL_DICOM_TAGS</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 
 
@@ -1639,7 +1742,7 @@
     </span>
     <nav>
       
-        <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>
+        <a href="mailto:72413722+joshuasiraj@users.noreply.github.com">Joshua Siraj</a>
     </nav>
   </span>
 
@@ -1674,7 +1777,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../lookup_tag/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Lookup Tag">
+          <a href="../autopipeline/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Taming the Chaos: AutoPipeline for Medical Image Processing">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1684,20 +1787,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Lookup Tag
+                Taming the Chaos: AutoPipeline for Medical Image Processing
               </div>
             </div>
           </a>
         
         
           
-          <a href="../tag_exists/" class="md-footer__link md-footer__link--next" aria-label="Next: Tag Exists">
+          <a href="../core/crawler/" class="md-footer__link md-footer__link--next" aria-label="Next: Crawler">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Tag Exists
+                Crawler
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1748,10 +1851,10 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c8b220af.min.js"></script>
+      <script src="../../assets/javascripts/bundle.c8b220af.min.js"></script>
       
     
   </body>

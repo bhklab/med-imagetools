@@ -398,6 +398,8 @@
       
         
       
+        
+      
     
     
     
@@ -463,6 +465,29 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../../usage/nnunet_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    nnUNetPipeline: Structured DICOM-to-NIfTI Conversion for Deep Learning
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
       
@@ -483,10 +508,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
             
   
   
@@ -499,8 +524,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
             <span class="md-nav__icon md-icon"></span>
             Core API
           </label>
@@ -586,10 +611,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
         
           
-          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
             
   
   
@@ -602,8 +627,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Writers
           </label>
@@ -952,6 +977,15 @@
   <a href="#imgtools.dicom.crawl.crawler.Crawler.get_modality" class="md-nav__link">
     <span class="md-ellipsis">
       <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_modality
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools.dicom.crawl.crawler.Crawler.get_series_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_series_info
     </span>
   </a>
   
@@ -1408,6 +1442,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#imgtools.dicom.crawl.crawler.Crawler.get_series_info" class="md-nav__link">
+    <span class="md-ellipsis">
+      <code class="doc-symbol doc-symbol-toc doc-symbol-method"></code>&nbsp;get_series_info
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1511,6 +1554,14 @@
               <td>
                 <div class="doc-md-description">
                   <p>Get the modality for a given series UID.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-method&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-function-name&quot;&gt;get_series_info&lt;/span&gt; (&lt;code&gt;imgtools.dicom.crawl.crawler.Crawler.get_series_info&lt;/code&gt;)" href="#imgtools.dicom.crawl.crawler.Crawler.get_series_info">get_series_info</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Get the series information for a given series UID.</p>
                 </div>
               </td>
             </tr>
@@ -1718,23 +1769,23 @@
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/crawl/crawler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76">76</a></span>
-<span class="normal"><a href="#__codelineno-0-77">77</a></span>
-<span class="normal"><a href="#__codelineno-0-78">78</a></span>
-<span class="normal"><a href="#__codelineno-0-79">79</a></span>
-<span class="normal"><a href="#__codelineno-0-80">80</a></span>
-<span class="normal"><a href="#__codelineno-0-81">81</a></span>
-<span class="normal"><a href="#__codelineno-0-82">82</a></span>
-<span class="normal"><a href="#__codelineno-0-83">83</a></span>
-<span class="normal"><a href="#__codelineno-0-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_uid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the folder for a given series UID.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="k">if</span> <span class="n">series_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">:</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Series UID </span><span class="si">{</span><span class="n">series_uid</span><span class="si">}</span><span class="s2"> not found in crawl results.&quot;</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">[</span><span class="n">series_uid</span><span class="p">]</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="n">first_subseries</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">return</span> <span class="n">first_subseries</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-86">86</a></span>
+<span class="normal"><a href="#__codelineno-0-87">87</a></span>
+<span class="normal"><a href="#__codelineno-0-88">88</a></span>
+<span class="normal"><a href="#__codelineno-0-89">89</a></span>
+<span class="normal"><a href="#__codelineno-0-90">90</a></span>
+<span class="normal"><a href="#__codelineno-0-91">91</a></span>
+<span class="normal"><a href="#__codelineno-0-92">92</a></span>
+<span class="normal"><a href="#__codelineno-0-93">93</a></span>
+<span class="normal"><a href="#__codelineno-0-94">94</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_uid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the folder for a given series UID.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="k">if</span> <span class="n">series_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">:</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Series UID </span><span class="si">{</span><span class="n">series_uid</span><span class="si">}</span><span class="s2"> not found in crawl results.&quot;</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">[</span><span class="n">series_uid</span><span class="p">]</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="n">first_subseries</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="k">return</span> <span class="n">first_subseries</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1759,23 +1810,64 @@
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/crawl/crawler.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-86">86</a></span>
-<span class="normal"><a href="#__codelineno-0-87">87</a></span>
-<span class="normal"><a href="#__codelineno-0-88">88</a></span>
-<span class="normal"><a href="#__codelineno-0-89">89</a></span>
-<span class="normal"><a href="#__codelineno-0-90">90</a></span>
-<span class="normal"><a href="#__codelineno-0-91">91</a></span>
-<span class="normal"><a href="#__codelineno-0-92">92</a></span>
-<span class="normal"><a href="#__codelineno-0-93">93</a></span>
-<span class="normal"><a href="#__codelineno-0-94">94</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_modality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_uid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the modality for a given series UID.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="k">if</span> <span class="n">series_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">:</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Series UID </span><span class="si">{</span><span class="n">series_uid</span><span class="si">}</span><span class="s2"> not found in crawl results.&quot;</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">[</span><span class="n">series_uid</span><span class="p">]</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="n">first_subseries</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="k">return</span> <span class="n">first_subseries</span><span class="p">[</span><span class="s2">&quot;modality&quot;</span><span class="p">]</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
+<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
+<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
+<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
+<span class="normal"><a href="#__codelineno-0-100">100</a></span>
+<span class="normal"><a href="#__codelineno-0-101">101</a></span>
+<span class="normal"><a href="#__codelineno-0-102">102</a></span>
+<span class="normal"><a href="#__codelineno-0-103">103</a></span>
+<span class="normal"><a href="#__codelineno-0-104">104</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_modality</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_uid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the modality for a given series UID.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="k">if</span> <span class="n">series_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">:</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Series UID </span><span class="si">{</span><span class="n">series_uid</span><span class="si">}</span><span class="s2"> not found in crawl results.&quot;</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">[</span><span class="n">series_uid</span><span class="p">]</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>    <span class="n">first_subseries</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>    <span class="k">return</span> <span class="n">first_subseries</span><span class="p">[</span><span class="s2">&quot;modality&quot;</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="imgtools.dicom.crawl.crawler.Crawler.get_series_info" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_series_info</span>
+
+
+<a href="#imgtools.dicom.crawl.crawler.Crawler.get_series_info" class="headerlink" title="Permanent link">#</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_series_info</span><span class="p">(</span><span class="n"><span title="imgtools.dicom.crawl.crawler.Crawler.get_series_info(series_uid)">series_uid</span></span><span class="p">:</span> <span class="n"><span title="str">str</span></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n"><span title="dict">dict</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">,</span> <span class="n"><span title="str">str</span></span><span class="p">]</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the series information for a given series UID.</p>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src/imgtools/dicom/crawl/crawler.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-76">76</a></span>
+<span class="normal"><a href="#__codelineno-0-77">77</a></span>
+<span class="normal"><a href="#__codelineno-0-78">78</a></span>
+<span class="normal"><a href="#__codelineno-0-79">79</a></span>
+<span class="normal"><a href="#__codelineno-0-80">80</a></span>
+<span class="normal"><a href="#__codelineno-0-81">81</a></span>
+<span class="normal"><a href="#__codelineno-0-82">82</a></span>
+<span class="normal"><a href="#__codelineno-0-83">83</a></span>
+<span class="normal"><a href="#__codelineno-0-84">84</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_series_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_uid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the series information for a given series UID.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>    <span class="k">if</span> <span class="n">series_uid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">:</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Series UID </span><span class="si">{</span><span class="n">series_uid</span><span class="si">}</span><span class="s2"> not found in crawl results.&quot;</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawl_results</span><span class="o">.</span><span class="n">crawl_db_raw</span><span class="p">[</span><span class="n">series_uid</span><span class="p">]</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a>    <span class="n">first_subseries</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a>    <span class="k">return</span> <span class="n">first_subseries</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
