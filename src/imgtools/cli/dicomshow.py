@@ -31,20 +31,33 @@ def dicomshow(
 ) -> None:
     """Extracts and displays the metadata associated with a single dicom file.
     
-        positional arguments:
-            path    Path to the dicom metadata in the following format `FILE_PATH::FIELD`
-                    where `FILE_PATH` is a filepath to a dicom file. 
-                    Optionally, If the `::FIELD` suffix is present, then only extract the metadata value of `FIELD`.
-                    `FIELD` supports accessing nested tags as well as the individual elements of a multivalue, sequence 
-                    or list element.
-                    
-                    Examples:
-                    
-                    `imgtools dicomshow your_dicom.dcm::specific_tag`
-                    Acesses and returns the value of `specific_tag` in `your_dicom.dcm`.
-                    
-                    `imgtools dicomshow your_dicom.dcm::specific_tag[0].nested_tag`
-                    This accesses the first element of `specific_tag` and returns the value of `nested_tag`."""
+    POSITIONAL ARGUMENTS:
+    `path`: A DICOM path in the format `FILE_PATH::FIELD` where:
+
+    - `FILE_PATH` is a path to a `DICOM` file.
+
+    - FIELD is the specific field to be extracted from the file.
+
+    - If the ::FIELD suffix is not present, then all metadata is extracted.
+
+    - FIELD supports:
+
+      - Nested tags
+
+      - Indexing into sequences/lists
+
+      - Accessing multivalue elements
+    
+
+    EXAMPLES:
+
+    `imgtools dicomshow your_dicom.dcm::specific_tag`
+
+    - Returns the value of 'specific_tag' from your_dicom.dcm
+
+    `imgtools dicomshow your_dicom.dcm::specific_tag[0].nested_tag`
+    
+    - Returns 'nested_tag' from the first element of 'specific_tag'."""
     from pydicom import dcmread
     from pydicom.dataset import FileDataset
     from pydicom.sequence import Sequence
