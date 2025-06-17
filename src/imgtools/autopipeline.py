@@ -99,7 +99,28 @@ SIMPLIFIED_COLUMNS = [
 
 @dataclass
 class ProcessSampleResult:
-    """Result of processing a single sample."""
+    """Result of processing a single sample.
+    
+    Attributes
+    ----------
+    
+    sample_id : str
+        Sample identifier information
+    sample : Sequence[SeriesNode]
+        Stores the entire sample.
+    output_files : List[Path]
+        Stores the Paths of the output files.
+    success : bool, Default=False
+        `True` if the sample was processed successfully, otherwise `False`.
+    error_type : Optional[str], Default=None
+        Records the type of error if an error has occured.
+    error_message : Optional[str], Default=None
+        Records the error message if an error has occured.
+    error_details : Optional[Dict], Default=None
+        Records additional error details if an error has occured.
+    processing_time : Optional[float], Default=None
+        Records the time to process the sample.
+        """
 
     # Sample identifier information
     sample_id: str

@@ -188,7 +188,17 @@ class VectorMask(MedImage):
     def iter_masks(
         self, include_background: bool = False
     ) -> Iterator[tuple[int, str, list[str], str, Mask]]:
-        """Yield (index, roi_key, roi_names, image_id, Mask) for each mask channel."""
+        """Yield (index, roi_key, roi_names, image_id, Mask) for each mask channel.
+        
+        Parameters
+        ----------
+        include_background : bool, Default=False
+            If True, includes the background in the result.
+        Returns
+        -------
+        Iterator[tuple[int, str, list[str], str, Mask]]
+            (index, roi_key, roi_names, image_id, Mask) for each mask channel.
+        """
         for i, mapping in self.roi_mapping.items():
             if i == 0 and not include_background:
                 continue
@@ -201,7 +211,7 @@ class VectorMask(MedImage):
             )
 
     def has_overlap(self) -> bool:
-        """Return True if any voxel has >1 mask"""
+        """Return True if any voxel has >1 mask."""
         arr = sitk.GetArrayFromImage(self)
         return self.n_masks > 1 and bool(np.any(np.sum(arr, axis=-1) > 1))
 
@@ -371,6 +381,11 @@ class VectorMask(MedImage):
         # gets the mask for Lung
         >>> mask = vector_mask.extract_mask(0)
         # gets the mask for Background
+
+        Parameters
+        ----------
+        key : str | int
+            An index or ROI key of a mask to be extracted.
         """
         # Check if the mask is already in the cache
         if key in self._mask_cache:
@@ -435,7 +450,21 @@ class VectorMask(MedImage):
         rtstruct: RTStructureSet,  # StructureSet
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
-        """Create VectorMask from RTSTRUCT using ROI matching."""
+        """Create VectorMask from RTSTRUCT using ROI matching.
+        
+        Parameters
+        ----------
+        reference_image : MedImage
+            The image whose geometry defines the spatial alignment of the masks.
+        rtstruct : RTStructureSet
+            The RTSTRUCT to extract the vector mask from.
+        roi_matcher : ROIMatcher
+            Matcher used to resolve user-defined keys to actual ROI names.
+        Returns
+        -------
+        VectorMask | None
+            Returns the VectorMask if there is an ROI match, otherwise returns None. 
+        """
         return rtstruct.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
@@ -448,13 +477,28 @@ class VectorMask(MedImage):
         seg: SEG,
         roi_matcher: ROIMatcher,
     ) -> VectorMask | None:
-        """Create VectorMask from SEG using ROI matching."""
+        """Create VectorMask from SEG using ROI matching.
+        
+        Parameters
+        ----------
+        reference_image : MedImage
+            The image whose geometry defines the spatial alignment of the masks.
+        seg : SEG
+            The SEG to extract the vector mask from.
+        roi_matcher : ROIMatcher
+            Matcher used to resolve user-defined keys to actual ROI names.
+        Returns
+        -------
+        VectorMask | None
+            Returns the VectorMask if there is an ROI match, otherwise returns None. 
+        """
         return seg.get_vector_mask(
             reference_image=reference_image,
             roi_matcher=roi_matcher,
         )
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
+        """Creates a rich representation of the VectorMask."""
         yield "modality", self.metadata.get("Modality", "Unknown")
         yield from super().__rich_repr__()
         yield "roi_mapping", self.roi_mapping
@@ -508,6 +552,7 @@ class Mask(MedImage):
         metadata: dict[str, str],
     ) -> None:
         """
+        Constructor.
         Parameters
         ----------
         image : sitk.Image
@@ -519,6 +564,7 @@ class Mask(MedImage):
         self.metadata = metadata
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
+        """Creates a rich representation of the instance."""
         yield from super().__rich_repr__()
         if hasattr(self, "metadata") and self.metadata:
             yield "metadata", self.metadata
