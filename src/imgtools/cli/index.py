@@ -73,11 +73,15 @@ def index(
         n_jobs=n_jobs,
         force=force,
     )
-
-    crawler.crawl()
-
-    logger.info("Crawling completed.")
-    logger.info("Crawl results saved to %s", crawler.output_dir)
+    try:
+        crawler.crawl()
+    except Exception as e:
+        logger.exception("Crawling failed: %s", e)
+        # exit with a non-zero status code
+        raise click.ClickException(f"Crawling failed: {e}") from e
+    else:
+        logger.info("Crawling completed successfully.")
+        logger.info("Crawl results saved to %s", crawler.output_dir)
 
 if __name__ == "__main__":
     index()
