@@ -621,9 +621,51 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Usage Example
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Code
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Output
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Rules and Dependencies
     </span>
   </a>
   
@@ -668,57 +710,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      Query Rules and Dependencies
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Example">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      CLI
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python Code
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Output
-    </span>
-  </a>
   
 </li>
       
@@ -1393,9 +1384,51 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
+  <a href="#usage-example" class="md-nav__link">
     <span class="md-ellipsis">
-      Overview
+      Usage Example
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Code
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Output
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-rules-and-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Query Rules and Dependencies
     </span>
   </a>
   
@@ -1443,57 +1476,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#query-rules-and-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      Query Rules and Dependencies
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Example">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      CLI
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#python-code" class="md-nav__link">
-    <span class="md-ellipsis">
-      Python Code
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Example Output
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -1529,21 +1511,70 @@
 <h1 id="interlacer-module">Interlacer Module<a class="headerlink" href="#interlacer-module" title="Permanent link">#</a></h1>
 <p>The <strong>Interlacer</strong> module builds and searches a tree-like structure made from
 DICOM series using metadata links. </p>
-<p>This tool enables efficient grouping, querying, and vizualization of medical
-imaging series, making it easier to understand the complex
-relationships between various imaging modalities (CT, MR, PT) and derived
-objects (RTSTRUCT, RTDOSE, SEG)</p>
+<p>This module enables efficient grouping, querying, and vizualization of medical
+imaging series. The module turns DICOM series into a set of trees (a forest), using metadata
+to connect related series. This helps users follow the relationships between
+series — for example, linking a <code>CT</code> scan to its <code>RTSTRUCT</code> and <code>RTDOSE</code> —
+and makes it easier to run queries or group series by type.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This module is available in <code>med-imagetools 2.0</code> and later versions.
 It replaces the now deprecated <code>DataGraph</code> module from <code>med-imagetools 1.0</code>.</p>
 </div>
 <hr />
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>This module turns DICOM series into a set of trees (a forest), using metadata
-to connect related series. This helps users follow the relationships between
-series — for example, linking a <code>CT</code> scan to its <code>RTSTRUCT</code> and <code>RTDOSE</code> —
-and makes it easier to run queries or group series by type.</p>
+<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
+<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h3>
+<p><img alt="interlacer_cli" src="../../../images/interlacer_cli.png" style="background: white; height:125%;" /></p>
+<h3 id="python-code">Python Code<a class="headerlink" href="#python-code" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crawler</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Define path to DICOM directory</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">dicom_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Create crawler and scan the directory</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">crawler</span> <span class="o">=</span> <span class="n">Crawler</span><span class="p">(</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">dicom_dir</span><span class="o">=</span><span class="n">dicom_dir</span><span class="p">,</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">crawler</span><span class="o">.</span><span class="n">crawl</span><span class="p">()</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Create the Interlacer from crawler results</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">interlacer</span> <span class="o">=</span> <span class="n">Interlacer</span><span class="p">(</span><span class="n">crawler</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Visualize the forest structure</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">print_tree</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span>  <span class="c1"># Console visualization</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Query for specific modality combinations</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Find CT series with associated RTSTRUCT objects</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">ct_rtstruct_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;CT,RTSTRUCT&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Get all possible series combinations</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">all_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># or interlacer.query(&quot;all&quot;)</span>
+</code></pre></div>
+<h2 id="example-output">Example Output<a class="headerlink" href="#example-output" title="Permanent link">#</a></h2>
+<p><strong>Visualization of the raw graph containing all series in the DICOM directory:</strong></p>
+<p><img alt="Unstructured Data" src="../../../images/unstructured.png" style="background: white; height:125%;" /></p>
+<p><strong>Visualization of The interlaced connections between series:</strong></p>
+<p><img alt="Structured Data" src="../../../images/structured.png" style="background: white; height:125%;" /></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<h2 id="query-rules-and-dependencies">Query Rules and Dependencies<a class="headerlink" href="#query-rules-and-dependencies" title="Permanent link">#</a></h2>
+<p>The Interlacer enforces the following modality dependency rules:</p>
+<ol>
+<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
+<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
+</ol>
+<p>Examples of valid and invalid queries:</p>
+<ul>
+<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
+<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
+<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
+<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
+</ul>
+</div>
 <hr />
 <h2 id="main-classes">Main Classes<a class="headerlink" href="#main-classes" title="Permanent link">#</a></h2>
 <h3 id="seriesnode"><code>SeriesNode</code><a class="headerlink" href="#seriesnode" title="Permanent link">#</a></h3>
@@ -1601,57 +1632,6 @@ This creates a hierarchical structure showing the relationships between differen
 </ul>
 <p>This enhancement is being tracked in <a href="https://github.com/bhklab/med-imagetools/issues/318">GitHub issue #318</a>.</p>
 </details>
-<h2 id="query-rules-and-dependencies">Query Rules and Dependencies<a class="headerlink" href="#query-rules-and-dependencies" title="Permanent link">#</a></h2>
-<p>The Interlacer enforces the following modality dependency rules:</p>
-<ol>
-<li><code>RTSTRUCT</code> and <code>RTDOSE</code> require a <code>CT</code>, <code>MR</code>, or <code>PT</code> series</li>
-<li><code>SEG</code> requires a <code>CT</code> or <code>MR</code> series</li>
-</ol>
-<p>Examples of valid and invalid queries:</p>
-<ul>
-<li>✅ <code>"CT,RTDOSE"</code> - Valid: CT with associated RTDOSE</li>
-<li>✅ <code>"CT,PT,RTSTRUCT"</code> - Valid: CT and PT with associated RTSTRUCT</li>
-<li>❌ <code>"PT,SEG"</code> - Invalid: SEG requires CT or MR, not PT</li>
-<li>❌ <code>"RTSTRUCT,RTDOSE"</code> - Invalid: Both require a source imaging series</li>
-</ul>
-<hr />
-<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
-<h3 id="cli">CLI<a class="headerlink" href="#cli" title="Permanent link">#</a></h3>
-<p><img alt="interlacer_cli" src="../../../images/interlacer_cli.png" style="background: white; height:125%;" /></p>
-<h3 id="python-code">Python Code<a class="headerlink" href="#python-code" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.crawl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Crawler</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">imgtools.dicom.interlacer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interlacer</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># Define path to DICOM directory</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">dicom_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;data/&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Create crawler and scan the directory</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">crawler</span> <span class="o">=</span> <span class="n">Crawler</span><span class="p">(</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">dicom_dir</span><span class="o">=</span><span class="n">dicom_dir</span><span class="p">,</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">n_jobs</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">crawler</span><span class="o">.</span><span class="n">crawl</span><span class="p">()</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Create the Interlacer from crawler results</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">interlacer</span> <span class="o">=</span> <span class="n">Interlacer</span><span class="p">(</span><span class="n">crawler</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="c1"># Visualize the forest structure</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="n">interlacer</span><span class="o">.</span><span class="n">print_tree</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span>  <span class="c1"># Console visualization</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># Query for specific modality combinations</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Find CT series with associated RTSTRUCT objects</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="n">ct_rtstruct_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;CT,RTSTRUCT&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="c1"># Get all possible series combinations</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="n">all_results</span> <span class="o">=</span> <span class="n">interlacer</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># or interlacer.query(&quot;all&quot;)</span>
-</code></pre></div>
-<h2 id="example-output">Example Output<a class="headerlink" href="#example-output" title="Permanent link">#</a></h2>
-<p><strong>The raw graph of all series in the DICOM directory:</strong></p>
-<p><img alt="Unstructured Data" src="../../../images/unstructured.png" style="background: white; height:125%;" /></p>
-<p><strong>The interlaced connections between series:</strong></p>
-<p><img alt="Structured Data" src="../../../images/structured.png" style="background: white; height:125%;" /></p>
 
 
 
@@ -1674,6 +1654,7 @@ This creates a hierarchical structure showing the relationships between differen
     </span>
     <nav>
       
+        <a href="mailto:79344667+declankorda@users.noreply.github.com">Declan Korda</a>, 
         <a href="mailto:jermiahjoseph98@gmail.com">Jermiah Joseph</a>, 
         <a href="mailto:44614774+jjjermiah@users.noreply.github.com">Jermiah Joseph</a>, 
         <a href="mailto:72413722+joshuasiraj@users.noreply.github.com">Joshua Siraj</a>

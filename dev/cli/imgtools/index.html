@@ -1517,7 +1517,7 @@
 <ul>
 <li><em><a href="#imgtools-autopipeline">autopipeline</a></em>: Core utility to process messy DICOM data into organized NIfTI files.</li>
 <li><em><a href="#imgtools-dicomfind">dicomfind</a></em>: A tool to find DICOM files.</li>
-<li><em><a href="#imgtools-dicomshow">dicomshow</a></em>: Extracts and displays the metadata associated with a single dicom file.</li>
+<li><em><a href="#imgtools-dicomshow">dicomshow</a></em>: Display and extract DICOM file metadata in a readable table format.</li>
 <li><em><a href="#imgtools-dicomsort">dicomsort</a></em>: Sorts DICOM files into directories based on their tags.</li>
 <li><em><a href="#imgtools-index">index</a></em>: Crawl DICOM directory and create a database index.</li>
 <li><em><a href="#imgtools-interlacer">interlacer</a></em>: Visualize DICOM series relationships after indexing.</li>
@@ -1714,23 +1714,25 @@ If multiple substrings are provided, all substrings must match to return a resul
 </tbody>
 </table>
 <h3 id="imgtools-dicomshow">imgtools dicomshow<a class="headerlink" href="#imgtools-dicomshow" title="Permanent link">#</a></h3>
-<p>Extracts and displays the metadata associated with a single dicom file.</p>
-<p>positional arguments:
-    path    Path to the dicom metadata in the following format <code>FILE_PATH::FIELD</code>
-            where <code>FILE_PATH</code> is a filepath to a dicom file. 
-            Optionally, If the <code>::FIELD</code> suffix is present, then only extract the metadata value of <code>FIELD</code>.
-            <code>FIELD</code> supports accessing nested tags as well as the individual elements of a multivalue, sequence 
-            or list element.</p>
-<div class="highlight"><pre><span></span><code>        Examples:
-
-        `imgtools dicomshow your_dicom.dcm::specific_tag`
-        Acesses and returns the value of `specific_tag` in `your_dicom.dcm`.
-
-        `imgtools dicomshow your_dicom.dcm::specific_tag[0].nested_tag`
-        This accesses the first element of `specific_tag` and returns the value of `nested_tag`.
-</code></pre></div>
+<p>Display and extract DICOM file metadata in a readable table format.</p>
+<p>FILE_PATH[::FIELD] specifies what to display:
+  - FILE_PATH: Show all metadata from the DICOM file
+  - FILE_PATH::FIELD: Extract only the specified field</p>
+<p>FIELD syntax options:
+  • Standard tag names: Modality, PatientName, SeriesDescription
+  • Nested tags: tag.nested_tag
+  • Array indexing: tag[0]
+  • Combining methods: tag[0].nested_tag
+  • DICOM hex tags: (0008,0060) for modality</p>
+<p>Examples:
+  imgtools dicomshow scan.dcm                        # Show all metadata
+  imgtools dicomshow scan.dcm::Modality              # Show only the modality
+  imgtools dicomshow scan.dcm::PatientName           # Extract patient name
+  imgtools dicomshow scan.dcm::SequenceItem[0].Value # Access sequence data
+  imgtools dicomshow scan.dcm::(0010,0010)           # Use standard DICOM tag</p>
+<p>Output is formatted as a color-coded table with field names and values.</p>
 <p><strong>Usage:</strong></p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools dicomshow [OPTIONS] DICOM_FILE
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>imgtools dicomshow [OPTIONS] FILE_PATH[::FIELD]
 </code></pre></div>
 <p><strong>Options:</strong></p>
 <table>
@@ -1746,13 +1748,13 @@ If multiple substrings are provided, all substrings must match to return a resul
 <tr>
 <td><code>--pydicom</code>, <code>-p</code></td>
 <td>boolean</td>
-<td>Use pydicom implementation, which does not include computed fields.</td>
+<td>Use raw pydicom implementation instead of enhanced metadata extraction. Faster but excludes computed fields.</td>
 <td><code>False</code></td>
 </tr>
 <tr>
 <td><code>--no-progress</code></td>
 <td>boolean</td>
-<td>Disable progress bars. Useful for piping output.</td>
+<td>Disable progress bars when displaying large files. Use this when piping output or in scripts.</td>
 <td><code>False</code></td>
 </tr>
 <tr>
