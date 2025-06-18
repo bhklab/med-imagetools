@@ -137,12 +137,13 @@ jobs:
                     git config user.name "github-actions"
                     git config user.email "github-actions@github.com"
 
+                    git pull origin ${{ github.head_ref }} --no-edit
                     git add docs/reference
                     
                     if ! git diff --cached --quiet; then
                         
-                        git commit --amend --no-edit
-                        git push origin HEAD:refs/heads/${{ github.head_ref }} --force
+                        git commit -m "chore: update API Reference"
+                        git push origin HEAD:refs/heads/${{ github.head_ref }}
                     else
                         echo "No changes to amend"
                     fi
