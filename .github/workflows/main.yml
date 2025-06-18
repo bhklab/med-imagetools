@@ -133,7 +133,7 @@ jobs:
 
             - name: Test docs build
               run: |
-                  pixi run -e ${{ matrix.env }} doc-build
+                    pixi run -e ${{ matrix.env }} doc-build
 
     ################################################################################################
     # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
@@ -173,7 +173,19 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-
+            - name: Build API Reference
+              if:   github.actor != 'github-actions[bot]'
+              run: |
+                    pixi run -e ${{ matrix.env }} api-ref-build
+                    git add docs/reference
+                    
+                    if ! git diff --cached --quiet; then
+                        
+                        git commit -m "chore: update API Reference"
+                        git push
+                    else
+                        echo "No changes to amend"
+                    fi
             - name: Test docs build
               run: |
                   pixi run -e ${{ matrix.env }} doc-build
