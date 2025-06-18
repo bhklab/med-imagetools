@@ -141,7 +141,7 @@ jobs:
                     
                     if ! git diff --cached --quiet; then
                         git commit --amend --no-edit
-                        git push origin ${{ github.ref_name }}
+                        git push origin ${{ github.head_ref }}
                     else
                         echo "No changes to amend"
                     fi
