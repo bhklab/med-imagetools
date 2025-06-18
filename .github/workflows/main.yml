@@ -114,7 +114,6 @@ jobs:
     ################################################################################################
     Build-Docs:
         runs-on: ${{ matrix.os }}
-        needs: Generate-PNG
         timeout-minutes: 15 # Consider increasing timeout
         strategy:
             matrix:
@@ -131,23 +130,6 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-            - name: Build API Reference
-              if: github.actor != 'github-actions'
-              run: |
-                    pixi run -e ${{ matrix.env }} api-ref-build
-                    git config user.name "github-actions"
-                    git config user.email "github-actions@github.com"
-
-                    git pull origin ${{ github.head_ref }} --no-edit
-                    git add docs/reference
-                    
-                    if ! git diff --cached --quiet; then
-                        
-                        git commit -m "chore: update API Reference"
-                        git push origin HEAD:refs/heads/${{ github.head_ref }}
-                    else
-                        echo "No changes to amend"
-                    fi
 
             - name: Test docs build
               run: |
@@ -191,7 +173,19 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-
+            - name: Build API Reference
+              if:   github.actor != 'github-actions[bot]'
+              run: |
+                    pixi run -e ${{ matrix.env }} api-ref-build
+                    git add docs/reference
+                    
+                    if ! git diff --cached --quiet; then
+                        
+                        git commit -m "chore: update API Reference"
+                        git push
+                    else
+                        echo "No changes to amend"
+                    fi
             - name: Test docs build
               run: |
                   pixi run -e ${{ matrix.env }} doc-build
