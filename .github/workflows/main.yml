@@ -130,7 +130,9 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-
+            - name: Build API Reference
+              run: |
+                  pixi run -e ${{ matrix.env }} api-ref-build
             - name: Test docs build
               run: |
                   pixi run -e ${{ matrix.env }} doc-build
@@ -173,10 +175,6 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-
-            - name: Build API Reference
-              run: |
-                  pixi run -e ${{ matrix.env }} api-ref-build
 
             - name: Test docs build
               run: |
