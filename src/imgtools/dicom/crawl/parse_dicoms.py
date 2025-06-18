@@ -255,18 +255,42 @@ def resolve_reference_series(
     return
 
 
-ParseDicomDirResult = t.NamedTuple(
-    "ParseDicomDirResult",
-    [
-        ("crawl_db", list[dict[str, str]]),
-        ("index", pd.DataFrame),
-        ("crawl_db_raw", SeriesMetaMap),
-        ("crawl_db_path", pathlib.Path),
-        ("index_csv_path", pathlib.Path),
-        ("crawl_cache_path", pathlib.Path),
-        ("sop_map_path", pathlib.Path),
-    ],
-)
+class ParseDicomDirResult(
+    t.NamedTuple(
+        "ParseDicomDirResult",
+        [
+            ("crawl_db", list[dict[str, str]]),
+            ("index", pd.DataFrame),
+            ("crawl_db_raw", SeriesMetaMap),
+            ("crawl_db_path", pathlib.Path),
+            ("index_csv_path", pathlib.Path),
+            ("crawl_cache_path", pathlib.Path),
+            ("sop_map_path", pathlib.Path),
+        ],
+    )
+):
+    """
+    A NamedTuple containing the result of parsing a DICOM directory.
+
+    Attributes
+    ----------
+    crawl_db : list[dict[str, str]]
+        A list of dictionaries containing the simplified crawl database.
+    index : pd.DataFrame
+        A DataFrame from which the relationships between DICOMs in the directory can be constructed.
+    crawl_db_raw : SeriesMetaMap
+        A mapping of each series to the corresponding subseries in the directory.
+    crawl_db_path : pathlib.Path
+        Path to the simplified crawl database JSON file.
+    index_csv_path : pathlib.path
+        Path to the index file.
+    crawl_cache_path : pathlib.Path
+        Path to the crawl cache.
+    sop_map_path : pathlib.Path
+        Path to the SOP map, which maps SOP UIDs to Series UIDs.
+    """
+
+    __slots__ = ()
 
 
 def parse_dicom_dir(
