@@ -180,82 +180,82 @@ writer = TextWriter(
 )
 ```
 
-=== "Basic Usage"
+ **Basic Usage**
 
-    We see here that the context variables for `grade`,
-    `class_subject`, `date`, and `message_type`
-    are the same for all students.
+  We see here that the context variables for `grade`,
+  `class_subject`, `date`, and `message_type`
+  are the same for all students.
 
-    This can become even worse with more
-    context variables, allowing for mistakes, and making the code harder to read.
+  This can become even worse with more
+  context variables, allowing for mistakes, and making the code harder to read.
 
-    ```python
-    
-    student, message = "Alice", "Hello, Alice!"
-    writer.save(
-        message,
-        person_name=student,
-        grade="12",
-        class_subject="math",
-        date="2025-01-01",
-        message_type="greeting"
-    )
-
-    student, message = "Bob", "Good morning, Bob!"
-    writer.save(
-        message,
-        person_name=student,
-        grade="12",
-        class_subject="math",
-        date="2025-01-01",
-        message_type="greeting"
-    )
-    ```
-
-=== "Setting Context Variables manually"
-
-    Instead of passing in the context variables every time,
-    you can store these variables in the writer and update them as needed
-    using the `set_context()` method.
-
-    Then only pass in the unique context variables for each `.save()` operation.
-
-    ```python
-    writer.set_context(
+  ```python
+  
+  student, message = "Alice", "Hello, Alice!"
+  writer.save(
+      message,
+      person_name=student,
       grade="12",
       class_subject="math",
       date="2025-01-01",
       message_type="greeting"
-    )
+  )
 
-    student, message = "Alice", "Hello, Alice!"
-    writer.save(message, person_name=student)
+  student, message = "Bob", "Good morning, Bob!"
+  writer.save(
+      message,
+      person_name=student,
+      grade="12",
+      class_subject="math",
+      date="2025-01-01",
+      message_type="greeting"
+  )
+  ```
 
-    student, message = "Bob", "Good morning, Bob!"
-    writer.save(message, person_name=student)
-    ```
+**Setting Context Variables manually**
 
-=== "Setting Context Variables during Initialization"
+  Instead of passing in the context variables every time,
+  you can store these variables in the writer and update them as needed
+  using the `set_context()` method.
 
-    If majority of the context variables are the same across all save 
-    operations, you can set context when initializing the writer.
+  Then only pass in the unique context variables for each `.save()` operation.
 
-    Note that here, we must pass as a dictionary to the `context` parameter 
-    instead of individual keyword arguments.
+  ```python
+  writer.set_context(
+    grade="12",
+    class_subject="math",
+    date="2025-01-01",
+    message_type="greeting"
+  )
 
-    ```python
-    writer = TextWriter(
-        root_directory="./data",
-        filename_format="{class_subject}/{person_name}/{date}_{message_type}.txt",
-        context={"grade": "12", "class_subject": "math", "date": "2025-01-01", "message_type": "greeting"}
-    )
+  student, message = "Alice", "Hello, Alice!"
+  writer.save(message, person_name=student)
 
-    student, message = "Alice", "Hello, Alice!"
-    writer.save(message, person_name=student)
+  student, message = "Bob", "Good morning, Bob!"
+  writer.save(message, person_name=student)
+  ```
 
-    student, message = "Bob", "Good morning, Bob!"
-    writer.save(message, person_name=student)
-    ```
+**Setting Context Variables during Initialization**
+
+  If majority of the context variables are the same across all save 
+  operations, you can set context when initializing the writer.
+
+  Note that here, we must pass as a dictionary to the `context` parameter 
+  instead of individual keyword arguments.
+
+  ```python
+  writer = TextWriter(
+      root_directory="./data",
+      filename_format="{class_subject}/{person_name}/{date}_{message_type}.txt",
+      context={"grade": "12", "class_subject": "math", "date": "2025-01-01", "message_type": "greeting"}
+  )
+
+  student, message = "Alice", "Hello, Alice!"
+  writer.save(message, person_name=student)
+
+  student, message = "Bob", "Good morning, Bob!"
+  writer.save(message, person_name=student)
+  ```
 
 #### Previewing File Paths
 

@@ -7,18 +7,21 @@ from imgtools.loggers import logger
 @click.argument(
     "dicom_file",
     type=str,
+    metavar="FILE_PATH[::FIELD]",
 )
 @click.option(
     "--pydicom", "-p",
     is_flag=True,
     default=False,
-    help="Use pydicom implementation, which does not include computed fields.",
+    help="Use raw pydicom implementation instead of enhanced metadata extraction. "
+         "Faster but excludes computed fields.",
 )
 @click.option(
     "--no-progress",
     is_flag=True,
     default=False,
-    help="Disable progress bars. Useful for piping output.",
+    help="Disable progress bars when displaying large files. "
+         "Use this when piping output or in scripts.",
 )
 @click.help_option(
     "-h",
@@ -29,35 +32,30 @@ def dicomshow(
     pydicom: bool = False,
     no_progress: bool = False,
 ) -> None:
-    """Extracts and displays the metadata associated with a single dicom file.
+    """Display and extract DICOM file metadata in a readable table format.
+
+    \b
+    FILE_PATH[::FIELD] specifies what to display:
+      - FILE_PATH: Show all metadata from the DICOM file
+      - FILE_PATH::FIELD: Extract only the specified field
     
-    POSITIONAL ARGUMENTS:
-    `path`: A DICOM path in the format `FILE_PATH::FIELD` where:
-
-    - `FILE_PATH` is a path to a `DICOM` file.
-
-    - FIELD is the specific field to be extracted from the file.
-
-    - If the ::FIELD suffix is not present, then all metadata is extracted.
-
-    - FIELD supports:
-
-      - Nested tags
-
-      - Indexing into sequences/lists
-
-      - Accessing multivalue elements
+    \b
+    FIELD syntax options:
+      • Standard tag names: Modality, PatientName, SeriesDescription
+      • Nested tags: tag.nested_tag
+      • Array indexing: tag[0]
+      • Combining methods: tag[0].nested_tag
+      • DICOM hex tags: (0008,0060) for modality
     
-
-    EXAMPLES:
-
-    `imgtools dicomshow your_dicom.dcm::specific_tag`
-
-    - Returns the value of 'specific_tag' from your_dicom.dcm
-
-    `imgtools dicomshow your_dicom.dcm::specific_tag[0].nested_tag`
+    \b
+    Examples:
+      imgtools dicomshow scan.dcm                        # Show all metadata
+      imgtools dicomshow scan.dcm::Modality              # Show only the modality
+      imgtools dicomshow scan.dcm::PatientName           # Extract patient name
+      imgtools dicomshow scan.dcm::SequenceItem[0].Value # Access sequence data
+      imgtools dicomshow scan.dcm::(0010,0010)           # Use standard DICOM tag
     
-    - Returns 'nested_tag' from the first element of 'specific_tag'."""
+    Output is formatted as a color-coded table with field names and values."""
     from pydicom import dcmread
     from pydicom.dataset import FileDataset
     from pydicom.sequence import Sequence
