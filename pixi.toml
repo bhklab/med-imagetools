@@ -138,6 +138,8 @@ doc-build.inputs = ["docs", "mkdocs.yml"]
 doc-build.outputs = ["site"]
 serve.description = "Serve the documentation to http://localhost:8001/"
 serve.cmd = "mkdocs serve -f mkdocs.yml"
+api-ref-build.description = "Create API reference pages based on source code"
+api-ref-build.cmd = "python docs/reference/update_api_reference.py"
 
 ############################################## QUALITY ###############################################
 # Quality includes linting, type checking, and formatting
@@ -172,3 +174,5 @@ build = { cmd = ["hatch", "build", "--clean"], inputs = [
     "src",
     "pyproject.toml",
 ], outputs = ["dist/*"], description = "🛠️ Builds the packages" }
+
+
