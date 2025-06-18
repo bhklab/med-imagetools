@@ -133,11 +133,7 @@ jobs:
             - name: Build API Reference
               if: github.actor != 'github-actions'
               run: |
-                  pixi run -e ${{ matrix.env }} api-ref-build
-
-            - name: Test docs build
-              run: |
-                    pixi run -e ${{ matrix.env }} doc-build
+                    pixi run -e ${{ matrix.env }} api-ref-build
                     git config user.name "github-actions"
                     git config user.email "github-actions@github.com"
                     
@@ -145,10 +141,14 @@ jobs:
                     
                     if ! git diff --cached --quiet; then
                         git commit --amend --no-edit
-                        git push --force
+                        git push origin HEAD:${{ github.ref_name }} --force
                     else
                         echo "No changes to amend"
                     fi
+
+            - name: Test docs build
+              run: |
+                    pixi run -e ${{ matrix.env }} doc-build
 
     ################################################################################################
     # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
