@@ -140,8 +140,8 @@ jobs:
                     git add docs/reference
                     
                     if ! git diff --cached --quiet; then
-                        git commit --amend --no-edit
                         git pull --rebase origin ${{ github.head_ref }}
+                        git commit --amend --no-edit
                         git push origin HEAD:refs/heads/${{ github.head_ref }}
                     else
                         echo "No changes to amend"
