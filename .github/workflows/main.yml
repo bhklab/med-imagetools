@@ -114,6 +114,7 @@ jobs:
     ################################################################################################
     Build-Docs:
         runs-on: ${{ matrix.os }}
+        needs: Generate-PNG
         timeout-minutes: 15 # Consider increasing timeout
         strategy:
             matrix:
