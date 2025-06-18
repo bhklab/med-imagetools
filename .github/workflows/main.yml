@@ -141,6 +141,7 @@ jobs:
                     
                     if ! git diff --cached --quiet; then
                         git commit --amend --no-edit
+                        git pull --rebase origin ${{ github.ref_name }}
                         git push origin HEAD:refs/heads/${{ github.head_ref }}
                     else
                         echo "No changes to amend"
