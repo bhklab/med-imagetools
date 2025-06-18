@@ -1,0 +1,131 @@
+[project]
+name = "med-imagetools"
+version = "2.9.2"
+description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
+authors = [
+    { name = "Sejin Kim" },
+    { name = "Michal Kazmierski" },
+    { name = "Kevin Qu" },
+    { name = "Vishwesh Ramanathan" },
+    { name = "Jermiah Joseph" },
+    { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
+]
+maintainers = [
+    { name = "Benjamin Haibe-Kains", email = "benjamin.haibe.kains@utoronto.ca" },
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.10,<4"
+
+# Standard dependencies
+dependencies = [
+    # logging, CLI, and progress bars
+    "structlog>=25.0,<26",
+    "click>=8.1,<9",
+    "tqdm>=4.66.4,<5",
+    "rich>=13.9.4",
+    "joblib>=1.4.2,<2",
+    # data manipulation
+    "matplotlib>=3.8.4,<4",
+    "numpy<3",
+    "pandas<3",
+    "dpath>=2.2.0",
+    # data handling
+    "pydantic-settings>=2.8.1,<3",
+    # image processing
+    "pydicom>=2.4.4",
+    "scikit-image>=0.23.2,<1",
+    "simpleitk>=2.4.0,<3",
+    "highdicom",
+    # lockfile
+    "fasteners==0.19",
+    "dill>=0.3.8,<1",
+    "pyyaml>=6.0,<7",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+	"Intended Audience :: Developers",
+	"Intended Audience :: Healthcare Industry",
+	"Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+	"Operating System :: MacOS",
+	"Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+	"Topic :: Scientific/Engineering :: Image Processing",
+	"Topic :: Scientific/Engineering :: Medical Science Apps.",
+	"Topic :: Scientific/Engineering :: Visualization",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Utilities",
+	"Typing :: Typed",
+]
+[project.urls]
+homepage = "https://github.com/bhklab/med-imagetools"
+documentation = "https://bhklab.github.io/med-imagetools/"
+issues = "https://github.com/bhklab/med-imagetools/issues"
+
+# Optional dependencies (extras)
+[project.optional-dependencies]
+pyvis = ["pyvis>=0.3.2,<0.4"]
+datasets = ["pygithub>=2.5.0", "aiohttp>=3.8.1"]
+all = [
+    "pygithub>=2.5.0",
+    "aiohttp>=3.8.1",
+    "pyvis>=0.3.2,<0.4",
+]
+
+# Entry points for CLI commands
+[project.scripts]
+imgtools = "imgtools.cli.__main__:cli"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build]
+directory = "dist"
+
+[tool.hatch.build.targets.wheel]
+# Automatically discovers packages in `src/`
+packages = ["src/imgtools"]
+include = ["pyproject.toml", "README.md", "src/imgtools/py.typed", "src/**"]
+
+[tool.semantic_release]
+version_variables = ["src/imgtools/__init__.py:__version__"]
+version_toml = ["pyproject.toml:project.version"]
+upload_to_release = true
+remove_dist = false
+commit_message = "chore(sem-ver): {version}"
+patch_without_tag = true
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+
+[tool.semantic_release.branches.dev]
+# any branch that contains "dev" will be considered a dev branch
+match = "(development|dev)"
+prerelease = true
+prerelease_token = "rc"
+
+[tool.coverage.paths]
+source = [
+    "src/imgtools",
+]
+
+[tool.coverage.run]
+omit = [
+    "src/imgtools/loggers/**/*.py",
+    "src/imgtools/cli/**/*.py",
+    "tests/**/*.py",
+    "src/imgtools/datasets/sample_images.py", # take forever on GHA
+    "src/imgtools/vizualize/**/*.py",
+    # ignore all __init__.py files
+    "src/imgtools/**/__init__.py",
+]
+
+[tool.coverage.report]

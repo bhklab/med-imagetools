@@ -1,0 +1,123 @@
+site_name: Med-ImageTools Documentation
+site_url: https://bhklab.github.io/med-imagetools
+repo_url: https://github.com/bhklab/med-imagetools
+watch: [docs, src, mkdocs.yml]
+dev_addr: "127.0.0.1:8001"
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - attr_list
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - mkdocs-click
+  - admonition
+  - pymdownx.details
+  - toc:
+      permalink: "#"
+
+extra:
+  homepage: https://bhklab.github.io/med-imagetools
+  social:
+    #######################################################################################
+    # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#social-links
+    - icon: fontawesome/brands/github
+      link: https://github.com/bhklab/
+      name: Check out our GitHub!
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/bhklab/
+      name: Connect with us on LinkedIn!
+  generator: false                     # disable 'built with MkDocs' footer
+
+theme: 
+    name: material
+    features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tooltips
+    - navigation.footer
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Switch to system preference
+
+plugins:
+  - awesome-pages                     # simplifies configuring page titles and their order
+  - search                            # necessary for search functionality to work
+  - git-authors                       # adds authors to pages using git history
+  - autorefs                          # automatically generates references to classes, functions, and methods 
+  # - mkdocs-jupyter:
+  #     allow_errors: false
+  #     include_source: true
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src/imgtools]
+          options:
+            extensions:
+              - griffe_inherited_docstrings:
+                  merge: true
+            # docstrings
+            docstring_style: numpy
+            docstring_options:
+              ignore_init_summary: true     # Ignore the first line in __init__ methods' docstrings.
+              warn_unknown_params: true     # Warn about parameters documented in docstrings that do not appear in the signature. Default: true.
+            show_docstring_examples: true
+            show_docstring_raises: false
+            docstring_section_style: table
+            filters: ["!^_"]
+            # heading_level: 1
+            merge_init_into_class: true  
+            inherited_members: true
+            parameter_headings: true
+            relative_crossrefs: true
+            scoped_crossrefs: true
+            show_bases: True
+            show_inheritance_diagram: true
+            show_root_heading: true
+            show_root_full_path: false
+            # Signatures
+            annotations_path: full
+            modernize_annotations: true    # https://mkdocstrings.github.io/python/usage/configuration/signatures/#modernize_annotations
+            separate_signature: true        # https://mkdocstrings.github.io/python/usage/configuration/signatures/#separate_signature
+            show_signature_annotations: true
+            signature_crossrefs: true
+            unwrap_annotated: true
+            # show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: 
+              functions: true

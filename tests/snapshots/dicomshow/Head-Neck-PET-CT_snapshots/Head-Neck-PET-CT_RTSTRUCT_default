@@ -1,0 +1,36 @@
+ Keyword                Value                                                   
+ AcquisitionDate        18850827                                                
+ FrameOfReferenceUID    1.3.6.1.4.1.14519.5.2.1.5168.2407.30732165265752852442… 
+ InstanceCreationDate   18850827                                                
+ InstanceCreationTime   111111                                                  
+ Manufacturer           MIM Software Inc.                                       
+ ManufacturerModelName  MIM                                                     
+ Modality               RTSTRUCT                                                
+ NumROIs                49                                                      
+ PatientID              HN-CHUM-051                                             
+ ROINames               ['Artefacts', 'BODY', 'CTV 1', 'CTV 2', 'CTV 3', 'Canal 
+                        medul PV', 'Canal medullaire', 'Cavite orale',          
+                        'Cerveau1', 'Chiasme', 'Dense', 'Dose 6970', 'Dose      
+                        7250', 'Dose 7251', 'GTV', 'GTV GG', 'Larynx', 'M       
+                        retropharynges', 'Mandibule', 'Nerf optique D', 'Nerf   
+                        optique G', 'Nuque1', 'Oeil D', 'Oeil G', 'Oesophage',  
+                        'Oreille int D', 'Oreille int G', 'Oreille moy D',      
+                        'Oreille moy G', 'PTV 50.4', 'PTV 59.4', 'PTV 70',      
+                        'Parotide D', 'Parotide D - PTV', 'Parotide G',         
+                        'Parotide G - PTV', 'Plexus brac D', 'Plexus brac G',   
+                        'Sous-max D', 'Sous-max G', 'TRONC 2mm', 'Trachee',     
+                        'Tronc', 'bidon', 'bidon2', 'bidon3', 'loin70',         
+                        'phy421', 'pres70']                                     
+ ReferencedSOPUIDs      []                                                      
+ ReferencedSeriesUID    1.3.6.1.4.1.14519.5.2.1.5168.2407.28694830917738518413… 
+ SeriesDate             18850827                                                
+ SeriesInstanceUID      1.3.6.1.4.1.14519.5.2.1.5168.2407.11851797101564370668… 
+ SeriesTime             111111                                                  
+ SoftwareVersions       6.3.9                                                   
+ StructureSetDate       18850827                                                
+ StructureSetLabel      RTstruct                                                
+ StructureSetName       RTstruct_CTsim->CT(PET-CT)                              
+ StructureSetTime       111111                                                  
+ StudyDate              18850827                                                
+ StudyInstanceUID       1.3.6.1.4.1.14519.5.2.1.5168.2407.23591672595466764236… 
+ StudyTime              111111                                                  

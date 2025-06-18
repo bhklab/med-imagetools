@@ -1,0 +1,110 @@
+extend-exclude = [".pixi/**/*", "tests/**/*.py", "src/imgtools/cli/**/*.py"]
+cache-dir = ".cache/.ruff-cache"
+line-length = 79
+
+[lint]
+select = [
+    ###########################################################################
+    # TYPE ANNOTATIONS
+    # Ensure all functions have type annotations
+    # https://docs.astral.sh/ruff/rules/#flake8-annotations-ann
+    "ANN",
+    # Use type hinting consistently
+    # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
+    "TCH",
+    ###########################################################################
+    # IMPORTS
+    # Sort imports naturally
+    # https://docs.astral.sh/ruff/rules/#isort-i
+    "I",
+    # Follow import conventions
+    # https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
+    "ICN",
+    # Clean up and organize imports
+    # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
+    "TID",
+    ###########################################################################
+    # CODE QUALITY
+    # Detect possible bugs, like unused variables or exception handling issues
+    # https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+    "B",
+    # Avoid using Python builtins incorrectly
+    # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    "A",
+    # Enforce correct usage of commas in lists, tuples, etc.
+    # https://docs.astral.sh/ruff/rules/#flake8-commas-com
+    "COM",
+    # Prevent use of debugging code, like breakpoints
+    # https://docs.astral.sh/ruff/rules/#flake8-debugger-t10
+    "T10",
+    # Disallow print statements
+    # https://docs.astral.sh/ruff/rules/#flake8-print-t20
+    "T20",
+    # Provide clear and explanatory error messages
+    # https://docs.astral.sh/ruff/rules/#flake8-errmsg-em
+    "EM",
+    ###########################################################################
+    # STANDARDS & STYLE
+    # Prefer pathlib for path manipulation
+    # https://docs.astral.sh/ruff/rules/#flake8-use-pathlib-pth
+    "PTH",
+    # Adhere to Pylint conventions
+    # https://docs.astral.sh/ruff/rules/#pylint-pl
+    "PL",
+    # Simplify code to reduce complexity
+    # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "SIM",
+    # errors like undefined names and unused imports without enforcing style rules.
+    # https://docs.astral.sh/ruff/rules/#pyflakes-f
+    "F",
+    #
+    # https://docs.astral.sh/ruff/rules/#pep8-naming-n
+    "N",
+    # Pydocstyle
+    # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    # "D",
+    ###########################################################################
+    # MIGRATION TO NUMPY2
+    # https://numpy.org/doc/stable/numpy_2_0_migration_guide.html
+    "NPY201",
+]
+ignore = [
+    # Allow too many arguments for functions
+    "PLR0913",
+    "PLR2004",
+    # Public Module Docstrings
+    "D100",
+    # Ignored because https://docs.astral.sh/ruff/formatter/#conflicting-lint-rules
+    "COM812", # https://docs.astral.sh/ruff/rules/missing-trailing-comma/#missing-trailing-comma-com812
+    "D206",
+    "N813",
+    "EM101",
+]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pydocstyle]
+convention = "numpy"
+
+[lint.isort]
+known-first-party = ["imgtools"]
+combine-as-imports = true
+relative-imports-order = "closest-to-furthest"
+
+[lint.per-file-ignores]
+"**/*.ipynb" = ["I", "F", "T20"]
+"src/imgtools/dicom/dicom_metadata/*" = [
+    "N805", # First argument of a method should be named `self`, but we are using classproperty
+
+]
+"src/imgtools/utils/dictionaries.py" = [
+    "ANN401", # allow typing.Any
+
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 49

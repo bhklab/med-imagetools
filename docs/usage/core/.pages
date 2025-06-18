@@ -1,0 +1,5 @@
+title: Core
+
+nav:
+  - Crawler: crawler.md
+  - Interlacer: interlacer.md

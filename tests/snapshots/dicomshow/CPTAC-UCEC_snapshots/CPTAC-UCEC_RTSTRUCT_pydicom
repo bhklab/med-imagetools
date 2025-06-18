@@ -1,0 +1,168 @@
+ Keyword                                Value                                   
+ SpecificCharacterSet                   ISO_IR 100                              
+ SOPClassUID                            1.2.840.10008.5.1.4.1.1.481.3           
+ SOPInstanceUID                         1.2.826.0.1.534147.756.812677238.20232… 
+ StudyDate                              20081216                                
+ SeriesDate                             20230315                                
+ StudyTime                              162706                                  
+ AccessionNumber                        empty                                   
+ Modality                               RTSTRUCT                                
+ Manufacturer                           Open Health Imaging Foundation          
+ ReferringPhysicianName                 empty                                   
+ CodingSchemeIdentificationSequence     Sequence of length 3                    
+ CodingSchemeDesignator                 DCM                                     
+ CodingSchemeUID                        1.2.840.10008.2.16.4                    
+ CodingSchemeName                       DICOM Controlled Terminology            
+ CodingSchemeResponsibleOrganization    DICOM                                   
+ CodingSchemeDesignator                 SCT                                     
+ CodingSchemeUID                        2.16.840.1.113883.6.96                  
+ CodingSchemeName                       SNOMED CT                               
+ CodingSchemeResponsibleOrganization    SNOMED International                    
+ CodingSchemeDesignator                 NCIt                                    
+ CodingSchemeUID                        2.16.840.1.113883.3.26.1.1              
+ CodingSchemeName                       NCI Thesaurus                           
+ CodingSchemeResponsibleOrganization    NCI                                     
+ StudyDescription                       PET / CT TUMOR IMAGING                  
+ SeriesDescription                      Pre-dose,  UTERUS - 1                   
+ OperatorsName                          empty                                   
+ ManufacturerModelName                  OHIF-XNAT Viewer 3.2.0                  
+ PatientName                            C3L-00947                               
+ PatientID                              C3L-00947                               
+ PatientBirthDate                       empty                                   
+ PatientSex                             F                                       
+ PatientAge                             071Y                                    
+ ClinicalTrialTimePointID               Pre-dose                                
+ DeidentificationMethod                 Per DICOM PS 3.15AnnexE. Details in     
+                                        0012,0064                               
+ DeidentificationMethodCodeSequence     Sequence of length 8                    
+ CodeValue                              113100                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Basic Application Confidentiality       
+                                        Profile                                 
+ CodeValue                              113101                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Clean Pixel Data Option                 
+ CodeValue                              113104                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Clean Structured Content Option         
+ CodeValue                              113105                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Clean Descriptors Option                
+ CodeValue                              113107                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Retain Longitudinal Temporal            
+                                        Information Modified Dates Option       
+ CodeValue                              113108                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Retain Patient Characteristics Option   
+ CodeValue                              113109                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Retain Device Identity Option           
+ CodeValue                              113111                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Retain Safe Private Option              
+                                        CTP                                     
+                                        Raw Byte Data                           
+                                        Raw Byte Data                           
+ BodyPartExamined                       ABDOMEN                                 
+ SoftwareVersions                       53.00                                   
+ StudyInstanceUID                       1.3.6.1.4.1.14519.5.2.1.6450.2626.8486… 
+ SeriesInstanceUID                      1.2.826.0.1.534147.756.812677238.20232… 
+ StudyID                                empty                                   
+ SeriesNumber                           12                                      
+ FrameOfReferenceUID                    1.3.6.1.4.1.14519.5.2.1.6450.2626.1181… 
+ PositionReferenceIndicator             empty                                   
+ AcquisitionContextSequence             Sequence of length 1                    
+ ValueType                              CODE                                    
+ ConceptNameCodeSequence                Sequence of length 1                    
+ CodeValue                              126072                                  
+ CodingSchemeDesignator                 DCM                                     
+ CodeMeaning                            Time Point Type                         
+ ConceptCodeSequence                    Sequence of length 1                    
+ CodeValue                              255235001                               
+ CodingSchemeDesignator                 SCT                                     
+ CodeMeaning                            Pre-dose                                
+ StructureSetLabel                      UTERUS - 1                              
+ StructureSetDate                       20230315                                
+ StructureSetTime                       121628                                  
+ ReferencedFrameOfReferenceSequence     Sequence of length 1                    
+ FrameOfReferenceUID                    1.3.6.1.4.1.14519.5.2.1.6450.2626.1181… 
+ RTReferencedStudySequence              Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.3.1.2.3.1                 
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.8486… 
+ RTReferencedSeriesSequence             Sequence of length 1                    
+ SeriesInstanceUID                      1.3.6.1.4.1.14519.5.2.1.6450.2626.1943… 
+ ContourImageSequence                   Sequence of length 5                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.8329… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.3974… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.3174… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.2588… 
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.2145… 
+ StructureSetROISequence                Sequence of length 1                    
+ ROINumber                              1                                       
+ ReferencedFrameOfReferenceUID          1.3.6.1.4.1.14519.5.2.1.6450.2626.1181… 
+ ROIName                                UTERUS - 1                              
+ ROIVolume                              4.989104                                
+ ROIGenerationAlgorithm                 MANUAL                                  
+ ROIContourSequence                     Sequence of length 1                    
+ ROIDisplayColor                        MultiValue of length 3                  
+ ContourSequence                        Sequence of length 5                    
+ ContourImageSequence                   Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.8329… 
+ ContourGeometricType                   CLOSED_PLANAR                           
+ NumberOfContourPoints                  18                                      
+ ContourNumber                          1                                       
+ ContourData                            MultiValue of length 54                 
+ ContourImageSequence                   Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.3974… 
+ ContourGeometricType                   CLOSED_PLANAR                           
+ NumberOfContourPoints                  20                                      
+ ContourNumber                          2                                       
+ ContourData                            MultiValue of length 60                 
+ ContourImageSequence                   Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.3174… 
+ ContourGeometricType                   CLOSED_PLANAR                           
+ NumberOfContourPoints                  14                                      
+ ContourNumber                          3                                       
+ ContourData                            MultiValue of length 42                 
+ ContourImageSequence                   Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.2588… 
+ ContourGeometricType                   CLOSED_PLANAR                           
+ NumberOfContourPoints                  14                                      
+ ContourNumber                          4                                       
+ ContourData                            MultiValue of length 42                 
+ ContourImageSequence                   Sequence of length 1                    
+ ReferencedSOPClassUID                  1.2.840.10008.5.1.4.1.1.128             
+ ReferencedSOPInstanceUID               1.3.6.1.4.1.14519.5.2.1.6450.2626.2145… 
+ ContourGeometricType                   CLOSED_PLANAR                           
+ NumberOfContourPoints                  11                                      
+ ContourNumber                          5                                       
+ ContourData                            MultiValue of length 33                 
+ ReferencedROINumber                    1                                       
+ RTROIObservationsSequence              Sequence of length 1                    
+ AnatomicRegionSequence                 Sequence of length 1                    
+ CodeValue                              95943005                                
+ CodingSchemeDesignator                 SCT                                     
+ CodeMeaning                            Uterus                                  
+ SegmentedPropertyCategoryCodeSequence  Sequence of length 1                    
+ CodeValue                              49755003                                
+ CodingSchemeDesignator                 SCT                                     
+ CodeMeaning                            Morphologically Abnormal Structure      
+ ObservationNumber                      1                                       
+ ReferencedROINumber                    1                                       
+ ROIObservationLabel                    UTERUS - 1                              
+ RTROIIdentificationCodeSequence        Sequence of length 1                    
+ CodeValue                              6219000                                 
+ CodingSchemeDesignator                 SCT                                     
+ CodeMeaning                            Neoplasm, Malignant                     
+ RTROIInterpretedType                   empty                                   
+ ROIInterpreter                         empty                                   

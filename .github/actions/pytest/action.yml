@@ -1,0 +1,91 @@
+name: 'Unit Tests Action'
+description: 'Run unit tests using pytest with configurable parameters'
+
+inputs:
+  os:
+    description: 'Operating system to run tests on'
+    required: true
+  env:
+    description: 'Python environment to use (e.g., py310, py311, py313)'
+    required: true
+  test_access_type:
+    description: 'Test access type (public or private)'
+    required: true
+    default: 'public'
+  github_token:
+    description: 'GitHub token for accessing test data'
+    required: false
+    default: ''
+  test_type:
+    description: 'Type of test to run (e.g., unittests, integration)'
+    required: true
+  codecov_token:
+    description: 'Codecov token for uploading coverage reports'
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Pixi
+      uses: prefix-dev/setup-pixi@v0.8.8
+      with:
+        environments: ${{ inputs.env }}
+        pixi-version: v0.47.0
+        cache: true
+
+    - name: Prepare data if needed
+      if: inputs.test_type == 'integration'
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
+      run: |
+        if [[ "${{ inputs.test_access_type }}" == "private" ]]; then
+          pixi run -e ${{ inputs.env }} imgtools testdata -p -d data
+        else
+          pixi run -e ${{ inputs.env }} imgtools testdata -d data
+        fi
+      shell: bash
+
+    - name: Run pytest
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        TEST_DATASET_TYPE: ${{ inputs.test_access_type }}
+      run: |
+        # specifically run code-coverage for py313 public ubuntu tests
+        mkdir -p coverage-report
+        
+        if [[ "${{ inputs.os }}" == "ubuntu-latest" && "${{ inputs.env }}" == "py313" ]]; then
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --cov=imgtools --cov-report="xml:coverage-report/coverage.xml" \
+            --numprocesses=auto
+        else
+          pixi run -e ${{ inputs.env }} \
+            pytest -m "${{ inputs.test_type }}" \
+            --no-cov \
+            --numprocesses=auto
+        fi
+      shell: bash
+
+    - name: Upload coverage report
+      if: inputs.os == 'ubuntu-latest' && inputs.env == 'py313' && inputs.test_access_type == 'public'
+      uses: codecov/codecov-action@v3
+      with:
+          token: ${{ inputs.codecov_token }}
+          files: coverage-report/coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+          name: codecov-umbrella
+
+    - name: JUnit Test Summary
+      id: pytest-summary
+      if: failure()
+      uses: test-summary/action@v2
+      with: 
+        paths: .cache/test-results/**/*.xml
+        show: "fail,skip"

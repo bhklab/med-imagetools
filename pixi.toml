@@ -1,0 +1,178 @@
+[project]
+authors = ["Jermiah Joseph <jermiahjoseph98@gmail.com>"]
+channels = ["conda-forge"]
+description = "Add a short description here"
+name = "med-imagetools"
+platforms = ["linux-64", "osx-arm64", "osx-64", "win-64"]
+
+[dependencies]
+python = "3.12.*, <3.12.10"
+pip = ">=24.3.1,<25"
+
+[pypi-dependencies]
+med-imagetools = { path = ".", editable = true }
+
+[environments]
+dev = ["test", "quality", "build", "dev", "docs"]
+docs = ["docs"]
+test = ["test", "quality"]
+py310 = { features = ["py310", "test"], no-default-feature = true }
+py311 = { features = ["py311", "test"], no-default-feature = true }
+py312 = { features = ["py312", "test"], no-default-feature = true }
+py313 = { features = ["py313", "test"], no-default-feature = true }
+
+############################################## DEV ###############################################
+[feature.dev.pypi-dependencies]
+med-imagetools = { path = ".", editable = true, extras = ["all"] }
+
+[feature.dev.dependencies]
+ipython = "*"
+ipykernel = "*"
+jupyterlab = "*"
+ipdb = ">=0.13.13,<0.14"
+ipympl = ">=0.9.6,<0.10"
+
+[feature.dev.activation.env]
+IMGTOOLS_LOG_LEVEL = "DEBUG"
+
+[feature.dev.tasks]
+clean = { cmd = [
+    "bash",
+    "-c",
+    "rm -rf .cache && rm -rf .*_cache && find . -type f -name '.coverage*' -exec rm -f {} +",
+], description = "Clear cache and coverage files" }
+
+############################################## PYTHON ###############################################
+[feature.py310.dependencies]
+python = "3.10.*"
+
+[feature.py311.dependencies]
+python = "3.11.*"
+
+[feature.py312.dependencies]
+python = "3.12.*"
+
+[feature.py313.dependencies]
+python = "3.13.*"
+
+############################################## TEST ################################################
+[feature.test.pypi-dependencies]
+med-imagetools = { path = ".", editable = true, extras = ["all"] }
+
+[feature.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-xdist = "*"
+pytest-mock = ">=3.14.0,<4"
+filelock = ">=3.17.0,<4"
+pytest-asyncio = ">=0.26.0,<0.27"
+anyio = ">=4.9.0,<5"
+pytest-snapshot = ">=0.9.0,<0.10"
+
+# pytest task with custom arguments
+# we want to be able to mainly have configurability for
+# 1) pytest markers (e.g. slow, fast, etc.)
+# 2) using either (--cov=src/imgtools + --cov-report=xml) OR --no-cov for speed
+# 3) using --numprocesses if we want to run tests in parallel
+[feature.test.tasks.test_base]
+cmd = "pytest {{ markers }} {{ coverage }} {{ parallel }}"
+args = [
+    # available markers in pytest.ini (unittests, integration)
+    { "arg" = "markers", "default" = "-m unittests" },
+    # automatically uses the config file with the env variable
+    # activate coverage with "--cov=src/imgtools --cov-report=xml"
+    { "arg" = "coverage", "default" = "--no-cov" },
+    # run tests in parallel with "--numprocesses=auto"
+    { "arg" = "parallel", "default" = "--numprocesses=0" }
+]
+
+# Specialized versions inheriting from test_base
+[feature.test.tasks.unittests]
+depends-on = [{ task = "test_base", args = ["-m unittests"] }]
+
+[feature.test.tasks.integration]
+depends-on = [{ task = "test_base", args = ["-m integration"] }]
+
+[feature.test.tasks.unittests_cov]
+depends-on = [
+    { task = "test_base", args = [
+        "-m unittests",
+        "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"
+    ] }
+]
+
+[feature.test.tasks.integration_cov]
+depends-on = [
+    { task = "test_base", args = [
+        "-m integration",
+        "--cov=src/imgtools --cov-report=xml:coverage-report/coverage.xml"
+    ] }
+]
+
+[feature.test.tasks.clean_tests]
+cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
+
+############################################## DOCS ###############################################
+[feature.docs.dependencies]
+mkdocs = ">=1.6.1,<2"
+mkdocs-material = ">=9.6.12,<10"
+mkdocstrings = ">=0.29.1,<0.30"
+mkdocstrings-python = ">=1.16.10,<2"
+mkdocs-git-authors-plugin = ">=0.9.5,<0.10"
+mkdocs-git-revision-date-localized-plugin = ">=1.2.9,<2"
+griffe-inherited-docstrings = ">=1.1.1,<2"
+mike = ">=2.1.3,<3"
+mkdocs-click = ">=0.9.0,<0.10"
+black = ">=25.1.0,<26"
+mkdocs-autorefs = "*"
+
+# mkdocs-jupyter = ">=0.25.1,<0.26"
+[feature.docs.pypi-dependencies]
+mkdocs-awesome-pages-plugin = ">=2.10.1, <3"
+pytkdocs = { version = ">=0.16.5, <0.17", extras = ["numpy-style"] }
+
+[feature.docs.tasks]
+doc-build.description = "Build the documentation using MkDocs"
+doc-build.cmd = "mkdocs build -f mkdocs.yml"
+doc-build.inputs = ["docs", "mkdocs.yml"]
+doc-build.outputs = ["site"]
+serve.description = "Serve the documentation to http://localhost:8001/"
+serve.cmd = "mkdocs serve -f mkdocs.yml"
+api-ref-build.description = "Create API reference pages based on source code"
+api-ref-build.cmd = "python docs/reference/update_api_reference.py"
+
+############################################## QUALITY ###############################################
+# Quality includes linting, type checking, and formatting
+[feature.quality.dependencies]
+ruff = ">=0.9.4"
+mypy = ">=1.13.0,<2"
+types-tqdm = ">=4.66.0.20240417,<5"
+pandas-stubs = ">=2.2.3.241126,<3"
+types-pyyaml = ">=6.0.12.20250402,<7"
+
+[feature.quality.pypi-dependencies]
+pydoctest = ">=0.2.1, <0.3"
+
+[feature.quality.tasks]
+ruff-check.cmd = ["ruff", "check", "src"]
+ruff-check.description = "Run ruff check"
+ruff-format.cmd = ["ruff", "format", "src"]
+ruff-format.description = "Run ruff format, run check first"
+type-check.cmd = ["mypy", "src"]
+type-check.description = "Run mypy type check."
+qc.depends-on = ["ruff-format", "ruff-check", "type-check"]
+qc.description = "Quality check: ruff & mypy"
+
+#################################### RELEASE & BUILD ###############################################
+[feature.build.dependencies]
+python-semantic-release = ">=9.14"
+hatch = ">=1.13"
+
+[feature.build.tasks]
+semver = 'echo "Next Version is: $(semantic-release version --print)"'
+build = { cmd = ["hatch", "build", "--clean"], inputs = [
+    "src",
+    "pyproject.toml",
+], outputs = ["dist/*"], description = "🛠️ Builds the packages" }
+
+

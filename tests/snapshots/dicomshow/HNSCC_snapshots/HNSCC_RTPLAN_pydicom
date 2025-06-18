@@ -1,0 +1,1836 @@
+ Keyword                                  Value                                 
+ SpecificCharacterSet                     ISO_IR 100                            
+ InstanceCreationDate                     20020113                              
+ InstanceCreationTime                     140836                                
+ SOPClassUID                              1.2.840.10008.5.1.4.1.1.481.5         
+ SOPInstanceUID                           1.3.6.1.4.1.14519.5.2.1.1706.8040.47… 
+ StudyDate                                20090301                              
+ StudyTime                                empty                                 
+ AccessionNumber                          2819497684894126                      
+ Modality                                 RTPLAN                                
+ Manufacturer                             ADAC                                  
+ ReferringPhysicianName                   empty                                 
+ ManufacturerModelName                    Pinnacle3                             
+ ReferencedStudySequence                  Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.3.1.2.3.2               
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.1706.8040.12… 
+ PatientName                              HNSCC-01-0176                         
+ PatientID                                HNSCC-01-0176                         
+ PatientBirthDate                         empty                                 
+ PatientSex                               M                                     
+ PatientIdentityRemoved                   YES                                   
+ DeidentificationMethod                   Per DICOM PS 3.15 AnnexE. Details in  
+                                          0012,0064                             
+ DeidentificationMethodCodeSequence       Sequence of length 8                  
+ CodeValue                                113100                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Basic Application Confidentiality     
+                                          Profile                               
+ CodeValue                                113101                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Pixel Data Option               
+ CodeValue                                113104                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Structured Content Option       
+ CodeValue                                113105                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Clean Descriptors Option              
+ CodeValue                                113107                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Longitudinal With Modified     
+                                          Dates Option                          
+ CodeValue                                113108                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Patient Characteristics Option 
+ CodeValue                                113109                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Device Identity Option         
+ CodeValue                                113111                                
+ CodingSchemeDesignator                   DCM                                   
+ CodeMeaning                              Retain Safe Private Option            
+                                          CTP                                   
+                                          Raw Byte Data                         
+                                          Raw Byte Data                         
+ BodyPartExamined                         HEADNECK                              
+ SoftwareVersions                         MultiValue of length 2                
+ StudyInstanceUID                         1.3.6.1.4.1.14519.5.2.1.1706.8040.12… 
+ SeriesInstanceUID                        1.3.6.1.4.1.14519.5.2.1.1706.8040.31… 
+ StudyID                                  empty                                 
+ SeriesNumber                             1                                     
+ FrameOfReferenceUID                      1.3.6.1.4.1.14519.5.2.1.1706.8040.70… 
+ PositionReferenceIndicator               empty                                 
+ LongitudinalTemporalInformationModified  MODIFIED                              
+ RTPlanLabel                              BOT.0                                 
+ RTPlanName                               BOT                                   
+ RTPlanDate                               20020113                              
+ RTPlanTime                               140835                                
+ RTPlanGeometry                           PATIENT                               
+ ToleranceTableSequence                   Sequence of length 4                  
+ ToleranceTableNumber                     7                                     
+ ToleranceTableLabel                      SMLC                                  
+ FractionGroupSequence                    Sequence of length 4                  
+ FractionGroupNumber                      1                                     
+ NumberOfFractionsPlanned                 20                                    
+ NumberOfBeams                            2                                     
+ NumberOfBrachyApplicationSetups          0                                     
+ ReferencedBeamSequence                   Sequence of length 2                  
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 1.3968                                
+ BeamMeterset                             140                                   
+ ReferencedBeamNumber                     1                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.598463                              
+ BeamMeterset                             64                                    
+ ReferencedBeamNumber                     2                                     
+ FractionGroupNumber                      2                                     
+ NumberOfFractionsPlanned                 5                                     
+ NumberOfBeams                            2                                     
+ NumberOfBrachyApplicationSetups          0                                     
+ ReferencedBeamSequence                   Sequence of length 2                  
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 1.39844                               
+ BeamMeterset                             141                                   
+ ReferencedBeamNumber                     3                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.602362                              
+ BeamMeterset                             65                                    
+ ReferencedBeamNumber                     4                                     
+ FractionGroupNumber                      3                                     
+ NumberOfFractionsPlanned                 5                                     
+ NumberOfBeams                            2                                     
+ NumberOfBrachyApplicationSetups          0                                     
+ ReferencedBeamSequence                   Sequence of length 2                  
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 1.39635                               
+ BeamMeterset                             153                                   
+ ReferencedBeamNumber                     5                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.600754                              
+ BeamMeterset                             66                                    
+ ReferencedBeamNumber                     6                                     
+ FractionGroupNumber                      4                                     
+ NumberOfFractionsPlanned                 33                                    
+ NumberOfBeams                            9                                     
+ NumberOfBrachyApplicationSetups          0                                     
+ ReferencedBeamSequence                   Sequence of length 9                  
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.281983                              
+ BeamMeterset                             72                                    
+ ReferencedBeamNumber                     7                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.982428                              
+ BeamMeterset                             163                                   
+ ReferencedBeamNumber                     8                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.261074                              
+ BeamMeterset                             92                                    
+ ReferencedBeamNumber                     9                                     
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.105295                              
+ BeamMeterset                             73                                    
+ ReferencedBeamNumber                     10                                    
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.313181                              
+ BeamMeterset                             60                                    
+ ReferencedBeamNumber                     11                                    
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.0876378                             
+ BeamMeterset                             85                                    
+ ReferencedBeamNumber                     12                                    
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.0373487                             
+ BeamMeterset                             53                                    
+ ReferencedBeamNumber                     13                                    
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.077764                              
+ BeamMeterset                             100                                   
+ ReferencedBeamNumber                     14                                    
+ BeamDoseSpecificationPoint               MultiValue of length 3                
+ BeamDose                                 0.018953                              
+ BeamMeterset                             65                                    
+ ReferencedBeamNumber                     15                                    
+ BeamSequence                             Sequence of length 15                 
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               1                                     
+ BeamName                                 J                                     
+ BeamDescription                          AP SCV                                
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              400                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              0                                     
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  941.511                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               2                                     
+ BeamName                                 K                                     
+ BeamDescription                          PA scv                                
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        18                                    
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              180                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  884.01                                
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               3                                     
+ BeamName                                 L                                     
+ BeamDescription                          AP  MLB                               
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              0                                     
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  941.511                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               4                                     
+ BeamName                                 M                                     
+ BeamDescription                          PA mlb                                
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        18                                    
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              180                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  884.01                                
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               5                                     
+ BeamName                                 N                                     
+ BeamDescription                          LAO RMNB                              
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              15                                    
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  946.014                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               6                                     
+ BeamName                                 O                                     
+ BeamDescription                          RPO rmnb                              
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    2                                     
+ ControlPointSequence                     Sequence of length 2                  
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        18                                    
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              195                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  819.669                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               7                                     
+ BeamName                                 A                                     
+ BeamDescription                          000-200 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    18                                    
+ ControlPointSequence                     Sequence of length 18                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              200                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  892.225                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121895                              
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121895                              
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.28729                               
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.28729                               
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.400539                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.400539                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.486586                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.486586                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.515514                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.515514                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.667153                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.667153                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.789365                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.789365                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.965436                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.965436                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               8                                     
+ BeamName                                 B                                     
+ BeamDescription                          000-240 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    22                                    
+ ControlPointSequence                     Sequence of length 22                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              240                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  911.867                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0580188                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0580188                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.231255                              
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.231255                              
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.286049                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.286049                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.47234                               
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.47234                               
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.514953                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.514953                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.72581                               
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.72581                               
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.84207                               
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.84207                               
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.869159                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.869159                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.882015                              
+ ControlPointIndex                        18                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.882015                              
+ ControlPointIndex                        19                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.97909                               
+ ControlPointIndex                        20                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.97909                               
+ ControlPointIndex                        21                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               9                                     
+ BeamName                                 C                                     
+ BeamDescription                          000-280 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    24                                    
+ ControlPointSequence                     Sequence of length 24                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              280                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  938.456                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0474454                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0474454                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0745139                             
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0745139                             
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.173639                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.173639                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.26439                               
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.26439                               
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.406732                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.406732                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.44054                               
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.44054                               
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.788448                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.788448                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.811141                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.811141                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.833834                              
+ ControlPointIndex                        18                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.833834                              
+ ControlPointIndex                        19                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.908874                              
+ ControlPointIndex                        20                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.908874                              
+ ControlPointIndex                        21                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.977393                              
+ ControlPointIndex                        22                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.977393                              
+ ControlPointIndex                        23                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               10                                    
+ BeamName                                 D                                     
+ BeamDescription                          000-320 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    20                                    
+ ControlPointSequence                     Sequence of length 20                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              320                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  949.075                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0285404                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0285404                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0570108                             
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0570108                             
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.143066                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.143066                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.466772                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.466772                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.495242                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.495242                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.523713                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.523713                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.584828                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.584828                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.79558                               
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.79558                               
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.924109                              
+ ControlPointIndex                        18                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.924109                              
+ ControlPointIndex                        19                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               11                                    
+ BeamName                                 E                                     
+ BeamDescription                          000-000 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    18                                    
+ ControlPointSequence                     Sequence of length 18                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              0                                     
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  941.511                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121272                              
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121272                              
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.253773                              
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.253773                              
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.288649                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.288649                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.323524                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.323524                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.3584                                
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.3584                                
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.393276                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.393276                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.476505                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.476505                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.739308                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.739308                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               12                                    
+ BeamName                                 F                                     
+ BeamDescription                          000-040 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    18                                    
+ ControlPointSequence                     Sequence of length 18                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              40                                    
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  953.675                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0261477                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0261477                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0507447                             
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0507447                             
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121781                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.121781                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.381265                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.381265                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.707553                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.707553                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.7321                                
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.7321                                
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.756647                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.756647                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.895293                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.895293                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               13                                    
+ BeamName                                 G                                     
+ BeamDescription                          000-080 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    20                                    
+ ControlPointSequence                     Sequence of length 20                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              80                                    
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  948.752                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0426331                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0426331                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.147882                              
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.147882                              
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.228977                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.228977                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.30684                               
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.30684                               
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.562243                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.562243                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.690811                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.690811                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.882998                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.882998                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.921998                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.921998                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.960999                              
+ ControlPointIndex                        18                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.960999                              
+ ControlPointIndex                        19                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               14                                    
+ BeamName                                 H                                     
+ BeamDescription                          000-120 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    22                                    
+ ControlPointSequence                     Sequence of length 22                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              120                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  904.207                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.336868                              
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.336868                              
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.357755                              
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.357755                              
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.378642                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.378642                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.535474                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.535474                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.55751                               
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.55751                               
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.771893                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.771893                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.815394                              
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.815394                              
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.866302                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.866302                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.900428                              
+ ControlPointIndex                        18                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.900428                              
+ ControlPointIndex                        19                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.921315                              
+ ControlPointIndex                        20                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.921315                              
+ ControlPointIndex                        21                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ Manufacturer                             Varian                                
+ TreatmentMachineName                     Varian 2109                           
+ PrimaryDosimeterUnit                     MU                                    
+ SourceAxisDistance                       1000                                  
+ BeamLimitingDeviceSequence               Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ SourceToBeamLimitingDeviceDistance       445                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ SourceToBeamLimitingDeviceDistance       358                                   
+ NumberOfLeafJawPairs                     1                                     
+ RTBeamLimitingDeviceType                 MLCX                                  
+ SourceToBeamLimitingDeviceDistance       538.3                                 
+ NumberOfLeafJawPairs                     60                                    
+ LeafPositionBoundaries                   MultiValue of length 61               
+ BeamNumber                               15                                    
+ BeamName                                 I                                     
+ BeamDescription                          000-160 BOT                           
+ BeamType                                 STATIC                                
+ RadiationType                            PHOTON                                
+ TreatmentDeliveryType                    TREATMENT                             
+ NumberOfWedges                           0                                     
+ NumberOfCompensators                     0                                     
+ NumberOfBoli                             0                                     
+ NumberOfBlocks                           0                                     
+ FinalCumulativeMetersetWeight            1                                     
+ NumberOfControlPoints                    18                                    
+ ControlPointSequence                     Sequence of length 18                 
+ ControlPointIndex                        0                                     
+ NominalBeamEnergy                        6                                     
+ DoseRateSet                              600                                   
+ BeamLimitingDevicePositionSequence       Sequence of length 3                  
+ RTBeamLimitingDeviceType                 ASYMX                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 ASYMY                                 
+ LeafJawPositions                         MultiValue of length 2                
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ GantryAngle                              160                                   
+ GantryRotationDirection                  NONE                                  
+ BeamLimitingDeviceAngle                  90                                    
+ BeamLimitingDeviceRotationDirection      NONE                                  
+ PatientSupportAngle                      0                                     
+ PatientSupportRotationDirection          NONE                                  
+ TableTopEccentricAngle                   0.0                                   
+ TableTopEccentricRotationDirection       NONE                                  
+ TableTopVerticalPosition                 None                                  
+ TableTopLongitudinalPosition             None                                  
+ TableTopLateralPosition                  None                                  
+ IsocenterPosition                        MultiValue of length 3                
+ SourceToSurfaceDistance                  815.725                               
+ CumulativeMetersetWeight                 0                                     
+ ControlPointIndex                        1                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0367236                             
+ ControlPointIndex                        2                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0367236                             
+ ControlPointIndex                        3                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0872991                             
+ ControlPointIndex                        4                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.0872991                             
+ ControlPointIndex                        5                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.411747                              
+ ControlPointIndex                        6                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.411747                              
+ ControlPointIndex                        7                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.443812                              
+ ControlPointIndex                        8                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.443812                              
+ ControlPointIndex                        9                                     
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.845657                              
+ ControlPointIndex                        10                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.845657                              
+ ControlPointIndex                        11                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.877722                              
+ ControlPointIndex                        12                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.877722                              
+ ControlPointIndex                        13                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.93573                               
+ ControlPointIndex                        14                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.93573                               
+ ControlPointIndex                        15                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.967796                              
+ ControlPointIndex                        16                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 0.967796                              
+ ControlPointIndex                        17                                    
+ BeamLimitingDevicePositionSequence       Sequence of length 1                  
+ RTBeamLimitingDeviceType                 MLCX                                  
+ LeafJawPositions                         MultiValue of length 120              
+ CumulativeMetersetWeight                 1                                     
+ ReferencedPatientSetupNumber             1                                     
+ ReferencedToleranceTableNumber           7                                     
+ PatientSetupSequence                     Sequence of length 1                  
+ PatientPosition                          HFS                                   
+ PatientSetupNumber                       1                                     
+ ReferencedStructureSetSequence           Sequence of length 1                  
+ ReferencedSOPClassUID                    1.2.840.10008.5.1.4.1.1.481.3         
+ ReferencedSOPInstanceUID                 1.3.6.1.4.1.14519.5.2.1.1706.8040.40… 
+ ApprovalStatus                           UNAPPROVED                            

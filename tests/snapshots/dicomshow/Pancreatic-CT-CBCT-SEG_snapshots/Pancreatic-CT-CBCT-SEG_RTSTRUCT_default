@@ -1,0 +1,24 @@
+ Keyword                Value                                                   
+ BodyPartExamined       ABDOMEN                                                 
+ InstanceCreationDate   20151123                                                
+ InstanceCreationTime   100408.996                                              
+ Manufacturer           MIM Software Inc.                                       
+ ManufacturerModelName  MIM                                                     
+ Modality               RTSTRUCT                                                
+ NumROIs                4                                                       
+ PatientID              Pancreas-CT-CB_003                                      
+ ROINames               ['Bowel_sm_CBCT', 'LUNG_L', 'LUNG_R',                   
+                        'Stomach_duo_CBCT']                                     
+ ReferencedSOPUIDs      []                                                      
+ ReferencedSeriesUID    1.3.6.1.4.1.14519.5.2.1.176764454955551222828043022685… 
+ SeriesDate             20151123                                                
+ SeriesInstanceUID      1.3.6.1.4.1.14519.5.2.1.761648790666199662069960999050… 
+ SeriesTime             100408.996                                              
+ SoftwareVersions       6.9.7                                                   
+ StructureSetDate       20151123                                                
+ StructureSetLabel      RTstruct                                                
+ StructureSetName       BSCB_LL_LR_SDCB                                         
+ StructureSetTime       100408.998                                              
+ StudyDate              20120115                                                
+ StudyInstanceUID       1.3.6.1.4.1.14519.5.2.1.202713618921278877052563249466… 
+ StudyTime              110314                                                  

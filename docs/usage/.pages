@@ -1,0 +1,5 @@
+nav:
+  - autopipeline.md
+  - nnunet_pipeline.md
+  - Core API: core
+  - ...
