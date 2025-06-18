@@ -139,7 +139,7 @@ jobs:
     # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
     ################################################################################################
     Publish-Docs:
-        needs: Build-Docs
+        needs: [Generate-PNG, Build-Docs]
         if: github.ref == 'refs/heads/main'
 
         concurrency:
