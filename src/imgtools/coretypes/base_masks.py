@@ -502,7 +502,7 @@ class Mask(MedImage):
         becomes a separate channel
     """
 
-    metadata: dict[str, str]
+    metadata: dict[str, str] = field(default_factory=dict)
 
     # This is lazy-loaded to avoid unnecessary computation
     # until the label shape filter is actually needed.
