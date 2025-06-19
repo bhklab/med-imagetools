@@ -146,6 +146,7 @@ class Crawler:
 
 def validate_output_dir(output_dir: Path) -> None:
     """Validate the output directory."""
+    output_dir = output_dir.expanduser().resolve()
     errmsg = ""
 
     if not output_dir.exists():
