@@ -4489,10 +4489,7 @@
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/crawl/parse_dicoms.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-458">458</a></span>
-<span class="normal"><a href="#__codelineno-0-459">459</a></span>
-<span class="normal"><a href="#__codelineno-0-460">460</a></span>
-<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-461">461</a></span>
 <span class="normal"><a href="#__codelineno-0-462">462</a></span>
 <span class="normal"><a href="#__codelineno-0-463">463</a></span>
 <span class="normal"><a href="#__codelineno-0-464">464</a></span>
@@ -4530,48 +4527,51 @@
 <span class="normal"><a href="#__codelineno-0-496">496</a></span>
 <span class="normal"><a href="#__codelineno-0-497">497</a></span>
 <span class="normal"><a href="#__codelineno-0-498">498</a></span>
-<span class="normal"><a href="#__codelineno-0-499">499</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="k">def</span><span class="w"> </span><span class="nf">construct_barebones_dict</span><span class="p">(</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>    <span class="n">series_meta_raw</span><span class="p">:</span> <span class="n">SeriesMetaMap</span><span class="p">,</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a simplified dictionary from the series metadata.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">barebones_dict</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>    <span class="k">for</span> <span class="n">seriesuid</span><span class="p">,</span> <span class="n">subsseries_map</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="k">for</span> <span class="n">subseriesid</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">subsseries_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>            <span class="k">match</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>                <span class="k">case</span> <span class="kc">None</span> <span class="o">|</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="k">case</span> <span class="p">[</span><span class="o">*</span><span class="n">multiple_refs</span><span class="p">]:</span>  <span class="c1"># only SR can have multiple references</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">multiple_refs</span><span class="p">)</span>
-<a id="__codelineno-0-471" name="__codelineno-0-471"></a>                    <span class="n">ref_modalities</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>                    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">multiple_refs</span><span class="p">:</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>                        <span class="k">if</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="p">:</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>                            <span class="n">ref_modalities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>                                <span class="n">series2modality</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">series_meta_raw</span><span class="p">)</span>
-<a id="__codelineno-0-476" name="__codelineno-0-476"></a>                            <span class="p">)</span>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_series</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_modalities</span><span class="p">)</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>                <span class="k">case</span> <span class="n">single_ref</span><span class="p">:</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="n">single_ref</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">series2modality</span><span class="p">(</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>                        <span class="n">ref_series</span><span class="p">,</span> <span class="n">series_meta_raw</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>                    <span class="p">)</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="n">barebones_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>                <span class="p">{</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>                    <span class="s2">&quot;PatientID&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;PatientID&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>                    <span class="s2">&quot;StudyInstanceUID&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;StudyInstanceUID&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>                    <span class="s2">&quot;SeriesInstanceUID&quot;</span><span class="p">:</span> <span class="n">seriesuid</span><span class="p">,</span>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a>                    <span class="s2">&quot;SubSeries&quot;</span><span class="p">:</span> <span class="n">subseriesid</span> <span class="ow">or</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a>                    <span class="s2">&quot;Modality&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Modality&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>                    <span class="s2">&quot;ReferencedModality&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a>                    <span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">:</span> <span class="n">ref_series</span><span class="p">,</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a>                    <span class="s2">&quot;instances&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instances&quot;</span><span class="p">,</span> <span class="p">[])),</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a>                    <span class="s2">&quot;folder&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">],</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a>                <span class="p">}</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="p">)</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a>    <span class="k">return</span> <span class="n">barebones_dict</span>
+<span class="normal"><a href="#__codelineno-0-499">499</a></span>
+<span class="normal"><a href="#__codelineno-0-500">500</a></span>
+<span class="normal"><a href="#__codelineno-0-501">501</a></span>
+<span class="normal"><a href="#__codelineno-0-502">502</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="k">def</span><span class="w"> </span><span class="nf">construct_barebones_dict</span><span class="p">(</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">series_meta_raw</span><span class="p">:</span> <span class="n">SeriesMetaMap</span><span class="p">,</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a simplified dictionary from the series metadata.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="n">barebones_dict</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="k">for</span> <span class="n">seriesuid</span><span class="p">,</span> <span class="n">subsseries_map</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="k">for</span> <span class="n">subseriesid</span><span class="p">,</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">subsseries_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="k">match</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>                <span class="k">case</span> <span class="kc">None</span> <span class="o">|</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<a id="__codelineno-0-471" name="__codelineno-0-471"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>                <span class="k">case</span> <span class="p">[</span><span class="o">*</span><span class="n">multiple_refs</span><span class="p">]:</span>  <span class="c1"># only SR can have multiple references</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">multiple_refs</span><span class="p">)</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>                    <span class="n">ref_modalities</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>                    <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">multiple_refs</span><span class="p">:</span>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>                        <span class="k">if</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="p">:</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>                            <span class="n">ref_modalities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>                                <span class="n">series2modality</span><span class="p">(</span><span class="n">ref</span><span class="p">,</span> <span class="n">series_meta_raw</span><span class="p">)</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>                            <span class="p">)</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref_series</span>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ref_modalities</span><span class="p">)</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>                <span class="k">case</span> <span class="n">single_ref</span><span class="p">:</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>                    <span class="n">ref_series</span> <span class="o">=</span> <span class="n">single_ref</span>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>                    <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">series2modality</span><span class="p">(</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>                        <span class="n">ref_series</span><span class="p">,</span> <span class="n">series_meta_raw</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>                    <span class="p">)</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="n">barebones_dict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>                <span class="p">{</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>                    <span class="s2">&quot;PatientID&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;PatientID&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>                    <span class="s2">&quot;StudyInstanceUID&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;StudyInstanceUID&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>                    <span class="s2">&quot;SeriesInstanceUID&quot;</span><span class="p">:</span> <span class="n">seriesuid</span><span class="p">,</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>                    <span class="s2">&quot;SubSeries&quot;</span><span class="p">:</span> <span class="n">subseriesid</span> <span class="ow">or</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>                    <span class="s2">&quot;Modality&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Modality&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>                    <span class="s2">&quot;ReferencedModality&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ReferencedModality&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>                    <span class="s2">&quot;ReferencedSeriesUID&quot;</span><span class="p">:</span> <span class="n">ref_series</span><span class="p">,</span>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>                    <span class="s2">&quot;instances&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;instances&quot;</span><span class="p">,</span> <span class="p">[])),</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>                    <span class="s2">&quot;folder&quot;</span><span class="p">:</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;folder&quot;</span><span class="p">],</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a>                <span class="p">}</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a>            <span class="p">)</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a>    <span class="k">return</span> <span class="n">barebones_dict</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5279,7 +5279,10 @@ The <code>crawl_db.json</code> file contains the simplified crawl database, whil
 <span class="normal"><a href="#__codelineno-0-452">452</a></span>
 <span class="normal"><a href="#__codelineno-0-453">453</a></span>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
-<span class="normal"><a href="#__codelineno-0-455">455</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_dicom_dir</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-296" name="__codelineno-0-296"></a><span class="k">def</span><span class="w"> </span><span class="nf">parse_dicom_dir</span><span class="p">(</span>
 <a id="__codelineno-0-297" name="__codelineno-0-297"></a>    <span class="n">dicom_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <a id="__codelineno-0-298" name="__codelineno-0-298"></a>    <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5341,104 +5344,107 @@ The <code>crawl_db.json</code> file contains the simplified crawl database, whil
 <a id="__codelineno-0-355" name="__codelineno-0-355"></a>
 <a id="__codelineno-0-356" name="__codelineno-0-356"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-357" name="__codelineno-0-357"></a>
-<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="n">top</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
-<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="n">ds_name</span> <span class="o">=</span> <span class="n">dataset_name</span> <span class="ow">or</span> <span class="n">top</span><span class="o">.</span><span class="n">name</span>
+<a id="__codelineno-0-358" name="__codelineno-0-358"></a>    <span class="c1"># resolve the search directory and determine the dataset name</span>
+<a id="__codelineno-0-359" name="__codelineno-0-359"></a>    <span class="n">search_directory</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">dicom_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span>
+<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="n">ds_name</span> <span class="o">=</span> <span class="n">dataset_name</span> <span class="ow">or</span> <span class="n">search_directory</span><span class="o">.</span><span class="n">name</span>
 <a id="__codelineno-0-361" name="__codelineno-0-361"></a>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>        <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="p">)</span>  <span class="c1"># create the output directory if it doesn&#39;t exist</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a>    <span class="c1"># determine the output directory paths</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>    <span class="n">crawl_db_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;crawl_db.json&quot;</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a>    <span class="n">crawl_cache</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;crawl-cache.json&quot;</span>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a>    <span class="n">sop_map_json</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;sop_map.json&quot;</span>
-<a id="__codelineno-0-370" name="__codelineno-0-370"></a>    <span class="n">index_csv</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;index.csv&quot;</span>
-<a id="__codelineno-0-371" name="__codelineno-0-371"></a>
-<a id="__codelineno-0-372" name="__codelineno-0-372"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">crawl_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">crawl_cache</span><span class="si">}</span><span class="s2"> exists and </span><span class="si">{</span><span class="n">force</span><span class="si">=}</span><span class="s2">. Loading from file.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>        <span class="k">with</span> <span class="n">crawl_cache</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a>            <span class="n">series_meta_raw</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sop_map_json</span><span class="si">}</span><span class="s2"> exists and </span><span class="si">{</span><span class="n">force</span><span class="si">=}</span><span class="s2">. Loading from file.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="k">with</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="n">sop_map</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="n">dicom_files</span> <span class="o">=</span> <span class="n">find_dicoms</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">)</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">dicom_files</span><span class="p">:</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No DICOM files found in </span><span class="si">{</span><span class="n">top</span><span class="si">}</span><span class="s2"> with extension </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dicom_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> DICOM files in </span><span class="si">{</span><span class="n">dicom_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a>        <span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">sop_map</span> <span class="o">=</span> <span class="n">parse_all_dicoms</span><span class="p">(</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a>            <span class="n">dicom_files</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a>        <span class="p">)</span>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a>        <span class="k">with</span> <span class="n">crawl_cache</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved cache.&quot;</span><span class="p">,</span> <span class="n">crawl_cache</span><span class="o">=</span><span class="n">crawl_cache</span><span class="p">)</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="k">with</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">sop_map</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved SOP map.&quot;</span><span class="p">,</span> <span class="n">sop_map_json</span><span class="o">=</span><span class="n">sop_map_json</span><span class="p">)</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a>    <span class="c1"># we have to resolve the reference series mapping</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>    <span class="c1"># for the `FrameOfReferenceUID` to `SeriesInstanceUID` mapping</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a>    <span class="c1"># this is a bit tricky, because the `FrameOfReferenceUID` will</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="c1"># be the same for many series</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="k">with</span> <span class="n">timed_context</span><span class="p">(</span><span class="s2">&quot;Mapping FrameOfReferenceUID to SeriesInstanceUID&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a>        <span class="n">frame_mapping</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="k">for</span> <span class="n">series_uid</span><span class="p">,</span> <span class="n">subsseries_map</span> <span class="ow">in</span> <span class="n">dpath_search</span><span class="p">(</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a>            <span class="n">series_meta_raw</span><span class="p">,</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a>            <span class="s2">&quot;*/**/FrameOfReferenceUID&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407"></a>        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">subsseries_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a>                <span class="k">if</span> <span class="n">frame</span> <span class="o">:=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;FrameOfReferenceUID&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a>                    <span class="n">frame_mapping</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">series_uid</span><span class="p">)</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="c1"># we have to extract all the nested metadata dictionaries</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="c1"># within each subseries</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a>    <span class="c1"># to resolve the reference series mapping</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="n">_meta_gen</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="n">meta</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>        <span class="k">for</span> <span class="n">seriesuid</span> <span class="ow">in</span> <span class="n">series_meta_raw</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="p">[</span><span class="n">seriesuid</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>    <span class="p">)</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="c1"># Using the function with the metadata generator</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="n">_meta_gen</span><span class="p">,</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Solving Reference Series Mapping&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>        <span class="n">leave</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>    <span class="p">):</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="n">resolve_reference_series</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">sop_map</span><span class="p">,</span> <span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">frame_mapping</span><span class="p">)</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="c1"># add &quot;ReferencedModality&quot; to the metadata</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>    <span class="c1"># and extract the relevant fields for barebones_dict</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>    <span class="n">slim_db</span> <span class="o">=</span> <span class="n">construct_barebones_dict</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">)</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>
-<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="c1"># drop duplicate entries with different subseries.</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="n">slim_db</span> <span class="o">=</span> <span class="n">remove_duplicate_entries</span><span class="p">(</span><span class="n">slim_db</span><span class="p">)</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="c1"># ensure the output directory is a pathlib.Path object</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>        <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>    <span class="p">)</span>  <span class="c1"># create the output directory if it doesn&#39;t exist</span>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>    <span class="c1"># determine the output directory paths</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>    <span class="n">crawl_db_path</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;crawl_db.json&quot;</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>    <span class="n">crawl_cache</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;crawl-cache.json&quot;</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>    <span class="n">sop_map_json</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;sop_map.json&quot;</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>    <span class="n">index_csv</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">ds_name</span> <span class="o">/</span> <span class="s2">&quot;index.csv&quot;</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">crawl_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">crawl_cache</span><span class="si">}</span><span class="s2"> exists and </span><span class="si">{</span><span class="n">force</span><span class="si">=}</span><span class="s2">. Loading from file.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="k">with</span> <span class="n">crawl_cache</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>            <span class="n">series_meta_raw</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sop_map_json</span><span class="si">}</span><span class="s2"> exists and </span><span class="si">{</span><span class="n">force</span><span class="si">=}</span><span class="s2">. Loading from file.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="k">with</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>            <span class="n">sop_map</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a>        <span class="n">dicom_files</span> <span class="o">=</span> <span class="n">find_dicoms</span><span class="p">(</span><span class="n">search_directory</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">)</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">dicom_files</span><span class="p">:</span>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>            <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;No DICOM files found in </span><span class="si">{</span><span class="n">search_directory</span><span class="si">}</span><span class="s2"> with extension </span><span class="si">{</span><span class="n">extension</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dicom_files</span><span class="p">)</span><span class="si">}</span><span class="s2"> DICOM files in </span><span class="si">{</span><span class="n">dicom_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>        <span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">sop_map</span> <span class="o">=</span> <span class="n">parse_all_dicoms</span><span class="p">(</span>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a>            <span class="n">dicom_files</span><span class="p">,</span> <span class="n">search_directory</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="p">)</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="k">with</span> <span class="n">crawl_cache</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved cache.&quot;</span><span class="p">,</span> <span class="n">crawl_cache</span><span class="o">=</span><span class="n">crawl_cache</span><span class="p">)</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a>        <span class="k">with</span> <span class="n">sop_map_json</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a>            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">sop_map</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved SOP map.&quot;</span><span class="p">,</span> <span class="n">sop_map_json</span><span class="o">=</span><span class="n">sop_map_json</span><span class="p">)</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="c1"># we have to resolve the reference series mapping</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="c1"># for the `FrameOfReferenceUID` to `SeriesInstanceUID` mapping</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="c1"># this is a bit tricky, because the `FrameOfReferenceUID` will</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a>    <span class="c1"># be the same for many series</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a>    <span class="k">with</span> <span class="n">timed_context</span><span class="p">(</span><span class="s2">&quot;Mapping FrameOfReferenceUID to SeriesInstanceUID&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a>        <span class="n">frame_mapping</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">)</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a>        <span class="k">for</span> <span class="n">series_uid</span><span class="p">,</span> <span class="n">subsseries_map</span> <span class="ow">in</span> <span class="n">dpath_search</span><span class="p">(</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a>            <span class="n">series_meta_raw</span><span class="p">,</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a>            <span class="s2">&quot;*/**/FrameOfReferenceUID&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>        <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a>            <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">subsseries_map</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a>                <span class="k">if</span> <span class="n">frame</span> <span class="o">:=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;FrameOfReferenceUID&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a>                    <span class="n">frame_mapping</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">series_uid</span><span class="p">)</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>    <span class="c1"># we have to extract all the nested metadata dictionaries</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>    <span class="c1"># within each subseries</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>    <span class="c1"># to resolve the reference series mapping</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>    <span class="n">_meta_gen</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>        <span class="n">meta</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="k">for</span> <span class="n">seriesuid</span> <span class="ow">in</span> <span class="n">series_meta_raw</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">series_meta_raw</span><span class="p">[</span><span class="n">seriesuid</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="p">)</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>    <span class="c1"># Using the function with the metadata generator</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>    <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="n">_meta_gen</span><span class="p">,</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Solving Reference Series Mapping&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="n">leave</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>    <span class="p">):</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="n">resolve_reference_series</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">sop_map</span><span class="p">,</span> <span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">frame_mapping</span><span class="p">)</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>    <span class="c1"># add &quot;ReferencedModality&quot; to the metadata</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>    <span class="c1"># and extract the relevant fields for barebones_dict</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>    <span class="n">slim_db</span> <span class="o">=</span> <span class="n">construct_barebones_dict</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">)</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="c1"># convert slimb_db to a pandas dataframe</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">index_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">slim_db</span><span class="p">)</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="c1"># drop duplicate entries with different subseries.</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="n">slim_db</span> <span class="o">=</span> <span class="n">remove_duplicate_entries</span><span class="p">(</span><span class="n">slim_db</span><span class="p">)</span>
 <a id="__codelineno-0-438" name="__codelineno-0-438"></a>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="n">index_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index_csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved index CSV.&quot;</span><span class="p">,</span> <span class="n">index_csv</span><span class="o">=</span><span class="n">index_csv</span><span class="p">)</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a>    <span class="c1"># convert slimb_db to a pandas dataframe</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a>    <span class="n">index_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">slim_db</span><span class="p">)</span>
 <a id="__codelineno-0-441" name="__codelineno-0-441"></a>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="c1"># save the crawl_db</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="k">with</span> <span class="n">crawl_db_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved crawl_db.&quot;</span><span class="p">,</span> <span class="n">crawl_db_path</span><span class="o">=</span><span class="n">crawl_db_path</span><span class="p">)</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a>    <span class="k">return</span> <span class="n">ParseDicomDirResult</span><span class="p">(</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a>        <span class="n">crawl_db</span><span class="o">=</span><span class="n">slim_db</span><span class="p">,</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>        <span class="n">index</span><span class="o">=</span><span class="n">index_df</span><span class="p">,</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a>        <span class="n">crawl_db_raw</span><span class="o">=</span><span class="n">series_meta_raw</span><span class="p">,</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="n">crawl_db_path</span><span class="o">=</span><span class="n">crawl_db_path</span><span class="p">,</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="n">index_csv_path</span><span class="o">=</span><span class="n">index_csv</span><span class="p">,</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="n">crawl_cache_path</span><span class="o">=</span><span class="n">crawl_cache</span><span class="p">,</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="n">sop_map_path</span><span class="o">=</span><span class="n">sop_map_json</span><span class="p">,</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>    <span class="p">)</span>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="n">index_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index_csv</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved index CSV.&quot;</span><span class="p">,</span> <span class="n">index_csv</span><span class="o">=</span><span class="n">index_csv</span><span class="p">)</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="c1"># save the crawl_db</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="k">with</span> <span class="n">crawl_db_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">series_meta_raw</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saved crawl_db.&quot;</span><span class="p">,</span> <span class="n">crawl_db_path</span><span class="o">=</span><span class="n">crawl_db_path</span><span class="p">)</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="k">return</span> <span class="n">ParseDicomDirResult</span><span class="p">(</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>        <span class="n">crawl_db</span><span class="o">=</span><span class="n">slim_db</span><span class="p">,</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>        <span class="n">index</span><span class="o">=</span><span class="n">index_df</span><span class="p">,</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="n">crawl_db_raw</span><span class="o">=</span><span class="n">series_meta_raw</span><span class="p">,</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="n">crawl_db_path</span><span class="o">=</span><span class="n">crawl_db_path</span><span class="p">,</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="n">index_csv_path</span><span class="o">=</span><span class="n">index_csv</span><span class="p">,</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="n">crawl_cache_path</span><span class="o">=</span><span class="n">crawl_cache</span><span class="p">,</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>        <span class="n">sop_map_path</span><span class="o">=</span><span class="n">sop_map_json</span><span class="p">,</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5501,10 +5507,7 @@ The <code>crawl_db.json</code> file contains the simplified crawl database, whil
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/dicom/crawl/parse_dicoms.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-502">502</a></span>
-<span class="normal"><a href="#__codelineno-0-503">503</a></span>
-<span class="normal"><a href="#__codelineno-0-504">504</a></span>
-<span class="normal"><a href="#__codelineno-0-505">505</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-505">505</a></span>
 <span class="normal"><a href="#__codelineno-0-506">506</a></span>
 <span class="normal"><a href="#__codelineno-0-507">507</a></span>
 <span class="normal"><a href="#__codelineno-0-508">508</a></span>
@@ -5547,53 +5550,56 @@ The <code>crawl_db.json</code> file contains the simplified crawl database, whil
 <span class="normal"><a href="#__codelineno-0-545">545</a></span>
 <span class="normal"><a href="#__codelineno-0-546">546</a></span>
 <span class="normal"><a href="#__codelineno-0-547">547</a></span>
-<span class="normal"><a href="#__codelineno-0-548">548</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_duplicate_entries</span><span class="p">(</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a>    <span class="n">slim_db</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">ignore_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes duplicate entries from a barebones dict, ignoring the keys in `ignore_keys`.</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        slim_db : list[dict[str, str]]</span>
-<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">            - The barebones dict to operate on. MUST contain the following keys:</span>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">                    &quot;PatientID&quot;</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">                    &quot;StudyInstanceUID&quot;</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">                    &quot;SeriesInstanceUID&quot;</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">                    &quot;SubSeries&quot;</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">                    &quot;Modality&quot;</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">                    &quot;ReferencedModality&quot;</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">                    &quot;ReferencedSeriesUID&quot;</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">                    &quot;instances&quot;</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">                    &quot;folder&quot;</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">        ignore_keys: Optional[list[str]], default = None</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">            - The list of keys to ignore when searching for duplicates.</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">            - If a row is exactly the same as another row, except for one of the keys listed in `ignore_keys`</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">              the row will still be considered a duplicate.</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    -------</span>
+<span class="normal"><a href="#__codelineno-0-548">548</a></span>
+<span class="normal"><a href="#__codelineno-0-549">549</a></span>
+<span class="normal"><a href="#__codelineno-0-550">550</a></span>
+<span class="normal"><a href="#__codelineno-0-551">551</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_duplicate_entries</span><span class="p">(</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a>    <span class="n">slim_db</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span> <span class="n">ignore_keys</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Removes duplicate entries from a barebones dict, ignoring the keys in `ignore_keys`.</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-510" name="__codelineno-0-510"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">        slim_db : list[dict[str, str]]</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">            - The barebones dict to operate on. MUST contain the following keys:</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">                    &quot;PatientID&quot;</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">                    &quot;StudyInstanceUID&quot;</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a><span class="sd">                    &quot;SeriesInstanceUID&quot;</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a><span class="sd">                    &quot;SubSeries&quot;</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a><span class="sd">                    &quot;Modality&quot;</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a><span class="sd">                    &quot;ReferencedModality&quot;</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="sd">                    &quot;ReferencedSeriesUID&quot;</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">                    &quot;instances&quot;</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="sd">                    &quot;folder&quot;</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        ignore_keys: Optional[list[str]], default = None</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            - The list of keys to ignore when searching for duplicates.</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">            - If a row is exactly the same as another row, except for one of the keys listed in `ignore_keys`</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">              the row will still be considered a duplicate.</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>
 <a id="__codelineno-0-528" name="__codelineno-0-528"></a>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">        list[dict[str, str]]</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">            - the barebones dict with duplicates removed.</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">    -------</span>
 <a id="__codelineno-0-531" name="__codelineno-0-531"></a>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">    Note: I tried to make this as efficient as possible, sorry if it slows down everything.</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">        list[dict[str, str]]</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">            - the barebones dict with duplicates removed.</span>
 <a id="__codelineno-0-534" name="__codelineno-0-534"></a>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="n">hash_values</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="c1"># I find it more intuitive to pass in a list, rather than a set, but since sets are faster for our usecase I cast ignore_keys to a set.</span>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="k">if</span> <span class="n">ignore_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="n">ignore_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;SubSeries&quot;</span><span class="p">])</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>    <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a>        <span class="n">ignore_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ignore_keys</span><span class="p">)</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a>    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">slim_db</span><span class="p">:</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a>        <span class="n">hash_key</span> <span class="o">=</span> <span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">record</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore_set</span><span class="p">]</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">hash_key</span><span class="p">,)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hash_values</span><span class="p">:</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a>            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a>            <span class="n">hash_values</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">*</span><span class="n">hash_key</span><span class="p">,))</span>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>    <span class="k">return</span> <span class="n">output</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">    Note: I tried to make this as efficient as possible, sorry if it slows down everything.</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="n">hash_values</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a>    <span class="c1"># I find it more intuitive to pass in a list, rather than a set, but since sets are faster for our usecase I cast ignore_keys to a set.</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a>    <span class="k">if</span> <span class="n">ignore_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a>        <span class="n">ignore_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;SubSeries&quot;</span><span class="p">])</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a>    <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a>        <span class="n">ignore_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">ignore_keys</span><span class="p">)</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a>    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a>    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">slim_db</span><span class="p">:</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a>        <span class="n">hash_key</span> <span class="o">=</span> <span class="p">[</span><span class="n">record</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">record</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore_set</span><span class="p">]</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a>        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">hash_key</span><span class="p">,)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hash_values</span><span class="p">:</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a>            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a>            <span class="n">hash_values</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="o">*</span><span class="n">hash_key</span><span class="p">,))</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a>    <span class="k">return</span> <span class="n">output</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
