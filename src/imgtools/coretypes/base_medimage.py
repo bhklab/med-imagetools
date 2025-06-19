@@ -53,15 +53,14 @@ class MedImage(sitk.Image):
         - class, hash, size, ndim, nvoxels, spacing, origin, direction
         - min, max, sum, mean, std, variance
         - dtype_str, dtype_numpy
-        - Any key starting with "mask."
         """
         # Load the image file
-        image = sitk.ReadImage(str(filepath))
+        image = sitk.ReadImage(filepath)
 
         # Create instance of the class (MedImage or a subclass)
+        instance = cls(image)
 
         if not metadata:
-            instance = cls(image)
             return instance
 
         # Process metadata if provided
@@ -71,7 +70,6 @@ class MedImage(sitk.Image):
             "origin", "direction", "min", "max", "sum", "mean", "std", 
             "variance", "dtype_str", "dtype_numpy"
         }  # fmt: skip
-        instance = cls(image)
         # Filter metadata to exclude fingerprint keys and mask.* keys
         instance.metadata = {
             k: v for k, v in metadata.items() if k not in fingerprint_keys

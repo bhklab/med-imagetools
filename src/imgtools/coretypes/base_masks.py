@@ -562,6 +562,13 @@ class Mask(MedImage):
                 f"which may not be appropriate for a mask. Consider converting to UInt8."
             )
 
+        if not isinstance(instance, Mask):
+            # If the instance is not a Mask, convert it to one
+            instance = cls(
+                image=instance,
+                metadata=instance.metadata.copy(),
+            )
+
         return instance
 
     def __init__(
