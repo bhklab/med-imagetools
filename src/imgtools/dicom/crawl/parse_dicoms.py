@@ -355,7 +355,7 @@ def parse_dicom_dir(
 
     """
 
-    # resolve the search directory and determine the dataset name 
+    # resolve the search directory and determine the dataset name
     search_directory = pathlib.Path(dicom_dir).resolve().absolute()
     ds_name = dataset_name or search_directory.name
 
