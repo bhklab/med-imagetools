@@ -35,13 +35,8 @@ __all__ = [
     "create_roi_matcher",
     # structureset
     "RTStructureSet",
-    "ContourPointsAcrossSlicesError",
-    "MaskArrayOutOfBoundsError",
-    "UnexpectedContourPointsError",
-    "NonIntegerZSliceIndexError",
     # seg
     "SEG",
-    "Segment",
     # base masks
     "VectorMask",
     "Mask",
