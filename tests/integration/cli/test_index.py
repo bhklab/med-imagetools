@@ -1,3 +1,4 @@
+import sys
 import pytest
 from pathlib import Path
 from click.testing import CliRunner
@@ -127,7 +128,7 @@ class TestIndexOutputDirectory:
         assert "is not a directory" in result.output
     
     @pytest.mark.skipif(
-        "sys.platform == 'win32'", 
+        sys.platform == 'win32', 
         reason="Permission tests behave differently on Windows"
     )
     def test_readonly_output_dir_fails(self, runner, sample_dicom_dir, temp_output_dir):
