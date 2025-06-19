@@ -355,9 +355,12 @@ def parse_dicom_dir(
 
     """
 
-    top = pathlib.Path(dicom_dir).absolute()
+    # resolve the search directory and determine the dataset name
+    search_directory = pathlib.Path(dicom_dir).resolve().absolute()
+    ds_name = dataset_name or search_directory.name
+
+    # ensure the output directory is a pathlib.Path object
     output_dir = pathlib.Path(output_dir)
-    ds_name = dataset_name or top.name
 
     pathlib.Path(output_dir / ds_name).mkdir(
         parents=True, exist_ok=True
@@ -377,15 +380,15 @@ def parse_dicom_dir(
         with sop_map_json.open("r") as f:
             sop_map = json.load(f)
     else:
-        dicom_files = find_dicoms(top, extension=extension)
+        dicom_files = find_dicoms(search_directory, extension=extension)
         if not dicom_files:
-            msg = f"No DICOM files found in {top} with extension {extension}"
+            msg = f"No DICOM files found in {search_directory} with extension {extension}"
             raise FileNotFoundError(msg)
 
         logger.info(f"Found {len(dicom_files)} DICOM files in {dicom_dir}")
 
         series_meta_raw, sop_map = parse_all_dicoms(
-            dicom_files, top, n_jobs=n_jobs
+            dicom_files, search_directory, n_jobs=n_jobs
         )
 
         with crawl_cache.open("w") as f:

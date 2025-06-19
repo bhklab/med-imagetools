@@ -65,7 +65,7 @@ def index(
     - By default, it saves the results in a ".imgtools" folder right next to 
         your DICOM directory, but you can pick your own place to store them.
     """
-    from imgtools.dicom.crawl import Crawler
+    from imgtools.dicom.crawl import Crawler, CrawlerOutputDirError
     crawler = Crawler(
         dicom_dir=dicom_dir,
         output_dir=output_dir,
@@ -73,11 +73,19 @@ def index(
         n_jobs=n_jobs,
         force=force,
     )
-
-    crawler.crawl()
-
-    logger.info("Crawling completed.")
-    logger.info("Crawl results saved to %s", crawler.output_dir)
+    try:
+        crawler.crawl()
+    except CrawlerOutputDirError as e:
+        logger.exception("Output directory error")
+        # exit with a non-zero status code
+        raise click.ClickException(f"Output directory error: {e}") from e
+    except Exception as e:
+        logger.exception("Unknown Crawling Error has occurred")
+        # exit with a non-zero status code
+        raise click.ClickException(f"Crawling failed") from e
+    else:
+        logger.info("Crawling completed successfully.")
+        logger.info("Crawl results saved to %s", crawler.output_dir)
 
 if __name__ == "__main__":
     index()
