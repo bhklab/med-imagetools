@@ -70,7 +70,7 @@ class MedImage(sitk.Image):
             "origin", "direction", "min", "max", "sum", "mean", "std", 
             "variance", "dtype_str", "dtype_numpy"
         }  # fmt: skip
-        # Filter metadata to exclude fingerprint keys and mask.* keys
+        # Filter metadata to exclude fingerprint keys
         instance.metadata = {
             k: v for k, v in metadata.items() if k not in fingerprint_keys
         }
