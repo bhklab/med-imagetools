@@ -78,7 +78,7 @@ def index(
     except CrawlerOutputDirError as e:
         logger.exception("Output directory error")
         # exit with a non-zero status code
-        raise click.ClickException(f"Output directory error") from e
+        raise click.ClickException(f"Output directory error: %s", e) from e
     except Exception as e:
         logger.exception("Unknown Crawling Error has occurred")
         # exit with a non-zero status code
