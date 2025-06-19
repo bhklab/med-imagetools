@@ -13,6 +13,8 @@ from imgtools.coretypes.spatial_types import (
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import numpy as np
 
 
@@ -24,6 +26,57 @@ class MedImage(sitk.Image):
     """
 
     metadata: dict[str, Any]
+
+    @classmethod
+    def from_file(
+        cls, filepath: str | "Path", metadata: dict[str, Any] | None = None
+    ) -> "MedImage":
+        """Create a MedImage from a file path with optional metadata.
+
+        This method filters out any fingerprint-related keys from the provided metadata.
+
+        Parameters
+        ----------
+        filepath : str | Path
+            Path to the image file
+        metadata : dict[str, Any] | None, optional
+            Optional metadata dictionary, by default None
+
+        Returns
+        -------
+        MedImage
+            A new MedImage instance
+
+        Notes
+        -----
+        The following fingerprint-related keys will be filtered out from metadata:
+        - class, hash, size, ndim, nvoxels, spacing, origin, direction
+        - min, max, sum, mean, std, variance
+        - dtype_str, dtype_numpy
+        - Any key starting with "mask."
+        """
+        # Load the image file
+        image = sitk.ReadImage(str(filepath))
+
+        # Create instance of the class (MedImage or a subclass)
+
+        if not metadata:
+            instance = cls(image)
+            return instance
+
+        # Process metadata if provided
+        # Define fingerprint keys to filter out
+        fingerprint_keys = {
+            "class", "hash", "size", "ndim", "nvoxels", "spacing", 
+            "origin", "direction", "min", "max", "sum", "mean", "std", 
+            "variance", "dtype_str", "dtype_numpy"
+        }  # fmt: skip
+        instance = cls(image)
+        # Filter metadata to exclude fingerprint keys and mask.* keys
+        instance.metadata = {
+            k: v for k, v in metadata.items() if k not in fingerprint_keys
+        }
+        return instance
 
     @property
     def size(self) -> Size3D:

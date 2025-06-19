@@ -12,6 +12,8 @@ from imgtools.coretypes.box import RegionBox
 from imgtools.loggers import logger
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from imgtools.coretypes.masktypes.seg import SEG
     from imgtools.coretypes.masktypes.structureset import (
         ROIMatcher,
@@ -500,7 +502,7 @@ class Mask(MedImage):
         becomes a separate channel
     """
 
-    metadata: dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str]
 
     # This is lazy-loaded to avoid unnecessary computation
     # until the label shape filter is actually needed.
@@ -511,6 +513,56 @@ class Mask(MedImage):
     # this is to signify for development that
     # we assume the Mask currently only has a single label!!!
     _label_value: int = field(default=1, init=False)
+
+    @classmethod
+    def from_file(
+        cls, filepath: str | "Path", metadata: dict[str, str] | None = None
+    ) -> "Mask":
+        """Create a Mask from a file path with optional metadata.
+
+        This method filters out any fingerprint-related keys from the provided metadata.
+
+        Parameters
+        ----------
+        filepath : str | Path
+            Path to the mask image file
+        metadata : dict[str, str] | None, optional
+            Optional metadata dictionary, by default None
+
+        Returns
+        -------
+        Mask
+            A new Mask instance
+
+        Notes
+        -----
+        The following fingerprint-related keys will be filtered out from metadata:
+        - All keys filtered by MedImage.from_file
+        - Additionally, any key starting with "mask." (mask shape statistics)
+
+        Since this is a Mask class, it will only accept images with pixel types
+        compatible with label images (typically sitk.sitkUInt8 or sitk.sitkLabelUInt8).
+        """
+        # Let MedImage.from_file do most of the work
+        instance = MedImage.from_file(filepath, metadata)
+
+        # Additional filtering for mask.* keys in metadata
+        if instance.metadata:
+            instance.metadata = {
+                k: v
+                for k, v in instance.metadata.items()
+                if not k.startswith("mask.")
+            }
+
+        # Check if the image is appropriate for a mask
+        pixel_id = instance.GetPixelID()
+        if pixel_id not in [sitk.sitkUInt8, sitk.sitkLabelUInt8]:
+            logger.warning(
+                f"Image loaded has pixel type {sitk.GetPixelIDValueAsString(pixel_id)} "
+                f"which may not be appropriate for a mask. Consider converting to UInt8."
+            )
+
+        return instance
 
     def __init__(
         self,
