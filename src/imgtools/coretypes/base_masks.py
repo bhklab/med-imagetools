@@ -514,6 +514,22 @@ class Mask(MedImage):
     # we assume the Mask currently only has a single label!!!
     _label_value: int = field(default=1, init=False)
 
+    def __init__(
+        self,
+        image: sitk.Image,
+        metadata: dict[str, str],
+    ) -> None:
+        """
+        Parameters
+        ----------
+        image : sitk.Image
+            A SimpleITK image with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8
+        metadata : dict[str, str]
+            Dictionary containing metadata about the mask
+        """
+        super().__init__(image)
+        self.metadata = metadata
+
     @classmethod
     def from_file(
         cls, filepath: str | "Path", metadata: dict[str, str] | None = None
@@ -570,22 +586,6 @@ class Mask(MedImage):
             )
 
         return instance
-
-    def __init__(
-        self,
-        image: sitk.Image,
-        metadata: dict[str, str],
-    ) -> None:
-        """
-        Parameters
-        ----------
-        image : sitk.Image
-            A SimpleITK image with pixel type sitk.sitkUInt8 or sitk.sitkLabelUInt8
-        metadata : dict[str, str]
-            Dictionary containing metadata about the mask
-        """
-        super().__init__(image)
-        self.metadata = metadata
 
     def __rich_repr__(self):  # type: ignore[no-untyped-def] # noqa: ANN204
         yield from super().__rich_repr__()
@@ -683,6 +683,13 @@ class Mask(MedImage):
         return self.label_shape_filter.GetElongation(self._label_value)
 
     @property
+    def volume_count(self) -> int:
+        """Get the number of connected components in the mask image."""
+        cc = sitk.ConnectedComponentImageFilter()
+        cc.Execute(self)
+        return int(cc.GetObjectCount())
+
+    @property
     def fingerprint(self) -> dict[str, Any]:  # noqa: ANN001
         """Append to MedImage fingerprint"""
         bbox = self.get_label_bounding_box()
@@ -698,4 +705,5 @@ class Mask(MedImage):
             "mask.equivalent_spherical_radius": self.equivalent_spherical_radius,
             "mask.equivalent_spherical_perimeter": self.equivalent_spherical_perimeter,
             "mask.equivalent_ellipsoid_diameters": self.equivalent_ellipsoid_diameters,
+            "mask.volume_count": self.volume_count,
         }

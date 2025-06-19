@@ -101,6 +101,7 @@ SIMPLIFIED_COLUMNS = [
     "mask.equivalent_spherical_radius",
     "mask.equivalent_spherical_perimeter",
     "mask.equivalent_ellipsoid_diameters",
+    "mask.volume_count",
 ]
 
 
