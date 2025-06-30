@@ -24,7 +24,6 @@ py313 = { features = ["py313", "test"], no-default-feature = true }
 ############################################## DEV ###############################################
 [feature.dev.pypi-dependencies]
 med-imagetools = { path = ".", editable = true, extras = ["all"] }
-nnunetv2 = ">=2.6.2, <3"
 
 [feature.dev.dependencies]
 ipython = "*"
@@ -112,6 +111,15 @@ depends-on = [
 
 [feature.test.tasks.clean_tests]
 cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
+
+[feature.test.target.linux-64.pypi-dependencies]
+nnunetv2 = ">=2.6.2, <3"
+
+[feature.test.target.osx-arm64.pypi-dependencies]
+nnunetv2 = ">=2.6.2, <3"
+
+[feature.test.target.win-64.pypi-dependencies]
+nnunetv2 = ">=2.6.2, <3"
 
 ############################################## DOCS ###############################################
 [feature.docs.dependencies]

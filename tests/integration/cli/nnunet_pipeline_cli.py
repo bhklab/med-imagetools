@@ -3,6 +3,7 @@ import tempfile
 import os
 import yaml
 import subprocess
+from sys import platform
 from pathlib import Path
 from click.testing import CliRunner
 from imgtools.cli.nnunet_pipeline import nnunet_pipeline
@@ -48,11 +49,15 @@ class TestnnUNetCLI:
         assert result.exit_code != 0
         assert "Missing option '--roi-match-yaml' / '-ryaml'" in result.output or "Error:" in result.output
 
+    @pytest.mark.skipif(platform == "darwin", reason="Test skipped on macOS, due to nnUNet py313 incompatibility")
     @pytest.mark.parametrize("mask_saving_strategy", ["sparse_mask", "region_mask"])
     def test_RADCURE(self, runner, temp_output_dir, DATA_DIR, mask_saving_strategy):
         """Test the CLI with different collections."""
             
         input_dir = DATA_DIR / "RADCURE"
+        if not input_dir.exists():
+            pytest.skip("RADCURE test data not available")
+
         modalities_str = "CT,RTSTRUCT"
 
         roi_dict = {
@@ -63,18 +68,18 @@ class TestnnUNetCLI:
         roi_yaml_path = input_dir / "roi_match.yaml"
         with (roi_yaml_path).open("w") as f:
             yaml.dump(roi_dict, f)
-        
+
         result = runner.invoke(nnunet_pipeline, [
             str(input_dir),
             str(temp_output_dir),
             "--modalities", modalities_str,
             "--roi-match-yaml", str(roi_yaml_path),
             "--existing-file-mode", "skip",  # Skip existing files to avoid errors
+            "--mask-saving-strategy", mask_saving_strategy,
         ])
         
         assert result.exit_code == 0, "imgtools nnunet_pipeline failed"
         
-
         env = os.environ.copy()
         env["nnUNet_raw"] = (temp_output_dir / "nnUNet_raw").as_posix()
         env["nnUNet_preprocessed"] = (temp_output_dir / "nnUNet_preprocessed").as_posix()
@@ -83,9 +88,9 @@ class TestnnUNetCLI:
             "nnUNetv2_extract_fingerprint",
             "-d", "1",
             "--verify_dataset_integrity",
-            "--mask-saving-strategy", mask_saving_strategy
             ],
-            env=env
+            env=env,
+            stdout=subprocess.PIPE
         )
 
         assert nnunet_result.returncode == 0, "nnUNetv2_extract_fingerprint failed"
