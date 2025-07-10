@@ -11,6 +11,7 @@ from datetime import datetime
 # Import Path in type-checking block
 from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
 
+import numpy as np
 import pandas as pd
 
 from imgtools.loggers import logger
@@ -133,13 +134,18 @@ def save_pipeline_reports(
 
         # Get columns in the order we want
         # If a column is not in the index_df, it will be filled with NaN
-        index_df = index_df[simplified_columns]
+        simple_index_df = pd.DataFrame(columns=simplified_columns)
+        for val in simplified_columns:
+            if val not in index_df.columns:
+                simple_index_df[val] = np.nan
+            else:
+                simple_index_df[val] = index_df[val]
 
         # Sort by 'filepath' to make it easier to read
-        if "filepath" in index_df.columns:
-            index_df = index_df.sort_values(by=["filepath"])
+        if "filepath" in simple_index_df.columns:
+            simple_index_df = simple_index_df.sort_values(by=["filepath"])
 
-        index_df.to_csv(simple_index, index=False)
+        simple_index_df.to_csv(simple_index, index=False)
         logger.info(f"Index file saved to {simple_index}")
     except Exception as e:
         logger.error(f"Failed to create simplified index: {e}")
