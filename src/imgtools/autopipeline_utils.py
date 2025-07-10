@@ -134,12 +134,7 @@ def save_pipeline_reports(
 
         # Get columns in the order we want
         # If a column is not in the index_df, it will be filled with NaN
-        simple_index_df = pd.DataFrame(columns=simplified_columns)
-        for val in simplified_columns:
-            if val not in index_df.columns:
-                simple_index_df[val] = np.nan
-            else:
-                simple_index_df[val] = index_df[val]
+        simple_index_df = index_df.reindex(columns=simplified_columns)
 
         # Sort by 'filepath' to make it easier to read
         if "filepath" in simple_index_df.columns:
