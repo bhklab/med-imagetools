@@ -10,6 +10,7 @@ from datetime import datetime
 
 # Import Path in type-checking block
 from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
+
 import pandas as pd
 
 from imgtools.loggers import logger
