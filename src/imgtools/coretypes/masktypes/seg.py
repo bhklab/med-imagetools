@@ -293,24 +293,10 @@ class SEG:
     def extract_roi_identifiers(self) -> dict[str, int]:
         """
         Returns a mapping of ROI names to segment numbers.
-
-        This provides a reverse mapping that can be used to match ROIs.
-        For each segment, all available naming formats are included in the mapping:
-        - The label (if not empty)
-        - The description (if not empty)
-        - "label::description" format (if both are present)
-
-        This ensures all possible ways to reference a segment are available for matching.
         """
         names_map = {}
         for idx, seg in self.segments.items():
-            # Add all available naming formats
-            if seg.label:
-                names_map[seg.label] = idx
-            if seg.description:
-                names_map[seg.description] = idx
-            if seg.label and seg.description:
-                names_map[f"{seg.label}::{seg.description}"] = idx
+            names_map[seg.label] = idx
         return names_map
 
     def get_vector_mask(
@@ -432,11 +418,11 @@ class SEG:
                     roi_names=segment_matches,
                     image_id=roi_key
                     if roi_matcher.handling_strategy.value == "merge"
-                    else f"{roi_key}__[{segment_matches[0].label}::{segment_matches[0].description}]",
+                    else f"{roi_key}__[{segment_matches[0].label}]",
                 )
             mask_images.append(sitk.GetImageFromArray(mask_array_3d))
 
-        mask_image = sitk.Compose(*mask_images)
+        mask_image = sitk.Compose(mask_images)
         mask_image.CopyInformation(reference_image)
 
         assert mask_image.GetNumberOfComponentsPerPixel() == len(mapping)
@@ -446,7 +432,7 @@ class SEG:
             mapping[idx] = ROIMaskMapping(
                 roi_key=m.roi_key,
                 roi_names=[
-                    f"{segment.label}::{segment.description}"
+                    f"{segment.label}"
                     for segment in m.roi_names
                 ],
                 image_id=m.image_id,
