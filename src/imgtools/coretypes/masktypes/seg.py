@@ -431,10 +431,7 @@ class SEG:
         for idx, m in mapping.items():
             mapping[idx] = ROIMaskMapping(
                 roi_key=m.roi_key,
-                roi_names=[
-                    f"{segment.label}"
-                    for segment in m.roi_names
-                ],
+                roi_names=[f"{segment.label}" for segment in m.roi_names],
                 image_id=m.image_id,
             )
 
