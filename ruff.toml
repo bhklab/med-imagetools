@@ -79,6 +79,7 @@ ignore = [
     "D206",
     "N813",
     "EM101",
+    "PLC0415", # Ignore imports not at top of file
 ]
 
 [lint.mccabe]
