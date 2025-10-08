@@ -465,7 +465,6 @@ def construct_barebones_dict(
     barebones_dict = []
     for seriesuid, subsseries_map in series_meta_raw.items():
         for subseriesid, meta in subsseries_map.items():
-            has_error = False
             match meta.get("ReferencedSeriesUID", None):
                 case None | "":
                     ref_series = ""
@@ -475,50 +474,31 @@ def construct_barebones_dict(
                     ref_modalities = []
                     for ref in multiple_refs:
                         if ref in series_meta_raw:
-                            try:
-                                ref_modalities.append(
-                                    series2modality(ref, series_meta_raw)
-                                )
-                            except (KeyError, IndexError) as e:
-                                logger.error(
-                                    f"Failed to get modality for referenced series {ref}: {e}. Skipping this image.",
-                                    series_uid=seriesuid,
-                                    referenced_series=ref
-                                )
-                                has_error = True
-                                break
-                    if not has_error:
-                        meta["ReferencedSeriesUID"] = ref_series
-                        meta["ReferencedModality"] = ";".join(ref_modalities)
+                            ref_modalities.append(
+                                series2modality(ref, series_meta_raw)
+                            )
+                    meta["ReferencedSeriesUID"] = ref_series
+                    meta["ReferencedModality"] = ";".join(ref_modalities)
                 case single_ref:
                     ref_series = single_ref
-                    try:
+                    if ref_series in series_meta_raw:
                         meta["ReferencedModality"] = series2modality(
                             ref_series, series_meta_raw
                         )
-                    except (KeyError, IndexError) as e:
-                        logger.error(
-                            f"Failed to get modality for referenced series {ref_series}: {e}. Skipping this image.",
-                            series_uid=seriesuid,
-                            referenced_series=ref_series
-                        )
-                        has_error = True
 
-            # Only add to barebones_dict if there were no errors
-            if not has_error:
-                barebones_dict.append(
-                    {
-                        "PatientID": meta["PatientID"],
-                        "StudyInstanceUID": meta["StudyInstanceUID"],
-                        "SeriesInstanceUID": seriesuid,
-                        "SubSeries": subseriesid or "1",
-                        "Modality": meta["Modality"],
-                        "ReferencedModality": meta.get("ReferencedModality", ""),
-                        "ReferencedSeriesUID": ref_series,
-                        "instances": len(meta.get("instances", [])),
-                        "folder": meta["folder"],
-                    }
-                )
+            barebones_dict.append(
+                {
+                    "PatientID": meta["PatientID"],
+                    "StudyInstanceUID": meta["StudyInstanceUID"],
+                    "SeriesInstanceUID": seriesuid,
+                    "SubSeries": subseriesid or "1",
+                    "Modality": meta["Modality"],
+                    "ReferencedModality": meta.get("ReferencedModality", ""),
+                    "ReferencedSeriesUID": ref_series,
+                    "instances": len(meta.get("instances", [])),
+                    "folder": meta["folder"],
+                }
+            )
 
     return barebones_dict
 
