@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, List, Sequence
+import tempfile
+import shutil
 
 from pydantic import (
     BaseModel,
@@ -186,48 +188,68 @@ class SampleOutput(BaseModel):
         """
         saved_files = []
         save_errors = []
-        for image in data:
-            try:
+        temp_dir = None
+
+        try:
+            # Create a unique temporary directory within the root output directory for this transaction
+            temp_dir = Path(tempfile.mkdtemp(prefix=".tmp_sample_", dir=self.writer.root_directory))
+
+            # Create a temporary writer configured to save into this new directory
+            temp_writer = NIFTIWriter(
+                root_directory=temp_dir,
+                filename_format=self.filename_format,
+                existing_file_mode=ExistingFileMode.FAIL, # Should not have conflicts in a new temp dir
+                compression_level=self.writer.compression_level,
+                context={**self.writer.context, **kwargs}
+            )
+
+            files_to_commit = {}
+
+            # Stage 1: Write all files to the temporary directory
+            for image in data:
                 if isinstance(image, VectorMask):
-                    for (
-                        _i,
-                        roi_key,
-                        roi_names,
-                        image_id,
-                        mask,
-                    ) in image.iter_masks():
-                        # image_id = f"{roi_key}_[{matched_rois}]"
-                        p = self.writer.save(
-                            mask,
-                            roi_key=roi_key,
-                            matched_rois="|".join(roi_names),
+                    for (_i, roi_key, roi_names, image_id, mask) in image.iter_masks():
+                        context = {
+                            "roi_key": roi_key,
+                            "matched_rois": "|".join(roi_names),
+                            "ImageID": image_id,
                             **image.metadata,
                             **kwargs,
-                            ImageID=image_id,
-                        )
-                        saved_files.append(p)
+                        }
+                        # Save to temp and resolve final path
+                        temp_path = temp_writer.save(mask, **context)
+                        final_path = self.writer.resolve_path(**context)
+                        files_to_commit[temp_path] = final_path
                 elif isinstance(image, MedImage):
-                    # Handle MedImage case
-                    p = self.writer.save(
-                        image,
+                    context = {
+                        "ImageID": image.metadata.get("Modality", "Unknown"),
                         **image.metadata,
                         **kwargs,
-                        ImageID=image.metadata["Modality"],
-                    )
-                    saved_files.append(p)
+                    }
+                    # Save to temp and resolve final path
+                    temp_path = temp_writer.save(image, **context)
+                    final_path = self.writer.resolve_path(**context)
+                    files_to_commit[temp_path] = final_path
                 else:
-                    errmsg = (
-                        f"Unsupported image type: {type(image)}. "
-                        "Expected MedImage or VectorMask."
-                    )
-                    logger.error(errmsg)
+                    errmsg = f"Unsupported image type: {type(image)}. Expected MedImage or VectorMask."
                     raise TypeError(errmsg)
-            except Exception as e:
-                errmsg = f"Failed to save image SeriesUID: {image.metadata['SeriesInstanceUID']}: {e}"
 
-                # create an error object
-                save_error = FailedToSaveSingleImageError(errmsg, image)
-                save_errors.append(save_error)
-                logger.error(errmsg, error=save_error)
+            # Stage 2: Commit files by moving them from temp to final destination
+            for temp_path, final_path in files_to_commit.items():
+                final_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(temp_path), str(final_path))
+                saved_files.append(final_path)
+
+        except Exception as e:
+            errmsg = f"Failed to save sample atomically: {e}"
+            image_context = data[0] if data else None
+            save_error = FailedToSaveSingleImageError(errmsg, image_context)
+            save_errors.append(save_error)
+            logger.error(errmsg, error=save_error)
+
+        finally:
+            # Stage 3: Cleanup the temporary directory
+            if temp_dir and temp_dir.exists():
+                shutil.rmtree(temp_dir)
 
         return AnnotatedPathSequence(saved_files, save_errors)
