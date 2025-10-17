@@ -298,9 +298,9 @@ class nnUNetOutput(BaseModel):  # noqa: N801
                 labels[self.roi_keys[component_index]] = indices
             regions_class_order = tuple(idx + 1 for idx in range(n_components))
         else:
-            labels = {
-                **{label: i + 1 for i, label in enumerate(self.roi_keys)},
-            }
+            labels.update(
+                {label: i + 1 for i, label in enumerate(self.roi_keys)}
+            )
             regions_class_order = None
 
         generate_dataset_json(
