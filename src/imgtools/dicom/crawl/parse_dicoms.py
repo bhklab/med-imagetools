@@ -481,9 +481,10 @@ def construct_barebones_dict(
                     meta["ReferencedModality"] = ";".join(ref_modalities)
                 case single_ref:
                     ref_series = single_ref
-                    meta["ReferencedModality"] = series2modality(
-                        ref_series, series_meta_raw
-                    )
+                    if ref_series in series_meta_raw:
+                        meta["ReferencedModality"] = series2modality(
+                            ref_series, series_meta_raw
+                        )
 
             barebones_dict.append(
                 {
