@@ -1,6 +1,6 @@
 [project]
 name = "med-imagetools"
-version = "2.12.1"
+version = "2.12.2"
 description = "Med-Imagetools: Transparent and Reproducible Medical Image Processing Pipelines in Python"
 authors = [
     { name = "Sejin Kim" },
