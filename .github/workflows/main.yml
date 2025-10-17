@@ -26,6 +26,7 @@ jobs:
             matrix:
                 os: [ubuntu-latest, macos-latest, windows-latest]
                 env: ["py310", "py311", "py312", "py313"]
+                TestAccessType: ["public"]
 
         steps:
             - uses: actions/checkout@v4
@@ -34,9 +35,11 @@ jobs:
               with:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
+                  test_access_type: ${{ matrix.TestAccessType }}
                   github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
                   codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "unittests"
+                  
 
     ###############################################################################################
     # Integration-Tests: Run integration tests (downloading and running on data)
@@ -48,7 +51,7 @@ jobs:
                 os: [ubuntu-latest, macos-latest, windows-latest]
                 # just going to test lowest and latest
                 env: ["py310", "py313"]
-                TestAccessType: ["public", "private"]
+                TestAccessType: ["public"]
 
         # this action needs to be able to read contents of other repos
         # for the test data (specifically private test data)
@@ -133,14 +136,14 @@ jobs:
 
             - name: Test docs build
               run: |
-                  pixi run -e ${{ matrix.env }} doc-build
+                    pixi run -e ${{ matrix.env }} doc-build
 
     ################################################################################################
     # Publish-Docs: Publish documentation to GitHub Pages using mike only on main branch
     ################################################################################################
     Publish-Docs:
-        needs: Build-Docs
-        if: github.ref == 'refs/heads/development'
+        needs: [Generate-PNG, Build-Docs]
+        if: github.ref == 'refs/heads/main'
 
         concurrency:
             group: ${{ github.workflow }}-${{ github.ref }}
@@ -173,7 +176,19 @@ jobs:
                   pixi-version: v0.46.0
                   cache: true
                   locked: false # wont be the same because of the tag
-
+            - name: Build API Reference
+              if:   github.actor != 'github-actions[bot]'
+              run: |
+                    pixi run -e ${{ matrix.env }} api-ref-build
+                    git add docs/reference
+                    
+                    if ! git diff --cached --quiet; then
+                        
+                        git commit -m "chore: update API Reference"
+                        git push
+                    else
+                        echo "No changes to amend"
+                    fi
             - name: Test docs build
               run: |
                   pixi run -e ${{ matrix.env }} doc-build

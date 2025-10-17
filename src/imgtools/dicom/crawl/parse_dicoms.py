@@ -200,10 +200,8 @@ def resolve_reference_series(
         Frame of reference mapping
     """
 
-    if (ref := meta.get("ReferencedSeriesUID")) and ref in series_meta_raw:
+    if meta.get("ReferencedSeriesUID"):
         return
-    else:
-        meta["ReferencedSeriesUID"] = ""
 
     match meta["Modality"]:
         case "SEG" | "RTSTRUCT" | "RTDOSE" | "RTPLAN":
@@ -257,18 +255,42 @@ def resolve_reference_series(
     return
 
 
-ParseDicomDirResult = t.NamedTuple(
-    "ParseDicomDirResult",
-    [
-        ("crawl_db", list[dict[str, str]]),
-        ("index", pd.DataFrame),
-        ("crawl_db_raw", SeriesMetaMap),
-        ("crawl_db_path", pathlib.Path),
-        ("index_csv_path", pathlib.Path),
-        ("crawl_cache_path", pathlib.Path),
-        ("sop_map_path", pathlib.Path),
-    ],
-)
+class ParseDicomDirResult(
+    t.NamedTuple(
+        "ParseDicomDirResult",
+        [
+            ("crawl_db", list[dict[str, str]]),
+            ("index", pd.DataFrame),
+            ("crawl_db_raw", SeriesMetaMap),
+            ("crawl_db_path", pathlib.Path),
+            ("index_csv_path", pathlib.Path),
+            ("crawl_cache_path", pathlib.Path),
+            ("sop_map_path", pathlib.Path),
+        ],
+    )
+):
+    """
+    A NamedTuple containing the result of parsing a DICOM directory.
+
+    Attributes
+    ----------
+    crawl_db : list[dict[str, str]]
+        A list of dictionaries containing the simplified crawl database.
+    index : pd.DataFrame
+        A DataFrame from which the relationships between DICOMs in the directory can be constructed.
+    crawl_db_raw : SeriesMetaMap
+        A mapping of each series to the corresponding subseries in the directory.
+    crawl_db_path : pathlib.Path
+        Path to the simplified crawl database JSON file.
+    index_csv_path : pathlib.path
+        Path to the index file.
+    crawl_cache_path : pathlib.Path
+        Path to the crawl cache.
+    sop_map_path : pathlib.Path
+        Path to the SOP map, which maps SOP UIDs to Series UIDs.
+    """
+
+    __slots__ = ()
 
 
 def parse_dicom_dir(
@@ -333,9 +355,12 @@ def parse_dicom_dir(
 
     """
 
-    top = pathlib.Path(dicom_dir).absolute()
+    # resolve the search directory and determine the dataset name
+    search_directory = pathlib.Path(dicom_dir).resolve().absolute()
+    ds_name = dataset_name or search_directory.name
+
+    # ensure the output directory is a pathlib.Path object
     output_dir = pathlib.Path(output_dir)
-    ds_name = dataset_name or top.name
 
     pathlib.Path(output_dir / ds_name).mkdir(
         parents=True, exist_ok=True
@@ -355,15 +380,15 @@ def parse_dicom_dir(
         with sop_map_json.open("r") as f:
             sop_map = json.load(f)
     else:
-        dicom_files = find_dicoms(top, extension=extension)
+        dicom_files = find_dicoms(search_directory, extension=extension)
         if not dicom_files:
-            msg = f"No DICOM files found in {top} with extension {extension}"
+            msg = f"No DICOM files found in {search_directory} with extension {extension}"
             raise FileNotFoundError(msg)
 
         logger.info(f"Found {len(dicom_files)} DICOM files in {dicom_dir}")
 
         series_meta_raw, sop_map = parse_all_dicoms(
-            dicom_files, top, n_jobs=n_jobs
+            dicom_files, search_directory, n_jobs=n_jobs
         )
 
         with crawl_cache.open("w") as f:
@@ -445,16 +470,21 @@ def construct_barebones_dict(
                     ref_series = ""
                     meta["ReferencedModality"] = ""
                 case [*multiple_refs]:  # only SR can have multiple references
-                    ref_series = "|".join(multiple_refs)
-                    meta["ReferencedModality"] = "|".join(
-                        series2modality(ref, series_meta_raw)
-                        for ref in multiple_refs
-                    )
+                    ref_series = ";".join(multiple_refs)
+                    ref_modalities = []
+                    for ref in multiple_refs:
+                        if ref in series_meta_raw:
+                            ref_modalities.append(
+                                series2modality(ref, series_meta_raw)
+                            )
+                    meta["ReferencedSeriesUID"] = ref_series
+                    meta["ReferencedModality"] = ";".join(ref_modalities)
                 case single_ref:
                     ref_series = single_ref
-                    meta["ReferencedModality"] = series2modality(
-                        ref_series, series_meta_raw
-                    )
+                    if ref_series in series_meta_raw:
+                        meta["ReferencedModality"] = series2modality(
+                            ref_series, series_meta_raw
+                        )
 
             barebones_dict.append(
                 {
@@ -463,8 +493,8 @@ def construct_barebones_dict(
                     "SeriesInstanceUID": seriesuid,
                     "SubSeries": subseriesid or "1",
                     "Modality": meta["Modality"],
-                    "ReferencedModality": meta["ReferencedModality"],
-                    "ReferencedSeriesUID": meta["ReferencedSeriesUID"],
+                    "ReferencedModality": meta.get("ReferencedModality", ""),
+                    "ReferencedSeriesUID": ref_series,
                     "instances": len(meta.get("instances", [])),
                     "folder": meta["folder"],
                 }
