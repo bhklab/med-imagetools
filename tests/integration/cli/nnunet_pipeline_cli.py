@@ -51,19 +51,19 @@ class TestnnUNetCLI:
 
     @pytest.mark.skipif(platform == "darwin", reason="Test skipped on macOS, due to nnUNet py313 incompatibility")
     @pytest.mark.parametrize("mask_saving_strategy", ["sparse_mask", "region_mask"])
-    def test_RADCURE(self, runner, temp_output_dir, DATA_DIR, mask_saving_strategy):
+    def test_nnunet_pipeline(self, runner, temp_output_dir, DATA_DIR, mask_saving_strategy):
         """Test the CLI with different collections."""
             
-        input_dir = DATA_DIR / "RADCURE"
+        input_dir = DATA_DIR / "Pancreatic-CT-CBCT-SEG"
         if not input_dir.exists():
-            pytest.skip("RADCURE test data not available")
+            pytest.skip("Pancreatic-CT-CBCT-SEG test data not available")
 
         modalities_str = "CT,RTSTRUCT"
 
         roi_dict = {
-            "BRAINSTEM": "Brainstem",
-            "SPINALCORD": "SpinalCord",
-            "LARYNX": "Larynx",
+            "ROI": "ROI",
+            "LUNG_L": "LUNG_L",
+            "LUNG_R": "LUNG_R",
         }
         roi_yaml_path = input_dir / "roi_match.yaml"
         with (roi_yaml_path).open("w") as f:
