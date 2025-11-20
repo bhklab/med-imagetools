@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
 from SimpleITK import Image
+from SimpleITK import N4BiasFieldCorrectionImageFilter
 
 from .base_transform import BaseTransform
 from .functional import (
     clip_intensity,
     window_intensity,
 )
+from .lambda_transforms import SimpleITKFilter
 
 __all__ = [
     "IntensityTransform",
@@ -150,3 +152,20 @@ class WindowIntensity(IntensityTransform):
         """
 
         return window_intensity(image, self.window, self.level)
+
+@dataclass
+class N4BiasFieldCorrection(IntensityTransform):
+    """N4BiasFieldCorrection operation class."""
+
+    def __post_init__(self) -> None:
+        self.filter = SimpleITKFilter(N4BiasFieldCorrectionImageFilter())
+
+    def __call__(self, image: Image) -> Image:
+        """Apply a bias field correction transform to an image.
+
+        Parameters
+        ----------
+        image : Image
+            The input intensity image.
+        """
+        return self.filter(image)

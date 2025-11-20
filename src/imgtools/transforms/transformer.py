@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Generic, Sequence, TypeVar
 
 import SimpleITK as sitk
+from numpy.ma import mr_
 
 from imgtools.coretypes.base_masks import VectorMask
 from imgtools.coretypes.base_medimage import MedImage
@@ -11,6 +12,7 @@ from imgtools.transforms import (
     IntensityTransform,
     SpatialTransform,
 )
+from imgtools.transforms.intensity_transforms import N4BiasFieldCorrection
 
 # Define TypeVars for the different image types
 T_MedImage = TypeVar("T_MedImage", bound=MedImage)
@@ -68,6 +70,11 @@ class Transformer(Generic[T_MedImage]):
                     and transform.supports_reference()
                 ):
                     transformed_image = transform(transformed_image, ref)
+                elif (
+                    isinstance(transform, N4BiasFieldCorrection) 
+                    and transformed_image.metadata.get("Modality", "Unknown") == "MR"
+                ):
+                    transformed_image = transform(transformed_image)
                 elif isinstance(
                     transform, (IntensityTransform, SpatialTransform)
                 ):
