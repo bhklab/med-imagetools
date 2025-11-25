@@ -126,6 +126,10 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
     absolute_paths_in_index : bool, default=False
         If True, saves absolute paths in the index file.
         If False, saves paths relative to the root directory.
+    dry_run : bool, default=False
+        If True, skip the actual file I/O operations but still write to the index
+        and return the resolved path. Useful for previewing what would be saved
+        or updating the index without writing files.
     pattern_resolver : PatternResolver
         Instance used to handle filename formatting with placeholders.
 
@@ -152,6 +156,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
     pattern_resolver: PatternResolver = field(init=False)
     overwrite_index: bool = field(default=False)
     absolute_paths_in_index: bool = field(default=False)
+    dry_run: bool = field(default=False)
 
     index_filename: Optional[str] = field(default=None)
     _checked_directories: set[str] = field(default_factory=set, init=False)
@@ -212,6 +217,21 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
         updating them with the kwargs passed from the save method.
 
         This will help simplify repeated saves with similar context variables.
+
+        When `self.dry_run` is True, implementations should skip file I/O operations
+        but still write to the index and return the resolved path.
+
+        Parameters
+        ----------
+        data : ContentType
+            The data to be saved.
+        **kwargs : Any
+            Additional context variables for filename generation and path resolution.
+
+        Returns
+        -------
+        Path
+            The resolved path where the file would be (or was) saved.
         """
         pass
 
@@ -612,7 +632,7 @@ class ExampleWriter(AbstractBaseWriter[str]):
 
         Parameters
         ----------
-        content : str
+        data : str
             The content to write to the file.
         **kwargs : Any
             Additional context for filename generation.
@@ -625,9 +645,10 @@ class ExampleWriter(AbstractBaseWriter[str]):
         # Resolve the output file path
         output_path = self.resolve_path(**kwargs)
 
-        # Write content to the file
-        with output_path.open(mode="w", encoding="utf-8") as f:
-            f.write(data)
+        # Write content to the file only if not in dry_run mode
+        if not self.dry_run:
+            with output_path.open(mode="w", encoding="utf-8") as f:
+                f.write(data)
 
         self.add_to_index(output_path, replace_existing=output_path.exists())
 

@@ -262,7 +262,7 @@ def process_one_sample(
             SampleNumber=idx,
         )
         result.output_files = list(saved_files)
-        if not result.output_files:
+        if not result.output_files and not sample_output.dry_run:
             raise ValueError(
                 "No output files were saved. Check the output directory."
             )
@@ -305,6 +305,7 @@ class Autopipeline:
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
+        dry_run: bool = False,
     ) -> None:
         """
         Initialize the Autopipeline.
@@ -342,6 +343,8 @@ class Autopipeline:
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
+        dry_run : bool, optional
+            Whether to run the pipeline in dry run mode, by default False
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
@@ -359,6 +362,7 @@ class Autopipeline:
             filename_format=output_filename_format,
             existing_file_mode=existing_file_mode,
             extra_context={},
+            dry_run=dry_run,
         )
 
         transforms: list[BaseTransform] = [

@@ -131,7 +131,11 @@ class SampleOutput(BaseModel):
             {"dataset": "NSCLC-Radiomics", "processing_date": "2025-04-22"}
         ],
     )
-
+    dry_run: bool = Field(
+        default=False,
+        description="Whether to run the pipeline in dry run mode, by default False",
+        title="Dry Run",
+    )
     _writer: AbstractBaseWriter | None = PrivateAttr(default=None)
 
     def model_post_init(self, __context) -> None:  # type: ignore # noqa: ANN001
@@ -141,6 +145,8 @@ class SampleOutput(BaseModel):
             existing_file_mode=self.existing_file_mode,
             filename_format=self.filename_format,
             context=self.extra_context,
+            dry_run=self.dry_run,
+            create_dirs=not self.dry_run, # only create directories if not in dry run mode
         )
 
     @field_validator("directory")

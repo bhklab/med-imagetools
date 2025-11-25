@@ -108,6 +108,15 @@ class ModalityMetadataExtractor(ABC):
         "SeriesInstanceUID",
         "StudyInstanceUID",
         "Modality",
+        # Sensitive Patient Demographics (PHI)
+        # These tags contain Protected Health Information (PHI) and are sensitive.
+        "PatientSex",
+        "PatientBirthDate",
+        "PatientAge",
+        "EthnicGroup",
+        "PatientWeight",
+        "PatientSize",
+        "AdditionalPatientHistory",
         # Image Geometry & Size
         "BodyPartExamined",
         "DataCollectionDiameter",
