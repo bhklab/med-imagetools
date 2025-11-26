@@ -133,7 +133,7 @@ class SampleOutput(BaseModel):
     )
     dry_run: bool = Field(
         default=False,
-        description="Whether to run the pipeline in dry run mode, by default False",
+        description="Whether to run the pipeline in dry run mode, by default False. Will generate the output index listing images and specified masks with ROIs.",
         title="Dry Run",
     )
     _writer: AbstractBaseWriter | None = PrivateAttr(default=None)
