@@ -352,6 +352,10 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             #     msg = f"Directory {out_path.parent} does not exist."
             #     raise DirectoryNotFoundError(msg)
             return out_path
+
+        if self.dry_run: # This is here so that the existing_file_mode logic is not executed in dry run mode
+            return out_path
+
         match self.existing_file_mode:
             case ExistingFileMode.SKIP:
                 return out_path
