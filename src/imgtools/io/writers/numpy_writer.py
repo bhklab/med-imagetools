@@ -116,7 +116,9 @@ class NumPyWriter(
                         out_path, allow_pickle=False, **arrays, **metadata
                     )
                 else:
-                    np.savez(out_path, allow_pickle=False, **arrays, **metadata)
+                    np.savez(
+                        out_path, allow_pickle=False, **arrays, **metadata
+                    )
             else:
                 raise NumpyWriterValidationError(
                     "Data must be a NumPy array, SimpleITK image, or a dictionary of these types."

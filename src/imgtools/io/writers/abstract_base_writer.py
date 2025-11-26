@@ -353,7 +353,7 @@ class AbstractBaseWriter(ABC, Generic[ContentType]):
             #     raise DirectoryNotFoundError(msg)
             return out_path
 
-        if self.dry_run: # This is here so that the existing_file_mode logic is not executed in dry run mode
+        if self.dry_run:  # This is here so that the existing_file_mode logic is not executed in dry run mode
             return out_path
 
         match self.existing_file_mode:

@@ -146,7 +146,7 @@ class SampleOutput(BaseModel):
             filename_format=self.filename_format,
             context=self.extra_context,
             dry_run=self.dry_run,
-            create_dirs=not self.dry_run, # only create directories if not in dry run mode
+            create_dirs=not self.dry_run,  # only create directories if not in dry run mode
         )
 
     @field_validator("directory")
