@@ -156,29 +156,6 @@ class WindowIntensity(IntensityTransform):
 @dataclass
 class N4BiasFieldCorrection(IntensityTransform):
     """
-    N4 bias-field correction operation class..
-    
-    - Corrects smooth intensity inhomogeneity (bias field) in the image.
-    - Does NOT change image geometry (no rotation, translation, or scaling).
-    """
-    
-    def __post_init__(self) -> None:
-        self.filter = SimpleITKFilter(N4BiasFieldCorrectionImageFilter())
-
-    def __call__(self, image: Image) -> Image:
-        """Apply a bias field correction transform to an image.
-
-        Parameters
-        ----------
-        image : Image
-            The input intensity image.
-        """
-        return self.filter(image)
-
-
-@dataclass
-class N4BiasFieldCorrection(IntensityTransform):
-    """
     N4 bias-field correction.
     - Corrects smooth intensity inhomogeneity (bias field) in the image.
     - Does NOT change image geometry (no rotation, translation, or scaling).
