@@ -69,15 +69,15 @@ class Transformer(Generic[T_MedImage]):
                     and transform.supports_reference()
                 ):
                     transformed_image = transform(transformed_image, ref)
-                elif (
-                    isinstance(transform, N4BiasFieldCorrection) 
-                    and transformed_image.metadata.get("Modality", "Unknown") == "MR"
-                ):
-                    transformed_image = transform(transformed_image)
                 elif isinstance(
                     transform, (IntensityTransform, SpatialTransform)
                 ):
-                    transformed_image = transform(transformed_image)
+                    # Apply N4BiasFieldCorrection only for MR images
+                    if isinstance(transform, N4BiasFieldCorrection):
+                        if transformed_image.metadata.get("Modality", "Unknown") == "MR":
+                            transformed_image = transform(transformed_image)
+                    else:
+                        transformed_image = transform(transformed_image)
                 else:
                     msg = f"Invalid transform type: {type(transform)}"
                     raise ValueError(msg)
