@@ -477,6 +477,13 @@ def construct_barebones_dict(
                             ref_modalities.append(
                                 series2modality(ref, series_meta_raw)
                             )
+                        else:
+                            logger.warning(
+                                f"Series {seriesuid} (Modality: {meta.get('Modality', 'Unknown')}) references a ReferencedSeriesUID {ref} that is not found in the series metadata. This will be ignored as it cannot be properly processed without its referenced series.",
+                                series_uid=seriesuid,
+                                modality=meta.get("Modality", "Unknown"),
+                                ref_series=ref,
+                            )
                     meta["ReferencedSeriesUID"] = ref_series
                     meta["ReferencedModality"] = ";".join(ref_modalities)
                 case single_ref:
@@ -484,6 +491,13 @@ def construct_barebones_dict(
                     if ref_series in series_meta_raw:
                         meta["ReferencedModality"] = series2modality(
                             ref_series, series_meta_raw
+                        )
+                    else:
+                        logger.warning(
+                            f"Series {seriesuid} (Modality: {meta.get('Modality', 'Unknown')}) references a ReferencedSeriesUID {ref_series} that is not found in the series metadata. This will be ignored as it cannot be properly processed without its referenced series.",
+                            series_uid=seriesuid,
+                            modality=meta.get("Modality", "Unknown"),
+                            ref_series=ref_series,
                         )
 
             barebones_dict.append(
