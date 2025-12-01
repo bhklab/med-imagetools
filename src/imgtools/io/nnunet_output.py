@@ -4,6 +4,8 @@ import contextlib
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Sequence
+import tempfile
+import shutil
 
 import pandas as pd
 from pydantic import (
@@ -26,6 +28,7 @@ from imgtools.utils.nnunet import (
     generate_dataset_json,
     generate_nnunet_scripts,
 )
+from imgtools.io.sample_output import FailedToSaveSingleImageError, AnnotatedPathSequence
 
 __all__ = ["nnUNetOutput", "MaskSavingStrategy"]
 
@@ -318,7 +321,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         /,
         SampleNumber: str,  # noqa: N803
         **kwargs: object,  # noqa: N803
-    ) -> Sequence[Path]:
+    ) -> AnnotatedPathSequence:
         """
         Save the data to files using the configured writer.
 
@@ -331,104 +334,81 @@ class nnUNetOutput(BaseModel):  # noqa: N801
 
         Returns
         -------
-        List[Path]
-            List of paths to the saved files.
+        AnnotatedPathSequence
+            List of paths to the saved files, annotated with any errors that occurred.
         """
-
-        valid_masks = self._get_valid_masks(data, SampleNumber)
-        selected_mask = valid_masks[0]  # Select the first valid mask
-
         saved_files = []
+        save_errors = []
+        temp_dir = None
 
-        match self.mask_saving_strategy:
-            case MaskSavingStrategy.LABEL_IMAGE:
-                mask = selected_mask.to_label_image()
-            case MaskSavingStrategy.SPARSE_MASK:
-                mask = selected_mask.to_sparse_mask()
-            case MaskSavingStrategy.REGION_MASK:
-                mask = selected_mask.to_region_mask()
-            case _:
-                msg = f"Unknown mask saving strategy: {self.mask_saving_strategy}"
-                raise MaskSavingStrategyError(msg)
+        try:
+            temp_dir = Path(tempfile.mkdtemp(prefix=".tmp_nnunet_", dir=self.writer.root_directory))
 
-        roi_match_data = {
-            f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names)
-            for rmap in selected_mask.roi_mapping.values()
-        }
+            temp_writer = NIFTIWriter(
+                root_directory=temp_dir,
+                filename_format=self._file_name_format,
+                existing_file_mode=ExistingFileMode.FAIL,
+                compression_level=self.writer.compression_level,
+                context={**self.writer.context, **kwargs}
+            )
 
-        p = self.writer.save(
-            mask,
-            DirType="labels",
-            SplitType="Tr",
-            SampleID=SampleNumber,
-            Dataset=self.dataset_name,
-            **roi_match_data,
-            **selected_mask.metadata,
-            **kwargs,
-        )
-        saved_files.append(p)
+            files_to_commit = {}
 
-        for image in data:
-            if isinstance(image, Scan):
-                # Handle Scan case(CT or MR)
-                p = self.writer.save(
-                    image,
-                    DirType="images",
-                    SplitType="Tr",
-                    SampleID=f"{SampleNumber}_{MODALITY_MAP[image.metadata['Modality']]}",
-                    Dataset=self.dataset_name,
-                    **image.metadata,
-                    **kwargs,
-                )
-                saved_files.append(p)
-            elif isinstance(image, VectorMask):
-                pass
-            else:
-                errmsg = (
-                    f"Unsupported image type: {type(image)}. "
-                    "Expected Scan or VectorMask."
-                )
-                logger.error(errmsg)
-                raise TypeError(errmsg)
+            valid_masks = self._get_valid_masks(data, SampleNumber)
+            selected_mask = valid_masks[0]
 
-        return saved_files
+            # Stage 1: Save all files for the sample to the temporary directory
+            mask = {
+                MaskSavingStrategy.LABEL_IMAGE: selected_mask.to_label_image,
+                MaskSavingStrategy.SPARSE_MASK: selected_mask.to_sparse_mask,
+                MaskSavingStrategy.REGION_MASK: selected_mask.to_region_mask,
+            }.get(self.mask_saving_strategy)()
 
+            if mask is None:
+                raise MaskSavingStrategyError(f"Unknown mask saving strategy: {self.mask_saving_strategy}")
 
-if __name__ == "__main__":
-    from imgtools.io.sample_input import SampleInput
+            roi_match_data = {
+                f"roi_matches.{rmap.roi_key}": "|".join(rmap.roi_names)
+                for rmap in selected_mask.roi_mapping.values()
+            }
 
-    input_directory = "./data/RADCURE"
-    output_directory = Path("./temp_outputs")
-    output_directory.mkdir(exist_ok=True)
-    modalities = ["CT", "RTSTRUCT"]
-    roi_match_map = {
-        "BRAIN": ["Brain"],
-        "BRAINSTEM": ["Brainstem"],
-    }
+            mask_context = {
+                "DirType": "labels", "SplitType": "Tr", "SampleID": SampleNumber,
+                "Dataset": self.dataset_name, **roi_match_data, **selected_mask.metadata, **kwargs
+            }
+            temp_mask_path = temp_writer.save(mask, **mask_context)
+            final_mask_path = self.writer.resolve_path(**mask_context)
+            files_to_commit[temp_mask_path] = final_mask_path
 
-    input = SampleInput.build(  # noqa: A001
-        directory=Path(input_directory),
-        modalities=modalities,
-        roi_match_map=roi_match_map,
-    )
-    output = nnUNetOutput(
-        directory=output_directory,
-        existing_file_mode=ExistingFileMode.OVERWRITE,
-        dataset_name="RADCURE",
-        extra_context={},
-        roi_keys=list(roi_match_map.keys()),
-        mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
-    )
+            for image in data:
+                if isinstance(image, Scan):
+                    image_context = {
+                        "DirType": "images", "SplitType": "Tr",
+                        "SampleID": f"{SampleNumber}_{MODALITY_MAP[image.metadata['Modality']]}",
+                        "Dataset": self.dataset_name, **image.metadata, **kwargs
+                    }
+                    temp_image_path = temp_writer.save(image, **image_context)
+                    final_image_path = self.writer.resolve_path(**image_context)
+                    files_to_commit[temp_image_path] = final_image_path
+                elif not isinstance(image, VectorMask):
+                    raise TypeError(f"Unsupported image type: {type(image)}. Expected Scan or VectorMask.")
 
-    samples = input.query()
+            # Stage 2: Commit files by moving them to their final destination
+            for temp_path, final_path in files_to_commit.items():
+                final_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(temp_path), str(final_path))
+                saved_files.append(final_path)
 
-    for idx, sample in enumerate(samples, start=1):
-        loaded_sample = input(sample)
+        except Exception as e:
+            errmsg = f"Failed to save nnUNet sample atomically: {e}"
+            image_context = data[0] if data else None
+            save_error = FailedToSaveSingleImageError(errmsg, image_context)
+            save_errors.append(save_error)
+            logger.error(errmsg, error=save_error)
 
-        with contextlib.suppress(Exception):
-            output(loaded_sample, SampleNumber=f"{idx:03}")
+        finally:
+            # Stage 3: cleanup the temporary directory
+            if temp_dir and temp_dir.exists():
+                shutil.rmtree(temp_dir)
 
-        if idx == 5:
-            break
-
-    output.finalize_dataset()
+        return AnnotatedPathSequence(saved_files, save_errors)
