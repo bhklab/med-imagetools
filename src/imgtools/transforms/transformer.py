@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Generic, Sequence, TypeVar
 
 import SimpleITK as sitk
-from numpy.ma import mr_
 
 from imgtools.coretypes.base_masks import VectorMask
 from imgtools.coretypes.base_medimage import MedImage
