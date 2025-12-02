@@ -155,10 +155,29 @@ class WindowIntensity(IntensityTransform):
 
 @dataclass
 class N4BiasFieldCorrection(IntensityTransform):
-    """
-    N4 bias-field correction.
-    - Corrects smooth intensity inhomogeneity (bias field) in the image.
-    - Does NOT change image geometry (no rotation, translation, or scaling).
+    """N4 bias field correction for MR images.
+
+    A callable class that applies N4 bias field correction to reduce
+    smooth intensity inhomogeneities (bias fields) commonly found in
+    MR imaging. This transform corrects voxel intensities while
+    preserving image geometry (spacing, orientation, and dimensions).
+
+    The correction uses SimpleITK's N4BiasFieldCorrectionImageFilter,
+    which implements the N4 algorithm (Tustison et al., 2010).
+
+    Notes
+    -----
+    - This transform is computationally intensive and may take several
+      seconds to minutes depending on image size.
+    - Best suited for MR images; application to other modalities is
+      typically not meaningful.
+    - No rotation, translation, or scaling is applied.
+
+    Examples
+    --------
+    >>> from imgtools.transforms.intensity_transforms import N4BiasFieldCorrection
+    >>> corrector = N4BiasFieldCorrection()
+    >>> corrected_image = corrector(mr_image)
     """
 
     def __post_init__(self) -> None:
