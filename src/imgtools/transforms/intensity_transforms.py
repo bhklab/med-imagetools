@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from SimpleITK import Image
-from SimpleITK import N4BiasFieldCorrectionImageFilter
+from SimpleITK import Image, N4BiasFieldCorrectionImageFilter
 
 from .base_transform import BaseTransform
 from .functional import (
