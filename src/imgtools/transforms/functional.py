@@ -424,6 +424,10 @@ def bias_correction(image: sitk.Image) -> sitk.Image:
     image : sitk.Image
         The MR image to apply bias field correction to.
 
+    Returns
+    -------
+    sitk.Image
+        The bias corrected image
     """
     bias_filter = SimpleITKFilter(sitk.N4BiasFieldCorrectionImageFilter())
     return bias_filter(image)
