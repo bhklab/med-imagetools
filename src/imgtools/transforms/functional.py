@@ -1,6 +1,8 @@
 import numpy as np
 import SimpleITK as sitk
 
+from .lambda_transforms import SimpleITKFilter
+
 INTERPOLATORS = {
     "linear": sitk.sitkLinear,
     "nearest": sitk.sitkNearestNeighbor,
@@ -13,6 +15,7 @@ __all__ = [
     "zoom",
     "rotate",
     "crop",
+    "bias_correction",
     "clip_intensity",
     "window_intensity",
 ]
@@ -410,3 +413,17 @@ def window_intensity(
     lower = level - window / 2
     upper = level + window / 2
     return clip_intensity(image, lower, upper)
+
+
+def bias_correction(image: sitk.Image) -> sitk.Image:
+    """Apply N4 bias field correction to reduce smooth intensity inhomogeneities (bias fields) commonly found in
+    MR imaging. This transform corrects voxel intensities while preserving image geometry (spacing, orientation, and dimensions).
+
+    Parameters
+    ----------
+    image : sitk.Image
+        The MR image to apply bias field correction to.
+
+    """
+    bias_filter = SimpleITKFilter(sitk.N4BiasFieldCorrectionImageFilter())
+    return bias_filter(image)

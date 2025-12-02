@@ -1,13 +1,9 @@
 from dataclasses import dataclass
 
-from SimpleITK import Image, N4BiasFieldCorrectionImageFilter
+from SimpleITK import Image
 
 from .base_transform import BaseTransform
-from .functional import (
-    clip_intensity,
-    window_intensity,
-)
-from .lambda_transforms import SimpleITKFilter
+from .functional import bias_correction, clip_intensity, window_intensity
 
 __all__ = [
     "IntensityTransform",
@@ -156,7 +152,7 @@ class WindowIntensity(IntensityTransform):
 
 @dataclass
 class N4BiasFieldCorrection(IntensityTransform):
-    """N4 bias field correction for MR images.
+    """N4BiasFieldCorrection operation class.
 
     A callable class that applies N4 bias field correction to reduce
     smooth intensity inhomogeneities (bias fields) commonly found in
@@ -173,29 +169,21 @@ class N4BiasFieldCorrection(IntensityTransform):
     - Best suited for MR images; application to other modalities is
       typically not meaningful.
     - No rotation, translation, or scaling is applied.
-
-    Examples
-    --------
-    >>> from imgtools.transforms.intensity_transforms import (
-    ...     N4BiasFieldCorrection,
-    ... )
-    >>> corrector = N4BiasFieldCorrection()
-    >>> corrected_image = corrector(mr_image)
     """
 
-    def __post_init__(self) -> None:
-        self.filter = SimpleITKFilter(N4BiasFieldCorrectionImageFilter())
+    # def __post_init__(self) -> None:
+    #     self.filter = SimpleITKFilter(N4BiasFieldCorrectionImageFilter())
 
     def __call__(self, image: Image) -> Image:
-        """Apply N4 bias-field intensity correction to an image.
+        """Apply N4 bias-field correction to an image.
 
         Parameters
         ----------
         image : Image
-            The input intensity image (e.g., MRI).
+            The input MR image to apply bias-field correction.
         Returns
         -------
         Image
-            Image with corrected intensities and unchanged geometry.
+            The MR image after applying N4 bias field correction.
         """
-        return self.filter(image)
+        return bias_correction(image)
