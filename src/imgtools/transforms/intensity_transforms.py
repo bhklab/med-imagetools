@@ -175,7 +175,9 @@ class N4BiasFieldCorrection(IntensityTransform):
 
     Examples
     --------
-    >>> from imgtools.transforms.intensity_transforms import N4BiasFieldCorrection
+    >>> from imgtools.transforms.intensity_transforms import (
+    ...     N4BiasFieldCorrection,
+    ... )
     >>> corrector = N4BiasFieldCorrection()
     >>> corrected_image = corrector(mr_image)
     """
