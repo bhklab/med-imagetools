@@ -74,7 +74,12 @@ class Transformer(Generic[T_MedImage]):
                 ):
                     # Apply N4BiasFieldCorrection only for MR images
                     if isinstance(transform, N4BiasFieldCorrection):
-                        if transformed_image.metadata.get("Modality", "Unknown") == "MR":
+                        if (
+                            transformed_image.metadata.get(
+                                "Modality", "Unknown"
+                            )
+                            == "MR"
+                        ):
                             transformed_image = transform(transformed_image)
                     else:
                         transformed_image = transform(transformed_image)
