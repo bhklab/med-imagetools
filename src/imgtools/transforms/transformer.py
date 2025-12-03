@@ -80,7 +80,7 @@ class Transformer(Generic[T_MedImage]):
                             )
                             == "MR"
                         ):
-                            transformed_image = transform(transformed_image)
+                            transformed_image = transform(transformed_image) # type: ignore
                     else:
                         transformed_image = transform(transformed_image)
                 else:
