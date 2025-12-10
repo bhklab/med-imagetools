@@ -7,7 +7,9 @@
  Manufacturer           3D Slicer Community                                     
  ManufacturerModelName  https://github.com/fedorov/Reporting                    
  Modality               SEG                                                     
+ PatientAge             078Y                                                    
  PatientID              R01-001                                                 
+ PatientSex             F                                                       
  ROIDescriptions        ['Segment No.1 is for ...']                             
  ROINames               ['Heart']                                               
  ReferencedSOPUIDs      ['1.3.6.1.4.1.14519.5.2.1.4334.1501.100822413162364501… 

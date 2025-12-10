@@ -17,8 +17,12 @@
  Manufacturer                     GE MEDICAL SYSTEMS                            
  Modality                         PT                                            
  NumberOfSlices                   205                                           
+ PatientAge                       078Y                                          
  PatientID                        R01-001                                       
  PatientPosition                  HFS                                           
+ PatientSex                       F                                             
+ PatientSize                      1.6000000238419                               
+ PatientWeight                    66                                            
  PixelSpacing                     [4.296875, 4.296875]                          
  ReconstructionMethod             OSEM                                          
  RescaleIntercept                 0                                             

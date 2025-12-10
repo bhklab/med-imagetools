@@ -5,7 +5,9 @@
  ManufacturerModelName  OHIF-XNAT Viewer 3.2.0                                  
  Modality               RTSTRUCT                                                
  NumROIs                1                                                       
+ PatientAge             071Y                                                    
  PatientID              C3L-00947                                               
+ PatientSex             F                                                       
  ROINames               ['UTERUS - 1']                                          
  ReferencedSOPUIDs      []                                                      
  ReferencedSeriesUID    1.3.6.1.4.1.14519.5.2.1.6450.2626.19431497777982132912… 
