@@ -21,6 +21,7 @@
  Modality                 CT                                                    
  PatientID                Pancreas-CT-CB_003                                    
  PatientPosition          HFS                                                   
+ PatientSex               M                                                     
  PixelSpacing             [1.3671875, 1.3671875]                                
  ReconstructionDiameter   700                                                   
  RescaleIntercept         -1000                                                 

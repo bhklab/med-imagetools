@@ -165,6 +165,13 @@ def parse_spacing(ctx, param, value): # type: ignore
     default=None,
     help="Path to YAML file containing ROI matching patterns."
 )
+@click.option(
+    "--dry-run",
+    "-d",
+    is_flag=True,
+    default=False,
+    help="Run the pipeline in dry run mode, by default False"
+)
 @click.help_option(
     "-h",
     "--help",
@@ -186,6 +193,7 @@ def autopipeline(
     roi_on_missing_regex: str,
     roi_match_map: Tuple[str],
     roi_match_yaml: Path,
+    dry_run: bool,
 ) -> None:
     """Core utility to process messy DICOM data into organized NIfTI files.
     
@@ -263,6 +271,7 @@ def autopipeline(
         spacing=spacing,
         window=window,
         level=level,
+        dry_run=dry_run,
     )
     
     # Run the pipeline

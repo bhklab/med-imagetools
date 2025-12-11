@@ -18,8 +18,11 @@
  ManufacturerModelName    Signa HDxt                                            
  Modality                 MR                                                    
  NumberOfAverages         1.5                                                   
+ PatientAge               078Y                                                  
  PatientID                C3L-02403                                             
  PatientPosition          FFS                                                   
+ PatientSex               F                                                     
+ PatientWeight            74.843                                                
  PercentPhaseFieldOfView  100                                                   
  PercentSampling          100                                                   
  PixelBandwidth           122.07                                                
