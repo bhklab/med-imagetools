@@ -82,6 +82,8 @@ class NumPyWriter(
         ----------
         data : np.ndarray | sitk.Image | dict[str, np.ndarray | sitk.Image]
             The data to save. Can be a single image or a dictionary of images.
+        **kwargs : object
+            Additional context for filename generation.
 
         Returns
         -------
@@ -95,29 +97,32 @@ class NumPyWriter(
         """
         out_path = self.resolve_path(**kwargs)
 
-        if isinstance(data, (np.ndarray, sitk.Image)):
-            # Single image or array
-            array, metadata = self._to_numpy(data)
-            np.savez_compressed(out_path, image_array=array, **metadata)
-        elif isinstance(data, dict):
-            # Multiple images or arrays
-            arrays = {}
-            metadata = {}
-            for key, value in data.items():
-                array, meta = self._to_numpy(value)
-                arrays[key] = array
-                for meta_key, meta_value in meta.items():
-                    metadata[f"{key}_{meta_key}"] = meta_value
-            if self.compressed:
-                np.savez_compressed(
-                    out_path, allow_pickle=False, **arrays, **metadata
-                )
+        if not self.dry_run:
+            if isinstance(data, (np.ndarray, sitk.Image)):
+                # Single image or array
+                array, metadata = self._to_numpy(data)
+                np.savez_compressed(out_path, image_array=array, **metadata)
+            elif isinstance(data, dict):
+                # Multiple images or arrays
+                arrays = {}
+                metadata = {}
+                for key, value in data.items():
+                    array, meta = self._to_numpy(value)
+                    arrays[key] = array
+                    for meta_key, meta_value in meta.items():
+                        metadata[f"{key}_{meta_key}"] = meta_value
+                if self.compressed:
+                    np.savez_compressed(
+                        out_path, allow_pickle=False, **arrays, **metadata
+                    )
+                else:
+                    np.savez(
+                        out_path, allow_pickle=False, **arrays, **metadata
+                    )
             else:
-                np.savez(out_path, allow_pickle=False, **arrays, **metadata)
-        else:
-            raise NumpyWriterValidationError(
-                "Data must be a NumPy array, SimpleITK image, or a dictionary of these types."
-            )
+                raise NumpyWriterValidationError(
+                    "Data must be a NumPy array, SimpleITK image, or a dictionary of these types."
+                )
 
         self.add_to_index(
             out_path,

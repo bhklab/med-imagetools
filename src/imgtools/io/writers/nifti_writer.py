@@ -195,25 +195,26 @@ class NIFTIWriter(AbstractBaseWriter[sitk.Image | np.ndarray]):
         else:
             out_path = self.resolve_path(**kwargs)
 
-        if (
-            out_path.exists()  # check if it exists
-            # This will only be true if SKIP,
-            # OVERWRITE would have deleted the file
-            and self.existing_file_mode == ExistingFileMode.SKIP
-        ):
-            logger.debug("File exists, skipping.", out_path=out_path)
-            return out_path
+        if not self.dry_run:
+            if (
+                out_path.exists()  # check if it exists
+                # This will only be true if SKIP,
+                # OVERWRITE would have deleted the file
+                and self.existing_file_mode == ExistingFileMode.SKIP
+            ):
+                logger.debug("File exists, skipping.", out_path=out_path)
+                return out_path
 
-        try:
-            sitk.WriteImage(
-                image,
-                out_path.as_posix(),
-                useCompression=True,
-                compressionLevel=self.compression_level,
-            )
-        except Exception as e:
-            msg = f"Error writing image to file {out_path}: {e}"
-            raise NiftiWriterIOError(msg) from e
+            try:
+                sitk.WriteImage(
+                    image,
+                    out_path.as_posix(),
+                    useCompression=True,
+                    compressionLevel=self.compression_level,
+                )
+            except Exception as e:
+                msg = f"Error writing image to file {out_path}: {e}"
+                raise NiftiWriterIOError(msg) from e
 
         self.add_to_index(
             out_path,
