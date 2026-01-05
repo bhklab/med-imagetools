@@ -35,7 +35,7 @@ runs:
         environments: ${{ inputs.env }}
         pixi-version: v0.61.0
         cache: true
-        log-level: vvv
+        locked: false
 
     - name: Prepare data if needed
       if: inputs.test_type == 'integration'
