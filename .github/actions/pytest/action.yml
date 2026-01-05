@@ -32,10 +32,8 @@ runs:
     - name: Install Pixi
       uses: prefix-dev/setup-pixi@v0.9.3
       with:
-        environments: ${{ inputs.env }}
         pixi-version: v0.61.0
         cache: true
-        locked: false
 
     - name: Prepare data if needed
       if: inputs.test_type == 'integration'
