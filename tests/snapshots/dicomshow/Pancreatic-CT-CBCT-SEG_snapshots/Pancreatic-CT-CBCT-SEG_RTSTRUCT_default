@@ -7,6 +7,7 @@
  Modality               RTSTRUCT                                                
  NumROIs                4                                                       
  PatientID              Pancreas-CT-CB_003                                      
+ PatientSex             M                                                       
  ROINames               ['Bowel_sm_CBCT', 'LUNG_L', 'LUNG_R',                   
                         'Stomach_duo_CBCT']                                     
  ReferencedSOPUIDs      []                                                      
