@@ -67,7 +67,7 @@ runs:
             --numprocesses=auto
         else
           pixi run -e ${{ inputs.env }} \
-            pytest -m "${{ inputs.test_type }}" \
+            pytest -s -m "${{ inputs.test_type }}" \
             --no-cov \
             --numprocesses=auto
         fi
