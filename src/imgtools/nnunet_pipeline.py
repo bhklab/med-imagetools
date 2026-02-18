@@ -42,6 +42,7 @@ class nnUNetPipeline:  # noqa: N801
         self,
         input_directory: str | Path,
         output_directory: str | Path,
+        crawl_directory: str | Path,
         modalities: list[str],
         roi_match_map: ROIMatcherInputs,
         mask_saving_strategy: MaskSavingStrategy,
@@ -104,6 +105,7 @@ class nnUNetPipeline:  # noqa: N801
         self.input = SampleInput.build(
             directory=Path(input_directory),
             update_crawl=update_crawl,
+            crawl_directory=Path(crawl_directory),
             n_jobs=n_jobs,
             modalities=modalities,
             roi_match_map=roi_match_map,

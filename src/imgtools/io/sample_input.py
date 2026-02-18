@@ -96,6 +96,11 @@ class SampleInput(BaseModel):
         max_length=100,
         examples=["NSCLC-Radiomics", "Head-Neck-PET-CT"],
     )
+    crawl_directory: Path = Field(
+        description="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
+        title="Crawl Directory",
+        default=None
+    )
     update_crawl: bool = Field(
         default=False,
         description="Force recrawl even if crawl data already exists. Set to True when directory contents have changed or to refresh metadata cache.",
@@ -146,6 +151,7 @@ class SampleInput(BaseModel):
     def build(
         cls,
         directory: str | Path,
+        crawl_directory: str | Path,
         dataset_name: str | None = None,
         update_crawl: bool = False,
         n_jobs: int | None = None,
@@ -217,6 +223,7 @@ class SampleInput(BaseModel):
         # Create the SampleInput
         return cls(
             directory=Path(directory),
+            crawl_directory=Path(crawl_directory),
             dataset_name=dataset_name,
             update_crawl=update_crawl,
             n_jobs=num_jobs,
@@ -249,6 +256,7 @@ class SampleInput(BaseModel):
         if self._crawler is None:
             crawler = Crawler(
                 dicom_dir=self.directory,
+                output_dir=self.crawl_directory,
                 dataset_name=self.dataset_name,
                 force=self.update_crawl,
                 n_jobs=self.n_jobs,
