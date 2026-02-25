@@ -1,12 +1,9 @@
 """Crawl a directory of (post-DICOM) image files and build an index of scan/mask pairs."""
 
-from os import nice
 from pathlib import Path
 
 from pydantic import BaseModel, Field, PrivateAttr
 
-import imgtools
-from imgtools.cli import niftiindex
 from imgtools.dicom.crawl.crawler import validate_output_dir
 from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.nifti.crawl.parse_niftis import (
