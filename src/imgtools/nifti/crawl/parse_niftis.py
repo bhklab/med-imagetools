@@ -203,7 +203,7 @@ def _introspect(
     file_type: str,
 ) -> dict[str, t.Any]:
     extra: dict[str, t.Any] = {}
-    """Read one image and return a serialized fingerprint payload."""  
+    """Read one image and return a serialized fingerprint payload."""
 
     sitk_img = sitk.ReadImage(str(fpath))
 
