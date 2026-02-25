@@ -133,7 +133,9 @@ def _normalise_extensions(
         return NIFTI_EXTENSIONS
     if isinstance(extensions, str):
         extensions = [extensions]
-    return tuple(ext if ext.startswith(".") else f".{ext}" for ext in extensions)
+    return tuple(
+        ext if ext.startswith(".") else f".{ext}" for ext in extensions
+    )
 
 
 def find_niftis(
@@ -168,9 +170,7 @@ def _validate_join_col_in_patterns(
             f"metadata_join_col={metadata_join_col!r} must appear as a "
             f"{{placeholder}} in {', '.join(missing_in)}."
         )
-        raise MetadataJoinColumnError(
-            msg
-        )
+        raise MetadataJoinColumnError(msg)
 
 
 def _log_unmatched_summary(
@@ -205,7 +205,7 @@ def _introspect(
     extra: dict[str, t.Any] = {}
 
     sitk_img = sitk.ReadImage(str(fpath))
-        
+
     if file_type == "scan":
         img = MedImage(sitk_img)
     elif file_type == "mask":
@@ -219,7 +219,7 @@ def _introspect(
             _sitk_img = sitk.GetImageFromArray(arr)
             _sitk_img.CopyInformation(sitk_img)
             img = Mask(_sitk_img, metadata={})
-    
+
     extra.update(img.serialized_fingerprint)
 
     return extra
@@ -296,8 +296,8 @@ def _read_metadata_file(metadata_path: Path) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 
 
-def parse_nifti_dir( # noqa: PLR0912, PLR0915
-    nifti_dir: Path, 
+def parse_nifti_dir(  # noqa: PLR0912, PLR0915
+    nifti_dir: Path,
     scan_name_pattern: str,
     mask_name_pattern: str | None,
     output_dir: Path,
@@ -370,7 +370,9 @@ def parse_nifti_dir( # noqa: PLR0912, PLR0915
 
     # Use cache if available
     if not force and index_csv_path.exists() and crawl_cache_path.exists():
-        logger.info("Loading cached crawl results.", index_csv_path=str(index_csv_path))
+        logger.info(
+            "Loading cached crawl results.", index_csv_path=str(index_csv_path)
+        )
         index = pd.read_csv(index_csv_path)
         cache = json.loads(crawl_cache_path.read_text())
         return ParseNiftiDirResult(
@@ -393,12 +395,16 @@ def parse_nifti_dir( # noqa: PLR0912, PLR0915
         raise FileNotFoundError(msg)
 
     # Compile patterns
-    scan_regex, scan_keys, scan_normalizers = _pattern_to_regex(scan_name_pattern)
+    scan_regex, scan_keys, scan_normalizers = _pattern_to_regex(
+        scan_name_pattern
+    )
     mask_regex: re.Pattern[str] | None = None
     mask_keys: list[str] = []
     mask_normalizers: dict[str, t.Callable[[str], str]] = {}
     if mask_name_pattern is not None:
-        mask_regex, mask_keys, mask_normalizers = _pattern_to_regex(mask_name_pattern)
+        mask_regex, mask_keys, mask_normalizers = _pattern_to_regex(
+            mask_name_pattern
+        )
     all_keys = list(dict.fromkeys(scan_keys + mask_keys))
     if metadata_join_col is not None:
         _validate_join_col_in_patterns(
@@ -411,7 +417,7 @@ def parse_nifti_dir( # noqa: PLR0912, PLR0915
     records: list[dict[str, t.Any]] = []
     unmatched: list[str] = []
     description = f"Parsing {len(nifti_files)} files"
-    
+
     for rec, rel in Parallel(n_jobs=n_jobs, return_as="generator")(
         delayed(_process_one_nifti)(
             fpath,
@@ -445,9 +451,7 @@ def parse_nifti_dir( # noqa: PLR0912, PLR0915
             f"All {len(nifti_files)} files were unmatched. "
             f"Check scan_name_pattern and mask_name_pattern."
         )
-        raise ValueError(
-            msg
-        )
+        raise ValueError(msg)
 
     index = pd.DataFrame.from_records(records)
 
@@ -456,12 +460,14 @@ def parse_nifti_dir( # noqa: PLR0912, PLR0915
         meta = _read_metadata_file(mpath)
         if metadata_join_col not in meta.columns:
             msg = f"metadata_join_col={metadata_join_col!r} not in {mpath.name}: {list(meta.columns)}"
-            raise MetadataJoinColumnError(
-                msg
-            )
+            raise MetadataJoinColumnError(msg)
         meta[metadata_join_col] = meta[metadata_join_col].astype(str)
         index = index.merge(meta, on=metadata_join_col, how="left")
-        logger.info("Merged metadata.", metadata_path=str(mpath), join_col=metadata_join_col)
+        logger.info(
+            "Merged metadata.",
+            metadata_path=str(mpath),
+            join_col=metadata_join_col,
+        )
 
     index.to_csv(index_csv_path, index=False)
     logger.info("Saved index.", path=str(index_csv_path), rows=len(index))

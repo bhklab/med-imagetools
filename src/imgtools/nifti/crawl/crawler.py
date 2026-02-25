@@ -84,7 +84,9 @@ class Crawler(BaseModel):
 
     def crawl(self) -> None:
         """Crawl the directory and build the index."""
-        self.output_dir = self.output_dir or self.nifti_dir.parent / ".imgtools"
+        self.output_dir = (
+            self.output_dir or self.nifti_dir.parent / ".imgtools"
+        )
         validate_output_dir(self.output_dir)
 
         logger.info(
@@ -117,7 +119,7 @@ if __name__ == "__main__":
     #     mask_name_pattern="{image_id}/segmentations/{ROI}.nii.gz",
     #     force=True,
     #     metadata_path=Path("TotalsegmentatorMRI_dataset_v100/meta.csv"),
-    #     metadata_join_col="image_id",   
+    #     metadata_join_col="image_id",
     #     deep=True,
     #     n_jobs=-1,
     # )
