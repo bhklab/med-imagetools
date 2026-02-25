@@ -203,6 +203,7 @@ def _introspect(
     file_type: str,
 ) -> dict[str, t.Any]:
     extra: dict[str, t.Any] = {}
+    """Read one image and return a serialized fingerprint payload."""  
 
     sitk_img = sitk.ReadImage(str(fpath))
 
@@ -211,7 +212,7 @@ def _introspect(
     elif file_type == "mask":
         arr = sitk.GetArrayFromImage(sitk_img)
 
-        if len(np.unique(arr)) == 1:
+        if np.count_nonzero(arr) == 0:
             logger.warning(f"Mask {fpath} is empty.")
             img = MedImage(sitk_img)
         else:

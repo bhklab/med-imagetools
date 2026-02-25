@@ -6,7 +6,7 @@ from pathlib import Path
 from imgtools.loggers import logger
 
 cpu_count: int | None = os.cpu_count()
-DEFAULT_WORKERS: int = cpu_count - 2 if cpu_count is not None else 1
+DEFAULT_WORKERS: int = max(1, cpu_count - 2) if cpu_count is not None else 1
 
 
 @click.command(no_args_is_help=True)
