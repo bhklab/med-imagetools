@@ -181,7 +181,7 @@ def filter_valid_dicoms(
     glob_method = directory.rglob if recursive else directory.glob
     return (
         file.absolute()
-        for file in glob_method(pattern, recurse_symlinks=True)
+        for file in glob_method(pattern)
         if (
             not search_input  # no search input passed
             or all(term in str(file.as_posix()) for term in search_input)
