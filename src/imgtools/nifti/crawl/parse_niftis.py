@@ -13,6 +13,7 @@ from tqdm import tqdm
 
 from imgtools.coretypes import Mask, MedImage
 from imgtools.loggers import logger
+from imgtools.utils import timer
 
 # ---------------------------------------------------------------------------
 # Public constants and types
@@ -43,6 +44,7 @@ class ParseNiftiDirResult(
             ("unmatched_files", list[str]),
             ("extensions", tuple[str, ...]),
             ("deep", bool),
+            ("shared_keys", list[str]),
             ("metadata_path", list[Path]),
             ("metadata_join_col", str | None),
         ],
@@ -225,7 +227,6 @@ def _introspect(
 
     return extra
 
-
 def _process_one_nifti(
     fpath: Path,
     nifti_dir: Path,
@@ -234,6 +235,7 @@ def _process_one_nifti(
     mask_regex: re.Pattern[str] | None,
     mask_normalizers: dict[str, t.Callable[[str], str]],
     all_keys: list[str],
+    shared_keys: list[str],
     deep: bool,
 ) -> tuple[dict[str, t.Any] | None, str]:
     """Process one NIfTI file: match pattern and introspect. For use in parallel processing.
@@ -252,12 +254,57 @@ def _process_one_nifti(
     record: dict[str, t.Any] = {k: groups.get(k, "") for k in all_keys}
     record["filepath"] = rel
     record["file_type"] = file_type
+    if shared_keys:
+        record["reference_id"] = "_".join(str(groups.get(k, "")) for k in shared_keys)
     if deep:
         try:
             record.update(_introspect(fpath, file_type))
         except Exception as e:
             logger.error(f"Error reading image {fpath}: {e}")
     return record, rel
+
+
+@timer("Parsing all NIfTI files")
+def parse_all_niftis(
+    nifti_files: list[Path],
+    nifti_dir: Path,
+    scan_regex: re.Pattern[str],
+    scan_normalizers: dict[str, t.Callable[[str], str]],
+    mask_regex: re.Pattern[str] | None,
+    mask_normalizers: dict[str, t.Callable[[str], str]],
+    all_keys: list[str],
+    shared_keys: list[str],
+    deep: bool,
+    n_jobs: int = -1,
+) -> tuple[list[dict[str, t.Any]], list[str]]:
+    """Parse a list of NIfTI files in parallel and return the results."""
+
+    records: list[dict[str, t.Any]] = []
+    unmatched: list[str] = []
+    tasks = [
+        delayed(_process_one_nifti)(
+            fpath, nifti_dir,
+            scan_regex, scan_normalizers,
+            mask_regex, mask_normalizers,
+            all_keys, shared_keys, deep,
+        )
+        for fpath in nifti_files
+    ]
+    results = Parallel(n_jobs=n_jobs, return_as="generator")(tasks)
+    for rec, rel in tqdm(
+        results,
+        total=len(nifti_files),
+        desc=f"Parsing {len(nifti_files)} files",
+        mininterval=1,
+        leave=False,
+        colour="green",
+    ):
+        if rec is None:
+            unmatched.append(rel)
+        else:
+            records.append(rec)
+
+    return records, unmatched
 
 
 # ---------------------------------------------------------------------------
@@ -371,8 +418,8 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
 
     # Use cache if available
     if not force and index_csv_path.exists() and crawl_cache_path.exists():
-        logger.info(
-            "Loading cached crawl results.", index_csv_path=str(index_csv_path)
+        logger.warning(
+            "Loading cached crawl results, use force=True to re-crawl.", index_csv_path=str(index_csv_path)
         )
         index = pd.read_csv(index_csv_path)
         cache = json.loads(crawl_cache_path.read_text())
@@ -383,6 +430,7 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
             unmatched_files=cache.get("unmatched_files", []),
             extensions=tuple(cache.get("extensions", list(NIFTI_EXTENSIONS))),
             deep=cache.get("deep", deep),
+            shared_keys=cache.get("shared_keys", []),
             metadata_path=[Path(p) for p in cache.get("metadata_path", [])],
             metadata_join_col=cache.get("metadata_join_col"),
         )
@@ -407,6 +455,11 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
             mask_name_pattern
         )
     all_keys = list(dict.fromkeys(scan_keys + mask_keys))
+    shared_keys = [k for k in scan_keys if k in mask_keys] if mask_name_pattern else []
+    if shared_keys:
+        logger.info(f"Using shared keys: {shared_keys} for reference_id, this will be used to link masks to their referenced scans")
+
+
     if metadata_join_col is not None:
         _validate_join_col_in_patterns(
             metadata_join_col,
@@ -415,33 +468,18 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         )
 
     # Match and introspect each file in parallel
-    records: list[dict[str, t.Any]] = []
-    unmatched: list[str] = []
-    description = f"Parsing {len(nifti_files)} files"
-
-    for rec, rel in Parallel(n_jobs=n_jobs, return_as="generator")(
-        delayed(_process_one_nifti)(
-            fpath,
-            nifti_dir,
-            scan_regex,
-            scan_normalizers,
-            mask_regex,
-            mask_normalizers,
-            all_keys,
-            deep,
-        )
-        for fpath in tqdm(
-            nifti_files,
-            desc=description,
-            mininterval=1,
-            leave=False,
-            colour="green",
-        )
-    ):
-        if rec is None:
-            unmatched.append(rel)
-        else:
-            records.append(rec)
+    records, unmatched = parse_all_niftis(
+        nifti_files,
+        nifti_dir,
+        scan_regex,
+        scan_normalizers,
+        mask_regex,
+        mask_normalizers,
+        all_keys,
+        shared_keys, 
+        deep, 
+        n_jobs
+    )
 
     if unmatched:
         _log_unmatched_summary(
@@ -455,6 +493,16 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         raise ValueError(msg)
 
     index = pd.DataFrame.from_records(records)
+
+    # Link masks to their referenced scans via shared pattern placeholders
+    if shared_keys and "reference_id" in index.columns:
+        scan_lookup = (
+            index.loc[index["file_type"] == "scan", ["reference_id", "filepath"]]
+            .drop_duplicates(subset="reference_id")
+            .set_index("reference_id")["filepath"]
+        )
+        index["reference_scan"] = index["reference_id"].map(scan_lookup)
+        index.loc[index["file_type"] == "scan", "reference_scan"] = ""
 
     # Merge external metadata
     for mpath in metadata_paths:
@@ -482,6 +530,7 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
                 "unmatched_files": unmatched,
                 "extensions": list(resolved_extensions),
                 "deep": deep,
+                "shared_keys": shared_keys,
                 "metadata_path": list(str(p) for p in metadata_paths),
                 "metadata_join_col": metadata_join_col,
             },
@@ -496,6 +545,7 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         unmatched_files=unmatched,
         extensions=resolved_extensions,
         deep=deep,
+        shared_keys=shared_keys,
         metadata_path=metadata_paths,
         metadata_join_col=metadata_join_col,
     )
