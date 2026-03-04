@@ -8,12 +8,17 @@ This module provides utilities for:
 - Finding similar DICOM tags.
 """
 
+import contextlib
 import difflib
 import functools
-from typing import FrozenSet, List, Optional
+from typing import FrozenSet, List, Optional, Tuple
 
 from pydicom._dicom_dict import DicomDictionary
-from pydicom.datadict import dictionary_has_tag, tag_for_keyword
+from pydicom.datadict import (
+    dictionary_description,
+    dictionary_has_tag,
+    tag_for_keyword,
+)
 
 ###############################################################################
 # DICOM TAG UTILITIES
@@ -127,3 +132,57 @@ def similar_tags(
     ['PatientID', 'PatientName']
     """
     return difflib.get_close_matches(keyword, ALL_DICOM_TAGS, n, threshold)
+
+
+def search_dicom_keywords(
+    query: str,
+    max_results: int = 25,
+    threshold: float = 0.0,
+) -> List[Tuple[str, str]]:
+    """Search DICOM keywords by substring and fuzzy match, with descriptions.
+
+    Parameters
+    ----------
+    query : str
+        Search string (substring match in keyword; also used for fuzzy ranking).
+    max_results : int, optional
+        Maximum number of (keyword, description) pairs to return (default 25).
+    threshold : float, optional
+        Minimum fuzzy ratio for inclusion when ranking (default 0.0 = no filter).
+
+    Returns
+    -------
+    list of (keyword, description)
+        Matches sorted by relevance (fuzzy score then alphabetical).
+    """
+    q = query.strip().lower()
+    if not q:
+        return []
+
+    # Substring matches
+    subset = [kw for kw in ALL_DICOM_TAGS if q in kw.lower()]
+    if not subset:
+        # Fall back to fuzzy match
+        subset = difflib.get_close_matches(
+            query, ALL_DICOM_TAGS, n=max_results * 2, cutoff=threshold
+        )
+
+    # Sort by relevance: prefer starts-with, then by fuzzy ratio, then alpha
+    def rank(kw: str) -> tuple:
+        kw_lower = kw.lower()
+        starts = kw_lower.startswith(q)
+        ratio = difflib.SequenceMatcher(None, q, kw_lower).ratio()
+        return (not starts, -ratio, kw)
+
+    subset = sorted(subset, key=rank)[:max_results]
+
+    result: List[Tuple[str, str]] = []
+    for keyword in subset:
+        tag = tag_for_keyword(keyword)
+        desc = ""
+        if tag is not None:
+            with contextlib.suppress(Exception):
+                desc = dictionary_description(tag) or ""
+        result.append((keyword, desc))
+
+    return result
