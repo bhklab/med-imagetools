@@ -63,7 +63,9 @@ def canonicalize_modality(value: object) -> Optional[str]:
         return None
 
     # Remove separators and uppercase for robust matching.
-    normalized = text.upper().replace(" ", "").replace("-", "").replace("_", "")
+    normalized = (
+        text.upper().replace(" ", "").replace("-", "").replace("_", "")
+    )
 
     if normalized in _MODALITY_ALIASES:
         return _MODALITY_ALIASES[normalized]
@@ -72,7 +74,9 @@ def canonicalize_modality(value: object) -> Optional[str]:
 
 def _snake_to_camel(name: str) -> str:
     """Convert snake_case or lowercase to CamelCase."""
-    return "".join(word.capitalize() for word in name.replace("-", "_").split("_"))
+    return "".join(
+        word.capitalize() for word in name.replace("-", "_").split("_")
+    )
 
 
 def _tag_description(keyword: str) -> str:
@@ -111,6 +115,7 @@ def suggest_dicom_keyword(
 # ---------------------------------------------------------------------------
 # Rich display helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_suggestion_table(suggestions: list[str]) -> Table:
     """Build a Rich table of numbered DICOM keyword suggestions."""
@@ -176,6 +181,7 @@ def _prompt_choice(n_suggestions: int, has_suggestions: bool) -> str:
 # Core interactive mapping
 # ---------------------------------------------------------------------------
 
+
 def run_mapping(  # noqa: PLR0912, PLR0915
     csv_path: Path,
     output_mapping: Optional[Path] = None,
@@ -207,11 +213,15 @@ def run_mapping(  # noqa: PLR0912, PLR0915
         )
 
     for col_idx, col in enumerate(columns, 1):
-        suggestions = suggest_dicom_keyword(col, top_n=top_n, threshold=threshold)
+        suggestions = suggest_dicom_keyword(
+            col, top_n=top_n, threshold=threshold
+        )
 
         if accept_all:
             mapping[col] = suggestions[0] if suggestions else None
-            logger.info(f"accept_all=True, automatically mapping {col} to {mapping[col]}")
+            logger.info(
+                f"accept_all=True, automatically mapping {col} to {mapping[col]}"
+            )
             continue
 
         _print_column_header(col, col_idx, total)
@@ -261,6 +271,7 @@ def run_mapping(  # noqa: PLR0912, PLR0915
     # Save mapping
     if output_mapping:
         import tomli_w
+
         out_path = output_mapping.resolve()
         out_path.parent.mkdir(parents=True, exist_ok=True)
         toml_mapping = {k: (v or "") for k, v in mapping.items()}
@@ -277,7 +288,11 @@ def run_mapping(  # noqa: PLR0912, PLR0915
             out_df = df.rename(columns=rename)
 
             # If a Modality column exists in the output, canonicalize alias values.
-            modality_columns = [c for c in out_df.columns if str(c).strip().lower() == "modality"]
+            modality_columns = [
+                c
+                for c in out_df.columns
+                if str(c).strip().lower() == "modality"
+            ]
             for col in modality_columns:
                 before = out_df[col]
                 out_df[col] = out_df[col].map(
@@ -301,6 +316,7 @@ def run_mapping(  # noqa: PLR0912, PLR0915
 # Key reading for live search
 # ---------------------------------------------------------------------------
 
+
 def _read_key() -> Optional[str]:  # noqa: PLR0911, PLR0912
     """Read one key from raw stdin.
 
@@ -312,6 +328,7 @@ def _read_key() -> Optional[str]:  # noqa: PLR0911, PLR0912
     try:
         if sys.platform == "win32":
             import msvcrt
+
             ch = msvcrt.getch()
             if ch in (b"\r", b"\n"):
                 return "enter"
@@ -338,6 +355,7 @@ def _read_key() -> Optional[str]:  # noqa: PLR0911, PLR0912
             import os
             import termios
             import tty
+
             fd = sys.stdin.fileno()
             old = termios.tcgetattr(fd)
             try:
@@ -354,6 +372,7 @@ def _read_key() -> Optional[str]:  # noqa: PLR0911, PLR0912
                 if ch == b"\x1b":
                     # Detect bare Escape vs. arrow-key escape sequences.
                     import select
+
                     if not select.select([fd], [], [], 0.03)[0]:
                         return "escape"
                     rest = os.read(fd, 2)
@@ -376,6 +395,7 @@ def _read_key() -> Optional[str]:  # noqa: PLR0911, PLR0912
 # ---------------------------------------------------------------------------
 # Live search with arrow-key selection (fzf-style)
 # ---------------------------------------------------------------------------
+
 
 def _make_search_panel(
     query: str,
