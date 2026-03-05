@@ -107,18 +107,30 @@ def _match_file(
     mask_regex: re.Pattern[str] | None,
     mask_normalizers: dict[str, t.Callable[[str], str]],
 ) -> tuple[dict[str, str], str] | None:
-    """Match rel_path against scan then mask regex. Returns (groupdict, file_type) or None.
+    """
+    Match rel_path against scan and mask regexes. Returns (groupdict, file_type) or None.
 
     Patterns are anchored: the full path must match from start to end (no partial matches).
+    If both patterns match, the mask match is returned and a warning is logged.
     """
+    scan_match = None
+    mask_match = None
+
     if scan_regex is not None:
-        m = scan_regex.fullmatch(rel_path)
-        if m:
-            return _apply_normalizers(m.groupdict(), scan_normalizers), "scan"
+        scan_match = scan_regex.fullmatch(rel_path)
+
     if mask_regex is not None:
-        m = mask_regex.fullmatch(rel_path)
-        if m:
-            return _apply_normalizers(m.groupdict(), mask_normalizers), "mask"
+        mask_match = mask_regex.fullmatch(rel_path)
+
+    if scan_match and mask_match:
+        logger.warning(f"File {rel_path} matched both scan and mask patterns. Returning mask match.")
+        return _apply_normalizers(mask_match.groupdict(), mask_normalizers), "mask"
+
+    if scan_match:
+        return _apply_normalizers(scan_match.groupdict(), scan_normalizers), "scan"
+    if mask_match:
+        return _apply_normalizers(mask_match.groupdict(), mask_normalizers), "mask"
+
     return None
 
 
