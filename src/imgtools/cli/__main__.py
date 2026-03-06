@@ -64,7 +64,7 @@ registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
 registry.add("utilities", dicomshow)
 
-registry.create_group("other", "Other tools for working with medical imaging data. (Nifti, Nrrd, etc.)")
+registry.create_group("other", "Other tools for working with medical imaging data. (NIfTI, NRRD, etc.)")
 registry.add("other", niftiindex)
 
 
