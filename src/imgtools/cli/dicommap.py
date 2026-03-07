@@ -28,8 +28,7 @@ from imgtools.loggers import logger
     help="Write a CSV with standardized DICOM column names (mapped columns renamed).",
 )
 @click.option(
-    "-y",
-    "--yes",
+    "--accept-all",
     "accept_all",
     is_flag=True,
     default=False,
@@ -76,7 +75,7 @@ def dicommap(
 
     Reads a metadata CSV and suggests DICOM keyword mappings for each column
     (fuzzy matching). In interactive mode you accept, reject, or skip each
-    suggestion. Use -y to accept all suggestions above the threshold and
+    suggestion. Use --accept-all to accept all suggestions above the threshold and
     write the mapping without prompts.
     """
 
