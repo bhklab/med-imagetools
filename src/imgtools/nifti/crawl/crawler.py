@@ -67,19 +67,6 @@ class Crawler(BaseModel):
         default=False,
     )
 
-    # ---- Metadata merge ----
-    metadata_path: MetadataInput | None = Field(
-        description="Path(s) to CSV or JSON to merge into the index. Single path or list.",
-        default=None,
-    )
-    metadata_join_col: str | None = Field(
-        description=(
-            "Column that must appear as a {placeholder} in the patterns "
-            "and in each metadata file. Required when metadata_path is set."
-        ),
-        default=None,
-    )
-
     _crawl_results: ParseNiftiDirResult | None = PrivateAttr(default=None)
 
     def crawl(self) -> None:
@@ -107,8 +94,6 @@ class Crawler(BaseModel):
                 output_dir=self.output_dir,
                 dataset_name=self.dataset_name,
                 force=self.force,
-                metadata_path=self.metadata_path,
-                metadata_join_col=self.metadata_join_col,
             )
 
 

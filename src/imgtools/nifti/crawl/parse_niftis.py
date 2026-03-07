@@ -45,8 +45,6 @@ class ParseNiftiDirResult(
             ("extensions", tuple[str, ...]),
             ("deep", bool),
             ("shared_keys", list[str]),
-            ("metadata_path", list[Path]),
-            ("metadata_join_col", str | None),
         ],
     ),
 ):
@@ -166,25 +164,6 @@ def find_niftis(
 # ---------------------------------------------------------------------------
 # Validation and logging
 # ---------------------------------------------------------------------------
-
-
-def _validate_join_col_in_patterns(
-    metadata_join_col: str,
-    scan_keys: list[str],
-    mask_keys: list[str] | None,
-) -> None:
-    """Raise if metadata_join_col is not a placeholder in the patterns."""
-    missing_in: list[str] = []
-    if metadata_join_col not in scan_keys:
-        missing_in.append("scan_name_pattern")
-    if mask_keys is not None and metadata_join_col not in mask_keys:
-        missing_in.append("mask_name_pattern")
-    if missing_in:
-        msg = (
-            f"metadata_join_col={metadata_join_col!r} must appear as a "
-            f"{{placeholder}} in {', '.join(missing_in)}."
-        )
-        raise MetadataJoinColumnError(msg)
 
 
 def _log_unmatched_summary(
@@ -320,38 +299,6 @@ def parse_all_niftis(
 
 
 # ---------------------------------------------------------------------------
-# Metadata I/O
-# ---------------------------------------------------------------------------
-
-
-def _normalise_metadata_paths(
-    metadata_path: MetadataInput | None,
-) -> list[Path]:
-    """Coerce metadata_path (str, Path, or list) into a list of Paths."""
-    if metadata_path is None:
-        return []
-    if isinstance(metadata_path, (str, Path)):
-        return [Path(metadata_path)]
-    return [Path(p) for p in metadata_path]
-
-
-def _read_metadata_file(metadata_path: Path) -> pd.DataFrame:
-    """Read a CSV or JSON metadata file into a DataFrame."""
-    suffix = metadata_path.suffix.lower()
-    if suffix == ".json":
-        data = json.loads(metadata_path.read_text(encoding="utf-8-sig"))
-        if isinstance(data, list):
-            return pd.DataFrame(data)
-        if isinstance(data, dict):
-            return pd.DataFrame([data])
-        msg = f"Unsupported JSON structure in {metadata_path}"
-        raise ValueError(msg)
-    return pd.read_csv(
-        metadata_path, sep=None, engine="python", encoding="utf-8-sig"
-    )
-
-
-# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -365,8 +312,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
     force: bool,
     extensions: str | list[str] | None = None,
     deep: bool = False,
-    metadata_path: MetadataInput | None = None,
-    metadata_join_col: str | None = None,
     n_jobs: int = -1,
 ) -> ParseNiftiDirResult:
     """Parse a directory of image files and build an index of matched scan/mask pairs.
@@ -389,10 +334,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         File extension(s) to search. Single string or list; default NIfTI.
     deep
         If True, read each image and run _introspect (fingerprint). If False, only file-level metadata.
-    metadata_path
-        Path(s) to CSV/JSON to merge into the index.
-    metadata_join_col
-        Column that must be a {placeholder} in patterns and in each metadata file. Required if metadata_path set.
     n_jobs
         Number of parallel jobs for introspecting files. -1 uses all available cores.
 
@@ -411,11 +352,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
     ValueError
         If all files are unmatched.
     """
-    metadata_paths = _normalise_metadata_paths(metadata_path)
-    if metadata_paths and metadata_join_col is None:
-        raise MetadataJoinColumnError(
-            "metadata_join_col is required when metadata_path is given."
-        )
 
     nifti_dir = nifti_dir.resolve()
     if not nifti_dir.is_dir():
@@ -472,13 +408,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         logger.info(f"Using shared keys: {shared_keys} for reference_id, this will be used to link masks to their referenced scans")
 
 
-    if metadata_join_col is not None:
-        _validate_join_col_in_patterns(
-            metadata_join_col,
-            scan_keys,
-            mask_keys if mask_name_pattern else None,
-        )
-
     # Match and introspect each file in parallel
     records, unmatched = parse_all_niftis(
         nifti_files,
@@ -516,19 +445,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         index["reference_scan"] = index["reference_id"].map(scan_lookup)
         index.loc[index["file_type"] == "scan", "reference_scan"] = ""
 
-    # Merge external metadata
-    for mpath in metadata_paths:
-        meta = _read_metadata_file(mpath)
-        if metadata_join_col not in meta.columns:
-            msg = f"metadata_join_col={metadata_join_col!r} not in {mpath.name}: {list(meta.columns)}"
-            raise MetadataJoinColumnError(msg)
-        meta[metadata_join_col] = meta[metadata_join_col].astype(str)
-        index = index.merge(meta, on=metadata_join_col, how="left")
-        logger.info(
-            "Merged metadata.",
-            metadata_path=str(mpath),
-            join_col=metadata_join_col,
-        )
 
     index.to_csv(index_csv_path, index=False)
     logger.info("Saved index.", path=str(index_csv_path), rows=len(index))
@@ -543,8 +459,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
                 "extensions": list(resolved_extensions),
                 "deep": deep,
                 "shared_keys": shared_keys,
-                "metadata_path": list(str(p) for p in metadata_paths),
-                "metadata_join_col": metadata_join_col,
             },
             indent=2,
         )
@@ -558,6 +472,4 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
         extensions=resolved_extensions,
         deep=deep,
         shared_keys=shared_keys,
-        metadata_path=metadata_paths,
-        metadata_join_col=metadata_join_col,
     )
