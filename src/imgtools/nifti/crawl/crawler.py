@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field, PrivateAttr
 from imgtools.dicom.crawl.crawler import validate_output_dir
 from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.nifti.crawl.parse_niftis import (
-    MetadataInput,
     ParseNiftiDirResult,
     parse_nifti_dir,
 )
@@ -67,19 +66,6 @@ class Crawler(BaseModel):
         default=False,
     )
 
-    # ---- Metadata merge ----
-    metadata_path: MetadataInput | None = Field(
-        description="Path(s) to CSV or JSON to merge into the index. Single path or list.",
-        default=None,
-    )
-    metadata_join_col: str | None = Field(
-        description=(
-            "Column that must appear as a {placeholder} in the patterns "
-            "and in each metadata file. Required when metadata_path is set."
-        ),
-        default=None,
-    )
-
     _crawl_results: ParseNiftiDirResult | None = PrivateAttr(default=None)
 
     def crawl(self) -> None:
@@ -107,8 +93,6 @@ class Crawler(BaseModel):
                 output_dir=self.output_dir,
                 dataset_name=self.dataset_name,
                 force=self.force,
-                metadata_path=self.metadata_path,
-                metadata_join_col=self.metadata_join_col,
             )
 
 
@@ -118,8 +102,6 @@ if __name__ == "__main__":
     #     scan_name_pattern="{image_id}/{Modality}.nii.gz",
     #     mask_name_pattern="{image_id}/segmentations/{ROI}.nii.gz",
     #     force=True,
-    #     metadata_path=Path("TotalsegmentatorMRI_dataset_v100/meta.csv"),
-    #     metadata_join_col="image_id",
     #     deep=True,
     #     n_jobs=-1,
     # )
@@ -130,8 +112,6 @@ if __name__ == "__main__":
         scan_name_pattern="images/{disease_site}/{split}/images/{patient_id:d}_{SeriesInstanceUID}.nii.gz",
         mask_name_pattern="images/{disease_site}/{split}/masks/{patient_id:d}_{SeriesInstanceUID}.nii.gz",
         force=True,
-        metadata_path=[Path("final-formatted/metadata/patients.csv")],
-        metadata_join_col="patient_id",
         deep=True,
         n_jobs=-1,
     )

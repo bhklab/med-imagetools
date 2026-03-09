@@ -38,19 +38,6 @@ DEFAULT_WORKERS: int = max(1, cpu_count - 2) if cpu_count is not None else 1
     help="File extension(s) to search (e.g. .nii.gz, .nii, .nrrd). Can be repeated. Default: .nii.gz, .nii.",
 )
 @click.option(
-    "--metadata-path",
-    type=click.Path(exists=True, path_type=Path),
-    multiple=True,
-    default=None,
-    help="Path(s) to CSV or JSON to merge into the index. Requires --metadata-join-col.",
-)
-@click.option(
-    "--metadata-join-col",
-    type=str,
-    default=None,
-    help="Column that must appear as a {placeholder} in the patterns and in each metadata file. Required when --metadata-path is set.",
-)
-@click.option(
     "--deep",
     is_flag=True,
     default=False,
@@ -89,8 +76,6 @@ def niftiindex(
     scan_name_pattern: str,
     mask_name_pattern: str | None,
     extensions: tuple[str, ...] | None,
-    metadata_path: tuple[Path, ...] | None,
-    metadata_join_col: str | None,
     output_dir: Path | None,
     dataset_name: str | None,
     deep: bool,
@@ -107,16 +92,11 @@ def niftiindex(
     from imgtools.nifti.crawl import Crawler
     from imgtools.dicom.crawl import CrawlerOutputDirError
 
-    if metadata_path and not metadata_join_col:
-        raise click.UsageError("--metadata-join-col is required when --metadata-path is set.")
-
     crawler = Crawler(
         nifti_dir=nifti_dir,
         scan_name_pattern=scan_name_pattern,
         mask_name_pattern=mask_name_pattern,
         extensions=list(extensions) if extensions else [".nii.gz", ".nii"],
-        metadata_path=list(metadata_path) if metadata_path else None,
-        metadata_join_col=metadata_join_col,
         output_dir=output_dir,
         dataset_name=dataset_name,
         deep=deep,
