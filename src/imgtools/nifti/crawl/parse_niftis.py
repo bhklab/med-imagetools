@@ -122,13 +122,21 @@ def _match_file(
         mask_match = mask_regex.fullmatch(rel_path)
 
     if scan_match and mask_match:
-        logger.warning(f"File {rel_path} matched both scan and mask patterns. Returning mask match.")
-        return _apply_normalizers(mask_match.groupdict(), mask_normalizers), "mask"
+        logger.warning(
+            f"File {rel_path} matched both scan and mask patterns. Returning mask match."
+        )
+        return _apply_normalizers(
+            mask_match.groupdict(), mask_normalizers
+        ), "mask"
 
     if scan_match:
-        return _apply_normalizers(scan_match.groupdict(), scan_normalizers), "scan"
+        return _apply_normalizers(
+            scan_match.groupdict(), scan_normalizers
+        ), "scan"
     if mask_match:
-        return _apply_normalizers(mask_match.groupdict(), mask_normalizers), "mask"
+        return _apply_normalizers(
+            mask_match.groupdict(), mask_normalizers
+        ), "mask"
 
     return None
 
@@ -259,6 +267,7 @@ def _introspect(
 
     return extra
 
+
 def _process_one_nifti(
     fpath: Path,
     nifti_dir: Path,
@@ -287,7 +296,9 @@ def _process_one_nifti(
     record["filepath"] = rel
     record["file_type"] = file_type
     if shared_keys:
-        record["reference_id"] = "_".join(str(groups.get(k, "")) for k in shared_keys)
+        record["reference_id"] = "_".join(
+            str(groups.get(k, "")) for k in shared_keys
+        )
     if deep:
         try:
             record.update(_introspect(fpath, file_type))
@@ -315,10 +326,15 @@ def parse_all_niftis(
     unmatched: list[str] = []
     tasks = [
         delayed(_process_one_nifti)(
-            fpath, nifti_dir,
-            scan_regex, scan_normalizers,
-            mask_regex, mask_normalizers,
-            all_keys, shared_keys, deep,
+            fpath,
+            nifti_dir,
+            scan_regex,
+            scan_normalizers,
+            mask_regex,
+            mask_normalizers,
+            all_keys,
+            shared_keys,
+            deep,
         )
         for fpath in nifti_files
     ]
@@ -408,7 +424,8 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
     # Use cache if available
     if not force and index_csv_path.exists() and crawl_cache_path.exists():
         logger.warning(
-            "Loading cached crawl results, use force=True to re-crawl.", index_csv_path=str(index_csv_path)
+            "Loading cached crawl results, use force=True to re-crawl.",
+            index_csv_path=str(index_csv_path),
         )
         index = pd.read_csv(index_csv_path)
         cache = json.loads(crawl_cache_path.read_text())
@@ -444,10 +461,13 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
             mask_name_pattern
         )
     all_keys = list(dict.fromkeys(scan_keys + mask_keys))
-    shared_keys = [k for k in scan_keys if k in mask_keys] if mask_name_pattern else []
+    shared_keys = (
+        [k for k in scan_keys if k in mask_keys] if mask_name_pattern else []
+    )
     if shared_keys:
-        logger.info(f"Using shared keys: {shared_keys} for reference_id, this will be used to link masks to their referenced scans")
-
+        logger.info(
+            f"Using shared keys: {shared_keys} for reference_id, this will be used to link masks to their referenced scans"
+        )
 
     # Match and introspect each file in parallel
     with tqdm_logging_redirect():
@@ -459,9 +479,9 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
             mask_regex,
             mask_normalizers,
             all_keys,
-            shared_keys, 
-            deep, 
-            n_jobs
+            shared_keys,
+            deep,
+            n_jobs,
         )
 
     if unmatched:
@@ -480,13 +500,14 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
     # Link masks to their referenced scans via shared pattern placeholders
     if shared_keys and "reference_id" in index.columns:
         scan_lookup = (
-            index.loc[index["file_type"] == "scan", ["reference_id", "filepath"]]
+            index.loc[
+                index["file_type"] == "scan", ["reference_id", "filepath"]
+            ]
             .drop_duplicates(subset="reference_id")
             .set_index("reference_id")["filepath"]
         )
         index["reference_scan"] = index["reference_id"].map(scan_lookup)
         index.loc[index["file_type"] == "scan", "reference_scan"] = ""
-
 
     index.to_csv(index_csv_path, index=False)
     logger.info("Saved index.", path=str(index_csv_path), rows=len(index))

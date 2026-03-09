@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field, PrivateAttr
 from imgtools.dicom.crawl.crawler import validate_output_dir
 from imgtools.loggers import logger, tqdm_logging_redirect
 from imgtools.nifti.crawl.parse_niftis import (
-    MetadataInput,
     ParseNiftiDirResult,
     parse_nifti_dir,
 )
