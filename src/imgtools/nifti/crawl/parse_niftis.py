@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 import typing as t
 from pathlib import Path
-import tempfile
 
 import nibabel as nib
 import numpy as np
@@ -213,7 +213,9 @@ def read_image(image_file: Path) -> sitk.Image:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpfile = Path(tmpdir) / "tmp.nii.gz"
             img = nib.load(str(image_file))
-            nib.save(nib.Nifti1Image(img.get_fdata(), img.get_qform()), tmpfile) # type: ignore
+            nib.save(
+                nib.Nifti1Image(img.get_fdata(), img.get_qform()), tmpfile
+            )  # type: ignore
             image = sitk.ReadImage(tmpfile)
     return image
 
