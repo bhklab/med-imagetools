@@ -215,7 +215,7 @@ def read_image(image_file: Path) -> sitk.Image:
             img = nib.load(str(image_file))
             nib.save(
                 nib.Nifti1Image(img.get_fdata(), img.get_qform()), tmpfile  # type: ignore
-            )  # type: ignore
+            ) 
             image = sitk.ReadImage(tmpfile)
     return image
 
