@@ -4,6 +4,7 @@ import json
 import re
 import typing as t
 from pathlib import Path
+import tempfile
 
 import nibabel as nib
 import numpy as np
@@ -200,44 +201,21 @@ def _log_unmatched_summary(
 # ---------------------------------------------------------------------------
 
 
-def _nib_to_sitk(fpath: Path) -> sitk.Image:
-    """Load a NIfTI file with nibabel and convert it to a SimpleITK image.
-
-    Handles the RAS (nibabel/NIfTI) to LPS (ITK/SimpleITK) coordinate
-    convention conversion so the result matches what ``sitk.ReadImage`` would
-    produce.
-    """
-    nib_img = nib.load(str(fpath))
-    data = np.asarray(nib_img.dataobj)
-    affine = nib_img.affine.copy()
-
-    # NIfTI stores the affine in RAS; SimpleITK/ITK uses LPS.
-    affine[:2, :] *= -1
-
-    spacing = np.sqrt(np.sum(affine[:3, :3] ** 2, axis=0))
-    direction = affine[:3, :3] / spacing[np.newaxis, :]
-    origin = affine[:3, 3]
-
-    # sitk.GetImageFromArray reverses axes: array(k,j,i) → image size (i,j,k)
-    sitk_img = sitk.GetImageFromArray(data.transpose(2, 1, 0))
-    sitk_img.SetSpacing(spacing.tolist())
-    sitk_img.SetOrigin(origin.tolist())
-    sitk_img.SetDirection(direction.flatten().tolist())
-
-    return sitk_img
-
-
-def _read_nifti(fpath: Path) -> sitk.Image:
-    """Read a NIfTI file, falling back to nibabel if SimpleITK fails."""
+def read_image(image_file: Path) -> sitk.Image:
     try:
-        return sitk.ReadImage(str(fpath))
-    except Exception as sitk_err:
+        image = sitk.ReadImage(image_file)
+    except RuntimeError as sitk_error:
         logger.warning(
             "SimpleITK failed to read file, falling back to nibabel.",
-            path=str(fpath),
-            sitk_error=str(sitk_err),
+            path=str(image_file),
+            error=sitk_error,
         )
-        return _nib_to_sitk(fpath)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpfile = Path(tmpdir) / "tmp.nii.gz"
+            img = nib.load(str(image_file))
+            nib.save(nib.Nifti1Image(img.get_fdata(), img.get_qform()), tmpfile) # type: ignore
+            image = sitk.ReadImage(tmpfile)
+    return image
 
 
 def _introspect(
@@ -247,11 +225,12 @@ def _introspect(
     extra: dict[str, t.Any] = {}
     """Read one image and return a serialized fingerprint payload."""
 
-    sitk_img = _read_nifti(fpath)
+    sitk_img = read_image(fpath)
 
     if file_type == "scan":
         img = MedImage(sitk_img)
     elif file_type == "mask":
+        sitk_img = sitk.Cast(sitk_img, sitk.sitkUInt8)
         arr = sitk.GetArrayFromImage(sitk_img)
 
         if np.count_nonzero(arr) == 0:
@@ -437,8 +416,6 @@ def parse_nifti_dir(  # noqa: PLR0912, PLR0915
             extensions=tuple(cache.get("extensions", list(NIFTI_EXTENSIONS))),
             deep=cache.get("deep", deep),
             shared_keys=cache.get("shared_keys", []),
-            metadata_path=[Path(p) for p in cache.get("metadata_path", [])],
-            metadata_join_col=cache.get("metadata_join_col"),
         )
 
     # Discover files

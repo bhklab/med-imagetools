@@ -102,8 +102,6 @@ if __name__ == "__main__":
     #     scan_name_pattern="{image_id}/{Modality}.nii.gz",
     #     mask_name_pattern="{image_id}/segmentations/{ROI}.nii.gz",
     #     force=True,
-    #     metadata_path=Path("TotalsegmentatorMRI_dataset_v100/meta.csv"),
-    #     metadata_join_col="image_id",
     #     deep=True,
     #     n_jobs=-1,
     # )
@@ -114,8 +112,6 @@ if __name__ == "__main__":
         scan_name_pattern="images/{disease_site}/{split}/images/{patient_id:d}_{SeriesInstanceUID}.nii.gz",
         mask_name_pattern="images/{disease_site}/{split}/masks/{patient_id:d}_{SeriesInstanceUID}.nii.gz",
         force=True,
-        metadata_path=[Path("final-formatted/metadata/patients.csv")],
-        metadata_join_col="patient_id",
         deep=True,
         n_jobs=-1,
     )
