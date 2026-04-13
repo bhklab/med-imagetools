@@ -56,7 +56,7 @@ def parse_spacing(ctx, param, value): # type: ignore
 @click.argument(
     "input_directory",
     type=click.Path(
-        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True, exists=True
+        file_okay=False, dir_okay=True, writable=False, path_type=Path, resolve_path=True, exists=True
     ),
 )
 @click.argument(
