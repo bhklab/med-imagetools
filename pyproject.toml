@@ -42,6 +42,7 @@ dependencies = [
     "fasteners==0.19",
     "dill>=0.3.8,<1",
     "pyyaml>=6.0,<7",
+    "tomli-w>=1.0.0",
 ]
 
 classifiers = [

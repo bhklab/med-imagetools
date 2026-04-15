@@ -37,6 +37,7 @@ from imgtools import __version__
 
 from . import set_log_verbosity
 from .autopipeline import autopipeline
+from .dicommap import dicommap
 from .dicomfind import dicomfind
 from .dicomshow import dicomshow
 from .dicomsort import dicomsort
@@ -64,8 +65,9 @@ registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
 registry.add("utilities", dicomshow)
 
-registry.create_group("other", "Other tools for working with medical imaging data. (NIfTI, NRRD, etc.)")
+registry.create_group("other", "Other tools for working with medical imaging data.")
 registry.add("other", niftiindex)
+registry.add("other", dicommap)
 
 
 if not testdata.hidden:
