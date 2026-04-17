@@ -1,5 +1,5 @@
-from itertools import islice
 import os
+from itertools import islice
 from pathlib import Path
 from typing import Generator, List
 
@@ -42,7 +42,7 @@ def _matches_extension(file: Path, extension: str, case_sensitive: bool) -> bool
     return file_ext.lower() == extension.lower()
 
 
-def _matches_search_input(file: Path, search_input: List[str] | None) -> bool:
+def _matches_search_input(file: Path, search_input: list[str] | None) -> bool:
     """Check whether all search terms occur in the file path."""
     if not search_input:
         return True
