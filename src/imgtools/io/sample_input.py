@@ -99,7 +99,7 @@ class SampleInput(BaseModel):
     crawl_directory: Path = Field(
         description="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
         title="Crawl Directory",
-        default=None
+        default=None,
     )
     update_crawl: bool = Field(
         default=False,

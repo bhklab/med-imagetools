@@ -30,7 +30,9 @@ def _normalize_extension(extension: str) -> str:
     return extension[1:] if extension.startswith(".") else extension
 
 
-def _matches_extension(file: Path, extension: str, case_sensitive: bool) -> bool:
+def _matches_extension(
+    file: Path, extension: str, case_sensitive: bool
+) -> bool:
     """Check whether a file matches the requested extension."""
     if not extension:
         return True
@@ -100,7 +102,9 @@ def _iter_files_following_symlinks(
             try:
                 real_child = child_dir.resolve()
             except OSError:
-                logger.warning("Failed to resolve child directory", directory=child_dir)
+                logger.warning(
+                    "Failed to resolve child directory", directory=child_dir
+                )
                 continue
 
             if real_child not in seen_dirs:
@@ -210,4 +214,6 @@ def convert_to_case_insensitive(extension: str) -> str:
         return ""
 
     lower_extension = extension.lower()
-    return "".join(f"[{char.lower()}{char.upper()}]" for char in lower_extension)
+    return "".join(
+        f"[{char.lower()}{char.upper()}]" for char in lower_extension
+    )
