@@ -56,7 +56,7 @@ def parse_spacing(ctx, param, value): # type: ignore
 @click.argument(
     "input_directory",
     type=click.Path(
-        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True, exists=True
+        file_okay=False, dir_okay=True, writable=False, path_type=Path, resolve_path=True, exists=True
     ),
 )
 @click.argument(
@@ -64,6 +64,14 @@ def parse_spacing(ctx, param, value): # type: ignore
     type=click.Path(
         file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
     ),
+)
+@click.option(
+    "--crawl-directory",
+    type=click.Path(
+        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
+    ),
+    default=None,
+    help="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
 )
 @click.option(
     "--filename-format",
@@ -172,6 +180,7 @@ def parse_spacing(ctx, param, value): # type: ignore
 def autopipeline(
     input_directory: str,
     output_directory: str,
+    crawl_directory: str,
     filename_format: str,
     existing_file_mode: str,
     update_crawl: bool,
@@ -250,6 +259,7 @@ def autopipeline(
     pipeline = Autopipeline(
         input_directory=input_directory,
         output_directory=output_directory,
+        crawl_directory=crawl_directory,
         output_filename_format=filename_format,
         existing_file_mode=ExistingFileMode[existing_file_mode.upper()],
         update_crawl=update_crawl,
