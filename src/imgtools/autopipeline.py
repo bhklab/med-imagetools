@@ -289,7 +289,7 @@ class Autopipeline:
         self,
         input_directory: str | Path,
         output_directory: str | Path,
-        crawl_directory: str | Path,
+        crawl_directory: str | Path | None = None,
         output_filename_format: str = DEFAULT_FILENAME_FORMAT,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
@@ -346,7 +346,7 @@ class Autopipeline:
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
-            crawl_directory=Path(crawl_directory),
+            crawl_directory=Path(crawl_directory) if crawl_directory else None,
             update_crawl=update_crawl,
             n_jobs=n_jobs,
             modalities=modalities,

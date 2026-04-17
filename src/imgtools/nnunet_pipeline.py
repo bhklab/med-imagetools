@@ -262,28 +262,28 @@ class nnUNetPipeline:  # noqa: N801
         yield "nnUNetOutput", self.output
 
 
-if __name__ == "__main__":
-    from rich import print  # noqa
+# if __name__ == "__main__":
+#     from rich import print  # noqa
 
-    # Interlacer parameters
-    dataset_name = "RADCURE"
+#     # Interlacer parameters
+#     dataset_name = "RADCURE"
 
-    # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
-    output_path = Path("temp_outputs") / dataset_name
-    output_path.mkdir(exist_ok=True, parents=True)
-    pipeline = nnUNetPipeline(
-        input_directory=f"data/{dataset_name}",
-        output_directory=output_path,
-        existing_file_mode=ExistingFileMode.OVERWRITE,
-        n_jobs=10,
-        modalities=["CT", "RTSTRUCT"],
-        roi_match_map={
-            "BRAIN": ["Brain"],
-            "BRAINSTEM": ["Brainstem"],
-        },
-        mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
-    )
+#     # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
+#     output_path = Path("temp_outputs") / dataset_name
+#     output_path.mkdir(exist_ok=True, parents=True)
+#     pipeline = nnUNetPipeline(
+#         input_directory=f"data/{dataset_name}",
+#         output_directory=output_path,
+#         existing_file_mode=ExistingFileMode.OVERWRITE,
+#         n_jobs=10,
+#         modalities=["CT", "RTSTRUCT"],
+#         roi_match_map={
+#             "BRAIN": ["Brain"],
+#             "BRAINSTEM": ["Brainstem"],
+#         },
+#         mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
+#     )
 
-    print(pipeline)
-    results = pipeline.run()
-    # print(f"Results: {results}")
+#     print(pipeline)
+#     results = pipeline.run()
+#     # print(f"Results: {results}")

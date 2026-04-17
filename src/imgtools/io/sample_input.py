@@ -96,7 +96,7 @@ class SampleInput(BaseModel):
         max_length=100,
         examples=["NSCLC-Radiomics", "Head-Neck-PET-CT"],
     )
-    crawl_directory: Path = Field(
+    crawl_directory: Path | None = Field(
         description="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
         title="Crawl Directory",
         default=None,
@@ -151,7 +151,7 @@ class SampleInput(BaseModel):
     def build(
         cls,
         directory: str | Path,
-        crawl_directory: str | Path,
+        crawl_directory: str | Path | None = None,
         dataset_name: str | None = None,
         update_crawl: bool = False,
         n_jobs: int | None = None,
@@ -223,7 +223,7 @@ class SampleInput(BaseModel):
         # Create the SampleInput
         return cls(
             directory=Path(directory),
-            crawl_directory=Path(crawl_directory),
+            crawl_directory=Path(crawl_directory) if crawl_directory else None,
             dataset_name=dataset_name,
             update_crawl=update_crawl,
             n_jobs=num_jobs,
