@@ -28,7 +28,7 @@ dependencies = [
     # data manipulation
     "matplotlib>=3.8.4,<4",
     "numpy<3",
-    "pandas<3",
+    "pandas<=3.0.2",
     "dpath>=2.2.0",
     # data handling
     "pydantic-settings>=2.8.1,<3",
