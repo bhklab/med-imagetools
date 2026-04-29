@@ -64,7 +64,7 @@ def get_extractor(modality: str) -> Type[ModalityMetadataExtractor]:
         The corresponding registered extractor class.
         If no extractor is registered for the modality, returns a FallbackMetadataExtractor.
     """
-    x = _EXTRACTOR_REGISTRY.get(modality.upper(), None)
+    x = _EXTRACTOR_REGISTRY.get(modality.upper())
     if not x:
         from imgtools.dicom.dicom_metadata.extractors import (
             FallbackMetadataExtractor,
