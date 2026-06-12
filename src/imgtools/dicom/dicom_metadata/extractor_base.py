@@ -107,6 +107,7 @@ class ModalityMetadataExtractor(ABC):
         "PatientID",
         "SeriesInstanceUID",
         "StudyInstanceUID",
+        "AccessionNumber",
         "Modality",
         # Image Geometry & Size
         "BodyPartExamined",
