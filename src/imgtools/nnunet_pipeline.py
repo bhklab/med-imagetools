@@ -54,6 +54,7 @@ class nnUNetPipeline:  # noqa: N801
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
+        test_set_ratio: float = 0.0
     ) -> None:
         """
         Initialize the nnUNetpipeline.
@@ -86,6 +87,8 @@ class nnUNetPipeline:  # noqa: N801
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
+        test_set_ratio : float 
+            The proportion of samples in the dataset that is to be used for testing
         """
 
         # Validate modalities
@@ -143,9 +146,15 @@ class nnUNetPipeline:  # noqa: N801
             transforms.append(WindowIntensity(window=window, level=level))
 
         self.transformer = Transformer(transforms)
+        
+        if test_set_ratio < 0:
+            raise ValueError("The test_set_ratio must be greater than or equal to 0")
 
+        self.test_set_ratio = min(test_set_ratio, 1)
+        
         logger.info("Pipeline initialized")
-
+    
+    #TODO: This function is long and has a lot of concerns built into it.
     def run(
         self,
     ) -> Dict[str, List[ProcessSampleResult]]:
@@ -208,10 +217,13 @@ class nnUNetPipeline:  # noqa: N801
                     failed_results.append(result)
                     pbar.update(0)
 
+
         # Log summary information
         success_count = len(successful_results)
         failure_count = len(failed_results)
         total_count = len(all_results)
+
+        self.output.split_dataset(self.test_set_ratio, successful_results)
 
         logger.info(
             f"Processing complete. {success_count} successful, {failure_count} failed "
