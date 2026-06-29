@@ -123,6 +123,15 @@ existing_file_modes = ["overwrite", "skip", "fail"]
     show_default=True,  
     help="Allow one ROI to match multiple keys in the match map"  
 )
+@click.option(
+    "--test-set-ratio",
+    type=click.FloatRange(0.0,1.0),
+    default=0.0,
+    help="The proportion of valid images that are to be used in the test set.",
+    show_default=True
+)
+
+
 @click.help_option(
     "-h",
     "--help",
@@ -142,6 +151,7 @@ def nnunet_pipeline(
     level: float,
     roi_ignore_case: bool,
     roi_allow_multi_matches: bool,
+    test_set_ratio:float
 ) -> None:
     """Process medical images in nnUNet format.
     
@@ -199,6 +209,7 @@ def nnunet_pipeline(
         spacing=spacing,
         window=window,
         level=level,
+        test_set_ratio=test_set_ratio
     )
     
     # Run the pipeline

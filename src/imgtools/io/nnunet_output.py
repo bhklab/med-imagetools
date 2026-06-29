@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import contextlib
 from enum import Enum
+from math import ceil
 from pathlib import Path
-from typing import Any, Dict, Sequence
+import random
+from shutil import move
+from typing import Any, Dict, Sequence,List
 
 import pandas as pd
 from pydantic import (
@@ -13,6 +16,7 @@ from pydantic import (
     field_validator,
 )
 
+from imgtools.autopipeline import ProcessSampleResult
 from imgtools.coretypes import MedImage, Scan, VectorMask
 from imgtools.io.validators import validate_directory
 from imgtools.io.writers import (
@@ -260,6 +264,58 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             )
 
         return valid_masks
+    
+    def _move_file_to_test_split(self, file_path: Path, dir_map: dict[str, str]):
+        """
+        Calculates the Ts path and moves the file based on the provided directory map.
+        Parameters
+        ----------
+        file_path: Path
+            The path to the file that is to be moved
+        dir_map: dict[str, str]
+            A dictionary whose keys are the name of the source dir, and values are the names of the value dirs 
+        
+        Returns
+        -------
+        Nothing
+        """
+        
+        if file_path.parent.name not in dir_map:
+            raise ValueError(f"Unexpected parent directory for split: {file_path.parent.name}")
+            
+        # 1. Construct the new path, NOTE: nnUNet requires everything in images type dir to be a file.
+        output_folder_path = file_path.parent.parent / dir_map[file_path.parent.name]
+        target_path =  output_folder_path/ file_path.name
+        output_folder_path.mkdir(exist_ok=True, parents=True)
+        move(file_path, target_path)
+
+    def split_dataset(self, test_set_ratio: float, successful_results: List[ProcessSampleResult], RANDOM_SEED=42) -> None:
+        """
+        Splits a dataset into a training and test set. 
+        Assumes that the files have already been processed and saved to imagesTr and labelsTr dirs.
+        Parameters
+        ----------
+        test_set_ratio: float
+            The proportion of the processed images that are to be used in the test set
+        successful_results: List[ProcessSampleResult]
+            List of the processed results objects for successfully processed images. 
+        
+        Returns
+        -------
+        Nothing
+
+        """
+        if not successful_results:
+            return
+
+        dir_map = {'labelsTr': 'labelsTs', 'imagesTr': 'imagesTs'}
+
+        rng = random.Random(RANDOM_SEED)
+        test_set = rng.sample(successful_results, ceil(test_set_ratio * success_count))
+
+        for sample in test_set:
+            for path in sample.output_files:
+                self._move_file_to_test_split(path, dir_map) 
 
     def finalize_dataset(self) -> None:
         """Finalize dataset by generating preprocessing scripts and dataset JSON configuration."""
