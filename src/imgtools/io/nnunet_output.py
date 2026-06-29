@@ -4,7 +4,7 @@ import contextlib
 from enum import Enum
 from math import ceil
 from pathlib import Path
-from random import sample as random_sample
+import random
 from shutil import move
 from typing import Any, Dict, Sequence,List
 
@@ -289,7 +289,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         output_folder_path.mkdir(exist_ok=True, parents=True)
         move(file_path, target_path)
 
-    def split_dataset(self, test_set_ratio: float, successful_results: List[ProcessSampleResult]) -> None:
+    def split_dataset(self, test_set_ratio: float, successful_results: List[ProcessSampleResult], RANDOM_SEED=42) -> None:
         """
         Splits a dataset into a training and test set. 
         Assumes that the files have already been processed and saved to imagesTr and labelsTr dirs.
@@ -310,8 +310,8 @@ class nnUNetOutput(BaseModel):  # noqa: N801
 
         dir_map = {'labelsTr': 'labelsTs', 'imagesTr': 'imagesTs'}
 
-        success_count = len(successful_results)
-        test_set = random_sample(successful_results, ceil(test_set_ratio * success_count))
+        rng = random.Random(RANDOM_SEED)
+        test_set = rng.sample(successful_results, ceil(test_set_ratio * success_count))
 
         for sample in test_set:
             for path in sample.output_files:
