@@ -9,8 +9,9 @@ from click.testing import CliRunner
 from imgtools.cli.nnunet_pipeline import nnunet_pipeline
 
 
+
 class TestnnUNetCLI:
-    """Integration tests for the autopipeline CLI command using collections from the test data."""
+    """Integration tests for the nnunet_pipeline CLI command using collections from the test data."""
 
     @pytest.fixture(scope="function")
     def runner(self):
@@ -65,7 +66,7 @@ class TestnnUNetCLI:
             "LUNG_L": "LUNG_L",
             "LUNG_R": "LUNG_R",
         }
-        roi_yaml_path = input_dir / "roi_match.yaml"
+        roi_yaml_path = temp_output_dir / "roi_match.yaml"
         with (roi_yaml_path).open("w") as f:
             yaml.dump(roi_dict, f)
 
@@ -73,13 +74,15 @@ class TestnnUNetCLI:
             str(input_dir),
             str(temp_output_dir),
             "--modalities", modalities_str,
-            "--roi-match-yaml", str(roi_yaml_path),
+            "--roi-match-yaml", roi_yaml_path.as_posix(),
             "--existing-file-mode", "skip",  # Skip existing files to avoid errors
             "--mask-saving-strategy", mask_saving_strategy,
         ])
         
-        assert result.exit_code == 0, "imgtools nnunet_pipeline failed"
-        
+        assert result.exit_code == 0, (
+            f"imgtools nnunet_pipeline failed:\n{result.output}\n{result.exception}"
+        )        
+
         env = os.environ.copy()
         env["nnUNet_raw"] = (temp_output_dir / "nnUNet_raw").as_posix()
         env["nnUNet_preprocessed"] = (temp_output_dir / "nnUNet_preprocessed").as_posix()
