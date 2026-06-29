@@ -1,0 +1,1 @@
+::: imgtools.coretypes.masktypes.structureset

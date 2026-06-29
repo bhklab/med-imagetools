@@ -245,8 +245,8 @@ imgtools autopipeline /path/to/dicoms/ /path/to/output/ \
 
 For more details on the components that AutoPipeline uses:
 
-- [Crawler Documentation](../reference/crawler.md)
-- [Interlacer Documentation](../reference/interlacer.md)
+- [Crawler Documentation](../reference/dicom/crawl/crawler.md)
+- [Interlacer Documentation](../reference/dicom/interlacer.md)
 - [ROI Matching and Masks] TODO::
 
 ## References

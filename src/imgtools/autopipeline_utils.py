@@ -133,13 +133,13 @@ def save_pipeline_reports(
 
         # Get columns in the order we want
         # If a column is not in the index_df, it will be filled with NaN
-        index_df = index_df[simplified_columns]
+        simple_index_df = index_df.reindex(columns=simplified_columns)
 
         # Sort by 'filepath' to make it easier to read
-        if "filepath" in index_df.columns:
-            index_df = index_df.sort_values(by=["filepath"])
+        if "filepath" in simple_index_df.columns:
+            simple_index_df = simple_index_df.sort_values(by=["filepath"])
 
-        index_df.to_csv(simple_index, index=False)
+        simple_index_df.to_csv(simple_index, index=False)
         logger.info(f"Index file saved to {simple_index}")
     except Exception as e:
         logger.error(f"Failed to create simplified index: {e}")

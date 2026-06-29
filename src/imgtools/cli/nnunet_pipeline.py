@@ -32,7 +32,7 @@ existing_file_modes = ["overwrite", "skip", "fail"]
 @click.argument(
     "input_directory",
     type=click.Path(
-        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True, exists=True
+        file_okay=False, dir_okay=True, writable=False, path_type=Path, resolve_path=True, exists=True
     ),
 )
 @click.argument(
@@ -40,6 +40,14 @@ existing_file_modes = ["overwrite", "skip", "fail"]
     type=click.Path(
         file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
     ),
+)
+@click.option(
+    "--crawl-directory",
+    type=click.Path(
+        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
+    ),
+    default=None,
+    help="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
 )
 @click.option(
     "--modalities", 
@@ -122,6 +130,7 @@ existing_file_modes = ["overwrite", "skip", "fail"]
 def nnunet_pipeline(
     input_directory: str,
     output_directory: str,
+    crawl_directory: str,
     modalities: str,
     roi_match_yaml: Path,
     mask_saving_strategy: str,
@@ -178,6 +187,7 @@ def nnunet_pipeline(
     pipeline = nnUNetPipeline(
         input_directory=input_directory,
         output_directory=output_directory,
+        crawl_directory=crawl_directory,
         modalities=list(modalities.split(",")),
         roi_match_map=roi_map,
         mask_saving_strategy=MaskSavingStrategy(mask_saving_strategy),

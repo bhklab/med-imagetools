@@ -11,6 +11,7 @@ from .functional import (
 from .intensity_transforms import (
     ClipIntensity,
     IntensityTransform,
+    N4BiasFieldCorrection,
     WindowIntensity,
 )
 from .lambda_transforms import ImageFunction, SimpleITKFilter
@@ -42,6 +43,7 @@ __all__ = [
     "IntensityTransform",
     "ClipIntensity",
     "WindowIntensity",
+    "N4BiasFieldCorrection",
     # spatial transform
     "SpatialTransform",
     "Resample",

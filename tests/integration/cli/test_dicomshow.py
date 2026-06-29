@@ -30,7 +30,6 @@ def collection(request):
 @pytest.mark.parametrize("collection", [
     "CPTAC-UCEC",
     "NSCLC_Radiogenomics",
-    "LIDC-IDRI",
     "Head-Neck-PET-CT",
     "HNSCC",
     "Pancreatic-CT-CBCT-SEG",

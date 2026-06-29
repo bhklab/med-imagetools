@@ -95,6 +95,7 @@ async def test_download_timeout(tmp_path: Path, ) -> None:
             )
 # skip if the GH_TOKEN environment variable is not set
 @pytest.mark.skipif(os.environ.get("GITHUB_TOKEN") is None, reason="GH_TOKEN environment variable is not set")
+@pytest.mark.skipif(os.environ.get("TEST_DATASET_TYPE") != "private", reason="Test is only for private datasets")
 @pytest.mark.skipif(not IS_PYTHON_GREATER_3_12, reason="Python version is less than 3.12")
 @pytest.mark.skipif(not sys.platform == "linux", reason="Test is only for Linux")
 @pytest.mark.asyncio

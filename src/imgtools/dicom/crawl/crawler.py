@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -28,6 +29,13 @@ class CrawlResultsNotAvailableError(Exception):
         super().__init__(message)
 
 
+class CrawlerOutputDirError(Exception):
+    """Exception for errors related to the output directory."""
+
+    def __init__(self, message: str) -> None:
+        super().__init__(f"Output directory error: {message}")
+
+
 @dataclass
 class Crawler:
     """Crawl a DICOM directory and extract metadata."""
@@ -47,7 +55,7 @@ class Crawler:
         self.output_dir = (
             self.output_dir or self.dicom_dir.parent / ".imgtools"
         )
-        self.output_dir.mkdir(parents=True, exist_ok=True)
+        validate_output_dir(self.output_dir)
 
         logger.info(
             "Starting DICOM crawl.",
@@ -134,3 +142,37 @@ class Crawler:
             )
             + "\n)"
         )
+
+
+def validate_output_dir(output_dir: Path) -> None:
+    """Validate the output directory."""
+    output_dir = output_dir.expanduser().resolve()
+    errmsg = ""
+
+    if not output_dir.exists():
+        logger.debug(f"Output path {output_dir} does not exist. Creating it.")
+        try:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            errmsg = f"Failed to create output directory {output_dir}: {e}"
+    elif output_dir.exists() and not output_dir.is_dir():
+        errmsg = f"Output path {output_dir} is not a directory."
+    elif not os.access(output_dir, os.W_OK):
+        # should only get here if the directory exists, but is not writable
+        errmsg = f"Output directory {output_dir} is not writable."
+
+        # do some more investigation to give user some more information
+        if not os.access(output_dir, os.R_OK):
+            errmsg += " It is also not readable."
+
+        # get the owner and permissions of the directory
+        try:
+            stat_info = output_dir.stat()
+            owner = stat_info.st_uid
+            permissions = oct(stat_info.st_mode)[-3:]
+            errmsg += f" Owner: {owner}, Permissions: {permissions}"
+        except OSError as e:
+            errmsg += f" Failed to retrieve directory stats for more information: {e}"
+
+    if errmsg:
+        raise CrawlerOutputDirError(errmsg)

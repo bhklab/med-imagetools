@@ -85,15 +85,23 @@ SIMPLIFIED_COLUMNS = [
     "spacing",
     "origin",
     "direction",
-    "bbox.size",
-    "bbox.min_coord",
-    "bbox.max_coord",
     "sum",
     "min",
     "max",
     "mean",
     "std",
     "variance",
+    "mask.bbox.size",
+    "mask.bbox.min_coord",
+    "mask.bbox.max_coord",
+    "mask.feret_diameter",
+    "mask.roundness",
+    "mask.flatness",
+    "mask.elongation",
+    "mask.equivalent_spherical_radius",
+    "mask.equivalent_spherical_perimeter",
+    "mask.equivalent_ellipsoid_diameters",
+    "mask.volume_count",
 ]
 
 
@@ -281,6 +289,7 @@ class Autopipeline:
         self,
         input_directory: str | Path,
         output_directory: str | Path,
+        crawl_directory: str | Path | None = None,
         output_filename_format: str = DEFAULT_FILENAME_FORMAT,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
@@ -337,6 +346,7 @@ class Autopipeline:
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
+            crawl_directory=Path(crawl_directory) if crawl_directory else None,
             update_crawl=update_crawl,
             n_jobs=n_jobs,
             modalities=modalities,

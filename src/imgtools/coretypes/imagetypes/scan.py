@@ -68,8 +68,15 @@ class Scan(MedImage):
         Note: if this is undesired behaviorm, we can have a config option to
         disable this manual fixing
         """
+        # Check if "SpacingBetweenSlices" is undefined - it's an optional tag so this is possible
+        # https://dicom.innolitics.com/ciods/ct-image/image-plane/00180088
+        raw_spacing = self.metadata.get("SpacingBetweenSlices")
+        try:
+            slice_spacing = float(raw_spacing) if raw_spacing else 0.0
+        except (ValueError, TypeError):
+            # SpacingBetweenSlices is undefined or not a valid numeric value
+            return
 
-        slice_spacing = float(self.metadata.get("SpacingBetweenSlices") or 0)
         if (not slice_spacing) or (slice_spacing >= 0):
             return
 
