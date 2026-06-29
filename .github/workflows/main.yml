@@ -245,7 +245,7 @@ jobs:
               id: release
               with:
                   root_options: -v
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
                   git_committer_name: "gh-actions-semver"
 
     ################################################################################################
