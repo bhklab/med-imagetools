@@ -6,12 +6,6 @@ import yaml
 
 from imgtools.loggers import logger
 
-# TODO:: think of a smarter way to handle this,
-# perhaps only try loading autopipeline cli help if the user
-# is using it, would need to modify click.Command to do this
-# Redfining these here to lazy load them later
-
-
 def parse_spacing(ctx, param, value): # type: ignore # noqa
     """Parse spacing as a tuple of floats."""
     if not value:
@@ -123,6 +117,25 @@ existing_file_modes = ["overwrite", "skip", "fail"]
     show_default=True,  
     help="Allow one ROI to match multiple keys in the match map"  
 )
+@click.option(
+    "--test-set-ratio",
+    type=click.FloatRange(0.0,1.0),
+    default=0.0,
+    help=(
+        "Proportion of successfully processed cases for the test set (imagesTs/labelsTs). "
+        "Uses ceil(ratio * n_cases); use 1.0 for a full test set (imagesTr will be empty)."
+    ),
+    show_default=True
+)
+@click.option(
+    "--random-seed",
+    type=int,
+    default=42,
+    help="The random seed to use for the test set split.",
+    show_default=True
+)
+
+
 @click.help_option(
     "-h",
     "--help",
@@ -142,6 +155,8 @@ def nnunet_pipeline(
     level: float,
     roi_ignore_case: bool,
     roi_allow_multi_matches: bool,
+    test_set_ratio:float,
+    random_seed: int,
 ) -> None:
     """Process medical images in nnUNet format.
     
@@ -199,6 +214,8 @@ def nnunet_pipeline(
         spacing=spacing,
         window=window,
         level=level,
+        test_set_ratio=test_set_ratio,
+        random_seed=random_seed
     )
     
     # Run the pipeline
