@@ -1266,6 +1266,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;test_set_ratio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;random_seed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#imgtools.nnunet_pipeline.nnUNetPipeline.run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4465,6 +4487,28 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;test_set_ratio
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        <code class="doc-symbol doc-symbol-toc doc-symbol-parameter"></code>&nbsp;random_seed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#imgtools.nnunet_pipeline.nnUNetPipeline.run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4562,15 +4606,15 @@
 <div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">nnUNetPipeline</span><span class="p">(</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;input_directory&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(input_directory)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(input_directory)">input_directory</a></span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib">pathlib</span></span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;output_directory&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(output_directory)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(output_directory)">output_directory</a></span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib">pathlib</span></span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n"><span title="imgtools.nnunet_pipeline.nnUNetPipeline(crawl_directory)">crawl_directory</span></span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib">pathlib</span></span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span><span class="p">,</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;modalities&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(modalities)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(modalities)">modalities</a></span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">],</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;roi_match_map&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(roi_match_map)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(roi_match_map)">roi_match_map</a></span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.coretypes">coretypes</span></span><span class="o">.</span><span class="n"><span title="imgtools.coretypes.masktypes">masktypes</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;roi_matching&lt;/span&gt; (&lt;code&gt;imgtools.coretypes.masktypes.roi_matching&lt;/code&gt;)" href="../coretypes/masktypes/roi_matching/#imgtools.coretypes.masktypes.roi_matching">roi_matching</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-attribute&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;Valid_Inputs&lt;/span&gt;
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;modalities&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(modalities)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(modalities)">modalities</a></span><span class="p">:</span> <span class="n"><span title="list">list</span></span><span class="p">[</span><span class="n"><span title="str">str</span></span><span class="p">],</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;roi_match_map&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(roi_match_map)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(roi_match_map)">roi_match_map</a></span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.coretypes">coretypes</span></span><span class="o">.</span><span class="n"><span title="imgtools.coretypes.masktypes">masktypes</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;roi_matching&lt;/span&gt; (&lt;code&gt;imgtools.coretypes.masktypes.roi_matching&lt;/code&gt;)" href="../coretypes/masktypes/roi_matching/#imgtools.coretypes.masktypes.roi_matching">roi_matching</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-attribute&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-attribute-name&quot;&gt;Valid_Inputs&lt;/span&gt;
 
 
   &lt;span class=&quot;doc doc-labels&quot;&gt;
       &lt;small class=&quot;doc doc-label doc-label-module-attribute&quot;&gt;&lt;code&gt;module-attribute&lt;/code&gt;&lt;/small&gt;
   &lt;/span&gt; (&lt;code&gt;imgtools.coretypes.masktypes.roi_matching.Valid_Inputs&lt;/code&gt;)" href="../coretypes/masktypes/roi_matching/#imgtools.coretypes.masktypes.roi_matching.Valid_Inputs">Valid_Inputs</a></span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;mask_saving_strategy&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(mask_saving_strategy)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(mask_saving_strategy)">mask_saving_strategy</a></span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.io">io</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;nnunet_output&lt;/span&gt; (&lt;code&gt;imgtools.io.nnunet_output&lt;/code&gt;)" href="../io/nnunet_output/#imgtools.io.nnunet_output">nnunet_output</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;MaskSavingStrategy&lt;/span&gt; (&lt;code&gt;imgtools.io.nnunet_output.MaskSavingStrategy&lt;/code&gt;)" href="../io/nnunet_output/#imgtools.io.nnunet_output.MaskSavingStrategy">MaskSavingStrategy</a></span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;mask_saving_strategy&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(mask_saving_strategy)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(mask_saving_strategy)">mask_saving_strategy</a></span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.io">io</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;nnunet_output&lt;/span&gt; (&lt;code&gt;imgtools.io.nnunet_output&lt;/code&gt;)" href="../io/nnunet_output/#imgtools.io.nnunet_output">nnunet_output</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;MaskSavingStrategy&lt;/span&gt; (&lt;code&gt;imgtools.io.nnunet_output.MaskSavingStrategy&lt;/code&gt;)" href="../io/nnunet_output/#imgtools.io.nnunet_output.MaskSavingStrategy">MaskSavingStrategy</a></span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n"><span title="imgtools.nnunet_pipeline.nnUNetPipeline(crawl_directory)">crawl_directory</span></span><span class="p">:</span> <span class="n"><span title="str">str</span></span> <span class="o">|</span> <span class="n"><span title="pathlib">pathlib</span></span><span class="o">.</span><span class="n"><span title="pathlib.Path">Path</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n"><span title="imgtools.nnunet_pipeline.nnUNetPipeline(existing_file_mode)">existing_file_mode</span></span><span class="p">:</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.io">io</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;sample_output&lt;/span&gt; (&lt;code&gt;imgtools.io.sample_output&lt;/code&gt;)" href="../io/sample_output/#imgtools.io.sample_output">sample_output</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;ExistingFileMode&lt;/span&gt; (&lt;code&gt;imgtools.io.sample_output.ExistingFileMode&lt;/code&gt;)" href="../io/writers/abstract_base_writer/#imgtools.io.writers.abstract_base_writer.ExistingFileMode">ExistingFileMode</a></span> <span class="o">=</span> <span class="n"><a class="autorefs autorefs-internal" href="../../cli/imgtools/#imgtools">imgtools</a></span><span class="o">.</span><span class="n"><span title="imgtools.io">io</span></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-module&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-module-name&quot;&gt;sample_output&lt;/span&gt; (&lt;code&gt;imgtools.io.sample_output&lt;/code&gt;)" href="../io/sample_output/#imgtools.io.sample_output">sample_output</a></span><span class="o">.</span><span class="n"><a class="autorefs autorefs-internal" title="&lt;code class=&quot;doc-symbol doc-symbol-heading doc-symbol-class&quot;&gt;&lt;/code&gt;            &lt;span class=&quot;doc doc-object-name doc-class-name&quot;&gt;ExistingFileMode&lt;/span&gt; (&lt;code&gt;imgtools.io.sample_output.ExistingFileMode&lt;/code&gt;)" href="../io/writers/abstract_base_writer/#imgtools.io.writers.abstract_base_writer.ExistingFileMode">ExistingFileMode</a></span><span class="o">.</span><span class="n"><span title="imgtools.io.sample_output.ExistingFileMode.FAIL">FAIL</span></span><span class="p">,</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;update_crawl&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(update_crawl)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(update_crawl)">update_crawl</a></span><span class="p">:</span> <span class="n"><span title="bool">bool</span></span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;n_jobs&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(n_jobs)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(n_jobs)">n_jobs</a></span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4579,7 +4623,9 @@
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;spacing&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(spacing)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(spacing)">spacing</a></span><span class="p">:</span> <span class="n"><span title="tuple">tuple</span></span><span class="p">[</span><span class="n"><span title="float">float</span></span><span class="p">,</span> <span class="n"><span title="float">float</span></span><span class="p">,</span> <span class="n"><span title="float">float</span></span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;window&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(window)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(window)">window</a></span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;level&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(level)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(level)">level</a></span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;test_set_ratio&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)">test_set_ratio</a></span><span class="p">:</span> <span class="n"><span title="float">float</span></span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n"><a class="autorefs autorefs-internal" title="&lt;code&gt;random_seed&lt;/code&gt; (&lt;code&gt;imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)&lt;/code&gt;)" href="#imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)">random_seed</a></span><span class="p">:</span> <span class="n"><span title="int">int</span></span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4799,6 +4845,39 @@ How to handle existing files (FAIL, SKIP, OVERWRITE).</p>
                   <code>None</code>
             </td>
           </tr>
+          <tr class="doc-section-item">
+            <td>
+<h4 id="imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)" class="doc doc-heading doc-heading-parameter">                  <code>test_set_ratio</code>
+<a href="#imgtools.nnunet_pipeline.nnUNetPipeline(test_set_ratio)" class="headerlink" title="Permanent link">#</a></h4>            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Proportion of successful cases for the test set. Count is
+ceil(ratio * n_cases); 1.0 moves all cases to the test set.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+<h4 id="imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)" class="doc doc-heading doc-heading-parameter">                  <code>random_seed</code>
+<a href="#imgtools.nnunet_pipeline.nnUNetPipeline(random_seed)" class="headerlink" title="Permanent link">#</a></h4>            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The random seed to use for the test set split.</p>
+              </div>
+            </td>
+            <td>
+                  <code>42</code>
+            </td>
+          </tr>
       </tbody>
     </table>
 
@@ -4832,8 +4911,7 @@ How to handle existing files (FAIL, SKIP, OVERWRITE).</p>
 
                   <details class="quote">
                     <summary>Source code in <code>src/imgtools/nnunet_pipeline.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-41"> 41</a></span>
-<span class="normal"><a href="#__codelineno-0-42"> 42</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-42"> 42</a></span>
 <span class="normal"><a href="#__codelineno-0-43"> 43</a></span>
 <span class="normal"><a href="#__codelineno-0-44"> 44</a></span>
 <span class="normal"><a href="#__codelineno-0-45"> 45</a></span>
@@ -4938,113 +5016,132 @@ How to handle existing files (FAIL, SKIP, OVERWRITE).</p>
 <span class="normal"><a href="#__codelineno-0-144">144</a></span>
 <span class="normal"><a href="#__codelineno-0-145">145</a></span>
 <span class="normal"><a href="#__codelineno-0-146">146</a></span>
-<span class="normal"><a href="#__codelineno-0-147">147</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">input_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">crawl_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+<span class="normal"><a href="#__codelineno-0-147">147</a></span>
+<span class="normal"><a href="#__codelineno-0-148">148</a></span>
+<span class="normal"><a href="#__codelineno-0-149">149</a></span>
+<span class="normal"><a href="#__codelineno-0-150">150</a></span>
+<span class="normal"><a href="#__codelineno-0-151">151</a></span>
+<span class="normal"><a href="#__codelineno-0-152">152</a></span>
+<span class="normal"><a href="#__codelineno-0-153">153</a></span>
+<span class="normal"><a href="#__codelineno-0-154">154</a></span>
+<span class="normal"><a href="#__codelineno-0-155">155</a></span>
+<span class="normal"><a href="#__codelineno-0-156">156</a></span>
+<span class="normal"><a href="#__codelineno-0-157">157</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">input_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
 <a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="n">modalities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
 <a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">roi_match_map</span><span class="p">:</span> <span class="n">ROIMatcherInputs</span><span class="p">,</span>
 <a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="n">mask_saving_strategy</span><span class="p">:</span> <span class="n">MaskSavingStrategy</span><span class="p">,</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="n">existing_file_mode</span><span class="p">:</span> <span class="n">ExistingFileMode</span> <span class="o">=</span> <span class="n">ExistingFileMode</span><span class="o">.</span><span class="n">FAIL</span><span class="p">,</span>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="n">update_crawl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">roi_ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="n">roi_allow_multi_key_matches</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="n">spacing</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">window</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    Initialize the nnUNetpipeline.</span>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    Parameters</span>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">    ----------</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">    input_directory : str | Path</span>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        Directory containing the DICOM files (or subdirectories with DICOM files)</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    output_directory : str | Path</span>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">        Directory to save the output nifti files</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">           existing_file_mode : ExistingFileMode</span>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        How to handle existing files (FAIL, SKIP, OVERWRITE).</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">    modalities : list[str]</span>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">        List of modalities to include</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    roi_match_map : ROIMatcherInputs</span>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        ROI matching patterns</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">    mask_saving_strategy : MaskSavingStrategy</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        Mask saving strateg</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    update_crawl : bool, optional</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">        Whether to force recrawling, by default False</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">    n_jobs : int | None, optional</span>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">        Number of parallel jobs, by default None (uses CPU count - 2)</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    roi_ignore_case : bool, optional</span>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        Whether to ignore case in ROI matching, by default True</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">    roi_allow_multi_key_matches : bool, optional</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">        Whether to allow multiple key matches in ROI matching, by default True</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">    spacing : tuple[float, float, float], default=(0.0, 0.0, 0.0)</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        Spacing for resampling, by default (0.0, 0.0, 0.0)</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    window : float | None, optional</span>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">        Window level for intensity normalization, by default None</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    level : float | None, optional</span>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        Window level for intensity normalization, by default None</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="c1"># Validate modalities</span>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="n">allowed_modalities</span> <span class="o">=</span> <span class="p">{</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="s2">&quot;SEG&quot;</span><span class="p">)),</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;MR&quot;</span><span class="p">,</span> <span class="s2">&quot;SEG&quot;</span><span class="p">)),</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="s2">&quot;RTSTRUCT&quot;</span><span class="p">)),</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;MR&quot;</span><span class="p">,</span> <span class="s2">&quot;RTSTRUCT&quot;</span><span class="p">)),</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="p">}</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="k">if</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">modalities</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_modalities</span><span class="p">:</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a>            <span class="sa">f</span><span class="s2">&quot;Invalid modalities: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modalities</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a>            <span class="sa">f</span><span class="s2">&quot;Allowed combinations are: </span><span class="si">{</span><span class="p">[</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">allowed</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">allowed_modalities</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a>        <span class="p">)</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="n">SampleInput</span><span class="o">.</span><span class="n">build</span><span class="p">(</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a>        <span class="n">directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">input_directory</span><span class="p">),</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="n">update_crawl</span><span class="o">=</span><span class="n">update_crawl</span><span class="p">,</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="n">crawl_directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">crawl_directory</span><span class="p">),</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a>        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="n">modalities</span><span class="o">=</span><span class="n">modalities</span><span class="p">,</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="n">roi_match_map</span><span class="o">=</span><span class="n">roi_match_map</span><span class="p">,</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a>        <span class="n">roi_ignore_case</span><span class="o">=</span><span class="n">roi_ignore_case</span><span class="p">,</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a>        <span class="n">roi_handling_strategy</span><span class="o">=</span><span class="n">ROIMatchStrategy</span><span class="o">.</span><span class="n">MERGE</span><span class="p">,</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a>        <span class="n">roi_on_missing_regex</span><span class="o">=</span><span class="n">ROIMatchFailurePolicy</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="n">roi_allow_multi_key_matches</span><span class="o">=</span><span class="n">roi_allow_multi_key_matches</span><span class="p">,</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="p">)</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">nnUNetOutput</span><span class="p">(</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="n">directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">output_directory</span><span class="p">),</span>
-<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="n">existing_file_mode</span><span class="o">=</span><span class="n">existing_file_mode</span><span class="p">,</span>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="n">dataset_name</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">input_directory</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="n">roi_keys</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">roi_matcher</span><span class="o">.</span><span class="n">match_map</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
-<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="n">mask_saving_strategy</span><span class="o">=</span><span class="n">mask_saving_strategy</span><span class="p">,</span>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a>        <span class="n">extra_context</span><span class="o">=</span><span class="p">{},</span>
-<a id="__codelineno-0-125" name="__codelineno-0-125"></a>    <span class="p">)</span>
-<a id="__codelineno-0-126" name="__codelineno-0-126"></a>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a>    <span class="n">transforms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseTransform</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="c1"># we could choose to only add resampling if any spacing component</span>
-<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="c1"># is non-zero, but this currently does additional non-intuitive</span>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="c1"># alignment by assuming the first image in the sample is the reference</span>
-<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="c1"># and all other images get resampled to that via sitk.Resample</span>
-<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="n">Resample</span><span class="p">(</span>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a>            <span class="n">spacing</span><span class="p">,</span>
-<a id="__codelineno-0-134" name="__codelineno-0-134"></a>            <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-135" name="__codelineno-0-135"></a>            <span class="n">anti_alias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a>            <span class="n">anti_alias_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-137" name="__codelineno-0-137"></a>            <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-138" name="__codelineno-0-138"></a>            <span class="n">output_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="p">),</span>
-<a id="__codelineno-0-140" name="__codelineno-0-140"></a>    <span class="p">]</span>
-<a id="__codelineno-0-141" name="__codelineno-0-141"></a>
-<a id="__codelineno-0-142" name="__codelineno-0-142"></a>    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-143" name="__codelineno-0-143"></a>        <span class="n">transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WindowIntensity</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">))</span>
-<a id="__codelineno-0-144" name="__codelineno-0-144"></a>
-<a id="__codelineno-0-145" name="__codelineno-0-145"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">transforms</span><span class="p">)</span>
-<a id="__codelineno-0-146" name="__codelineno-0-146"></a>
-<a id="__codelineno-0-147" name="__codelineno-0-147"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline initialized&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="n">crawl_directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>    <span class="n">existing_file_mode</span><span class="p">:</span> <span class="n">ExistingFileMode</span> <span class="o">=</span> <span class="n">ExistingFileMode</span><span class="o">.</span><span class="n">FAIL</span><span class="p">,</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="n">update_crawl</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>    <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>    <span class="n">roi_ignore_case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>    <span class="n">roi_allow_multi_key_matches</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="n">spacing</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">window</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="n">test_set_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">    Initialize the nnUNetpipeline.</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">    Parameters</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    ----------</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    input_directory : str | Path</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">        Directory containing the DICOM files (or subdirectories with DICOM files)</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">    output_directory : str | Path</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        Directory to save the output nifti files</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">           existing_file_mode : ExistingFileMode</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">        How to handle existing files (FAIL, SKIP, OVERWRITE).</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">    modalities : list[str]</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        List of modalities to include</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">    roi_match_map : ROIMatcherInputs</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">        ROI matching patterns</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">    mask_saving_strategy : MaskSavingStrategy</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">        Mask saving strateg</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    update_crawl : bool, optional</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">        Whether to force recrawling, by default False</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">    n_jobs : int | None, optional</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">        Number of parallel jobs, by default None (uses CPU count - 2)</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">    roi_ignore_case : bool, optional</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">        Whether to ignore case in ROI matching, by default True</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">    roi_allow_multi_key_matches : bool, optional</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        Whether to allow multiple key matches in ROI matching, by default True</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    spacing : tuple[float, float, float], default=(0.0, 0.0, 0.0)</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        Spacing for resampling, by default (0.0, 0.0, 0.0)</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">    window : float | None, optional</span>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        Window level for intensity normalization, by default None</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">    level : float | None, optional</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a><span class="sd">        Window level for intensity normalization, by default None</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="sd">    test_set_ratio : float</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a><span class="sd">        Proportion of successful cases for the test set. Count is</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a><span class="sd">        ceil(ratio * n_cases); 1.0 moves all cases to the test set.</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a><span class="sd">    random_seed : int</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">        The random seed to use for the test set split.</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="c1"># Validate modalities</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="n">allowed_modalities</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="s2">&quot;SEG&quot;</span><span class="p">)),</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;MR&quot;</span><span class="p">,</span> <span class="s2">&quot;SEG&quot;</span><span class="p">)),</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;CT&quot;</span><span class="p">,</span> <span class="s2">&quot;RTSTRUCT&quot;</span><span class="p">)),</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>        <span class="nb">frozenset</span><span class="p">((</span><span class="s2">&quot;MR&quot;</span><span class="p">,</span> <span class="s2">&quot;RTSTRUCT&quot;</span><span class="p">)),</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a>    <span class="p">}</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>    <span class="k">if</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">modalities</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_modalities</span><span class="p">:</span>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a>        <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a>            <span class="sa">f</span><span class="s2">&quot;Invalid modalities: </span><span class="si">{</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">modalities</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a>            <span class="sa">f</span><span class="s2">&quot;Allowed combinations are: </span><span class="si">{</span><span class="p">[</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">allowed</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">allowed</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">allowed_modalities</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="p">)</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="n">SampleInput</span><span class="o">.</span><span class="n">build</span><span class="p">(</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a>        <span class="n">directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">input_directory</span><span class="p">),</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="n">update_crawl</span><span class="o">=</span><span class="n">update_crawl</span><span class="p">,</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a>        <span class="n">crawl_directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">crawl_directory</span><span class="p">)</span> <span class="k">if</span> <span class="n">crawl_directory</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>        <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="n">modalities</span><span class="o">=</span><span class="n">modalities</span><span class="p">,</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="n">roi_match_map</span><span class="o">=</span><span class="n">roi_match_map</span><span class="p">,</span>
+<a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="n">roi_ignore_case</span><span class="o">=</span><span class="n">roi_ignore_case</span><span class="p">,</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>        <span class="n">roi_handling_strategy</span><span class="o">=</span><span class="n">ROIMatchStrategy</span><span class="o">.</span><span class="n">MERGE</span><span class="p">,</span>
+<a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="n">roi_on_missing_regex</span><span class="o">=</span><span class="n">ROIMatchFailurePolicy</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+<a id="__codelineno-0-123" name="__codelineno-0-123"></a>        <span class="n">roi_allow_multi_key_matches</span><span class="o">=</span><span class="n">roi_allow_multi_key_matches</span><span class="p">,</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="p">)</span>
+<a id="__codelineno-0-125" name="__codelineno-0-125"></a>
+<a id="__codelineno-0-126" name="__codelineno-0-126"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">nnUNetOutput</span><span class="p">(</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>        <span class="n">directory</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">output_directory</span><span class="p">),</span>
+<a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="n">existing_file_mode</span><span class="o">=</span><span class="n">existing_file_mode</span><span class="p">,</span>
+<a id="__codelineno-0-129" name="__codelineno-0-129"></a>        <span class="n">dataset_name</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">input_directory</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>        <span class="n">roi_keys</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">roi_matcher</span><span class="o">.</span><span class="n">match_map</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+<a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="n">mask_saving_strategy</span><span class="o">=</span><span class="n">mask_saving_strategy</span><span class="p">,</span>
+<a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="n">test_set_ratio</span><span class="o">=</span><span class="n">test_set_ratio</span><span class="p">,</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="n">random_seed</span><span class="o">=</span><span class="n">random_seed</span><span class="p">,</span>
+<a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="n">extra_context</span><span class="o">=</span><span class="p">{},</span>
+<a id="__codelineno-0-135" name="__codelineno-0-135"></a>    <span class="p">)</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136"></a>
+<a id="__codelineno-0-137" name="__codelineno-0-137"></a>    <span class="n">transforms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseTransform</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-138" name="__codelineno-0-138"></a>        <span class="c1"># we could choose to only add resampling if any spacing component</span>
+<a id="__codelineno-0-139" name="__codelineno-0-139"></a>        <span class="c1"># is non-zero, but this currently does additional non-intuitive</span>
+<a id="__codelineno-0-140" name="__codelineno-0-140"></a>        <span class="c1"># alignment by assuming the first image in the sample is the reference</span>
+<a id="__codelineno-0-141" name="__codelineno-0-141"></a>        <span class="c1"># and all other images get resampled to that via sitk.Resample</span>
+<a id="__codelineno-0-142" name="__codelineno-0-142"></a>        <span class="n">Resample</span><span class="p">(</span>
+<a id="__codelineno-0-143" name="__codelineno-0-143"></a>            <span class="n">spacing</span><span class="p">,</span>
+<a id="__codelineno-0-144" name="__codelineno-0-144"></a>            <span class="n">interpolation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-145" name="__codelineno-0-145"></a>            <span class="n">anti_alias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-146" name="__codelineno-0-146"></a>            <span class="n">anti_alias_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-147" name="__codelineno-0-147"></a>            <span class="n">transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-148" name="__codelineno-0-148"></a>            <span class="n">output_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-149" name="__codelineno-0-149"></a>        <span class="p">),</span>
+<a id="__codelineno-0-150" name="__codelineno-0-150"></a>    <span class="p">]</span>
+<a id="__codelineno-0-151" name="__codelineno-0-151"></a>
+<a id="__codelineno-0-152" name="__codelineno-0-152"></a>    <span class="k">if</span> <span class="n">window</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-153" name="__codelineno-0-153"></a>        <span class="n">transforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">WindowIntensity</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">))</span>
+<a id="__codelineno-0-154" name="__codelineno-0-154"></a>
+<a id="__codelineno-0-155" name="__codelineno-0-155"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="p">(</span><span class="n">transforms</span><span class="p">)</span>
+<a id="__codelineno-0-156" name="__codelineno-0-156"></a>
+<a id="__codelineno-0-157" name="__codelineno-0-157"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline initialized&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -5115,18 +5212,7 @@ ProcessSampleResult objects.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/imgtools/nnunet_pipeline.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-149">149</a></span>
-<span class="normal"><a href="#__codelineno-0-150">150</a></span>
-<span class="normal"><a href="#__codelineno-0-151">151</a></span>
-<span class="normal"><a href="#__codelineno-0-152">152</a></span>
-<span class="normal"><a href="#__codelineno-0-153">153</a></span>
-<span class="normal"><a href="#__codelineno-0-154">154</a></span>
-<span class="normal"><a href="#__codelineno-0-155">155</a></span>
-<span class="normal"><a href="#__codelineno-0-156">156</a></span>
-<span class="normal"><a href="#__codelineno-0-157">157</a></span>
-<span class="normal"><a href="#__codelineno-0-158">158</a></span>
-<span class="normal"><a href="#__codelineno-0-159">159</a></span>
-<span class="normal"><a href="#__codelineno-0-160">160</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-160">160</a></span>
 <span class="normal"><a href="#__codelineno-0-161">161</a></span>
 <span class="normal"><a href="#__codelineno-0-162">162</a></span>
 <span class="normal"><a href="#__codelineno-0-163">163</a></span>
@@ -5220,112 +5306,127 @@ ProcessSampleResult objects.</p>
 <span class="normal"><a href="#__codelineno-0-251">251</a></span>
 <span class="normal"><a href="#__codelineno-0-252">252</a></span>
 <span class="normal"><a href="#__codelineno-0-253">253</a></span>
-<span class="normal"><a href="#__codelineno-0-254">254</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-149" name="__codelineno-0-149"></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
-<a id="__codelineno-0-150" name="__codelineno-0-150"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-151" name="__codelineno-0-151"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ProcessSampleResult</span><span class="p">]]:</span>
-<a id="__codelineno-0-152" name="__codelineno-0-152"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-153" name="__codelineno-0-153"></a><span class="sd">    Run the pipeline on all samples.</span>
-<a id="__codelineno-0-154" name="__codelineno-0-154"></a>
-<a id="__codelineno-0-155" name="__codelineno-0-155"></a><span class="sd">    Returns</span>
-<a id="__codelineno-0-156" name="__codelineno-0-156"></a><span class="sd">    -------</span>
-<a id="__codelineno-0-157" name="__codelineno-0-157"></a><span class="sd">    Dict[str, List[ProcessSampleResult]]</span>
-<a id="__codelineno-0-158" name="__codelineno-0-158"></a><span class="sd">        Dictionary with &#39;success&#39; and &#39;failure&#39; keys, each containing a list of</span>
-<a id="__codelineno-0-159" name="__codelineno-0-159"></a><span class="sd">        ProcessSampleResult objects.</span>
-<a id="__codelineno-0-160" name="__codelineno-0-160"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-161" name="__codelineno-0-161"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<a id="__codelineno-0-162" name="__codelineno-0-162"></a>
-<a id="__codelineno-0-163" name="__codelineno-0-163"></a>    <span class="c1"># Load the samples</span>
-<a id="__codelineno-0-164" name="__codelineno-0-164"></a>    <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
-<a id="__codelineno-0-165" name="__codelineno-0-165"></a>    <span class="n">samples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">PatientID</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
-<a id="__codelineno-0-166" name="__codelineno-0-166"></a>
-<a id="__codelineno-0-167" name="__codelineno-0-167"></a>    <span class="c1"># Create a timestamp for this run</span>
-<a id="__codelineno-0-168" name="__codelineno-0-168"></a>    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-169" name="__codelineno-0-169"></a>
-<a id="__codelineno-0-170" name="__codelineno-0-170"></a>    <span class="c1"># Prepare arguments for parallel processing</span>
-<a id="__codelineno-0-171" name="__codelineno-0-171"></a>    <span class="n">arg_tuples</span> <span class="o">=</span> <span class="p">[</span>
-<a id="__codelineno-0-172" name="__codelineno-0-172"></a>        <span class="p">(</span>
-<a id="__codelineno-0-173" name="__codelineno-0-173"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">idx</span><span class="si">:</span><span class="s2">04</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-174" name="__codelineno-0-174"></a>            <span class="n">sample</span><span class="p">,</span>
-<a id="__codelineno-0-175" name="__codelineno-0-175"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span>
-<a id="__codelineno-0-176" name="__codelineno-0-176"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">,</span>
-<a id="__codelineno-0-177" name="__codelineno-0-177"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>        <span class="p">)</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a>    <span class="p">]</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a>    <span class="c1"># Lists to track results</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a>    <span class="n">all_results</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a>    <span class="n">successful_results</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a>    <span class="n">failed_results</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a>    <span class="k">with</span> <span class="p">(</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a>        <span class="n">tqdm_logging_redirect</span><span class="p">(),</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>        <span class="n">tqdm</span><span class="p">(</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a>            <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_tuples</span><span class="p">),</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a>            <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing samples&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a>            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a>        <span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">,</span>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="p">):</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>        <span class="c1"># Process samples in parallel</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a>        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">Parallel</span><span class="p">(</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a>            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="n">return_as</span><span class="o">=</span><span class="s2">&quot;generator&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-200" name="__codelineno-0-200"></a>        <span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">process_one_sample</span><span class="p">)(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_tuples</span><span class="p">):</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a>            <span class="c1"># Update progress bar and track results by success/failure</span>
-<a id="__codelineno-0-204" name="__codelineno-0-204"></a>            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a>                <span class="n">successful_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-<a id="__codelineno-0-206" name="__codelineno-0-206"></a>                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-208" name="__codelineno-0-208"></a>                <span class="n">failed_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-<a id="__codelineno-0-209" name="__codelineno-0-209"></a>                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a id="__codelineno-0-210" name="__codelineno-0-210"></a>
-<a id="__codelineno-0-211" name="__codelineno-0-211"></a>    <span class="c1"># Log summary information</span>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a>    <span class="n">success_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">successful_results</span><span class="p">)</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a>    <span class="n">failure_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed_results</span><span class="p">)</span>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a>    <span class="n">total_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_results</span><span class="p">)</span>
-<a id="__codelineno-0-215" name="__codelineno-0-215"></a>
-<a id="__codelineno-0-216" name="__codelineno-0-216"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-<a id="__codelineno-0-217" name="__codelineno-0-217"></a>        <span class="sa">f</span><span class="s2">&quot;Processing complete. </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="s2"> successful, </span><span class="si">{</span><span class="n">failure_count</span><span class="si">}</span><span class="s2"> failed &quot;</span>
-<a id="__codelineno-0-218" name="__codelineno-0-218"></a>        <span class="sa">f</span><span class="s2">&quot;out of </span><span class="si">{</span><span class="n">total_count</span><span class="si">}</span><span class="s2"> total samples (</span><span class="si">{</span><span class="n">success_count</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_count</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% success rate).&quot;</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a>    <span class="p">)</span>
-<a id="__codelineno-0-220" name="__codelineno-0-220"></a>
-<a id="__codelineno-0-221" name="__codelineno-0-221"></a>    <span class="c1"># Finalize output(Generate dataset.json and nnUNet scripts)</span>
-<a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="k">if</span> <span class="n">success_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-223" name="__codelineno-0-223"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">finalize_dataset</span><span class="p">()</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a>
-<a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="n">index_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">index_file</span>
-<a id="__codelineno-0-226" name="__codelineno-0-226"></a>    <span class="c1"># TODO:: discuss how we want to name these files</span>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="c1"># Generate report file names</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>    <span class="n">success_file</span> <span class="o">=</span> <span class="n">index_file</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">root_directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_successful_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.json&quot;</span>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a>    <span class="p">)</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a>    <span class="n">failure_file</span> <span class="o">=</span> <span class="n">index_file</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">root_directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_failed_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.json&quot;</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>    <span class="p">)</span>
-<a id="__codelineno-0-234" name="__codelineno-0-234"></a>
-<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="c1"># Convert results to dictionaries for JSON serialization</span>
-<a id="__codelineno-0-236" name="__codelineno-0-236"></a>    <span class="n">success_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">successful_results</span><span class="p">]</span>
-<a id="__codelineno-0-237" name="__codelineno-0-237"></a>    <span class="n">failure_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">failed_results</span><span class="p">]</span>
-<a id="__codelineno-0-238" name="__codelineno-0-238"></a>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>    <span class="c1"># Write reports</span>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="c1"># with open(success_file, &quot;w&quot;) as f:</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a>    <span class="k">with</span> <span class="n">success_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">success_dicts</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detailed success report saved to </span><span class="si">{</span><span class="n">success_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a>    <span class="c1"># if no failures, we can skip writing the failure file</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a>    <span class="k">if</span> <span class="n">failure_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">successful_results</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a>    <span class="k">with</span> <span class="n">failure_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">failure_dicts</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detailed failure report saved to </span><span class="si">{</span><span class="n">failure_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="c1"># Return all results categorized</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">successful_results</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">:</span> <span class="n">failed_results</span><span class="p">}</span>
+<span class="normal"><a href="#__codelineno-0-254">254</a></span>
+<span class="normal"><a href="#__codelineno-0-255">255</a></span>
+<span class="normal"><a href="#__codelineno-0-256">256</a></span>
+<span class="normal"><a href="#__codelineno-0-257">257</a></span>
+<span class="normal"><a href="#__codelineno-0-258">258</a></span>
+<span class="normal"><a href="#__codelineno-0-259">259</a></span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span>
+<span class="normal"><a href="#__codelineno-0-264">264</a></span>
+<span class="normal"><a href="#__codelineno-0-265">265</a></span>
+<span class="normal"><a href="#__codelineno-0-266">266</a></span>
+<span class="normal"><a href="#__codelineno-0-267">267</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-160" name="__codelineno-0-160"></a><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+<a id="__codelineno-0-161" name="__codelineno-0-161"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-162" name="__codelineno-0-162"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ProcessSampleResult</span><span class="p">]]:</span>
+<a id="__codelineno-0-163" name="__codelineno-0-163"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-164" name="__codelineno-0-164"></a><span class="sd">    Run the pipeline on all samples.</span>
+<a id="__codelineno-0-165" name="__codelineno-0-165"></a>
+<a id="__codelineno-0-166" name="__codelineno-0-166"></a><span class="sd">    Returns</span>
+<a id="__codelineno-0-167" name="__codelineno-0-167"></a><span class="sd">    -------</span>
+<a id="__codelineno-0-168" name="__codelineno-0-168"></a><span class="sd">    Dict[str, List[ProcessSampleResult]]</span>
+<a id="__codelineno-0-169" name="__codelineno-0-169"></a><span class="sd">        Dictionary with &#39;success&#39; and &#39;failure&#39; keys, each containing a list of</span>
+<a id="__codelineno-0-170" name="__codelineno-0-170"></a><span class="sd">        ProcessSampleResult objects.</span>
+<a id="__codelineno-0-171" name="__codelineno-0-171"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-172" name="__codelineno-0-172"></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<a id="__codelineno-0-173" name="__codelineno-0-173"></a>
+<a id="__codelineno-0-174" name="__codelineno-0-174"></a>    <span class="c1"># Load the samples</span>
+<a id="__codelineno-0-175" name="__codelineno-0-175"></a>    <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+<a id="__codelineno-0-176" name="__codelineno-0-176"></a>    <span class="n">samples</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">PatientID</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+<a id="__codelineno-0-177" name="__codelineno-0-177"></a>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>    <span class="c1"># Create a timestamp for this run</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a>    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">_%H%M%S&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a>    <span class="c1"># Prepare arguments for parallel processing</span>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a>    <span class="n">arg_tuples</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a>        <span class="p">(</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">idx</span><span class="si">:</span><span class="s2">04</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a>            <span class="n">sample</span><span class="p">,</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="p">,</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">,</span>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a>        <span class="p">)</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a>        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">sample</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="p">]</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a>    <span class="c1"># Lists to track results</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="n">all_results</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>    <span class="n">successful_results</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a>    <span class="n">failed_results</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a>    <span class="k">with</span> <span class="p">(</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>        <span class="n">tqdm_logging_redirect</span><span class="p">(),</span>
+<a id="__codelineno-0-200" name="__codelineno-0-200"></a>        <span class="n">tqdm</span><span class="p">(</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_tuples</span><span class="p">),</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a>            <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing samples&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a>            <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a>        <span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">,</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a>    <span class="p">):</span>
+<a id="__codelineno-0-206" name="__codelineno-0-206"></a>        <span class="c1"># Process samples in parallel</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a>        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">Parallel</span><span class="p">(</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208"></a>            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">n_jobs</span><span class="p">,</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209"></a>            <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a>            <span class="n">return_as</span><span class="o">=</span><span class="s2">&quot;generator&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-211" name="__codelineno-0-211"></a>        <span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">process_one_sample</span><span class="p">)(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">arg_tuples</span><span class="p">):</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a>            <span class="n">all_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a>            <span class="c1"># Update progress bar and track results by success/failure</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215"></a>            <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a>                <span class="n">successful_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-0-217" name="__codelineno-0-217"></a>                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-218" name="__codelineno-0-218"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a>                <span class="n">failed_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a>                <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a>    <span class="c1"># Log summary information</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a>    <span class="n">success_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">successful_results</span><span class="p">)</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="n">failure_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">failed_results</span><span class="p">)</span>
+<a id="__codelineno-0-225" name="__codelineno-0-225"></a>    <span class="n">total_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_results</span><span class="p">)</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226"></a>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">split_dataset</span><span class="p">(</span><span class="n">successful_results</span><span class="p">)</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>        <span class="sa">f</span><span class="s2">&quot;Processing complete. </span><span class="si">{</span><span class="n">success_count</span><span class="si">}</span><span class="s2"> successful, </span><span class="si">{</span><span class="n">failure_count</span><span class="si">}</span><span class="s2"> failed &quot;</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a>        <span class="sa">f</span><span class="s2">&quot;out of </span><span class="si">{</span><span class="n">total_count</span><span class="si">}</span><span class="s2"> total samples (</span><span class="si">{</span><span class="n">success_count</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_count</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% success rate).&quot;</span>
+<a id="__codelineno-0-232" name="__codelineno-0-232"></a>    <span class="p">)</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>    <span class="c1"># Finalize output(Generate dataset.json and nnUNet scripts)</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>    <span class="k">if</span> <span class="n">success_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">finalize_dataset</span><span class="p">()</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a>
+<a id="__codelineno-0-238" name="__codelineno-0-238"></a>    <span class="n">index_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">index_file</span>
+<a id="__codelineno-0-239" name="__codelineno-0-239"></a>    <span class="c1"># TODO:: discuss how we want to name these files</span>
+<a id="__codelineno-0-240" name="__codelineno-0-240"></a>    <span class="c1"># Generate report file names</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a>    <span class="n">success_file</span> <span class="o">=</span> <span class="n">index_file</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">root_directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_successful_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.json&quot;</span>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a>    <span class="p">)</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a>    <span class="n">failure_file</span> <span class="o">=</span> <span class="n">index_file</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">root_directory</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_failed_</span><span class="si">{</span><span class="n">timestamp</span><span class="si">}</span><span class="s2">.json&quot;</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a>    <span class="p">)</span>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a>    <span class="c1"># Convert results to dictionaries for JSON serialization</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a>    <span class="n">success_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">successful_results</span><span class="p">]</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>    <span class="n">failure_dicts</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">failed_results</span><span class="p">]</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>    <span class="c1"># Write reports</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="c1"># with open(success_file, &quot;w&quot;) as f:</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>    <span class="k">with</span> <span class="n">success_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">success_dicts</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detailed success report saved to </span><span class="si">{</span><span class="n">success_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="c1"># if no failures, we can skip writing the failure file</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="k">if</span> <span class="n">failure_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">successful_results</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>    <span class="k">with</span> <span class="n">failure_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">failure_dicts</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-0-264" name="__codelineno-0-264"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detailed failure report saved to </span><span class="si">{</span><span class="n">failure_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-265" name="__codelineno-0-265"></a>
+<a id="__codelineno-0-266" name="__codelineno-0-266"></a>    <span class="c1"># Return all results categorized</span>
+<a id="__codelineno-0-267" name="__codelineno-0-267"></a>    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="n">successful_results</span><span class="p">,</span> <span class="s2">&quot;failure&quot;</span><span class="p">:</span> <span class="n">failed_results</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

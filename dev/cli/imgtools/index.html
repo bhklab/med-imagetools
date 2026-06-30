@@ -4906,6 +4906,18 @@ TODO:: explain this in the docs?</li>
 <td><code>True</code></td>
 </tr>
 <tr>
+<td><code>--test-set-ratio</code></td>
+<td>float range (between <code>0.0</code> and <code>1.0</code>)</td>
+<td>Proportion of successfully processed cases for the test set (imagesTs/labelsTs). Uses ceil(ratio * n_cases); use 1.0 for a full test set (imagesTr will be empty).</td>
+<td><code>0.0</code></td>
+</tr>
+<tr>
+<td><code>--random-seed</code></td>
+<td>integer</td>
+<td>The random seed to use for the test set split.</td>
+<td><code>42</code></td>
+</tr>
+<tr>
 <td><code>-h</code>, <code>--help</code></td>
 <td>boolean</td>
 <td>Show this message and exit.</td>
