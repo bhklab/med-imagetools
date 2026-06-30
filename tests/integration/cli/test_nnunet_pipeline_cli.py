@@ -1,11 +1,14 @@
-import pytest
-import tempfile
 import os
-import yaml
 import subprocess
-from sys import platform
+import tempfile
+from math import ceil
 from pathlib import Path
+from sys import platform
+
+import pytest
+import yaml
 from click.testing import CliRunner
+
 from imgtools.cli.nnunet_pipeline import nnunet_pipeline
 
 
@@ -31,6 +34,8 @@ class TestnnUNetCLI:
         assert "Process medical images in nnUNet format." in result.output
         assert "--modalities" in result.output
         assert "--roi-match-yaml" in result.output
+        assert "--test-set-ratio" in result.output
+        assert "--random-seed" in result.output
 
     def test_invalid_args(self, runner, temp_output_dir):
         """Test CLI behavior with invalid arguments."""
@@ -77,11 +82,26 @@ class TestnnUNetCLI:
             "--roi-match-yaml", roi_yaml_path.as_posix(),
             "--existing-file-mode", "skip",  # Skip existing files to avoid errors
             "--mask-saving-strategy", mask_saving_strategy,
+            "--test-set-ratio", "0.1",
+            "--random-seed", "42",
         ])
         
         assert result.exit_code == 0, (
             f"imgtools nnunet_pipeline failed:\n{result.output}\n{result.exception}"
         )        
+
+        dataset_dir = temp_output_dir / "nnUNet_raw" / "Dataset001_Pancreatic-CT-CBCT-SEG"
+        test_set_ratio = 0.1
+
+        images_tr = list((dataset_dir / "imagesTr").glob("*.nii.gz"))
+        images_ts = list((dataset_dir / "imagesTs").glob("*.nii.gz"))
+        labels_ts = list((dataset_dir / "labelsTs").glob("*.nii.gz"))
+
+        n_cases = len(images_tr) + len(images_ts)
+        expected_n_test = ceil(test_set_ratio * n_cases)
+
+        assert len(images_ts) == expected_n_test
+        assert len(labels_ts) == expected_n_test
 
         env = os.environ.copy()
         env["nnUNet_raw"] = (temp_output_dir / "nnUNet_raw").as_posix()

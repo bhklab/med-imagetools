@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
-from imgtools.autopipeline import ProcessSampleResult, process_one_sample
+from imgtools.autopipeline import process_one_sample
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
+    from imgtools.autopipeline import ProcessSampleResult
 
 
 class nnUNetPipeline:  # noqa: N801
@@ -54,7 +55,8 @@ class nnUNetPipeline:  # noqa: N801
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
-        test_set_ratio: float = 0.0
+        test_set_ratio: float = 0.0,
+        random_seed: int = 42
     ) -> None:
         """
         Initialize the nnUNetpipeline.
@@ -87,8 +89,11 @@ class nnUNetPipeline:  # noqa: N801
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
-        test_set_ratio : float 
-            The proportion of samples in the dataset that is to be used for testing
+        test_set_ratio : float
+            Proportion of successful cases for the test set. Count is
+            ceil(ratio * n_cases); 1.0 moves all cases to the test set.
+        random_seed : int
+            The random seed to use for the test set split.
         """
 
         # Validate modalities
@@ -124,6 +129,8 @@ class nnUNetPipeline:  # noqa: N801
             dataset_name=Path(input_directory).name,
             roi_keys=list(self.input.roi_matcher.match_map.keys()),
             mask_saving_strategy=mask_saving_strategy,
+            test_set_ratio=test_set_ratio,
+            random_seed=random_seed,
             extra_context={},
         )
 
@@ -146,12 +153,7 @@ class nnUNetPipeline:  # noqa: N801
             transforms.append(WindowIntensity(window=window, level=level))
 
         self.transformer = Transformer(transforms)
-        
-        if test_set_ratio < 0:
-            raise ValueError("The test_set_ratio must be greater than or equal to 0")
 
-        self.test_set_ratio = min(test_set_ratio, 1)
-        
         logger.info("Pipeline initialized")
     
     #TODO: This function is long and has a lot of concerns built into it.
@@ -223,7 +225,7 @@ class nnUNetPipeline:  # noqa: N801
         failure_count = len(failed_results)
         total_count = len(all_results)
 
-        self.output.split_dataset(self.test_set_ratio, successful_results)
+        self.output.split_dataset(successful_results)
 
         logger.info(
             f"Processing complete. {success_count} successful, {failure_count} failed "
