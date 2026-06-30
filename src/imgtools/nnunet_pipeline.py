@@ -27,9 +27,9 @@ from imgtools.transforms import (
 if TYPE_CHECKING:
     import rich.repr
 
+    from imgtools.autopipeline import ProcessSampleResult
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
-    from imgtools.autopipeline import ProcessSampleResult
 
 
 class nnUNetPipeline:  # noqa: N801
@@ -56,7 +56,7 @@ class nnUNetPipeline:  # noqa: N801
         window: float | None = None,
         level: float | None = None,
         test_set_ratio: float = 0.0,
-        random_seed: int = 42
+        random_seed: int = 42,
     ) -> None:
         """
         Initialize the nnUNetpipeline.
@@ -155,8 +155,8 @@ class nnUNetPipeline:  # noqa: N801
         self.transformer = Transformer(transforms)
 
         logger.info("Pipeline initialized")
-    
-    #TODO: This function is long and has a lot of concerns built into it.
+
+    # TODO: This function is long and has a lot of concerns built into it.
     def run(
         self,
     ) -> Dict[str, List[ProcessSampleResult]]:
@@ -218,7 +218,6 @@ class nnUNetPipeline:  # noqa: N801
                 else:
                     failed_results.append(result)
                     pbar.update(0)
-
 
         # Log summary information
         success_count = len(successful_results)

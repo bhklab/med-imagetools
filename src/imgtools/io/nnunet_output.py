@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import contextlib
+import random
 from enum import Enum
 from math import ceil
 from pathlib import Path
-import random
 from shutil import move
-from typing import Any, Dict, Sequence,List
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence
 
 import pandas as pd
 from pydantic import (
@@ -16,7 +16,6 @@ from pydantic import (
     field_validator,
 )
 
-from imgtools.autopipeline import ProcessSampleResult
 from imgtools.coretypes import MedImage, Scan, VectorMask
 from imgtools.io.validators import validate_directory
 from imgtools.io.writers import (
@@ -30,6 +29,9 @@ from imgtools.utils.nnunet import (
     generate_dataset_json,
     generate_nnunet_scripts,
 )
+
+if TYPE_CHECKING:
+    from imgtools.autopipeline import ProcessSampleResult
 
 __all__ = ["nnUNetOutput", "MaskSavingStrategy"]
 
@@ -280,8 +282,10 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             )
 
         return valid_masks
-    
-    def _move_file_to_test_split(self, file_path: Path, dir_map: dict[str, str]) -> Path:
+
+    def _move_file_to_test_split(
+        self, file_path: Path, dir_map: dict[str, str]
+    ) -> Path:
         """
         Calculates the Ts path and moves the file based on the provided directory map.
         Parameters
@@ -298,10 +302,14 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         """
 
         if file_path.parent.name not in dir_map:
-            raise ValueError(f"Unexpected parent directory for split: {file_path.parent.name}")
+            msg = f"Unexpected parent directory for split: {file_path.parent.name}"
+            logger.error(msg)
+            raise ValueError(msg)
 
         # NOTE: nnUNet requires everything in images type dir to be a file.
-        output_folder_path = file_path.parent.parent / dir_map[file_path.parent.name]
+        output_folder_path = (
+            file_path.parent.parent / dir_map[file_path.parent.name]
+        )
         target_path = output_folder_path / file_path.name
         output_folder_path.mkdir(exist_ok=True, parents=True)
         move(file_path, target_path)
@@ -334,7 +342,9 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             return str(Path(dir_map[parts[0]], *parts[1:]))
 
         mask = df["SampleID"].map(belongs_to_moved_case)
-        df.loc[mask, "filepath"] = df.loc[mask, "filepath"].map(rewrite_split_path)
+        df.loc[mask, "filepath"] = df.loc[mask, "filepath"].map(
+            rewrite_split_path
+        )
         if "SplitType" in df.columns:
             df.loc[mask, "SplitType"] = "Ts"
 
