@@ -306,6 +306,7 @@ class Autopipeline:
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
+        group_by_root: bool = True,
     ) -> None:
         """
         Initialize the Autopipeline.
@@ -343,6 +344,9 @@ class Autopipeline:
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
+        group_by_root : bool, default=True
+            If True, group results by their root CT/MR/PT node (avoids duplicate
+            root nodes). Set to False to get all matching series individually.
         """
         self.input = SampleInput.build(
             directory=Path(input_directory),
@@ -382,6 +386,7 @@ class Autopipeline:
             transforms.append(WindowIntensity(window=window, level=level))
 
         self.transformer = Transformer(transforms)
+        self.group_by_root = group_by_root
 
         logger.info("Pipeline initialized")
 
@@ -399,7 +404,7 @@ class Autopipeline:
         """
 
         # Load the samples
-        samples = self.input.query()
+        samples = self.input.query(group_by_root=self.group_by_root)
         samples = sorted(samples, key=lambda x: x[0].PatientID.lower())
 
         if not samples:
