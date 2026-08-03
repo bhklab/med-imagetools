@@ -5,20 +5,97 @@ Utility functions for the autopipeline module.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime
-
-# Import Path in type-checking block
-from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
+from pathlib import Path
+from typing import TYPE_CHECKING, Callable, Dict, Generic, List, Sequence, TypeVar
 
 import pandas as pd
 
 from imgtools.loggers import logger
+from imgtools.utils import sanitize_file_name
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from imgtools.dicom.interlacer import SeriesNode
 
 ResultType = TypeVar("ResultType", bound=object)
+
+# Default output folders use "{SampleNumber}__{PatientID}/..." where SampleNumber
+# is zero-padded digits (e.g. "0000__Patient123").
+_SAMPLE_NUMBER_PATIENT_FOLDER = re.compile(r"^(\d+)__(.+)$")
+
+
+def extract_patient_id_from_folder_name(folder_name: str) -> str:
+    """Extract a PatientID from a top-level output folder name.
+
+    Supports the default `{SampleNumber}__{PatientID}` layout as well as a
+    bare `{PatientID}` folder.
+    """
+    match = _SAMPLE_NUMBER_PATIENT_FOLDER.match(folder_name)
+    if match:
+        return match.group(2)
+    return folder_name
+
+
+def find_existing_patient_ids(output_directory: str | Path) -> set[str]:
+    """Return PatientIDs that already have an output folder.
+
+    Parameters
+    ----------
+    output_directory : str | Path
+        Pipeline output directory to scan for existing patient folders.
+
+    Returns
+    -------
+    set[str]
+        Sanitized PatientIDs inferred from existing top-level directories.
+    """
+    output_path = Path(output_directory)
+    if not output_path.exists() or not output_path.is_dir():
+        return set()
+
+    existing: set[str] = set()
+    for path in output_path.iterdir():
+        if not path.is_dir() or path.name.startswith("."):
+            continue
+        existing.add(extract_patient_id_from_folder_name(path.name))
+    return existing
+
+
+def filter_samples_without_existing_folders(
+    samples: Sequence[Sequence[SeriesNode]],
+    output_directory: str | Path,
+) -> tuple[list[Sequence[SeriesNode]], list[str]]:
+    """Drop samples whose PatientID already has an output folder.
+
+    Parameters
+    ----------
+    samples : Sequence[Sequence[SeriesNode]]
+        Queried pipeline samples.
+    output_directory : str | Path
+        Pipeline output directory.
+
+    Returns
+    -------
+    tuple[list[Sequence[SeriesNode]], list[str]]
+        Remaining samples and the PatientIDs that were skipped.
+    """
+    existing_ids = find_existing_patient_ids(output_directory)
+    if not existing_ids:
+        return list(samples), []
+
+    kept: list[Sequence[SeriesNode]] = []
+    skipped_ids: list[str] = []
+    for sample in samples:
+        patient_id = sample[0].PatientID
+        sanitized_id = sanitize_file_name(str(patient_id))
+        if sanitized_id in existing_ids:
+            skipped_ids.append(str(patient_id))
+            continue
+        kept.append(sample)
+
+    return kept, skipped_ids
 
 
 @dataclass
