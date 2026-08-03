@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Dict, Generic, List, Sequence, TypeVar
+from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
 
 import pandas as pd
 
@@ -64,28 +64,28 @@ def find_existing_patient_ids(output_directory: str | Path) -> set[str]:
 
 
 def filter_samples_without_existing_folders(
-    samples: Sequence[Sequence[SeriesNode]],
+    samples: list[list[SeriesNode]],
     output_directory: str | Path,
-) -> tuple[list[Sequence[SeriesNode]], list[str]]:
+) -> tuple[list[list[SeriesNode]], list[str]]:
     """Drop samples whose PatientID already has an output folder.
 
     Parameters
     ----------
-    samples : Sequence[Sequence[SeriesNode]]
+    samples : list[list[SeriesNode]]
         Queried pipeline samples.
     output_directory : str | Path
         Pipeline output directory.
 
     Returns
     -------
-    tuple[list[Sequence[SeriesNode]], list[str]]
+    tuple[list[list[SeriesNode]], list[str]]
         Remaining samples and the PatientIDs that were skipped.
     """
     existing_ids = find_existing_patient_ids(output_directory)
     if not existing_ids:
         return list(samples), []
 
-    kept: list[Sequence[SeriesNode]] = []
+    kept: list[list[SeriesNode]] = []
     skipped_ids: list[str] = []
     for sample in samples:
         patient_id = sample[0].PatientID
