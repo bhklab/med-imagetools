@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from imgtools.autopipeline_utils import (
     PipelineResults,
-    filter_samples_without_existing_folders,
+    filter_samples_without_existing_output,
     save_pipeline_reports,
 )
 from imgtools.coretypes.masktypes.roi_matching import (
@@ -310,7 +310,7 @@ class Autopipeline:
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
-        ignore_existing_patients: bool = False,
+        ignore_existing_samples: bool = False,
     ) -> None:
         """
         Initialize the Autopipeline.
@@ -348,12 +348,12 @@ class Autopipeline:
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
-        ignore_existing_patients : bool, optional
-            If True, skip samples whose PatientID already has an output folder
+        ignore_existing_samples : bool, optional
+            If True, skip samples whose writer-resolved output already exists
             before any loading or transformation. Unlike ``existing_file_mode=SKIP``,
-            this avoids processing those patients entirely.
+            this avoids processing those samples entirely.
         """
-        self.ignore_existing_patients = ignore_existing_patients
+        self.ignore_existing_samples = ignore_existing_samples
         self.input = SampleInput.build(
             directory=Path(input_directory),
             crawl_directory=Path(crawl_directory) if crawl_directory else None,
@@ -419,40 +419,46 @@ class Autopipeline:
                 valid_queries=self.input.interlacer.valid_queries,
             )
 
-        if self.ignore_existing_patients:
-            samples, skipped_ids = filter_samples_without_existing_folders(
-                samples,
-                self.output.directory,
-            )
-            if skipped_ids:
-                logger.info(
-                    "Ignoring patients with existing output folders",
-                    skipped_count=len(skipped_ids),
-                    skipped_patient_ids=skipped_ids,
+        # Create a timestamp for this run
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        if self.ignore_existing_samples:
+            numbered_samples, skipped_labels = (
+                filter_samples_without_existing_output(
+                    samples,
+                    self.output.writer,
                 )
-            if not samples:
+            )
+            if skipped_labels:
+                logger.info(
+                    "Ignoring samples with existing writer output",
+                    skipped_count=len(skipped_labels),
+                    skipped_samples=skipped_labels,
+                )
+            if not numbered_samples:
                 raise NoValidSamplesError(
                     message=(
-                        "No valid samples found after ignoring patients with "
-                        "existing output folders."
+                        "No valid samples found after ignoring samples with "
+                        "existing writer output."
                     ),
                     user_query=self.input.modalities,
                     valid_queries=self.input.interlacer.valid_queries,
                 )
-
-        # Create a timestamp for this run
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        else:
+            numbered_samples = [
+                (f"{idx:04}", sample) for idx, sample in enumerate(samples)
+            ]
 
         # Prepare arguments for parallel processing
         arg_tuples = [
             (
-                f"{idx:04}",
+                sample_number,
                 sample,
                 self.input,
                 self.transformer,
                 self.output,
             )
-            for idx, sample in enumerate(samples)
+            for sample_number, sample in numbered_samples
         ]
 
         # Lists to track results

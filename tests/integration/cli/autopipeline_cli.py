@@ -26,7 +26,7 @@ class TestAutopipelineCLI:
         assert result.exit_code == 0
         assert "--modalities" in result.output
         assert "--roi-strategy" in result.output
-        assert "--ignore-existing-patients" in result.output
+        assert "--ignore-existing-samples" in result.output
 
     def test_invalid_args(self, runner, temp_output_dir):
         """Test CLI behavior with invalid arguments."""

@@ -5,97 +5,127 @@ Utility functions for the autopipeline module.
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
 
 import pandas as pd
 
 from imgtools.loggers import logger
-from imgtools.utils import sanitize_file_name
+from imgtools.utils import sanitize_file_name, truncate_uid
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from imgtools.dicom.interlacer import SeriesNode
+    from imgtools.io.writers import AbstractBaseWriter
 
 ResultType = TypeVar("ResultType", bound=object)
 
-# Default output folders use "{SampleNumber}__{PatientID}/..." where SampleNumber
-# is zero-padded digits (e.g. "0000__Patient123").
-_SAMPLE_NUMBER_PATIENT_FOLDER = re.compile(r"^(\d+)__(.+)$")
+
+def _sample_path_context(
+    sample: list[SeriesNode],
+    sample_number: str,
+    writer: AbstractBaseWriter,
+) -> dict[str, object]:
+    """Build filename-format context for a sample from series metadata."""
+    series = sample[0]
+    context: dict[str, object] = {
+        "SampleNumber": sample_number,
+        "PatientID": series.PatientID,
+        "Modality": series.Modality,
+        "SeriesInstanceUID": series.SeriesInstanceUID,
+        "StudyInstanceUID": series.StudyInstanceUID,
+        "ImageID": series.Modality,
+        "ReferencedSeriesUID": series.ReferencedSeriesUID or "",
+    }
+
+    truncate = getattr(writer, "truncate_uids_in_filename", 0) or 0
+    if truncate:
+        context = {
+            key: (
+                truncate_uid(str(value), truncate)
+                if key.lower().endswith("uid") and value not in (None, "")
+                else value
+            )
+            for key, value in context.items()
+        }
+
+    # Fill any remaining format placeholders so directory resolution can proceed
+    # even when ImageID/roi keys are only known after processing.
+    for key in writer.pattern_resolver.keys:
+        context.setdefault(key, "placeholder")
+
+    return context
 
 
-def extract_patient_id_from_folder_name(folder_name: str) -> str:
-    """Extract a PatientID from a top-level output folder name.
+def resolve_sample_output_path(
+    writer: AbstractBaseWriter,
+    sample: list[SeriesNode],
+    sample_number: str,
+) -> Path:
+    """Resolve the writer output path for a sample without creating directories."""
+    context = _sample_path_context(sample, sample_number, writer)
+    relative = writer.pattern_resolver.resolve(context)
+    if writer.sanitize_filenames:
+        relative = sanitize_file_name(relative)
+    return writer.root_directory / relative
 
-    Supports the default `{SampleNumber}__{PatientID}` layout as well as a
-    bare `{PatientID}` folder.
+
+def sample_output_exists(
+    writer: AbstractBaseWriter,
+    sample: list[SeriesNode],
+    sample_number: str,
+) -> bool:
+    """Return True if the writer already has output for this sample.
+
+    Uses the writer's filename format to resolve the expected path, then checks
+    existing paths under that location (sample directory contents, or the file
+    itself for flat formats).
     """
-    match = _SAMPLE_NUMBER_PATIENT_FOLDER.match(folder_name)
-    if match:
-        return match.group(2)
-    return folder_name
+    resolved = resolve_sample_output_path(writer, sample, sample_number)
+    relative = resolved.relative_to(writer.root_directory)
+
+    if len(relative.parts) > 1:
+        sample_dir = writer.root_directory / relative.parts[0]
+        return sample_dir.is_dir() and any(sample_dir.iterdir())
+
+    return resolved.exists()
 
 
-def find_existing_patient_ids(output_directory: str | Path) -> set[str]:
-    """Return PatientIDs that already have an output folder.
-
-    Parameters
-    ----------
-    output_directory : str | Path
-        Pipeline output directory to scan for existing patient folders.
-
-    Returns
-    -------
-    set[str]
-        Sanitized PatientIDs inferred from existing top-level directories.
-    """
-    output_path = Path(output_directory)
-    if not output_path.exists() or not output_path.is_dir():
-        return set()
-
-    existing: set[str] = set()
-    for path in output_path.iterdir():
-        if not path.is_dir() or path.name.startswith("."):
-            continue
-        existing.add(extract_patient_id_from_folder_name(path.name))
-    return existing
-
-
-def filter_samples_without_existing_folders(
+def filter_samples_without_existing_output(
     samples: list[list[SeriesNode]],
-    output_directory: str | Path,
-) -> tuple[list[list[SeriesNode]], list[str]]:
-    """Drop samples whose PatientID already has an output folder.
+    writer: AbstractBaseWriter,
+) -> tuple[list[tuple[str, list[SeriesNode]]], list[str]]:
+    """Drop samples whose writer-resolved output already exists.
+
+    Sample numbers are assigned before filtering and preserved on kept samples
+    so existing `{SampleNumber}__...` paths stay stable across re-runs.
 
     Parameters
     ----------
     samples : list[list[SeriesNode]]
         Queried pipeline samples.
-    output_directory : str | Path
-        Pipeline output directory.
+    writer : AbstractBaseWriter
+        Output writer used to resolve expected paths.
 
     Returns
     -------
-    tuple[list[list[SeriesNode]], list[str]]
-        Remaining samples and the PatientIDs that were skipped.
+    tuple[list[tuple[str, list[SeriesNode]]], list[str]]
+        Kept ``(sample_number, sample)`` pairs and skipped sample labels.
     """
-    existing_ids = find_existing_patient_ids(output_directory)
-    if not existing_ids:
-        return list(samples), []
+    kept: list[tuple[str, list[SeriesNode]]] = []
+    skipped: list[str] = []
 
-    kept: list[list[SeriesNode]] = []
-    skipped_ids: list[str] = []
-    for sample in samples:
-        patient_id = sample[0].PatientID
-        sanitized_id = sanitize_file_name(str(patient_id))
-        if sanitized_id in existing_ids:
-            skipped_ids.append(str(patient_id))
+    for idx, sample in enumerate(samples):
+        sample_number = f"{idx:04}"
+        label = f"{sample_number}:{sample[0].PatientID}"
+        if sample_output_exists(writer, sample, sample_number):
+            skipped.append(label)
             continue
-        kept.append(sample)
+        kept.append((sample_number, sample))
 
-    return kept, skipped_ids
+    return kept, skipped
 
 
 @dataclass
@@ -165,11 +195,11 @@ class PipelineResults(Generic[ResultType]):
 
 def save_pipeline_reports(
     results: PipelineResults,
-    index_file: "Path",
+    index_file: Path,
     root_dir_name: str,
     simplified_columns: List[str],
-    index_lock_check_func: Callable[[], "Path"] | None = None,
-) -> Dict[str, "Path"]:
+    index_lock_check_func: Callable[[], Path] | None = None,
+) -> Dict[str, Path]:
     """
     Save pipeline reports including success/failure reports and simplified index.
 

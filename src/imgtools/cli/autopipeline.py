@@ -99,13 +99,13 @@ def parse_spacing(ctx, param, value): # type: ignore
     help="How to handle existing files"
 )
 @click.option(
-    "--ignore-existing-patients",
+    "--ignore-existing-samples",
     is_flag=True,
     default=False,
     help=(
-        "Skip patients that already have an output folder before processing. "
-        "Unlike --existing-file-mode skip, this avoids loading and transforming "
-        "those patients entirely."
+        "Skip samples whose writer-resolved output already exists before "
+        "processing. Unlike --existing-file-mode skip, this avoids loading "
+        "and transforming those samples entirely."
     ),
 )
 @click.option(
@@ -193,7 +193,7 @@ def autopipeline(
     crawl_directory: str,
     filename_format: str,
     existing_file_mode: str,
-    ignore_existing_patients: bool,
+    ignore_existing_samples: bool,
     update_crawl: bool,
     jobs: int,
     modalities: str,
@@ -284,7 +284,7 @@ def autopipeline(
         spacing=spacing,
         window=window,
         level=level,
-        ignore_existing_patients=ignore_existing_patients,
+        ignore_existing_samples=ignore_existing_samples,
     )
     
     # Run the pipeline
