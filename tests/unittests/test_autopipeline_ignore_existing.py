@@ -5,13 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-from imgtools.autopipeline_utils import (
-    filter_samples_without_existing_output,
-    resolve_sample_output_path,
-    sample_output_exists,
-)
-from imgtools.io.writers import ExistingFileMode, NIFTIWriter
+from imgtools.autopipeline_utils import filter_samples_without_existing_output
 from imgtools.io.sample_output import DEFAULT_FILENAME_FORMAT
+from imgtools.io.writers import ExistingFileMode, NIFTIWriter
 
 
 def _sample(
@@ -41,53 +37,7 @@ def _writer(tmp_path: Path, filename_format: str = DEFAULT_FILENAME_FORMAT) -> N
     )
 
 
-def test_resolve_sample_output_path_uses_writer_format(tmp_path: Path) -> None:
-    writer = _writer(tmp_path)
-    sample = _sample("Patient_A", series_uid="1.2.3.45678901")
-
-    resolved = resolve_sample_output_path(writer, sample, "0000")
-
-    assert resolved.parent.parent == tmp_path / "0000__Patient_A"
-    assert "CT_" in resolved.parent.name
-
-
-def test_sample_output_exists_for_nested_format(tmp_path: Path) -> None:
-    writer = _writer(tmp_path)
-    sample = _sample("Patient_A")
-
-    assert not sample_output_exists(writer, sample, "0000")
-
-    sample_dir = tmp_path / "0000__Patient_A"
-    sample_dir.mkdir()
-    (sample_dir / "marker.txt").write_text("done")
-
-    assert sample_output_exists(writer, sample, "0000")
-
-
-def test_sample_output_exists_for_patient_format(tmp_path: Path) -> None:
-    writer = _writer(tmp_path, "{PatientID}/{Modality}/{ImageID}.nii.gz")
-    sample = _sample("Patient_B")
-
-    assert not sample_output_exists(writer, sample, "0001")
-
-    patient_dir = tmp_path / "Patient_B"
-    patient_dir.mkdir()
-    (patient_dir / "CT").mkdir()
-    (patient_dir / "CT" / "CT.nii.gz").write_text("x")
-
-    assert sample_output_exists(writer, sample, "0001")
-
-
-def test_sample_output_exists_for_flat_format(tmp_path: Path) -> None:
-    writer = _writer(tmp_path, "{PatientID}_{Modality}.nii.gz")
-    sample = _sample("Patient_C")
-
-    assert not sample_output_exists(writer, sample, "0000")
-    (tmp_path / "Patient_C_CT.nii.gz").write_text("x")
-    assert sample_output_exists(writer, sample, "0000")
-
-
-def test_filter_preserves_sample_numbers(tmp_path: Path) -> None:
+def test_filter_skips_existing_nested_sample(tmp_path: Path) -> None:
     writer = _writer(tmp_path)
     samples = [_sample("Patient_A"), _sample("Patient_B"), _sample("Patient_C")]
 
@@ -103,6 +53,33 @@ def test_filter_preserves_sample_numbers(tmp_path: Path) -> None:
         "Patient_C",
     ]
     assert skipped == ["0001:Patient_B"]
+
+
+def test_filter_skips_existing_patient_format(tmp_path: Path) -> None:
+    writer = _writer(tmp_path, "{PatientID}/{Modality}/{ImageID}.nii.gz")
+    samples = [_sample("Patient_A"), _sample("Patient_B")]
+
+    patient_dir = tmp_path / "Patient_A"
+    patient_dir.mkdir()
+    (patient_dir / "CT").mkdir()
+    (patient_dir / "CT" / "CT.nii.gz").write_text("x")
+
+    kept, skipped = filter_samples_without_existing_output(samples, writer)
+
+    assert [sample[0].PatientID for _, sample in kept] == ["Patient_B"]
+    assert skipped == ["0000:Patient_A"]
+
+
+def test_filter_skips_existing_flat_format(tmp_path: Path) -> None:
+    writer = _writer(tmp_path, "{PatientID}_{Modality}.nii.gz")
+    samples = [_sample("Patient_C"), _sample("Patient_D")]
+
+    (tmp_path / "Patient_C_CT.nii.gz").write_text("x")
+
+    kept, skipped = filter_samples_without_existing_output(samples, writer)
+
+    assert [sample[0].PatientID for _, sample in kept] == ["Patient_D"]
+    assert skipped == ["0000:Patient_C"]
 
 
 def test_filter_keeps_all_when_no_existing_output(tmp_path: Path) -> None:

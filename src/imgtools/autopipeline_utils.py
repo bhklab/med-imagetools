@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
 
 import pandas as pd
@@ -15,82 +16,10 @@ from imgtools.loggers import logger
 from imgtools.utils import sanitize_file_name, truncate_uid
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from imgtools.dicom.interlacer import SeriesNode
     from imgtools.io.writers import AbstractBaseWriter
 
 ResultType = TypeVar("ResultType", bound=object)
-
-
-def _sample_path_context(
-    sample: list[SeriesNode],
-    sample_number: str,
-    writer: AbstractBaseWriter,
-) -> dict[str, object]:
-    """Build filename-format context for a sample from series metadata."""
-    series = sample[0]
-    context: dict[str, object] = {
-        "SampleNumber": sample_number,
-        "PatientID": series.PatientID,
-        "Modality": series.Modality,
-        "SeriesInstanceUID": series.SeriesInstanceUID,
-        "StudyInstanceUID": series.StudyInstanceUID,
-        "ImageID": series.Modality,
-        "ReferencedSeriesUID": series.ReferencedSeriesUID or "",
-    }
-
-    truncate = getattr(writer, "truncate_uids_in_filename", 0) or 0
-    if truncate:
-        context = {
-            key: (
-                truncate_uid(str(value), truncate)
-                if key.lower().endswith("uid") and value not in (None, "")
-                else value
-            )
-            for key, value in context.items()
-        }
-
-    # Fill any remaining format placeholders so directory resolution can proceed
-    # even when ImageID/roi keys are only known after processing.
-    for key in writer.pattern_resolver.keys:
-        context.setdefault(key, "placeholder")
-
-    return context
-
-
-def resolve_sample_output_path(
-    writer: AbstractBaseWriter,
-    sample: list[SeriesNode],
-    sample_number: str,
-) -> Path:
-    """Resolve the writer output path for a sample without creating directories."""
-    context = _sample_path_context(sample, sample_number, writer)
-    relative = writer.pattern_resolver.resolve(context)
-    if writer.sanitize_filenames:
-        relative = sanitize_file_name(relative)
-    return writer.root_directory / relative
-
-
-def sample_output_exists(
-    writer: AbstractBaseWriter,
-    sample: list[SeriesNode],
-    sample_number: str,
-) -> bool:
-    """Return True if the writer already has output for this sample.
-
-    Uses the writer's filename format to resolve the expected path, then checks
-    existing paths under that location (sample directory contents, or the file
-    itself for flat formats).
-    """
-    resolved = resolve_sample_output_path(writer, sample, sample_number)
-    relative = resolved.relative_to(writer.root_directory)
-
-    if len(relative.parts) > 1:
-        sample_dir = writer.root_directory / relative.parts[0]
-        return sample_dir.is_dir() and any(sample_dir.iterdir())
-
-    return resolved.exists()
 
 
 def filter_samples_without_existing_output(
@@ -99,31 +28,54 @@ def filter_samples_without_existing_output(
 ) -> tuple[list[tuple[str, list[SeriesNode]]], list[str]]:
     """Drop samples whose writer-resolved output already exists.
 
-    Sample numbers are assigned before filtering and preserved on kept samples
-    so existing `{SampleNumber}__...` paths stay stable across re-runs.
-
-    Parameters
-    ----------
-    samples : list[list[SeriesNode]]
-        Queried pipeline samples.
-    writer : AbstractBaseWriter
-        Output writer used to resolve expected paths.
-
-    Returns
-    -------
-    tuple[list[tuple[str, list[SeriesNode]]], list[str]]
-        Kept ``(sample_number, sample)`` pairs and skipped sample labels.
+    Uses the writer's filename format to resolve each sample's expected path.
+    Nested formats skip when the top-level sample directory has content; flat
+    formats skip when the resolved file exists. Sample numbers are assigned
+    before filtering and preserved so re-runs stay path-stable.
     """
     kept: list[tuple[str, list[SeriesNode]]] = []
     skipped: list[str] = []
+    truncate = getattr(writer, "truncate_uids_in_filename", 0) or 0
 
     for idx, sample in enumerate(samples):
         sample_number = f"{idx:04}"
-        label = f"{sample_number}:{sample[0].PatientID}"
-        if sample_output_exists(writer, sample, sample_number):
+        series = sample[0]
+        context: dict[str, object] = {
+            "SampleNumber": sample_number,
+            "PatientID": series.PatientID,
+            "Modality": series.Modality,
+            "SeriesInstanceUID": series.SeriesInstanceUID,
+            "StudyInstanceUID": series.StudyInstanceUID,
+            "ImageID": series.Modality,
+            "ReferencedSeriesUID": series.ReferencedSeriesUID or "",
+        }
+        if truncate:
+            context = {
+                key: (
+                    truncate_uid(str(value), truncate)
+                    if key.lower().endswith("uid") and value not in (None, "")
+                    else value
+                )
+                for key, value in context.items()
+            }
+        for key in writer.pattern_resolver.keys:
+            context.setdefault(key, "placeholder")
+
+        relative = writer.pattern_resolver.resolve(context)
+        if writer.sanitize_filenames:
+            relative = sanitize_file_name(relative)
+        relative_path = Path(relative)
+        if len(relative_path.parts) > 1:
+            sample_dir = writer.root_directory / relative_path.parts[0]
+            exists = sample_dir.is_dir() and any(sample_dir.iterdir())
+        else:
+            exists = (writer.root_directory / relative_path).exists()
+
+        label = f"{sample_number}:{series.PatientID}"
+        if exists:
             skipped.append(label)
-            continue
-        kept.append((sample_number, sample))
+        else:
+            kept.append((sample_number, sample))
 
     return kept, skipped
 
