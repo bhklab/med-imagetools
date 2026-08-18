@@ -32,6 +32,11 @@ def filter_samples_without_existing_output(
     Nested formats skip when the top-level sample directory has content; flat
     formats skip when the resolved file exists. Sample numbers are assigned
     before filtering and preserved so re-runs stay path-stable.
+
+    Returns
+    -------
+    tuple[list[tuple[str, list[SeriesNode]]], list[str]]
+        Kept ``(sample_number, sample)`` pairs and skipped sample numbers.
     """
     kept: list[tuple[str, list[SeriesNode]]] = []
     skipped: list[str] = []
@@ -71,9 +76,8 @@ def filter_samples_without_existing_output(
         else:
             exists = (writer.root_directory / relative_path).exists()
 
-        label = f"{sample_number}:{series.PatientID}"
         if exists:
-            skipped.append(label)
+            skipped.append(sample_number)
         else:
             kept.append((sample_number, sample))
 

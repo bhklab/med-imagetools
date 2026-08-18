@@ -423,17 +423,17 @@ class Autopipeline:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         if self.ignore_existing_samples:
-            numbered_samples, skipped_labels = (
+            numbered_samples, skipped_sample_numbers = (
                 filter_samples_without_existing_output(
                     samples,
                     self.output.writer,
                 )
             )
-            if skipped_labels:
+            if skipped_sample_numbers:
                 logger.info(
                     "Ignoring samples with existing writer output",
-                    skipped_count=len(skipped_labels),
-                    skipped_samples=skipped_labels,
+                    skipped_count=len(skipped_sample_numbers),
+                    skipped_sample_numbers=skipped_sample_numbers,
                 )
             if not numbered_samples:
                 raise NoValidSamplesError(
