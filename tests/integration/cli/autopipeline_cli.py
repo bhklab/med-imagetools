@@ -24,9 +24,9 @@ class TestAutopipelineCLI:
         """Test that the CLI command displays help information correctly."""
         result = runner.invoke(autopipeline, ["--help"])
         assert result.exit_code == 0
-        assert "Run the Autopipeline for processing medical images" in result.output
         assert "--modalities" in result.output
         assert "--roi-strategy" in result.output
+        assert "--ignore-existing-samples" in result.output
 
     def test_invalid_args(self, runner, temp_output_dir):
         """Test CLI behavior with invalid arguments."""

@@ -7,18 +7,81 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-
-# Import Path in type-checking block
+from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Dict, Generic, List, TypeVar
 
 import pandas as pd
 
 from imgtools.loggers import logger
+from imgtools.utils import sanitize_file_name, truncate_uid
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from imgtools.dicom.interlacer import SeriesNode
+    from imgtools.io.writers import AbstractBaseWriter
 
 ResultType = TypeVar("ResultType", bound=object)
+
+
+def filter_samples_without_existing_output(
+    samples: list[list[SeriesNode]],
+    writer: AbstractBaseWriter,
+) -> tuple[list[tuple[str, list[SeriesNode]]], list[str]]:
+    """Drop samples whose writer-resolved output already exists.
+
+    Uses the writer's filename format to resolve each sample's expected path.
+    Nested formats skip when the top-level sample directory has content; flat
+    formats skip when the resolved file exists. Sample numbers are assigned
+    before filtering and preserved so re-runs stay path-stable.
+
+    Returns
+    -------
+    tuple[list[tuple[str, list[SeriesNode]]], list[str]]
+        Kept ``(sample_number, sample)`` pairs and skipped sample numbers.
+    """
+    kept: list[tuple[str, list[SeriesNode]]] = []
+    skipped: list[str] = []
+    truncate = getattr(writer, "truncate_uids_in_filename", 0) or 0
+
+    for idx, sample in enumerate(samples):
+        sample_number = f"{idx:04}"
+        series = sample[0]
+        context: dict[str, object] = {
+            "SampleNumber": sample_number,
+            "PatientID": series.PatientID,
+            "Modality": series.Modality,
+            "SeriesInstanceUID": series.SeriesInstanceUID,
+            "StudyInstanceUID": series.StudyInstanceUID,
+            "ImageID": series.Modality,
+            "ReferencedSeriesUID": series.ReferencedSeriesUID or "",
+        }
+        if truncate:
+            context = {
+                key: (
+                    truncate_uid(str(value), truncate)
+                    if key.lower().endswith("uid") and value not in (None, "")
+                    else value
+                )
+                for key, value in context.items()
+            }
+        for key in writer.pattern_resolver.keys:
+            context.setdefault(key, "placeholder")
+
+        relative = writer.pattern_resolver.resolve(context)
+        if writer.sanitize_filenames:
+            relative = sanitize_file_name(relative)
+        relative_path = Path(relative)
+        if len(relative_path.parts) > 1:
+            sample_dir = writer.root_directory / relative_path.parts[0]
+            exists = sample_dir.is_dir() and any(sample_dir.iterdir())
+        else:
+            exists = (writer.root_directory / relative_path).exists()
+
+        if exists:
+            skipped.append(sample_number)
+        else:
+            kept.append((sample_number, sample))
+
+    return kept, skipped
 
 
 @dataclass
@@ -88,11 +151,11 @@ class PipelineResults(Generic[ResultType]):
 
 def save_pipeline_reports(
     results: PipelineResults,
-    index_file: "Path",
+    index_file: Path,
     root_dir_name: str,
     simplified_columns: List[str],
-    index_lock_check_func: Callable[[], "Path"] | None = None,
-) -> Dict[str, "Path"]:
+    index_lock_check_func: Callable[[], Path] | None = None,
+) -> Dict[str, Path]:
     """
     Save pipeline reports including success/failure reports and simplified index.
 
