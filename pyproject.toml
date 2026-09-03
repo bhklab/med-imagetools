@@ -37,6 +37,7 @@ dependencies = [
     "pydicom>=2.4.4",
     "scikit-image>=0.23.2,<1",
     "simpleitk>=2.4.0,<3",
+    "nibabel>=5.0,<6",
     "highdicom",
     # lockfile
     "fasteners==0.19",

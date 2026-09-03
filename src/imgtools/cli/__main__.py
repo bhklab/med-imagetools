@@ -43,6 +43,7 @@ from .dicomsort import dicomsort
 
 from .index import index
 from .interlacer import interlacer
+from .niftiindex import niftiindex
 from .nnunet_pipeline import nnunet_pipeline
 
 from .sectioned_group import SectionedGroup, CommandRegistry
@@ -62,6 +63,9 @@ registry.create_group("utilities", "Tools for working with DICOM files.")
 registry.add("utilities", dicomfind)
 registry.add("utilities", dicomsort)
 registry.add("utilities", dicomshow)
+
+registry.create_group("other", "Other tools for working with medical imaging data. (NIfTI, NRRD, etc.)")
+registry.add("other", niftiindex)
 
 
 if not testdata.hidden:
