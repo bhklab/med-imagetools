@@ -1,4 +1,4 @@
-[project]
+[workspace]
 authors = ["Jermiah Joseph <jermiahjoseph98@gmail.com>"]
 channels = ["conda-forge"]
 description = "Add a short description here"
@@ -111,6 +111,12 @@ depends-on = [
 
 [feature.test.tasks.clean_tests]
 cmd = "rm -rf .pytest_cache data tests/temp temp_outputs .cache"
+
+[feature.test.target.linux-64.pypi-dependencies]
+nnunetv2 = ">=2.6.2, <3"
+
+[feature.test.target.win-64.pypi-dependencies]
+nnunetv2 = ">=2.6.2, <3"
 
 ############################################## DOCS ###############################################
 [feature.docs.dependencies]

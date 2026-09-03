@@ -51,7 +51,7 @@ jobs:
                 os: [ubuntu-latest, macos-latest, windows-latest]
                 # just going to test lowest and latest
                 env: ["py310", "py313"]
-                TestAccessType: ["public"]
+                TestAccessType: ["public", "private"]
 
         # this action needs to be able to read contents of other repos
         # for the test data (specifically private test data)
@@ -67,7 +67,7 @@ jobs:
                   os: ${{ matrix.os }}
                   env: ${{ matrix.env }}
                   test_access_type: ${{ matrix.TestAccessType }}
-                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
+                  github_token: ${{ secrets.BHKLAB_GITHUB_TOKEN }}
                   codecov_token: ${{ secrets.CODECOV_TOKEN }}
                   test_type: "integration"
 
@@ -92,7 +92,7 @@ jobs:
               uses: prefix-dev/setup-pixi@v0.9.4
               with:
                   environments: "test"
-                  pixi-version: v0.47.0
+                  pixi-version: v0.62.2
                   cache: true
                   locked: false
 
@@ -245,7 +245,7 @@ jobs:
               id: release
               with:
                   root_options: -v
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  github_token: ${{ secrets.MEDIMG_TESTDATA_PAT }}
                   git_committer_name: "gh-actions-semver"
 
     ################################################################################################
