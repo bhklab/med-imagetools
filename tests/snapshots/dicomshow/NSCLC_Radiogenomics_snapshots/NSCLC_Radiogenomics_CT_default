@@ -11,8 +11,10 @@
  ImagePositionPatient     [-182.1533203125, -314.1533203125, -67]               
  KVP                      120                                                   
  Modality                 CT                                                    
+ PatientAge               078Y                                                  
  PatientID                R01-001                                               
  PatientPosition          HFS                                                   
+ PatientSex               F                                                     
  PixelSpacing             [0.693359375, 0.693359375]                            
  ProtocolName             01_CAP                                                
  ReconstructionDiameter   355                                                   

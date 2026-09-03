@@ -266,7 +266,7 @@ def process_one_sample(
             SampleNumber=idx,
         )
         result.output_files = list(saved_files)
-        if not result.output_files:
+        if not result.output_files and not sample_output.dry_run:
             raise ValueError(
                 "No output files were saved. Check the output directory."
             )
@@ -311,6 +311,7 @@ class Autopipeline:
         window: float | None = None,
         level: float | None = None,
         ignore_existing_samples: bool = False,
+        dry_run: bool = False,
     ) -> None:
         """
         Initialize the Autopipeline.
@@ -352,6 +353,8 @@ class Autopipeline:
             If True, skip samples whose writer-resolved output already exists
             before any loading or transformation. Unlike ``existing_file_mode=SKIP``,
             this avoids processing those samples entirely.
+        dry_run : bool, optional
+            Whether to run the pipeline in dry run mode, by default False
         """
         self.ignore_existing_samples = ignore_existing_samples
         self.input = SampleInput.build(
@@ -371,6 +374,7 @@ class Autopipeline:
             filename_format=output_filename_format,
             existing_file_mode=existing_file_mode,
             extra_context={},
+            dry_run=dry_run,
         )
 
         transforms: list[BaseTransform] = [

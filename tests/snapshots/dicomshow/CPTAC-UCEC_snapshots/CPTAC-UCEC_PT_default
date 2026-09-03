@@ -4,6 +4,7 @@
  AcquisitionTerminationCondition  TIME                                          
  AcquisitionTime                  163712                                        
  ActualFrameDuration              150000                                        
+ AdditionalPatientHistory         ENDO CA                                       
  AttenuationCorrectionMethod      NONE, 0.000000 cm-1,                          
  CoincidenceWindowWidth           0                                             
  ContentDate                      20081216                                      
@@ -22,8 +23,12 @@
  ManufacturerModelName            Discovery 710                                 
  Modality                         PT                                            
  NumberOfSlices                   227                                           
+ PatientAge                       071Y                                          
  PatientID                        C3L-00947                                     
  PatientPosition                  HFS                                           
+ PatientSex                       F                                             
+ PatientSize                      1.52                                          
+ PatientWeight                    87                                            
  PixelSpacing                     [3.6458332538605, 3.6458332538605]            
  ProtocolName                     7.9 PTCT attenuation only  MED 120-199        
  ReconstructionMethod             VPFX                                          

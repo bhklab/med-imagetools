@@ -16,6 +16,7 @@
  ManufacturerModelName    ARIA RadOnc                                           
  Modality                 RTDOSE                                                
  PatientID                Pancreas-CT-CB_003                                    
+ PatientSex               M                                                     
  PixelSpacing             [2.5, 2.5]                                            
  ReferencedSeriesSOPUIDs  ['1.3.6.1.4.1.14519.5.2.1.30741749844713802115267821… 
  SeriesDate               20120120                                              

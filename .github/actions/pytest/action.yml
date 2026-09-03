@@ -30,11 +30,12 @@ runs:
     - uses: actions/checkout@v4
 
     - name: Install Pixi
-      uses: prefix-dev/setup-pixi@v0.9.4
+      uses: prefix-dev/setup-pixi@v0.10.2
       with:
         environments: ${{ inputs.env }}
-        pixi-version: v0.62.2
+        pixi-version: v0.66.0
         cache: true
+        locked: false
 
     - name: Prepare data if needed
       if: inputs.test_type == 'integration'
