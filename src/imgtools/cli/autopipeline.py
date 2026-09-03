@@ -56,7 +56,7 @@ def parse_spacing(ctx, param, value): # type: ignore
 @click.argument(
     "input_directory",
     type=click.Path(
-        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True, exists=True
+        file_okay=False, dir_okay=True, writable=False, path_type=Path, resolve_path=True, exists=True
     ),
 )
 @click.argument(
@@ -64,6 +64,14 @@ def parse_spacing(ctx, param, value): # type: ignore
     type=click.Path(
         file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
     ),
+)
+@click.option(
+    "--crawl-directory",
+    type=click.Path(
+        file_okay=False, dir_okay=True, writable=True, path_type=Path, resolve_path=True
+    ),
+    default=None,
+    help="Path to save the crawl data. If not provided, a directory named '.imgtools' will be created in the parent directory of the input directory.",
 )
 @click.option(
     "--filename-format",
@@ -89,6 +97,16 @@ def parse_spacing(ctx, param, value): # type: ignore
     type=click.Choice(existing_file_modes), 
     default="fail",
     help="How to handle existing files"
+)
+@click.option(
+    "--ignore-existing-samples",
+    is_flag=True,
+    default=False,
+    help=(
+        "Skip samples whose writer-resolved output already exists before "
+        "processing. Unlike --existing-file-mode skip, this avoids loading "
+        "and transforming those samples entirely."
+    ),
 )
 @click.option(
     "--update-crawl", 
@@ -179,8 +197,10 @@ def parse_spacing(ctx, param, value): # type: ignore
 def autopipeline(
     input_directory: str,
     output_directory: str,
+    crawl_directory: str,
     filename_format: str,
     existing_file_mode: str,
+    ignore_existing_samples: bool,
     update_crawl: bool,
     jobs: int,
     modalities: str,
@@ -258,6 +278,7 @@ def autopipeline(
     pipeline = Autopipeline(
         input_directory=input_directory,
         output_directory=output_directory,
+        crawl_directory=crawl_directory,
         output_filename_format=filename_format,
         existing_file_mode=ExistingFileMode[existing_file_mode.upper()],
         update_crawl=update_crawl,
@@ -271,6 +292,7 @@ def autopipeline(
         spacing=spacing,
         window=window,
         level=level,
+        ignore_existing_samples=ignore_existing_samples,
         dry_run=dry_run,
     )
     

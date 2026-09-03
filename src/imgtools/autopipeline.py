@@ -9,7 +9,11 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Sequence
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
-from imgtools.autopipeline_utils import PipelineResults, save_pipeline_reports
+from imgtools.autopipeline_utils import (
+    PipelineResults,
+    filter_samples_without_existing_output,
+    save_pipeline_reports,
+)
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -289,6 +293,7 @@ class Autopipeline:
         self,
         input_directory: str | Path,
         output_directory: str | Path,
+        crawl_directory: str | Path | None = None,
         output_filename_format: str = DEFAULT_FILENAME_FORMAT,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
@@ -305,6 +310,7 @@ class Autopipeline:
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
+        ignore_existing_samples: bool = False,
         dry_run: bool = False,
     ) -> None:
         """
@@ -343,11 +349,17 @@ class Autopipeline:
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
+        ignore_existing_samples : bool, optional
+            If True, skip samples whose writer-resolved output already exists
+            before any loading or transformation. Unlike ``existing_file_mode=SKIP``,
+            this avoids processing those samples entirely.
         dry_run : bool, optional
             Whether to run the pipeline in dry run mode, by default False
         """
+        self.ignore_existing_samples = ignore_existing_samples
         self.input = SampleInput.build(
             directory=Path(input_directory),
+            crawl_directory=Path(crawl_directory) if crawl_directory else None,
             update_crawl=update_crawl,
             n_jobs=n_jobs,
             modalities=modalities,
@@ -414,16 +426,43 @@ class Autopipeline:
         # Create a timestamp for this run
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
+        if self.ignore_existing_samples:
+            numbered_samples, skipped_sample_numbers = (
+                filter_samples_without_existing_output(
+                    samples,
+                    self.output.writer,
+                )
+            )
+            if skipped_sample_numbers:
+                logger.info(
+                    "Ignoring samples with existing writer output",
+                    skipped_count=len(skipped_sample_numbers),
+                    skipped_sample_numbers=skipped_sample_numbers,
+                )
+            if not numbered_samples:
+                raise NoValidSamplesError(
+                    message=(
+                        "No valid samples found after ignoring samples with "
+                        "existing writer output."
+                    ),
+                    user_query=self.input.modalities,
+                    valid_queries=self.input.interlacer.valid_queries,
+                )
+        else:
+            numbered_samples = [
+                (f"{idx:04}", sample) for idx, sample in enumerate(samples)
+            ]
+
         # Prepare arguments for parallel processing
         arg_tuples = [
             (
-                f"{idx:04}",
+                sample_number,
                 sample,
                 self.input,
                 self.transformer,
                 self.output,
             )
-            for idx, sample in enumerate(samples)
+            for sample_number, sample in numbered_samples
         ]
 
         # Lists to track results

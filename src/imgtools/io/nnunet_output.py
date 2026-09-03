@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import contextlib
+import random
 from enum import Enum
+from math import ceil
 from pathlib import Path
-from typing import Any, Dict, Sequence
+from shutil import move
+from typing import TYPE_CHECKING, Any, Dict, List, Sequence
 
 import pandas as pd
 from pydantic import (
@@ -26,6 +29,9 @@ from imgtools.utils.nnunet import (
     generate_dataset_json,
     generate_nnunet_scripts,
 )
+
+if TYPE_CHECKING:
+    from imgtools.autopipeline import ProcessSampleResult
 
 __all__ = ["nnUNetOutput", "MaskSavingStrategy"]
 
@@ -142,6 +148,22 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         description="How to handle existing files: FAIL (raise error), SKIP (don't overwrite), or OVERWRITE (replace existing files).",
         title="Existing File Handling",
     )
+    test_set_ratio: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Proportion of successfully processed cases assigned to the test set "
+            "(imagesTs/labelsTs). The count is ceil(ratio * n_cases); use 1.0 for a "
+            "full test set (imagesTr will be empty and numTraining will be 0)."
+        ),
+        title="Test Set Ratio",
+    )
+    random_seed: int = Field(
+        default=42,
+        description="The random seed to use for the test set split.",
+        title="Random Seed",
+    )
     extra_context: Dict[str, Any] = Field(
         default_factory=dict,
         description="Additional metadata fields to include when saving files. These values can be referenced in the filename_format.",
@@ -178,7 +200,7 @@ class nnUNetOutput(BaseModel):  # noqa: N801
         )
 
         self._file_name_format = (
-            "{DirType}{SplitType}/{Dataset}_{SampleID}.nii.gz"
+            "{DirType}{SplitType}/{PatientID}_{SampleID}.nii.gz"
         )
 
         self._writer = NIFTIWriter(
@@ -260,6 +282,125 @@ class nnUNetOutput(BaseModel):  # noqa: N801
             )
 
         return valid_masks
+
+    def _move_file_to_test_split(
+        self, file_path: Path, dir_map: dict[str, str]
+    ) -> Path:
+        """
+        Calculates the Ts path and moves the file based on the provided directory map.
+        Parameters
+        ----------
+        file_path: Path
+            The path to the file that is to be moved
+        dir_map: dict[str, str]
+            A dictionary whose keys are the name of the source dir, and values are the names of the target dirs
+
+        Returns
+        -------
+        Path
+            The path where the file was moved.
+        """
+
+        if file_path.parent.name not in dir_map:
+            msg = f"Unexpected parent directory for split: {file_path.parent.name}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        # NOTE: nnUNet requires everything in images type dir to be a file.
+        output_folder_path = (
+            file_path.parent.parent / dir_map[file_path.parent.name]
+        )
+        target_path = output_folder_path / file_path.name
+        output_folder_path.mkdir(exist_ok=True, parents=True)
+        move(file_path, target_path)
+        return target_path
+
+    def _patch_index_for_test_split(self, moved_sample_ids: set[str]) -> None:
+        """Update index rows for cases moved to imagesTs/labelsTs.
+
+        Assumes filepath values are relative to the dataset root with the split
+        directory as the first path component (e.g. ``imagesTr/case_0001.nii.gz``).
+        """
+        index_file = self.writer.index_file
+        if not moved_sample_ids or not index_file.exists():
+            return
+
+        dir_map = {"imagesTr": "imagesTs", "labelsTr": "labelsTs"}
+        df = pd.read_csv(index_file, dtype={"SampleID": str})
+
+        def belongs_to_moved_case(sample_id: str) -> bool:
+            sample_id = str(sample_id)
+            return any(
+                sample_id == mid or sample_id.startswith(f"{mid}_")
+                for mid in moved_sample_ids
+            )
+
+        def rewrite_split_path(filepath: str) -> str:
+            parts = Path(filepath).parts
+            if not parts or parts[0] not in dir_map:
+                return filepath
+            return str(Path(dir_map[parts[0]], *parts[1:]))
+
+        mask = df["SampleID"].map(belongs_to_moved_case)
+        df.loc[mask, "filepath"] = df.loc[mask, "filepath"].map(
+            rewrite_split_path
+        )
+        if "SplitType" in df.columns:
+            df.loc[mask, "SplitType"] = "Ts"
+
+        df.to_csv(index_file, index=False)
+
+    def split_dataset(
+        self,
+        successful_results: List[ProcessSampleResult],
+    ) -> None:
+        """
+        Split successfully processed cases into nnUNet train and test folders.
+
+        Files must already be under imagesTr and labelsTr. Selected cases are moved
+        to imagesTs and labelsTs. The number of test cases is
+        ``ceil(test_set_ratio * n_cases)``. A ratio of 1.0 moves every case to the
+        test set.
+
+        Parameters
+        ----------
+        successful_results: List[ProcessSampleResult]
+            Results for successfully processed cases.
+
+        """
+        if self.test_set_ratio == 0.0 or not successful_results:
+            return
+
+        n_cases = len(successful_results)
+        n_test = ceil(self.test_set_ratio * n_cases)
+        dir_map = {"labelsTr": "labelsTs", "imagesTr": "imagesTs"}
+
+        pool = sorted(successful_results, key=lambda r: r.sample_id)
+        rng = random.Random(self.random_seed)
+        test_set = rng.sample(pool, n_test)
+
+        for sample in test_set:
+            sample.output_files = [
+                self._move_file_to_test_split(path, dir_map)
+                for path in sample.output_files
+            ]
+
+        self._patch_index_for_test_split({s.sample_id for s in test_set})
+
+        logger.info(
+            "Test set split: moved %d of %d cases to imagesTs/labelsTs "
+            "(ratio=%.2f, seed=%d)",
+            n_test,
+            n_cases,
+            self.test_set_ratio,
+            self.random_seed,
+        )
+        if n_test == n_cases:
+            logger.warning(
+                "All %d successful cases were moved to the test set; "
+                "imagesTr will be empty and numTraining will be 0.",
+                n_cases,
+            )
 
     def finalize_dataset(self) -> None:
         """Finalize dataset by generating preprocessing scripts and dataset JSON configuration."""

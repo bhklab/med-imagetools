@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List
 from joblib import Parallel, delayed  # type: ignore
 from tqdm import tqdm
 
-from imgtools.autopipeline import ProcessSampleResult, process_one_sample
+from imgtools.autopipeline import process_one_sample
 from imgtools.coretypes.masktypes.roi_matching import (
     ROIMatchFailurePolicy,
     ROIMatchStrategy,
@@ -27,6 +27,7 @@ from imgtools.transforms import (
 if TYPE_CHECKING:
     import rich.repr
 
+    from imgtools.autopipeline import ProcessSampleResult
     from imgtools.coretypes.base_masks import VectorMask
     from imgtools.coretypes.base_medimage import MedImage
 
@@ -45,6 +46,7 @@ class nnUNetPipeline:  # noqa: N801
         modalities: list[str],
         roi_match_map: ROIMatcherInputs,
         mask_saving_strategy: MaskSavingStrategy,
+        crawl_directory: str | Path | None = None,
         existing_file_mode: ExistingFileMode = ExistingFileMode.FAIL,
         update_crawl: bool = False,
         n_jobs: int | None = None,
@@ -53,6 +55,8 @@ class nnUNetPipeline:  # noqa: N801
         spacing: tuple[float, float, float] = (0.0, 0.0, 0.0),
         window: float | None = None,
         level: float | None = None,
+        test_set_ratio: float = 0.0,
+        random_seed: int = 42,
     ) -> None:
         """
         Initialize the nnUNetpipeline.
@@ -85,6 +89,11 @@ class nnUNetPipeline:  # noqa: N801
             Window level for intensity normalization, by default None
         level : float | None, optional
             Window level for intensity normalization, by default None
+        test_set_ratio : float
+            Proportion of successful cases for the test set. Count is
+            ceil(ratio * n_cases); 1.0 moves all cases to the test set.
+        random_seed : int
+            The random seed to use for the test set split.
         """
 
         # Validate modalities
@@ -104,6 +113,7 @@ class nnUNetPipeline:  # noqa: N801
         self.input = SampleInput.build(
             directory=Path(input_directory),
             update_crawl=update_crawl,
+            crawl_directory=Path(crawl_directory) if crawl_directory else None,
             n_jobs=n_jobs,
             modalities=modalities,
             roi_match_map=roi_match_map,
@@ -119,6 +129,8 @@ class nnUNetPipeline:  # noqa: N801
             dataset_name=Path(input_directory).name,
             roi_keys=list(self.input.roi_matcher.match_map.keys()),
             mask_saving_strategy=mask_saving_strategy,
+            test_set_ratio=test_set_ratio,
+            random_seed=random_seed,
             extra_context={},
         )
 
@@ -144,6 +156,7 @@ class nnUNetPipeline:  # noqa: N801
 
         logger.info("Pipeline initialized")
 
+    # TODO: This function is long and has a lot of concerns built into it.
     def run(
         self,
     ) -> Dict[str, List[ProcessSampleResult]]:
@@ -211,6 +224,8 @@ class nnUNetPipeline:  # noqa: N801
         failure_count = len(failed_results)
         total_count = len(all_results)
 
+        self.output.split_dataset(successful_results)
+
         logger.info(
             f"Processing complete. {success_count} successful, {failure_count} failed "
             f"out of {total_count} total samples ({success_count / total_count * 100:.1f}% success rate)."
@@ -260,28 +275,28 @@ class nnUNetPipeline:  # noqa: N801
         yield "nnUNetOutput", self.output
 
 
-if __name__ == "__main__":
-    from rich import print  # noqa
+# if __name__ == "__main__":
+#     from rich import print  # noqa
 
-    # Interlacer parameters
-    dataset_name = "RADCURE"
+#     # Interlacer parameters
+#     dataset_name = "RADCURE"
 
-    # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
-    output_path = Path("temp_outputs") / dataset_name
-    output_path.mkdir(exist_ok=True, parents=True)
-    pipeline = nnUNetPipeline(
-        input_directory=f"data/{dataset_name}",
-        output_directory=output_path,
-        existing_file_mode=ExistingFileMode.OVERWRITE,
-        n_jobs=10,
-        modalities=["CT", "RTSTRUCT"],
-        roi_match_map={
-            "BRAIN": ["Brain"],
-            "BRAINSTEM": ["Brainstem"],
-        },
-        mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
-    )
+#     # shutil.rmtree(f"temp_outputs/{dataset_name}", ignore_errors=True)
+#     output_path = Path("temp_outputs") / dataset_name
+#     output_path.mkdir(exist_ok=True, parents=True)
+#     pipeline = nnUNetPipeline(
+#         input_directory=f"data/{dataset_name}",
+#         output_directory=output_path,
+#         existing_file_mode=ExistingFileMode.OVERWRITE,
+#         n_jobs=10,
+#         modalities=["CT", "RTSTRUCT"],
+#         roi_match_map={
+#             "BRAIN": ["Brain"],
+#             "BRAINSTEM": ["Brainstem"],
+#         },
+#         mask_saving_strategy=MaskSavingStrategy.REGION_MASK,
+#     )
 
-    print(pipeline)
-    results = pipeline.run()
-    # print(f"Results: {results}")
+#     print(pipeline)
+#     results = pipeline.run()
+#     # print(f"Results: {results}")

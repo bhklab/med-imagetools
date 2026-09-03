@@ -241,6 +241,14 @@ imgtools autopipeline /path/to/dicoms/ /path/to/output/ \
     --existing-file-mode skip  # Options: skip, overwrite, fail
 ```
 
+`--existing-file-mode skip` still loads and transforms each sample, then skips writing files that already exist. To skip samples whose writer-resolved output already exists *before* any processing:
+
+```bash
+imgtools autopipeline /path/to/dicoms/ /path/to/output/ \
+    --modalities CT,RTSTRUCT \
+    --ignore-existing-samples
+```
+
 ## Additional Resources
 
 For more details on the components that AutoPipeline uses:
